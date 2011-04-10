@@ -1,0 +1,156 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    overflow-y: scroll;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 85%;
+    line-height: 1em; /*color: #393939;*/
+    color: #444444;
+    text-align: center;
+    background-color: black;
+}
+
+#progress {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 48px;
+    height: 36px;
+    margin: auto;
+    background-color: black;
+    opacity: 0.5;
+    border-radius: 15px;
+    padding: 0px;
+    padding-top: 12px;
+} 
+
+#messages-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 320px;
+    height: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    color: red;
+    
+}
+
+
+/* ---------------------------------- TreeView ------------------------------------ */
+
+#geom-model-doc {
+    position: absolute;
+    left: 20px;
+    top: 320px;
+    color: white;
+}
+
+#geom-model-doc table {
+    border-collapse:collapse;
+    /*border: solid thin grey;*/
+    text-align: left;
+}
+
+#geom-model-doc table td {
+    border: 1px solid #666;
+    padding: 3px;
+}
+
+
+#geom-model-doc table tr.odd {
+    background-color: #000;
+}
+
+#geom-model-doc table tr.even {
+    background-color: #222;
+}
+
+#geom-model-doc table tr.validation-error {
+    background-color: #c00;
+}
+
+
+
+#geom-model-doc table tr.selected {
+    background-color: #eeee00;
+    color: black;
+}
+
+.show-hide-siblings {
+    padding-right: 3px;
+}
+
+.select-geom {
+    cursor: pointer;
+}
+
+.delete-transform {
+    color: #900;
+    text-align: right;
+    cursor: pointer;
+    padding-left: 5px;
+}
+
+/* ---------------------------------- Toolbar ------------------------------------ */
+
+
+#edit {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+}
+
+#primitives {
+    position: absolute;
+    left: 20px;
+    top: 80px;
+}
+
+#boolean {
+    position: absolute;
+    left: 20px;
+    top: 140px;
+}
+
+#transforms {
+    position:absolute;
+    left:20px;
+    top:200px;
+}
+
+#copy_transforms {
+    position:absolute;
+    left:20px;
+    top:260px;
+}
+
+.toolbar {
+    background-color: #333;
+    padding: 5px;
+    border-radius: 0px;
+    opacity: 0.75;
+    border: solid thin #666;
+}
+
+.toolbar img {
+    background: transparent;
+    opacity: 1.0;
+}
+
+.toolbar img:hover {
+    background-color: #444;
+    border-radius: 0px;
+}
+
+

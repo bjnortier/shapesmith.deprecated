@@ -1,0 +1,18 @@
+%%-*- mode: erlang -*-
+{application, node,
+ [
+  {description, "node"},
+  {vsn, "1"},
+  {modules, []},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  crypto,
+                  mochiweb,
+                  webmachine
+                 ]},
+  {mod, { node_app, []}},
+  {env, [{db_dir, "../db"},
+         {port, 8000}]}
+ ]}.
