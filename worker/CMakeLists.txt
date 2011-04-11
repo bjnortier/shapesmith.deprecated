@@ -17,6 +17,7 @@ configure_file (
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("include")
 include_directories("/usr/local/include")
+include_directories("/usr/include/opencascade")
 
  
 # add the executable
