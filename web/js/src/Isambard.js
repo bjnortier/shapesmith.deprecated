@@ -3,7 +3,7 @@ window.addEventListener("popstate", function(e) {
     if (e.state != null) {
 	command_stack.popState(e.state);
     }
-});
+}, false);
 
 var geom_doc = new GeomDocument();
 var treeView = new TreeView();
