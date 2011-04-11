@@ -38,7 +38,7 @@ init([]) ->
     %% TODO: Move worker binary to application config
     WorkerBin = filename:join(
                   [filename:dirname(code:which(?MODULE)),
-                   "..", "..", "worker", "xcode", "Debug", "worker"]),
+                   "..", "..", "worker", "build", "worker"]),
     process_flag(trap_exit, true),
     Port = open_port({spawn_executable, WorkerBin}, [{packet, 4}]),
     {ok, #state{port = Port}}.
