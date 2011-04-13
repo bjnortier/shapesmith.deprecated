@@ -1,16 +1,69 @@
 <!DOCTYPE HTML>
 <html>
   <head>
-    <title></title>
+    <title>Shapesmith.net</title>
     
-    <link href="css/style.css" rel="stylesheet" type="text/css"/>
-    <script type="text/javascript" src="js/lib/jquery-1.5.1.min.js"></script>
+   <script type="text/javascript" src="js/lib/jquery-1.5.1.min.js"></script>
     <script type="text/javascript" src="js/lib/jquery.mustache.js"></script>
+    <style type="text/css">
+      body {
+      background-color: #111111;
+      font-family: Helvetica, Sans;
+      }
+     
+      h1 {
+      font-size: 1.5em;
+      text-shadow: #333333 1px 1px 0px;
+      }
+      
+      .welcome {
+      color: white;
+      font-size: 1.1em;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 100px;
+      width: 600px;
+      color: #eeeeee;
+      }
+      
+      .welcome .new {
+      text-align: center;
+      }
+      
+      .logo.shape {
+      color: white;
+      }
+      
+      .logo.smith {
+      color: #00ff00;
+      }
+      
+      a:visited, a:link {
+      color: #00ff00;
+      }
+
+      a:active, a:hover {
+      color: white;
+      }
+
+    </style>
+    
   
   </head>
   <body>
-    <input id="newButton" type="button" value="New"/>
-    <div id="existingDocs"></div>
+
+    <div class="welcome">
+      <h1>Welcome to <span class="logo shape">shape</span><span class="logo smith">smith</span>.</h1>
+      <p>This is an early preview, and feedback will be very much appreciated.</p>
+      <p>There are some caveats:
+	<ul>
+	  <li>I cannot guarantee that your models will be available in the future.</li>
+	  <li>This demo is running on a micro EC2 instance, so I'm not sure how many users it can cope with.</li>
+	</ul>
+      </p>
+      <p>Follow this project <a href="http://www.twitter.com/shapesmith">on twitter</a></p>
+     <div style="text-align: center"><input style="font-size: 10em;" id="newButton" type="button" value="Build something!"/></div>
+    </div>
     <script type="text/javascript" src="js/src/index.js"></script>
  </body>
 </html>

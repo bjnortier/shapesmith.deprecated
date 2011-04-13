@@ -12,9 +12,10 @@ body {
     font-size: 85%;
     line-height: 1em; /*color: #393939;*/
     color: #444444;
-    text-align: center;
+    /*text-align: center;*/
     background-color: black;
 }
+
 
 #progress {
     position: absolute;
