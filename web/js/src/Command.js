@@ -4,10 +4,15 @@ function renderErrorMessage(error) {
 	// No need for a message as there is already validation feedback
 	console.log(error);
     } else if (error.string) {
-	$('#messages-container').append('<div class="message">' + error.string + '</div>');
+	$('#messages-container').append('<div class="error">' + error.string + '</div>');
     } else {
-	$('#messages-container').append('<div class="message">Oops. An unknown problem occurred</div>');
+	$('#messages-container').append('<div class="error">Oops. An unknown problem occurred</div>');
     }
+}
+
+function renderSuccessMessage(message) {
+    $('#messages-container').empty();
+    $('#messages-container').append('<div class="info">' + message + '</div>');
 }
 
 

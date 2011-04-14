@@ -43,9 +43,18 @@ body {
     height: 0px;
     margin-left: auto;
     margin-right: auto;
-    color: red;
+    text-align: center;
     
 }
+
+#messages-container div.error {
+    color: red;
+}
+
+#messages-container div.info {
+    color: white;
+}
+
 
 
 /* ---------------------------------- TreeView ------------------------------------ */

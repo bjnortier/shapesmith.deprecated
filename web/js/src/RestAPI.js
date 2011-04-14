@@ -228,8 +228,8 @@ function save() {
         data: JSON.stringify(rootPaths),
         success: function() {
             console.log('saved');
-        }
-,
+	    renderSuccessMessage('Saved');
+        },
         error: function(jqXHR, textStatus, errorThrown) {
             error_response(jqXHR.responseText);
         }
