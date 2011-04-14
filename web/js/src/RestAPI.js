@@ -221,6 +221,7 @@ function save() {
         return x.path;
     });
     console.log(rootPaths);
+    showSpinner();
     $.ajax({
         type: 'PUT',
         url: '/doc/' + docId,
@@ -229,9 +230,11 @@ function save() {
         success: function() {
             console.log('saved');
 	    renderSuccessMessage('Saved');
+	    hideSpinner();
         },
         error: function(jqXHR, textStatus, errorThrown) {
             error_response(jqXHR.responseText);
+	    hideSpinner();
         }
     });
 }

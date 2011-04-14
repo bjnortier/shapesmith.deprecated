@@ -16,6 +16,18 @@ function renderSuccessMessage(message) {
 }
 
 
+function showSpinner() {
+    if ($('#progress-container').children().size() == 0) {
+        $('#progress-container').append(
+	    '<div id="progress"><img src="images/progress-spinner.gif" alt="in progress"/></div>');
+    }
+    $('#progress').show();
+}
+
+function hideSpinner() {
+    $('#progress').hide();
+}
+
 function Command(executeFn, undoFn, redoFn) {
     var executeFn = executeFn;
     var undoFn = undoFn;
@@ -87,17 +99,7 @@ function CommandStack() {
         return last_executed_index < commands.length - 1;
     };
 
-    var showSpinner = function() {
-	if ($('#progress-container').children().size() == 0) {
-            $('#progress-container').append(
-		'<div id="progress"><img src="images/progress-spinner.gif" alt="in progress"/></div>');
-	}
-	$('#progress').show();
-    }
 
-    var hideSpinner = function() {
-	$('#progress').hide();
-    }
 
     this.inProgressSuccess = function() {
         console.log("command in progress success");
