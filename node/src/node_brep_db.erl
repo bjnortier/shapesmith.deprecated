@@ -63,11 +63,14 @@ handle_call({create, Hash, Geometry}, _From, State) ->
             Msg = {struct, [{<<"type">>, <<"deserialize">>},
                             {<<"id">>, list_to_binary(Hash)},
                             {<<"s11n">>, S11N}]},
-            "\"ok\"" = node_worker_server:call(mochijson2:encode(Msg)),
-            NewLog = dict:store(Hash, from_serialized, State#state.log),
-            NewState = State#state{ log = NewLog },
-
-            {reply, ok, NewState};
+            case node_worker_server:call(mochijson2:encode(Msg)) of
+		"\"ok\"" ->
+		    NewLog = dict:store(Hash, from_serialized, State#state.log),
+		    NewState = State#state{ log = NewLog },
+		    {reply, ok, NewState};
+		ErrorMsg ->
+		    {reply, {error, ErrorMsg}, State}
+	    end;
 
         false ->
             
@@ -75,12 +78,14 @@ handle_call({create, Hash, Geometry}, _From, State) ->
 
             {struct, GeomProps} = Geometry,
             {<<"type">>, GeomType} = lists:keyfind(<<"type">>, 1, GeomProps),
-            "\"ok\"" = create_type(Hash, GeomType, Geometry),
-            
-            NewLog = dict:store(Hash, from_worker, State#state.log),
-            NewState = State#state{ log = NewLog },
-            
-            {reply, ok, NewState}
+	    case create_type(Hash, GeomType, Geometry) of
+		"\"ok\"" ->
+		    NewLog = dict:store(Hash, from_worker, State#state.log),
+		    NewState = State#state{ log = NewLog },
+		    {reply, ok, NewState};
+		ErrorMsg ->
+		    {reply, {error, ErrorMsg}, State}
+	    end
     end;
 
 handle_call({serialize, Hash}, _From, State) ->

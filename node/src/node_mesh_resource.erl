@@ -27,6 +27,11 @@ content_types_provided(ReqData, Context) ->
 
 provide_content(ReqData, Context) ->
     Id = Context#context.id,
-    {ok, Mesh} =  node_master:mesh_geom(Id),
-    {mochijson2:encode(Mesh), ReqData, Context}.
+    case node_master:mesh_geom(Id) of
+	{ok, Mesh} ->
+	    {mochijson2:encode(Mesh), ReqData, Context};
+	{error, _Err} ->
+	    ErrorJSON = mochijson2:encode({struct, [{<<"error">>, <<"Could not mesh geometry">>}]}),
+	    {{halt, 500}, wrq:set_resp_body(ErrorJSON, ReqData), Context}
+    end.
 

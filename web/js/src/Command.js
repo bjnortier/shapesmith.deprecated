@@ -5,6 +5,8 @@ function renderErrorMessage(error) {
 	console.log(error);
     } else if (error.string) {
 	$('#messages-container').append('<div class="error">' + error.string + '</div>');
+    } else if (error.error) {
+	$('#messages-container').append('<div class="error">' + error.error + '</div>');
     } else {
 	$('#messages-container').append('<div class="error">Oops. An unknown problem occurred</div>');
     }

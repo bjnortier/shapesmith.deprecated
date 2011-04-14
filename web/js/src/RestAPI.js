@@ -240,6 +240,7 @@ function save() {
 }
 
 function load(docId) {
+    showSpinner();
     $.ajax({
         type: 'GET',
         url: '/doc/' + docId,
@@ -259,6 +260,7 @@ function load(docId) {
                             success: function(mesh) {
                                 newNode.mesh = mesh;
                                 geom_doc.add(newNode);
+				hideSpinner();
                             },
 			    error: function(jqXHR, textStatus, errorThrown) {
 				error_response(jqXHR.responseText);

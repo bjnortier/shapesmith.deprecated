@@ -83,8 +83,7 @@ validate_geom_type(<<"cylinder">>, Props) ->
 			      ]);
 validate_geom_type(<<"cone">>, Props) ->
     validate_primitive(Props, [
-			       {<<"top_radius">>, fun positive/1},
-			       {<<"bottom_radius">>, fun positive/1},
+			       {[<<"top_radius">>, <<"bottom_radius">>], fun one_zero_one_positive/1},
 			       {<<"height">>, fun positive/1}
 			      ]);
 validate_geom_type(<<"wedge">>, Props) ->
@@ -252,6 +251,8 @@ validate_parameters(Parameters, Specs) ->
                                  case validate_spec(Parameters, Spec) of
                                      ok ->
                                          Acc;
+				     Errors when is_list(Errors) ->
+					 Errors ++ Acc;
                                      Error ->
                                          [Error|Acc]
                                  end
@@ -294,10 +295,41 @@ validate_parameters_test_() ->
                             [
                              {<<"a">>, fun positive/1},
                              {<<"b">>, fun positive/1}
+                            ])),
+     ?_assertEqual(
+        {error, {struct, [{<<"a">>, <<"one must be positive">>},
+			  {<<"b">>, <<"one must be positive">>}]}},
+        validate_parameters({struct, [{<<"b">>, 0},
+                                      {<<"a">>, 0}]},
+                            [
+                             {[<<"a">>, <<"b">>], fun one_zero_one_positive/1}
                             ]))
     ].
 -endif.
 
+validate_spec({struct, ParameterProps}, {Fields, CheckFn}) when is_list(Fields) ->
+    Values = lists:foldr(fun(Field, Acc) ->
+				 case lists:keyfind(Field, 1, ParameterProps) of
+				     false -> 
+					 Acc;
+				     {_, Value} ->
+					 [Value|Acc]
+				 end
+			 end,
+			 [],
+			 Fields),
+    NumberOfFields = length(Fields),
+    case length(Values) of
+	NumberOfFields ->
+	    case CheckFn(Values) of
+                ok ->
+                    ok;
+                {error, Reason} ->
+		    [{Field, Reason} || Field <- Fields]
+            end; 
+	_ ->
+	    {Fields, <<"not found">>}
+    end;
 validate_spec({struct, ParameterProps}, {Field, CheckFn}) ->
     case lists:keyfind(Field, 1, ParameterProps) of
         false ->
@@ -338,6 +370,12 @@ number(Value) when is_integer(Value) orelse is_float(Value) ->
 number(_) ->
     {error, <<"must be a number">>}.
 
+one_zero_one_positive([A, B]) when A > 0 andalso B >= 0 ->
+    ok;
+one_zero_one_positive([A, B]) when B > 0 andalso A >= 0 ->
+    ok;
+one_zero_one_positive(_) ->
+    {error, <<"one must be positive">>}.
 
 
 -ifdef(TEST).
@@ -352,7 +390,13 @@ validate_spec_test_() ->
      ?_assertEqual({<<"a">>, <<"must be a positive integer">>}, 
                    validate_spec({struct, [{<<"a">>, 0}]}, {<<"a">>, fun positive_integer/1})),
      ?_assertEqual({<<"a">>, <<"must be a number">>}, 
-                   validate_spec({struct, [{<<"a">>, <<"x">>}]}, {<<"a">>, fun number/1}))
+                   validate_spec({struct, [{<<"a">>, <<"x">>}]}, {<<"a">>, fun number/1})),
+     ?_assertEqual([{<<"a">>, <<"one must be positive">>},
+		    {<<"b">>, <<"one must be positive">>}],
+                   validate_spec({struct, [{<<"a">>, 0},
+					   {<<"b">>, 0}]}, 
+				 {[<<"a">>,<<"b">>], fun one_zero_one_positive/1}))
+     
     ].
 -endif.
 

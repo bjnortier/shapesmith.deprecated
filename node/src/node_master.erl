@@ -83,15 +83,23 @@ handle_call({deserialize_geom, Id}, _From, State) ->
 handle_call({mesh_geom, Id}, _From, State) ->
     Geometry = node_geom_db:geometry(Id),
     Hash = node_geom_db:hash(Id),
-    ok = ensure_brep_exists(Id, Geometry, Hash),
-    Reply = node_mesh_db:mesh(Hash),
-    {reply, Reply, State};
+    case ensure_brep_exists(Id, Geometry, Hash) of
+	ok ->
+	    Reply = node_mesh_db:mesh(Hash),
+	    {reply, Reply, State};
+	{error, Err} ->
+	    {reply, {error, Err}, State}
+    end;
 handle_call({serialize_brep, Id}, _From, State) ->
     Hash = node_geom_db:hash(Id),
     Geometry = node_geom_db:geometry(Id),
-    ok = ensure_brep_exists(Id, Geometry, Hash),
-    ok = node_brep_db:serialize(Hash),
-    {reply, ok, State};
+    case ensure_brep_exists(Id, Geometry, Hash) of
+	ok ->
+	    Reply = node_brep_db:serialize(Hash),
+	    {reply, Reply, State};
+	{error, Err} ->
+	    {reply, {error, Err}, State}
+    end;
 handle_call({stl, Id}, _From, State) ->
     Hash = node_geom_db:hash(Id),
     Reply = node_mesh_db:stl(Hash),
@@ -137,9 +145,8 @@ ensure_brep_exists(Id, Geometry, Hash) ->
     case node_brep_db:exists(Hash) of
         false -> 
             node_log:info("BREP not found. Creating BREP for ~p[~p]~n", [Id, Hash]),
-            ok = node_brep_db:create(Hash, Geometry);
+            node_brep_db:create(Hash, Geometry);
         true ->
             node_log:info("BREP found for ~p[~p]~n", [Id, Hash]),
             ok
-    end,
-    ok.
+    end.
