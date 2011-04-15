@@ -92,6 +92,7 @@ var scene = new SceneJS.Scene(
         },
         new SceneJS.Camera(
             {
+		id: "camera",
                 type: "camera",
                 optics: {
                     type: "perspective",
@@ -243,6 +244,15 @@ SceneJS.bind("reset", function() {
 });
 pInterval = window.setInterval("window.render()", 10);
 
+$(window).resize(function () { 
+    $('#theCanvas').width(window.innerWidth);
+    $('#theCanvas').height(window.innerHeight);
+
+    var aspect = window.innerWidth/window.innerHeight;
+    var optics = SceneJS.withNode("camera").get("optics");
+    optics.aspect = aspect;
+    SceneJS.withNode("camera").set("optics", optics);
+});
 
 
 
