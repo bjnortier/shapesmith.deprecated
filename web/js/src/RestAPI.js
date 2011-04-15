@@ -246,8 +246,10 @@ function load(docId) {
         url: '/doc/' + docId,
         dataType: 'json',
         success: function(geomPaths) {
+	    hideSpinner();
             geomPaths.map(function(path) {
                 console.log("loading " + path);
+		showSpinner();
                 $.ajax({
                     type: 'GET',
                     url: path + '?recursive=true',
