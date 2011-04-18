@@ -22,7 +22,7 @@ describe("Command", function() {
         );
         
         expect(doc.rootNodes).toEqual([]);
-        command.do();
+        command.execute();
         expect(doc.rootNodes).toEqual([node]);
         command.undo();
         expect(doc.rootNodes).toEqual([]);
@@ -38,12 +38,15 @@ describe("CommandStack", function() {
     var cmd = new Command(
         function() {
             a += 1;
+	    stack.inProgressSuccess();
         },
         function() {
             a -= 1;
+	    stack.inProgressSuccess();
         },
         function() {
             a += 1;
+	    stack.inProgressSuccess();
         }
     );
     

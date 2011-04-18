@@ -5,6 +5,11 @@ window.addEventListener("popstate", function(e) {
     }
 }, false);
 
+command_stack.showSpinner = showSpinner;
+command_stack.hideSpinner = hideSpinner;
+command_stack.renderErrorMessage = renderErrorMessage;
+command_stack.clearMessages = clearMessages;
+
 var geom_doc = new GeomDocument();
 var treeView = new TreeView();
 
