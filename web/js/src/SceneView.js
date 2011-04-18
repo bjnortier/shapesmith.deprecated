@@ -244,7 +244,7 @@ SceneJS.bind("reset", function() {
 });
 pInterval = window.setInterval("window.render()", 10);
 
-$(window).resize(function () { 
+function resetAspectRatio() {
     $('#theCanvas').width(window.innerWidth);
     $('#theCanvas').height(window.innerHeight);
 
@@ -252,6 +252,10 @@ $(window).resize(function () {
     var optics = SceneJS.withNode("camera").get("optics");
     optics.aspect = aspect;
     SceneJS.withNode("camera").set("optics", optics);
+}
+
+$(window).resize(function () { 
+    resetAspectRatio();
 });
 
 

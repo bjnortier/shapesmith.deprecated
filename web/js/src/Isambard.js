@@ -50,4 +50,5 @@ $(document).ready(function() {
         return;
     }
     load(docId);
+    resetAspectRatio();
 });
