@@ -27,8 +27,8 @@ describe("GeomNode", function() {
                                                           transforms: []});
 
         expect(JSON.parse(node.toDeepJson())).toEqual({type: "union",
-                                                          children: [],
-                                                          transforms: []});
+                                                       children: [],
+                                                       transforms: []});
     });
 
     it("can have children", function() {

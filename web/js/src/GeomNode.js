@@ -33,9 +33,14 @@ function GeomNode() {
     this.type = arguments[0].type;
     this.path = arguments[0].path;
     this.parameters = arguments[0].parameters;
-    this.transforms = arguments[0].transforms || [];
     this.mesh = arguments[0].mesh;
     this.children = [];
+
+    var transformDescriptions = arguments[0].transforms || [];
+    this.transforms = transformDescriptions.map(function(transformDescription) {
+	return new Transform(transformDescription);
+    });
+	
 
     if (arguments[1]) {
         if (!typeof(arguments[1]) == "object") {
