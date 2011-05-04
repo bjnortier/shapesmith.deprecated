@@ -27,8 +27,14 @@ loop(JobPeriod, BRepExpirySecs) ->
 	    stopped
     after JobPeriod ->
 	    lists:map(fun(Hash) ->
-			      node_log:info("Purging expired BREP: ~p~n", [Hash]),
-			      node_worker_access_logger:removed(Hash)
+			      Msg = {struct, [{<<"purge">>, list_to_binary(Hash)}]},
+			      case node_worker_server:call(mochijson2:encode(Msg)) of
+				  "true" -> 
+				      node_worker_access_logger:removed(Hash),
+				      node_log:info("Purged expired BREP: ~p~n", [Hash]);
+				  X ->
+				      node_log:info("Error purging expired BREP: ~p Reason: ~p~n", [Hash, X])
+			      end
 		      end,
 		      node_worker_access_logger:expired(BRepExpirySecs)),
 	    loop(JobPeriod, BRepExpirySecs)
