@@ -14,5 +14,7 @@
                  ]},
   {mod, { node_app, []}},
   {env, [{db_dir, "../db"},
-         {port, 8000}]}
+         {port, 8000},
+	 {brep_purge_job_period, 60000}, %% Check every minute
+	 {brep_purge_expiry, 3600}]} %% Expire after 1 hour
  ]}.

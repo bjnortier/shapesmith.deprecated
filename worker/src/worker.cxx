@@ -699,6 +699,28 @@ int main (int argc, char *argv[]) {
                     continue;
                 }
                 
+                mValue purgeId = objMap["purge"];
+                if (!purgeId.is_null() && (purgeId.type() == str_type)) {
+                    
+                    mValue response = true;
+                    
+                    map< string, TopoDS_Shape >::iterator it = unmeshed_shapes.find(purgeId.get_str());
+                    if (it != unmeshed_shapes.end()) {
+                        unmeshed_shapes.erase(it);
+                        response = true;
+                    } else {
+                        it = meshed_shapes.find(purgeId.get_str());
+                        if (it != meshed_shapes.end()) {
+                            meshed_shapes.erase(it);
+                            response = true;
+                        }
+                    }
+                    
+                    string output = write(response);
+                    write_cmd(output.c_str(), output.size());
+                    continue;
+                }
+                
                 
                 mValue filename = objMap["filename"];
                 if (!msgType.is_null() && (msgType.type() == str_type) && (msgType.get_str() == string("stl"))

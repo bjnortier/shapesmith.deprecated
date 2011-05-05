@@ -32,12 +32,16 @@ init([]) ->
     {ok, []}.
 
 handle_call({exists, Hash}, _From, State) ->
+    node_worker_access_logger:accessed(Hash),
+
     Reply = case lists:keyfind(Hash, 1, State) of
                 {Hash, _} -> true;
                 false -> false
             end,
     {reply, Reply, State};
 handle_call({mesh, Hash}, _From, State) ->
+    node_worker_access_logger:accessed(Hash),
+
     Reply = case lists:keyfind(Hash, 1, State) of
                 {Hash, Mesh} -> 
                     {ok, Mesh};
@@ -56,6 +60,8 @@ handle_call({mesh, Hash}, _From, State) ->
             end,
     {reply, Reply, State};
 handle_call({stl, Hash}, _From, State) ->
+    node_worker_access_logger:accessed(Hash),
+
     {ok, DbDir} = application:get_env(node, db_dir),
     Filename = filename:join(
                  [filename:dirname(code:which(?MODULE)),
