@@ -96,6 +96,7 @@ serialize_geom(_Config) ->
     from_worker = proplists:get_value(node_geom_db:hash(Id), BRepLog),
 
     ok.
+
 serialize_geom_and_brep(_Config) ->
     Geometry = {struct, [{<<"type">>, <<"sphere">>},
                          {<<"parameters">>, {struct, [{<<"radius">>, 1}]}}]},

@@ -4,7 +4,7 @@
 -export([start_link/0, stop/0]).
 -export([exists/1, create/2]).
 -export([log/0]).
--export([serialize/1]).
+-export([serialize/1, purge/1]).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -27,6 +27,9 @@ log() ->
 
 serialize(Hash) ->
     gen_server:call(?MODULE, {serialize, Hash}, 30000).
+purge(Hash) ->
+    gen_server:call(?MODULE, {purge, Hash}, 30000).
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -90,15 +93,20 @@ handle_call({create, Hash, Geometry}, _From, State) ->
 		    {reply, {error, ErrorMsg}, State}
 	    end
     end;
-
+handle_call({purge, Hash}, _From, State) ->
+    ok = serialize_to_disk(Hash),
+    Msg = {struct, [{<<"purge">>, list_to_binary(Hash)}]},
+    {Reply, NewState} = case node_worker_server:call(mochijson2:encode(Msg)) of
+			    "true" ->
+				NewLog = dict:store(Hash, purged, State#state.log),
+				S2 = State#state{ log = NewLog }, 
+				{ok, S2};
+			    Reason -> 
+				{{error, Reason}, State}
+			end,
+    {reply, Reply, NewState};
 handle_call({serialize, Hash}, _From, State) ->
-    Msg = {struct, [{<<"type">>, <<"serialize">>},
-                    {<<"id">>, list_to_binary(Hash)}]},
-    {struct, [{<<"s11n">>, S11N}]} = mochijson2:decode(node_worker_server:call(mochijson2:encode(Msg))),
-    
-    BREPFilename = brep_filename(Hash),
-    node_log:info("writing brep for ~p to ~s~n", [Hash, BREPFilename]),
-    ok = file:write_file(BREPFilename, S11N),
+    ok = serialize_to_disk(Hash),
     {reply, ok, State};
 
 handle_call(log, _From, State) ->
@@ -129,6 +137,15 @@ code_change(_OldVsn, State, _Extra) ->
 %%%                                 private                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
+serialize_to_disk(Hash) ->
+    Msg = {struct, [{<<"type">>, <<"serialize">>},
+                    {<<"id">>, list_to_binary(Hash)}]},
+    {struct, [{<<"s11n">>, S11N}]} = mochijson2:decode(node_worker_server:call(mochijson2:encode(Msg))),
+    
+    BREPFilename = brep_filename(Hash),
+    node_log:info("writing brep for ~p to ~s~n", [Hash, BREPFilename]),
+    ok = file:write_file(BREPFilename, S11N).
+    
 
 brep_filename(Hash) ->
     {ok, DbDir} = application:get_env(node, db_dir),
