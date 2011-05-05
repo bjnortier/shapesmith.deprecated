@@ -11,17 +11,24 @@
       font-family: Helvetica, Sans;
       }
      
-      h1 {
+      h2 {
+      font-weight: normal;
       font-size: 1.5em;
       text-shadow: #333333 1px 1px 0px;
+      }
+
+      .logo {
+      margin-left: auto;
+      margin-right: auto;
+      width: 500px;
       }
       
       .welcome {
       color: white;
       font-size: 1.1em;
+      margin-top: 50px;
       margin-left: auto;
       margin-right: auto;
-      margin-top: 100px;
       width: 600px;
       color: #eeeeee;
       }
@@ -30,15 +37,7 @@
       text-align: center;
       }
       
-      .logo.shape {
-      color: white;
-      }
-      
-      .logo.smith {
-      color: #00ff00;
-      }
-      
-      a:visited, a:link {
+     a:visited, a:link {
       color: #00ff00;
       }
 
@@ -56,21 +55,26 @@
   </head>
   <body>
 
-    <div class="welcome">
-      <h1>Welcome to <span class="logo shape">shape</span><span class="logo smith">smith</span>.</h1>
-      <p>This is an early preview, and feedback will be very much appreciated.</p>
-      <p>There are some caveats:
-	<ul>
-	  <li>I cannot guarantee that your models will be available in the future.</li>
-	  <li>This demo is running on a micro EC2 instance, so I'm not sure how many users it can cope with.</li>
-	  <li>A WebGL browser is required, i.e. Chrome v10 (recommended) or Firefox4</li>
-	</ul>
-      </p>
-      <p>Follow this project <a href="http://www.twitter.com/shapesmith">on twitter</a></p>
-     <div style="text-align: center"><input id="newButton" type="button" value="Build something!"/></div>
+    <div class="logo">
+      <img src="/images/logo.png"/>
     </div>
-    <script type="text/javascript" src="js/src/index.js"></script>
- </body>
+    <div class="welcome center">
+      <h2>Welcome to <span style="color: #00ff00;">shape</span><span style="color:white;">smith</span>!</h1>
+<p>This is an early preview, and <script>document.write('<'+'a'+' '+'h'+'r'+'e'+'f'+'='+"'"+'m'+'a'+'i'+'&'+'#'+'1'+'0'+'8'+';'+'t'+'&'+'#'+'1'+'1'+'1'+';'+'&'+'#'+'5'+'8'+';'+'b'+'j'+'n'+'&'+'#'+'1'+'1'+'1'+';'+'r'+'%'+'7'+'4'+'&'+'#'+'1'+'0'+'5'+';'+'e'+'r'+'&'+'#'+'6'+'4'+';'+'s'+'&'+'#'+'3'+'7'+';'+'6'+'&'+'#'+'5'+'6'+';'+'a'+'%'+'7'+'0'+'%'+'6'+'5'+'s'+'m'+'i'+'t'+'h'+'&'+'#'+'4'+'6'+';'+'%'+'6'+'E'+'%'+'&'+'#'+'5'+'4'+';'+'5'+'&'+'#'+'3'+'7'+';'+'7'+'4'+"'"+'>feedback</a>');</script> will be very much appreciated.</p>
+
+<div style="text-align: center"><input id="newButton" type="button" value="Build Something!"/></div>
+</div>
+<div class="welcome">
+  <p>Caveats:
+	<ul>
+	  <li>A WebGL browser is required, i.e. Chrome v10 (recommended) or Firefox4</li>
+	  <li>I cannot guarantee that your models will be available in the future, so don't build anything too spectacular...</li>
+	</ul>
+  </p>
+  <p>Follow this project <a href="http://www.twitter.com/shapesmith">on twitter</a></p>
+  </div>
+  <script type="text/javascript" src="js/src/index.js"></script>
+</body>
 
     <script type="text/javascript">
 
