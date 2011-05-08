@@ -129,6 +129,10 @@ $(document).ready(function() {
     /*
      * Copy & Transform
      */
+    new Action("Copy", "/images/copy.png", 
+               function(parameters) { 
+		   copy()
+	       }).render($("#copy_transforms"));
     new Action("Copy Translate", "/images/copy_translate.png", 
                function(parameters) { create_transform("copy_translate", ["dx", "dy", "dz", "n"]); }).render($("#copy_transforms"));
     new Action("Copy Rotate", "/images/copy_rotate.png", 
