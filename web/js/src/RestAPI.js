@@ -212,6 +212,59 @@ function boolean(type) {
     command_stack.execute(cmd);
 }
 
+function copyNode(node, finishedFn) {
+
+    var remaining = node.children.length;
+    var copiedChildren = node.children.map(function(child) {
+	return {};
+    });
+
+    var nodeCopyFn = function() {
+
+	var geometry = JSON.parse(node.toShallowJson());
+	geometry.children = copiedChildren.map(function(copiedChild) {
+	    return copiedChild.path;
+	});
+
+	$.ajax({
+	    type: 'POST',
+	    url: '/geom/',
+	    contentType: 'application/json',
+	    data: JSON.stringify(geometry),
+	    dataType: 'json',
+	    success: function(nodeData) {
+		var path = nodeData.path;
+		var newNode = new GeomNode({
+                    type : geometry.type,
+                    path : path,
+                    parameters : geometry.parameters
+		}, copiedChildren);
+		finishedFn(newNode);
+	    }, 
+	    error: function(jqXHR, textStatus, errorThrown) {
+		error_response(jqXHR.responseText);
+		command_stack.inProgressFailure();
+	    }
+	});
+    };
+
+    if (remaining == 0) {
+	nodeCopyFn();
+    } else {
+	$.map(node.children, function(childNode, childIndex) {
+	    var finishedFn = function(newChildNode) {
+		copiedChildren.splice(childIndex - 1, 1, newChildNode);
+		--remaining;
+		if (remaining == 0) {
+		    nodeCopyFn()
+		}
+	    };
+	    copyNode(childNode, finishedFn);
+	    ++childIndex;
+	});
+    }
+}
+
 function copy() {
     if (selectionManager.size() !== 1)  {
         alert("must have 1 object selected");
@@ -220,89 +273,27 @@ function copy() {
 
     var path = selectionManager.selected()[0];
     var node = geom_doc.findByPath(path);
-    var copyNode;
     
     var doFn = function() {
-	var copiedChildren = node.children.map(function(child) {
-	    return {};
-	});
 
-	var topNodeCreateFn = function() {
-	    var geometry = JSON.parse(node.toShallowJson());
-	    geometry.children = copiedChildren.map(function(copiedChild) {
-		return copiedChild.path;
-	    });
-	    $.ajax({
-		type: 'POST',
-		url: '/geom/',
-		contentType: 'application/json',
-		data: JSON.stringify(geometry),
+	copyNode(node, function(copiedNode) {
+            id = idForGeomPath(copiedNode.path);
+            $.ajax({
+		type: 'GET',
+		url: '/mesh/' + id,
 		dataType: 'json',
-		success: function(nodeData){
-                    var path = nodeData.path;
-                    id = idForGeomPath(nodeData.path);
-                    $.ajax({
-			type: 'GET',
-			url: '/mesh/' + id,
-			dataType: 'json',
-			success: function(mesh) {
-                            geomNode = new GeomNode({
-				type : geometry.type,
-				path : path,
-				parameters : geometry.parameters,
-				mesh : mesh}, copiedChildren)
-                            selectionManager.deselectAll();
-                            geom_doc.add(geomNode);
-                            command_stack.inProgressSuccess();
-			},
-			error: function(jqXHR, textStatus, errorThrown) {
-			    error_response(jqXHR.responseText);
-			}
-                    });
+		success: function(mesh) {
+		    copiedNode.mesh = mesh;
+                    selectionManager.deselectAll();
+                    geom_doc.add(copiedNode);
+                    command_stack.inProgressSuccess();
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
-                    error_response(jqXHR.responseText);
+		    error_response(jqXHR.responseText);
 		}
-	    });
-	};
+            });
+	});
 
-	var index = 0;
-	var remaining = node.children.length;
-
-	if (remaining == 0) {
-	    topNodeCreateFn();
-	} else {
-	    node.children.map(function(child) {
-		var childGeometry = JSON.parse(child.toShallowJson());
-		var childIndex = index;
-		++index;
-		$.ajax({
-		    type: 'POST',
-		    url: '/geom/',
-		    contentType: 'application/json',
-		    data: JSON.stringify(childGeometry),
-		    dataType: 'json',
-		    success: function(nodeData) {
-			var path = nodeData.path;
-			var newChildNode = new GeomNode({
-                            type : childGeometry.type,
-                            path : path,
-                            parameters : childGeometry.parameters
-			});
-			copiedChildren.splice(childIndex, 1, newChildNode);
-			--remaining;
-			console.log('remaining: ' + remaining);
-			if (remaining == 0) {
-			    topNodeCreateFn();
-			}
-		    }, 
-		    error: function(jqXHR, textStatus, errorThrown) {
-			error_response(jqXHR.responseText);
-			command_stack.inProgressFailure();
-		    }
-		});
-	    });
-	}
     };
     var undoFn = function() {
         geom_doc.remove(copyNode);
