@@ -1,9 +1,4 @@
 var command_stack = new CommandStack();
-window.addEventListener("popstate", function(e) {
-    if (e.state != null) {
-	command_stack.popState(e.state);
-    }
-}, false);
 
 command_stack.showSpinner = showSpinner;
 command_stack.hideSpinner = hideSpinner;

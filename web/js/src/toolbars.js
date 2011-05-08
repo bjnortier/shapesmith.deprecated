@@ -70,6 +70,15 @@ $(document).ready(function() {
                function(parameters) { save(); }).render($("#edit"));
     new Action("Delete", "images/trash.png", 
                function(parameters) { delete_geom(); }).render($("#edit"));
+    new Action("Undo", "images/undo.png", 
+               function(parameters) { 
+		   command_stack.undo(); 
+	       }).render($("#edit"));
+    new Action("Redo", "images/redo.png", 
+               function(parameters) { 
+		   command_stack.redo(); 
+	       }).render($("#edit"));
+    
     $('#edit').append('<a id="action_stl" href=""><img src="images/stl.png" alt="stl" title="Export to STL"></img></a>');
 
 

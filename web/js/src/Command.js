@@ -25,10 +25,6 @@ function CommandStack() {
             commands.splice(last_executed_index + 1, commands.length - (last_executed_index) - 1);
             commands.push(command);
             last_executed_index  += 1;
-	    // Page history
-	    if (history) {
-		history.pushState(last_executed_index, null, window.location.href);
-	    }
         }
         command.execute();
     }
@@ -65,17 +61,6 @@ function CommandStack() {
         return last_executed_index < commands.length - 1;
     };
 
-    this.popState = function(executed_index) {
-	// Compare popped state to current state to determine if it's 
-	// undo or redo
-	if (executed_index <= last_executed_index) {
-	    this.undo();
-	} else if (executed_index >= last_executed_index + 1) {
-	    this.redo();
-	} else {
-	    throw new Error('Invalid history pop event.');
-	}
-    }
     
     this.inProgressSuccess = function() {
         successFn();
@@ -84,7 +69,6 @@ function CommandStack() {
     }
 
     this.inProgressFailure = function(error) {
-        console.log("command in progress failure: " + JSON.stringify(error));
 	this.renderErrorMessage(error);
         this.hideSpinner();
     }
