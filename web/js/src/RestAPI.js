@@ -237,6 +237,7 @@ function copyNode(node, finishedFn) {
 		var newNode = new GeomNode({
                     type : geometry.type,
                     path : path,
+		    transforms : geometry.transforms,
                     parameters : geometry.parameters
 		}, copiedChildren);
 		finishedFn(newNode);
