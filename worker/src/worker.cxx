@@ -79,7 +79,18 @@ TopoDS_Shape find_shape(string id) {
 
 void mesh(string id) {
     TopoDS_Shape shape = unmeshed_shapes[id];
-    BRepMesh().Mesh(shape, 0.0125);
+
+    // If we mesh a shape that has no faces, e.g. an empty intersect,
+    // Meshing generates an exception
+    TopExp_Explorer Ex; 
+    int numFaces = 0;
+    for (Ex.Init(shape,TopAbs_FACE); Ex.More(); Ex.Next()) { 
+        ++numFaces;
+    }
+        
+    if (numFaces > 0) {
+        BRepMesh().Mesh(shape, 0.0125);
+    }
     
     meshed_shapes[id] = unmeshed_shapes[id];
     unmeshed_shapes.erase(id);
@@ -87,7 +98,6 @@ void mesh(string id) {
     
     
 mValue tesselate(string id) {
-    
     
     TopoDS_Shape shape = meshed_shapes[id];
     
