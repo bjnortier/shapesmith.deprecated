@@ -1,0 +1,5 @@
+ebin/
+db/*.stl
+db/*.doc
+deps/
+priv/log/
