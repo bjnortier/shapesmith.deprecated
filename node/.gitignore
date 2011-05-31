@@ -1,5 +1,6 @@
 ebin/
 db/*.stl
 db/*.doc
+db/*.brep
 deps/
 priv/log/
