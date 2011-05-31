@@ -17,16 +17,16 @@ configure_file (
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("include")
 include_directories("/usr/local/include")
+include_directories("/opt/local/include")
 include_directories("/usr/include/opencascade")
+include_directories ("/Library/OpenCASCADE/6.3.0/inc")
 
  
 # add the executable
 add_executable(worker src/worker.cxx src/base64.cpp)
 
-include_directories ("/Library/OpenCASCADE/6.3.0/inc")
-
 set(CMAKE_CXX_FLAGS "-DHAVE_CONFIG_H")
 
-target_link_libraries(worker -L/Library/OpenCASCADE/6.3.0/lib -ljson_spirit -lpthread -lTKernel -lPTKernel -lTKMath -lTKService -lTKV3d -lTKV2d -lTKBRep -lTKIGES -lTKSTL -lTKVRML -lTKSTEP -lTKSTEPAttr -lTKSTEP209 -lTKSTEPBase -lTKShapeSchema -lTKGeomBase -lTKGeomAlgo -lTKG3d -lTKG2d -lTKXSBase -lTKPShape -lTKShHealing -lTKHLR -lTKTopAlgo -lTKMesh -lTKPrim -lTKCDF -lTKBool -lTKBO -lTKFillet -lTKOffset)
+target_link_libraries(worker -L/Library/OpenCASCADE/6.3.0/lib -L/opt/local/lib -ljson_spirit -lpthread -lTKernel -lPTKernel -lTKMath -lTKService -lTKV3d -lTKV2d -lTKBRep -lTKIGES -lTKSTL -lTKVRML -lTKSTEP -lTKSTEPAttr -lTKSTEP209 -lTKSTEPBase -lTKShapeSchema -lTKGeomBase -lTKGeomAlgo -lTKG3d -lTKG2d -lTKXSBase -lTKPShape -lTKShHealing -lTKHLR -lTKTopAlgo -lTKMesh -lTKPrim -lTKCDF -lTKBool -lTKBO -lTKFillet -lTKOffset)
 
 
