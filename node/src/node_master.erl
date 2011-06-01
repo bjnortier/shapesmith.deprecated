@@ -84,9 +84,14 @@ handle_call({mesh_geom, Id}, _From, State) ->
     Geometry = node_geom_db:geometry(Id),
     Hash = node_geom_db:hash(Id),
     case ensure_brep_exists(Id, Geometry, Hash) of
-	ok ->
-	    Reply = node_mesh_db:mesh(Hash),
-	    {reply, Reply, State};
+	AllHashes when is_list(AllHashes) ->
+	    MeshReply = node_mesh_db:mesh(Hash),
+	    %% Purge everything
+	    lists:map(fun(PurgeHashBin) ->
+			      node_brep_db:purge(binary_to_list(PurgeHashBin))
+		      end,
+		      AllHashes),
+	    {reply, MeshReply, State};
 	{error, Err} ->
 	    {reply, {error, Err}, State}
     end;
@@ -126,27 +131,31 @@ code_change(_OldVsn, State, _Extra) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 ensure_brep_exists(Id, Geometry, Hash) ->
+    ensure_brep_exists(Id, Geometry, Hash, []).
+
+ensure_brep_exists(Id, Geometry, Hash, AllHashes) ->
 
     {struct, GeomProps} = Geometry,
-    case lists:keyfind(<<"children">>, 1, GeomProps) of
-        false ->
-            ok;
-        {<<"children">>, Children} ->
-            lists:map(fun(ChildIdBin) ->
-                              ChildId = binary_to_list(ChildIdBin),
-                              ChildGeometry = node_geom_db:geometry(ChildId),
-                              ChildHash = node_geom_db:hash(ChildId),
-                              ensure_brep_exists(ChildId, ChildGeometry, ChildHash)
-                      end,
-                      Children)
-    end,
-
+    ChildHashes = case lists:keyfind(<<"children">>, 1, GeomProps) of
+		      false ->
+			  [];
+		      {<<"children">>, Children} ->
+			  lists:map(fun(ChildIdBin) ->
+					    ChildId = binary_to_list(ChildIdBin),
+					    ChildGeometry = node_geom_db:geometry(ChildId),
+					    ChildHash = node_geom_db:hash(ChildId),
+					    ensure_brep_exists(ChildId, ChildGeometry, ChildHash, AllHashes)
+				    end,
+				    Children)
+		  end,
+    
     %% Create BRep if it doesn't exist
     case node_brep_db:exists(Hash) of
         false -> 
             node_log:info("BREP not found. Creating BREP for ~p[~p]~n", [Id, Hash]),
-            node_brep_db:create(Hash, Geometry);
-        true ->
-            node_log:info("BREP found for ~p[~p]~n", [Id, Hash]),
-            ok
+            node_brep_db:create(Hash, Geometry),
+	    lists:flatten([list_to_binary(Hash)|ChildHashes]);
+	true ->
+	    node_log:info("BREP found for ~p[~p]~n", [Id, Hash]),
+	    lists:flatten([list_to_binary(Hash)|ChildHashes])
     end.

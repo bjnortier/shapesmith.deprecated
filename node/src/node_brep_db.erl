@@ -94,7 +94,13 @@ handle_call({create, Hash, Geometry}, _From, State) ->
 	    end
     end;
 handle_call({purge, Hash}, _From, State) ->
-    ok = serialize_to_disk(Hash),
+    BREPFilename = brep_filename(Hash),
+    case filelib:is_regular(BREPFilename) of
+	false ->
+	    ok = serialize_to_disk(Hash);
+	_ ->
+	    ok
+    end,
     Msg = {struct, [{<<"purge">>, list_to_binary(Hash)}]},
     {Reply, NewState} = case node_worker_server:call(mochijson2:encode(Msg)) of
 			    "true" ->
