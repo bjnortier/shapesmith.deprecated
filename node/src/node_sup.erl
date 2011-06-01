@@ -75,19 +75,9 @@ init([]) ->
               {node_mesh_db, start_link, []},
               permanent, 5000, worker, dynamic},
 
-    {ok, BRepPurgeJobPeriodMilliSecs} = application:get_env(node, brep_purge_job_period),
-    {ok, BRepExpirySecs} = application:get_env(node, brep_purge_expiry),
-    BRepPurgeJob = {node_brep_purge_job,
-		    {node_brep_purge_job, start_link, [BRepPurgeJobPeriodMilliSecs, BRepExpirySecs]},
-		    permanent, 5000, worker, dynamic},
-
-    AccessLogger = {node_worker_access_logger,
-		    {node_worker_access_logger, start_link, []},
-		    permanent, 5000, worker, dynamic},
-    
     WorkerServer = {node_worker_server,
                   {node_worker_server, start_link, []},
                   permanent, 5000, worker, dynamic},
 
-    Processes = [Web, DocDb, Master, GeomDb, BrepDb, MeshDb, AccessLogger, BRepPurgeJob, WorkerServer],
+    Processes = [Web, DocDb, Master, GeomDb, BrepDb, MeshDb, WorkerServer],
     {ok, { {one_for_one, 10, 10}, Processes} }.

@@ -43,8 +43,6 @@ init([]) ->
     {ok, State}.
 
 handle_call({exists, Hash}, _From, State) ->
-    node_worker_access_logger:accessed(Hash),
-
     Msg = {struct, [{<<"exists">>, list_to_binary(Hash)}]},
     Reply = case node_worker_server:call(mochijson2:encode(Msg)) of
                 "true" -> true;
@@ -54,8 +52,6 @@ handle_call({exists, Hash}, _From, State) ->
     {reply, Reply, State};
 
 handle_call({create, Hash, Geometry}, _From, State) ->
-    node_worker_access_logger:accessed(Hash),
-
     %% If the serialized BREP exists, use that. Otherwise
     %% create using the worker
     BREPFilename = brep_filename(Hash),
