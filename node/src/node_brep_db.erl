@@ -3,7 +3,6 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/0, stop/0]).
 -export([exists/1, create/2]).
--export([log/0]).
 -export([serialize/1, purge/1]).
 
 
@@ -22,9 +21,6 @@ exists(Hash) ->
 create(Hash, Geometry) ->
     gen_server:call(?MODULE, {create, Hash, Geometry}, 30000).
 
-log() ->
-    gen_server:call(?MODULE, log, 30000).
-
 serialize(Hash) ->
     gen_server:call(?MODULE, {serialize, Hash}, 30000).
 purge(Hash) ->
@@ -36,11 +32,9 @@ purge(Hash) ->
 %%%                              gen_server                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
--record(state, {log}).
 
 init([]) ->
-    State = #state{log = dict:new() },
-    {ok, State}.
+    {ok, []}.
 
 handle_call({exists, Hash}, _From, State) ->
     Msg = {struct, [{<<"exists">>, list_to_binary(Hash)}]},
@@ -67,9 +61,7 @@ handle_call({create, Hash, Geometry}, _From, State) ->
                             {<<"s11n">>, S11N}]},
             case node_worker_server:call(mochijson2:encode(Msg)) of
 		"\"ok\"" ->
-		    NewLog = dict:store(Hash, from_serialized, State#state.log),
-		    NewState = State#state{ log = NewLog },
-		    {reply, ok, NewState};
+		    {reply, ok, State};
 		ErrorMsg ->
 		    {reply, {error, ErrorMsg}, State}
 	    end;
@@ -82,9 +74,7 @@ handle_call({create, Hash, Geometry}, _From, State) ->
             {<<"type">>, GeomType} = lists:keyfind(<<"type">>, 1, GeomProps),
 	    case create_type(Hash, GeomType, Geometry) of
 		"\"ok\"" ->
-		    NewLog = dict:store(Hash, from_worker, State#state.log),
-		    NewState = State#state{ log = NewLog },
-		    {reply, ok, NewState};
+		    {reply, ok, State};
 		ErrorMsg ->
 		    {reply, {error, ErrorMsg}, State}
 	    end
@@ -100,9 +90,7 @@ handle_call({purge, Hash}, _From, State) ->
     Msg = {struct, [{<<"purge">>, list_to_binary(Hash)}]},
     {Reply, NewState} = case node_worker_server:call(mochijson2:encode(Msg)) of
 			    "true" ->
-				NewLog = dict:store(Hash, purged, State#state.log),
-				S2 = State#state{ log = NewLog }, 
-				{ok, S2};
+				{ok, State};
 			    Reason -> 
 				{{error, Reason}, State}
 			end,
@@ -110,10 +98,6 @@ handle_call({purge, Hash}, _From, State) ->
 handle_call({serialize, Hash}, _From, State) ->
     ok = serialize_to_disk(Hash),
     {reply, ok, State};
-
-handle_call(log, _From, State) ->
-    Log = dict:to_list(State#state.log),
-    {reply, Log, State};
 
 handle_call(stop, _From, State) ->
     {stop, normal, stopped, State};

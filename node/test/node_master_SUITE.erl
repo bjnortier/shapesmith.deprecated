@@ -90,11 +90,6 @@ serialize_geom(_Config) ->
     ok = node_master:deserialize_geom(Id),
     {ok, {struct, _}} = node_master:mesh_geom(Id),
 
-    %% It must have been read from file
-    BRepLog = node_brep_db:log(),
-    1 = length(BRepLog),
-    from_worker = proplists:get_value(node_geom_db:hash(Id), BRepLog),
-
     ok.
 
 serialize_geom_and_brep(_Config) ->
@@ -112,11 +107,6 @@ serialize_geom_and_brep(_Config) ->
     %% Deserialize and load mesh
     ok = node_master:deserialize_geom(Id),
     {ok, {struct, _}} = node_master:mesh_geom(Id),
-
-    %% It must have been read from file
-    BRepLog = node_brep_db:log(),
-    1 = length(BRepLog),
-    from_serialized = proplists:get_value(node_geom_db:hash(Id), BRepLog),
 
     ok.
 
@@ -158,14 +148,6 @@ serialize_boolean(_Config) ->
     ok = node_master:deserialize_geom(Id3),
 
     {ok, {struct, _}} = node_master:mesh_geom(Id3),
-
-    %% All three objects have been created from a worker
-    BRepLog = node_brep_db:log(),
-    3 = length(BRepLog),
-    from_serialized = proplists:get_value(node_geom_db:hash(Id1), BRepLog),
-    from_worker = proplists:get_value(node_geom_db:hash(Id2), BRepLog),
-    from_worker = proplists:get_value(node_geom_db:hash(Id3), BRepLog),
-    
     ok.
 
 serialize_deep_boolean(_Config) ->

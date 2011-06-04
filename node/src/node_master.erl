@@ -88,7 +88,7 @@ handle_call({mesh_geom, Id}, _From, State) ->
 	    MeshReply = node_mesh_db:mesh(Hash),
 	    %% Purge everything
 	    lists:map(fun(PurgeHashBin) ->
-			      node_brep_db:purge(binary_to_list(PurgeHashBin))
+			      ok = node_brep_db:purge(binary_to_list(PurgeHashBin))
 		      end,
 		      AllHashes),
 	    {reply, MeshReply, State};
@@ -99,16 +99,30 @@ handle_call({serialize_brep, Id}, _From, State) ->
     Hash = node_geom_db:hash(Id),
     Geometry = node_geom_db:geometry(Id),
     case ensure_brep_exists(Id, Geometry, Hash) of
-	ok ->
-	    Reply = node_brep_db:serialize(Hash),
-	    {reply, Reply, State};
+	AllHashes when is_list(AllHashes) ->
+	    lists:map(fun(PurgeHashBin) ->
+			      ok = node_brep_db:purge(binary_to_list(PurgeHashBin))
+		      end,
+		      AllHashes),
+	    {reply, ok, State};
 	{error, Err} ->
 	    {reply, {error, Err}, State}
     end;
 handle_call({stl, Id}, _From, State) ->
     Hash = node_geom_db:hash(Id),
-    Reply = node_mesh_db:stl(Hash),
-    {reply, Reply, State};
+    Geometry = node_geom_db:geometry(Id),
+    case ensure_brep_exists(Id, Geometry, Hash) of
+	AllHashes when is_list(AllHashes) ->
+	    Reply = node_mesh_db:stl(Hash),
+	    %% Purge everything
+	    lists:map(fun(PurgeHashBin) ->
+			      ok = node_brep_db:purge(binary_to_list(PurgeHashBin))
+		      end,
+		      AllHashes),
+	    {reply, Reply, State};
+	{error, Err} ->
+	    {reply, {error, Err}, State}
+    end;
 handle_call(stop, _From, State) ->
     {stop, normal, stopped, State};
 handle_call(_Request, _From, State) ->
