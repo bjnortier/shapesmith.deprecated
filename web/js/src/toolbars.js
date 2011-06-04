@@ -18,11 +18,34 @@ function Action(label, iconPath, fn) {
 }
 
 function delete_geom() {
-    var selected = selectionManager.selected();
-    selectionManager.deselectAll();
-    for (var i in selected) {
-        geom_doc.removeByPath(selected[i]);
+    if (selectionManager.size() == 0)  {
+            alert("please select at least one object");
+        return;
     }
+    var selected = selectionManager.selected();
+    var nodes = selected.map(function(path) {
+	return geom_doc.findByPath(path);
+    });
+    selectionManager.deselectAll();
+
+    var doFn = function() {
+	for (var i in nodes) {
+            geom_doc.remove(nodes[i]);
+	}
+	command_stack.inProgressSuccess();
+    }
+
+    var undoFn = function() {
+	for (var i in nodes) {
+            geom_doc.add(nodes[i]);
+	}
+	command_stack.inProgressSuccess();
+    }
+
+    var redoFn = doFn;
+    var cmd = new Command(doFn, undoFn, redoFn);
+    command_stack.execute(cmd);
+
 }
 
 
