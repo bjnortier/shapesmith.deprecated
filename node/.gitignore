@@ -2,9 +2,11 @@ ebin/
 db/*.stl
 db/*.doc
 db/*.brep
+db/*.geom
 deps/
 priv/log/
 logs/
 test_db/
 db/*.geom
 test/*.beam
+.eunit/
