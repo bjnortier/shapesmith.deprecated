@@ -4,3 +4,7 @@ db/*.doc
 db/*.brep
 deps/
 priv/log/
+logs/
+test_db/
+db/*.geom
+test/*.beam
