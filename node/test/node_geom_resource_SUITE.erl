@@ -23,6 +23,7 @@ init_per_suite(Config) ->
 end_per_suite(_Config) ->
     application:stop(node),
     application:unload(node),
+    application:stop(inets),
     ok.
 
 create_update(_Config) ->

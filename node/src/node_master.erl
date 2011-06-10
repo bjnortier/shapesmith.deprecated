@@ -83,46 +83,18 @@ handle_call({deserialize_geom, Id}, _From, State) ->
 handle_call({mesh_geom, Id}, _From, State) ->
     Geometry = node_geom_db:geometry(Id),
     Hash = node_geom_db:hash(Id),
-    case ensure_brep_exists(Id, Geometry, Hash) of
-	AllHashes when is_list(AllHashes) ->
-	    MeshReply = node_mesh_db:mesh(Hash),
-	    %% Purge everything
-	    lists:map(fun(PurgeHashBin) ->
-			      ok = node_brep_db:purge(binary_to_list(PurgeHashBin))
-		      end,
-		      AllHashes),
-	    {reply, MeshReply, State};
-	{error, Err} ->
-	    {reply, {error, Err}, State}
-    end;
+    MeshReply = ensure_brep_exists(Id, Geometry, Hash, fun() -> node_mesh_db:mesh(Hash) end),
+    {reply, MeshReply, State};
 handle_call({serialize_brep, Id}, _From, State) ->
     Hash = node_geom_db:hash(Id),
     Geometry = node_geom_db:geometry(Id),
-    case ensure_brep_exists(Id, Geometry, Hash) of
-	AllHashes when is_list(AllHashes) ->
-	    lists:map(fun(PurgeHashBin) ->
-			      ok = node_brep_db:purge(binary_to_list(PurgeHashBin))
-		      end,
-		      AllHashes),
-	    {reply, ok, State};
-	{error, Err} ->
-	    {reply, {error, Err}, State}
-    end;
+    Reply = ensure_brep_exists(Id, Geometry, Hash, fun() -> ok end),
+    {reply, Reply, State};
 handle_call({stl, Id}, _From, State) ->
     Hash = node_geom_db:hash(Id),
     Geometry = node_geom_db:geometry(Id),
-    case ensure_brep_exists(Id, Geometry, Hash) of
-	AllHashes when is_list(AllHashes) ->
-	    Reply = node_mesh_db:stl(Hash),
-	    %% Purge everything
-	    lists:map(fun(PurgeHashBin) ->
-			      ok = node_brep_db:purge(binary_to_list(PurgeHashBin))
-		      end,
-		      AllHashes),
-	    {reply, Reply, State};
-	{error, Err} ->
-	    {reply, {error, Err}, State}
-    end;
+    Reply = ensure_brep_exists(Id, Geometry, Hash, fun() -> node_mesh_db:stl(Hash) end),
+    {reply, Reply, State};
 handle_call(stop, _From, State) ->
     {stop, normal, stopped, State};
 handle_call(_Request, _From, State) ->
@@ -144,10 +116,10 @@ code_change(_OldVsn, State, _Extra) ->
 %%%                                 private                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-ensure_brep_exists(Id, Geometry, Hash) ->
-    ensure_brep_exists(Id, Geometry, Hash, []).
+ensure_brep_exists(Id, Geometry, Hash, TopLevelFn) ->
+    ensure_brep_exists(Id, Geometry, Hash, TopLevelFn, true).
 
-ensure_brep_exists(Id, Geometry, Hash, AllHashes) ->
+ensure_brep_exists(Id, Geometry, Hash, TopLevelFn, IsTopLevel) ->
 
     {struct, GeomProps} = Geometry,
     ChildHashes = case lists:keyfind(<<"children">>, 1, GeomProps) of
@@ -158,11 +130,11 @@ ensure_brep_exists(Id, Geometry, Hash, AllHashes) ->
 					    ChildId = binary_to_list(ChildIdBin),
 					    ChildGeometry = node_geom_db:geometry(ChildId),
 					    ChildHash = node_geom_db:hash(ChildId),
-					    ensure_brep_exists(ChildId, ChildGeometry, ChildHash, AllHashes)
+					    ensure_brep_exists(ChildId, ChildGeometry, ChildHash, TopLevelFn, false)
 				    end,
 				    Children)
 		  end,
-    
+
     %% Create BRep if it doesn't exist
     case node_brep_db:exists(Hash) of
         false -> 
@@ -172,4 +144,22 @@ ensure_brep_exists(Id, Geometry, Hash, AllHashes) ->
 	true ->
 	    node_log:info("BREP found for ~p[~p]~n", [Id, Hash]),
 	    lists:flatten([list_to_binary(Hash)|ChildHashes])
-    end.
+    end,
+    
+    %% Compute the top level function if this is the top level of the tree
+    Result = case IsTopLevel of
+		 true ->
+		     R = TopLevelFn(),
+		     ok = node_brep_db:purge(Hash),
+		     R;
+		 false ->
+		     Hash
+	     end,
+    
+    %% Purge all children
+    lists:map(fun(ChildHash) ->
+		      ok= node_brep_db:purge(ChildHash)
+	      end,
+	      ChildHashes),
+    Result.
+

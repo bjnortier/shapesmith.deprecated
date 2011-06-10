@@ -16,6 +16,15 @@ all() ->
          serialize_deep_boolean
 	].
 
+init_per_suite(Config) ->
+    ok = application:start(inets),
+    Config.
+
+end_per_suite(_Config) ->
+    application:stop(node),
+    ok.
+    
+
 init_per_testcase(_TestCase, Config) ->
     ok = application:load(node),
     ok = application:set_env(node, port, 8001),
