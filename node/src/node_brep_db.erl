@@ -12,21 +12,21 @@
 
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+
 stop() ->
     gen_server:call(?MODULE, stop).
 
 exists(Hash) ->
-    gen_server:call(?MODULE, {exists, Hash}, 30000).
+    gen_server:call(?MODULE, {exists, Hash}).
 
 create(Hash, Geometry) ->
-    gen_server:call(?MODULE, {create, Hash, Geometry}, 30000).
+    gen_server:call(?MODULE, {create, Hash, Geometry}).
 
 serialize(Hash) ->
-    gen_server:call(?MODULE, {serialize, Hash}, 30000).
+    gen_server:call(?MODULE, {serialize, Hash}).
+
 purge(Hash) ->
-    gen_server:call(?MODULE, {purge, Hash}, 30000).
-
-
+    gen_server:call(?MODULE, {purge, Hash}).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              gen_server                                  %%%
@@ -39,9 +39,14 @@ init([]) ->
 handle_call({exists, Hash}, _From, State) ->
     Msg = {struct, [{<<"exists">>, list_to_binary(Hash)}]},
     Reply = case node_worker_server:call(mochijson2:encode(Msg)) of
-                "true" -> true;
-                "false" -> false;
-                X -> throw({unknown_exists_reponse, X})
+                "true" -> 
+		    true;
+                "false" -> 
+		    false;
+		{error, Reason} ->
+		    {error, Reason};
+		X ->
+		    {error, {unknown_response, X}}
             end,
     {reply, Reply, State};
 
@@ -62,6 +67,8 @@ handle_call({create, Hash, Geometry}, _From, State) ->
             case node_worker_server:call(mochijson2:encode(Msg)) of
 		"\"ok\"" ->
 		    {reply, ok, State};
+		{error, Reason} ->
+		    {reply, {error, Reason}, State};
 		ErrorMsg ->
 		    {reply, {error, ErrorMsg}, State}
 	    end;
@@ -75,6 +82,8 @@ handle_call({create, Hash, Geometry}, _From, State) ->
 	    case create_type(Hash, GeomType, Geometry) of
 		"\"ok\"" ->
 		    {reply, ok, State};
+		{error, Reason} ->
+		    {reply, {error, Reason}, State};
 		ErrorMsg ->
 		    {reply, {error, ErrorMsg}, State}
 	    end
@@ -91,25 +100,21 @@ handle_call({purge, Hash}, _From, State) ->
     {Reply, NewState} = case node_worker_server:call(mochijson2:encode(Msg)) of
 			    "true" ->
 				{ok, State};
-			    Reason -> 
-				{{error, Reason}, State}
+			    {error, Reason} ->
+				{error, Reason};
+			    Error -> 
+				{error, Error}
 			end,
     {reply, Reply, NewState};
 handle_call({serialize, Hash}, _From, State) ->
     ok = serialize_to_disk(Hash),
     {reply, ok, State};
-
 handle_call(stop, _From, State) ->
     {stop, normal, stopped, State};
-
 handle_call(_Request, _From, State) ->
     {reply, unknown_call, State}.
-
-
-
 handle_cast(_Msg, State) ->
     {noreply, State}.
-
 handle_info(_Info, State) ->
     {noreply, State}.
 

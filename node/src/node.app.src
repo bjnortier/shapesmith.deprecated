@@ -15,5 +15,6 @@
   {mod, { node_app, []}},
   {env, [{db_dir, "../db"},
 	 {worker_executable, ["..", "..", "worker", "build", "worker"]},
+	 {worker_max_time, 30000},
          {port, 8000}]}
  ]}.

@@ -75,8 +75,11 @@ init([]) ->
               {node_mesh_db, start_link, []},
               permanent, 5000, worker, dynamic},
 
+    {ok, WorkerPath} = application:get_env(node, worker_executable),
+    {ok, WorkerMaxTime} = application:get_env(node, worker_max_time),
+
     WorkerServer = {node_worker_server,
-                  {node_worker_server, start_link, []},
+                  {node_worker_server, start_link, [WorkerPath, WorkerMaxTime]},
                   permanent, 5000, worker, dynamic},
 
     Processes = [Web, DocDb, Master, GeomDb, BrepDb, MeshDb, WorkerServer],
