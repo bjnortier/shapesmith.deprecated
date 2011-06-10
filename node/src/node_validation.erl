@@ -84,6 +84,7 @@ validate_geom_type(<<"cylinder">>, Props) ->
 validate_geom_type(<<"cone">>, Props) ->
     validate_primitive(Props, [
 			       {[<<"top_radius">>, <<"bottom_radius">>], fun one_zero_one_positive/1},
+			       {[<<"top_radius">>, <<"bottom_radius">>], fun not_equal/1},
 			       {<<"height">>, fun positive/1}
 			      ]);
 validate_geom_type(<<"wedge">>, Props) ->
@@ -377,6 +378,12 @@ one_zero_one_positive([A, B]) when B > 0 andalso A >= 0 ->
 one_zero_one_positive(_) ->
     {error, <<"one must be positive">>}.
 
+not_equal([A, B]) when A =:= B ->
+    {error, <<"can't be equal">>};
+not_equal(_) ->
+    ok.
+
+
 
 -ifdef(TEST).
 validate_spec_test_() ->
@@ -395,7 +402,13 @@ validate_spec_test_() ->
 		    {<<"b">>, <<"one must be positive">>}],
                    validate_spec({struct, [{<<"a">>, 0},
 					   {<<"b">>, 0}]}, 
-				 {[<<"a">>,<<"b">>], fun one_zero_one_positive/1}))
+				 {[<<"a">>,<<"b">>], fun one_zero_one_positive/1})),
+     ?_assertEqual([{<<"a">>, <<"can't be equal">>},
+		    {<<"b">>, <<"can't be equal">>}],
+                   validate_spec({struct, [{<<"a">>, 1},
+					   {<<"b">>, 1}]}, 
+				 {[<<"a">>,<<"b">>], fun not_equal/1}))
+
      
     ].
 -endif.
