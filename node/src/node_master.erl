@@ -69,8 +69,18 @@ handle_call({recursive_geometry, Id}, _From, State) ->
     Reply = node_geom_db:recursive_geometry(Id),
     {reply, Reply, State};
 handle_call({create_geom, Geometry}, _From, State) ->
-    Reply = node_geom_db:create(Geometry),
-    {reply, Reply, State};
+    case node_geom_db:create(Geometry) of
+	{ok, Id} ->
+	    Hash = node_geom_db:hash(Id),
+	    case ensure_brep_exists(Id, Geometry, Hash, fun() -> ok end) of
+		ok ->
+		    {reply, {ok, Id}, State};     
+		{error, Reason} ->
+		    {reply, {error, Reason}, State}
+	    end;
+	{error, Reason} ->
+	    {reply, {error, Reason}, State}
+    end;
 handle_call({update_geom, Id, Geometry}, _From, State) ->
     Reply = node_geom_db:update(Id, Geometry),
     {reply, Reply, State};
