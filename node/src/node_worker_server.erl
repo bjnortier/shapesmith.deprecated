@@ -35,10 +35,9 @@ call(_Msg) ->
 -record(state, {port}).
 
 init([]) ->
-    %% TODO: Move worker binary to application config
+    {ok, WorkerPath} = application:get_env(node, worker_executable),
     WorkerBin = filename:join(
-                  [filename:dirname(code:which(?MODULE)),
-                   "..", "..", "worker", "build", "worker"]),
+                  [filename:dirname(code:which(?MODULE))|WorkerPath]),
     process_flag(trap_exit, true),
     Port = open_port({spawn_executable, WorkerBin}, [{packet, 4}]),
     {ok, #state{port = Port}}.

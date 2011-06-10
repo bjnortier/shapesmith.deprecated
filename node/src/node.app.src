@@ -14,5 +14,6 @@
                  ]},
   {mod, { node_app, []}},
   {env, [{db_dir, "../db"},
+	 {worker_executable, ["..", "..", "worker", "build", "worker"]},
          {port, 8000}]}
  ]}.
