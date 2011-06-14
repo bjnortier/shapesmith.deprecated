@@ -133,7 +133,14 @@ ensure_child_breps_exist([], _) ->
     ok;
 ensure_child_breps_exist([{Id, Geometry, Hash}|Rest], NodeFn) ->
     node_log:info("Ensure child BRep exists ~p[~p]~n", [Id, Hash]),
-    ChildNodes = get_child_nodes(Geometry),
+    
+    ChildNodes = case node_brep_db:is_serialized(Hash) of
+		     true ->
+			 [];
+		     false ->
+			 %% We need to create the children
+			 get_child_nodes(Geometry)
+		 end,
     case ensure_child_breps_exist(ChildNodes, fun() -> ok end) of
 	ok ->
 	    case node_brep_db:create(Hash, Geometry) of
