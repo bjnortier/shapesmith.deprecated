@@ -127,59 +127,56 @@ code_change(_OldVsn, State, _Extra) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 ensure_brep_exists(Id, Geometry, Hash, TopLevelFn) ->
-    ensure_brep_exists([{Id, Geometry, Hash}], [], TopLevelFn).
-
-ensure_brep_exists([{Id, Geometry, Hash}|Rest], ChildrenThatExist, NodeFn) ->
-    
-    %% Phase 1 - create child breps if required
-    {struct, GeomProps} = Geometry,
-    ChildNodes = case lists:keyfind(<<"children">>, 1, GeomProps) of
-		     false ->
-			 [];
-		     {<<"children">>, Children} ->
-			 lists:map(fun(ChildIdBin) ->
-					   ChildId = binary_to_list(ChildIdBin),
-					   ChildGeometry = node_geom_db:geometry(ChildId),
-					   ChildHash = node_geom_db:hash(ChildId),
-					   {ChildId, ChildGeometry, ChildHash}
-				   end,
-				   Children)
-		 end,
-    
-    BRepExists = case ensure_brep_exists(ChildNodes, [], fun() -> ok end) of
-		     %% Some error occurred
-		     {error, R1} ->
-			 {error, R1};
-		     %% All children exist
-		     ok ->
-			 case node_brep_db:exists(Hash) of
-			     false -> 
-				 node_log:info("BREP not found. Creating BREP for ~p[~p]~n", [Id, Hash]),
-				 node_brep_db:create(Hash, Geometry);
-			     true ->
-				 node_log:info("BREP found for ~p[~p]~n", [Id, Hash]),
-				 ok;
-			     {error, R2} ->
-				 {error, R2}
-
-			 end
-		 end,
-    
-    case BRepExists of 
+    node_log:info("Top level BRep exists: ~p~n", [Hash]),
+    ChildNodes = get_child_nodes(Geometry),
+    case ensure_child_breps_exist(ChildNodes) of
 	ok ->
-	    ensure_brep_exists(Rest, [{Id, Geometry, Hash}|ChildrenThatExist], NodeFn);
-	Error ->
-	    Error
-    end;
+	    case node_brep_db:create(Hash, Geometry) of 
+		ok ->
+		    Result = TopLevelFn(),
+		    %% Purge the top level and children
+		    purge_nodes([{Id, Geometry, Hash}|ChildNodes]),
+		    Result;
+		{error, R1} ->
+		    %% Purge the children
+		    purge_nodes(ChildNodes),
+		    {error, R1}
+	    end;
+	{error, R2} ->
+	    %% Purge the children
+	    purge_nodes(ChildNodes),
+	    {error, R2}
+    end.
 
-%% No more remaining, execute & purge
-ensure_brep_exists([], ChildrenThatExist, NodeFn) ->
-    Result = NodeFn(),
+ensure_child_breps_exist([]) ->
+    ok;
+ensure_child_breps_exist([{Id, Geometry, Hash}|Rest]) ->
+    node_log:info("Creating BREP for ~p[~p]~n", [Id, Hash]),
+    case node_brep_db:create(Hash, Geometry) of
+	{error, Error} ->
+	    {error, Error};
+	ok ->
+	    ensure_child_breps_exist(Rest)
+    end.
 
-    %% Purge whether error(s) occurred or not
-    lists:map(fun({_,_,ChildHash}) ->
-		      ok= node_brep_db:purge(ChildHash)
+get_child_nodes(Geometry) ->
+    {struct, GeomProps} = Geometry,
+    case lists:keyfind(<<"children">>, 1, GeomProps) of
+	false ->
+	    [];
+	{<<"children">>, Children} ->
+	    lists:map(fun(ChildIdBin) ->
+			      ChildId = binary_to_list(ChildIdBin),
+			      ChildGeometry = node_geom_db:geometry(ChildId),
+			      ChildHash = node_geom_db:hash(ChildId),
+			      {ChildId, ChildGeometry, ChildHash}
+		      end,
+		      Children)
+    end.
+
+purge_nodes(Nodes) ->
+    lists:map(fun({_,_,Hash}) ->
+		      node_brep_db:purge(Hash)
 	      end,
-	      ChildrenThatExist),
-    Result.
-
+	      Nodes),
+    ok.

@@ -2,7 +2,7 @@
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/0, stop/0]).
--export([exists/1, create/2]).
+-export([is_serialized/1, create/2]).
 -export([serialize/1, purge/1]).
 
 
@@ -16,8 +16,8 @@ start_link() ->
 stop() ->
     gen_server:call(?MODULE, stop).
 
-exists(Hash) ->
-    gen_server:call(?MODULE, {exists, Hash}).
+is_serialized(Hash) ->
+    gen_server:call(?MODULE, {is_serialized, Hash}).
 
 create(Hash, Geometry) ->
     gen_server:call(?MODULE, {create, Hash, Geometry}).
@@ -36,18 +36,9 @@ purge(Hash) ->
 init([]) ->
     {ok, []}.
 
-handle_call({exists, Hash}, _From, State) ->
-    Msg = {struct, [{<<"exists">>, list_to_binary(Hash)}]},
-    Reply = case node_worker_server:call(mochijson2:encode(Msg)) of
-                "true" -> 
-		    true;
-                "false" -> 
-		    false;
-		{error, Reason} ->
-		    {error, Reason};
-		ErrorMsg ->
-		    {error, ErrorMsg}
-            end,
+handle_call({is_serialized, Hash}, _From, State) ->
+    BREPFilename = brep_filename(Hash),
+    Reply = filelib:is_regular(BREPFilename),
     {reply, Reply, State};
 
 handle_call({create, Hash, Geometry}, _From, State) ->
@@ -96,6 +87,7 @@ handle_call({purge, Hash}, _From, State) ->
 	_ ->
 	    ok
     end,
+    node_log:info("Purging ~p~n", [Hash]),
     Msg = {struct, [{<<"purge">>, list_to_binary(Hash)}]},
     {Reply, NewState} = case node_worker_server:call(mochijson2:encode(Msg)) of
 			    "true" ->
