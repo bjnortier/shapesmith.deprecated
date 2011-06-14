@@ -152,11 +152,17 @@ ensure_child_breps_exist([]) ->
     ok;
 ensure_child_breps_exist([{Id, Geometry, Hash}|Rest]) ->
     node_log:info("Creating BREP for ~p[~p]~n", [Id, Hash]),
-    case node_brep_db:create(Hash, Geometry) of
-	{error, Error} ->
-	    {error, Error};
+    ChildNodes = get_child_nodes(Geometry),
+    case ensure_child_breps_exist(ChildNodes) of
 	ok ->
-	    ensure_child_breps_exist(Rest)
+	    case node_brep_db:create(Hash, Geometry) of
+		{error, R1} ->
+		    {error, R1};
+		ok ->
+		    ensure_child_breps_exist(Rest)
+	    end;
+	{error, R2} ->
+	    {error, R2}
     end.
 
 get_child_nodes(Geometry) ->
