@@ -126,37 +126,23 @@ code_change(_OldVsn, State, _Extra) ->
 %%%                                 private                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-
 ensure_brep_exists(Id, Geometry, Hash, TopLevelFn) ->
-    node_log:info("Top level ensure BRep exists: ~p~n", [Hash]),
-    ChildNodes = get_child_nodes(Geometry),
-    case ensure_child_breps_exist(ChildNodes) of
-	ok ->
-	    case node_brep_db:create(Hash, Geometry) of 
-		ok ->
-		    TopLevelResult = TopLevelFn(),
-		    purge_nodes([{Id, Geometry, Hash}|ChildNodes]),
-		    TopLevelResult;
-		{error, R1} ->
-		    purge_nodes(ChildNodes),
-		    {error, R1}
-	    end;
-	{error, R2} ->
-	    purge_nodes(ChildNodes),
-	    {error, R2}
-    end.
+    ensure_child_breps_exist([{Id, Geometry, Hash}], TopLevelFn).
 
-ensure_child_breps_exist([]) ->
+ensure_child_breps_exist([], _) ->
     ok;
-ensure_child_breps_exist([{Id, Geometry, Hash}|Rest]) ->
+ensure_child_breps_exist([{Id, Geometry, Hash}|Rest], NodeFn) ->
     node_log:info("Ensure child BRep exists ~p[~p]~n", [Id, Hash]),
     ChildNodes = get_child_nodes(Geometry),
-    case ensure_child_breps_exist(ChildNodes) of
+    case ensure_child_breps_exist(ChildNodes, fun() -> ok end) of
 	ok ->
 	    case node_brep_db:create(Hash, Geometry) of
 		ok ->
+		    Result = NodeFn(),
 		    purge_nodes(ChildNodes),
-		    ensure_child_breps_exist(Rest);
+		    ensure_child_breps_exist(Rest, NodeFn),
+		    Result;
+
 		{error, R1} ->
 		    purge_nodes(ChildNodes),
 		    {error, R1}
