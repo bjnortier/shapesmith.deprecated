@@ -13,7 +13,8 @@ all() ->
          serialize_geom,
          serialize_geom_and_brep,
          serialize_boolean,
-         serialize_deep_boolean
+         serialize_deep_boolean,
+	 timeout
 	].
 
 init_per_suite(Config) ->
@@ -25,12 +26,18 @@ end_per_suite(_Config) ->
     ok.
     
 
-init_per_testcase(_TestCase, Config) ->
+init_per_testcase(TestCase, Config) ->
+
     ok = application:load(node),
     ok = application:set_env(node, port, 8001),
     ok = application:set_env(node, db_dir, filename:join(["../test_db/", ?MODULE])),
+    case TestCase of 
+	timeout -> 
+	    ok = application:set_env(node, worker_max_time, 0);
+	_ ->
+	    ok
+    end,
     ok = node:start(),
-
     
     %% Clean the directory
     TestDb = filename:join(
@@ -55,6 +62,12 @@ create_simple(_Config) ->
     {ok, {struct, _}} = node_master:mesh_geom(Id),
     {ok, Stl} = node_master:stl(Id),
     true = is_binary(Stl),
+    ok.
+
+timeout(_Config) ->
+    Geometry = {struct, [{<<"type">>, <<"sphere">>},
+                         {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]},
+    {error, _} = node_master:create_geom(Geometry),
     ok.
 
 create_boolean(_Config) ->

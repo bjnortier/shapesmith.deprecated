@@ -45,8 +45,8 @@ handle_call({exists, Hash}, _From, State) ->
 		    false;
 		{error, Reason} ->
 		    {error, Reason};
-		X ->
-		    {error, {unknown_response, X}}
+		ErrorMsg ->
+		    {error, ErrorMsg}
             end,
     {reply, Reply, State};
 

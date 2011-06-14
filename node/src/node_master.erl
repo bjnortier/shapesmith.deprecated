@@ -127,49 +127,59 @@ code_change(_OldVsn, State, _Extra) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 ensure_brep_exists(Id, Geometry, Hash, TopLevelFn) ->
-    ensure_brep_exists(Id, Geometry, Hash, TopLevelFn, true).
+    ensure_brep_exists([{Id, Geometry, Hash}], [], TopLevelFn).
 
-ensure_brep_exists(Id, Geometry, Hash, TopLevelFn, IsTopLevel) ->
-
+ensure_brep_exists([{Id, Geometry, Hash}|Rest], ChildrenThatExist, NodeFn) ->
+    
+    %% Phase 1 - create child breps if required
     {struct, GeomProps} = Geometry,
-    ChildHashes = case lists:keyfind(<<"children">>, 1, GeomProps) of
-		      false ->
-			  [];
-		      {<<"children">>, Children} ->
-			  lists:map(fun(ChildIdBin) ->
-					    ChildId = binary_to_list(ChildIdBin),
-					    ChildGeometry = node_geom_db:geometry(ChildId),
-					    ChildHash = node_geom_db:hash(ChildId),
-					    ensure_brep_exists(ChildId, ChildGeometry, ChildHash, TopLevelFn, false)
-				    end,
-				    Children)
-		  end,
+    ChildNodes = case lists:keyfind(<<"children">>, 1, GeomProps) of
+		     false ->
+			 [];
+		     {<<"children">>, Children} ->
+			 lists:map(fun(ChildIdBin) ->
+					   ChildId = binary_to_list(ChildIdBin),
+					   ChildGeometry = node_geom_db:geometry(ChildId),
+					   ChildHash = node_geom_db:hash(ChildId),
+					   {ChildId, ChildGeometry, ChildHash}
+				   end,
+				   Children)
+		 end,
+    
+    BRepExists = case ensure_brep_exists(ChildNodes, [], fun() -> ok end) of
+		     %% Some error occurred
+		     {error, R1} ->
+			 {error, R1};
+		     %% All children exist
+		     ok ->
+			 case node_brep_db:exists(Hash) of
+			     false -> 
+				 node_log:info("BREP not found. Creating BREP for ~p[~p]~n", [Id, Hash]),
+				 node_brep_db:create(Hash, Geometry);
+			     true ->
+				 node_log:info("BREP found for ~p[~p]~n", [Id, Hash]),
+				 ok;
+			     {error, R2} ->
+				 {error, R2}
 
-    %% Create BRep if it doesn't exist
-    case node_brep_db:exists(Hash) of
-        false -> 
-            node_log:info("BREP not found. Creating BREP for ~p[~p]~n", [Id, Hash]),
-            node_brep_db:create(Hash, Geometry),
-	    lists:flatten([list_to_binary(Hash)|ChildHashes]);
-	true ->
-	    node_log:info("BREP found for ~p[~p]~n", [Id, Hash]),
-	    lists:flatten([list_to_binary(Hash)|ChildHashes])
-    end,
+			 end
+		 end,
     
-    %% Compute the top level function if this is the top level of the tree
-    Result = case IsTopLevel of
-		 true ->
-		     R = TopLevelFn(),
-		     ok = node_brep_db:purge(Hash),
-		     R;
-		 false ->
-		     Hash
-	     end,
-    
-    %% Purge all children
-    lists:map(fun(ChildHash) ->
+    case BRepExists of 
+	ok ->
+	    ensure_brep_exists(Rest, [{Id, Geometry, Hash}|ChildrenThatExist], NodeFn);
+	Error ->
+	    Error
+    end;
+
+%% No more remaining, execute & purge
+ensure_brep_exists([], ChildrenThatExist, NodeFn) ->
+    Result = NodeFn(),
+
+    %% Purge whether error(s) occurred or not
+    lists:map(fun({_,_,ChildHash}) ->
 		      ok= node_brep_db:purge(ChildHash)
 	      end,
-	      ChildHashes),
+	      ChildrenThatExist),
     Result.
 
