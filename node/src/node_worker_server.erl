@@ -16,11 +16,16 @@ stop() ->
     gen_server:call(?MODULE, stop).
 
 call(Msg) when is_list(Msg) andalso length(Msg) > 0 ->
-    catch(gen_server:call(?MODULE, {call, Msg}));
+    call(list_to_binary(Msg));
 call(Msg) when is_list(Msg)  ->
     {error, empty_msg};
 call(Msg) when is_binary(Msg) andalso size(Msg) > 0 ->
-    catch(gen_server:call(?MODULE, {call, Msg}));
+    case catch(gen_server:call(?MODULE, {call, Msg})) of
+	{'EXIT',{{error, Reason},_}} ->
+	    {error, Reason};
+	Result ->
+	    Result
+    end;
 call(Msg) when is_binary(Msg) ->
     {error, empty_msg};
 call(_Msg) ->

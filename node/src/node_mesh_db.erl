@@ -43,15 +43,18 @@ handle_call({mesh, Hash}, _From, State) ->
                     {ok, Mesh};
                 false -> 
                     node_log:info("meshing hash:~p~n", [Hash]),
-                    Result = mochijson2:decode(
-                               node_worker_server:call(
-                                 mochijson2:encode(
-                                   {struct, [{<<"tesselate">>, list_to_binary(Hash)}]}))),
-                    case Result of
-                        {struct, [{<<"error">>, E}]} ->
-                            {error, E};
-                        _ ->
-                            {ok, Result}
+		    case node_worker_server:call(
+			   mochijson2:encode(
+			     {struct, [{<<"tesselate">>, list_to_binary(Hash)}]})) of
+			{error, Reason} ->
+			    {error, Reason};
+			JSON ->
+			    case mochijson2:decode(JSON) of
+				{struct, [{<<"error">>, E}]} ->
+				    {error, E};
+				Result ->
+				    {ok, Result}
+			    end
                     end
             end,
     {reply, Reply, State};
@@ -65,11 +68,13 @@ handle_call({stl, Hash}, _From, State) ->
                     {<<"id">>, list_to_binary(Hash)},
                     {<<"filename">>, list_to_binary(Filename)}
                    ]},
-    %% TODO: Error handling
-    "\"ok\"" = node_worker_server:call(mochijson2:encode(Msg)),
-    {ok, STL} = file:read_file(Filename),
-    {reply, {ok, STL}, State};
-
+    case node_worker_server:call(mochijson2:encode(Msg)) of
+	"\"ok\"" ->
+	    {ok, STL} = file:read_file(Filename),
+	    {reply, {ok, STL}, State};
+	{error, Reason} ->
+	    {reply, {error, Reason}, State}
+    end;
 handle_call(stop, _From, State) ->
     {stop, normal, stopped, State};
 handle_call(_Request, _From, State) ->

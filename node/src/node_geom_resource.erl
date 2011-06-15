@@ -83,9 +83,13 @@ malformed_request(ReqData, Context, 'PUT') ->
 		    case node_master:update_geom(Id, transform_paths_to_ids(JSON)) of
 			ok ->
 			    {false, ReqData, Context};
-			{error, {validation, ErrorParams}} ->
-			    ReqData1 = error_response(ReqData, ErrorParams),
-			    {true, ReqData1, Context}
+			{error, Reason = {validation, _}} ->
+			    ReqData1 = error_response(Reason, ReqData),
+			    {true, ReqData1, Context};
+			Error = {error, _Reason} ->
+			    node_log:error("~p~n", [Error]),
+			    ReqData1 = error_response(Error, ReqData),
+			    {{halt, 500}, ReqData1, Context}
 		    end;
 		false ->
 		    {true, ReqData, Context}
@@ -101,21 +105,37 @@ malformed_request(ReqData, Context, 'POST') ->
 		    ReqData1 = wrq:set_resp_body(
 				 mochijson2:encode({struct, [{<<"path">>, iolist_to_binary(Path)}]}), ReqData),
 		    {false, ReqData1, Context};
-		{error, {validation, ErrorParams}} ->
-		    ReqData1 = error_response(ReqData, ErrorParams),
-		    {true, ReqData1, Context}
+		{error, Reason = {validation, _}} ->
+		    ReqData1 = error_response(Reason, ReqData),
+		    {true, ReqData1, Context};
+		Error = {error, _Reason} ->
+		    node_log:error("~p~n", [Error]),
+		    ReqData1 = error_response(Error, ReqData),
+		    {{halt, 500}, ReqData1, Context}
+
 	    end;
 	false ->
 	    ReqData1 = wrq:set_resp_body(<<"\"invalid json\"">>, ReqData),
 	    {true, ReqData1, Context}
     end.
 
-
-error_response(ReqData, ErrorParams) ->
+error_response({validation, ErrorParams}, ReqData) ->
     wrq:set_resp_body(
       mochijson2:encode(
 	{struct, [{<<"validation">>, ErrorParams}]}), 
+      ReqData);
+error_response({error,worker_timeout}, ReqData) ->
+    wrq:set_resp_body(
+      mochijson2:encode(
+	{struct, [{<<"error">>, <<"timeout">>}]}), 
+      ReqData);
+error_response(_, ReqData) ->
+    wrq:set_resp_body(
+      mochijson2:encode(
+	{struct, [{<<"error">>, <<"internal error">>}]}), 
       ReqData).
+
+
 
 valid_json(Body) ->
     try 
