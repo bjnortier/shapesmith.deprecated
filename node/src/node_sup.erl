@@ -53,34 +53,19 @@ init([]) ->
                  {dispatch, Dispatch}],
     Web = {webmachine_mochiweb,
            {webmachine_mochiweb, start, [WebConfig]},
-           permanent, 5000, worker, dynamic},
+           permanent, 5000, worker, [webmachine_mochiweb]},
 
     DocDb = {node_document_db,
              {node_document_db, start_link, []},
-             permanent, 5000, worker, dynamic},
+             permanent, 5000, worker, [node_document_db]},
 
-    Master = {node_master,
-              {node_master, start_link, []},
-              permanent, 5000, worker, dynamic},
-    
     GeomDb = {node_geom_db,
               {node_geom_db, start_link, []},
-              permanent, 5000, worker, dynamic},
+              permanent, 5000, worker, [node_geom_db]},
 
-    BrepDb = {node_brep_db,
-              {node_brep_db, start_link, []},
-              permanent, 5000, worker, dynamic},
+    WorkerPoolSup = {node_worker_pool_sup,
+		     {node_worker_pool_sup, start_link, []},
+		     permanent, 5000, worker, [node_worker_pool_sup]},
 
-    MeshDb = {node_mesh_db,
-              {node_mesh_db, start_link, []},
-              permanent, 5000, worker, dynamic},
-
-    {ok, WorkerPath} = application:get_env(node, worker_executable),
-    {ok, WorkerMaxTime} = application:get_env(node, worker_max_time),
-
-    WorkerServer = {node_worker_server,
-                  {node_worker_server, start_link, [WorkerPath, WorkerMaxTime]},
-                  permanent, 5000, worker, dynamic},
-
-    Processes = [Web, DocDb, Master, GeomDb, BrepDb, MeshDb, WorkerServer],
+    Processes = [Web, DocDb, GeomDb, WorkerPoolSup],
     {ok, { {one_for_one, 10, 10}, Processes} }.

@@ -1,137 +1,80 @@
 -module(node_master).
--behaviour(gen_server).
--export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/0, stop/0]).
 -export([create_geom/1, update_geom/2, mesh_geom/1, exists/1, geometry/1, recursive_geometry/1, stl/1]).
 -export([serialize_geom/1, deserialize_geom/1]).
--export([serialize_brep/1, deserialize_brep/1]).
+-export([serialize_brep/1]).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-start_link() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
-
-stop() ->
-    gen_server:call(?MODULE, stop).
-
 exists(Id) ->
-    gen_server:call(?MODULE, {exists, Id}, 30000).
-
-create_geom(Geometry) ->
-    gen_server:call(?MODULE, {create_geom, Geometry}, 30000).
-update_geom(Id, Geometry) ->
-    gen_server:call(?MODULE, {update_geom, Id, Geometry}, 30000).
-
+    node_geom_db:exists(Id).
 
 geometry(Id) ->
-    gen_server:call(?MODULE, {geometry, Id}, 30000).
+    node_geom_db:geometry(Id).
 
 recursive_geometry(Id) ->
-    gen_server:call(?MODULE, {recursive_geometry, Id}, 30000).
+    node_geom_db:recursive_geometry(Id).
 
-serialize_geom(Id) ->
-    gen_server:call(?MODULE, {serialize_geom, Id}, 30000).
-
-deserialize_geom(Id) ->
-    gen_server:call(?MODULE, {deserialize_geom, Id}, 30000).
-
-serialize_brep(Id) ->
-    gen_server:call(?MODULE, {serialize_brep, Id}, 30000).
-
-deserialize_brep(Id) ->
-    gen_server:call(?MODULE, {deserialize_brep, Id}, 30000).
-
-
-mesh_geom(Id) -> 
-    gen_server:call(?MODULE, {mesh_geom, Id}, 30000).
-
-stl(Id) ->
-    gen_server:call(?MODULE, {stl, Id}, 30000).
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%                              gen_server                                  %%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-
-init([]) ->
-    {ok, []}.
-
-handle_call({exists, Id}, _From, State) ->
-    Reply = node_geom_db:exists(Id),
-    {reply, Reply, State};
-handle_call({geometry, Id}, _From, State) ->
-    Reply = node_geom_db:geometry(Id),
-    {reply, Reply, State};
-handle_call({recursive_geometry, Id}, _From, State) ->
-    Reply = node_geom_db:recursive_geometry(Id),
-    {reply, Reply, State};
-handle_call({create_geom, Geometry}, _From, State) ->
+create_geom(Geometry) ->
     case node_geom_db:create(Geometry) of
 	{ok, Id} ->
 	    Hash = node_geom_db:hash(Id),
-	    case ensure_brep_exists(Id, Geometry, Hash, fun() -> ok end) of
+	    case ensure_brep_exists(Id, Geometry, Hash, fun(_WorkerPid) -> ok end) of
 		ok ->
-		    {reply, {ok, Id}, State};     
+		    {ok, Id};
 		{error, Reason} ->
-		    {reply, {error, Reason}, State}
+		    {error, Reason}
 	    end;
 	{error, Reason} ->
-	    {reply, {error, Reason}, State}
-    end;
-handle_call({update_geom, Id, Geometry}, _From, State) ->
-    Reply = node_geom_db:update(Id, Geometry),
-    {reply, Reply, State};
-handle_call({serialize_geom, Id}, _From, State) ->
-    ok = node_geom_db:serialize(Id),
-    {reply, ok, State};
-handle_call({deserialize_geom, Id}, _From, State) ->
-    ok = node_geom_db:deserialize(Id),
-    {reply, ok, State};
-handle_call({mesh_geom, Id}, _From, State) ->
+	    {error, Reason}
+    end.
+
+update_geom(Id, Geometry) ->
+    node_geom_db:update(Id, Geometry).
+
+serialize_geom(Id) ->
+    ok = node_geom_db:serialize(Id).
+
+deserialize_geom(Id) ->
+    ok = node_geom_db:deserialize(Id).
+
+mesh_geom(Id) ->
     Geometry = node_geom_db:geometry(Id),
     Hash = node_geom_db:hash(Id),
-    MeshReply = ensure_brep_exists(Id, Geometry, Hash, fun() -> node_mesh_db:mesh(Hash) end),
-    {reply, MeshReply, State};
-handle_call({serialize_brep, Id}, _From, State) ->
+    ensure_brep_exists(Id, Geometry, Hash, fun(WorkerPid) -> 
+						   node_mesh_db:mesh(WorkerPid, Hash) 
+					   end).
+
+serialize_brep(Id) ->
     Hash = node_geom_db:hash(Id),
     Geometry = node_geom_db:geometry(Id),
-    Reply = ensure_brep_exists(Id, Geometry, Hash, fun() -> ok end),
-    {reply, Reply, State};
-handle_call({stl, Id}, _From, State) ->
+    ensure_brep_exists(Id, Geometry, Hash, fun(_WorkerPid) -> ok end).
+
+stl(Id) ->
     Hash = node_geom_db:hash(Id),
     Geometry = node_geom_db:geometry(Id),
-    Reply = ensure_brep_exists(Id, Geometry, Hash, fun() -> node_mesh_db:stl(Hash) end),
-    {reply, Reply, State};
-handle_call(stop, _From, State) ->
-    {stop, normal, stopped, State};
-handle_call(_Request, _From, State) ->
-    {reply, unmatched_handle_call_in_gen_server, State}.
+    ensure_brep_exists(Id, Geometry, Hash, fun(WorkerPid) -> 
+						   node_mesh_db:stl(WorkerPid, Hash) 
+					   end).
 
-handle_cast(_Msg, State) ->
-    {noreply, State}.
-
-handle_info(_Info, State) ->
-    {noreply, State}.
-
-terminate(_Reason, _State) ->
-    ok.
-
-code_change(_OldVsn, State, _Extra) ->
-    {ok, State}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                 private                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 ensure_brep_exists(Id, Geometry, Hash, TopLevelFn) ->
-    ensure_child_breps_exist([{Id, Geometry, Hash}], TopLevelFn).
+    case node_worker_pool:get_worker() of
+	{error, Error} ->
+	    {error, Error};
+	WorkerPid ->
+	    ensure_child_breps_exist(WorkerPid, [{Id, Geometry, Hash}], TopLevelFn)
+    end.
 
-ensure_child_breps_exist([], _) ->
+ensure_child_breps_exist(_, [], _) ->
     ok;
-ensure_child_breps_exist([{Id, Geometry, Hash}|Rest], NodeFn) ->
+ensure_child_breps_exist(WorkerPid, [{Id, Geometry, Hash}|Rest], NodeFn) ->
     node_log:info("Ensure child BRep exists ~p[~p]~n", [Id, Hash]),
     
     ChildNodes = case node_brep_db:is_serialized(Hash) of
@@ -141,21 +84,21 @@ ensure_child_breps_exist([{Id, Geometry, Hash}|Rest], NodeFn) ->
 			 %% We need to create the children
 			 get_child_nodes(Geometry)
 		 end,
-    case ensure_child_breps_exist(ChildNodes, fun() -> ok end) of
+    case ensure_child_breps_exist(WorkerPid, ChildNodes, fun(_WorkerPid) -> ok end) of
 	ok ->
-	    case node_brep_db:create(Hash, Geometry) of
+	    case node_brep_db:create(WorkerPid, Hash, Geometry) of
 		ok ->
-		    Result = NodeFn(),
-		    purge_nodes(ChildNodes),
-		    ensure_child_breps_exist(Rest, NodeFn),
+		    Result = NodeFn(WorkerPid),
+		    purge_nodes(WorkerPid, ChildNodes),
+		    ensure_child_breps_exist(WorkerPid, Rest, NodeFn),
 		    Result;
 
 		{error, R1} ->
-		    purge_nodes(ChildNodes),
+		    purge_nodes(WorkerPid, ChildNodes),
 		    {error, R1}
 	    end;
 	{error, R2} ->
-	    purge_nodes(ChildNodes),
+	    purge_nodes(WorkerPid, ChildNodes),
 	    {error, R2}
     end.
     
@@ -175,9 +118,9 @@ get_child_nodes(Geometry) ->
 		      Children)
     end.
 
-purge_nodes(Nodes) ->
+purge_nodes(WorkerPid, Nodes) ->
     lists:map(fun({_,_,Hash}) ->
-		      node_brep_db:purge(Hash)
+		      node_brep_db:purge(WorkerPid, Hash)
 	      end,
 	      Nodes),
     ok.

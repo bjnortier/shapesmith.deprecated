@@ -1,47 +1,18 @@
 -module(node_brep_db).
--behaviour(gen_server).
--export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/0, stop/0]).
--export([is_serialized/1, create/2]).
--export([serialize/1, purge/1]).
+-export([is_serialized/1, create/3]).
+-export([serialize/2, purge/2]).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-start_link() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
-
-stop() ->
-    gen_server:call(?MODULE, stop).
 
 is_serialized(Hash) ->
-    gen_server:call(?MODULE, {is_serialized, Hash}).
-
-create(Hash, Geometry) ->
-    gen_server:call(?MODULE, {create, Hash, Geometry}).
-
-serialize(Hash) ->
-    gen_server:call(?MODULE, {serialize, Hash}).
-
-purge(Hash) ->
-    gen_server:call(?MODULE, {purge, Hash}).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%                              gen_server                                  %%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-
-
-init([]) ->
-    {ok, []}.
-
-handle_call({is_serialized, Hash}, _From, State) ->
     BREPFilename = brep_filename(Hash),
-    Reply = filelib:is_regular(BREPFilename),
-    {reply, Reply, State};
+    filelib:is_regular(BREPFilename).
 
-handle_call({create, Hash, Geometry}, _From, State) ->
+create(WorkerPid, Hash, Geometry) ->
     %% If the serialized BREP exists, use that. Otherwise
     %% create using the worker
     BREPFilename = brep_filename(Hash),
@@ -55,13 +26,13 @@ handle_call({create, Hash, Geometry}, _From, State) ->
             Msg = {struct, [{<<"type">>, <<"deserialize">>},
                             {<<"id">>, list_to_binary(Hash)},
                             {<<"s11n">>, S11N}]},
-            case node_worker_server:call(mochijson2:encode(Msg)) of
+            case node_worker_pool:call(WorkerPid, mochijson2:encode(Msg)) of
 		"\"ok\"" ->
-		    {reply, ok, State};
+		    ok;
 		{error, Reason} ->
-		    {reply, {error, Reason}, State};
+		    {error, Reason};
 		ErrorMsg ->
-		    {reply, {error, ErrorMsg}, State}
+		    {error, ErrorMsg}
 	    end;
 
         false ->
@@ -70,60 +41,47 @@ handle_call({create, Hash, Geometry}, _From, State) ->
 
             {struct, GeomProps} = Geometry,
             {<<"type">>, GeomType} = lists:keyfind(<<"type">>, 1, GeomProps),
-	    case create_type(Hash, GeomType, Geometry) of
+	    case create_type(WorkerPid, Hash, GeomType, Geometry) of
 		"\"ok\"" ->
-		    {reply, ok, State};
+		    ok;
 		{error, Reason} ->
-		    {reply, {error, Reason}, State};
+		    {error, Reason};
 		ErrorMsg ->
-		    {reply, {error, ErrorMsg}, State}
+		    {error, ErrorMsg}
 	    end
-    end;
-handle_call({purge, Hash}, _From, State) ->
+    end.
+
+purge(WorkerPid, Hash) ->
     BREPFilename = brep_filename(Hash),
     case filelib:is_regular(BREPFilename) of
 	false ->
-	    ok = serialize_to_disk(Hash);
+	    ok = serialize_to_disk(WorkerPid, Hash);
 	_ ->
 	    ok
     end,
     node_log:info("Purging ~p~n", [Hash]),
     Msg = {struct, [{<<"purge">>, list_to_binary(Hash)}]},
-    {Reply, NewState} = case node_worker_server:call(mochijson2:encode(Msg)) of
-			    "true" ->
-				{ok, State};
-			    {error, Reason} ->
-				{error, Reason};
-			    Error -> 
-				{error, Error}
-			end,
-    {reply, Reply, NewState};
-handle_call({serialize, Hash}, _From, State) ->
-    ok = serialize_to_disk(Hash),
-    {reply, ok, State};
-handle_call(stop, _From, State) ->
-    {stop, normal, stopped, State};
-handle_call(_Request, _From, State) ->
-    {reply, unknown_call, State}.
-handle_cast(_Msg, State) ->
-    {noreply, State}.
-handle_info(_Info, State) ->
-    {noreply, State}.
+    case node_worker_pool:call(WorkerPid, mochijson2:encode(Msg)) of
+	"true" ->
+	    ok;
+	{error, Reason} ->
+	    {error, Reason};
+	Error -> 
+	    {error, Error}
+    end.
 
-terminate(_Reason, _State) ->
-    ok.
+serialize(WorkerPid, Hash) ->
+    serialize_to_disk(WorkerPid, Hash).
 
-code_change(_OldVsn, State, _Extra) ->
-    {ok, State}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                 private                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-serialize_to_disk(Hash) ->
+serialize_to_disk(WorkerPid, Hash) ->
     Msg = {struct, [{<<"type">>, <<"serialize">>},
                     {<<"id">>, list_to_binary(Hash)}]},
-    {struct, [{<<"s11n">>, S11N}]} = mochijson2:decode(node_worker_server:call(mochijson2:encode(Msg))),
+    {struct, [{<<"s11n">>, S11N}]} = mochijson2:decode(node_worker_pool:call(WorkerPid, mochijson2:encode(Msg))),
     
     BREPFilename = brep_filename(Hash),
     node_log:info("writing brep for ~p to ~s~n", [Hash, BREPFilename]),
@@ -136,17 +94,17 @@ brep_filename(Hash) ->
       [filename:dirname(code:which(?MODULE)),
        DbDir, Hash ++ ".brep"]).
 
-create_type(Hash, <<"union">>, Geometry) ->
-    create_boolean(Hash, <<"union">>, Geometry);
-create_type(Hash, <<"subtract">>, Geometry) ->
-    create_boolean(Hash, <<"subtract">>, Geometry);
-create_type(Hash, <<"intersect">>, Geometry) ->
-    create_boolean(Hash, <<"intersect">>, Geometry);
+create_type(WorkerPid, Hash, <<"union">>, Geometry) ->
+    create_boolean(WorkerPid, Hash, <<"union">>, Geometry);
+create_type(WorkerPid, Hash, <<"subtract">>, Geometry) ->
+    create_boolean(WorkerPid, Hash, <<"subtract">>, Geometry);
+create_type(WorkerPid, Hash, <<"intersect">>, Geometry) ->
+    create_boolean(WorkerPid, Hash, <<"intersect">>, Geometry);
 %% Non-bool pass through
-create_type(Hash, _, Geometry) ->
-    worker_create(Hash, Geometry).
+create_type(WorkerPid, Hash, _, Geometry) ->
+    worker_create(WorkerPid, Hash, Geometry).
 
-create_boolean(Hash, Type, Geometry) ->
+create_boolean(WorkerPid, Hash, Type, Geometry) ->
     {struct, GeomProps} = Geometry,
     {<<"children">>, ChildIds} = lists:keyfind(<<"children">>, 1, GeomProps),
     ChildHashes = lists:map(fun(ChildId) ->
@@ -159,13 +117,13 @@ create_boolean(Hash, Type, Geometry) ->
                      false -> [];
                      {<<"transforms">>, T} -> T
                  end,
-    worker_create(Hash, {struct, [{<<"type">>, Type},
-                                  {<<"children">>, ChildHashes},
-                                  {<<"transforms">>, Transforms}
-                                 ]}).
-worker_create(Hash, Geometry) ->
+    worker_create(WorkerPid, Hash, {struct, [{<<"type">>, Type},
+					     {<<"children">>, ChildHashes},
+					     {<<"transforms">>, Transforms}
+					    ]}).
+worker_create(WorkerPid, Hash, Geometry) ->
     Msg = {struct, [{<<"type">>, <<"create">>},
                     {<<"id">>, list_to_binary(Hash)},
                     {<<"geometry">>, Geometry}
                    ]},
-    node_worker_server:call(mochijson2:encode(Msg)).
+    node_worker_pool:call(WorkerPid, mochijson2:encode(Msg)).
