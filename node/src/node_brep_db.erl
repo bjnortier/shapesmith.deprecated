@@ -1,6 +1,6 @@
 -module(node_brep_db).
 -export([is_serialized/1, create/3]).
--export([serialize/2, purge/2]).
+-export([serialize/2, purge/2, purge_all/1]).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -63,6 +63,17 @@ purge(WorkerPid, Hash) ->
     Msg = {struct, [{<<"purge">>, list_to_binary(Hash)}]},
     case node_worker_pool:call(WorkerPid, mochijson2:encode(Msg)) of
 	"true" ->
+	    ok;
+	{error, Reason} ->
+	    {error, Reason};
+	Error -> 
+	    {error, Error}
+    end.
+
+purge_all(WorkerPid) ->
+    Msg = <<"purge_all">>,
+    case node_worker_pool:call(WorkerPid, mochijson2:encode(Msg)) of
+	"\"ok\"" ->
 	    ok;
 	{error, Reason} ->
 	    {error, Reason};

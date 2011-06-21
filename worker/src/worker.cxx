@@ -730,7 +730,7 @@ int main (int argc, char *argv[]) {
                     write_cmd(output.c_str(), output.size());
                     continue;
                 }
-                
+		
                 
                 mValue filename = objMap["filename"];
                 if (!msgType.is_null() && (msgType.type() == str_type) && (msgType.get_str() == string("stl"))
@@ -868,6 +868,21 @@ int main (int argc, char *argv[]) {
                 }
                 
             }
+
+	    if (value.type() == str_type) {
+    	        string message = value.get_str();
+
+		if (message == "purge_all") {
+                    
+		    unmeshed_shapes = map< string, TopoDS_Shape >();
+		    meshed_shapes = map< string, TopoDS_Shape >();
+
+		    mValue response = mValue("ok");
+                    string output = write(response);
+                    write_cmd(output.c_str(), output.size());
+                    continue;
+                }
+	    }
             
             mObject error;
             error["error"] = "unknown message";
