@@ -14,7 +14,8 @@ all() ->
          serialize_geom_and_brep,
          serialize_boolean,
          serialize_deep_boolean,
-	 timeout
+	 timeout,
+	 parallel_workers
 	].
 
 init_per_suite(Config) ->
@@ -219,3 +220,39 @@ serialize_deep_boolean(_Config) ->
     {ok, {struct, _}} = node_master:mesh_geom(Id5),
 
     ok.
+
+
+parallel_workers(_Config) ->
+    Results = pmap(fun(R) -> 
+			   Geom =  {struct,[{<<"type">>,<<"sphere">>}, 
+					    {<<"parameters">>,{struct,[{<<"radius">>, R}]}}]},
+			   node_master:create_geom(Geom) end, 
+		   lists:seq(1,10)),
+    lists:map(fun(Result) ->
+
+		      {ok, Id} = Result
+	      end,
+	      Results).
+    
+
+pmap(F, L) ->
+    S = self(),
+    Ref = erlang:make_ref(),
+    Pids = lists:map(fun(I) ->
+			     spawn(fun() -> do_f(S, Ref, F, I) end)
+		     end, 
+		     L),
+    gather(Pids, Ref).
+
+do_f(Parent, Ref, F, I) ->
+    Parent ! {self(), Ref, (catch F(I))}.
+
+gather([Pid| Rest], Ref) ->
+    receive 
+	{Pid, Ref, Ret} ->
+	    [Ret|gather(Rest, Ref)]
+    end;
+gather([], _) ->
+    [].
+
+

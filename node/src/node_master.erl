@@ -72,6 +72,7 @@ ensure_brep_exists(Id, Geometry, Hash, TopLevelFn) ->
 	    Result = ensure_child_breps_exist(WorkerPid, [{Id, Geometry, Hash}], TopLevelFn),
 	    %% Some brep may be left over if error occured and cleanup wasn't complete
 	    node_brep_db:purge_all(WorkerPid),
+	    node_worker_pool:return_worker(WorkerPid),
 	    Result
 	    
     end.

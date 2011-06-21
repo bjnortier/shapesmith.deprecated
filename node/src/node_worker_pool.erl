@@ -1,7 +1,7 @@
 -module(node_worker_pool).
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/2, stop/0, get_worker/0, call/2]).
+-export([start_link/2, stop/0, get_worker/0, call/2, return_worker/1]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
@@ -20,9 +20,11 @@ call(WorkerPid, Msg) ->
 	{'EXIT', {{error, Reason}, _}} ->
 	    {error, Reason};
 	Result ->
-	    ?MODULE ! {finished, WorkerPid},
 	    Result
     end.
+
+return_worker(WorkerPid) ->
+    ?MODULE ! {finished, WorkerPid}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              gen_server                                  %%%
@@ -43,9 +45,7 @@ handle_call(get_worker, _From, State) ->
 	    node_log:info("Waiting for worker... ~n"),
 	    receive
 		{finished, FinishedPid} ->
-		    %% The worker may be dead after finishing, only add 
-		    %% it to the available set if it is still alive
-		    {Pid, NewState} = get_next(State#state{ available = [FinishedPid] }),
+		    {Pid, NewState} = get_next(return_worker_if_alive(State, FinishedPid)),
 		    {reply, Pid, NewState}
 	    after WorkerMaxTime ->
 		    {reply, {error, worker_timeout}, State}
@@ -63,7 +63,7 @@ handle_cast(_Msg, State) ->
     {noreply, State}.
 
 handle_info({finished, Pid}, State) ->
-    {noreply, State#state{ available = [Pid|State#state.available]}};
+    {noreply, return_worker_if_alive(State, Pid)};
 handle_info({'EXIT', Pid, Reason}, State) ->
     node_log:error("Worker ~p exited. Reason: ~p~n", [Pid, Reason]),
     NewWorkerPid = create_worker(),
@@ -96,3 +96,14 @@ get_next(State) ->
     [Pid|Remaining] = State#state.available,
     node_log:info("Next worker: ~p~n", [Pid]),
     {Pid, State#state{ available = Remaining }}.
+
+return_worker_if_alive(State, Pid) ->
+    case is_process_alive(Pid) of
+	true ->
+	    node_log:info("Returning worker ~p~n", [Pid]),
+	    State#state{ available = [Pid|State#state.available]};
+	false ->
+	    node_log:info("Ignoring dead worker ~p~n", [Pid]),
+	    State
+    end.
+
