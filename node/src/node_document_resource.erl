@@ -21,7 +21,8 @@ allowed_methods(ReqData, Context) ->
     {['GET', 'PUT'], ReqData, Context}.
 
 resource_exists(ReqData, Context) ->
-    Exists = node_document_db:exists(Context#context.id),
+    {ok, DB} = application:get_env(node, db_module),
+    Exists = DB:exists(doc, Context#context.id),
     {Exists, ReqData, Context}.
 
 content_types_provided(ReqData, Context) ->
@@ -29,7 +30,8 @@ content_types_provided(ReqData, Context) ->
 
 provide_content(ReqData, Context) ->
     Id = Context#context.id,
-    case node_document_db:load(Id) of
+    {ok, DB} = application:get_env(node, db_module),
+    case DB:get(doc, Id) of
         undefined ->
             {"{\"error\" : \"not found\"", ReqData, Context};
         GeomIds ->
@@ -49,7 +51,8 @@ accept_content(ReqData, Context) ->
                                 GeomId
                         end,
                         Context#context.json_obj),
-    case node_document_db:update(Context#context.id, GeomIds) of
+    {ok, DB} = application:get_env(node, db_module),
+    case DB:put(doc, Context#context.id, GeomIds) of
         ok ->
             Path = io_lib:format("/doc/~s", [Id]),
             io:format("updated doc: ~s~n", [Path]),

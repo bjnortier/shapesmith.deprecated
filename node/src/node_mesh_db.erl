@@ -24,11 +24,7 @@ mesh(WorkerPid, Hash) ->
     end.
 
 stl(WorkerPid, Hash) ->
-    {ok, DbDir} = application:get_env(node, db_dir),
-    Filename = filename:join(
-                 [filename:dirname(code:which(?MODULE)),
-                  DbDir, Hash ++ ".stl"]),
-
+    Filename = filename:join(["/tmp", Hash ++ ".stl"]),
     Msg = {struct, [{<<"type">>, <<"stl">>},
                     {<<"id">>, list_to_binary(Hash)},
                     {<<"filename">>, list_to_binary(Filename)}

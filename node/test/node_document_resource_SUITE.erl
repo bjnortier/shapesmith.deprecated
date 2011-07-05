@@ -1,3 +1,4 @@
+%%-*- mode: erlang -*-
 -module(node_document_resource_SUITE).
 -compile(export_all).
 
@@ -15,18 +16,8 @@ init_per_suite(Config) ->
     ok = application:load(node),
     application:set_env(node, port, 8001),
     application:start(inets),
-    ok = application:set_env(node, db_dir, filename:join(["../test_db/", ?MODULE])),
+    ok = application:set_env(node, db_module, node_riak_db),
     ok = node:start(),
-
-    %% Clean the directory
-    TestDb = filename:join(
-               [filename:dirname(code:which(?MODULE)), "../test_db/", ?MODULE]),
-    ok = filelib:ensure_dir(TestDb),
-    file:make_dir(TestDb),
-    {ok, Files} = file:list_dir(TestDb),
-    [file:delete(filename:join(TestDb, File)) || File <- Files],
-    {ok, []} = file:list_dir(TestDb),
-
     Config.
 
 end_per_suite(_Config) ->
@@ -60,19 +51,10 @@ save_simple(_Config) ->
 	httpc:request(put, {"http://localhost:8001" ++ DocPath, [], "application/json", iolist_to_binary(mochijson2:encode(SaveDoc))}, [], []),
     [] = SaveResponse,
 
-    %% Restart the worker node to ensure it is empty, then load the document
-    catch(node:stop()),
-    catch(node:start()),
-    timer:sleep(1000),
-    false = node_geom_db:exists(GeomId),
-
     %% Load the document
     {ok,{{"HTTP/1.1",200,_}, _, LoadResponse}} = 
 	httpc:request(get, {"http://localhost:8001" ++ DocPath, []}, [], []),
     SaveDoc = mochijson2:decode(LoadResponse),
-
-    true = node_document_db:exists(DocId),
-    true = node_geom_db:exists(GeomId),
 
     {ok, {struct, _}} = node_master:mesh_geom(GeomId),
 
@@ -108,23 +90,10 @@ save_boolean(_Config) ->
 	httpc:request(put, {"http://localhost:8001" ++ DocPath, [], "application/json", iolist_to_binary(mochijson2:encode(SaveDoc))}, [], []),
     [] = SaveResponse,
 
-    %% Restart the worker node to ensure it is empty, then load the document
-    catch(node:stop()),
-    catch(node:start()),
-
-    false = node_geom_db:exists(GeomIdA),
-    false = node_geom_db:exists(GeomIdB),
-    false = node_geom_db:exists(GeomIdC),
-
     %% Load the document
     {ok,{{"HTTP/1.1",200,_}, _, LoadResponse}} = 
 	httpc:request(get, {"http://localhost:8001" ++ DocPath, []}, [], []),
     SaveDoc = mochijson2:decode(LoadResponse),
-
-    true = node_document_db:exists(DocId),
-    true = node_geom_db:exists(GeomIdC),
-    true = node_geom_db:exists(GeomIdA),
-    true = node_geom_db:exists(GeomIdB),
 
     {ok, {struct, _}} = node_master:mesh_geom(GeomIdC),
 
