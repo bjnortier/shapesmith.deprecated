@@ -16,13 +16,21 @@ init_per_suite(Config) ->
     ok = application:load(node),
     application:set_env(node, port, 8001),
     application:start(inets),
-    ok = application:set_env(node, db_module, node_riak_db),
+    ok = application:set_env(node, db_module, node_mem_db),
     ok = node:start(),
     Config.
 
 end_per_suite(_Config) ->
     application:stop(node),
     application:unload(node),
+    ok.
+
+init_per_testcase(_Testcase, Config) ->
+    {ok, _} = node_mem_db:start_link(),
+    Config.
+
+end_per_testcase(_Testcase, _Config) ->
+    node_mem_db:stop(),
     ok.
 
 save_simple(_Config) ->
@@ -33,7 +41,6 @@ save_simple(_Config) ->
 
     %% Get
     DocPath = binary_to_list(PathBin),
-    "/doc/" ++ DocId = DocPath,
     {ok,{{"HTTP/1.1",200,_}, _, GetResponse}} = 
 	httpc:request(get, {"http://localhost:8001" ++ DocPath, []}, [], []),
     [] = mochijson2:decode(GetResponse),
@@ -66,7 +73,6 @@ save_boolean(_Config) ->
 	httpc:request(post, {"http://localhost:8001/doc/", [], "application/json", "[]"}, [], []),
     {struct, [{<<"path">>, PathBin}]} = mochijson2:decode(PostResponse),
     DocPath = binary_to_list(PathBin),
-    "/doc/" ++ DocId = DocPath,
     
     %% Create a geometry node
     GeomA = {struct, [{<<"type">>, <<"sphere">>},

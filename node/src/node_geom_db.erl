@@ -9,9 +9,6 @@ exists(Id) ->
     {ok, DB} = application:get_env(node, db_module),
     DB:exists(geom, Id).
 
-raw_geom_record(Id) ->
-    gen_server:call(?MODULE, {raw_geom_record, Id}).
-
 create(Geometry) ->
     case node_validation:geom(Geometry) of
 	{error, ErrorParams} ->
@@ -21,7 +18,6 @@ create(Geometry) ->
 	    Id = DB:create(geom, Geometry),
 	    {ok, Id}
     end.
-
 
 update(Id, Geometry) ->
     case node_validation:geom(Geometry) of
@@ -34,21 +30,23 @@ update(Id, Geometry) ->
 
 geometry(Id) ->
     {ok, DB} = application:get_env(node, db_module),
-    DB:get(geom, Id).
+    {struct, Props1} = DB:get(geom, Id),
+    {struct, [{<<"id">>, list_to_binary(Id)}|Props1]}.
 
 recursive_geometry(Id) ->
     {ok, DB} = application:get_env(node, db_module),
-    {struct, Props} = DB:get(geom, Id),
-    case lists:keyfind(<<"children">>, 1, Props) of
+    {struct, Props1} = DB:get(geom, Id),
+    Props2 = [{<<"id">>, list_to_binary(Id)}|Props1],
+    case lists:keyfind(<<"children">>, 1, Props2) of
         false ->
-            {struct, Props};
+            {struct, Props2};
         {<<"children">>, ChildIds} ->
             RecursiveChildren = lists:map(fun(ChildIdBin) ->
 						  ChildId = binary_to_list(ChildIdBin),
 						  recursive_geometry(ChildId)
 					  end,
 					  ChildIds),
-            {struct, lists:keyreplace(<<"children">>, 1, Props, {<<"children">>, RecursiveChildren})}
+            {struct, lists:keyreplace(<<"children">>, 1, Props2, {<<"children">>, RecursiveChildren})}
     end.  
 
 hash(Id) ->
