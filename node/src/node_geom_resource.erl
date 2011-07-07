@@ -82,7 +82,7 @@ malformed_request(ReqData, Context, 'PUT') ->
 		{true, JSON} ->
 		    case node_master:update_geom(Id, transform_paths_to_ids(JSON)) of
 			ok ->
-			    {false, ReqData, Context};
+			    {false, ReqData, Context#context{id = Id}};
 			{error, Reason = {validation, _}} ->
 			    ReqData1 = error_response(Reason, ReqData),
 			    {true, ReqData1, Context};

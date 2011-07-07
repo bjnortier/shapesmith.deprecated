@@ -18,9 +18,12 @@ get(Bucket, Id) ->
     Client = get_client(),
     case riakc_pb_socket:get(Client, riak_bucket(Bucket), list_to_binary(Id)) of
 	{error, notfound} ->
+	    riakc_pb_socket:stop(Client),
 	    undefined;
 	{ok, Obj} ->
-	    binary_to_term(riakc_obj:get_value(Obj))
+	    Result = binary_to_term(riakc_obj:get_value(Obj)),
+	    riakc_pb_socket:stop(Client),
+	    Result
     end.
 
 -spec create(bucket(), value()) -> id().
@@ -29,6 +32,7 @@ create(Bucket, Value) ->
     Obj = riakc_obj:new(riak_bucket(Bucket), list_to_binary(Id), term_to_binary(Value)),
     Client = get_client(),
     ok = riakc_pb_socket:put(Client, Obj),
+    riakc_pb_socket:stop(Client),
     Id.
     
 -spec put(bucket(), id(), value()) -> {error, notfound} | ok.
@@ -37,10 +41,14 @@ put(Bucket, Id, Value) ->
     case riakc_pb_socket:get(Client, riak_bucket(Bucket), list_to_binary(Id)) of
 	{error, notfound} ->
 	    Obj = riakc_obj:new(riak_bucket(Bucket), list_to_binary(Id), term_to_binary(Value)),
-	    ok = riakc_pb_socket:put(Client, Obj);
+	    ok = riakc_pb_socket:put(Client, Obj),
+	    riakc_pb_socket:stop(Client),
+	    ok;
 	{ok, ObjA} ->
 	    ObjB = riakc_obj:update_value(ObjA, term_to_binary(Value)),
-	    ok = riakc_pb_socket:put(Client, ObjB)
+	    ok = riakc_pb_socket:put(Client, ObjB),
+	    riakc_pb_socket:stop(Client),
+	    ok
     end.
 
 
