@@ -25,6 +25,6 @@ add_executable(worker src/worker.cxx src/base64.cpp)
 
 set(CMAKE_CXX_FLAGS "-DHAVE_CONFIG_H")
 
-target_link_libraries(worker -L/opt/local/lib -ljson_spirit -lpthread -lTKernel -lPTKernel -lTKMath -lTKService -lTKV3d -lTKV2d -lTKBRep -lTKIGES -lTKSTL -lTKVRML -lTKSTEP -lTKSTEPAttr -lTKSTEP209 -lTKSTEPBase -lTKShapeSchema -lTKGeomBase -lTKGeomAlgo -lTKG3d -lTKG2d -lTKXSBase -lTKPShape -lTKShHealing -lTKHLR -lTKTopAlgo -lTKMesh -lTKPrim -lTKCDF -lTKBool -lTKBO -lTKFillet -lTKOffset)
+target_link_libraries(worker -L/opt/local/lib -ljson_spirit -lpthread -lTKernel -lPTKernel -lTKMath -lTKService -lTKV3d -lTKBRep -lTKSTL -lTKShapeSchema -lTKGeomBase -lTKGeomAlgo -lTKXSBase -lTKPShape -lTKShHealing -lTKHLR -lTKTopAlgo -lTKMesh -lTKPrim -lTKCDF -lTKBool -lTKBO -lTKOffset)
 
 
