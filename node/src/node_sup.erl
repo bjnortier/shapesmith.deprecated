@@ -51,21 +51,14 @@ init([]) ->
                  {port, Port},
                  {log_dir, "priv/log"},
                  {dispatch, Dispatch}],
+
     Web = {webmachine_mochiweb,
            {webmachine_mochiweb, start, [WebConfig]},
            permanent, 5000, worker, [webmachine_mochiweb]},
-
-    DocDb = {node_document_db,
-             {node_document_db, start_link, []},
-             permanent, 5000, worker, [node_document_db]},
-
-    GeomDb = {node_geom_db,
-              {node_geom_db, start_link, []},
-              permanent, 5000, worker, [node_geom_db]},
 
     WorkerPoolSup = {node_worker_pool_sup,
 		     {node_worker_pool_sup, start_link, []},
 		     permanent, 5000, worker, [node_worker_pool_sup]},
 
-    Processes = [Web, DocDb, GeomDb, WorkerPoolSup],
+    Processes = [Web, WorkerPoolSup],
     {ok, { {one_for_one, 10, 10}, Processes} }.

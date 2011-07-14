@@ -2,26 +2,24 @@
 -export([is_serialized/1, create/3]).
 -export([serialize/2, purge/2, purge_all/1]).
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 
 is_serialized(Hash) ->
-    BREPFilename = brep_filename(Hash),
-    filelib:is_regular(BREPFilename).
+    {ok, DB} = application:get_env(node, db_module),
+    DB:exists(brep, Hash).
 
 create(WorkerPid, Hash, Geometry) ->
     %% If the serialized BREP exists, use that. Otherwise
     %% create using the worker
-    BREPFilename = brep_filename(Hash),
-    case filelib:is_regular(BREPFilename) of
+    {ok, DB} = application:get_env(node, db_module),
+    case DB:exists(brep, Hash) of
         true ->
 
             node_log:info("Creating BREP for ~p from file~n", [Hash]),
-
-            {ok, S11N} = file:read_file(BREPFilename),
+	    S11N = DB:get(brep, Hash),
             %% Insert into worker
             Msg = {struct, [{<<"type">>, <<"deserialize">>},
                             {<<"id">>, list_to_binary(Hash)},
@@ -52,8 +50,8 @@ create(WorkerPid, Hash, Geometry) ->
     end.
 
 purge(WorkerPid, Hash) ->
-    BREPFilename = brep_filename(Hash),
-    case filelib:is_regular(BREPFilename) of
+    {ok, DB} = application:get_env(node, db_module),
+    case DB:exists(brep, Hash) of
 	false ->
 	    ok = serialize_to_disk(WorkerPid, Hash);
 	_ ->
@@ -94,16 +92,10 @@ serialize_to_disk(WorkerPid, Hash) ->
                     {<<"id">>, list_to_binary(Hash)}]},
     {struct, [{<<"s11n">>, S11N}]} = mochijson2:decode(node_worker_pool:call(WorkerPid, mochijson2:encode(Msg))),
     
-    BREPFilename = brep_filename(Hash),
-    node_log:info("writing brep for ~p to ~s~n", [Hash, BREPFilename]),
-    ok = file:write_file(BREPFilename, S11N).
+    node_log:info("writing brep for ~p~n", [Hash]),
+    {ok, DB} = application:get_env(node, db_module),
+    DB:put(brep, Hash, S11N).
     
-
-brep_filename(Hash) ->
-    {ok, DbDir} = application:get_env(node, db_dir),
-    filename:join(
-      [filename:dirname(code:which(?MODULE)),
-       DbDir, Hash ++ ".brep"]).
 
 create_type(WorkerPid, Hash, <<"union">>, Geometry) ->
     create_boolean(WorkerPid, Hash, <<"union">>, Geometry);

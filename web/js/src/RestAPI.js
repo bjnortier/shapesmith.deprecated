@@ -1,11 +1,16 @@
 
 function error_response(responseText) {
-    var error = JSON.parse(responseText);
-    $('tr.field').removeClass('validation-error');
-    if (error.validation) {
-	for (var i in error.validation) {
-	    $('#' + i).parents('tr.field').addClass('validation-error');
+    var error;
+    try {
+	var error = JSON.parse(responseText);
+	$('tr.field').removeClass('validation-error');
+	if (error.validation) {
+	    for (var i in error.validation) {
+		$('#' + i).parents('tr.field').addClass('validation-error');
+	    }
 	}
+    } catch (e) {
+	error = {exception: e};
     }
     command_stack.inProgressFailure(error);
 }

@@ -82,7 +82,7 @@ malformed_request(ReqData, Context, 'PUT') ->
 		{true, JSON} ->
 		    case node_master:update_geom(Id, transform_paths_to_ids(JSON)) of
 			ok ->
-			    {false, ReqData, Context};
+			    {false, ReqData, Context#context{id = Id}};
 			{error, Reason = {validation, _}} ->
 			    ReqData1 = error_response(Reason, ReqData),
 			    {true, ReqData1, Context};
@@ -161,6 +161,7 @@ transform_paths_to_ids(JSON = {struct, Props}) ->
     end.
 
 transform_ids_to_paths({struct, Props}) ->
+    io:format("!!! ~p~n", [Props]),
     {<<"id">>, IdBin} = lists:keyfind(<<"id">>, 1, Props),
     Props1 = lists:keyreplace(<<"id">>, 1, Props, 
                              {<<"path">>, list_to_binary("/geom/" ++ binary_to_list(IdBin))}),

@@ -1,8 +1,6 @@
 -module(node_master).
 -export([create_geom/1, update_geom/2, mesh_geom/1, exists/1, geometry/1, recursive_geometry/1, stl/1]).
--export([serialize_geom/1, deserialize_geom/1]).
 -export([serialize_brep/1]).
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
@@ -33,12 +31,6 @@ create_geom(Geometry) ->
 
 update_geom(Id, Geometry) ->
     node_geom_db:update(Id, Geometry).
-
-serialize_geom(Id) ->
-    ok = node_geom_db:serialize(Id).
-
-deserialize_geom(Id) ->
-    ok = node_geom_db:deserialize(Id).
 
 mesh_geom(Id) ->
     Geometry = node_geom_db:geometry(Id),

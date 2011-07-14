@@ -16,6 +16,7 @@ all() ->
 init_per_suite(Config) ->
     ok = application:load(node),
     application:set_env(node, port, 8001),
+    application:set_env(node, db_module, node_mem_db),
     application:start(inets),
     ok = node:start(),
     Config.
@@ -24,6 +25,14 @@ end_per_suite(_Config) ->
     application:stop(node),
     application:unload(node),
     application:stop(inets),
+    ok.
+
+init_per_testcase(Testcase, Config) ->
+    {ok, _} = node_mem_db:start_link(),
+    Config.
+
+end_per_testcase(_Testcase, _Config) ->
+    node_mem_db:stop(),
     ok.
 
 create_update(_Config) ->
