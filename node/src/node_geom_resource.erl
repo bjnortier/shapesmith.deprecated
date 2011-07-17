@@ -7,6 +7,7 @@
          content_types_accepted/2,
          accept_content/2,
 	 post_is_create/2,
+	 allow_missing_post/2,
 	 create_path/2,
 	 resource_exists/2,
          malformed_request/2
@@ -27,7 +28,7 @@ allowed_methods(ReqData, Context) ->
 resource_exists(ReqData, Context) ->
     case wrq:method(ReqData) of
         'POST' ->
-            {true, ReqData, Context};
+            {false, ReqData, Context};
         _ ->
             Exists = node_geom_db:exists(Context#context.id),
             {Exists, ReqData, Context}
@@ -51,6 +52,9 @@ content_types_accepted(ReqData, Context) ->
     {[{"application/json", accept_content}], ReqData, Context}.
 
 post_is_create(ReqData, Context) ->
+    {true, ReqData, Context}. 
+
+allow_missing_post(ReqData, Context) ->
     {true, ReqData, Context}.
 
 create_path(ReqData, Context) ->
