@@ -165,7 +165,6 @@ transform_paths_to_ids(JSON = {struct, Props}) ->
     end.
 
 transform_ids_to_paths({struct, Props}) ->
-    io:format("!!! ~p~n", [Props]),
     {<<"id">>, IdBin} = lists:keyfind(<<"id">>, 1, Props),
     Props1 = lists:keyreplace(<<"id">>, 1, Props, 
                              {<<"path">>, list_to_binary("/geom/" ++ binary_to_list(IdBin))}),
