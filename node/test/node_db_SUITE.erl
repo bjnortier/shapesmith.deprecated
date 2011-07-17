@@ -27,9 +27,9 @@ init_per_testcase(riak, Config) ->
     ok = node:start(),
     Config.
 
-end_per_testcase(in_mem, Config) ->
+end_per_testcase(in_mem, _Config) ->
     node_mem_db:stop();
-end_per_testcase(riak, Config) ->
+end_per_testcase(riak, _Config) ->
     application:stop(node),
     application:unload(node).
 

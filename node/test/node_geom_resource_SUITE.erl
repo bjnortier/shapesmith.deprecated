@@ -27,7 +27,7 @@ end_per_suite(_Config) ->
     application:stop(inets),
     ok.
 
-init_per_testcase(Testcase, Config) ->
+init_per_testcase(_Testcase, Config) ->
     {ok, _} = node_mem_db:start_link(),
     Config.
 

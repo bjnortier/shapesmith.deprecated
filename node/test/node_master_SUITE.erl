@@ -93,8 +93,7 @@ parallel_workers(_Config) ->
 			   node_master:create_geom(Geom) end, 
 		   lists:seq(1,10)),
     lists:map(fun(Result) ->
-
-		      {ok, Id} = Result
+		      {ok, _Id} = Result
 	      end,
 	      Results).
     
