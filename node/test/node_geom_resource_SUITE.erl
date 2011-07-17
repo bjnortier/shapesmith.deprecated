@@ -40,7 +40,7 @@ create_update(_Config) ->
     %% Create
     GeomJSONA = {struct, [{<<"type">>, <<"sphere">>},
                           {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]},
-    {ok,{{"HTTP/1.1",200,_}, _, PostResponse}} = 
+    {ok,{{"HTTP/1.1",201,_}, _, PostResponse}} = 
 	httpc:request(post, {"http://localhost:8001/geom/", [], "application/json", iolist_to_binary(mochijson2:encode(GeomJSONA))}, [], []),
     {struct, [{<<"path">>, PathBin}]} = mochijson2:decode(PostResponse),
     "/geom/" ++ GeomId = binary_to_list(PathBin),
@@ -57,7 +57,7 @@ nested_geoms(_Config) ->
     %% Create
     GeomJSONA = {struct, [{<<"type">>, <<"sphere">>},
                           {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]},
-    {ok,{{"HTTP/1.1",200,_}, _, PostAResponse}} = 
+    {ok,{{"HTTP/1.1",201,_}, _, PostAResponse}} = 
 	httpc:request(post, {"http://localhost:8001/geom/", [], "application/json", iolist_to_binary(mochijson2:encode(GeomJSONA))}, [], []),
     {struct, [{<<"path">>, PathABin}]} = mochijson2:decode(PostAResponse),
     "/geom/" ++ GeomIdA = binary_to_list(PathABin),
@@ -67,7 +67,7 @@ nested_geoms(_Config) ->
                                                        {<<"depth">>, 1.0},
                                                        {<<"height">>, 1.0}]}}]},
     
-    {ok,{{"HTTP/1.1",200,_}, _, PostBResponse}} = 
+    {ok,{{"HTTP/1.1",201,_}, _, PostBResponse}} = 
 	httpc:request(post, {"http://localhost:8001/geom/", [], "application/json", iolist_to_binary(mochijson2:encode(GeomJSONB))}, [], []),
     {struct, [{<<"path">>, PathBBin}]} = mochijson2:decode(PostBResponse),
     "/geom/" ++ GeomIdB = binary_to_list(PathBBin),
@@ -76,7 +76,7 @@ nested_geoms(_Config) ->
     GeomJSONC = {struct, [{<<"type">>, <<"union">>},
                           {<<"children">>, [list_to_binary("/geom/" ++ GeomIdA),
                                             list_to_binary("/geom/" ++ GeomIdB)]}]},
-    {ok,{{"HTTP/1.1",200,_}, _, PostCResponse}} = 
+    {ok,{{"HTTP/1.1",201,_}, _, PostCResponse}} = 
 	httpc:request(post, {"http://localhost:8001/geom/", [], "application/json", iolist_to_binary(mochijson2:encode(GeomJSONC))}, [], []),
     {struct, [{<<"path">>, PathCBin}]} = mochijson2:decode(PostCResponse),
     "/geom/" ++ GeomIdC = binary_to_list(PathCBin),
@@ -125,7 +125,7 @@ validation_update(_Config) ->
     %% Create
     GeomJSONA = {struct, [{<<"type">>, <<"sphere">>},
                           {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]},
-    {ok,{{"HTTP/1.1",200,_}, _, PostResponse}} = 
+    {ok,{{"HTTP/1.1",201,_}, _, PostResponse}} = 
 	httpc:request(post, {"http://localhost:8001/geom/", [], "application/json", iolist_to_binary(mochijson2:encode(GeomJSONA))}, [], []),
     {struct, [{<<"path">>, PathBin}]} = mochijson2:decode(PostResponse),
     "/geom/" ++ GeomId = binary_to_list(PathBin),
