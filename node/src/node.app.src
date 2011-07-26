@@ -15,7 +15,7 @@
   {mod, { node_app, []}},
   {env, [{worker_executable, ["..", "..", "worker", "build", "worker"]},
 	 {worker_max_time, 60000},
-	 {worker_pool_size, 10},
+	 {worker_pool_size, 2},
 	 {db_module, node_riak_db},
 	 {riak_host, {"127.0.0.1", 8087}},
          {port, 8000}]}
