@@ -1,0 +1,9 @@
+Install dependencies on Ubuntu
+==============================
+
+Intall libraries
+----------------
+
+ * sudo apt-get install build-essential libncurses5-dev libssl-dev git-core cmake libx11-dev libfreetype6-dev libftgl-dev libxmu-dev
+
+
