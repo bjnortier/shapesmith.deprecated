@@ -8,12 +8,6 @@ Prerequisites
  * Riak 0.14.1 http://downloads.basho.com/riak/CURRENT/
  * Libraries for OpenCASCADE, Erlang etc: *Follow the instructions for installing these in either INSTALL.MacOSX or INSTALL.Ubuntu*
 
-Clone the Shapesmith repo from github
--------------------------------------
-
- * git clone git://github.com/bjnortier/shapesmith.git
- * cd shapesmith
-
 Install OCE v 0.4
 -----------------
  
@@ -24,6 +18,12 @@ Install OCE v 0.4
  * cmake ..
  * make -j4
  * sudo make install/strip
+
+Clone the Shapesmith repo from github
+-------------------------------------
+
+ * git clone git://github.com/bjnortier/shapesmith.git
+ * cd shapesmith
 
 Build the worker process
 ------------------------
