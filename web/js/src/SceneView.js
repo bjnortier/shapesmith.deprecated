@@ -83,139 +83,146 @@ var scene = new SceneJS.Scene(
         canvasId: "theCanvas",
         loggingElementId: "theLoggingDiv"
     },
-    new SceneJS.LookAt(
-        {
-            id : "lookat",
-            eye : sceneView.eye,
-            look : sceneView.look,
-            up : sceneView.up
-        },
-        new SceneJS.Camera(
-            {
-		id: "camera",
-                type: "camera",
-                optics: {
-                    type: "perspective",
-                    fovy : 5.0,
-                    aspect : 1.47,
-                    near : 0.10,
-                    far : 3000.0
-                }
+    new SceneJS.renderer(
+	{ 
+            clearColor : { r:0.01, g:0.01, b:0.01, a: 0 }, 
+            clear : { depth : true, color : true} , 
+            depthRange : { near: .5, far: 1500 }
+	},
+	new SceneJS.LookAt(
+	    {
+		id : "lookat",
+		eye : sceneView.eye,
+		look : sceneView.look,
+		up : sceneView.up
             },
-            new SceneJS.Light(
-                {
-                    mode:                   "dir",
-                    color:                  { r: 0.5, g: 0.5, b: 0.5 },
-                    diffuse:                true,
-                    specular:               true,
-                    dir:                    { x: -1.0, y: -1.0, z: 1.0 }
-                }),
-            new SceneJS.Light(
-                {
-                    mode:                   "dir",
-                    color:                  { r: 0.7, g: 0.7, b: 0.7 },
-                    diffuse:                true,
-                    specular:               true,
-                    dir:                    { x: 0.0, y: 1.0, z: -1.0 }
-                }),
-            new SceneJS.Light(
-                {
-                    mode:                   "dir",
-                    color:                  { r: 0.8, g: 0.8, b: 0.8 },
-                    diffuse:                true,
-                    specular:               true,
-                    dir:                    { x: -1.0, y: -1.0, z: 1.0 }
-                }),
-            new SceneJS.Translate(
-                {
-                    id : "cameraTranslate",
-                    x : sceneView.camera_translate.x,
-                    y : sceneView.camera_translate.y,
-                    z : sceneView.camera_translate.z
-                },
-                new SceneJS.Rotate(
+            new SceneJS.Camera(
+		{
+		    id: "camera",
+                    type: "camera",
+                    optics: {
+			type: "perspective",
+			fovy : 5.0,
+			aspect : 1.47,
+			near : 0.10,
+			far : 3000.0
+                    }
+		},
+		new SceneJS.Light(
                     {
-                        id: "pitch",
-                        angle: sceneView.pitch_angle,
-                        y : 1.0
+			mode:                   "dir",
+			color:                  { r: 0.5, g: 0.5, b: 0.5 },
+			diffuse:                true,
+			specular:               true,
+			dir:                    { x: -1.0, y: -1.0, z: 1.0 }
+                    }),
+		new SceneJS.Light(
+                    {
+			mode:                   "dir",
+			color:                  { r: 0.7, g: 0.7, b: 0.7 },
+			diffuse:                true,
+			specular:               true,
+			dir:                    { x: 0.0, y: 1.0, z: -1.0 }
+                    }),
+		new SceneJS.Light(
+                    {
+			mode:                   "dir",
+			color:                  { r: 0.8, g: 0.8, b: 0.8 },
+			diffuse:                true,
+			specular:               true,
+			dir:                    { x: -1.0, y: -1.0, z: 1.0 }
+                    }),
+		new SceneJS.Translate(
+                    {
+			id : "cameraTranslate",
+			x : sceneView.camera_translate.x,
+			y : sceneView.camera_translate.y,
+			z : sceneView.camera_translate.z
                     },
                     new SceneJS.Rotate(
-                        {
-                            id: "yaw",
-                            angle: sceneView.yaw_angle,
-                            z : 1.0
-                        },
-                        new SceneJS.Material(
+			{
+                            id: "pitch",
+                            angle: sceneView.pitch_angle,
+                            y : 1.0
+			},
+			new SceneJS.Rotate(
                             {
-                                id: "x-axis",
-                                emit: 1,
-                                baseColor:      { b: 1.0 },
-                                specular:       0,
+				id: "yaw",
+				angle: sceneView.yaw_angle,
+				z : 1.0
                             },
-                            new SceneJS.Geometry(
-                                {
-                                    primitive: "lines",
-                                    positions : [
-                                        0,0,0,
-                                        1000,0,0
-                                    ],
-                                    normals : [],
-                                    uv : [],
-                                    uv2 : [],
-                                    indices : [0,1]
-                                })),
-                        new SceneJS.Material(
-                            {
-                                id: "y-axis",
-                                emit: 1,
-                                baseColor:      { g: 1.0 },
-                                specular:       0,
-                            },
-                            new SceneJS.Geometry(
-                                {
-                                    primitive: "lines",
-                                    positions : [
-                                        0,0,0,
-                                        0,1000,0
-                                    ],
-                                    normals : [],
-                                    uv : [],
-                                    uv2 : [],
-                                    indices : [0,1]
-                                })),
-                        new SceneJS.Material(
-                            {
-                                id: "z-axis",
-                                emit: 1,
-                                baseColor:      { r: 1.0 },
-                                specular:       0,
-                            },
-                            new SceneJS.Geometry(
-                                {
-                                    primitive: "lines",
-                                    positions : [
-                                        0,0,0,
-                                        0,0,1000
-                                    ],
-                                    normals : [],
-                                    uv : [],
-                                    uv2 : [],
-                                    indices : [0,1]
-                                })),
-                        new SceneJS.Material(
-                            {
-                                id: "geom",
-                                emit: 0,
-                                baseColor:      { r: 0.5, g: 1.0, b: 0.0 },
-                                specularColor:  { r: 0.9, g: 0.9, b: 0.9 },
-                                specular:       0.9,
-                                shine:          100.0,
-                            }
-                        )
+                            new SceneJS.Material(
+				{
+                                    id: "x-axis",
+                                    emit: 1,
+                                    baseColor:      { b: 1.0 },
+                                    specular:       0,
+				},
+				new SceneJS.Geometry(
+                                    {
+					primitive: "lines",
+					positions : [
+                                            0,0,0,
+                                            1000,0,0
+					],
+					normals : [],
+					uv : [],
+					uv2 : [],
+					indices : [0,1]
+                                    })),
+                            new SceneJS.Material(
+				{
+                                    id: "y-axis",
+                                    emit: 1,
+                                    baseColor:      { g: 1.0 },
+                                    specular:       0,
+				},
+				new SceneJS.Geometry(
+                                    {
+					primitive: "lines",
+					positions : [
+                                            0,0,0,
+                                            0,1000,0
+					],
+					normals : [],
+					uv : [],
+					uv2 : [],
+					indices : [0,1]
+                                    })),
+                            new SceneJS.Material(
+				{
+                                    id: "z-axis",
+                                    emit: 1,
+                                    baseColor:      { r: 1.0 },
+                                    specular:       0,
+				},
+				new SceneJS.Geometry(
+                                    {
+					primitive: "lines",
+					positions : [
+                                            0,0,0,
+                                            0,0,1000
+					],
+					normals : [],
+					uv : [],
+					uv2 : [],
+					indices : [0,1]
+                                    })),
+                            new SceneJS.Material(
+				{
+                                    id: "geom",
+                                    emit: 0,
+                                    baseColor:      { r: 0.5, g: 1.0, b: 0.0 },
+                                    specularColor:  { r: 0.9, g: 0.9, b: 0.9 },
+                                    specular:       0.9,
+                                    shine:          100.0,
+				}
+                            )
+			)
                     )
-                )
+		)
             )
-        )
+	)
     )
 );
               
