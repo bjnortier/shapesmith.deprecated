@@ -15,18 +15,10 @@ var DAT = DAT || {};
 
 DAT.Globe = function(container, colorFn) {
 
-    colorFn = colorFn || function(x) {
-	var c = new THREE.Color();
-	c.setHSV( ( 0.6 - ( x * 0.5 ) ), 1.0, 1.0 );
-	return c;
-    };
-
     var camera, scene, sceneAtmosphere, renderer, w, h;
     var vector, mesh, atmosphere, point;
 
     var overRenderer;
-
-    var zoomSpeed = 50;
 
     var mouse = { x: 0, y: 0 }, mouseOnDown = { x: 0, y: 0 };
     var elevation = 0;
@@ -35,7 +27,7 @@ DAT.Globe = function(container, colorFn) {
     target = { azimuth: Math.PI/4, elevation: Math.PI*3/8 };
     targetOnDown = { azimuth: target.azimuth, elevation: target.elevation };
 
-    var distance = 10000, distanceTarget = 1000;
+    var distance = 100, distanceTarget = 20;
     var padding = 40;
     var PI_HALF = Math.PI / 2;
 
@@ -58,21 +50,18 @@ DAT.Globe = function(container, colorFn) {
 	scene = new THREE.Scene();
 	sceneAtmosphere = new THREE.Scene();
 
-	var geometry = new THREE.Sphere(50, 20, 20);
+	var geometry = new THREE.Sphere(2.5, 20, 20);
 	var material = new THREE.MeshLambertMaterial( { color: 0xFF0000 } );
 	var mesh = new THREE.Mesh(geometry, material);
 	mesh.matrixAutoUpdate = false;
 	scene.addObject(mesh);
 
-	geometry = new THREE.Cube(200, 40, 30);
+	geometry = new THREE.Cube(2, 1, 0.5);
 	material = new THREE.MeshLambertMaterial( { color: 0x00FF00, opacity: 0.5 } );
 	mesh = new THREE.Mesh(geometry, material);
 	mesh.matrixAutoUpdate = false;
 	scene.addObject(mesh);
 
-	geometry = new THREE.Geometry();
-	geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( - 500, 0, 0 ) ) );
-	geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 500, 0, 0 ) ) );
 
 	axes = [new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry()];
 	axes[0].vertices.push( new THREE.Vertex( new THREE.Vector3( 00, 0, 0 ) ) );
@@ -88,33 +77,41 @@ DAT.Globe = function(container, colorFn) {
 	scene.addObject(new THREE.Line( axes[1], new THREE.LineBasicMaterial( { color: 0x00ff00, opacity: 0.5 } ) ));
 	scene.addObject(new THREE.Line( axes[2], new THREE.LineBasicMaterial( { color: 0xff0000, opacity: 0.5 } ) ));
 
-	/*for ( var i = 0; i <= 200; i ++ ) {
+	
+
+	gridLineGeometry = new THREE.Geometry();
+	gridLineGeometry.vertices.push( new THREE.Vertex( new THREE.Vector3( -5, 0, 0 ) ) );
+	gridLineGeometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 5, 0, 0 ) ) );
+	var majorMaterial = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.2 } );
+	var minorMaterial = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.02 } );
+
+	for (var i = -5; i <= 5; i++) {
 	    
-	    if (i % 20 != 0) {
+	    var line = new THREE.Line(gridLineGeometry, majorMaterial);
+	    line.position.y = i;
+	    scene.addObject(line);
+	    
+	    var line = new THREE.Line(gridLineGeometry, majorMaterial);
+	    line.position.x = i;
+	    line.rotation.z = 90 * Math.PI / 180;
+	    scene.addObject( line );
+	}
+
+	for (var i = -50; i <= 50; i++) {
+	    
+	    if (i % 10 != 0) {
+		var line = new THREE.Line(gridLineGeometry, minorMaterial);
+		line.position.y = i/10;
+		scene.addObject(line);
+
+		var line = new THREE.Line(gridLineGeometry, minorMaterial);
+		line.position.x = i/10;
+		line.rotation.z = 90 * Math.PI / 180;
+		scene.addObject(line);
 		
-		var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.15 } ) );
-		line.position.z = ( i * 5 ) - 500;
-		scene.addObject( line );
-		
-		var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.15 } ) );
-		line.position.x = ( i * 5 ) - 500;
-		line.rotation.y = 90 * Math.PI / 180;
-		scene.addObject( line );
 	    }
 	    
-	}*/
-
-	/*for ( var i = -5; i <= 5; i ++ ) {
-	    
-	    var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.7 } ) );
-	    line.position.z = ( i * 50 ) - 500;
-	    scene.addObject( line );
-	    
-	    var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.7 } ) );
-	    line.position.x = ( i * 50 ) - 500;
-	    line.rotation.y = 90 * Math.PI / 180;
-	    scene.addObject( line );
-	    }*/
+	}
 	
 	/*var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.7 } ) );
 	line.position.z = ( i * 500 ) - 500;
@@ -171,7 +168,7 @@ DAT.Globe = function(container, colorFn) {
 	mouse.x = - event.clientX;
 	mouse.y = event.clientY;
 
-	var zoomDamp = distance/1000;
+	var zoomDamp = distance/10;
 
 	target.azimuth = targetOnDown.azimuth + (mouse.x - mouseOnDown.x) * 0.005 * zoomDamp;
 	target.elevation = targetOnDown.elevation - (mouse.y - mouseOnDown.y) * 0.005 * zoomDamp;
@@ -196,7 +193,7 @@ DAT.Globe = function(container, colorFn) {
     function onMouseWheel(event) {
 	event.preventDefault();
 	if (overRenderer) {
-	    zoom(event.wheelDeltaY * 0.3);
+	    zoom(event.wheelDeltaY * 0.1);
 	}
 	return false;
     }
@@ -223,8 +220,8 @@ DAT.Globe = function(container, colorFn) {
 
     function zoom(delta) {
 	distanceTarget -= delta;
-	distanceTarget = distanceTarget > 1000 ? 1000 : distanceTarget;
-	distanceTarget = distanceTarget < 350 ? 350 : distanceTarget;
+	distanceTarget = distanceTarget > 100 ? 100 : distanceTarget;
+	distanceTarget = distanceTarget < 3 ? 3 : distanceTarget;
     }
 
     function animate() {
