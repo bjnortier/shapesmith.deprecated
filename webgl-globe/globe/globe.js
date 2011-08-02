@@ -61,7 +61,7 @@ DAT.Globe = function(container, colorFn) {
 	mesh.matrixAutoUpdate = false;
 	scene.addObject(mesh);*/
 
-	var light = new THREE.PointLight(0xFFFF00);
+	var light = new THREE.PointLight(0xFFFFFF);
 	light.position.set(-1000, 1000, 1000);
 	scene.addLight(light);
 
@@ -191,6 +191,34 @@ DAT.Globe = function(container, colorFn) {
 
     function addGrid() {
 
+	var height = 0.01,
+	size = 3,
+	curveSegments = 6,
+	font = "helvetiker", 		
+	weight = "bold",		
+	style = "normal";
+
+
+
+	var textMaterial = new THREE.MeshBasicMaterial( { color: 0xffff22, opacity: 0.5, wireframe: false } );
+
+	for (var x = -5; x <= 5; ++x) {
+	    var textGeo = new THREE.TextGeometry( '' + (1.0*x*10), {
+		size: size, 
+		height: height,
+		curveSegments: curveSegments,
+		font: font,
+		weight: weight,
+		style: style,
+		bezelEnabled: false
+	    });
+	    var textMesh1 = new THREE.Mesh( textGeo, textMaterial );
+	    textMesh1.position.y = insideY[1] + 4;
+	    textMesh1.position.x = x*10;
+	    textMesh1.rotation.z = Math.PI;
+	    scene.addObject(textMesh1);
+	}
+
 	addAxes();
 	addMainGrid();
 	for(var x = -gridExtents; x <= gridExtents; ++x) {
@@ -300,4 +328,5 @@ DAT.Globe = function(container, colorFn) {
     return this;
 
 };
+
 
