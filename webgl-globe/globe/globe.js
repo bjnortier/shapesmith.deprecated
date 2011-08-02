@@ -31,6 +31,10 @@ DAT.Globe = function(container, colorFn) {
     var padding = 40;
     var PI_HALF = Math.PI / 2;
 
+    var insideX = [-5,5];
+    var insideY = [-5,5];
+    var gridExtents = 20;
+
     function init() {
 
 	container.style.color = '#fff';
@@ -62,8 +66,8 @@ DAT.Globe = function(container, colorFn) {
 	mesh.matrixAutoUpdate = false;
 	scene.addObject(mesh);*/
 
-	for(var tileX = -10; tileX <= 10; ++tileX) {
-	    for(var tileY = -10; tileY <= 10; ++tileY) {
+	for(var tileX = -20; tileX <= 20; ++tileX) {
+	    for(var tileY = -20; tileY <= 20; ++tileY) {
 		addGridTile(tileX,tileY);
 	    }
 	}
@@ -213,8 +217,8 @@ DAT.Globe = function(container, colorFn) {
     gridLineGeometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 0, 0, 0 ) ) );
     gridLineGeometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 1, 0, 0 ) ) );
 
-    var majorMaterialInside = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 1 } );
-    var minorMaterialInside = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.5 } );
+    var majorMaterialInside = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.5 } );
+    var minorMaterialInside = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.2 } );
 
     // Add a grid tile a position x,y where x and y are integer values
     // E.g. the first tile in the +x and +y quadrant is x=1, y=1
@@ -228,7 +232,8 @@ DAT.Globe = function(container, colorFn) {
 	var inside = ((x >= -5) && (x <= 5) && (y >= -5) && (y <= 5));
 	if (!inside) {
 	    var opacity = 0.5;
-	    majorMaterial = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: opacity } );
+	    r = Math.sqrt(x*x+y*y);
+	    majorMaterial = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 1.0/r } );
 	}
 		
 	var line = new THREE.Line(gridLineGeometry, majorMaterial);
