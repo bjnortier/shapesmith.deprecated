@@ -50,7 +50,7 @@ DAT.Globe = function(container, colorFn) {
 	scene = new THREE.Scene();
 	sceneAtmosphere = new THREE.Scene();
 
-	var geometry = new THREE.Sphere(2.5, 20, 20);
+	/*var geometry = new THREE.Sphere(2.5, 20, 20);
 	var material = new THREE.MeshLambertMaterial( { color: 0xFF0000 } );
 	var mesh = new THREE.Mesh(geometry, material);
 	mesh.matrixAutoUpdate = false;
@@ -60,8 +60,13 @@ DAT.Globe = function(container, colorFn) {
 	material = new THREE.MeshLambertMaterial( { color: 0x00FF00, opacity: 0.5 } );
 	mesh = new THREE.Mesh(geometry, material);
 	mesh.matrixAutoUpdate = false;
-	scene.addObject(mesh);
+	scene.addObject(mesh);*/
 
+	for(var tileX = -10; tileX <= 10; ++tileX) {
+	    for(var tileY = -10; tileY <= 10; ++tileY) {
+		addGridTile(tileX,tileY);
+	    }
+	}
 
 	axes = [new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry()];
 	axes[0].vertices.push( new THREE.Vertex( new THREE.Vector3( 00, 0, 0 ) ) );
@@ -78,49 +83,6 @@ DAT.Globe = function(container, colorFn) {
 	scene.addObject(new THREE.Line( axes[2], new THREE.LineBasicMaterial( { color: 0xff0000, opacity: 0.5 } ) ));
 
 	
-
-	gridLineGeometry = new THREE.Geometry();
-	gridLineGeometry.vertices.push( new THREE.Vertex( new THREE.Vector3( -5, 0, 0 ) ) );
-	gridLineGeometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 5, 0, 0 ) ) );
-	var majorMaterial = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.2 } );
-	var minorMaterial = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.02 } );
-
-	for (var i = -5; i <= 5; i++) {
-	    
-	    var line = new THREE.Line(gridLineGeometry, majorMaterial);
-	    line.position.y = i;
-	    scene.addObject(line);
-	    
-	    var line = new THREE.Line(gridLineGeometry, majorMaterial);
-	    line.position.x = i;
-	    line.rotation.z = 90 * Math.PI / 180;
-	    scene.addObject( line );
-	}
-
-	for (var i = -50; i <= 50; i++) {
-	    
-	    if (i % 10 != 0) {
-		var line = new THREE.Line(gridLineGeometry, minorMaterial);
-		line.position.y = i/10;
-		scene.addObject(line);
-
-		var line = new THREE.Line(gridLineGeometry, minorMaterial);
-		line.position.x = i/10;
-		line.rotation.z = 90 * Math.PI / 180;
-		scene.addObject(line);
-		
-	    }
-	    
-	}
-	
-	/*var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.7 } ) );
-	line.position.z = ( i * 500 ) - 500;
-	scene.addObject( line );
-	
-	var line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0x999999, opacity: 1.0 } ) );
-	line.position.x = ( i * 500 ) - 500;
-	line.rotation.y = 90 * Math.PI / 180;
-	scene.addObject( line );*/
 
 	var light = new THREE.PointLight( 0xFFFF00 );
 	light.position.set( -1000, 1000, 1000 );
@@ -193,7 +155,7 @@ DAT.Globe = function(container, colorFn) {
     function onMouseWheel(event) {
 	event.preventDefault();
 	if (overRenderer) {
-	    zoom(event.wheelDeltaY * 0.1);
+	    zoom(event.wheelDeltaY * 0.05);
 	}
 	return false;
     }
@@ -246,6 +208,59 @@ DAT.Globe = function(container, colorFn) {
 	renderer.render(sceneAtmosphere, camera);
     }
 
+    var gridLineGeometry = new THREE.Geometry();
+    
+    gridLineGeometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 0, 0, 0 ) ) );
+    gridLineGeometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 1, 0, 0 ) ) );
+
+    var majorMaterialInside = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 1 } );
+    var minorMaterialInside = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.5 } );
+
+    // Add a grid tile a position x,y where x and y are integer values
+    // E.g. the first tile in the +x and +y quadrant is x=1, y=1
+    // x=0 and y=0 has no meaning
+    function addGridTile(x,y) {
+	if ((x == 0) || (y == 0)) {
+	    return;
+	}
+
+	var majorMaterial = majorMaterialInside;
+	var inside = ((x >= -5) && (x <= 5) && (y >= -5) && (y <= 5));
+	if (!inside) {
+	    var opacity = 0.5;
+	    majorMaterial = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: opacity } );
+	}
+		
+	var line = new THREE.Line(gridLineGeometry, majorMaterial);
+	line.position.x = x > 0 ? (x-1) : x;
+	line.position.y = y;
+	scene.addObject(line);
+	
+	var line = new THREE.Line(gridLineGeometry, majorMaterial);
+	line.position.x = x;
+	line.position.y = y > 0 ? (y-1) : y;
+	line.rotation.z = 90 * Math.PI / 180;
+	scene.addObject( line );
+
+	if (inside) {
+	    for (var i = 1; i <= 9; i++) {
+		
+		var line = new THREE.Line(gridLineGeometry, minorMaterialInside);
+		line.position.x = x > 0 ? (x-1) : x;
+		line.position.y = (y > 0 ? (y-1) : y) + i/9;
+		scene.addObject(line);
+		
+		var line = new THREE.Line(gridLineGeometry, minorMaterialInside);
+		line.position.x = (x > 0 ? (x-1) : x) + i/9;
+		line.position.y = y > 0 ? (y-1) : y;
+		line.rotation.z = 90 * Math.PI / 180;
+		scene.addObject(line);
+		
+	    }
+	}
+	
+    }
+    
     init();
     this.animate = animate;
     this.renderer = renderer;
