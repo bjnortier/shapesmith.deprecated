@@ -15,8 +15,8 @@ var DAT = DAT || {};
 
 DAT.Globe = function(container, colorFn) {
 
-    var camera, scene, sceneAtmosphere, renderer, w, h;
-    var vector, mesh, atmosphere, point;
+    var camera, scene, renderer, w, h;
+    var mesh, point;
 
     var overRenderer;
 
@@ -27,13 +27,8 @@ DAT.Globe = function(container, colorFn) {
     target = { azimuth: Math.PI/4, elevation: Math.PI*3/8 };
     targetOnDown = { azimuth: target.azimuth, elevation: target.elevation };
 
-    var distance = 100, distanceTarget = 20;
-    var padding = 40;
-    var PI_HALF = Math.PI / 2;
+    var distance = 1000, distanceTarget = 400;
 
-    var insideX = [-5,5];
-    var insideY = [-5,5];
-    var gridExtents = 20;
 
     function init() {
 
@@ -50,47 +45,25 @@ DAT.Globe = function(container, colorFn) {
 	camera.up.z = 1;
 	
 	vector = new THREE.Vector3();
-
 	scene = new THREE.Scene();
-	sceneAtmosphere = new THREE.Scene();
+
+	addGrid();
 
 	/*var geometry = new THREE.Sphere(2.5, 20, 20);
-	var material = new THREE.MeshLambertMaterial( { color: 0xFF0000 } );
+	var material = new THREE.MeshLambertMaterial({ color: 0xFF0000 });
 	var mesh = new THREE.Mesh(geometry, material);
 	mesh.matrixAutoUpdate = false;
 	scene.addObject(mesh);
 
 	geometry = new THREE.Cube(2, 1, 0.5);
-	material = new THREE.MeshLambertMaterial( { color: 0x00FF00, opacity: 0.5 } );
+	material = new THREE.MeshLambertMaterial({ color: 0x00FF00, opacity: 0.5 });
 	mesh = new THREE.Mesh(geometry, material);
 	mesh.matrixAutoUpdate = false;
 	scene.addObject(mesh);*/
 
-	for(var tileX = -20; tileX <= 20; ++tileX) {
-	    for(var tileY = -20; tileY <= 20; ++tileY) {
-		addGridTile(tileX,tileY);
-	    }
-	}
-
-	axes = [new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry()];
-	axes[0].vertices.push( new THREE.Vertex( new THREE.Vector3( 00, 0, 0 ) ) );
-	axes[0].vertices.push( new THREE.Vertex( new THREE.Vector3( 500, 0, 0 ) ) );
-
-	axes[1].vertices.push( new THREE.Vertex( new THREE.Vector3( 0, 00, 0 ) ) );
-	axes[1].vertices.push( new THREE.Vertex( new THREE.Vector3( -0, 500, 0 ) ) );
-
-	axes[2].vertices.push( new THREE.Vertex( new THREE.Vector3( 0, 0, 00 ) ) );
-	axes[2].vertices.push( new THREE.Vertex( new THREE.Vector3( 0, 0, 500 ) ) );
-
-	scene.addObject(new THREE.Line( axes[0], new THREE.LineBasicMaterial( { color: 0x0000ff, opacity: 0.5 } ) ));
-	scene.addObject(new THREE.Line( axes[1], new THREE.LineBasicMaterial( { color: 0x00ff00, opacity: 0.5 } ) ));
-	scene.addObject(new THREE.Line( axes[2], new THREE.LineBasicMaterial( { color: 0xff0000, opacity: 0.5 } ) ));
-
-	
-
-	var light = new THREE.PointLight( 0xFFFF00 );
-	light.position.set( -1000, 1000, 1000 );
-	scene.addLight( light );
+	var light = new THREE.PointLight(0xFFFF00);
+	light.position.set(-1000, 1000, 1000);
+	scene.addLight(light);
 
 	renderer = new THREE.WebGLRenderer({antialias: true});
 	renderer.autoClear = false;
@@ -134,7 +107,7 @@ DAT.Globe = function(container, colorFn) {
 	mouse.x = - event.clientX;
 	mouse.y = event.clientY;
 
-	var zoomDamp = distance/10;
+	var zoomDamp = distance/100;
 
 	target.azimuth = targetOnDown.azimuth + (mouse.x - mouseOnDown.x) * 0.005 * zoomDamp;
 	target.elevation = targetOnDown.elevation - (mouse.y - mouseOnDown.y) * 0.005 * zoomDamp;
@@ -177,17 +150,17 @@ DAT.Globe = function(container, colorFn) {
 	}
     }
 
-    function onWindowResize( event ) {
+    function onWindowResize(event) {
 	console.log('resize');
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
-	renderer.setSize( window.innerWidth, window.innerHeight );
+	renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
     function zoom(delta) {
 	distanceTarget -= delta;
-	distanceTarget = distanceTarget > 100 ? 100 : distanceTarget;
-	distanceTarget = distanceTarget < 3 ? 3 : distanceTarget;
+	distanceTarget = distanceTarget > 1000 ? 1000 : distanceTarget;
+	distanceTarget = distanceTarget < 30 ? 30 : distanceTarget;
     }
 
     function animate() {
@@ -209,61 +182,114 @@ DAT.Globe = function(container, colorFn) {
 
 	renderer.clear();
 	renderer.render(scene, camera);
-	renderer.render(sceneAtmosphere, camera);
+    }
+    
+    var insideX = [-50,50];
+    var insideY = [-50,50];
+    var gridExtents = 100;
+    var majorTick = 10;
+
+    function addGrid() {
+
+	addAxes();
+	addMainGrid();
+	for(var x = -gridExtents; x <= gridExtents; ++x) {
+	    for(var y = -gridExtents; y <= gridExtents; ++y) {
+		var inside = ((x >= insideX[0]) && (x <= insideX[1]) &&
+			      (y >= insideY[0]) && (y <= insideY[1]));
+		if ((x % majorTick == 0) && (y % majorTick == 0) &&
+		    (x != 0) && (y != 0) &&
+		    !inside) {
+		    addFadingGridTile(x,y);
+		}
+	    }
+	}
+
+    }
+    
+    function addAxes() {
+
+	axes = [new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry()];
+	axes[0].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	axes[0].vertices.push(new THREE.Vertex(new THREE.Vector3(500, 0, 0)));
+
+	axes[1].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	axes[1].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 500, 0)));
+
+	axes[2].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	axes[2].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 500)));
+
+	axes[3].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	axes[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-gridExtents, 0, 0)));
+
+	axes[4].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	axes[4].vertices.push(new THREE.Vertex(new THREE.Vector3(0, -gridExtents, 0)));
+
+	scene.addObject(new THREE.Line(axes[0], new THREE.LineBasicMaterial({ color: 0x0000ff, opacity: 0.5 }))); //  X
+	scene.addObject(new THREE.Line(axes[1], new THREE.LineBasicMaterial({ color: 0x00ff00, opacity: 0.5 }))); //  Y
+	scene.addObject(new THREE.Line(axes[2], new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.5 }))); //  Z
+	scene.addObject(new THREE.Line(axes[3], new THREE.LineBasicMaterial({ color: 0x0000ff, opacity: 0.2 }))); // -X
+	scene.addObject(new THREE.Line(axes[4], new THREE.LineBasicMaterial({ color: 0x00ff00, opacity: 0.2 }))); // -X
     }
 
-    var gridLineGeometry = new THREE.Geometry();
+    var majorGridLineGeometry = new THREE.Geometry();
+    majorGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(insideX[0], 0, 0)));
+    majorGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(insideX[1], 0, 0)));
+
+    var minorGridLineGeometry = new THREE.Geometry();
+    minorGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(insideX[0], 0, 0)));
+    minorGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(insideX[1], 0, 0)));
+
+    var majorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 });
+    var minorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.05 });
+
+    function addMainGrid() {
+
+
+	for (var x = insideX[0]; x <= insideX[1]; ++x) {
+	    if (x != 0) {
+		var material = (x % 10 == 0) ? majorMaterialInside : minorMaterialInside;
+		var geometry = (y % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
+		var line = new THREE.Line(geometry, material);
+		line.position.x = x;
+		line.rotation.z = 90 * Math.PI / 180;
+		scene.addObject(line);
+
+	    }
+	}
+
+	for (var y = insideY[0]; y <= insideY[1]; ++y) {
+	    if (y != 0) {
+		var material = (y % 10 == 0) ? majorMaterialInside : minorMaterialInside;
+		var geometry = (y % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
+		var line = new THREE.Line(geometry, material);
+		line.position.y = y;
+		scene.addObject(line);
+	    }
+	}
+    }
     
-    gridLineGeometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 0, 0, 0 ) ) );
-    gridLineGeometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 1, 0, 0 ) ) );
+    var fadingGridLineGeometry = new THREE.Geometry();
+    fadingGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+    fadingGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(majorTick, 0, 0)));
+    
+    function addFadingGridTile(x,y) {
+	
+	var r = Math.sqrt(x*x + y*y);
+	var opacity = (r == 0) ? 1.0 : 1.0/(r*0.9);
+	var material = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: opacity });
 
-    var majorMaterialInside = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.5 } );
-    var minorMaterialInside = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.2 } );
-
-    // Add a grid tile a position x,y where x and y are integer values
-    // E.g. the first tile in the +x and +y quadrant is x=1, y=1
-    // x=0 and y=0 has no meaning
-    function addGridTile(x,y) {
-	if ((x == 0) || (y == 0)) {
-	    return;
-	}
-
-	var majorMaterial = majorMaterialInside;
-	var inside = ((x >= -5) && (x <= 5) && (y >= -5) && (y <= 5));
-	if (!inside) {
-	    var opacity = 0.5;
-	    r = Math.sqrt(x*x+y*y);
-	    majorMaterial = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 1.0/r } );
-	}
-		
-	var line = new THREE.Line(gridLineGeometry, majorMaterial);
-	line.position.x = x > 0 ? (x-1) : x;
+	var line = new THREE.Line(fadingGridLineGeometry, material);
+	line.position.x = x > 0 ? (x-majorTick) : x;
 	line.position.y = y;
 	scene.addObject(line);
 	
-	var line = new THREE.Line(gridLineGeometry, majorMaterial);
+	var line = new THREE.Line(fadingGridLineGeometry, material);
 	line.position.x = x;
-	line.position.y = y > 0 ? (y-1) : y;
+	line.position.y = y > 0 ? (y-majorTick) : y;
 	line.rotation.z = 90 * Math.PI / 180;
-	scene.addObject( line );
+	scene.addObject(line);
 
-	if (inside) {
-	    for (var i = 1; i <= 9; i++) {
-		
-		var line = new THREE.Line(gridLineGeometry, minorMaterialInside);
-		line.position.x = x > 0 ? (x-1) : x;
-		line.position.y = (y > 0 ? (y-1) : y) + i/9;
-		scene.addObject(line);
-		
-		var line = new THREE.Line(gridLineGeometry, minorMaterialInside);
-		line.position.x = (x > 0 ? (x-1) : x) + i/9;
-		line.position.y = y > 0 ? (y-1) : y;
-		line.rotation.z = 90 * Math.PI / 180;
-		scene.addObject(line);
-		
-	    }
-	}
-	
     }
     
     init();
