@@ -192,7 +192,7 @@ DAT.Globe = function(container, colorFn) {
     function addGrid() {
 
 	var height = 0.01,
-	size = 3,
+	size = 2,
 	curveSegments = 6,
 	font = "helvetiker", 		
 	weight = "bold",		
@@ -200,9 +200,9 @@ DAT.Globe = function(container, colorFn) {
 
 
 
-	var textMaterial = new THREE.MeshBasicMaterial( { color: 0xffff22, opacity: 0.5, wireframe: false } );
+	var textMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.5, wireframe: false } );
 
-	for (var x = -5; x <= 5; ++x) {
+	for (var x = (insideX[0]/majorTick); x <= (insideX[1]/majorTick); ++x) {
 	    var textGeo = new THREE.TextGeometry( '' + (1.0*x*10), {
 		size: size, 
 		height: height,
@@ -213,9 +213,26 @@ DAT.Globe = function(container, colorFn) {
 		bezelEnabled: false
 	    });
 	    var textMesh1 = new THREE.Mesh( textGeo, textMaterial );
-	    textMesh1.position.y = insideY[1] + 4;
-	    textMesh1.position.x = x*10;
+	    textMesh1.position.y = insideY[1] + 3;
+	    textMesh1.position.x = x*10 + (x > 0 ? -2 : (x < 0 ? 2.5 : 0));
 	    textMesh1.rotation.z = Math.PI;
+	    scene.addObject(textMesh1);
+	}
+
+	for (var y = (insideY[0]/majorTick); y <= (insideY[1]/majorTick); ++y) {
+	    var textGeo = new THREE.TextGeometry( '' + (1.0*y*10), {
+		size: size, 
+		height: height,
+		curveSegments: curveSegments,
+		font: font,
+		weight: weight,
+		style: style,
+		bezelEnabled: false
+	    });
+	    var textMesh1 = new THREE.Mesh( textGeo, textMaterial );
+	    textMesh1.position.y = y*10 + (y > 0 ? -2 : (y < 0 ? 2.5 : 0));
+	    textMesh1.position.x = insideY[1] + 3;
+	    textMesh1.rotation.z = Math.PI/2;
 	    scene.addObject(textMesh1);
 	}
 
@@ -303,7 +320,20 @@ DAT.Globe = function(container, colorFn) {
     
     function addFadingGridTile(x,y) {
 	
-	var r = Math.sqrt(x*x + y*y);
+	var dx = 0;
+	if (x < insideX[0]) {
+	    dx = insideX[0] - x;
+	} else if (x > insideX[1]) {
+	    dx = x - insideX[1];
+	}
+	var dy = 0;
+	if (y < insideY[0]) {
+	    dy = insideY[0] - y;
+	} else if (y > insideY[1]) {
+	    dy = y - insideY[1];
+	}
+
+	var r = Math.sqrt(dx*dx + dy*dy);
 	var opacity = (r == 0) ? 1.0 : 1.0/(r*0.9);
 	var material = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: opacity });
 
