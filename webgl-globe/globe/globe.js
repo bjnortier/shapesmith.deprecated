@@ -34,7 +34,6 @@ DAT.Globe = function(container, colorFn) {
 	var mesh = JSON.parse('{"indices":[1,3,2,1,0,3,5,7,6,5,4,7,11,9,8,10,9,11,15,13,12,14,13,15,19,17,16,18,17,19,23,21,20,22,21,23],"normals":[-1.0,0.0,0.0,-1.0,0.0,0.0,-1.0,0.0,0.0,-1.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,0.0,0.0,-1.0,0.0,0.0,-1.0,0.0,0.0,-1.0,0.0,0.0,-1.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,0.0,0.0,-1.0,0.0,0.0,-1.0,0.0,0.0,-1.0,0.0,0.0,-1.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,0.0,1.0],"positions":[0.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,1.0,0.0,1.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,1.0,0.0,1.0,0.0,0.0,0.0,0.0,1.0,0.0,1.0,1.0,1.0,1.0,1.0,1.0,0.0,1.0],"primitive":"triangles"}');
 
 	var numSegs = 3, topRad = 2, botRad = 5, height = 5, topOffset, botOffset;
-
 	var geometry = new THREE.Geometry(), i, PI2 = Math.PI * 2, halfHeight = height / 2;
 
 	// Top circle vertices
@@ -42,30 +41,10 @@ DAT.Globe = function(container, colorFn) {
 	    v( Math.sin( PI2 * i / numSegs ) * topRad, Math.cos( PI2 * i / numSegs ) * topRad, 0 );
 	}
 	f3(2,1,0);
-
-	for ( var i = 0, il = geometry.faces.length; i < il; i ++ ) {
-
-	    var uvs = [], face = geometry.faces[ i ],
-	    a = geometry.vertices[ face.a ],
-	    b = geometry.vertices[ face.b ],
-	    c = geometry.vertices[ face.c ];
-
-	    uvs.push( new THREE.UV( 0.5 + Math.atan2( a.position.x, a.position.y ) / PI2, 0.5 + ( a.position.z / height ) ) );
-	    uvs.push( new THREE.UV( 0.5 + Math.atan2( b.position.x, b.position.y ) / PI2, 0.5 + ( b.position.z / height ) ) );
-	    uvs.push( new THREE.UV( 0.5 + Math.atan2( c.position.x, c.position.y ) / PI2, 0.5 + ( c.position.z / height ) ) );
-
-	    geometry.faceVertexUvs[ 0 ].push( uvs );
-
-	}
-
-	geometry.computeCentroids();
-	geometry.computeFaceNormals();
-	// this.computeVertexNormals();
+	geometry.faces[0].normal = new THREE.Vector3(0,0,1);
 
 	function v( x, y, z ) {
-
 	    geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( x, y, z ) ) );
-
 	}
 
 	function f3( a, b, c) {
