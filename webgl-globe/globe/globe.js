@@ -36,23 +36,25 @@ DAT.Globe = function(container, colorFn) {
 	var numSegs = 3, topRad = 2, botRad = 5, height = 5, topOffset, botOffset;
 	var geometry = new THREE.Geometry(), i, PI2 = Math.PI * 2, halfHeight = height / 2;
 
-	// Top circle vertices
-	for ( i = 0; i < 3; i ++ ) {
-	    v( Math.sin( PI2 * i / numSegs ) * topRad, Math.cos( PI2 * i / numSegs ) * topRad, 0 );
-	}
-	f3(2,1,0);
-	geometry.faces[0].normal = new THREE.Vector3(0,0,1);
-
-	function v( x, y, z ) {
-	    geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( x, y, z ) ) );
+	for (var i = 0; i  < mesh.positions.length/3; ++i) {
+	    var position = new THREE.Vector3(mesh.positions[i * 3], 
+					     mesh.positions[i * 3 + 1], 
+					     mesh.positions[i * 3 + 2]);
+	    var vertex = new THREE.Vertex(position);
+	
+	    geometry.vertices.push(vertex);
 	}
 
-	function f3( a, b, c) {
-	    geometry.faces.push( new THREE.Face3( a, b, c) );
-	}
+	for (var i = 0; i < mesh.indices.length/3; ++i) {
+	    var a = mesh.indices[i * 3],
+	    b = mesh.indices[i * 3 + 1],
+	    c = mesh.indices[i * 3 + 2];
 
-	function f4( a, b, c, d ) {
-	    geometry.faces.push( new THREE.Face4( a, b, c, d ) );
+	    var face = new THREE.Face3(a,b,c);
+	    face.vertexNormals = [new THREE.Vector3(mesh.normals[a*3], mesh.normals[a*3+1], mesh.normals[a*3+2]),
+				  new THREE.Vector3(mesh.normals[b*3], mesh.normals[b*3+1], mesh.normals[b*3+2]),
+				  new THREE.Vector3(mesh.normals[c*3], mesh.normals[c*3+1], mesh.normals[c*3+2])];
+	    geometry.faces.push(face);
 	}
 
 	return geometry;
@@ -77,21 +79,12 @@ DAT.Globe = function(container, colorFn) {
 
 	addGrid();
 
-
-
 	var geometry = cylinder();
-// new THREE.Geometry();
-// 	geometry.vertices.push(new THREE.Vertex(0,0,0));
-// 	geometry.vertices.push(new THREE.Vertex(0,50,0));
-// 	geometry.vertices.push(new THREE.Vertex(0,0,50));
-
-// 	geometry.faces.push(new THREE.Face3(0,1,2));
-
-// 	Geometry.Computecentroids();
-// 	geometry.computeFaceNormals();
 	
 	var material = new THREE.MeshLambertMaterial({ color: 0xFF0000 });
-	scene.addObject(new THREE.Mesh(geometry, material));
+	var mesh = new THREE.Mesh(geometry, material);
+	mesh.doubleSided = true;
+	scene.addObject(mesh);
 
 	/*var geometry = new THREE.Sphere(2.5, 20, 20);
 	var material = new THREE.MeshLambertMaterial({ color: 0xFF0000 });
@@ -107,6 +100,14 @@ DAT.Globe = function(container, colorFn) {
 
 	var light = new THREE.PointLight(0xFFFFFF);
 	light.position.set(-1000, 1000, 1000);
+	scene.addLight(light);
+
+	light = new THREE.PointLight(0xFFFFFF);
+	light.position.set(1000, -1000, 1000);
+	scene.addLight(light);
+
+	light = new THREE.PointLight(0x666666);
+	light.position.set(0, 0, -1000);
 	scene.addLight(light);
 
 	renderer = new THREE.WebGLRenderer({antialias: true});
@@ -203,8 +204,6 @@ DAT.Globe = function(container, colorFn) {
 
     function zoom(delta) {
 	distanceTarget -= delta;
-	distanceTarget = distanceTarget > 1000 ? 1000 : distanceTarget;
-	distanceTarget = distanceTarget < 30 ? 30 : distanceTarget;
     }
 
     function animate() {
@@ -218,7 +217,18 @@ DAT.Globe = function(container, colorFn) {
 
 	azimuth += (target.azimuth - azimuth) * 0.2;
 	elevation += (target.elevation - elevation) * 0.3;
-	distance += (distanceTarget - distance) * 0.3;
+
+	var dDistance = (distanceTarget - distance) * 0.3;
+
+	if (distance + dDistance > 1000) {
+	    distanceTarget = 1000;
+	    distance = 1000;
+	} else if (distance + dDistance < 3) {
+	    distanceTarget = 3;
+	    distance = 3;
+	} else {
+	    distance += dDistance;
+	}
 
 	camera.position.x = distance * Math.sin(elevation) * Math.cos(azimuth);
 	camera.position.y = distance * Math.sin(elevation) * Math.sin(azimuth);
