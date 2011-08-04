@@ -14,6 +14,7 @@ SS.SceneView = function(container) {
     var targetOnDown = { azimuth: target.azimuth, elevation: target.elevation };
 
     var distance = 1000, distanceTarget = 400;
+    var INTERSECTED;
 
     function init() {
 
@@ -100,6 +101,40 @@ SS.SceneView = function(container) {
 	targetOnDown.elevation = target.elevation;
 
 	container.style.cursor = 'move';
+
+
+	var mouse = {};
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+	// var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
+	// var projector = new THREE.Projector();
+	// projector.unprojectVector( vector, camera );
+	// var ray = new THREE.Ray( camera.position, vector.subSelf( camera.position ).normalize() );
+	// var intersects = ray.intersectScene( scene );
+
+	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
+	var projector = new THREE.Projector();
+	var mouse3D = projector.unprojectVector(vector, camera);
+	var ray = new THREE.Ray(camera.position, null);
+	ray.direction = mouse3D.subSelf(camera.position).normalize();
+	var intersects = ray.intersectScene(scene);
+
+	if ( intersects.length > 0 ) {
+	    if ( INTERSECTED != intersects[ 0 ].object ) {
+		if ( INTERSECTED ) INTERSECTED.materials[ 0 ].color.setHex( INTERSECTED.currentHex );
+		INTERSECTED = intersects[ 0 ].object;
+		INTERSECTED.currentHex = INTERSECTED.materials[ 0 ].color.hex;
+		INTERSECTED.materials[ 0 ].color.setHex( 0xff0000 );
+	    }
+	} else {
+	    if ( INTERSECTED ) INTERSECTED.materials[ 0 ].color.setHex( INTERSECTED.currentHex );
+	    INTERSECTED = null;
+	}
+
+	console.log(intersects.length);
+
+
     }
     
     function onMouseMove(event) {
@@ -374,6 +409,7 @@ SS.SceneView = function(container) {
 
     var add = function(geomNode) {
         if (geom_doc.isRoot(geomNode) && geomNode.mesh) {
+	    //var geometry =new THREE.CubeGeometry( 10, 10, 10, 1, 1, 1);
 	    var geometry = createGeometry(geomNode.mesh);
 	    var material = new THREE.MeshPhongMaterial( { ambient: 0x030303, color: 0x00dd00, specular: 0xccffcc, shininess: 100, shading: THREE.SmoothShading } );
 	    //var material = new THREE.MeshLambertMaterial({ color: 0x00FF00 });
@@ -416,6 +452,8 @@ SS.SceneView = function(container) {
 						    mesh.normals[c*3+1], mesh.normals[c*3+2])];
 	    geometry.faces.push(face);
 	}
+	geometry.computeCentroids();
+	geometry.computeFaceNormals();
 	return geometry;
     }
     
