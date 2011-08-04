@@ -84,7 +84,7 @@ function ScenePicker(_selectionManager) {
     var shiftPicking = false;
     var picker = this;
 
-    SceneJS.withNode("theScene").bind("post-rendered",
+    /*SceneJS.withNode("theScene").bind("post-rendered",
                                        function(event) {
                                            picker.afterPick()
                                        });
@@ -117,7 +117,7 @@ function ScenePicker(_selectionManager) {
     this.picked = function(path) {
         pickHit = true;
         selectionManager.picked(path);
-    }
+    }*/
 
 }
 

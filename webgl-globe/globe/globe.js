@@ -86,18 +86,6 @@ DAT.Globe = function(container, colorFn) {
 	mesh.doubleSided = true;
 	scene.addObject(mesh);
 
-	/*var geometry = new THREE.Sphere(2.5, 20, 20);
-	var material = new THREE.MeshLambertMaterial({ color: 0xFF0000 });
-	var mesh = new THREE.Mesh(geometry, material);
-	mesh.matrixAutoUpdate = false;
-	scene.addObject(mesh);
-
-	geometry = new THREE.Cube(2, 1, 0.5);
-	material = new THREE.MeshLambertMaterial({ color: 0x00FF00, opacity: 0.5 });
-	mesh = new THREE.Mesh(geometry, material);
-	mesh.matrixAutoUpdate = false;
-	scene.addObject(mesh);*/
-
 	var light = new THREE.PointLight(0xFFFFFF);
 	light.position.set(-1000, 1000, 1000);
 	scene.addLight(light);
@@ -152,7 +140,7 @@ DAT.Globe = function(container, colorFn) {
 	mouse.x = - event.clientX;
 	mouse.y = event.clientY;
 
-	var zoomDamp = distance/100;
+	var zoomDamp = Math.sqrt(distance)/10;
 
 	target.azimuth = targetOnDown.azimuth + (mouse.x - mouseOnDown.x) * 0.005 * zoomDamp;
 	target.elevation = targetOnDown.elevation - (mouse.y - mouseOnDown.y) * 0.005 * zoomDamp;

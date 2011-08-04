@@ -89,8 +89,8 @@ $(document).ready(function() {
     /*
      * Basic
      */
-    /*new Action("Save", "images/save.png", 
-               function(parameters) { save(); }).render($("#edit"));*/
+    new Action("Save", "images/save.png", 
+               function(parameters) { save(); }).render($("#edit"));
     new Action("Delete", "images/trash.png", 
                function(parameters) { delete_geom(); }).render($("#edit"));
     new Action("Undo", "images/undo.png", 

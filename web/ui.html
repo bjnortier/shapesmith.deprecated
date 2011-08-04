@@ -5,13 +5,18 @@
     
     <link href="css/style.css" rel="stylesheet" type="text/css"/>
 
-    <script type="text/javascript" src="js/lib/scenejs.js"></script>
-    <script type="text/javascript" src="js/lib/jquery-1.5.1.min.js"></script>
-    <script type="text/javascript" src="js/lib/jquery.mustache.js"></script>
-    <script type="text/javascript" src="js/lib/jquery.getQueryParam.1.0.0.min.js"></script>
-    <script type="text/javascript" src="js/src/ext.js"></script>
-    
+    <script type="text/javascript" src="/js/lib/jquery-1.5.1.min.js"></script>
+    <script type="text/javascript" src="/js/lib/jquery.mustache.js"></script>
+    <script type="text/javascript" src="/js/lib/jquery.getQueryParam.1.0.0.min.js"></script>
+    <script type="text/javascript" src="/js/src/ext.js"></script>
+    <script type="text/javascript" src="/js/lib/RequestAnimationFrame.js"></script>
+    <script type="text/javascript" src="/js/lib/Detector.js"></script>
+    <script type="text/javascript" src="/js/lib/Three.js"></script>
+    <script type="text/javascript" src="/js/lib/helvetiker_bold.typeface.js"></script>
+
+   
   </head>
+  <div id="scene"></div>
   <div id="container">
     <div id="progress-container"></div>
     <div id="messages-container"></div>
@@ -24,11 +29,7 @@
     <div id="geom-model-doc"></div>
     
   </div>
-  <script type="text/javascript">
-    var canvasElement = '<canvas id="theCanvas" width="{innerWidth}" height="{innerHeight}"/>'.
-    weave(window);
-    $('#container').prepend(canvasElement);
-  </script>
+
   <script type="text/javascript" src="js/src/Observable.js"></script>
   <script type="text/javascript" src="js/src/Messages.js"></script>
   <script type="text/javascript" src="js/src/Command.js"></script>
@@ -36,8 +37,19 @@
   <script type="text/javascript" src="js/src/GeomDocument.js"></script>
   <script type="text/javascript" src="js/src/TreeView.js"></script>
   <script type="text/javascript" src="js/src/SceneView.js"></script>
+  <script type="text/javascript">
+
+    if(!Detector.webgl){
+    Detector.addGetWebGLMessage();
+    } else {
+    var container = document.getElementById('scene');
+    var sceneView = new SS.SceneView(container);
+    sceneView.animate();
+    }
+
+  </script>
+  
   <script type="text/javascript" src="js/src/SelectionManager.js"></script>
-  <script type="text/javascript" src="js/src/interaction.js"></script>
   <script type="text/javascript" src="js/src/toolbars.js"></script>
   <script type="text/javascript" src="js/src/RestAPI.js"></script>
   <script type="text/javascript" src="js/src/Isambard.js"></script>
