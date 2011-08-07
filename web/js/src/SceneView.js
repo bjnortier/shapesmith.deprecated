@@ -4,23 +4,18 @@ SS.SceneView = function(container) {
     var camera, scene, renderer, w, h;
     var overRenderer;
 
-    var mouse = { x: 0, y: 0 }, mouseOnDown = { x: 0, y: 0 };
-    var elevation = 0;
-    var azimuth = Math.PI/4;
-
+    var mouseOnDown = null;
+    var planeMesh, mouseOnWorkplane = {x: 0, y: 0}, workplaneXObj, workplaneYObj, workplanePointer;
+        
+    var elevation = 0, azimuth = Math.PI/4;
     var target = { azimuth: Math.PI/4, elevation: Math.PI*3/8 };
     var targetOnDown = { azimuth: target.azimuth, elevation: target.elevation };
-
     var distance = 1000, distanceTarget = 400;
 
     var pathToModel = {};
+    var unselectedColor = 0x00dd00, selectedColor = 0xdddd00;
+    var panning = false, rotating = false, threshhold = 5; // inside this threshold is a single click
 
-    var unselectedColor = 0x00dd00;
-    var selectedColor = 0xdddd00;
-
-    var panning = false;
-    var rotating = false;
-    var threshhold = 5; // inside this threshold is a single click
     
     function init() {
 
@@ -75,6 +70,7 @@ SS.SceneView = function(container) {
 
 	container.addEventListener('mousedown', onMouseDown, false);
 	container.addEventListener('mousewheel', onMouseWheel, false);
+	container.addEventListener('mousemove', onMouseMove, false);
 	document.addEventListener('keydown', onDocumentKeyDown, false);
 	window.addEventListener('resize', onWindowResize, false);
 	container.addEventListener('mouseover', function() {
@@ -89,13 +85,13 @@ SS.SceneView = function(container) {
     function onMouseDown(event) {
 	event.preventDefault();
 
+	mouseOnDown = {};
 	mouseOnDown.x = event.clientX;
 	mouseOnDown.y = event.clientY;
 
 	rotating = false;
 	panning = false;
-
-	container.addEventListener('mousemove', onMouseMove, false);
+	
 	container.addEventListener('mouseup', onMouseUp, false);
 	container.addEventListener('mouseout', onMouseOut, false);
 
@@ -103,35 +99,53 @@ SS.SceneView = function(container) {
     
     function onMouseMove(event) {
 
-	if (!(rotating || panning)) {
-	    if (event.button == 0) {
-		if ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
-		    ||
-                    (Math.abs(event.clientY - mouseOnDown.y) > threshhold)) {
+	if (mouseOnDown) {
+	    if (!(rotating || panning)) {
+		if (event.button == 0) {
+		    if ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
+			||
+			(Math.abs(event.clientY - mouseOnDown.y) > threshhold)) {
 
-                    rotating = true;
+			rotating = true;
+		    }
 		}
-            }
-            if (event.button == 1) {
-		if ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
-                    ||
-                    (Math.abs(event.clientY - mouseOnDown.y) > threshhold)) {
-                    panning = true;
+		if (event.button == 1) {
+		    if ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
+			||
+			(Math.abs(event.clientY - mouseOnDown.y) > threshhold)) {
+			panning = true;
+		    }
 		}
-            }
-	}
+	    }
 
-	if (rotating) {
-	    mouse.x = event.clientX;
-	    mouse.y = event.clientY;
+	    if (rotating) {
+		var mouse = {};
+		mouse.x = event.clientX;
+		mouse.y = event.clientY;
+		var zoomDamp = Math.sqrt(distance)/10;
 
-	    var zoomDamp = Math.sqrt(distance)/10;
+		target.azimuth = targetOnDown.azimuth - (mouse.x - mouseOnDown.x) * 0.005 * zoomDamp;
+		target.elevation = targetOnDown.elevation - (mouse.y - mouseOnDown.y) * 0.005 * zoomDamp;
 
-	    target.azimuth = targetOnDown.azimuth - (mouse.x - mouseOnDown.x) * 0.005 * zoomDamp;
-	    target.elevation = targetOnDown.elevation - (mouse.y - mouseOnDown.y) * 0.005 * zoomDamp;
+		target.elevation = target.elevation > Math.PI ? Math.PI : target.elevation;
+		target.elevation = target.elevation < 0 ? 0 : target.elevation;
+	    }
+	} else {
 
-	    target.elevation = target.elevation > Math.PI ? Math.PI : target.elevation;
-	    target.elevation = target.elevation < 0 ? 0 : target.elevation;
+	    var mouse = {};
+	    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+	    
+	    var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
+	    var projector = new THREE.Projector();
+	    var mouse3D = projector.unprojectVector(vector, camera);
+	    var ray = new THREE.Ray(camera.position, null);
+	    ray.direction = mouse3D.subSelf(camera.position).normalize();
+	    var intersects = ray.intersectObject(planeMesh);
+	    if (intersects.length == 1) {
+		updateWorkplaneXYLocation(intersects[0].point.x, intersects[0].point.y);
+	    }
+	    
 	}
     }
 
@@ -156,11 +170,14 @@ SS.SceneView = function(container) {
 
 	    if ( intersects.length > 0 ) {
 		var path = intersects[0].object.name;
-		if (event.shiftKey) {
-		    selectionManager.shiftPick(path);
-		} else {
-		    selectionManager.pick(path);
-		}
+		// Only named objects are objects
+		if (path) {
+		    if (event.shiftKey) {
+			selectionManager.shiftPick(path);
+		    } else {
+			selectionManager.pick(path);
+		    }
+		} 
 	    } else {
 		selectionManager.deselectAll();
 	    }
@@ -169,14 +186,14 @@ SS.SceneView = function(container) {
 	rotating = false;
 	panning = false;
 
-	container.removeEventListener('mousemove', onMouseMove, false);
+	mouseOnDown = null;
 	container.removeEventListener('mouseup', onMouseUp, false);
 	container.removeEventListener('mouseout', onMouseOut, false);
 	container.style.cursor = 'auto';
     }
 
     function onMouseOut(event) {
-	container.removeEventListener('mousemove', onMouseMove, false);
+	mouseOnDown = null;
 	container.removeEventListener('mouseup', onMouseUp, false);
 	container.removeEventListener('mouseout', onMouseOut, false);
     }
@@ -290,11 +307,12 @@ SS.SceneView = function(container) {
 	    });
 	    var textMesh1 = new THREE.Mesh( textGeo, textMaterial );
 	    textMesh1.position.y = y*10 + (y > 0 ? -2 : (y < 0 ? 2.5 : 0));
-	    textMesh1.position.x = insideY[1] + 3;
+	    textMesh1.position.x = insideX[1] + 3;
 	    textMesh1.rotation.z = Math.PI/2;
 	    scene.addObject(textMesh1);
 	}
 
+	addPlane();
 	addAxes();
 	addMainGrid();
 	for(var x = -gridExtents; x <= gridExtents; ++x) {
@@ -310,7 +328,111 @@ SS.SceneView = function(container) {
 	}
 
     }
+
+    function updateWorkplaneXYLocation(x, y) {
+
+	var x = Math.round(x);
+	var y = Math.round(y);
+	var isInsideX = (x >= insideX[0]) && (x <= insideX[1]);
+	var isInsideY = (y >= insideY[0]) && (y <= insideY[1]);
+	if (isInsideX) {
+	    updateWorkplaneX(x);
+	}
+	if (isInsideY) {
+	    updateWorkplaneY(y);
+	}
+	if (isInsideX && isInsideY) {
+	    updateWorkplanePointer(x,y);
+	}
+    }
     
+    function labelMesh(value) {
+	var height = 0.01,
+	size = 2,
+	curveSegments = 6,
+	font = "helvetiker", 		
+	weight = "bold",		
+	style = "normal";
+	var labelMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00, opacity: 0.7, wireframe: false } );
+	var labelGeometry = new THREE.TextGeometry('' + Math.round(value), {
+	    size: size, 
+	    height: height,
+	    curveSegments: curveSegments,
+	    font: font,
+	    weight: weight,
+	    style: style,
+	    bezelEnabled: false
+	});
+	return new THREE.Mesh(labelGeometry, labelMaterial);
+    }
+
+    function updateWorkplanePointer(x,y) {
+	if (workplanePointer) {
+	    scene.removeObject(workplanePointer);
+	}
+
+	var pointerMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00, opacity: 0.7, wireframe: false } );
+	var pointerGeometry = new THREE.CubeGeometry(0.5, 0.5, 0.5);
+	workplanePointer = new THREE.Mesh(pointerGeometry, pointerMaterial);
+	workplanePointer.position.x = x;
+	workplanePointer.position.y = y;
+	scene.addObject(workplanePointer);
+
+    }
+
+    function updateWorkplaneX(x) {
+	if (workplaneXObj) {
+	    scene.removeObject(workplaneXObj);
+	}
+
+	workplaneXObj = new THREE.Object3D();
+	var background = new THREE.Mesh(new THREE.PlaneGeometry(5, 3),
+					new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 1.0 }));
+	background.position.x = x;
+	background.position.y = insideY[1] + 2;
+	background.position.z = 0.1;
+
+	var label = labelMesh(x);
+	label.position.x = x;
+	label.position.y = insideY[1] + 3;
+	label.position.z = 0.1;
+	label.rotation.z = Math.PI;
+
+	workplaneXObj.addChild(background);
+	workplaneXObj.addChild(label);
+	scene.addObject(workplaneXObj);
+    }
+
+    function updateWorkplaneY(y) {
+	if (workplaneYObj) {
+	    scene.removeObject(workplaneYObj);
+	}
+
+	workplaneYObj = new THREE.Object3D();
+	var background = new THREE.Mesh(new THREE.PlaneGeometry(3, 5),
+					new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 1.0 }));
+	background.position.x = insideX[1] + 2;
+	background.position.y = y;
+	background.position.z = 0.1;
+
+	var label = labelMesh(y);
+	label.position.x = insideX[1] + 3;
+	label.position.y = y;
+	label.position.z = 0.1;
+	label.rotation.z = Math.PI/2;
+
+	workplaneYObj.addChild(background);
+	workplaneYObj.addChild(label);
+	scene.addObject(workplaneYObj);
+    }
+
+    function addPlane() {
+	var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
+	planeMesh = new THREE.Mesh(planeGeometry,
+				   new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 0 }));
+	scene.addObject(planeMesh);
+    }
+
     function addAxes() {
 
 	axes = [new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry()];
@@ -348,7 +470,6 @@ SS.SceneView = function(container) {
     var minorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.05 });
 
     function addMainGrid() {
-
 
 	for (var x = insideX[0]; x <= insideX[1]; ++x) {
 	    if (x != 0) {
