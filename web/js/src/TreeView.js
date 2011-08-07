@@ -183,7 +183,7 @@ function TreeView() {
             if (!id) {
                 throw Error('id for editing could not be determined');
             }
-            selectionManager.picked('/geom/' + id);
+            selectionManager.pick('/geom/' + id);
         });
 
         // Edit geom

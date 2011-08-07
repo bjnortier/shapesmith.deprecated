@@ -24,6 +24,7 @@ function update_geom_command(fromNode, toNode) {
         toChain = toChain.map(function(x) { return x });
         var nextTo = toChain.splice(0,1)[0];
         var nextFrom = fromChain.splice(0,1)[0];
+	selectionManager.deselectAll();
         if (nextTo) {
             $.ajax({
                 type: 'PUT',
@@ -48,7 +49,6 @@ function update_geom_command(fromNode, toNode) {
                             url: '/mesh/' + idForGeomPath(nextFrom.path),
                             success: function(mesh) {
                                 nextTo.mesh = mesh;
-                                selectionManager.deselectAll();
                                 geom_doc.replace(nextFrom, nextTo);
 				command_stack.inProgressSuccess();
                             },
@@ -175,6 +175,7 @@ function boolean(type) {
                     type: "GET",
                     url: '/mesh/' + id,
                     success: function(mesh) {
+			selectionManager.deselectAll();
                         childNodes = selected.map(function(x) {
                             var node = geom_doc.findByPath(x);
                             geom_doc.remove(node);
@@ -183,7 +184,6 @@ function boolean(type) {
                         geometry["path"] = path;
                         boolNode = new GeomNode(geometry, childNodes);
                         boolNode.mesh = mesh;
-                        selectionManager.deselectAll();
                         geom_doc.add(boolNode);
 			command_stack.inProgressSuccess();
                     },

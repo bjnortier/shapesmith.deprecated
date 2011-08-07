@@ -13,25 +13,24 @@ function SelectionManager() {
     this.size = function() {
         return selected.length;
     }
-    
-    this.picked = function(path) {
 
-        var alreadySelected = false;
+    this.shiftPick = function(path) {
+	var alreadySelected = false;
         for (var i in selected) {
             if (selected[i] == path) {
                 alreadySelected = true;
             } 
         }
 
-        if (shiftPicking) {
-            if (alreadySelected) {
-                this.deselectPath(path);
-            } else  {
-                this.selectPath(path);
-            }
-        } else {
-            this.selectOnly(path);
+        if (alreadySelected) {
+            this.deselectPath(path);
+        } else  {
+            this.selectPath(path);
         }
+    }
+    
+    this.pick = function(path) {
+        this.selectOnly(path);
     }
 
     this.selectPath = function(path) {
@@ -74,51 +73,3 @@ function SelectionManager() {
 var selectionManager = new SelectionManager();
 Observable.makeObservable(selectionManager);
 
-
-
-function ScenePicker(_selectionManager) {
-
-    var selectionManager = _selectionManager;
-    var picking = false;
-    var pickHit = false;
-    var shiftPicking = false;
-    var picker = this;
-
-    /*SceneJS.withNode("theScene").bind("post-rendered",
-                                       function(event) {
-                                           picker.afterPick()
-                                       });
-
-    this.addPickable = function(path) {
-        SceneJS.withNode(path).bind("picked",
-                                    function(event) {
-                                        picker.picked(path);
-                                    });
-    }
-    
-    this.beforePick = function() {
-        picking = true;
-        pickHit = false;
-    }
-
-    this.afterPick = function() {
-        if (picking && !pickHit && !shiftPicking) {
-            selectionManager.deselectAll();
-        }
-        picking = false;
-        shiftPicking = false;
-    }
-
-    this.beforePick = function() {
-        picking = true;
-        pickHit = false;
-    }
-
-    this.picked = function(path) {
-        pickHit = true;
-        selectionManager.picked(path);
-    }*/
-
-}
-
-var picker = new ScenePicker(selectionManager);

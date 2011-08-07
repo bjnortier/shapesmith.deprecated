@@ -2,8 +2,6 @@ var SS = SS || {};
 SS.SceneView = function(container) {
 
     var camera, scene, renderer, w, h;
-    var mesh, point;
-
     var overRenderer;
 
     var mouse = { x: 0, y: 0 }, mouseOnDown = { x: 0, y: 0 };
@@ -14,8 +12,16 @@ SS.SceneView = function(container) {
     var targetOnDown = { azimuth: target.azimuth, elevation: target.elevation };
 
     var distance = 1000, distanceTarget = 400;
-    var INTERSECTED;
 
+    var pathToModel = {};
+
+    var unselectedColor = 0x00dd00;
+    var selectedColor = 0xdddd00;
+
+    var panning = false;
+    var rotating = false;
+    var threshhold = 5; // inside this threshold is a single click
+    
     function init() {
 
 	container.style.color = '#fff';
@@ -35,18 +41,6 @@ SS.SceneView = function(container) {
 
 	addGrid();
 
-	/*var light = new THREE.PointLight(0xFFFFFF);
-	light.position.set(1000, 1000, 0);
-	scene.addLight(light);
-
-	light = new THREE.PointLight(0xFFFFFF);
-	light.position.set(1000, -1000, 1000);
-	scene.addLight(light);
-
-	light = new THREE.PointLight(0x666666);
-	light.position.set(0, 0, -1000);
-	scene.addLight(light);*/
-
 	ambientLight = new THREE.AmbientLight( 0x101010 );
 	scene.addLight( ambientLight );
 
@@ -56,6 +50,11 @@ SS.SceneView = function(container) {
 
 	pointLight = new THREE.PointLight( 0x333333 );
 	pointLight.position.z = -100;
+	scene.addLight(pointLight);
+
+	pointLight = new THREE.PointLight( 0x333333 );
+	pointLight.position.x = -100;
+	pointLight.position.y = -100;
 	scene.addLight(pointLight);
 
 	directionalLight = new THREE.DirectionalLight( 0xaaaa88 );
@@ -90,67 +89,86 @@ SS.SceneView = function(container) {
     function onMouseDown(event) {
 	event.preventDefault();
 
+	mouseOnDown.x = event.clientX;
+	mouseOnDown.y = event.clientY;
+
+	rotating = false;
+	panning = false;
+
 	container.addEventListener('mousemove', onMouseMove, false);
 	container.addEventListener('mouseup', onMouseUp, false);
 	container.addEventListener('mouseout', onMouseOut, false);
 
-	mouseOnDown.x = - event.clientX;
-	mouseOnDown.y = event.clientY;
+    }
+    
+    function onMouseMove(event) {
+
+	if (!(rotating || panning)) {
+	    if (event.button == 0) {
+		if ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
+		    ||
+                    (Math.abs(event.clientY - mouseOnDown.y) > threshhold)) {
+
+                    rotating = true;
+		}
+            }
+            if (event.button == 1) {
+		if ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
+                    ||
+                    (Math.abs(event.clientY - mouseOnDown.y) > threshhold)) {
+                    panning = true;
+		}
+            }
+	}
+
+	if (rotating) {
+	    mouse.x = event.clientX;
+	    mouse.y = event.clientY;
+
+	    var zoomDamp = Math.sqrt(distance)/10;
+
+	    target.azimuth = targetOnDown.azimuth - (mouse.x - mouseOnDown.x) * 0.005 * zoomDamp;
+	    target.elevation = targetOnDown.elevation - (mouse.y - mouseOnDown.y) * 0.005 * zoomDamp;
+
+	    target.elevation = target.elevation > Math.PI ? Math.PI : target.elevation;
+	    target.elevation = target.elevation < 0 ? 0 : target.elevation;
+	}
+    }
+
+    function onMouseUp(event) {
 
 	targetOnDown.azimuth = target.azimuth;
 	targetOnDown.elevation = target.elevation;
 
-	container.style.cursor = 'move';
+	if (!panning && !rotating) {
+	    container.style.cursor = 'move';
 
+	    var mouse = {};
+	    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-	var mouse = {};
-	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+	    var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
+	    var projector = new THREE.Projector();
+	    var mouse3D = projector.unprojectVector(vector, camera);
+	    var ray = new THREE.Ray(camera.position, null);
+	    ray.direction = mouse3D.subSelf(camera.position).normalize();
+	    var intersects = ray.intersectScene(scene);
 
-	// var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-	// var projector = new THREE.Projector();
-	// projector.unprojectVector( vector, camera );
-	// var ray = new THREE.Ray( camera.position, vector.subSelf( camera.position ).normalize() );
-	// var intersects = ray.intersectScene( scene );
-
-	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-	var projector = new THREE.Projector();
-	var mouse3D = projector.unprojectVector(vector, camera);
-	var ray = new THREE.Ray(camera.position, null);
-	ray.direction = mouse3D.subSelf(camera.position).normalize();
-	var intersects = ray.intersectScene(scene);
-
-	if ( intersects.length > 0 ) {
-	    if ( INTERSECTED != intersects[ 0 ].object ) {
-		if ( INTERSECTED ) INTERSECTED.materials[ 0 ].color.setHex( INTERSECTED.currentHex );
-		INTERSECTED = intersects[ 0 ].object;
-		INTERSECTED.currentHex = INTERSECTED.materials[ 0 ].color.hex;
-		INTERSECTED.materials[ 0 ].color.setHex( 0xff0000 );
+	    if ( intersects.length > 0 ) {
+		var path = intersects[0].object.name;
+		if (event.shiftKey) {
+		    selectionManager.shiftPick(path);
+		} else {
+		    selectionManager.pick(path);
+		}
+	    } else {
+		selectionManager.deselectAll();
 	    }
-	} else {
-	    if ( INTERSECTED ) INTERSECTED.materials[ 0 ].color.setHex( INTERSECTED.currentHex );
-	    INTERSECTED = null;
 	}
 
-	console.log(intersects.length);
+	rotating = false;
+	panning = false;
 
-
-    }
-    
-    function onMouseMove(event) {
-	mouse.x = - event.clientX;
-	mouse.y = event.clientY;
-
-	var zoomDamp = Math.sqrt(distance)/10;
-
-	target.azimuth = targetOnDown.azimuth + (mouse.x - mouseOnDown.x) * 0.005 * zoomDamp;
-	target.elevation = targetOnDown.elevation - (mouse.y - mouseOnDown.y) * 0.005 * zoomDamp;
-
-	target.elevation = target.elevation > Math.PI ? Math.PI : target.elevation;
-	target.elevation = target.elevation < 0 ? 0 : target.elevation;
-    }
-
-    function onMouseUp(event) {
 	container.removeEventListener('mousemove', onMouseMove, false);
 	container.removeEventListener('mouseup', onMouseUp, false);
 	container.removeEventListener('mouseout', onMouseOut, false);
@@ -409,20 +427,37 @@ SS.SceneView = function(container) {
 
     var add = function(geomNode) {
         if (geom_doc.isRoot(geomNode) && geomNode.mesh) {
-	    //var geometry =new THREE.CubeGeometry( 10, 10, 10, 1, 1, 1);
 	    var geometry = createGeometry(geomNode.mesh);
-	    var material = new THREE.MeshPhongMaterial( { ambient: 0x030303, color: 0x00dd00, specular: 0xccffcc, shininess: 100, shading: THREE.SmoothShading } );
-	    //var material = new THREE.MeshLambertMaterial({ color: 0x00FF00 });
+	    var material = new THREE.MeshPhongMaterial( { ambient: 0x030303, color: unselectedColor, specular: 0xccffcc, shininess: 100, shading: THREE.SmoothShading } );
 	    var mesh = new THREE.Mesh(geometry, material);
 	    mesh.doubleSided = true;
+	    mesh.name = geomNode.path;
 	    scene.addObject(mesh);
-
-
+	    pathToModel[geomNode.path] = mesh;
         }
     }
 
     var remove = function(geomNode) {
         if (geomNode.path) {
+	    var mesh = pathToModel[geomNode.path];
+	    scene.removeObject(mesh);
+	    delete pathToModel[geomNode.path];
+        }
+    }
+
+    this.selectionUpdated = function(event) {
+        if (event.deselected) {
+            for (var i in event.deselected) {
+                var path = event.deselected[i];
+		pathToModel[path].materials[0].color.setHex(unselectedColor);
+            }
+        }
+        if (event.selected) {
+            for (var i in event.selected) {
+                var path = event.selected[i];
+		pathToModel[path].materials[0].color.setHex(selectedColor);
+		
+            }
         }
     }
 
@@ -464,274 +499,3 @@ SS.SceneView = function(container) {
 
     return this;
 }
-
-/*
-function _SceneView() {
-
-    this.eye = {x: 50.0, y: 0.0, z: 0.0};
-    this.look = {x: 0.0, y:0.0, z:0.0};
-    this.up = {z: 1.0};
-
-    this.yaw_angle = -45;
-    this.pitch_angle = 20;
-    this.camera_translate = {x: 0, y:0, z:0};
-
-    var add = function(geomNode) {
-        if (geom_doc.isRoot(geomNode) && geomNode.mesh) {
-            var sceneNode = {type : "geometry",
-                             indices : geomNode.mesh.indices,
-                             positions : geomNode.mesh.positions,
-                             normals : geomNode.mesh.normals,
-                             primitive : geomNode.mesh.primitive};
-
-            SceneJS.withNode("geom").add("node", {type: "material",
-                                                  id: geomNode.path,
-                                                  emit: 0,
-                                                  baseColor:      { r: 0.5, g: 1.0, b: 0.0 },
-                                                  specularColor:  { r: 0.9, g: 0.9, b: 0.9 },
-                                                  specular:       0.9,
-                                                  shine:          100.0,
-                                                  nodes: [sceneNode]});
-            
-            picker.addPickable(geomNode.path);
-        }
-    }
-
-    var remove = function(geomNode) {
-        if (geomNode.path 
-            && 
-            SceneJS.nodeExists(geomNode.path) 
-            && 
-            SceneJS.withNode(geomNode.path).parent()) {
-
-            SceneJS.withNode(geomNode.path).parent().remove({node: geomNode.path});
-        }
-    }
-
-    this.selectionUpdated = function(event) {
-        if (event.deselected) {
-            for (var i in event.deselected) {
-                var path = event.deselected[i];
-                SceneJS.withNode(path).set('baseColor', { r: 0.5, g: 1.0, b: 0.0 });
-            }
-        }
-        if (event.selected) {
-            for (var i in event.selected) {
-                var path = event.selected[i];
-                SceneJS.withNode(path).set('baseColor', { r: 1.0, g: 1.0, b: 0.0 });
-            }
-        }
-    }
-
-    this.geomDocUpdated = function(event) {
-
-        if (event.add) {
-            add(event.add);
-        }
-
-        if (event.remove) {
-            remove(event.remove);
-        }
-
-        if (event.replace) {
-            remove(event.replace.original);
-            add(event.replace.replacement);
-        }
-
-
-    }
-
-}
-
-var sceneView = new SceneView();
-
-var scene = new SceneJS.Scene(
-    {
-        id: "theScene",
-        canvasId: "theCanvas",
-        loggingElementId: "theLoggingDiv"
-    },
-    new SceneJS.renderer(
-	{ 
-            clearColor : { r:0.01, g:0.01, b:0.01, a: 0 }, 
-            clear : { depth : true, color : true} , 
-            depthRange : { near: .5, far: 1500 }
-	},
-	new SceneJS.LookAt(
-	    {
-		id : "lookat",
-		eye : sceneView.eye,
-		look : sceneView.look,
-		up : sceneView.up
-            },
-            new SceneJS.Camera(
-		{
-		    id: "camera",
-                    type: "camera",
-                    optics: {
-			type: "perspective",
-			fovy : 5.0,
-			aspect : 1.47,
-			near : 0.10,
-			far : 3000.0
-                    }
-		},
-		new SceneJS.Light(
-                    {
-			mode:                   "dir",
-			color:                  { r: 0.5, g: 0.5, b: 0.5 },
-			diffuse:                true,
-			specular:               true,
-			dir:                    { x: -1.0, y: -1.0, z: 1.0 }
-                    }),
-		new SceneJS.Light(
-                    {
-			mode:                   "dir",
-			color:                  { r: 0.7, g: 0.7, b: 0.7 },
-			diffuse:                true,
-			specular:               true,
-			dir:                    { x: 0.0, y: 1.0, z: -1.0 }
-                    }),
-		new SceneJS.Light(
-                    {
-			mode:                   "dir",
-			color:                  { r: 0.8, g: 0.8, b: 0.8 },
-			diffuse:                true,
-			specular:               true,
-			dir:                    { x: -1.0, y: -1.0, z: 1.0 }
-                    }),
-		new SceneJS.Translate(
-                    {
-			id : "cameraTranslate",
-			x : sceneView.camera_translate.x,
-			y : sceneView.camera_translate.y,
-			z : sceneView.camera_translate.z
-                    },
-                    new SceneJS.Rotate(
-			{
-                            id: "pitch",
-                            angle: sceneView.pitch_angle,
-                            y : 1.0
-			},
-			new SceneJS.Rotate(
-                            {
-				id: "yaw",
-				angle: sceneView.yaw_angle,
-				z : 1.0
-                            },
-                            new SceneJS.Material(
-				{
-                                    id: "x-axis",
-                                    emit: 1,
-                                    baseColor:      { b: 1.0 },
-                                    specular:       0,
-				},
-				new SceneJS.Geometry(
-                                    {
-					primitive: "lines",
-					positions : [
-                                            0,0,0,
-                                            1000,0,0
-					],
-					normals : [],
-					uv : [],
-					uv2 : [],
-					indices : [0,1]
-                                    })),
-                            new SceneJS.Material(
-				{
-                                    id: "y-axis",
-                                    emit: 1,
-                                    baseColor:      { g: 1.0 },
-                                    specular:       0,
-				},
-				new SceneJS.Geometry(
-                                    {
-					primitive: "lines",
-					positions : [
-                                            0,0,0,
-                                            0,1000,0
-					],
-					normals : [],
-					uv : [],
-					uv2 : [],
-					indices : [0,1]
-                                    })),
-                            new SceneJS.Material(
-				{
-                                    id: "z-axis",
-                                    emit: 1,
-                                    baseColor:      { r: 1.0 },
-                                    specular:       0,
-				},
-				new SceneJS.Geometry(
-                                    {
-					primitive: "lines",
-					positions : [
-                                            0,0,0,
-                                            0,0,1000
-					],
-					normals : [],
-					uv : [],
-					uv2 : [],
-					indices : [0,1]
-                                    })),
-                            new SceneJS.Material(
-				{
-                                    id: "geom",
-                                    emit: 0,
-                                    baseColor:      { r: 0.5, g: 1.0, b: 0.0 },
-                                    specularColor:  { r: 0.9, g: 0.9, b: 0.9 },
-                                    specular:       0.9,
-                                    shine:          100.0,
-				}
-                            )
-			)
-                    )
-		)
-            )
-	)
-    )
-);
-              
-
-window.render = function() {
-    
-    SceneJS.withNode("pitch").set("angle", sceneView.pitch_angle);
-    SceneJS.withNode("yaw").set("angle", sceneView.yaw_angle);
-    SceneJS.withNode("cameraTranslate").set("x", sceneView.camera_translate.x);
-    SceneJS.withNode("cameraTranslate").set("y", sceneView.camera_translate.y);
-    SceneJS.withNode("cameraTranslate").set("z", sceneView.camera_translate.z);
-
-    SceneJS.withNode("theScene").render();
-};
-
-
-var pInterval;
-SceneJS.bind("error", function() {
-    window.clearInterval(pInterval);
-});
-SceneJS.bind("reset", function() {
-    window.clearInterval(pInterval);
-});
-pInterval = window.setInterval("window.render()", 10);
-
-function resetAspectRatio() {
-    $('#theCanvas').width(window.innerWidth);
-    $('#theCanvas').height(window.innerHeight);
-
-    var aspect = window.innerWidth/window.innerHeight;
-    var optics = SceneJS.withNode("camera").get("optics");
-    optics.aspect = aspect;
-    SceneJS.withNode("camera").set("optics", optics);
-}
-
-$(window).resize(function () { 
-    resetAspectRatio();
-});
-
-*/
-
-
-
-
