@@ -79,7 +79,15 @@ ensure_brep_exists(Id, Geometry, Hash, TopLevelFn) ->
 	{error, Error} ->
 	    {error, Error};
 	WorkerPid ->
-	    Result = ensure_child_breps_exist(WorkerPid, [{Id, Geometry, Hash}], TopLevelFn),
+	    Result = try ensure_child_breps_exist(WorkerPid, [{Id, Geometry, Hash}], TopLevelFn) of
+			 X ->
+			     node_brep_db:purge(WorkerPid, Hash),
+			     X
+		     catch
+			 Type:Exception ->
+			     node_log:error("Exception on ensure_child_breps_exist: ~p:~p", [Type, Exception]),
+			     {error, {Type, Exception}}
+		     end,
 	    %% Some brep may be left over if error occured and cleanup wasn't complete
 	    node_brep_db:purge_all(WorkerPid),
 	    node_worker_pool:return_worker(WorkerPid),
