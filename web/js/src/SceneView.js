@@ -101,15 +101,15 @@ SS.SceneView = function(container) {
 
 	if (mouseOnDown) {
 	    if (!(rotating || panning)) {
-		if (event.button == 0) {
+		if (event.button == 0 && !event.shiftKey) {
 		    if ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
 			||
 			(Math.abs(event.clientY - mouseOnDown.y) > threshhold)) {
 
 			rotating = true;
 		    }
-		}
-		if (event.button == 1) {
+		} 
+		if (event.button == 1 || event.shiftKey) {
 		    if ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
 			||
 			(Math.abs(event.clientY - mouseOnDown.y) > threshhold)) {
@@ -335,6 +335,17 @@ SS.SceneView = function(container) {
 	var y = Math.round(y);
 	var isInsideX = (x >= insideX[0]) && (x <= insideX[1]);
 	var isInsideY = (y >= insideY[0]) && (y <= insideY[1]);
+
+	if (workplaneXObj) {
+	    scene.removeObject(workplaneXObj);
+	}
+	if (workplaneYObj) {
+	    scene.removeObject(workplaneYObj);
+	}
+	if (workplanePointer) {
+	    scene.removeObject(workplanePointer);
+	}
+
 	if (isInsideX) {
 	    updateWorkplaneX(x);
 	}
@@ -367,9 +378,6 @@ SS.SceneView = function(container) {
     }
 
     function updateWorkplanePointer(x,y) {
-	if (workplanePointer) {
-	    scene.removeObject(workplanePointer);
-	}
 
 	var pointerMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00, opacity: 0.7, wireframe: false } );
 	var pointerGeometry = new THREE.CubeGeometry(0.5, 0.5, 0.5);
@@ -381,16 +389,47 @@ SS.SceneView = function(container) {
     }
 
     function updateWorkplaneX(x) {
-	if (workplaneXObj) {
-	    scene.removeObject(workplaneXObj);
-	}
 
 	workplaneXObj = new THREE.Object3D();
 	var background = new THREE.Mesh(new THREE.PlaneGeometry(5, 3),
-					new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 1.0 }));
+					new THREE.MeshBasicMaterial({ color: 0x101010, opacity: 1.0 }));
 	background.position.x = x;
 	background.position.y = insideY[1] + 2;
 	background.position.z = 0.1;
+
+	var borderGeom = [new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry()];
+	borderGeom[0].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 0, 0)));
+	borderGeom[0].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 0, 0)));
+	borderGeom[1].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 0, 0)));
+	borderGeom[1].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 3, 0)));
+	borderGeom[2].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 3, 0)));
+	borderGeom[2].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 3, 0)));
+	borderGeom[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 3, 0)));
+	borderGeom[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 0, 0)));
+	for (var i = 0; i < 4; ++i) {
+	    var border = new THREE.Line(borderGeom[i], new THREE.LineBasicMaterial({ color: 0xe9fb00, opacity: 0.5 }));
+	    border.position.x = x;
+	    border.position.y = insideY[1] + 0.5;
+	    border.position.z = 0.15;
+	    workplaneXObj.addChild(border);
+	}
+
+	var arrowGeometry = new THREE.Geometry();
+	arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(-0.5, 0.5, 0)));
+	arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0.5, 0.5, 0)));
+	var face = new THREE.Face3(0,1,2);
+	arrowGeometry.faces.push(face);
+	arrowGeometry.computeCentroids();
+	arrowGeometry.computeFaceNormals();
+
+	var arrowMaterial = new THREE.MeshBasicMaterial({ color: 0xe9fb00, opacity: 1.0 });
+	var arrow = new THREE.Mesh(arrowGeometry, arrowMaterial);
+	arrow.doubleSided = true;
+	arrow.position.x = x;
+	arrow.position.y = insideY[1];
+	arrow.position.z = 0.15;
+	workplaneXObj.addChild(arrow);
 
 	var label = labelMesh(x);
 	label.position.x = x;
@@ -404,16 +443,49 @@ SS.SceneView = function(container) {
     }
 
     function updateWorkplaneY(y) {
-	if (workplaneYObj) {
-	    scene.removeObject(workplaneYObj);
-	}
 
 	workplaneYObj = new THREE.Object3D();
 	var background = new THREE.Mesh(new THREE.PlaneGeometry(3, 5),
-					new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 1.0 }));
+					new THREE.MeshBasicMaterial({ color: 0x101010, opacity: 1.0 }));
 	background.position.x = insideX[1] + 2;
 	background.position.y = y;
 	background.position.z = 0.1;
+
+	var borderGeom = [new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry()];
+	borderGeom[0].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 0, 0)));
+	borderGeom[0].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 0, 0)));
+	borderGeom[1].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 0, 0)));
+	borderGeom[1].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 3, 0)));
+	borderGeom[2].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 3, 0)));
+	borderGeom[2].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 3, 0)));
+	borderGeom[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 3, 0)));
+	borderGeom[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 0, 0)));
+	for (var i = 0; i < 4; ++i) {
+	    var border = new THREE.Line(borderGeom[i], new THREE.LineBasicMaterial({ color: 0xe9fb00, opacity: 0.5 }));
+	    border.position.x = insideX[1] + 0.5;
+	    border.position.y = y;
+	    border.position.z = 0.15;
+	    border.rotation.z = Math.PI*3/2;
+	    workplaneYObj.addChild(border);
+	}
+
+	var arrowGeometry = new THREE.Geometry();
+	arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(-0.5, 0.5, 0)));
+	arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0.5, 0.5, 0)));
+	var face = new THREE.Face3(0,1,2);
+	arrowGeometry.faces.push(face);
+	arrowGeometry.computeCentroids();
+	arrowGeometry.computeFaceNormals();
+
+	var arrowMaterial = new THREE.MeshBasicMaterial({ color: 0xe9fb00, opacity: 1.0 });
+	var arrow = new THREE.Mesh(arrowGeometry, arrowMaterial);
+	arrow.doubleSided = true;
+	arrow.position.x = insideX[1];
+	arrow.position.y = y;
+	arrow.position.z = 0.15;
+	arrow.rotation.z = Math.PI*3/2;
+	workplaneXObj.addChild(arrow);
 
 	var label = labelMesh(y);
 	label.position.x = insideX[1] + 3;
@@ -430,6 +502,7 @@ SS.SceneView = function(container) {
 	var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
 	planeMesh = new THREE.Mesh(planeGeometry,
 				   new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 0 }));
+	planeMesh.doubleSided = true;
 	scene.addObject(planeMesh);
     }
 
