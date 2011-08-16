@@ -6,7 +6,7 @@ SS.SceneView = function(container) {
 
     var mouseOnDown = null;
     var lastMouseDownTime = null;
-    var popupMenuDelay = 600;
+    var popupMenuDelay = 200;
     var showPopup = false, showingPopup = false;
     var planeMesh, mouseOnWorkplane = {x: 0, y: 0}, workplaneXObj, workplaneYObj, workplanePointer;
         
@@ -191,6 +191,7 @@ SS.SceneView = function(container) {
 	if (!panning && !rotating) {
 
 	    var now = new Date().getTime();
+	    console.log(now - lastMouseDownTime);
 	    if (now - lastMouseDownTime < popupMenuDelay) {
 
 		var mouse = {};
