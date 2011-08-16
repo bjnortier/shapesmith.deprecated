@@ -5,13 +5,20 @@ function Action(label, iconPath, fn) {
 
     this.render = function(toolbar) {
 
-        var imgId = "action_" + label.toLowerCase().replace(' ', '_');
+        var imgId = "action_" + label.toLowerCase().replace(/ /g, '_');
         toolbar.append('<img id="' + imgId + '" src="' + this.iconPath + '" title="' + label + '"/>');
         
         // Because 'this' is the HTML element inside the function below,
         // we have to use a reference
         var fn = this.fn;
-        jQuery("#" + imgId).click(function() {
+	var ref = '#' + imgId;
+        jQuery(ref).mouseenter(function() {
+	    jQuery(ref).css('background-color', '#444');
+	});
+        jQuery(ref).mouseleave(function() {
+	    jQuery(ref).css('background-color', '');
+	});
+        jQuery("#" + imgId).mouseup(function() {
             fn();
         });
     }
@@ -87,30 +94,34 @@ function create_transform(type, keys) {
 $(document).ready(function() {
 
     /*
-     * Basic
+     * Document
      */
     new Action("Save", "images/save.png", 
-               function(parameters) { save(); }).render($("#edit"));
-    new Action("Delete", "images/trash.png", 
-               function(parameters) { delete_geom(); }).render($("#edit"));
+               function(parameters) { 
+		   save(); 
+	       }).render($("#document"));
     new Action("Undo", "images/undo.png", 
                function(parameters) { 
 		   command_stack.undo(); 
-	       }).render($("#edit"));
+	       }).render($("#document"));
     new Action("Redo", "images/redo.png", 
                function(parameters) { 
 		   command_stack.redo(); 
+	       }).render($("#document"));
+    
+
+    // Edit
+    new Action("Delete", "images/trash.png", 
+               function(parameters) { 
+		   delete_geom(); 
 	       }).render($("#edit"));
-    
-    $('#edit').append('<a id="action_stl" href=""><img src="images/stl.png" alt="stl" title="Export to STL"></img></a>');
+    new Action("Export to STL", "images/stl.png", 
+               function(parameters) { 
+		   var pattern = /^\/geom\/(.*)$/;
+		   var id = selectionManager.selected()[0].match(pattern)[1];
+		   window.location = '/stl/' + id; 
+	       }).render($("#edit"));
 
-
-    $('#action_stl').click(function() {
-        alert("select one object"); 
-        return false;
-    });
-        
-    
     /*
      * Primitives
      */
@@ -155,15 +166,19 @@ $(document).ready(function() {
     new Action("Copy", "/images/copy.png", 
                function(parameters) { 
 		   copy()
-	       }).render($("#copy_transforms"));
+	       }).render($("#copyTransforms"));
     new Action("Copy Translate", "/images/copy_translate.png", 
-               function(parameters) { create_transform("copy_translate", ["dx", "dy", "dz", "n"]); }).render($("#copy_transforms"));
+               function(parameters) { 
+		   create_transform("copy_translate", ["dx", "dy", "dz", "n"]); 
+	       }).render($("#copyTransforms"));
     new Action("Copy Rotate", "/images/copy_rotate.png", 
-               function(parameters) { create_transform("copy_rotate", ["px", "py", "pz", "vx", "vy", "vz", "angle", "n"]); }).render($("#copy_transforms"));
+               function(parameters) { 
+		   create_transform("copy_rotate", ["px", "py", "pz", "vx", "vy", "vz", "angle", "n"]);
+	       }).render($("#copyTransforms"));
     new Action("Copy Mirror", "/images/copy_mirror.png", 
-               function(parameters) { create_transform("copy_mirror", ["px", "py", "pz", "vx", "vy", "vz"]); }).render($("#copy_transforms"));
-
-
+               function(parameters) { 
+		   create_transform("copy_mirror", ["px", "py", "pz", "vx", "vy", "vz"]); 
+	       }).render($("#copyTransforms"));
 
 
 });

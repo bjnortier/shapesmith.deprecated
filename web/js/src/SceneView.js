@@ -5,6 +5,9 @@ SS.SceneView = function(container) {
     var overRenderer;
 
     var mouseOnDown = null;
+    var lastMouseDownTime = null;
+    var popupMenuDelay = 600;
+    var showPopup = false, showingPopup = false;
     var planeMesh, mouseOnWorkplane = {x: 0, y: 0}, workplaneXObj, workplaneYObj, workplanePointer;
         
     var elevation = 0, azimuth = Math.PI/4;
@@ -14,8 +17,7 @@ SS.SceneView = function(container) {
 
     var pathToModel = {};
     var unselectedColor = 0x00dd00, selectedColor = 0xdddd00;
-    var panning = false, rotating = false, threshhold = 5; // inside this threshold is a single click
-
+    var panning = false, rotating = false, threshhold = 10; // inside this threshold is a single click
     
     function init() {
 
@@ -85,6 +87,10 @@ SS.SceneView = function(container) {
     function onMouseDown(event) {
 	event.preventDefault();
 
+	showPopup = true;
+	showingPopup = false;
+	lastMouseDownTime = new Date().getTime();
+	setTimeout(function() { popupMenu(); }, popupMenuDelay);
 	mouseOnDown = {};
 	mouseOnDown.x = event.clientX;
 	mouseOnDown.y = event.clientY;
@@ -93,13 +99,13 @@ SS.SceneView = function(container) {
 	panning = false;
 	
 	container.addEventListener('mouseup', onMouseUp, false);
-	container.addEventListener('mouseout', onMouseOut, false);
+	//container.addEventListener('mouseout', onMouseOut, false);
 
     }
     
     function onMouseMove(event) {
 
-	if (mouseOnDown) {
+	if (mouseOnDown && !showingPopup) {
 	    if (!(rotating || panning)) {
 		if (event.button == 0 && !event.shiftKey) {
 		    if ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
@@ -118,6 +124,12 @@ SS.SceneView = function(container) {
 		}
 	    }
 
+	    if (panning || rotating) {
+		container.style.cursor = 'move';
+	    } else {
+		showPopup = false;
+	    }
+
 	    if (rotating) {
 		var mouse = {};
 		mouse.x = event.clientX;
@@ -130,7 +142,7 @@ SS.SceneView = function(container) {
 		target.elevation = target.elevation > Math.PI ? Math.PI : target.elevation;
 		target.elevation = target.elevation < 0 ? 0 : target.elevation;
 	    }
-	} else {
+	} else if (!showingPopup) {
 
 	    var mouse = {};
 	    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -149,50 +161,91 @@ SS.SceneView = function(container) {
 	}
     }
 
+    function popupMenu() {
+	if (showPopup) {
+	    document.getElementById('toolWheel').addEventListener('mouseup', onMouseUp, false);
+	    showingPopup = true;
+	    $('#toolWheel').css('left', mouseOnDown.x);
+	    $('#toolWheel').css('top', mouseOnDown.y);
+
+	    if (selectionManager.selected().length == 0) {
+		$('#toolWheel').append($('#primitives'));
+	    } else if (selectionManager.selected().length == 1) {
+		$('#toolWheel').append($('#edit'));
+		$('#toolWheel').append($('#transforms'));
+		$('#toolWheel').append($('#copyTransforms'));
+	    } else if (selectionManager.selected().length == 2) {
+		$('#toolWheel').append($('#boolean'));
+	    }
+
+	    $('#toolWheel').show();
+	}
+    }
+
     function onMouseUp(event) {
 
 	targetOnDown.azimuth = target.azimuth;
 	targetOnDown.elevation = target.elevation;
+	showPopup = false;
 
 	if (!panning && !rotating) {
-	    container.style.cursor = 'move';
 
-	    var mouse = {};
-	    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+	    var now = new Date().getTime();
+	    if (now - lastMouseDownTime < popupMenuDelay) {
 
-	    var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-	    var projector = new THREE.Projector();
-	    var mouse3D = projector.unprojectVector(vector, camera);
-	    var ray = new THREE.Ray(camera.position, null);
-	    ray.direction = mouse3D.subSelf(camera.position).normalize();
-	    var intersects = ray.intersectScene(scene);
+		var mouse = {};
+		mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+		mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
-	    if ((intersects.length > 0) && (intersects[0].object.name)) {
-		var path = intersects[0].object.name;
-		if (event.shiftKey) {
-		    selectionManager.shiftPick(path);
-		} else {
-		    selectionManager.pick(path);
+		var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
+		var projector = new THREE.Projector();
+		var mouse3D = projector.unprojectVector(vector, camera);
+		var ray = new THREE.Ray(camera.position, null);
+		ray.direction = mouse3D.subSelf(camera.position).normalize();
+		var intersects = ray.intersectScene(scene);
+
+		var foundObjectPath = null;
+		if (intersects.length > 0) {
+		    for (var i in intersects) {
+			if (intersects[i].object.name) {
+			    foundObjectPath = intersects[i].object.name;
+			    break;
+			}
+		    }
 		}
-	    } else {
-		selectionManager.deselectAll();
+
+		if (foundObjectPath) {
+		    if (event.shiftKey) {
+			selectionManager.shiftPick(foundObjectPath);
+		    } else {
+			selectionManager.pick(foundObjectPath);
+		    }
+		} else {
+		    selectionManager.deselectAll();
+		}
 	    }
 	}
 
 	rotating = false;
 	panning = false;
+	if (showingPopup) {
+	    showingPopup = false;
+	    $('#toolWheel').hide();
+	    var toolbars = $('#toolWheel').children().detach();
+	    $('#toolbarStaging').append(toolbars);
+	    document.getElementById('toolWheel').removeEventListener('mouseup', onMouseUp, false);
+	}
 
 	mouseOnDown = null;
 	container.removeEventListener('mouseup', onMouseUp, false);
-	container.removeEventListener('mouseout', onMouseOut, false);
+	//container.removeEventListener('mouseout', onMouseOut, false);
 	container.style.cursor = 'auto';
     }
 
     function onMouseOut(event) {
 	mouseOnDown = null;
 	container.removeEventListener('mouseup', onMouseUp, false);
-	container.removeEventListener('mouseout', onMouseOut, false);
+	//container.removeEventListener('mouseout', onMouseOut, false);
     }
 
     function onMouseWheel(event) {
@@ -231,7 +284,6 @@ SS.SceneView = function(container) {
 	requestAnimationFrame(animate);
 	render();
     }
-
 
     function render() {
 	zoom(0);
@@ -482,7 +534,7 @@ SS.SceneView = function(container) {
 	arrow.position.y = y;
 	arrow.position.z = 0.15;
 	arrow.rotation.z = Math.PI*3/2;
-	workplaneXObj.addChild(arrow);
+	workplaneYObj.addChild(arrow);
 
 	var label = labelMesh(y);
 	label.position.x = insideX[1] + 3;
