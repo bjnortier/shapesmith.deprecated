@@ -168,16 +168,13 @@ SS.SceneView = function(container) {
 	    ray.direction = mouse3D.subSelf(camera.position).normalize();
 	    var intersects = ray.intersectScene(scene);
 
-	    if ( intersects.length > 0 ) {
+	    if ((intersects.length > 0) && (intersects[0].object.name)) {
 		var path = intersects[0].object.name;
-		// Only named objects are objects
-		if (path) {
-		    if (event.shiftKey) {
-			selectionManager.shiftPick(path);
-		    } else {
-			selectionManager.pick(path);
-		    }
-		} 
+		if (event.shiftKey) {
+		    selectionManager.shiftPick(path);
+		} else {
+		    selectionManager.pick(path);
+		}
 	    } else {
 		selectionManager.deselectAll();
 	    }
