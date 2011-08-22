@@ -11,10 +11,11 @@ Prerequisites
 Install OCE v 0.4
 -----------------
  
- * clone https://github.com/tpaviot/oce.git
- * git checkout -b 0.4.0 OCE-0.4.0
+ * git clone https://github.com/tpaviot/oce.git
  * cd oce
+ * git checkout -b 0.4.0 OCE-0.4.0
  * mkdir build
+ * cd build
  * cmake ..
  * make -j4
  * sudo make install/strip
