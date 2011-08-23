@@ -18,7 +18,8 @@ Install OCE v 0.4
  * cd build
  * cmake ..
  * make -j4
- * sudo make install/strip
+ * sudo make install/strip 
+ * sudo ldconfig /usr/local/lib on Ubuntu
 
 Clone the Shapesmith repo from github
 -------------------------------------
