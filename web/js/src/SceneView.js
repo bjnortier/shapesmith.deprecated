@@ -8,8 +8,7 @@ SS.SceneView = function(container) {
     var lastMouseDownTime = null;
     var popupMenuDelay = 200;
     var showPopup = false, showingPopup = false;
-    var planeMesh, mouseOnWorkplane = {x: 0, y: 0}, workplaneXObj, workplaneYObj, workplanePointer;
-        
+
     var elevation = 0, azimuth = Math.PI/4;
     var target = { azimuth: Math.PI/4, elevation: Math.PI*3/8 };
     var targetOnDown = { azimuth: target.azimuth, elevation: target.elevation };
@@ -18,6 +17,8 @@ SS.SceneView = function(container) {
     var pathToModel = {};
     var unselectedColor = 0x00dd00, selectedColor = 0xdddd00;
     var panning = false, rotating = false, threshhold = 10; // inside this threshold is a single click
+
+    var workplane;
     
     function init() {
 
@@ -36,30 +37,8 @@ SS.SceneView = function(container) {
 	vector = new THREE.Vector3();
 	scene = new THREE.Scene();
 
-	addGrid();
-
-	ambientLight = new THREE.AmbientLight( 0x101010 );
-	scene.addLight( ambientLight );
-
-	pointLight = new THREE.PointLight( 0xa0a050 );
-	pointLight.position.z = 100;
-	scene.addLight(pointLight);
-
-	pointLight = new THREE.PointLight( 0x333333 );
-	pointLight.position.z = -100;
-	scene.addLight(pointLight);
-
-	pointLight = new THREE.PointLight( 0x333333 );
-	pointLight.position.x = -100;
-	pointLight.position.y = -100;
-	scene.addLight(pointLight);
-
-	directionalLight = new THREE.DirectionalLight( 0xaaaa88 );
-	directionalLight.position.x = 100;
-	directionalLight.position.y = 50;
-	directionalLight.position.z = 50;
-	directionalLight.position.normalize();
-	scene.addLight( directionalLight );
+	addLights();
+	workplane = new SS.Workplane(scene);
 
 	renderer = new THREE.WebGLRenderer({antialias: true});
 	renderer.autoClear = false;
@@ -99,8 +78,6 @@ SS.SceneView = function(container) {
 	panning = false;
 	
 	container.addEventListener('mouseup', onMouseUp, false);
-	//container.addEventListener('mouseout', onMouseOut, false);
-
     }
     
     function onMouseMove(event) {
@@ -153,9 +130,9 @@ SS.SceneView = function(container) {
 	    var mouse3D = projector.unprojectVector(vector, camera);
 	    var ray = new THREE.Ray(camera.position, null);
 	    ray.direction = mouse3D.subSelf(camera.position).normalize();
-	    var intersects = ray.intersectObject(planeMesh);
+	    var intersects = ray.intersectObject(workplane.getPlaneMesh());
 	    if (intersects.length == 1) {
-		updateWorkplaneXYLocation(intersects[0].point.x, intersects[0].point.y);
+		workplane.updateXYLocation(intersects[0].point.x, intersects[0].point.y);
 	    }
 	    
 	}
@@ -312,346 +289,32 @@ SS.SceneView = function(container) {
 	renderer.render(scene, camera);
     }
     
-    var insideX = [-50,50];
-    var insideY = [-50,50];
-    var gridExtents = 100;
-    var majorTick = 10;
+    function addLights() {
+	ambientLight = new THREE.AmbientLight( 0x101010 );
+	scene.addLight( ambientLight );
 
-    function addGrid() {
+	pointLight = new THREE.PointLight( 0xa0a050 );
+	pointLight.position.z = 100;
+	scene.addLight(pointLight);
 
-	var height = 0.01,
-	size = 2,
-	curveSegments = 6,
-	font = "helvetiker", 		
-	weight = "bold",		
-	style = "normal";
+	pointLight = new THREE.PointLight( 0x333333 );
+	pointLight.position.z = -100;
+	scene.addLight(pointLight);
 
-	var textMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.5, wireframe: false } );
+	pointLight = new THREE.PointLight( 0x333333 );
+	pointLight.position.x = -100;
+	pointLight.position.y = -100;
+	scene.addLight(pointLight);
 
-	for (var x = (insideX[0]/majorTick); x <= (insideX[1]/majorTick); ++x) {
-	    var textGeo = new THREE.TextGeometry( '' + (1.0*x*10), {
-		size: size, 
-		height: height,
-		curveSegments: curveSegments,
-		font: font,
-		weight: weight,
-		style: style,
-		bezelEnabled: false
-	    });
-	    var textMesh1 = new THREE.Mesh( textGeo, textMaterial );
-	    textMesh1.position.y = insideY[1] + 3;
-	    textMesh1.position.x = x*10 + (x > 0 ? -2 : (x < 0 ? 2.5 : 0));
-	    textMesh1.rotation.z = Math.PI;
-	    scene.addObject(textMesh1);
-	}
-
-	for (var y = (insideY[0]/majorTick); y <= (insideY[1]/majorTick); ++y) {
-	    var textGeo = new THREE.TextGeometry( '' + (1.0*y*10), {
-		size: size, 
-		height: height,
-		curveSegments: curveSegments,
-		font: font,
-		weight: weight,
-		style: style,
-		bezelEnabled: false
-	    });
-	    var textMesh1 = new THREE.Mesh( textGeo, textMaterial );
-	    textMesh1.position.y = y*10 + (y > 0 ? -2 : (y < 0 ? 2.5 : 0));
-	    textMesh1.position.x = insideX[1] + 3;
-	    textMesh1.rotation.z = Math.PI/2;
-	    scene.addObject(textMesh1);
-	}
-
-	addPlane();
-	addAxes();
-	addMainGrid();
-	for(var x = -gridExtents; x <= gridExtents; ++x) {
-	    for(var y = -gridExtents; y <= gridExtents; ++y) {
-		var inside = ((x >= insideX[0]) && (x <= insideX[1]) &&
-			      (y >= insideY[0]) && (y <= insideY[1]));
-		if ((x % majorTick == 0) && (y % majorTick == 0) &&
-		    (x != 0) && (y != 0) &&
-		    !inside) {
-		    addFadingGridTile(x,y);
-		}
-	    }
-	}
-
+	directionalLight = new THREE.DirectionalLight( 0xaaaa88 );
+	directionalLight.position.x = 100;
+	directionalLight.position.y = 50;
+	directionalLight.position.z = 50;
+	directionalLight.position.normalize();
+	scene.addLight( directionalLight );
     }
 
-    function updateWorkplaneXYLocation(x, y) {
 
-	var x = Math.round(x);
-	var y = Math.round(y);
-	var isInsideX = (x >= insideX[0]) && (x <= insideX[1]);
-	var isInsideY = (y >= insideY[0]) && (y <= insideY[1]);
-
-	if (workplaneXObj) {
-	    scene.removeObject(workplaneXObj);
-	}
-	if (workplaneYObj) {
-	    scene.removeObject(workplaneYObj);
-	}
-	if (workplanePointer) {
-	    scene.removeObject(workplanePointer);
-	}
-
-	if (isInsideX) {
-	    updateWorkplaneX(x);
-	}
-	if (isInsideY) {
-	    updateWorkplaneY(y);
-	}
-	if (isInsideX && isInsideY) {
-	    updateWorkplanePointer(x,y);
-	}
-    }
-    
-    function labelMesh(value) {
-	var height = 0.01,
-	size = 2,
-	curveSegments = 6,
-	font = "helvetiker", 		
-	weight = "bold",		
-	style = "normal";
-	var labelMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00, opacity: 0.7, wireframe: false } );
-	var labelGeometry = new THREE.TextGeometry('' + Math.round(value), {
-	    size: size, 
-	    height: height,
-	    curveSegments: curveSegments,
-	    font: font,
-	    weight: weight,
-	    style: style,
-	    bezelEnabled: false
-	});
-	return new THREE.Mesh(labelGeometry, labelMaterial);
-    }
-
-    function updateWorkplanePointer(x,y) {
-
-	var pointerMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00, opacity: 0.7, wireframe: false } );
-	var pointerGeometry = new THREE.CubeGeometry(0.5, 0.5, 0.5);
-	workplanePointer = new THREE.Mesh(pointerGeometry, pointerMaterial);
-	workplanePointer.position.x = x;
-	workplanePointer.position.y = y;
-	scene.addObject(workplanePointer);
-
-    }
-
-    function updateWorkplaneX(x) {
-
-	workplaneXObj = new THREE.Object3D();
-	var background = new THREE.Mesh(new THREE.PlaneGeometry(5, 3),
-					new THREE.MeshBasicMaterial({ color: 0x101010, opacity: 1.0 }));
-	background.position.x = x;
-	background.position.y = insideY[1] + 2;
-	background.position.z = 0.1;
-
-	var borderGeom = [new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry()];
-	borderGeom[0].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 0, 0)));
-	borderGeom[0].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 0, 0)));
-	borderGeom[1].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 0, 0)));
-	borderGeom[1].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 3, 0)));
-	borderGeom[2].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 3, 0)));
-	borderGeom[2].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 3, 0)));
-	borderGeom[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 3, 0)));
-	borderGeom[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 0, 0)));
-	for (var i = 0; i < 4; ++i) {
-	    var border = new THREE.Line(borderGeom[i], new THREE.LineBasicMaterial({ color: 0xe9fb00, opacity: 0.5 }));
-	    border.position.x = x;
-	    border.position.y = insideY[1] + 0.5;
-	    border.position.z = 0.15;
-	    workplaneXObj.addChild(border);
-	}
-
-	var arrowGeometry = new THREE.Geometry();
-	arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(-0.5, 0.5, 0)));
-	arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0.5, 0.5, 0)));
-	var face = new THREE.Face3(0,1,2);
-	arrowGeometry.faces.push(face);
-	arrowGeometry.computeCentroids();
-	arrowGeometry.computeFaceNormals();
-
-	var arrowMaterial = new THREE.MeshBasicMaterial({ color: 0xe9fb00, opacity: 1.0 });
-	var arrow = new THREE.Mesh(arrowGeometry, arrowMaterial);
-	arrow.doubleSided = true;
-	arrow.position.x = x;
-	arrow.position.y = insideY[1];
-	arrow.position.z = 0.15;
-	workplaneXObj.addChild(arrow);
-
-	var label = labelMesh(x);
-	label.position.x = x;
-	label.position.y = insideY[1] + 3;
-	label.position.z = 0.1;
-	label.rotation.z = Math.PI;
-
-	workplaneXObj.addChild(background);
-	workplaneXObj.addChild(label);
-	scene.addObject(workplaneXObj);
-    }
-
-    function updateWorkplaneY(y) {
-
-	workplaneYObj = new THREE.Object3D();
-	var background = new THREE.Mesh(new THREE.PlaneGeometry(3, 5),
-					new THREE.MeshBasicMaterial({ color: 0x101010, opacity: 1.0 }));
-	background.position.x = insideX[1] + 2;
-	background.position.y = y;
-	background.position.z = 0.1;
-
-	var borderGeom = [new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry()];
-	borderGeom[0].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 0, 0)));
-	borderGeom[0].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 0, 0)));
-	borderGeom[1].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 0, 0)));
-	borderGeom[1].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 3, 0)));
-	borderGeom[2].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 3, 0)));
-	borderGeom[2].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 3, 0)));
-	borderGeom[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 3, 0)));
-	borderGeom[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 0, 0)));
-	for (var i = 0; i < 4; ++i) {
-	    var border = new THREE.Line(borderGeom[i], new THREE.LineBasicMaterial({ color: 0xe9fb00, opacity: 0.5 }));
-	    border.position.x = insideX[1] + 0.5;
-	    border.position.y = y;
-	    border.position.z = 0.15;
-	    border.rotation.z = Math.PI*3/2;
-	    workplaneYObj.addChild(border);
-	}
-
-	var arrowGeometry = new THREE.Geometry();
-	arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(-0.5, 0.5, 0)));
-	arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0.5, 0.5, 0)));
-	var face = new THREE.Face3(0,1,2);
-	arrowGeometry.faces.push(face);
-	arrowGeometry.computeCentroids();
-	arrowGeometry.computeFaceNormals();
-
-	var arrowMaterial = new THREE.MeshBasicMaterial({ color: 0xe9fb00, opacity: 1.0 });
-	var arrow = new THREE.Mesh(arrowGeometry, arrowMaterial);
-	arrow.doubleSided = true;
-	arrow.position.x = insideX[1];
-	arrow.position.y = y;
-	arrow.position.z = 0.15;
-	arrow.rotation.z = Math.PI*3/2;
-	workplaneYObj.addChild(arrow);
-
-	var label = labelMesh(y);
-	label.position.x = insideX[1] + 3;
-	label.position.y = y;
-	label.position.z = 0.1;
-	label.rotation.z = Math.PI/2;
-
-	workplaneYObj.addChild(background);
-	workplaneYObj.addChild(label);
-	scene.addObject(workplaneYObj);
-    }
-
-    function addPlane() {
-	var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
-	planeMesh = new THREE.Mesh(planeGeometry,
-				   new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 0 }));
-	planeMesh.doubleSided = true;
-	scene.addObject(planeMesh);
-    }
-
-    function addAxes() {
-
-	axes = [new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry()];
-	axes[0].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	axes[0].vertices.push(new THREE.Vertex(new THREE.Vector3(500, 0, 0)));
-
-	axes[1].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	axes[1].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 500, 0)));
-
-	axes[2].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	axes[2].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 500)));
-
-	axes[3].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	axes[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-gridExtents, 0, 0)));
-
-	axes[4].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	axes[4].vertices.push(new THREE.Vertex(new THREE.Vector3(0, -gridExtents, 0)));
-
-	scene.addObject(new THREE.Line(axes[0], new THREE.LineBasicMaterial({ color: 0x0000ff, opacity: 0.5 }))); //  X
-	scene.addObject(new THREE.Line(axes[1], new THREE.LineBasicMaterial({ color: 0x00ff00, opacity: 0.5 }))); //  Y
-	scene.addObject(new THREE.Line(axes[2], new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.5 }))); //  Z
-	scene.addObject(new THREE.Line(axes[3], new THREE.LineBasicMaterial({ color: 0x0000ff, opacity: 0.2 }))); // -X
-	scene.addObject(new THREE.Line(axes[4], new THREE.LineBasicMaterial({ color: 0x00ff00, opacity: 0.2 }))); // -X
-    }
-
-    var majorGridLineGeometry = new THREE.Geometry();
-    majorGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(insideX[0], 0, 0)));
-    majorGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(insideX[1], 0, 0)));
-
-    var minorGridLineGeometry = new THREE.Geometry();
-    minorGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(insideX[0], 0, 0)));
-    minorGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(insideX[1], 0, 0)));
-
-    var majorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 });
-    var minorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.05 });
-
-    function addMainGrid() {
-
-	for (var x = insideX[0]; x <= insideX[1]; ++x) {
-	    if (x != 0) {
-		var material = (x % 10 == 0) ? majorMaterialInside : minorMaterialInside;
-		var geometry = (y % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
-		var line = new THREE.Line(geometry, material);
-		line.position.x = x;
-		line.rotation.z = 90 * Math.PI / 180;
-		scene.addObject(line);
-
-	    }
-	}
-
-	for (var y = insideY[0]; y <= insideY[1]; ++y) {
-	    if (y != 0) {
-		var material = (y % 10 == 0) ? majorMaterialInside : minorMaterialInside;
-		var geometry = (y % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
-		var line = new THREE.Line(geometry, material);
-		line.position.y = y;
-		scene.addObject(line);
-	    }
-	}
-    }
-    
-    var fadingGridLineGeometry = new THREE.Geometry();
-    fadingGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-    fadingGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(majorTick, 0, 0)));
-    
-    function addFadingGridTile(x,y) {
-	
-	var dx = 0;
-	if (x < insideX[0]) {
-	    dx = insideX[0] - x;
-	} else if (x > insideX[1]) {
-	    dx = x - insideX[1];
-	}
-	var dy = 0;
-	if (y < insideY[0]) {
-	    dy = insideY[0] - y;
-	} else if (y > insideY[1]) {
-	    dy = y - insideY[1];
-	}
-
-	var r = Math.sqrt(dx*dx + dy*dy);
-	var opacity = (r == 0) ? 1.0 : 1.0/(r*0.9);
-	var material = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: opacity });
-
-	var line = new THREE.Line(fadingGridLineGeometry, material);
-	line.position.x = x > 0 ? (x-majorTick) : x;
-	line.position.y = y;
-	scene.addObject(line);
-	
-	var line = new THREE.Line(fadingGridLineGeometry, material);
-	line.position.x = x;
-	line.position.y = y > 0 ? (y-majorTick) : y;
-	line.rotation.z = 90 * Math.PI / 180;
-	scene.addObject(line);
-
-    }
 
     this.geomDocUpdated = function(event) {
 
