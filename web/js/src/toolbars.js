@@ -57,6 +57,8 @@ function delete_geom() {
 
 
 function create_primitive(type, keys) {
+    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+
     var geometryParams = {};
     for (var i in keys) {
         geometryParams[keys[i]] = null;
@@ -64,6 +66,7 @@ function create_primitive(type, keys) {
     geom_doc.add(new GeomNode({
         type: type,
         editing: true,
+	origin: {x: lastMousePosition.x, y: lastMousePosition.y, z:0},
         parameters: geometryParams}));
 }
 

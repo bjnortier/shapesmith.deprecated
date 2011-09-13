@@ -437,6 +437,19 @@ string create_cuboid(string id, map< string, mValue > geometry) {
                                                  get_double(depth), 
                                                  get_double(height)).Shape();
         
+        if (!geometry["origin"].is_null()) {
+            map< string, mValue > origin = geometry["origin"].get_obj();
+            mValue x = origin["x"];
+            mValue y = origin["y"];
+            mValue z = origin["z"];
+            gp_Trsf transformation = gp_Trsf();
+            transformation.SetTranslation(gp_Vec(get_double(x), get_double(y), get_double(z)));
+        
+            BRepBuilderAPI_Transform brep_transform(shape, transformation);
+            shape = brep_transform.Shape();
+        }
+        
+        
         unmeshed_shapes[id] = applyTransforms(shape, geometry);
         return "ok";
     }

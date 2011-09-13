@@ -111,6 +111,7 @@ function create_geom_command(prototype, geometry) {
                         geomNode = new GeomNode({
                             type : geometry.type,
                             path : path,
+			    origin: geometry.origin,
                             parameters : geometry.parameters,
                             mesh : mesh})
                         selectionManager.deselectAll();
@@ -242,8 +243,9 @@ function copyNode(node, finishedFn) {
 		var newNode = new GeomNode({
                     type : geometry.type,
                     path : path,
-		    transforms : geometry.transforms,
-                    parameters : geometry.parameters
+                    origin : geometry.origin,
+                    parameters : geometry.parameters,
+		    transforms : geometry.transforms
 		}, copiedChildren);
 		finishedFn(newNode);
 	    }, 

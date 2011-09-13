@@ -32,6 +32,7 @@ function GeomNode() {
     this.editing = arguments[0].editing;
     this.type = arguments[0].type;
     this.path = arguments[0].path;
+    this.origin = arguments[0].origin;
     this.parameters = arguments[0].parameters;
     this.mesh = arguments[0].mesh;
     this.children = [];
@@ -55,6 +56,10 @@ function GeomNode() {
 
 GeomNode.prototype.editableCopy = function() {
 
+    var copiedOrigin = {};
+    for (key in this.origin) {
+        copiedOrigin[key] = this.origin[key];
+    }
     var copiedParameters = {};
     for (key in this.parameters) {
         copiedParameters[key] = this.parameters[key];
@@ -65,6 +70,7 @@ GeomNode.prototype.editableCopy = function() {
         
     var newNode = new GeomNode({type : this.type,
                                 path : this.path,
+				origin: copiedOrigin,
                                 parameters : copiedParameters,
                                 transforms : copiedTransforms,
                                 mesh : this.mesh,
@@ -79,6 +85,7 @@ GeomNode.prototype.toShallowJson = function() {
     // No need to do somethign special with parameters if they are not 
     // defined, as JSON.stringigy simply ignores those fields
     return JSON.stringify({type: this.type,
+			   origin: this.origin,
                            parameters: this.parameters,
                            children: this.children.map(function(child) {
                                return child.path;
@@ -94,6 +101,7 @@ GeomNode.prototype.toDeepJson = function() {
     // No need to do somethign special with parameters if they are not 
     // defined, as JSON.stringify simply ignores those fields
     return JSON.stringify({type: this.type,
+			   origin: this.origin,
                            parameters: this.parameters,
                            children: this.children.map(function(child) {
                                return JSON.parse(child.toDeepJson());

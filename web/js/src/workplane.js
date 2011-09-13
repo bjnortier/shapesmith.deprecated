@@ -376,6 +376,9 @@ SS.Workplane = function(scene) {
 	var gridX = Math.round(x);
 	var gridY = Math.round(y);
 
+	mouseOnWorkplane.x = gridX;
+	mouseOnWorkplane.y = gridY;
+
 	xPositionIndicator.update(gridX);
 	yPositionIndicator.update(gridY);
 	workplanePointer.update({x: gridX, y: gridY});
@@ -383,6 +386,10 @@ SS.Workplane = function(scene) {
 
     this.getPlaneMesh = function() {
 	return grid.intersectionPlane;
+    }
+    
+    this.getLastMousePosition = function() {
+	return mouseOnWorkplane;
     }
 
 }

@@ -403,6 +403,7 @@ SS.SceneView = function(container) {
     this.animate = animate;
     this.renderer = renderer;
     this.scene = scene;
+    this.workplane = workplane;
 
     return this;
 }
