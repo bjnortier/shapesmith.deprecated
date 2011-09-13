@@ -131,7 +131,7 @@ $(document).ready(function() {
     new Action("Cuboid", "/images/cuboid.png", 
                function() { create_primitive("cuboid",  ["u", "v", "w"]); }).render($("#primitives"));
     new Action("Sphere", "/images/sphere.png", 
-               function() { create_primitive("sphere", ["radius"]); }).render($("#primitives"));
+               function() { create_primitive("sphere", ["r"]); }).render($("#primitives"));
     new Action("Cylinder", "/images/cylinder.png", 
                function() { create_primitive("cylinder", ["radius", "height"]); }).render($("#primitives"));
     new Action("Cone", "/images/cone.png", 

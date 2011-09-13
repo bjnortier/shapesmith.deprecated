@@ -58,20 +58,20 @@ validate_geom_test_() ->
      ?_assertEqual(ok,
 		   geom({struct, [{<<"type">>, <<"sphere">>},
 				  {<<"parameters">>, {struct, [
-							       {<<"radius">>, 1.2}
+							       {<<"r">>, 1.2}
 							      ]}}]})),
      ?_assertEqual(ok,
 		   geom({struct, [{<<"type">>, <<"union">>},
 				  {<<"children">>, [<<"abc">>, <<"123">>]}]})),
-     ?_assertEqual({error, {struct, [{<<"radius">>,<<"must be positive">>}]}},
+     ?_assertEqual({error, {struct, [{<<"r">>,<<"must be positive">>}]}},
 		   geom({struct, [{<<"type">>, <<"sphere">>},
 				  {<<"parameters">>, {struct, [
-							       {<<"radius">>, -0.3}
+							       {<<"r">>, -0.3}
 							      ]}}]})),
      ?_assertEqual({error, {struct, [{<<"factor">>,<<"must be positive">>}]}},
 		   geom({struct, [{<<"type">>, <<"sphere">>},
 				  {<<"parameters">>, {struct, [
-							       {<<"radius">>, 3}
+							       {<<"r">>, 3}
 							      ]}},
 				  {<<"transforms">>,
 				   [{struct, [{<<"type">>, <<"scale">>},
@@ -86,7 +86,7 @@ validate_geom_test_() ->
 
 validate_geom_type(<<"sphere">>, Props) ->
     validate_primitive(Props, [
-			       {<<"radius">>, fun positive/1}
+			       {<<"r">>, fun positive/1}
 			      ]);
 validate_geom_type(<<"cuboid">>, Props) ->
     validate_primitive(Props, [
@@ -151,15 +151,15 @@ validate_geom_type_test_() ->
      ?_assertEqual(
         ok, 
         validate_geom_type(<<"sphere">>, [{<<"parameters">>, 
-					   {struct, [{<<"radius">>, 0.1}]}}])),
+					   {struct, [{<<"r">>, 0.1}]}}])),
      ?_assertEqual(
-        {error, {struct, [{<<"radius">>, <<"not found">>}]}}, 
+        {error, {struct, [{<<"r">>, <<"not found">>}]}}, 
         validate_geom_type(<<"sphere">>, [{<<"parameters">>, 
 					   {struct, []}}])),
      ?_assertEqual(
-        {error, {struct, [{<<"radius">>, <<"must be positive">>}]}}, 
+        {error, {struct, [{<<"r">>, <<"must be positive">>}]}}, 
         validate_geom_type(<<"sphere">>, [{<<"parameters">>, 
-					   {struct, [{<<"radius">>, -4}]}}])),
+					   {struct, [{<<"r">>, -4}]}}])),
      ?_assertEqual(
         {error, {struct, [{<<"u">>, <<"must be positive">>},
 			  {<<"w">>, <<"must be positive">>}]}}, 

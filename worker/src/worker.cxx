@@ -408,6 +408,19 @@ TopoDS_Shape applyTransform(map<string, mValue> transform, TopoDS_Shape shape) {
 
 TopoDS_Shape applyTransforms(TopoDS_Shape shape, map< string, mValue > geometry) {
     TopoDS_Shape transformedShape = shape;
+    
+    if (!geometry["origin"].is_null()) {
+        map< string, mValue > origin = geometry["origin"].get_obj();
+        mValue x = origin["x"];
+        mValue y = origin["y"];
+        mValue z = origin["z"];
+        gp_Trsf transformation = gp_Trsf();
+        transformation.SetTranslation(gp_Vec(get_double(x), get_double(y), get_double(z)));
+        
+        BRepBuilderAPI_Transform brep_transform(shape, transformation);
+        transformedShape = brep_transform.Shape();
+    }
+    
     if (!geometry["transforms"].is_null() && (geometry["transforms"].type() == array_type)) {
         mArray transforms = geometry["transforms"].get_array();
         vector< mValue >::iterator it;
@@ -437,19 +450,6 @@ string create_cuboid(string id, map< string, mValue > geometry) {
                                                  get_double(depth), 
                                                  get_double(height)).Shape();
         
-        if (!geometry["origin"].is_null()) {
-            map< string, mValue > origin = geometry["origin"].get_obj();
-            mValue x = origin["x"];
-            mValue y = origin["y"];
-            mValue z = origin["z"];
-            gp_Trsf transformation = gp_Trsf();
-            transformation.SetTranslation(gp_Vec(get_double(x), get_double(y), get_double(z)));
-        
-            BRepBuilderAPI_Transform brep_transform(shape, transformation);
-            shape = brep_transform.Shape();
-        }
-        
-        
         unmeshed_shapes[id] = applyTransforms(shape, geometry);
         return "ok";
     }
@@ -458,7 +458,7 @@ string create_cuboid(string id, map< string, mValue > geometry) {
 
 string create_sphere(string id, map< string, mValue > geometry) {
     map< string, mValue > parameters = geometry["parameters"].get_obj();
-    mValue radius = parameters["radius"];
+    mValue radius = parameters["r"];
     if (!radius.is_null() && ((radius.type() == real_type) || (radius.type() == int_type))) {
         TopoDS_Shape shape = BRepPrimAPI_MakeSphere(get_double(radius)).Shape();
         unmeshed_shapes[id] = applyTransforms(shape, geometry);
