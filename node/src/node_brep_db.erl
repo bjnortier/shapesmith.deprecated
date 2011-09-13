@@ -109,7 +109,6 @@ serialize_to_disk(WorkerPid, Hash) ->
     Msg = {struct, [{<<"type">>, <<"serialize">>},
                     {<<"id">>, list_to_binary(Hash)}]},
     {struct, [{<<"s11n">>, S11N}]} = mochijson2:decode(node_worker_pool:call(WorkerPid, mochijson2:encode(Msg))),
-    
     node_log:info("writing brep for ~p~n", [Hash]),
     {ok, DB} = application:get_env(node, db_module),
     DB:put(brep, Hash, S11N).

@@ -327,7 +327,7 @@ TopoDS_Shape copy_transform(TopoDS_Shape shape,
                             map< string, mValue > parameters) {
     int n = parameters["n"].get_int();
     
-    TopoDS_Shape copies[n + 1]; // worst case memory requirement
+    TopoDS_Shape copies[n + 1]; // worst case memory requirement
     copies[0] = shape;
     
     
@@ -424,9 +424,9 @@ TopoDS_Shape applyTransforms(TopoDS_Shape shape, map< string, mValue > geometry)
 
 string create_cuboid(string id, map< string, mValue > geometry) {
     map< string, mValue > parameters = geometry["parameters"].get_obj();
-    mValue width = parameters["width"];
-    mValue depth = parameters["depth"];
-    mValue height = parameters["height"];
+    mValue width = parameters["u"];
+    mValue depth = parameters["v"];
+    mValue height = parameters["w"];
     if (!width.is_null() && ((width.type() == real_type) || (width.type() == int_type))
         &&
         !depth.is_null() && ((depth.type() == real_type) || (depth.type() == int_type))

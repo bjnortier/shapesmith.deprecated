@@ -90,10 +90,10 @@ validate_geom_type(<<"sphere">>, Props) ->
 			      ]);
 validate_geom_type(<<"cuboid">>, Props) ->
     validate_primitive(Props, [
-			       {<<"width">>, fun positive/1},
-			       {<<"depth">>, fun positive/1},
-			       {<<"height">>, fun positive/1}
-			      ]);
+				    {<<"u">>, fun positive/1},
+				    {<<"v">>, fun positive/1},
+				    {<<"w">>, fun positive/1}
+				   ]);
 validate_geom_type(<<"cylinder">>, Props) ->
     validate_primitive(Props, [
 			       {<<"radius">>, fun positive/1},
@@ -161,12 +161,12 @@ validate_geom_type_test_() ->
         validate_geom_type(<<"sphere">>, [{<<"parameters">>, 
 					   {struct, [{<<"radius">>, -4}]}}])),
      ?_assertEqual(
-        {error, {struct, [{<<"width">>, <<"must be positive">>},
-			  {<<"height">>, <<"must be positive">>}]}}, 
+        {error, {struct, [{<<"u">>, <<"must be positive">>},
+			  {<<"w">>, <<"must be positive">>}]}}, 
         validate_geom_type(<<"cuboid">>, [{<<"parameters">>,
-					   {struct, [{<<"height">>, -4},
-						     {<<"depth">>, 3.1},
-						     {<<"width">>, -0.1}
+					   {struct, [{<<"u">>, -4},
+						     {<<"v">>, 3.1},
+						     {<<"w">>, -0.1}
 						    ]}}]))
     ].
 -endif.
@@ -325,6 +325,7 @@ validate_parameters_test_() ->
                             ]))
     ].
 -endif.
+
 
 validate_spec({struct, ParameterProps}, {Fields, CheckFn}) when is_list(Fields) ->
     Values = lists:foldr(fun(Field, Acc) ->
