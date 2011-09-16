@@ -102,5 +102,14 @@ function GeomDocument() {
         });
     }
 
+    this.getPreviewNode = function() {
+	for(i in this.rootNodes) {
+	    if (this.rootNodes[i].editing) {
+		return this.rootNodes[i];
+	    }
+	}
+	return null;
+    }
+
     Observable.makeObservable(this);
 }

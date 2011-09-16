@@ -37,15 +37,17 @@ function renderNode(geomNode) {
     var geomNodeId = idForGeomNode(geomNode);
 
     // Origin & Orientation
-    var originArr = [];
-    var originArr = ['x', 'y', 'z'].map(function(key) {
-	return {key: key, 
-		value: geomNode.origin[key], 
-		clazz: 'edit-geom target-' + geomNodeId,
-		editing: geomNode.editing}
-    });
-    var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{clazz}}">{{value}}</span>{{/editing}}{{#editing}}<input id="{{key}}" type="text" value="{{value}}"/>{{/editing}}</td></tr>{{/originArr}}</table>';
-    var originTable = $.mustache(originTemplate, {originArr : originArr});
+    var originTable = null;
+    if (geomNode.origin) {
+	var originArr = ['x', 'y', 'z'].map(function(key) {
+	    return {key: key, 
+		    value: geomNode.origin[key], 
+		    clazz: 'edit-geom target-' + geomNodeId,
+		    editing: geomNode.editing}
+	});
+	var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{clazz}}">{{value}}</span>{{/editing}}{{#editing}}<input id="{{key}}" type="text" value="{{value}}"/>{{/editing}}</td></tr>{{/originArr}}</table>';
+	var originTable = $.mustache(originTemplate, {originArr : originArr});
+    }
 
     // Params
     var paramsArr = [];
@@ -122,33 +124,37 @@ function TreeView() {
 
         if (geomNode.editing) {
             $('#modal-ok').click(function() {
-                if (geomNode.editing) {
-                    var cmd;
-                    if (geomNode.path) {
-			for (key in geomNode.origin) {
-                            geomNode.origin[key] = parseFloat($('#' + key).val());
-                        }
-                        for (key in geomNode.parameters) {
-                            geomNode.parameters[key] = parseFloat($('#' + key).val());
-                        }
-                        cmd = update_geom_command(precursor, geomNode);
-                    } else {
-                        var origin = {};
-			for (key in geomNode.origin) {
-                            origin[key] = parseFloat($('#' + key).val());
-                        }
-			var parameters = {};
-                        for (key in geomNode.parameters) {
-                            parameters[key] = parseFloat($('#' + key).val());
-                        }
-                        cmd = create_geom_command(geomNode, {type: geomNode.type,
-							     origin: origin,
-                                                             parameters: parameters});
+
+		SS.constructors.active && SS.constructors.active.dispose();
+
+                var cmd;
+                if (geomNode.path) {
+		    for (key in geomNode.origin) {
+                        geomNode.origin[key] = parseFloat($('#' + key).val());
                     }
-                    command_stack.execute(cmd);
+                    for (key in geomNode.parameters) {
+                        geomNode.parameters[key] = parseFloat($('#' + key).val());
+                    }
+                    cmd = update_geom_command(precursor, geomNode);
+                } else {
+                    var origin = {};
+		    for (key in geomNode.origin) {
+                        origin[key] = parseFloat($('#' + key).val());
+                    }
+		    var parameters = {};
+                    for (key in geomNode.parameters) {
+                        parameters[key] = parseFloat($('#' + key).val());
+                    }
+                    cmd = create_geom_command(geomNode, {type: geomNode.type,
+							 origin: origin,
+                                                         parameters: parameters});
                 }
+                command_stack.execute(cmd);
             });
             $('#modal-cancel').click(function() {
+
+		SS.constructors.active && SS.constructors.active.dispose();
+
                 if (geomNode.path) {
                     geom_doc.replace(geomNode, precursor);
                 } else {

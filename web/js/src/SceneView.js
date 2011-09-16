@@ -38,7 +38,7 @@ SS.SceneView = function(container) {
 	scene = new THREE.Scene();
 
 	addLights();
-	workplane = new SS.Workplane(scene);
+	workplane = new SS.Workplane({scene: scene});
 
 	renderer = new THREE.WebGLRenderer({antialias: true});
 	renderer.autoClear = false;
@@ -120,21 +120,26 @@ SS.SceneView = function(container) {
 		target.elevation = target.elevation < 0 ? 0 : target.elevation;
 	    }
 	} else if (!showingPopup) {
+	    var positionOnWorkplane = determinePositionOnWorkplane(event);
+	    workplane.updateXYLocation(positionOnWorkplane);
+	}
+    }
 
-	    var mouse = {};
-	    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    function determinePositionOnWorkplane(event) {
+	var mouse = {};
+	mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+	mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 	    
-	    var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-	    var projector = new THREE.Projector();
-	    var mouse3D = projector.unprojectVector(vector, camera);
-	    var ray = new THREE.Ray(camera.position, null);
-	    ray.direction = mouse3D.subSelf(camera.position).normalize();
-	    var intersects = ray.intersectObject(workplane.getPlaneMesh());
-	    if (intersects.length == 1) {
-		workplane.updateXYLocation(intersects[0].point.x, intersects[0].point.y);
-	    }
-	    
+	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
+	var projector = new THREE.Projector();
+	var mouse3D = projector.unprojectVector(vector, camera);
+	var ray = new THREE.Ray(camera.position, null);
+	ray.direction = mouse3D.subSelf(camera.position).normalize();
+	var intersects = ray.intersectObject(workplane.getPlaneMesh());
+	if (intersects.length == 1) {
+	    return {x: intersects[0].point.x, y: intersects[0].point.y};
+	} else {
+	    return null;
 	}
     }
 
@@ -171,9 +176,14 @@ SS.SceneView = function(container) {
 	    console.log(now - lastMouseDownTime);
 	    if (now - lastMouseDownTime < popupMenuDelay) {
 
+		var positionOnWorkplane = determinePositionOnWorkplane(event);
+		if (positionOnWorkplane) {
+		    workplane.clicked(positionOnWorkplane);
+		}
+
 		var mouse = {};
-		mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-		mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+		mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+		mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
 		var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
 		var projector = new THREE.Projector();
@@ -201,7 +211,7 @@ SS.SceneView = function(container) {
 		} else {
 		    selectionManager.deselectAll();
 		}
-	    }
+	    } 
 	}
 
 	rotating = false;

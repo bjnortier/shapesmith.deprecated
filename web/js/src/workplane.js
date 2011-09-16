@@ -28,6 +28,7 @@ SS.workplane.pointer = function(spec) {
     var pointerMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00, opacity: 0.7, wireframe: false } );
     var pointerGeometry = new THREE.CubeGeometry(0.5, 0.5, 0.5);
     var pointer = new THREE.Mesh(pointerGeometry, pointerMaterial);
+
     pointer.position.x = 0;
     pointer.position.y = 0;
     scene.addObject(pointer);
@@ -344,7 +345,7 @@ SS.workplane.grid = function(spec) {
     var addIntersectionPlane = function() {
 	var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
 	var planeMesh = new THREE.Mesh(planeGeometry,
-				   new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 0 }));
+				       new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 0 }));
 	planeMesh.doubleSided = true;
 	scene.addObject(planeMesh);
 	return planeMesh;
@@ -360,10 +361,10 @@ SS.workplane.grid = function(spec) {
 
 }
 
-SS.Workplane = function(scene) {
+SS.Workplane = function(spec) {
+    var that = {};
 
-
-    var planeMesh, mouseOnWorkplane = {x: 0, y: 0};
+    var planeMesh, mouseOnWorkplane = {x: 0, y: 0}, scene = spec.scene;
 
     var gridExtents        = SS.workplane.gridExtents({minX: -50, minY: -50, maxX: 50, maxY: 50, fadingWidth: 50});
     var workplanePointer   = SS.workplane.pointer({scene: scene, gridExtents: gridExtents});
@@ -371,10 +372,19 @@ SS.Workplane = function(scene) {
     var yPositionIndicator = SS.workplane.yPositionIndicator({scene: scene, gridExtents: gridExtents});
     var grid = SS.workplane.grid({scene: scene, gridExtents: gridExtents});
 
-    this.updateXYLocation = function(x, y) {
+    // Make the workplane evented
+    evented(that);
 
-	var gridX = Math.round(x);
-	var gridY = Math.round(y);
+    that.clicked = function(position) {
+	that.fire({type: 'workplaneClicked', 
+		   x: position.x, 
+		   y: position.y});
+    }
+
+    that.updateXYLocation = function(position) {
+
+	var gridX = Math.round(position.x);
+	var gridY = Math.round(position.y);
 
 	mouseOnWorkplane.x = gridX;
 	mouseOnWorkplane.y = gridY;
@@ -382,15 +392,20 @@ SS.Workplane = function(scene) {
 	xPositionIndicator.update(gridX);
 	yPositionIndicator.update(gridY);
 	workplanePointer.update({x: gridX, y: gridY});
+
+	that.fire({type: 'workplaneCursorUpdated', 
+		   x: gridX, 
+		   y: gridY});
     }
 
-    this.getPlaneMesh = function() {
+    that.getPlaneMesh = function() {
 	return grid.intersectionPlane;
     }
     
-    this.getLastMousePosition = function() {
+    that.getLastMousePosition = function() {
 	return mouseOnWorkplane;
     }
 
+    return that;
 }
 

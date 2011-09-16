@@ -57,7 +57,6 @@ function delete_geom() {
 
 
 function create_primitive(type, keys) {
-    var lastMousePosition = sceneView.workplane.getLastMousePosition();
 
     var geometryParams = {};
     for (var i in keys) {
@@ -66,7 +65,7 @@ function create_primitive(type, keys) {
     geom_doc.add(new GeomNode({
         type: type,
         editing: true,
-	origin: {x: lastMousePosition.x, y: lastMousePosition.y, z:0},
+	origin: {x: 0, y: 0, z: 0},
         parameters: geometryParams}));
 }
 
@@ -129,9 +128,15 @@ $(document).ready(function() {
      * Primitives
      */
     new Action("Cuboid", "/images/cuboid.png", 
-               function() { create_primitive("cuboid",  ["u", "v", "w"]); }).render($("#primitives"));
+               function() { 
+		   create_primitive("cuboid",  ["u", "v", "w"]); 
+		   //SS.constructors.cuboid().create();
+	       }).render($("#primitives"));
     new Action("Sphere", "/images/sphere.png", 
-               function() { create_primitive("sphere", ["r"]); }).render($("#primitives"));
+               function() { 
+		   create_primitive("sphere", ["r"]); 
+		   SS.constructors.sphere().create();
+	       }).render($("#primitives"));
     new Action("Cylinder", "/images/cylinder.png", 
                function() { create_primitive("cylinder", ["radius", "height"]); }).render($("#primitives"));
     new Action("Cone", "/images/cone.png", 
