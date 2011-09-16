@@ -138,7 +138,10 @@ $(document).ready(function() {
 		   SS.constructors.sphere().create();
 	       }).render($("#primitives"));
     new Action("Cylinder", "/images/cylinder.png", 
-               function() { create_primitive("cylinder", ["radius", "height"]); }).render($("#primitives"));
+               function() { 
+		   create_primitive("cylinder", ["r", "h"]); 
+		   SS.constructors.cylinder().create();
+	       }).render($("#primitives"));
     new Action("Cone", "/images/cone.png", 
                function() { create_primitive("cone", ["bottom_radius", "top_radius", "height"]); }).render($("#primitives"));
     new Action("Wedge", "/images/wedge.png", 

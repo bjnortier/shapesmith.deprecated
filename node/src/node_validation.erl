@@ -96,8 +96,8 @@ validate_geom_type(<<"cuboid">>, Props) ->
 				   ]);
 validate_geom_type(<<"cylinder">>, Props) ->
     validate_primitive(Props, [
-			       {<<"radius">>, fun positive/1},
-			       {<<"height">>, fun positive/1}
+			       {<<"r">>, fun positive/1},
+			       {<<"h">>, fun positive/1}
 			      ]);
 validate_geom_type(<<"cone">>, Props) ->
     validate_primitive(Props, [

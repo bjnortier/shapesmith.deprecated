@@ -469,14 +469,14 @@ string create_sphere(string id, map< string, mValue > geometry) {
 
 string create_cylinder(string id, map< string, mValue > geometry) {
     map< string, mValue > parameters = geometry["parameters"].get_obj();
-    mValue radius = parameters["radius"];
-    mValue height = parameters["height"];
-    if (!radius.is_null() && ((radius.type() == real_type) || (radius.type() == int_type))
+    mValue r = parameters["r"];
+    mValue h = parameters["h"];
+    if (!r.is_null() && ((r.type() == real_type) || (r.type() == int_type))
         &&
-        !height.is_null() && ((height.type() == real_type) || (height.type() == int_type))) {
+        !h.is_null() && ((h.type() == real_type) || (h.type() == int_type))) {
         
-        TopoDS_Shape shape = BRepPrimAPI_MakeCylinder(get_double(radius), 
-                                                      get_double(height)).Shape();
+        TopoDS_Shape shape = BRepPrimAPI_MakeCylinder(get_double(r), 
+                                                      get_double(h)).Shape();
         unmeshed_shapes[id] = applyTransforms(shape, geometry);
         return "ok";
     }
