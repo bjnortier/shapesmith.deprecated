@@ -121,7 +121,7 @@ SS.SceneView = function(container) {
 	    }
 	} else if (!showingPopup) {
 	    var positionOnWorkplane = determinePositionOnWorkplane(event);
-	    workplane.updateXYLocation(positionOnWorkplane);
+	    workplane.updateXYLocation(positionOnWorkplane, event);
 	}
     }
 
@@ -135,6 +135,7 @@ SS.SceneView = function(container) {
 	var mouse3D = projector.unprojectVector(vector, camera);
 	var ray = new THREE.Ray(camera.position, null);
 	ray.direction = mouse3D.subSelf(camera.position).normalize();
+
 	var intersects = ray.intersectObject(workplane.getPlaneMesh());
 	if (intersects.length == 1) {
 	    return {x: intersects[0].point.x, y: intersects[0].point.y};
@@ -142,6 +143,44 @@ SS.SceneView = function(container) {
 	    return null;
 	}
     }
+
+    function determinePositionOnRay(event, givenRay) {
+	var mouse = {};
+	mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+	mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+	    
+	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
+	var projector = new THREE.Projector();
+	var mouse3D = projector.unprojectVector(vector, camera);
+	var mouseRay = new THREE.Ray(camera.position, null);
+	mouseRay.direction = mouse3D.subSelf(camera.position).normalize();
+
+	var intersects = mouseRay.intersectObject(workplane.getPlaneMesh());
+	if (intersects.length == 1) {
+	    mouseRay.origin = intersects[0].point.clone();
+	} else {
+	    return null;
+	}
+
+	// http://softsurfer.com/Archive/algorithm_0106/algorithm_0106.htm
+	var u = givenRay.direction.clone().normalize();
+	var v = mouseRay.direction.clone().normalize();
+
+	var w0 = new THREE.Vector3().sub(givenRay.origin.clone(), mouseRay.origin.clone());
+
+	var a = u.dot(u), b = u.dot(v), c = v.dot(v), d = u.dot(w0), e = v.dot(w0);
+	
+	var sc = (b*e - c*d)/(a*c - b*b);
+	var tc = (a*e - b*d)/(a*c - b*b);
+	
+	return  new THREE.Vector3().add(givenRay.origin, u.clone().multiplyScalar(sc));
+
+    }
+	
+	
+
+
+    
 
     function popupMenu() {
 	if (showPopup) {
@@ -414,6 +453,7 @@ SS.SceneView = function(container) {
     this.renderer = renderer;
     this.scene = scene;
     this.workplane = workplane;
+    this.determinePositionOnRay = determinePositionOnRay;
 
     return this;
 }

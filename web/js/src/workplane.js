@@ -379,7 +379,7 @@ SS.Workplane = function(spec) {
 		   y: position.y});
     }
 
-    that.updateXYLocation = function(position) {
+    that.updateXYLocation = function(position, originalEvent) {
 
 	var gridX = Math.round(position.x);
 	var gridY = Math.round(position.y);
@@ -393,7 +393,9 @@ SS.Workplane = function(spec) {
 
 	that.fire({type: 'workplaneCursorUpdated', 
 		   x: gridX, 
-		   y: gridY});
+		   y: gridY,
+		   originalEvent: originalEvent
+		  });
     }
 
     that.getPlaneMesh = function() {

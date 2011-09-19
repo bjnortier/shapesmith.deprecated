@@ -88,7 +88,7 @@ SS.constructors.sphere = function() {
 	
 	var x = parseFloat($('#x').val());
 	var y = parseFloat($('#y').val());
-	var r  =parseFloat($('#r').val());
+	var r = parseFloat($('#r').val());
 
 	var geometry = new THREE.SphereGeometry(r, 50, 10);
 	var material = new THREE.MeshBasicMaterial({color: 0x3F8FD2, opacity: 0.5});
@@ -169,8 +169,8 @@ SS.constructors.cylinder = function(spec) {
 	originMixin.updatePreview();
 
 	var originAxisGeom = new THREE.Geometry();
-	originAxisGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	originAxisGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 50)));
+	originAxisGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, -25)));
+	originAxisGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 25)));
 
 	var originAxis = new THREE.Line(originAxisGeom, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
 	shared.previewGeometry.addChild(originAxis);
@@ -226,6 +226,16 @@ SS.constructors.cylinder = function(spec) {
 	    $('#r').val(r.toFixed(2));
 	    shared.updatePreview();
 	} else if (shared.focussed === 'h') {
+
+	    var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
+
+	    var origin = new THREE.Vector3(originX, originY, 0);
+	    var direction = new THREE.Vector3(0, 0, 1);
+	    var ray = new THREE.Ray(origin, direction);
+	    var positionOnVertical = sceneView.determinePositionOnRay(event.originalEvent, ray);
+
+	    $('#h').val(positionOnVertical.z.toFixed(0));
+
 	    shared.updatePreview();
 	}
 
@@ -233,8 +243,8 @@ SS.constructors.cylinder = function(spec) {
 
     shared.onWorkplaneClicked = function(event) {
 	if (shared.focussed === 'origin') {
-	    if ($('#h').val() === '') {
-		$('#h').focus();
+	    if ($('#r').val() === '') {
+		$('#r').focus();
 	    } else {
 		$('#modal-ok').focus();
 	    }
