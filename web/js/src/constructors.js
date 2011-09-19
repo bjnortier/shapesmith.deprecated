@@ -33,6 +33,23 @@ SS.constructors.originMixin = function(shared) {
 	$('#model-ok').blur(function()  { shared.focussed = undefined; });
     }
 
+
+    that.updatePreview = function() {
+
+	if (shared.previewGeometry) {
+	    sceneView.scene.removeObject(shared.previewGeometry);
+	}
+	shared.previewGeometry = new THREE.Object3D();
+
+	var pointerMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.5, wireframe: false } );
+	var pointerGeometry = new THREE.CubeGeometry(0.5, 0.5, 0.5);
+	var pointer = new THREE.Mesh(pointerGeometry, pointerMaterial);
+	
+
+	shared.previewGeometry.addChild(pointer);
+
+    }
+
     that.create = function() {
 	var lastMousePosition = sceneView.workplane.getLastMousePosition();
 
@@ -67,17 +84,13 @@ SS.constructors.sphere = function() {
     var shared = {}, originMixin; 
 
     shared.updatePreview = function() {
-	if (shared.previewGeometry) {
-	    sceneView.scene.removeObject(shared.previewGeometry);
-	}
-
-	shared.previewGeometry = new THREE.Object3D();
-
+	originMixin.updatePreview();
+	
 	var x = parseFloat($('#x').val());
 	var y = parseFloat($('#y').val());
 	var r  =parseFloat($('#r').val());
 
-	var geometry = new THREE.SphereGeometry(r, 50, 50);
+	var geometry = new THREE.SphereGeometry(r, 50, 10);
 	var material = new THREE.MeshBasicMaterial({color: 0x3F8FD2, opacity: 0.5});
 	var sphere = new THREE.Mesh(geometry, material);
 	shared.previewGeometry.addChild(sphere);
@@ -153,10 +166,14 @@ SS.constructors.cylinder = function(spec) {
 
     shared.updatePreview = function() {
 
-	if (shared.previewGeometry) {
-	    sceneView.scene.removeObject(shared.previewGeometry);
-	}
-	shared.previewGeometry = new THREE.Object3D();
+	originMixin.updatePreview();
+
+	var originAxisGeom = new THREE.Geometry();
+	originAxisGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	originAxisGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 50)));
+
+	var originAxis = new THREE.Line(originAxisGeom, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	shared.previewGeometry.addChild(originAxis);
 
 	var x = parseFloat($('#x').val());
 	var y = parseFloat($('#y').val());
