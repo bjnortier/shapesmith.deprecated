@@ -346,8 +346,6 @@ SS.workplane.grid = function(spec) {
 	var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
 	var planeMesh = new THREE.Mesh(planeGeometry,
 				       new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 0 }));
-	planeMesh.doubleSided = true;
-	scene.addObject(planeMesh);
 	return planeMesh;
     }
 
