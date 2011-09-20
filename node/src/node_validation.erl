@@ -107,10 +107,10 @@ validate_geom_type(<<"cone">>, Props) ->
 			      ]);
 validate_geom_type(<<"wedge">>, Props) ->
     validate_primitive(Props, [
-			       {<<"x1">>, fun positive/1},
-			       {<<"x2">>, fun positive_or_zero/1},
-			       {<<"y">>, fun positive/1},
-			       {<<"z">>, fun positive/1}
+			       {<<"u1">>, fun positive/1},
+			       {<<"u2">>, fun positive_or_zero/1},
+			       {<<"v">>, fun positive/1},
+			       {<<"w">>, fun positive/1}
 			      ]);
 validate_geom_type(<<"torus">>, Props) ->
     validate_primitive(Props, [

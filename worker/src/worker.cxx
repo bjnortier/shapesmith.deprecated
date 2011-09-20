@@ -505,10 +505,10 @@ string create_cone(string id, map< string, mValue > geometry) {
 
 string create_wedge(string id, map< string, mValue > geometry) {
     map< string, mValue > parameters = geometry["parameters"].get_obj();
-    mValue x1 = parameters["x1"];
-    mValue x2 = parameters["x2"];
-    mValue y = parameters["y"];
-    mValue z = parameters["z"];
+    mValue x1 = parameters["u1"];
+    mValue x2 = parameters["u2"];
+    mValue y = parameters["v"];
+    mValue z = parameters["w"];
     if (!x1.is_null() && ((x1.type() == real_type) || (x1.type() == int_type))
         &&
         !x2.is_null() && ((x2.type() == real_type) || (x2.type() == int_type))

@@ -148,7 +148,10 @@ $(document).ready(function() {
 		   SS.constructors.cone().create();
 	       }).render($("#primitives"));
     new Action("Wedge", "/images/wedge.png", 
-               function() { create_primitive("wedge", ["x1", "x2", "y", "z"]); }).render($("#primitives"));
+               function() { 
+		   create_primitive("wedge", ["u1", "v", "u2", "w"]); 
+		   SS.constructors.wedge().create();
+	       }).render($("#primitives"));
     new Action("Torus", "/images/torus.png", 
                function() { 
 		   create_primitive("torus", ["r1", "r2"]); 

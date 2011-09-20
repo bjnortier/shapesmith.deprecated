@@ -558,6 +558,153 @@ SS.constructors.cone = function(spec) {
     return that;
 }
 
+
+SS.constructors.wedge = function(spec) {
+
+    var my = {};
+    var that = SS.constructors.origin(my);
+
+    var superUpdatePreview = that.updatePreview;
+    var updatePreview = function() {
+
+	superUpdatePreview();
+
+	var x = parseFloat($('#x').val());
+	var y = parseFloat($('#y').val());
+	var r = parseFloat($('#r').val());
+	var u1 = parseFloat($('#u1').val());
+	var u2 = parseFloat($('#u2').val());
+	var v = parseFloat($('#v').val());
+	var w = parseFloat($('#w').val());
+
+	if (u1 && v && w) {
+	    var geometry = new THREE.WedgeGeometry(u1,v,w,u2 - u1);
+	    var materials = [ new THREE.MeshBasicMaterial( { color: 0x3F8FD2, opacity: 0.5 } ), new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe: true, opacity: 0.5 } ) ];
+	    var wedge = new THREE.Mesh(geometry, materials);
+	    wedge.position.x = u1/2;
+	    wedge.position.y = v/2;
+	    wedge.position.z = w/2;
+	    my.previewGeometry.addChild(wedge);
+
+	} else if (u1 && v && u2) {
+
+	    var uvLineGeom = new THREE.Geometry();
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u1, 0, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u2, v, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, v, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	    var uvLine = new THREE.Line(uvLineGeom, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    my.previewGeometry.addChild(uvLine);
+	} else if (u1 && v) {
+	    var uvLineGeom = new THREE.Geometry();
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u1, 0, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u1, v, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, v, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	    var uvLine = new THREE.Line(uvLineGeom, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    my.previewGeometry.addChild(uvLine);
+
+	} else if (u1) {
+	    var uLineGeom = new THREE.Geometry();
+	    uLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	    uLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u1, 0, 0)));
+	    var uLine = new THREE.Line(uLineGeom, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    my.previewGeometry.addChild(uLine);
+	}
+
+	my.previewGeometry.position.x = x;
+	my.previewGeometry.position.y = y;
+
+	sceneView.scene.addObject(my.previewGeometry);
+	
+    }
+
+    var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
+    that.onWorkplaneCursorUpdated = function(event) {
+	
+	if (superOnWorkplaneCursorUpdated(event)) {
+	    updatePreview();
+	    return;
+	}
+
+	var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
+	var x = event.x, y = event.y;
+	
+	if (my.focussed === 'u1') {
+	    var u = x - originX, v = y - originY;
+	    $('#u1').val(u.toFixed(2));
+	    updatePreview();
+
+	} else if (my.focussed === 'v') {
+	    var v = y - originY;
+	    $('#v').val(v.toFixed(2));
+	    updatePreview();
+	}
+
+	else if (my.focussed === 'u2') {
+	    var u = x - originX, v = y - originY;
+	    $('#u2').val(u.toFixed(2));
+	    updatePreview();
+
+	} else if (my.focussed === 'w') {
+
+	    var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
+
+	    var origin = new THREE.Vector3(originX, originY, 0);
+	    var direction = new THREE.Vector3(0, 0, 1);
+	    var ray = new THREE.Ray(origin, direction);
+	    var positionOnVertical = sceneView.determinePositionOnRay(event.originalEvent, ray);
+
+	    $('#w').val(positionOnVertical.z.toFixed(0));
+
+	    updatePreview();
+	}
+
+    }
+
+    var superOnWorkplaneClicked = that.onWorkplaneClicked;
+    that.onWorkplaneClicked = function(event) {
+	superOnWorkplaneClicked({origin: 'u1', u1:'v', v:'u2', u2:'w'});
+    }
+    
+    var superSetupValueHandlers = that.setupValueHandlers;
+    that.setupValueHandlers = function() {
+	superSetupValueHandlers(updatePreview);
+	$('#u1').change(that.updatePreview);
+	$('#v').change(that.updatePreview);
+	$('#u2').change(that.updatePreview);
+	$('#w').change(that.updatePreview);
+    }
+
+    var superSetupFocusHandlers = that.setupFocusHandlers;
+    that.setupFocusHandlers = function() {
+	superSetupFocusHandlers();
+
+	$('#u1').focus(function() { my.focussed = 'u1'; });
+	$('#u1').blur(function()  { my.focussed = undefined; });
+
+	$('#v').focus(function() { my.focussed = 'v'; });
+	$('#v').blur(function()  { my.focussed = undefined; });
+
+	$('#u2').focus(function() { my.focussed = 'u2'; });
+	$('#u2').blur(function()  { my.focussed = undefined; });
+
+	$('#w').focus(function() { my.focussed = 'w'; });
+	$('#w').blur(function()  { my.focussed = undefined; });
+    }
+
+    var superCreate = that.create;
+    that.create = function() {
+	superCreate();
+	$('#u1').focus();
+	SS.constructors.active = this;
+    }
+
+    return that;
+}
+
 SS.constructors.torus = function(spec) {
 
     var my = {};
@@ -664,3 +811,4 @@ SS.constructors.torus = function(spec) {
 
     return that;
 }
+

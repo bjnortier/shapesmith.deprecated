@@ -34,10 +34,10 @@ THREE.WedgeGeometry = function ( width, height, depth, dWidth, materials, flippe
 	}
     }
 
-    this.sides.px && buildPlane( 'z', 'y',   1 * flip, - 1, depth, height, - width_half, this.materials[ 0 ] ); // px
-    //this.sides.nx && buildPlane( 'z', 'y', - 1 * flip, - 1, depth, height, width_half, this.materials[ 1 ] );   // nx
-    this.sides.py && buildPlane( 'x', 'z',   1 * flip,   1, width + dWidth, depth, height_half, this.materials[ 2 ] );   // py
-    this.sides.ny && buildPlane( 'x', 'z',   1 * flip, - 1, width, depth, - height_half, this.materials[ 3 ] ); // ny
+    this.sides.px && buildPlane( 'z', 'y',   1 * flip, - 1, depth, height, - width_half, dWidth, this.materials[ 0 ] ); // px
+    this.sides.nx && buildSkewPlane(- 1 * flip, - 1, depth, height, width_half, dWidth, this.materials[ 1 ] );   // nx
+    this.sides.py && buildPlane( 'x', 'z',   1 * flip,   1, width, depth, height_half, dWidth, this.materials[ 2 ] );   // py
+    this.sides.ny && buildPlane( 'x', 'z',   1 * flip, - 1, width, depth, - height_half, dWidth, this.materials[ 3 ] ); // ny
     this.sides.pz && buildWedgePlane(1 * flip, - 1, width, height, depth_half, dWidth, this.materials[ 4 ] );   // pz
     this.sides.nz && buildWedgePlane(- 1 * flip, - 1, width, height, - depth_half, dWidth, this.materials[ 5 ] ); // nz
 
@@ -70,36 +70,44 @@ THREE.WedgeGeometry = function ( width, height, depth, dWidth, materials, flippe
 		scope.vertices.push( new THREE.Vertex( vector ) );
 	    }
 	}
-	
-	for( iy = 0; iy < 1; iy++ ) {
 
-	    for( ix = 0; ix < 1; ix++ ) {
+	createFaces(offset, material);
+    }
 
-		var a = ix + 2 * iy;
-		var b = ix + 2 * ( iy + 1 );
-		var c = ( ix + 1 ) + 2 * ( iy + 1 );
-		var d = ( ix + 1 ) + 2 * iy;
+    function buildSkewPlane(udir, vdir, width, height, depth, dWidth, material) {
 
-		scope.faces.push( new THREE.Face4( a + offset, b + offset, c + offset, d + offset, null, null, material ) );
-		scope.faceVertexUvs[ 0 ].push( [
-		    new THREE.UV( ix, iy ),
-		    new THREE.UV( ix, ( iy + 1 ) ),
-		    new THREE.UV( ( ix + 1 ), ( iy + 1 ) ),
-		    new THREE.UV( ( ix + 1 ), iy )
-		] );
+	var u = 'z', v = 'y', w = 'x';
+	var w, ix, iy,
+	width_half = width / 2,
+	height_half = height / 2,
+	offset = scope.vertices.length;
+
+	for( iy = 0; iy < 2; iy++ ) {
+
+	    for( ix = 0; ix < 2; ix++ ) {
+
+		var vector = new THREE.Vector3();
+		vector[ u ] = ( ix * width - width_half ) * udir;
+		vector[ v ] = ( iy * height - height_half ) * vdir;
+		if (iy === 0) {
+		    vector[ w ] = depth + dWidth;
+		} else {
+		    vector[ w ] = depth;
+		}
+
+		scope.vertices.push( new THREE.Vertex( vector ) );
 
 	    }
 
 	}
 
-
+	createFaces(offset, material);
+	
     }
-
+    
     function buildPlane( u, v, udir, vdir, width, height, depth, dWidth, material ) {
 
 	var w, ix, iy,
-	gridX = 1,
-	gridY = 1,
 	width_half = width / 2,
 	height_half = height / 2,
 	offset = scope.vertices.length;
@@ -108,10 +116,8 @@ THREE.WedgeGeometry = function ( width, height, depth, dWidth, materials, flippe
 	    w = 'z';
 	} else if ( ( u == 'x' && v == 'z' ) || ( u == 'z' && v == 'x' ) ) {
 	    w = 'y';
-	    gridY = 1;
 	} else if ( ( u == 'z' && v == 'y' ) || ( u == 'y' && v == 'z' ) ) {
 	    w = 'x';
-	    gridX = 1;
 	}
 
 	for( iy = 0; iy < 2; iy++ ) {
@@ -119,8 +125,8 @@ THREE.WedgeGeometry = function ( width, height, depth, dWidth, materials, flippe
 	    for( ix = 0; ix < 2; ix++ ) {
 
 		var vector = new THREE.Vector3();
-		if (u === 'x' && v === 'z' && vdir === 1) {
-		    vector[ u ] = ( ix * width - width) * udir;
+		if (ix == 1 && u === 'x' && v === 'z' && vdir === 1) {
+		    vector[ u ] = ( ix * width - width_half + dWidth) * udir;
 		} else {
 		    vector[ u ] = ( ix * width - width_half ) * udir;
 		}
@@ -128,31 +134,26 @@ THREE.WedgeGeometry = function ( width, height, depth, dWidth, materials, flippe
 		vector[ w ] = depth;
 
 		scope.vertices.push( new THREE.Vertex( vector ) );
-
 	    }
-
 	}
+	createFaces(offset, material);
 
-	for( iy = 0; iy < gridY; iy++ ) {
+    }
 
-	    for( ix = 0; ix < gridX; ix++ ) {
-
-		var a = ix + 2 * iy;
-		var b = ix + 2 * ( iy + 1 );
-		var c = ( ix + 1 ) + 2 * ( iy + 1 );
-		var d = ( ix + 1 ) + 2 * iy;
-
-		scope.faces.push( new THREE.Face4( a + offset, b + offset, c + offset, d + offset, null, null, material ) );
-		scope.faceVertexUvs[ 0 ].push( [
-		    new THREE.UV( ix, iy ),
-		    new THREE.UV( ix, ( iy + 1 ) ),
-		    new THREE.UV( ( ix + 1 ), ( iy + 1 ) ),
-		    new THREE.UV( ( ix + 1 ), iy )
-		] );
-
-	    }
-
-	}
+    function createFaces(offset, material) {
+	
+	var a = 0;
+	var b = 2;
+	var c = 3;
+	var d = 1;
+	
+	scope.faces.push( new THREE.Face4( a + offset, b + offset, c + offset, d + offset, null, null, material ) );
+	scope.faceVertexUvs[ 0 ].push( [
+	    new THREE.UV( 0, 0 ),
+	    new THREE.UV( 0, 1 ),
+	    new THREE.UV( 1, 1 ),
+	    new THREE.UV( 1, 0 )
+	] );
 
     }
 
