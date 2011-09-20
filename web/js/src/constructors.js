@@ -2,11 +2,11 @@ var SS = SS || {};
 
 SS.constructors = {};
 
-SS.constructors.originMixin = function(shared) {
+SS.constructors.origin = function(my) {
     var that = {};
 
     that.onWorkplaneCursorUpdated = function (event) {
-	if (shared.focussed === 'origin') {
+	if (my.focussed === 'origin') {
 	    $('#x').val(event.x);
 	    $('#y').val(event.y);
 	    return true;
@@ -14,64 +14,79 @@ SS.constructors.originMixin = function(shared) {
 	return false;
     }
 
-    that.setupValueHandlers = function() {
-	$('#x').change(shared.updatePreview);
-	$('#y').change(shared.updatePreview);
-	$('#z').change(shared.updatePreview);
+    that.onWorkplaneClicked = function(focusSequence) {
+	var nextFound = false;
+	var next = my.focussed;
+	do {
+	    next = focusSequence[next];
+	    if (next) {
+		if ($('#' + next).val() === '') {
+		    $('#' + next).focus();
+		    nextFound = true;
+		}
+	    } else {
+		$('#modal-ok').focus();
+	    }
+	    
+	} while(!nextFound && next);
     }
-
-    that.setupFocusHandlers = function() {
-	$('#x').focus(function() { shared.focussed = 'origin'; });
-	$('#y').focus(function() { shared.focussed = 'origin'; });
-	$('#z').focus(function() { shared.focussed = 'origin'; });
-
-	$('#x').blur(function() { shared.focussed = undefined; });
-	$('#y').blur(function() { shared.focussed = undefined; });
-	$('#z').blur(function() { shared.focussed = undefined; });
-
-	$('#modal-ok').focus(function() { shared.focussed = 'ok'; });
-	$('#model-ok').blur(function()  { shared.focussed = undefined; });
-    }
-
 
     that.updatePreview = function() {
 
-	if (shared.previewGeometry) {
-	    sceneView.scene.removeObject(shared.previewGeometry);
+	if (my.previewGeometry) {
+	    sceneView.scene.removeObject(my.previewGeometry);
 	}
-	shared.previewGeometry = new THREE.Object3D();
+	my.previewGeometry = new THREE.Object3D();
 
 	var pointerMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.5, wireframe: false } );
 	var pointerGeometry = new THREE.CubeGeometry(0.5, 0.5, 0.5);
 	var pointer = new THREE.Mesh(pointerGeometry, pointerMaterial);
 	
 
-	shared.previewGeometry.addChild(pointer);
+	my.previewGeometry.addChild(pointer);
+    }
 
+    that.setupValueHandlers = function() {
+	$('#x').change(that.updatePreview);
+	$('#y').change(that.updatePreview);
+	$('#z').change(that.updatePreview);
+    }
+
+    that.setupFocusHandlers = function() {
+	$('#x').focus(function() { my.focussed = 'origin'; });
+	$('#y').focus(function() { my.focussed = 'origin'; });
+	$('#z').focus(function() { my.focussed = 'origin'; });
+
+	$('#x').blur(function() { my.focussed = undefined; });
+	$('#y').blur(function() { my.focussed = undefined; });
+	$('#z').blur(function() { my.focussed = undefined; });
+
+	$('#modal-ok').focus(function() { my.focussed = 'ok'; });
+	$('#model-ok').blur(function()  { my.focussed = undefined; });
     }
 
     that.create = function() {
 	var lastMousePosition = sceneView.workplane.getLastMousePosition();
 
-	shared.setupValueHandlers();
-	shared.setupFocusHandlers();
+	that.setupValueHandlers();
+	that.setupFocusHandlers();
 
 	var originX = lastMousePosition.x;
 	var originY = lastMousePosition.y;
 	$('#x').val(originX);
 	$('#y').val(originY);
 
-	sceneView.workplane.on('workplaneCursorUpdated', shared.onWorkplaneCursorUpdated);
-	sceneView.workplane.on('workplaneClicked', shared.onWorkplaneClicked);
+	sceneView.workplane.on('workplaneCursorUpdated', that.onWorkplaneCursorUpdated);
+	sceneView.workplane.on('workplaneClicked', that.onWorkplaneClicked);
 
     }
     
     that.dispose = function() {
-	sceneView.workplane.off('workplaneCursorUpdated', shared.onWorkplaneCursorUpdated);
-	sceneView.workplane.off('workplaneClicked', shared.onWorkplaneClicked);
+	sceneView.workplane.off('workplaneCursorUpdated', that.onWorkplaneCursorUpdated);
+	sceneView.workplane.off('workplaneClicked', that.onWorkplaneClicked);
 	
-	if (shared.previewGeometry) {
-	    sceneView.scene.removeObject(shared.previewGeometry);
+	if (my.previewGeometry) {
+	    sceneView.scene.removeObject(my.previewGeometry);
 	}
 	SS.constructors.active = null;
     }
@@ -79,12 +94,143 @@ SS.constructors.originMixin = function(shared) {
     return that;
 }
 
-SS.constructors.sphere = function() {
-    var that = {};
-    var shared = {}, originMixin; 
 
-    shared.updatePreview = function() {
-	originMixin.updatePreview();
+SS.constructors.cuboid = function(spec) {
+
+    var my = {};
+    var that = SS.constructors.origin(my);
+
+    var superUpdatePreview = that.updatePreview;
+    var updatePreview = function() {
+
+	superUpdatePreview();
+
+	var x = parseFloat($('#x').val());
+	var y = parseFloat($('#y').val());
+	var r = parseFloat($('#r').val());
+	var u = parseFloat($('#u').val());
+	var v = parseFloat($('#v').val());
+	var w = parseFloat($('#w').val());
+
+	if (u && v && w) {
+	    var geometry = new THREE.CubeGeometry(u,v,w);
+	    var materials = [ new THREE.MeshBasicMaterial( { color: 0x3F8FD2, opacity: 0.5 } ), new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe: true, opacity: 0.5 } ) ];
+	    var cube = new THREE.Mesh(geometry, materials);
+	    cube.position.x = u/2;
+	    cube.position.y = v/2;
+	    cube.position.z = w/2;
+	    my.previewGeometry.addChild(cube);
+
+	} else if (u && v) {
+	    var uvLineGeom = new THREE.Geometry();
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u, 0, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u, v, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, v, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	    var uvLine = new THREE.Line(uvLineGeom, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    my.previewGeometry.addChild(uvLine);
+
+	} else if (u) {
+	    var uLineGeom = new THREE.Geometry();
+	    uLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	    uLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u, 0, 0)));
+	    var uLine = new THREE.Line(uLineGeom, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    my.previewGeometry.addChild(uLine);
+	}
+
+	my.previewGeometry.position.x = x;
+	my.previewGeometry.position.y = y;
+
+	sceneView.scene.addObject(my.previewGeometry);
+	
+    }
+
+    var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
+    that.onWorkplaneCursorUpdated = function(event) {
+	
+	if (superOnWorkplaneCursorUpdated(event)) {
+	    updatePreview();
+	} else if (my.focussed === 'u') {
+	    var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
+	    var x = event.x, y = event.y;
+	    
+	    var u = x - originX, v = y - originY;
+	    
+	    $('#u').val(u.toFixed(2));
+	    updatePreview();
+
+	} else if (my.focussed === 'v') {
+	    var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
+	    var x = event.x, y = event.y;
+	    
+	    var v = y - originY;
+	    
+	    $('#v').val(v.toFixed(2));
+	    updatePreview();
+
+	} else if (my.focussed === 'w') {
+
+	    var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
+
+	    var origin = new THREE.Vector3(originX, originY, 0);
+	    var direction = new THREE.Vector3(0, 0, 1);
+	    var ray = new THREE.Ray(origin, direction);
+	    var positionOnVertical = sceneView.determinePositionOnRay(event.originalEvent, ray);
+
+	    $('#w').val(positionOnVertical.z.toFixed(0));
+
+	    updatePreview();
+	}
+
+    }
+
+    var superOnWorkplaneClicked = that.onWorkplaneClicked;
+    that.onWorkplaneClicked = function(event) {
+	superOnWorkplaneClicked({origin: 'u', u:'v', v:'w'});
+    }
+    
+    var superSetupValueHandlers = that.setupValueHandlers;
+    that.setupValueHandlers = function() {
+	superSetupValueHandlers(updatePreview);
+	$('#u').change(that.updatePreview);
+	$('#v').change(that.updatePreview);
+	$('#w').change(that.updatePreview);
+    }
+
+    var superSetupFocusHandlers = that.setupFocusHandlers;
+    that.setupFocusHandlers = function() {
+	superSetupFocusHandlers();
+
+	$('#u').focus(function() { my.focussed = 'u'; });
+	$('#u').blur(function()  { my.focussed = undefined; });
+
+	$('#v').focus(function() { my.focussed = 'v'; });
+	$('#v').blur(function()  { my.focussed = undefined; });
+
+	$('#w').focus(function() { my.focussed = 'w'; });
+	$('#w').blur(function()  { my.focussed = undefined; });
+    }
+
+    var superCreate = that.create;
+    that.create = function() {
+	superCreate();
+	$('#u').focus();
+	SS.constructors.active = this;
+    }
+
+    return that;
+}
+
+SS.constructors.sphere = function() {
+
+    var my = {};
+    var that = SS.constructors.origin(my);
+
+    var superUpdatePreview = that.updatePreview;
+    var updatePreview = function() {
+
+	superUpdatePreview();
 	
 	var x = parseFloat($('#x').val());
 	var y = parseFloat($('#y').val());
@@ -93,7 +239,7 @@ SS.constructors.sphere = function() {
 	var geometry = new THREE.SphereGeometry(r, 50, 10);
 	var material = new THREE.MeshBasicMaterial({color: 0x3F8FD2, opacity: 0.5});
 	var sphere = new THREE.Mesh(geometry, material);
-	shared.previewGeometry.addChild(sphere);
+	my.previewGeometry.addChild(sphere);
 
 	var circleGeom = new THREE.Geometry();
 	for(var i = 0; i <= 50; ++i) {
@@ -103,129 +249,248 @@ SS.constructors.sphere = function() {
 	    circleGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	}
 	var circle = new THREE.Line(circleGeom, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
-	shared.previewGeometry.addChild(circle);
+	my.previewGeometry.addChild(circle);
     
-	shared.previewGeometry.position.x = x;
-	shared.previewGeometry.position.y = y;
-	sceneView.scene.addObject(shared.previewGeometry);
+	my.previewGeometry.position.x = x;
+	my.previewGeometry.position.y = y;
+	sceneView.scene.addObject(my.previewGeometry);
     }
 
-    shared.onWorkplaneCursorUpdated = function(event) {
+    var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
+    that.onWorkplaneCursorUpdated = function(event) {
 
-	if (originMixin.onWorkplaneCursorUpdated(event)) {
-	    shared.updatePreview();
-	} else if (shared.focussed === 'r') {
-	    var originX = $('#x').val(), originY = $('#y').val();
+	if (superOnWorkplaneCursorUpdated(event)) {
+	    updatePreview();
+	    return;
+	}
+	
+	var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
+	if (my.focussed === 'r') {
+	    
 	    var x = event.x, y = event.y;
 	    
 	    var dx = Math.abs(x - originX), dy = Math.abs(y - originY);
 	    var r  = Math.sqrt(dx*dx + dy*dy);
 	    
 	    $('#r').val(r.toFixed(2));
-	    shared.updatePreview();
+	    updatePreview();
 	}
     }
 
-    shared.onWorkplaneClicked = function(event) {
-	if (shared.focussed === 'origin') {
-	    $('#modal-ok').focus();
-	} else if (shared.focussed === 'r') {
-	    $('#modal-ok').focus();
-	}
+    var superOnWorkplaneClicked = that.onWorkplaneClicked;
+    that.onWorkplaneClicked = function(event) {
+	superOnWorkplaneClicked({origin: 'r'});
     }
 
-    shared.setupValueHandlers = function() {
-	originMixin.setupValueHandlers();
-	$('#r').change(shared.updatePreview);
+    var superSetupValueHandlers = that.setupValueHandlers;
+    that.setupValueHandlers = function() {
+	superSetupValueHandlers();
+	$('#r').change(updatePreview);
     }
 
-    shared.setupFocusHandlers = function() {
-	originMixin.setupFocusHandlers();
-	$('#r').focus(function() { shared.focussed = 'r'; });
-	$('#r').blur(function()  { shared.focussed = undefined; });
+    var superSetupFocusHandlers = that.setupFocusHandlers;
+    that.setupFocusHandlers = function() {
+	superSetupFocusHandlers();
+	$('#r').focus(function() { my.focussed = 'r'; });
+	$('#r').blur(function()  { my.focussed = undefined; });
     }
 
-    var originMixin = this.originMixin(shared);
-
+    var superCreate = that.create;
     that.create = function() {
-	originMixin.create();
+	superCreate();
 	$('#r').focus();
 	SS.constructors.active = this;
     }
-
-    that.dispose = function() {
-	originMixin.dispose();
-    }
-    
+   
     return that;
 }
 
 SS.constructors.cylinder = function(spec) {
-    var that = {};
-    var shared = {}, originMixin;
 
-    shared.updatePreview = function() {
+    var my = {};
+    var that = SS.constructors.origin(my);
 
-	originMixin.updatePreview();
+    var superUpdatePreview = that.updatePreview;
+    var updatePreview = function() {
 
-	var originAxisGeom = new THREE.Geometry();
-	originAxisGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, -25)));
-	originAxisGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 25)));
-
-	var originAxis = new THREE.Line(originAxisGeom, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
-	shared.previewGeometry.addChild(originAxis);
+	superUpdatePreview();
 
 	var x = parseFloat($('#x').val());
 	var y = parseFloat($('#y').val());
 	var r = parseFloat($('#r').val());
 	var h = parseFloat($('#h').val());
 
-	if (h) {
+	if (r) {
+	    var circleGeom1 = new THREE.Geometry(), circleGeom2 = new THREE.Geometry();
+	    for(var i = 0; i <= 50; ++i) {
+		var theta = Math.PI*2*i/50;
+		var dx = r*Math.cos(theta);
+		var dy = r*Math.sin(theta);
+		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+	    }
+	    var circle1 = new THREE.Line(circleGeom1, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    my.previewGeometry.addChild(circle1);
+	}
+
+	if (r && h) {
+	    var circle2 = new THREE.Line(circleGeom2, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    circle2.position.z = h;
+	    my.previewGeometry.addChild(circle2);
+
 	    var geometry = new THREE.CylinderGeometry(50, r, r, h);
 	    var material = new THREE.MeshBasicMaterial({color: 0x3F8FD2, opacity: 0.5});
 	    var cylinder = new THREE.Mesh(geometry, material);
 	    cylinder.position.z = h/2;
-	    shared.previewGeometry.addChild(cylinder);
+	    my.previewGeometry.addChild(cylinder);
 	}
 
-	var circleGeom1 = new THREE.Geometry(), circleGeom2 = new THREE.Geometry();
-	for(var i = 0; i <= 50; ++i) {
-	    var theta = Math.PI*2*i/50;
-	    var dx = r*Math.cos(theta);
-	    var dy = r*Math.sin(theta);
-	    circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
-	    circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
-	}
-	var circle1 = new THREE.Line(circleGeom1, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
-	shared.previewGeometry.addChild(circle1);
+	my.previewGeometry.position.x = x;
+	my.previewGeometry.position.y = y;
 
-	if (h) {
-	    var circle2 = new THREE.Line(circleGeom2, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
-	    circle2.position.z = h;
-	    shared.previewGeometry.addChild(circle2);
-	}
-
-	shared.previewGeometry.position.x = x;
-	shared.previewGeometry.position.y = y;
-
-	sceneView.scene.addObject(shared.previewGeometry);
+	sceneView.scene.addObject(my.previewGeometry);
 	
     }
 
-    shared.onWorkplaneCursorUpdated = function(event) {
+    var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
+    that.onWorkplaneCursorUpdated = function(event) {
 	
-	if (originMixin.onWorkplaneCursorUpdated(event)) {
-	    shared.updatePreview();
-	} else if (shared.focussed === 'r') {
-	    var originX = $('#x').val(), originY = $('#y').val();
-	    var x = event.x, y = event.y, r;
+	if (superOnWorkplaneCursorUpdated(event)) {
+	    updatePreview();
+	    return;
+	}
+	
+	var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
+
+	if (my.focussed === 'r') {
+	    var x = event.x, y = event.y;
 	    
 	    var dx = Math.abs(x - originX), dy = Math.abs(y - originY);
 	    var r  = Math.sqrt(dx*dx + dy*dy);
 	    
 	    $('#r').val(r.toFixed(2));
-	    shared.updatePreview();
-	} else if (shared.focussed === 'h') {
+	    updatePreview();
+	} else if (my.focussed === 'h') {
+
+	    var origin = new THREE.Vector3(originX, originY, 0);
+	    var direction = new THREE.Vector3(0, 0, 1);
+	    var ray = new THREE.Ray(origin, direction);
+	    var positionOnVertical = sceneView.determinePositionOnRay(event.originalEvent, ray);
+
+	    $('#h').val(positionOnVertical.z.toFixed(0));
+
+	    updatePreview();
+	}
+
+    }
+
+    var superOnWorkplaneClicked = that.onWorkplaneClicked;
+    that.onWorkplaneClicked = function(event) {
+	superOnWorkplaneClicked({origin: 'r', r:'h'});
+    }
+
+    var superSetupValueHandlers = that.setupValueHandlers;
+    that.setupValueHandlers = function() {
+	superSetupValueHandlers(updatePreview);
+	$('#r').change(updatePreview);
+	$('#h').change(updatePreview);
+    }
+
+    var superSetupFocusHandlers = that.setupFocusHandlers;
+    that.setupFocusHandlers = function() {
+	superSetupFocusHandlers();
+
+	$('#r').focus(function() { my.focussed = 'r'; });
+	$('#r').blur(function()  { my.focussed = undefined; });
+
+	$('#h').focus(function() { my.focussed = 'h'; });
+	$('#h').blur(function()  { my.focussed = undefined; });
+    }
+
+    var superCreate = that.create;
+    that.create = function() {
+	superCreate();
+	$('#r').focus();
+	SS.constructors.active = this;
+    }
+
+    return that;
+}
+
+SS.constructors.cone = function(spec) {
+
+    var my = {};
+    var that = SS.constructors.origin(my);
+
+    var superUpdatePreview = that.updatePreview;
+    var updatePreview = function() {
+
+	superUpdatePreview();
+
+	var x = parseFloat($('#x').val());
+	var y = parseFloat($('#y').val());
+	var r1 = parseFloat($('#r1').val());
+	var h = parseFloat($('#h').val());
+	var r2 = parseFloat($('#r2').val());
+
+	if (r1 && h) {
+
+	    var geometry = new THREE.CylinderGeometry(50, r1, r2 || 0.000001, h);
+	    var material = new THREE.MeshBasicMaterial({color: 0x3F8FD2, opacity: 0.5});
+	    var cone = new THREE.Mesh(geometry, material);
+	    cone.position.z = h/2;
+	    my.previewGeometry.addChild(cone);
+	    
+	    var circleGeom2 = new THREE.Geometry();
+	    for(var i = 0; i <= 50; ++i) {
+		var theta = Math.PI*2*i/50;
+		var dx = r2*Math.cos(theta);
+		var dy = r2*Math.sin(theta);
+		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+	    }
+	    var circle2 = new THREE.Line(circleGeom2, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    circle2.position.z = h;
+	    my.previewGeometry.addChild(circle2);
+
+	} else if (r1) {
+	    var circleGeom1 = new THREE.Geometry();
+	    for(var i = 0; i <= 50; ++i) {
+		var theta = Math.PI*2*i/50;
+		var dx = r1*Math.cos(theta);
+		var dy = r1*Math.sin(theta);
+		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+	    }
+	    var circle1 = new THREE.Line(circleGeom1, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    my.previewGeometry.addChild(circle1);
+	}
+
+	my.previewGeometry.position.x = x;
+	my.previewGeometry.position.y = y;
+
+	sceneView.scene.addObject(my.previewGeometry);
+	
+    }
+
+    var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
+    that.onWorkplaneCursorUpdated = function(event) {
+
+	if (superOnWorkplaneCursorUpdated(event)) {
+	    updatePreview();
+	    return;
+	}
+
+	var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
+	var x = event.x, y = event.y;
+
+	if (my.focussed === 'r1') {
+	    
+	    var dx = Math.abs(x - originX), dy = Math.abs(y - originY);
+	    var r1  = Math.sqrt(dx*dx + dy*dy);
+	    
+	    $('#r1').val(r1.toFixed(2));
+	    updatePreview();
+
+	} else if (my.focussed === 'h') {
 
 	    var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
 
@@ -236,57 +501,59 @@ SS.constructors.cylinder = function(spec) {
 
 	    $('#h').val(positionOnVertical.z.toFixed(0));
 
-	    shared.updatePreview();
+	    updatePreview();
+	} else if (my.focussed === 'r2') {
+
+	    
+	    var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
+	    var planeMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 0 }));
+	    planeMesh.position.z = parseFloat($('#h').val()) || 0;
+
+	    var position = sceneView.determinePositionPlane(event.originalEvent, planeMesh);
+
+	    var dx = Math.abs(position.x - originX), dy = Math.abs(position.y - originY);
+	    var r2  = Math.sqrt(dx*dx + dy*dy);
+	    
+	    $('#r2').val(r2.toFixed(2));
+	    updatePreview();
+
 	}
 
     }
 
-    shared.onWorkplaneClicked = function(event) {
-	if (shared.focussed === 'origin') {
-	    if ($('#r').val() === '') {
-		$('#r').focus();
-	    } else {
-		$('#modal-ok').focus();
-	    }
-	} else if (shared.focussed === 'r') {
-	    if ($('#h').val() === '') {
-		$('#h').focus();		
-	    } else {
-		$('#modal-ok').focus();
-	    }
-	} else if (shared.focussed === 'h') {
-	    $('#modal-ok').focus();
-	}
+    var superOnWorkplaneClicked = that.onWorkplaneClicked;
+    that.onWorkplaneClicked = function(event) {
+	superOnWorkplaneClicked({origin: 'r1', r1:'h', h:'r2'});
     }
 
-    shared.setupValueHandlers = function() {
-	originMixin.setupValueHandlers(shared.updatePreview);
-	$('#r').change(shared.updatePreview);
-	$('#h').change(shared.updatePreview);
+    var superSetupValueHandlers = that.setupValueHandlers;
+    that.setupValueHandlers = function() {
+	superSetupValueHandlers();
+	$('#r').change(updatePreview);
+	$('#h').change(updatePreview);
     }
 
-    shared.setupFocusHandlers = function() {
-	originMixin.setupFocusHandlers();
+    var superSetupFocusHandlers = that.setupFocusHandlers;
+    that.setupFocusHandlers = function() {
+	superSetupFocusHandlers();
 
-	$('#r').focus(function() { shared.focussed = 'r'; });
-	$('#r').blur(function()  { shared.focussed = undefined; });
+	$('#r1').focus(function() { my.focussed = 'r1'; });
+	$('#r1').blur(function()  { my.focussed = undefined; });
 
-	$('#h').focus(function() { shared.focussed = 'h'; });
-	$('#h').blur(function()  { shared.focussed = undefined; });
+	$('#h').focus(function() { my.focussed = 'h'; });
+	$('#h').blur(function()  { my.focussed = undefined; });
+
+	$('#r2').focus(function() { my.focussed = 'r2'; });
+	$('#r2').blur(function()  { my.focussed = undefined; });
+
     }
 
-    var originMixin = this.originMixin(shared);
-    
+    var superCreate = that.create;
     that.create = function() {
-	originMixin.create();
-	$('#r').focus();
+	superCreate();
+	$('#r1').focus();
 	SS.constructors.active = this;
-    }
-
-    that.dispose = function() {
-	originMixin.dispose();
     }
     
     return that;
 }
-

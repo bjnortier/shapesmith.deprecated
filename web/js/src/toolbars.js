@@ -130,7 +130,7 @@ $(document).ready(function() {
     new Action("Cuboid", "/images/cuboid.png", 
                function() { 
 		   create_primitive("cuboid",  ["u", "v", "w"]); 
-		   //SS.constructors.cuboid().create();
+		   SS.constructors.cuboid().create();
 	       }).render($("#primitives"));
     new Action("Sphere", "/images/sphere.png", 
                function() { 
@@ -143,7 +143,10 @@ $(document).ready(function() {
 		   SS.constructors.cylinder().create();
 	       }).render($("#primitives"));
     new Action("Cone", "/images/cone.png", 
-               function() { create_primitive("cone", ["bottom_radius", "top_radius", "height"]); }).render($("#primitives"));
+               function() { 
+		   create_primitive("cone", ["r1", "h", "r2"]); 
+		   SS.constructors.cone().create();
+	       }).render($("#primitives"));
     new Action("Wedge", "/images/wedge.png", 
                function() { create_primitive("wedge", ["x1", "x2", "y", "z"]); }).render($("#primitives"));
     new Action("Torus", "/images/torus.png", 

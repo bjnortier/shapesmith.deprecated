@@ -101,9 +101,9 @@ validate_geom_type(<<"cylinder">>, Props) ->
 			      ]);
 validate_geom_type(<<"cone">>, Props) ->
     validate_primitive(Props, [
-			       {[<<"top_radius">>, <<"bottom_radius">>], fun one_zero_one_positive/1},
-			       {[<<"top_radius">>, <<"bottom_radius">>], fun not_equal/1},
-			       {<<"height">>, fun positive/1}
+			       {[<<"r1">>, <<"r2">>], fun one_zero_one_positive/1},
+			       {[<<"r1">>, <<"r2">>], fun not_equal/1},
+			       {<<"h">>, fun positive/1}
 			      ]);
 validate_geom_type(<<"wedge">>, Props) ->
     validate_primitive(Props, [

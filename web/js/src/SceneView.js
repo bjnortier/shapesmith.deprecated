@@ -126,6 +126,13 @@ SS.SceneView = function(container) {
     }
 
     function determinePositionOnWorkplane(event) {
+	var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
+	var planeMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 0 }));
+	return determinePositionPlane(event, planeMesh);
+    }
+
+    function determinePositionPlane(event, planeMesh) {
+	
 	var mouse = {};
 	mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
 	mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -136,12 +143,14 @@ SS.SceneView = function(container) {
 	var ray = new THREE.Ray(camera.position, null);
 	ray.direction = mouse3D.subSelf(camera.position).normalize();
 
-	var intersects = ray.intersectObject(workplane.getPlaneMesh());
+
+	var intersects = ray.intersectObject(planeMesh);
 	if (intersects.length == 1) {
-	    return {x: intersects[0].point.x, y: intersects[0].point.y};
+	    return {x: Math.round(intersects[0].point.x), y: Math.round(intersects[0].point.y)};
 	} else {
 	    return null;
 	}
+
     }
 
     function determinePositionOnRay(event, givenRay) {
@@ -155,7 +164,10 @@ SS.SceneView = function(container) {
 	var mouseRay = new THREE.Ray(camera.position, null);
 	mouseRay.direction = mouse3D.subSelf(camera.position).normalize();
 
-	var intersects = mouseRay.intersectObject(workplane.getPlaneMesh());
+	var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
+	var planeMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 0 }));
+
+	var intersects = mouseRay.intersectObject(planeMesh);
 	if (intersects.length == 1) {
 	    mouseRay.origin = intersects[0].point.clone();
 	} else {
@@ -174,13 +186,7 @@ SS.SceneView = function(container) {
 	var tc = (a*e - b*d)/(a*c - b*b);
 	
 	return  new THREE.Vector3().add(givenRay.origin, u.clone().multiplyScalar(sc));
-
     }
-	
-	
-
-
-    
 
     function popupMenu() {
 	if (showPopup) {
@@ -454,6 +460,7 @@ SS.SceneView = function(container) {
     this.scene = scene;
     this.workplane = workplane;
     this.determinePositionOnRay = determinePositionOnRay;
+    this.determinePositionPlane = determinePositionPlane;
 
     return this;
 }

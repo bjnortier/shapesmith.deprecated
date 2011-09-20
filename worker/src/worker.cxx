@@ -485,18 +485,18 @@ string create_cylinder(string id, map< string, mValue > geometry) {
 
 string create_cone(string id, map< string, mValue > geometry) {
     map< string, mValue > parameters = geometry["parameters"].get_obj();
-    mValue bottom_radius = parameters["bottom_radius"];
-    mValue top_radius = parameters["top_radius"];
-    mValue height = parameters["height"];
-    if (!bottom_radius.is_null() && ((bottom_radius.type() == real_type) || (bottom_radius.type() == int_type))
+    mValue r1 = parameters["r1"];
+    mValue r2 = parameters["r2"];
+    mValue h = parameters["h"];
+    if (!r1.is_null() && ((r1.type() == real_type) || (r1.type() == int_type))
         &&
-        !top_radius.is_null() && ((top_radius.type() == real_type) || (top_radius.type() == int_type))
+        !r2.is_null() && ((r2.type() == real_type) || (r2.type() == int_type))
         &&
-        !height.is_null() && ((height.type() == real_type) || (height.type() == int_type))) {
+        !h.is_null() && ((h.type() == real_type) || (h.type() == int_type))) {
         
-        TopoDS_Shape shape = BRepPrimAPI_MakeCone(get_double(bottom_radius), 
-                                                  get_double(top_radius), 
-                                                  get_double(height)).Shape();
+        TopoDS_Shape shape = BRepPrimAPI_MakeCone(get_double(r1), 
+                                                  get_double(r2), 
+                                                  get_double(h)).Shape();
         unmeshed_shapes[id] = applyTransforms(shape, geometry);
         return "ok";
     }
