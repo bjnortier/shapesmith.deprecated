@@ -721,19 +721,33 @@ SS.constructors.torus = function(spec) {
 	var r2 = parseFloat($('#r2').val());
 
 	if (r1) {
-	    var circleGeom1 = new THREE.Geometry(), circleGeom2 = new THREE.Geometry();
+	    var circleGeom1 = new THREE.Geometry();
 	    for(var i = 0; i <= 50; ++i) {
 		var theta = Math.PI*2*i/50;
 		var dx = r1*Math.cos(theta);
 		var dy = r1*Math.sin(theta);
 		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
-		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	    }
 	    var circle1 = new THREE.Line(circleGeom1, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
 	    my.previewGeometry.addChild(circle1);
 	}
 
 	if (r1 && r2) {
+
+	    var circleGeom1 = new THREE.Geometry(), circleGeom2 = new THREE.Geometry();
+	    for(var i = 0; i <= 50; ++i) {
+		var theta = Math.PI*2*i/50;
+		var dx1 = (r1 + r2)*Math.cos(theta);
+		var dy1 = (r1 + r2)*Math.sin(theta);
+		var dx2 = (r1 - r2)*Math.cos(theta);
+		var dy2 = (r1 - r2)*Math.sin(theta);
+		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx1, dy1, 0)));
+		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx2, dy2, 0)));
+	    }
+	    var circle1 = new THREE.Line(circleGeom1, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    var circle2 = new THREE.Line(circleGeom2, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    my.previewGeometry.addChild(circle1);
+	    my.previewGeometry.addChild(circle2);
 
 	    var geometry = new THREE.TorusGeometry(r1, r2, 10, 50);
 	    var material = new THREE.MeshBasicMaterial({color: 0x3F8FD2, opacity: 0.5});
