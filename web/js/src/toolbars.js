@@ -150,7 +150,10 @@ $(document).ready(function() {
     new Action("Wedge", "/images/wedge.png", 
                function() { create_primitive("wedge", ["x1", "x2", "y", "z"]); }).render($("#primitives"));
     new Action("Torus", "/images/torus.png", 
-               function() { create_primitive("torus", ["r1", "r2"]); }).render($("#primitives"));
+               function() { 
+		   create_primitive("torus", ["r1", "r2"]); 
+		   SS.constructors.torus().create();
+	       }).render($("#primitives"));
     
     /*
      * Booleans

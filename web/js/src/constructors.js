@@ -557,3 +557,110 @@ SS.constructors.cone = function(spec) {
     
     return that;
 }
+
+SS.constructors.torus = function(spec) {
+
+    var my = {};
+    var that = SS.constructors.origin(my);
+
+    var superUpdatePreview = that.updatePreview;
+    var updatePreview = function() {
+
+	superUpdatePreview();
+
+	var x = parseFloat($('#x').val());
+	var y = parseFloat($('#y').val());
+	var r1 = parseFloat($('#r1').val());
+	var r2 = parseFloat($('#r2').val());
+
+	if (r1) {
+	    var circleGeom1 = new THREE.Geometry(), circleGeom2 = new THREE.Geometry();
+	    for(var i = 0; i <= 50; ++i) {
+		var theta = Math.PI*2*i/50;
+		var dx = r1*Math.cos(theta);
+		var dy = r1*Math.sin(theta);
+		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+	    }
+	    var circle1 = new THREE.Line(circleGeom1, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    my.previewGeometry.addChild(circle1);
+	}
+
+	if (r1 && r2) {
+
+	    var geometry = new THREE.TorusGeometry(r1, r2, 10, 50);
+	    var material = new THREE.MeshBasicMaterial({color: 0x3F8FD2, opacity: 0.5});
+	    var torus = new THREE.Mesh(geometry, material);
+	    my.previewGeometry.addChild(torus);
+	}
+
+	my.previewGeometry.position.x = x;
+	my.previewGeometry.position.y = y;
+
+	sceneView.scene.addObject(my.previewGeometry);
+	
+    }
+
+    var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
+    that.onWorkplaneCursorUpdated = function(event) {
+	
+	if (superOnWorkplaneCursorUpdated(event)) {
+	    updatePreview();
+	    return;
+	}
+	
+	var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
+	var x = event.x, y = event.y;
+
+	if (my.focussed === 'r1') {
+	    
+	    var dx = Math.abs(x - originX), dy = Math.abs(y - originY);
+	    var r1  = Math.sqrt(dx*dx + dy*dy);
+	    $('#r1').val(r1.toFixed(2));
+
+	    updatePreview();
+
+	} else if (my.focussed === 'r2') {
+
+	    var dx = Math.abs(x - originX), dy = Math.abs(y - originY);
+	    var r1 = parseFloat($('#r1').val());
+	    var r2  = Math.abs(r1 - Math.sqrt(dx*dx + dy*dy));
+	    $('#r2').val(r2.toFixed(2));
+
+	    updatePreview();
+	}
+
+    }
+
+    var superOnWorkplaneClicked = that.onWorkplaneClicked;
+    that.onWorkplaneClicked = function(event) {
+	superOnWorkplaneClicked({origin: 'r1', r1:'r2'});
+    }
+
+    var superSetupValueHandlers = that.setupValueHandlers;
+    that.setupValueHandlers = function() {
+	superSetupValueHandlers(updatePreview);
+	$('#r1').change(updatePreview);
+	$('#r2').change(updatePreview);
+    }
+
+    var superSetupFocusHandlers = that.setupFocusHandlers;
+    that.setupFocusHandlers = function() {
+	superSetupFocusHandlers();
+
+	$('#r1').focus(function() { my.focussed = 'r1'; });
+	$('#r1').blur(function()  { my.focussed = undefined; });
+
+	$('#r2').focus(function() { my.focussed = 'r2'; });
+	$('#r2').blur(function()  { my.focussed = undefined; });
+    }
+
+    var superCreate = that.create;
+    that.create = function() {
+	superCreate();
+	$('#r1').focus();
+	SS.constructors.active = this;
+    }
+
+    return that;
+}
