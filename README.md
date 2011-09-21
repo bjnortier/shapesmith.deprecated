@@ -1,5 +1,5 @@
-Shapesmith
-==========
+Shapesmith 0.1
+==============
 
 Shapesmith is a browser-based 3D design application that aims to be a powerful, parametric applicaiton that is open and extensible.
 
