@@ -90,27 +90,27 @@ validate_geom_type(<<"sphere">>, Props) ->
 			      ]);
 validate_geom_type(<<"cuboid">>, Props) ->
     validate_primitive(Props, [
-				    {<<"u">>, fun positive/1},
-				    {<<"v">>, fun positive/1},
-				    {<<"w">>, fun positive/1}
+				    {<<"u">>, fun not_zero/1},
+				    {<<"v">>, fun not_zero/1},
+				    {<<"w">>, fun not_zero/1}
 				   ]);
 validate_geom_type(<<"cylinder">>, Props) ->
     validate_primitive(Props, [
 			       {<<"r">>, fun positive/1},
-			       {<<"h">>, fun positive/1}
+			       {<<"h">>, fun not_zero/1}
 			      ]);
 validate_geom_type(<<"cone">>, Props) ->
     validate_primitive(Props, [
 			       {[<<"r1">>, <<"r2">>], fun one_zero_one_positive/1},
 			       {[<<"r1">>, <<"r2">>], fun not_equal/1},
-			       {<<"h">>, fun positive/1}
+			       {<<"h">>, fun not_zero/1}
 			      ]);
 validate_geom_type(<<"wedge">>, Props) ->
     validate_primitive(Props, [
 			       {<<"u1">>, fun positive/1},
 			       {<<"u2">>, fun positive_or_zero/1},
 			       {<<"v">>, fun positive/1},
-			       {<<"w">>, fun positive/1}
+			       {<<"w">>, fun not_zero/1}
 			      ]);
 validate_geom_type(<<"torus">>, Props) ->
     validate_primitive(Props, [
@@ -161,12 +161,12 @@ validate_geom_type_test_() ->
         validate_geom_type(<<"sphere">>, [{<<"parameters">>, 
 					   {struct, [{<<"r">>, -4}]}}])),
      ?_assertEqual(
-        {error, {struct, [{<<"u">>, <<"must be positive">>},
-			  {<<"w">>, <<"must be positive">>}]}}, 
+        {error, {struct, [{<<"u">>, <<"cannot be zero">>},
+			  {<<"w">>, <<"cannot be zero">>}]}}, 
         validate_geom_type(<<"cuboid">>, [{<<"parameters">>,
-					   {struct, [{<<"u">>, -4},
+					   {struct, [{<<"u">>, 0},
 						     {<<"v">>, 3.1},
-						     {<<"w">>, -0.1}
+						     {<<"w">>, 0}
 						    ]}}]))
     ].
 -endif.
@@ -401,6 +401,13 @@ not_equal([A, B]) when A =:= B ->
     {error, <<"can't be equal">>};
 not_equal(_) ->
     ok.
+
+not_zero(Value) when is_integer(Value) andalso Value =/= 0 ->
+    ok;
+not_zero(Value) when is_float(Value) andalso Value =/= 0 ->
+    ok;
+not_zero(_) ->
+    {error, <<"cannot be zero">>}.
 
 
 

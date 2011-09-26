@@ -54,13 +54,18 @@ SS.SceneView = function(container) {
 	container.addEventListener('mousewheel', onMouseWheel, false);
 	container.addEventListener('mousemove', onMouseMove, false);
 	document.addEventListener('keydown', onDocumentKeyDown, false);
-	window.addEventListener('resize', onWindowResize, false);
 	container.addEventListener('mouseover', function() {
 	    overRenderer = true;
 	}, false);
 	container.addEventListener('mouseout', function() {
 	    overRenderer = false;
 	}, false);
+	container.addEventListener('dblclick', function() {
+	    alert('dbl!');
+	});
+
+	window.addEventListener('resize', onWindowResize, false);
+	
     }
 
 
@@ -77,6 +82,7 @@ SS.SceneView = function(container) {
 	panning = false;
 	
 	container.addEventListener('mouseup', onMouseUp, false);
+	ondblclick
     }
     
     function onMouseMove(event) {

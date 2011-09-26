@@ -445,13 +445,30 @@ string create_cuboid(string id, map< string, mValue > geometry) {
         !depth.is_null() && ((depth.type() == real_type) || (depth.type() == int_type))
         &&
         !height.is_null() && ((height.type() == real_type) || (height.type() == int_type))) {
+      
+      map< string, mValue > origin = geometry["origin"].get_obj();
+      if(get_double(width) < 0) {
+	origin["x"] = get_double(origin["x"]) + get_double(width);
+	width = -get_double(width);
+      }
+
+      if(get_double(depth) < 0) {
+	origin["y"] = get_double(origin["y"]) + get_double(depth);
+	depth = -get_double(depth);
+      }
+      
+      if(get_double(height) < 0) {
+	origin["z"] = get_double(origin["z"]) + get_double(height);
+	height = -get_double(height);
+      }
+      geometry["origin"] = origin;
         
-        TopoDS_Shape shape = BRepPrimAPI_MakeBox(get_double(width), 
-                                                 get_double(depth), 
-                                                 get_double(height)).Shape();
+      TopoDS_Shape shape = BRepPrimAPI_MakeBox(get_double(width), 
+					       get_double(depth), 
+					       get_double(height)).Shape();
         
-        unmeshed_shapes[id] = applyTransforms(shape, geometry);
-        return "ok";
+      unmeshed_shapes[id] = applyTransforms(shape, geometry);
+      return "ok";
     }
     return "invalid geometry parameters";
 }
@@ -474,6 +491,13 @@ string create_cylinder(string id, map< string, mValue > geometry) {
     if (!r.is_null() && ((r.type() == real_type) || (r.type() == int_type))
         &&
         !h.is_null() && ((h.type() == real_type) || (h.type() == int_type))) {
+
+      map< string, mValue > origin = geometry["origin"].get_obj();
+      if(get_double(h) < 0) {
+	origin["z"] = get_double(origin["z"]) + get_double(h);
+	h = -get_double(h);
+	geometry["origin"] = origin;
+      }
         
         TopoDS_Shape shape = BRepPrimAPI_MakeCylinder(get_double(r), 
                                                       get_double(h)).Shape();
@@ -493,6 +517,17 @@ string create_cone(string id, map< string, mValue > geometry) {
         !r2.is_null() && ((r2.type() == real_type) || (r2.type() == int_type))
         &&
         !h.is_null() && ((h.type() == real_type) || (h.type() == int_type))) {
+
+      map< string, mValue > origin = geometry["origin"].get_obj();
+      if(get_double(h) < 0) {
+	origin["z"] = get_double(origin["z"]) + get_double(h);
+	h = -get_double(h);
+	geometry["origin"] = origin;
+
+	double tmp = get_double(r1);
+	r1 = r2;
+	r2 = tmp;
+      }
         
         TopoDS_Shape shape = BRepPrimAPI_MakeCone(get_double(r1), 
                                                   get_double(r2), 
@@ -516,6 +551,13 @@ string create_wedge(string id, map< string, mValue > geometry) {
         !y.is_null() && ((y.type() == real_type) || (y.type() == int_type))
         &&
         !z.is_null() && ((z.type() == real_type) || (z.type() == int_type))) {
+
+      map< string, mValue > origin = geometry["origin"].get_obj();
+      if(get_double(z) < 0) {
+	origin["z"] = get_double(origin["z"]) + get_double(z);
+	z = -get_double(z);
+      }
+      geometry["origin"] = origin;
         
         TopoDS_Shape shape = BRepPrimAPI_MakeWedge(get_double(x1), 
                                                    get_double(y), 
