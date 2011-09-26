@@ -2,6 +2,12 @@ var SS = SS || {};
 
 SS.constructors = {};
 
+SS.constructors.lineColor = 0x66A1D2;
+SS.constructors.faceColor = 0x3F8FD2;
+SS.constructors.faceMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.faceColor, opacity: 0.5 } );
+SS.constructors.lineMaterial = new THREE.LineBasicMaterial({ color: SS.constructors.lineColor, wireframe : true });
+SS.constructors.wireframeMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.lineColor, wireframe: true } )
+
 SS.constructors.origin = function(my) {
     var that = {};
 
@@ -38,7 +44,7 @@ SS.constructors.origin = function(my) {
 	}
 	my.previewGeometry = new THREE.Object3D();
 
-	var pointerMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.5, wireframe: false } );
+	var pointerMaterial = [ SS.constructors.faceMaterial, SS.constructors.wireframeMaterial ];
 	var pointerGeometry = new THREE.CubeGeometry(0.5, 0.5, 0.5);
 	var pointer = new THREE.Mesh(pointerGeometry, pointerMaterial);
 	
@@ -116,7 +122,7 @@ SS.constructors.cuboid = function(spec) {
 
 	if (u && v && w) {
 	    var geometry = new THREE.CubeGeometry(u,v,w);
-	    var materials = [ new THREE.MeshBasicMaterial( { color: 0x3F8FD2, opacity: 0.5 } ), new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe: true, opacity: 0.5 } ) ];
+	    var materials = [ SS.constructors.faceMaterial, SS.constructors.wireframeMaterial ];
 	    var cube = new THREE.Mesh(geometry, materials);
 	    cube.position.x = u/2;
 	    cube.position.y = v/2;
@@ -130,14 +136,14 @@ SS.constructors.cuboid = function(spec) {
 	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u, v, 0)));
 	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, v, 0)));
 	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	    var uvLine = new THREE.Line(uvLineGeom, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    var uvLine = new THREE.Line(uvLineGeom, SS.constructors.lineMaterial);
 	    my.previewGeometry.addChild(uvLine);
 
 	} else if (u) {
 	    var uLineGeom = new THREE.Geometry();
 	    uLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
 	    uLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u, 0, 0)));
-	    var uLine = new THREE.Line(uLineGeom, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    var uLine = new THREE.Line(uLineGeom, SS.constructors.lineMaterial);
 	    my.previewGeometry.addChild(uLine);
 	}
 
@@ -238,8 +244,7 @@ SS.constructors.sphere = function() {
 	var r = parseFloat($('#r').val());
 
 	var geometry = new THREE.SphereGeometry(r, 50, 10);
-	var material = new THREE.MeshBasicMaterial({color: 0x3F8FD2, opacity: 0.5});
-	var sphere = new THREE.Mesh(geometry, material);
+	var sphere = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
 	my.previewGeometry.addChild(sphere);
 
 	var circleGeom = new THREE.Geometry();
@@ -249,7 +254,7 @@ SS.constructors.sphere = function() {
 	    var dy = r*Math.sin(theta);
 	    circleGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	}
-	var circle = new THREE.Line(circleGeom, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	var circle = new THREE.Line(circleGeom, SS.constructors.lineMaterial);
 	my.previewGeometry.addChild(circle);
     
 	my.previewGeometry.position.x = x;
@@ -329,18 +334,17 @@ SS.constructors.cylinder = function(spec) {
 		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	    }
-	    var circle1 = new THREE.Line(circleGeom1, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    var circle1 = new THREE.Line(circleGeom1, SS.constructors.lineMaterial);
 	    my.previewGeometry.addChild(circle1);
 	}
 
 	if (r && h) {
-	    var circle2 = new THREE.Line(circleGeom2, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    var circle2 = new THREE.Line(circleGeom2, SS.constructors.lineMaterial);
 	    circle2.position.z = h;
 	    my.previewGeometry.addChild(circle2);
 
 	    var geometry = new THREE.CylinderGeometry(50, r, r, h);
-	    var material = new THREE.MeshBasicMaterial({color: 0x3F8FD2, opacity: 0.5});
-	    var cylinder = new THREE.Mesh(geometry, material);
+	    var cylinder = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
 	    cylinder.position.z = h/2;
 	    my.previewGeometry.addChild(cylinder);
 	}
@@ -435,8 +439,7 @@ SS.constructors.cone = function(spec) {
 	if (r1 && h) {
 
 	    var geometry = new THREE.CylinderGeometry(50, r1, r2 || 0.000001, h);
-	    var material = new THREE.MeshBasicMaterial({color: 0x3F8FD2, opacity: 0.5});
-	    var cone = new THREE.Mesh(geometry, material);
+	    var cone = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
 	    cone.position.z = h/2;
 	    my.previewGeometry.addChild(cone);
 	    
@@ -447,7 +450,7 @@ SS.constructors.cone = function(spec) {
 		var dy = r2*Math.sin(theta);
 		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	    }
-	    var circle2 = new THREE.Line(circleGeom2, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    var circle2 = new THREE.Line(circleGeom2, SS.constructors.lineMaterial);
 	    circle2.position.z = h;
 	    my.previewGeometry.addChild(circle2);
 
@@ -459,7 +462,7 @@ SS.constructors.cone = function(spec) {
 		var dy = r1*Math.sin(theta);
 		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	    }
-	    var circle1 = new THREE.Line(circleGeom1, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    var circle1 = new THREE.Line(circleGeom1, SS.constructors.lineMaterial);
 	    my.previewGeometry.addChild(circle1);
 	}
 
@@ -577,7 +580,7 @@ SS.constructors.wedge = function(spec) {
 
 	if (u1 && v && w) {
 	    var geometry = new THREE.WedgeGeometry(u1,v,w,u2 - u1);
-	    var materials = [ new THREE.MeshBasicMaterial( { color: 0x3F8FD2, opacity: 0.5 } ), new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe: true, opacity: 0.5 } ) ];
+	    var materials = [ SS.constructors.faceMaterial, SS.constructors.wireframeMaterial ];
 	    var wedge = new THREE.Mesh(geometry, materials);
 	    wedge.position.x = u1/2;
 	    wedge.position.y = v/2;
@@ -592,7 +595,7 @@ SS.constructors.wedge = function(spec) {
 	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u2, v, 0)));
 	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, v, 0)));
 	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	    var uvLine = new THREE.Line(uvLineGeom, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    var uvLine = new THREE.Line(uvLineGeom, SS.constructors.lineMaterial);
 	    my.previewGeometry.addChild(uvLine);
 	} else if (u1 && v) {
 	    var uvLineGeom = new THREE.Geometry();
@@ -601,14 +604,14 @@ SS.constructors.wedge = function(spec) {
 	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u1, v, 0)));
 	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, v, 0)));
 	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	    var uvLine = new THREE.Line(uvLineGeom, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    var uvLine = new THREE.Line(uvLineGeom, SS.constructors.lineMaterial);
 	    my.previewGeometry.addChild(uvLine);
 
 	} else if (u1) {
 	    var uLineGeom = new THREE.Geometry();
 	    uLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
 	    uLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u1, 0, 0)));
-	    var uLine = new THREE.Line(uLineGeom, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    var uLine = new THREE.Line(uLineGeom, SS.constructors.lineMaterial);
 	    my.previewGeometry.addChild(uLine);
 	}
 
@@ -725,7 +728,7 @@ SS.constructors.torus = function(spec) {
 		var dy = r1*Math.sin(theta);
 		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	    }
-	    var circle1 = new THREE.Line(circleGeom1, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    var circle1 = new THREE.Line(circleGeom1, SS.constructors.lineMaterial);
 	    my.previewGeometry.addChild(circle1);
 	}
 
@@ -741,14 +744,13 @@ SS.constructors.torus = function(spec) {
 		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx1, dy1, 0)));
 		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx2, dy2, 0)));
 	    }
-	    var circle1 = new THREE.Line(circleGeom1, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
-	    var circle2 = new THREE.Line(circleGeom2, new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 }));
+	    var circle1 = new THREE.Line(circleGeom1, SS.constructors.lineMaterial);
+	    var circle2 = new THREE.Line(circleGeom2, SS.constructors.lineMaterial);
 	    my.previewGeometry.addChild(circle1);
 	    my.previewGeometry.addChild(circle2);
 
 	    var geometry = new THREE.TorusGeometry(r1, r2, 10, 50);
-	    var material = new THREE.MeshBasicMaterial({color: 0x3F8FD2, opacity: 0.5});
-	    var torus = new THREE.Mesh(geometry, material);
+	    var torus = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
 	    my.previewGeometry.addChild(torus);
 	}
 
