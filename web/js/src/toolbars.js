@@ -20,6 +20,8 @@ function Action(label, iconPath, fn) {
 	});
         jQuery("#" + imgId).mouseup(function() {
             fn();
+	    // TODO: Move this to the popupmenu
+	    sceneView.popupMenu.disposeIfShowing();
         });
     }
 }

@@ -6,7 +6,6 @@ SS.SceneView = function(container) {
 
     var mouseOnDown = null;
     var lastMouseDownTime = null;
-    var popupMenuDelay = 200;
     var showPopup = false, showingPopup = false;
 
     var elevation = 0, azimuth = Math.PI/4;
@@ -19,6 +18,7 @@ SS.SceneView = function(container) {
     var panning = false, rotating = false, threshhold = 10; // inside this threshold is a single click
 
     var workplane;
+    var popupMenu = SS.popupMenu();
     
     function init() {
 
@@ -39,6 +39,7 @@ SS.SceneView = function(container) {
 
 	addLights();
 	workplane = new SS.Workplane({scene: scene});
+	popupMenu = SS.popupMenu();
 
 	renderer = new THREE.WebGLRenderer({antialias: true});
 	renderer.autoClear = false;
@@ -66,10 +67,8 @@ SS.SceneView = function(container) {
     function onMouseDown(event) {
 	event.preventDefault();
 
-	showPopup = true;
-	showingPopup = false;
-	lastMouseDownTime = new Date().getTime();
-	setTimeout(function() { popupMenu(); }, popupMenuDelay);
+	popupMenu.onMouseDown(event);
+
 	mouseOnDown = {};
 	mouseOnDown.x = event.clientX;
 	mouseOnDown.y = event.clientY;
@@ -103,9 +102,8 @@ SS.SceneView = function(container) {
 
 	    if (panning || rotating) {
 		container.style.cursor = 'move';
-	    } else {
-		showPopup = false;
-	    }
+		popupMenu.cancel()
+	    } 
 
 	    if (rotating) {
 		var mouse = {};
@@ -128,6 +126,7 @@ SS.SceneView = function(container) {
     function determinePositionOnWorkplane(event) {
 	var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
 	var planeMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 0 }));
+	planeMesh.doubleSided = true;
 	return determinePositionPlane(event, planeMesh);
     }
 
@@ -188,86 +187,61 @@ SS.SceneView = function(container) {
 	return  new THREE.Vector3().add(givenRay.origin, u.clone().multiplyScalar(sc));
     }
 
-    function popupMenu() {
-	if (showPopup) {
-	    document.getElementById('toolWheel').addEventListener('mouseup', onMouseUp, false);
-	    showingPopup = true;
-	    $('#toolWheel').css('left', mouseOnDown.x);
-	    $('#toolWheel').css('top', mouseOnDown.y);
+    function selectObject(event) {
+	    var mouse = {};
+	    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+	    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-	    if (selectionManager.selected().length == 0) {
-		$('#toolWheel').append($('#primitives'));
-	    } else if (selectionManager.selected().length == 1) {
-		$('#toolWheel').append($('#edit'));
-		$('#toolWheel').append($('#transforms'));
-		$('#toolWheel').append($('#copyTransforms'));
-	    } else if (selectionManager.selected().length == 2) {
-		$('#toolWheel').append($('#boolean'));
+	    var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
+	    var projector = new THREE.Projector();
+	    var mouse3D = projector.unprojectVector(vector, camera);
+	    var ray = new THREE.Ray(camera.position, null);
+	    ray.direction = mouse3D.subSelf(camera.position).normalize();
+	    var intersects = ray.intersectScene(scene);
+
+	    var foundObjectPath = null;
+	    if (intersects.length > 0) {
+		for (var i in intersects) {
+		    if (intersects[i].object.name) {
+			foundObjectPath = intersects[i].object.name;
+			break;
+		    }
+		}
 	    }
 
-	    $('#toolWheel').show();
-	}
+	    if (foundObjectPath) {
+		if (event.shiftKey) {
+		    selectionManager.shiftPick(foundObjectPath);
+		} else {
+		    selectionManager.pick(foundObjectPath);
+		}
+	    } else {
+		selectionManager.deselectAll();
+	    }
     }
 
     function onMouseUp(event) {
 
 	targetOnDown.azimuth = target.azimuth;
 	targetOnDown.elevation = target.elevation;
-	showPopup = false;
 
 	if (!panning && !rotating) {
 
-	    var now = new Date().getTime();
-	    console.log(now - lastMouseDownTime);
-	    if (now - lastMouseDownTime < popupMenuDelay) {
+	    var positionOnWorkplane = determinePositionOnWorkplane(event);
+	    if (positionOnWorkplane) {
+		workplane.clicked(positionOnWorkplane);
+	    }
 
-		var positionOnWorkplane = determinePositionOnWorkplane(event);
-		if (positionOnWorkplane) {
-		    workplane.clicked(positionOnWorkplane);
-		}
+	    if (!SS.constructors.active) {
+		selectObject(event);
+	    }
 
-		var mouse = {};
-		mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-		mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-		var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-		var projector = new THREE.Projector();
-		var mouse3D = projector.unprojectVector(vector, camera);
-		var ray = new THREE.Ray(camera.position, null);
-		ray.direction = mouse3D.subSelf(camera.position).normalize();
-		var intersects = ray.intersectScene(scene);
-
-		var foundObjectPath = null;
-		if (intersects.length > 0) {
-		    for (var i in intersects) {
-			if (intersects[i].object.name) {
-			    foundObjectPath = intersects[i].object.name;
-			    break;
-			}
-		    }
-		}
-
-		if (foundObjectPath) {
-		    if (event.shiftKey) {
-			selectionManager.shiftPick(foundObjectPath);
-		    } else {
-			selectionManager.pick(foundObjectPath);
-		    }
-		} else {
-		    selectionManager.deselectAll();
-		}
-	    } 
 	}
 
 	rotating = false;
 	panning = false;
-	if (showingPopup) {
-	    showingPopup = false;
-	    $('#toolWheel').hide();
-	    var toolbars = $('#toolWheel').children().detach();
-	    $('#toolbarStaging').append(toolbars);
-	    document.getElementById('toolWheel').removeEventListener('mouseup', onMouseUp, false);
-	}
+	
+	popupMenu.onMouseUp(event);
 
 	mouseOnDown = null;
 	container.removeEventListener('mouseup', onMouseUp, false);
@@ -461,6 +435,7 @@ SS.SceneView = function(container) {
     this.workplane = workplane;
     this.determinePositionOnRay = determinePositionOnRay;
     this.determinePositionPlane = determinePositionPlane;
+    this.popupMenu = popupMenu;
 
     return this;
 }
