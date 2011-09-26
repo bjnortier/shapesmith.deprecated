@@ -231,6 +231,11 @@ function TreeView() {
             var editingNode = geomNode.editableCopy();
             editingNode.editing = true;
             geom_doc.replace(geomNode, editingNode);
+
+	    
+	    if (SS.constructors[geomNode.type]) {
+		SS.constructors[geomNode.type]().edit();
+	    }
         });
 
         // Edit transform

@@ -65,20 +65,22 @@ SS.constructors.origin = function(my) {
 	$('#model-ok').blur(function()  { my.focussed = undefined; });
     }
 
-    that.create = function() {
-	var lastMousePosition = sceneView.workplane.getLastMousePosition();
-
+    that.edit = function() {
 	that.setupValueHandlers();
 	that.setupFocusHandlers();
+	sceneView.workplane.on('workplaneCursorUpdated', that.onWorkplaneCursorUpdated);
+	sceneView.workplane.on('workplaneClicked', that.onWorkplaneClicked);
 
+	SS.constructors.active = that;
+    }
+
+    that.create = function() {
+	that.edit();
+	var lastMousePosition = sceneView.workplane.getLastMousePosition();
 	var originX = lastMousePosition.x;
 	var originY = lastMousePosition.y;
 	$('#x').val(originX);
 	$('#y').val(originY);
-
-	sceneView.workplane.on('workplaneCursorUpdated', that.onWorkplaneCursorUpdated);
-	sceneView.workplane.on('workplaneClicked', that.onWorkplaneClicked);
-
     }
     
     that.dispose = function() {
@@ -216,7 +218,6 @@ SS.constructors.cuboid = function(spec) {
     that.create = function() {
 	superCreate();
 	$('#u').focus();
-	SS.constructors.active = this;
     }
 
     return that;
@@ -299,7 +300,6 @@ SS.constructors.sphere = function() {
     that.create = function() {
 	superCreate();
 	$('#r').focus();
-	SS.constructors.active = this;
     }
    
     return that;
@@ -411,7 +411,6 @@ SS.constructors.cylinder = function(spec) {
     that.create = function() {
 	superCreate();
 	$('#r').focus();
-	SS.constructors.active = this;
     }
 
     return that;
@@ -552,9 +551,8 @@ SS.constructors.cone = function(spec) {
     that.create = function() {
 	superCreate();
 	$('#r1').focus();
-	SS.constructors.active = this;
     }
-    
+
     return that;
 }
 
@@ -699,7 +697,6 @@ SS.constructors.wedge = function(spec) {
     that.create = function() {
 	superCreate();
 	$('#u1').focus();
-	SS.constructors.active = this;
     }
 
     return that;
@@ -820,7 +817,6 @@ SS.constructors.torus = function(spec) {
     that.create = function() {
 	superCreate();
 	$('#r1').focus();
-	SS.constructors.active = this;
     }
 
     return that;
