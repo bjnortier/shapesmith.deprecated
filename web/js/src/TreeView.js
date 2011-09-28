@@ -125,8 +125,6 @@ function TreeView() {
         if (geomNode.editing) {
             $('#modal-ok').click(function() {
 
-		SS.constructors.active && SS.constructors.active.dispose();
-
                 var cmd;
                 if (geomNode.path) {
 		    for (key in geomNode.origin) {
@@ -152,8 +150,6 @@ function TreeView() {
                 command_stack.execute(cmd);
             });
             $('#modal-cancel').click(function() {
-
-		SS.constructors.active && SS.constructors.active.dispose();
 
                 if (geomNode.path) {
                     geom_doc.replace(geomNode, precursor);
@@ -300,6 +296,9 @@ function TreeView() {
         }
 
         if (event.remove) {
+	    // Preview model is removed on cancel
+	    SS.constructors.active && SS.constructors.active.dispose();
+
             var geomNode = event.remove;
             var id = idForGeomNode(geomNode);
             $('#' + id).remove();
@@ -307,6 +306,9 @@ function TreeView() {
         }
 
         if (event.replace) {
+	    // Preview model is replaced with real model on success
+	    SS.constructors.active && SS.constructors.active.dispose();
+	    
             var original = event.replace.original;
             var replacement = event.replace.replacement;
             var nodeTable = renderNode(replacement);
