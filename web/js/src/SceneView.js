@@ -61,7 +61,15 @@ SS.SceneView = function(container) {
 	    overRenderer = false;
 	}, false);
 	container.addEventListener('dblclick', function() {
-	    alert('dbl!');
+	    popupMenu.cancel();
+	    if (selectionManager.size() == 1) {
+		var editPath = selectionManager.getSelected()[0];
+		var id = idForGeomPath(editPath);
+
+		$('#' + id + ' > tbody > tr:nth-child(1)').addClass('selected');
+		treeView.edit(id);
+	    }
+	    
 	});
 
 	window.addEventListener('resize', onWindowResize, false);
@@ -82,7 +90,6 @@ SS.SceneView = function(container) {
 	panning = false;
 	
 	container.addEventListener('mouseup', onMouseUp, false);
-	ondblclick
     }
     
     function onMouseMove(event) {
@@ -194,36 +201,36 @@ SS.SceneView = function(container) {
     }
 
     function selectObject(event) {
-	    var mouse = {};
-	    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-	    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+	var mouse = {};
+	mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+	mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-	    var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-	    var projector = new THREE.Projector();
-	    var mouse3D = projector.unprojectVector(vector, camera);
-	    var ray = new THREE.Ray(camera.position, null);
-	    ray.direction = mouse3D.subSelf(camera.position).normalize();
-	    var intersects = ray.intersectScene(scene);
+	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
+	var projector = new THREE.Projector();
+	var mouse3D = projector.unprojectVector(vector, camera);
+	var ray = new THREE.Ray(camera.position, null);
+	ray.direction = mouse3D.subSelf(camera.position).normalize();
+	var intersects = ray.intersectScene(scene);
 
-	    var foundObjectPath = null;
-	    if (intersects.length > 0) {
-		for (var i in intersects) {
-		    if (intersects[i].object.name) {
-			foundObjectPath = intersects[i].object.name;
-			break;
-		    }
+	var foundObjectPath = null;
+	if (intersects.length > 0) {
+	    for (var i in intersects) {
+		if (intersects[i].object.name) {
+		    foundObjectPath = intersects[i].object.name;
+		    break;
 		}
 	    }
+	}
 
-	    if (foundObjectPath) {
-		if (event.shiftKey) {
-		    selectionManager.shiftPick(foundObjectPath);
-		} else {
-		    selectionManager.pick(foundObjectPath);
-		}
+	if (foundObjectPath) {
+	    if (event.shiftKey) {
+		selectionManager.shiftPick(foundObjectPath);
 	    } else {
-		selectionManager.deselectAll();
+		selectionManager.pick(foundObjectPath);
 	    }
+	} else {
+	    selectionManager.deselectAll();
+	}
     }
 
     function onMouseUp(event) {
@@ -370,7 +377,11 @@ SS.SceneView = function(container) {
     var add = function(geomNode) {
         if (geom_doc.isRoot(geomNode) && geomNode.mesh) {
 	    var geometry = createGeometry(geomNode.mesh);
-	    var material = new THREE.MeshPhongMaterial( { ambient: 0x030303, color: unselectedColor, specular: 0xccffcc, shininess: 100, shading: THREE.SmoothShading } );
+	    var color = unselectedColor;
+	    if (geomNode.editing) {
+		color = 0x3F8FD2;
+	    }
+	    var material = new THREE.MeshPhongMaterial( { ambient: 0x030303, color: color, specular: 0xccffcc, shininess: 100, shading: THREE.SmoothShading } );
 	    var mesh = new THREE.Mesh(geometry, material);
 	    mesh.doubleSided = true;
 	    mesh.name = geomNode.path;

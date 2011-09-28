@@ -96,6 +96,7 @@ function renderNode(geomNode) {
 
 function TreeView() {
 
+    var that = this;
     this.domNodeLookup = {};
 
     this.addEvents = function(precursor, geomNode) {
@@ -211,6 +212,7 @@ function TreeView() {
 
         // Edit geom
         $('.edit-geom').dblclick(function() { 
+
             var id;
             var pattern = /^target-(.*)$/;
             var classes = $(this).attr('class').split(' ');
@@ -223,16 +225,9 @@ function TreeView() {
             if (!id) {
                 throw Error('id for editing could not be determined');
             }
-            var geomNode = geom_doc.findByPath('/geom/' + id);
-            var editingNode = geomNode.editableCopy();
-            editingNode.editing = true;
-            geom_doc.replace(geomNode, editingNode);
-
-	    
-	    if (SS.constructors[geomNode.type]) {
-		SS.constructors[geomNode.type]().edit();
-	    }
+	    that.edit(id);
         });
+	
 
         // Edit transform
         $('.edit-transform').dblclick(function() { 
@@ -283,6 +278,20 @@ function TreeView() {
         });
         
     }
+
+    this.edit = function(id) {
+	selectionManager.deselectAll();
+
+	var geomNode = geom_doc.findByPath('/geom/' + id);
+        var editingNode = geomNode.editableCopy();
+        editingNode.editing = true;
+        geom_doc.replace(geomNode, editingNode);
+
+	if (SS.constructors[geomNode.type]) {
+	    SS.constructors[geomNode.type]().edit();
+	}
+    }
+				 
 
     this.geomDocUpdated = function(event) {
         if (event.add) {

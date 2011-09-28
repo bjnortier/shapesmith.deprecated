@@ -3,9 +3,9 @@ SS.popupMenu = function() {
 
     var that = {};
 
-    var showing = false, cancelled = false, displayTime = 5000, autoHideReference = 0;
+    var showing = false, cancelled = false, displayTime = 3000, autoHideReference = 0;
 
-    var updateToolWheelPosition = function() {
+    var updateToolWheelPosition = function(event) {
 	document.getElementById('toolWheel').addEventListener('mouseup', that.onMouseUp, false);
 	showing = true;
 	$('#toolWheel').css('left', event.clientX);
@@ -13,20 +13,20 @@ SS.popupMenu = function() {
     }
 
     var addActions = function() {
-	if (selectionManager.selected().length == 0) {
+	if (selectionManager.getSelected().length == 0) {
 	    $('#toolWheel').append($('#primitives'));
-	} else if (selectionManager.selected().length == 1) {
+	} else if (selectionManager.getSelected().length == 1) {
 	    $('#toolWheel').append($('#edit'));
 	    $('#toolWheel').append($('#transforms'));
 	    $('#toolWheel').append($('#copyTransforms'));
-	} else if (selectionManager.selected().length == 2) {
+	} else if (selectionManager.getSelected().length == 2) {
 	    $('#toolWheel').append($('#boolean'));
 	}
     }
 
     var show = function() {
 	$('#toolWheel').show();
-
+	showing = true;
 	var reference = autoHideReference;
 	setTimeout(function() {
 	    if (reference === autoHideReference) {
@@ -36,22 +36,24 @@ SS.popupMenu = function() {
     }
     
     var showIfNotCancelled = function(event) {
-	if (!cancelled && !SS.constructors.active) {
-	    updateToolWheelPosition();
-	    addActions();
-	    show();
-	}
+	setTimeout(function() {
+	    if (!cancelled && !SS.constructors.active) {
+		updateToolWheelPosition(event);
+		addActions();
+		show();
+	    }
+	}, 200);
     }
 
     that.disposeIfShowing = function() {
 	if (showing) {
-	    showing = false;
 	    $('#toolWheel').hide();
 	    var toolbars = $('#toolWheel').children().detach();
 	    $('#toolbarStaging').append(toolbars);
 	    document.getElementById('toolWheel').removeEventListener('mouseup', that.onMouseUp, false);
 	    ++autoHideReference;
 	}
+	showing = false;
     }
 
     that.onMouseUp = function(event) {
@@ -60,7 +62,11 @@ SS.popupMenu = function() {
     }
 
     that.onMouseDown = function(event) {
-	cancelled = false;
+	//if (showing) {
+	//cancelled = true;
+	//} else {
+	    cancelled = false;
+	//}
 	that.disposeIfShowing();
     }
 
@@ -68,8 +74,6 @@ SS.popupMenu = function() {
     that.cancel = function() {
 	cancelled = true;
     }
-
-
 
     return that;
 

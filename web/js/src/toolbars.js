@@ -31,7 +31,7 @@ function delete_geom() {
             alert("please select at least one object");
         return;
     }
-    var selected = selectionManager.selected();
+    var selected = selectionManager.getSelected();
     var nodes = selected.map(function(path) {
 	return geom_doc.findByPath(path);
     });
@@ -81,7 +81,7 @@ function create_transform(type, keys) {
         transformParams[keys[i]] = null;
     }
     
-    var path = selectionManager.selected()[0];
+    var path = selectionManager.getSelected()[0];
     
     var original = geom_doc.findByPath(path);
     var replacement = original.editableCopy();
@@ -100,10 +100,10 @@ $(document).ready(function() {
     /*
      * Document
      */
-    new Action("Save", "images/save.png", 
+    /*new Action("Save", "images/save.png", 
                function() { 
 		   save(); 
-	       }).render($("#document"));
+	       }).render($("#document"));*/
     new Action("Undo", "images/undo.png", 
                function() { 
 		   command_stack.undo(); 
@@ -122,7 +122,7 @@ $(document).ready(function() {
     new Action("Export to STL", "images/stl.png", 
                function() { 
 		   var pattern = /^\/geom\/(.*)$/;
-		   var id = selectionManager.selected()[0].match(pattern)[1];
+		   var id = selectionManager.getSelected()[0].match(pattern)[1];
 		   window.location = '/stl/' + id; 
 	       }).render($("#edit"));
 

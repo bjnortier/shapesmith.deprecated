@@ -18,15 +18,11 @@ selectionManager.addListener(function(event) {
 
 geom_doc.addListener(function(event) {
     sceneView.geomDocUpdated(event);
+    selectionManager.geomDocUpdated(event);
 });
 selectionManager.addListener(function(event) {
     sceneView.selectionUpdated(event);
 });
-
-selectionManager.addListener(function(event) {
-    sceneView.selectionUpdated(event);
-});
-
 
 $(document).ready(function() {
     var docId = $.getQueryParam("docid");

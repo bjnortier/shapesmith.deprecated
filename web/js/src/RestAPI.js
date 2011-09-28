@@ -159,7 +159,7 @@ function boolean(type) {
     var childNodes;
 
     var doFn = function() {
-        var selected = selectionManager.selected();
+        var selected = selectionManager.getSelected();
         var geometry = {type: type,
                         children: selected
                        };
@@ -279,7 +279,7 @@ function copy() {
         return;
     }
 
-    var path = selectionManager.selected()[0];
+    var path = selectionManager.getSelected()[0];
     var node = geom_doc.findByPath(path);
     
     var doFn = function() {

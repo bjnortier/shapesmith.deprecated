@@ -2,7 +2,7 @@ function SelectionManager() {
 
     var selected = [];
 
-    this.selected = function() {
+    this.getSelected = function() {
         var toReturn = [];
         for (var i in selected) {
             toReturn.push(selected[i]);
@@ -55,7 +55,9 @@ function SelectionManager() {
         }
         selected = [path];
         
-        this.notify({deselected : deselected});
+	if (deselected.length > 0) {
+            this.notify({deselected : deselected});
+	}
         if (!found) {
             this.notify({selected : [path]});
         }
@@ -67,6 +69,10 @@ function SelectionManager() {
             selected = [];
             this.notify({deselected : deselected});
         }
+    }
+    
+    this.geomDocUpdated = function(event) {
+	this.deselectAll();
     }
 
 }
