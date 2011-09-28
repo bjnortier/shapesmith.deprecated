@@ -3,10 +3,13 @@ SS.popupMenu = function() {
 
     var that = {};
 
-    var showing = false, cancelled = false, displayTime = 3000, autoHideReference = 0;
+
+    var showing = false, holding = false, cancelled = false, holdDelayTime = 500;
+    // The reference counter is used to couple a mouse down and mouse up event, so
+    // that the holding down of the button (delayed popup) is coupled correctly
+    var referenceCounter = 0;
 
     var updateToolWheelPosition = function(event) {
-	document.getElementById('toolWheel').addEventListener('mouseup', that.onMouseUp, false);
 	showing = true;
 	$('#toolWheel').css('left', event.clientX);
 	$('#toolWheel').css('top', event.clientY);
@@ -27,22 +30,14 @@ SS.popupMenu = function() {
     var show = function() {
 	$('#toolWheel').show();
 	showing = true;
-	var reference = autoHideReference;
-	setTimeout(function() {
-	    if (reference === autoHideReference) {
-		that.disposeIfShowing();
-	    }
-	}, displayTime);
     }
     
     var showIfNotCancelled = function(event) {
-	setTimeout(function() {
-	    if (!cancelled && !SS.constructors.active) {
-		updateToolWheelPosition(event);
-		addActions();
-		show();
-	    }
-	}, 200);
+	if (!cancelled && !SS.constructors.active) {
+	    updateToolWheelPosition(event);
+	    addActions();
+	    show();
+	}
     }
 
     that.disposeIfShowing = function() {
@@ -50,29 +45,40 @@ SS.popupMenu = function() {
 	    $('#toolWheel').hide();
 	    var toolbars = $('#toolWheel').children().detach();
 	    $('#toolbarStaging').append(toolbars);
-	    document.getElementById('toolWheel').removeEventListener('mouseup', that.onMouseUp, false);
-	    ++autoHideReference;
 	}
 	showing = false;
     }
 
     that.onMouseUp = function(event) {
-	lastMouseDownTime = new Date().getTime();
-	showIfNotCancelled(event);
+	holding = false;
+	++referenceCounter;
     }
 
     that.onMouseDown = function(event) {
-	//if (showing) {
-	//cancelled = true;
-	//} else {
-	    cancelled = false;
-	//}
+	var reference = referenceCounter;
+	cancelled = false;
+	holding = true;
 	that.disposeIfShowing();
+	
+	if (event.button == 2) {
+	    showIfNotCancelled(event);
+	} else {
+	    setTimeout(function() {
+		if (holding && (reference == referenceCounter)) {
+		    showIfNotCancelled(event);
+		}
+	    }, holdDelayTime);
+	}
+	
     }
 
     // Cancel the popup when for example the view has been rotated
     that.cancel = function() {
 	cancelled = true;
+    }
+
+    that.isShowing = function() {
+	return showing;
     }
 
     return that;

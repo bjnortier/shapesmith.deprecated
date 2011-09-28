@@ -6,7 +6,6 @@ SS.SceneView = function(container) {
 
     var mouseOnDown = null;
     var lastMouseDownTime = null;
-    var showPopup = false, showingPopup = false;
 
     var elevation = 0, azimuth = Math.PI/4;
     var target = { azimuth: Math.PI/4, elevation: Math.PI*3/8 };
@@ -88,14 +87,18 @@ SS.SceneView = function(container) {
 
 	rotating = false;
 	panning = false;
-	
+
+
+
 	container.addEventListener('mouseup', onMouseUp, false);
+
+
     }
     
     function onMouseMove(event) {
 
-	if (mouseOnDown && !showingPopup) {
-	    if (!(rotating || panning)) {
+	if (mouseOnDown) {
+	    if (!(rotating || panning) && !popupMenu.isShowing()) {
 		if (event.button == 0 && !event.shiftKey) {
 		    if ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
 			||
@@ -130,7 +133,7 @@ SS.SceneView = function(container) {
 		target.elevation = target.elevation > Math.PI ? Math.PI : target.elevation;
 		target.elevation = target.elevation < 0 ? 0 : target.elevation;
 	    }
-	} else if (!showingPopup) {
+	} else {
 	    var positionOnWorkplane = determinePositionOnWorkplane(event);
 	    workplane.updateXYLocation(positionOnWorkplane, event);
 	}
@@ -245,10 +248,9 @@ SS.SceneView = function(container) {
 		workplane.clicked(positionOnWorkplane);
 	    }
 
-	    if (!SS.constructors.active) {
+	    if (!SS.constructors.active && (event.button == 0)) {
 		selectObject(event);
 	    }
-
 	}
 
 	rotating = false;
@@ -258,14 +260,12 @@ SS.SceneView = function(container) {
 
 	mouseOnDown = null;
 	container.removeEventListener('mouseup', onMouseUp, false);
-	//container.removeEventListener('mouseout', onMouseOut, false);
 	container.style.cursor = 'auto';
     }
 
     function onMouseOut(event) {
 	mouseOnDown = null;
 	container.removeEventListener('mouseup', onMouseUp, false);
-	//container.removeEventListener('mouseout', onMouseOut, false);
     }
 
     function onMouseWheel(event) {
@@ -290,7 +290,6 @@ SS.SceneView = function(container) {
     }
 
     function onWindowResize(event) {
-	console.log('resize');
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 	renderer.setSize(window.innerWidth, window.innerHeight);
@@ -453,6 +452,7 @@ SS.SceneView = function(container) {
     this.determinePositionOnRay = determinePositionOnRay;
     this.determinePositionPlane = determinePositionPlane;
     this.popupMenu = popupMenu;
+    this.onMouseUp = onMouseUp;
 
     return this;
 }

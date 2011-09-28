@@ -141,14 +141,14 @@ function create_geom_command(prototype, geometry) {
 }
 
 
-function boolean(type) {
+function boolean(selected, type) {
     if ((type == 'union') || (type == 'intersect')) {
-        if (selectionManager.size() <= 1)  {
+        if (selected.length <= 1)  {
             alert("must have > 2 object selected!");
             return;
         }
     } else if (type =='subtract') {
-        if (selectionManager.size() != 2)  {
+        if (selected.length != 2)  {
             alert("must have 2 object selected!");
             return;
         }
@@ -159,7 +159,6 @@ function boolean(type) {
     var childNodes;
 
     var doFn = function() {
-        var selected = selectionManager.getSelected();
         var geometry = {type: type,
                         children: selected
                        };
@@ -273,13 +272,13 @@ function copyNode(node, finishedFn) {
     }
 }
 
-function copy() {
-    if (selectionManager.size() !== 1)  {
+function copy(selected) {
+    if (selected.length !== 1)  {
         alert("must have 1 object selected");
         return;
     }
 
-    var path = selectionManager.getSelected()[0];
+    var path = selected[0];
     var node = geom_doc.findByPath(path);
     
     var doFn = function() {
