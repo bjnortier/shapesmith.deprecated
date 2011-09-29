@@ -197,19 +197,19 @@ $(document).ready(function() {
      * Copy & Transform
      */
     new Action("Copy", "/images/copy.png", 
-               function() { 
+               function(selected) { 
 		   copy()
 	       }).render($("#copyTransforms"));
     new Action("Copy Translate", "/images/copy_translate.png", 
-               function() { 
+               function(selected) { 
 		   create_transform(selected, "copy_translate", ["dx", "dy", "dz", "n"]); 
 	       }).render($("#copyTransforms"));
     new Action("Copy Rotate", "/images/copy_rotate.png", 
-               function() { 
+               function(selected) { 
 		   create_transform(selected, "copy_rotate", ["px", "py", "pz", "vx", "vy", "vz", "angle", "n"]);
 	       }).render($("#copyTransforms"));
     new Action("Copy Mirror", "/images/copy_mirror.png", 
-               function() { 
+               function(selected) { 
 		   create_transform(selected, "copy_mirror", ["px", "py", "pz", "vx", "vy", "vz"]); 
 	       }).render($("#copyTransforms"));
 
