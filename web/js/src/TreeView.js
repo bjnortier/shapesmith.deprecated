@@ -124,6 +124,7 @@ function TreeView() {
         }
 
         if (geomNode.editing) {
+
             $('#modal-ok').click(function() {
 
                 var cmd;
@@ -150,14 +151,26 @@ function TreeView() {
                 }
                 command_stack.execute(cmd);
             });
-            $('#modal-cancel').click(function() {
 
-                if (geomNode.path) {
+	    var cancelFunction = function() {
+		if (geomNode.path) {
                     geom_doc.replace(geomNode, precursor);
                 } else {
                     // It's a new node, remove it
                     geom_doc.remove(geomNode);
                 }
+	    }
+
+	    if (geomNode.editing) {
+		$(document).bind('keyup.editing', function(e) {
+		    if (e.keyCode == 27) { 
+			cancelFunction();
+		    }
+		});
+	    } 
+
+            $('#modal-cancel').click(function() {
+                cancelFunction();
             });
         } 
 
@@ -294,6 +307,9 @@ function TreeView() {
 				 
 
     this.geomDocUpdated = function(event) {
+
+	$(document).unbind('keyup.editing');
+
         if (event.add) {
             var geomNode = event.add;
 
@@ -317,7 +333,7 @@ function TreeView() {
         if (event.replace) {
 	    // Preview model is replaced with real model on success
 	    SS.constructors.active && SS.constructors.active.dispose();
-	    
+
             var original = event.replace.original;
             var replacement = event.replace.replacement;
             var nodeTable = renderNode(replacement);
