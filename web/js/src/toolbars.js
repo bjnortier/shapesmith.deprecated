@@ -198,7 +198,7 @@ $(document).ready(function() {
      */
     new Action("Copy", "/images/copy.png", 
                function(selected) { 
-		   copy()
+		   copy(selected)
 	       }).render($("#copyTransforms"));
     new Action("Copy Translate", "/images/copy_translate.png", 
                function(selected) { 
