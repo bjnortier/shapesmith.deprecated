@@ -41,6 +41,7 @@ create_geom(Geometry) ->
 		ok ->
 		    {ok, Id};
 		{error, Reason} ->
+		    node_log:error("create_geom failed: ~p~n", [Reason]),
 		    {error, Reason}
 	    end;
 	{error, Reason} ->
@@ -79,17 +80,21 @@ ensure_brep_exists(Id, Geometry, Hash, TopLevelFn) ->
 	{error, Error} ->
 	    {error, Error};
 	WorkerPid ->
-	    Result = try ensure_child_breps_exist(WorkerPid, [{Id, Geometry, Hash}], TopLevelFn) of
-			 X ->
-			     node_brep_db:purge(WorkerPid, Hash),
-			     X
+	    Result = try 
+			 ensure_child_breps_exist(WorkerPid, [{Id, Geometry, Hash}], TopLevelFn)
 		     catch
 			 Type:Exception ->
-			     node_log:error("Exception on ensure_child_breps_exist: ~p:~p", [Type, Exception]),
+			     node_log:error("Exception on ensure_child_breps_exist: ~p:~p~n", [Type, Exception]),
 			     {error, {Type, Exception}}
 		     end,
+	    %% Purge the top level geometry. Also,
 	    %% Some brep may be left over if error occured and cleanup wasn't complete
-	    node_brep_db:purge_all(WorkerPid),
+	    try 
+		node_brep_db:purge_all(WorkerPid)
+	    catch
+		A:B ->
+		    node_log:error("Exception on purge_all in ensure_child_breps_exist: ~p:~p~n", [A, B])
+	    end,
 	    node_worker_pool:return_worker(WorkerPid),
 	    Result
 	    

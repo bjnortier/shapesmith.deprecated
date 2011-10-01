@@ -327,7 +327,7 @@ TopoDS_Shape copy_transform(TopoDS_Shape shape,
                             map< string, mValue > parameters) {
     int n = parameters["n"].get_int();
     
-    TopoDS_Shape copies[n + 1]; // worst case memory requirement
+    TopoDS_Shape copies[n + 1]; // worst case memory requirement
     copies[0] = shape;
     
     
@@ -408,6 +408,19 @@ TopoDS_Shape applyTransform(map<string, mValue> transform, TopoDS_Shape shape) {
 
 TopoDS_Shape applyTransforms(TopoDS_Shape shape, map< string, mValue > geometry) {
     TopoDS_Shape transformedShape = shape;
+    
+    if (!geometry["origin"].is_null()) {
+        map< string, mValue > origin = geometry["origin"].get_obj();
+        mValue x = origin["x"];
+        mValue y = origin["y"];
+        mValue z = origin["z"];
+        gp_Trsf transformation = gp_Trsf();
+        transformation.SetTranslation(gp_Vec(get_double(x), get_double(y), get_double(z)));
+        
+        BRepBuilderAPI_Transform brep_transform(shape, transformation);
+        transformedShape = brep_transform.Shape();
+    }
+    
     if (!geometry["transforms"].is_null() && (geometry["transforms"].type() == array_type)) {
         mArray transforms = geometry["transforms"].get_array();
         vector< mValue >::iterator it;
@@ -424,28 +437,45 @@ TopoDS_Shape applyTransforms(TopoDS_Shape shape, map< string, mValue > geometry)
 
 string create_cuboid(string id, map< string, mValue > geometry) {
     map< string, mValue > parameters = geometry["parameters"].get_obj();
-    mValue width = parameters["width"];
-    mValue depth = parameters["depth"];
-    mValue height = parameters["height"];
+    mValue width = parameters["u"];
+    mValue depth = parameters["v"];
+    mValue height = parameters["w"];
     if (!width.is_null() && ((width.type() == real_type) || (width.type() == int_type))
         &&
         !depth.is_null() && ((depth.type() == real_type) || (depth.type() == int_type))
         &&
         !height.is_null() && ((height.type() == real_type) || (height.type() == int_type))) {
+      
+      map< string, mValue > origin = geometry["origin"].get_obj();
+      if(get_double(width) < 0) {
+	origin["x"] = get_double(origin["x"]) + get_double(width);
+	width = -get_double(width);
+      }
+
+      if(get_double(depth) < 0) {
+	origin["y"] = get_double(origin["y"]) + get_double(depth);
+	depth = -get_double(depth);
+      }
+      
+      if(get_double(height) < 0) {
+	origin["z"] = get_double(origin["z"]) + get_double(height);
+	height = -get_double(height);
+      }
+      geometry["origin"] = origin;
         
-        TopoDS_Shape shape = BRepPrimAPI_MakeBox(get_double(width), 
-                                                 get_double(depth), 
-                                                 get_double(height)).Shape();
+      TopoDS_Shape shape = BRepPrimAPI_MakeBox(get_double(width), 
+					       get_double(depth), 
+					       get_double(height)).Shape();
         
-        unmeshed_shapes[id] = applyTransforms(shape, geometry);
-        return "ok";
+      unmeshed_shapes[id] = applyTransforms(shape, geometry);
+      return "ok";
     }
     return "invalid geometry parameters";
 }
 
 string create_sphere(string id, map< string, mValue > geometry) {
     map< string, mValue > parameters = geometry["parameters"].get_obj();
-    mValue radius = parameters["radius"];
+    mValue radius = parameters["r"];
     if (!radius.is_null() && ((radius.type() == real_type) || (radius.type() == int_type))) {
         TopoDS_Shape shape = BRepPrimAPI_MakeSphere(get_double(radius)).Shape();
         unmeshed_shapes[id] = applyTransforms(shape, geometry);
@@ -456,14 +486,21 @@ string create_sphere(string id, map< string, mValue > geometry) {
 
 string create_cylinder(string id, map< string, mValue > geometry) {
     map< string, mValue > parameters = geometry["parameters"].get_obj();
-    mValue radius = parameters["radius"];
-    mValue height = parameters["height"];
-    if (!radius.is_null() && ((radius.type() == real_type) || (radius.type() == int_type))
+    mValue r = parameters["r"];
+    mValue h = parameters["h"];
+    if (!r.is_null() && ((r.type() == real_type) || (r.type() == int_type))
         &&
-        !height.is_null() && ((height.type() == real_type) || (height.type() == int_type))) {
+        !h.is_null() && ((h.type() == real_type) || (h.type() == int_type))) {
+
+      map< string, mValue > origin = geometry["origin"].get_obj();
+      if(get_double(h) < 0) {
+	origin["z"] = get_double(origin["z"]) + get_double(h);
+	h = -get_double(h);
+	geometry["origin"] = origin;
+      }
         
-        TopoDS_Shape shape = BRepPrimAPI_MakeCylinder(get_double(radius), 
-                                                      get_double(height)).Shape();
+        TopoDS_Shape shape = BRepPrimAPI_MakeCylinder(get_double(r), 
+                                                      get_double(h)).Shape();
         unmeshed_shapes[id] = applyTransforms(shape, geometry);
         return "ok";
     }
@@ -472,18 +509,29 @@ string create_cylinder(string id, map< string, mValue > geometry) {
 
 string create_cone(string id, map< string, mValue > geometry) {
     map< string, mValue > parameters = geometry["parameters"].get_obj();
-    mValue bottom_radius = parameters["bottom_radius"];
-    mValue top_radius = parameters["top_radius"];
-    mValue height = parameters["height"];
-    if (!bottom_radius.is_null() && ((bottom_radius.type() == real_type) || (bottom_radius.type() == int_type))
+    mValue r1 = parameters["r1"];
+    mValue r2 = parameters["r2"];
+    mValue h = parameters["h"];
+    if (!r1.is_null() && ((r1.type() == real_type) || (r1.type() == int_type))
         &&
-        !top_radius.is_null() && ((top_radius.type() == real_type) || (top_radius.type() == int_type))
+        !r2.is_null() && ((r2.type() == real_type) || (r2.type() == int_type))
         &&
-        !height.is_null() && ((height.type() == real_type) || (height.type() == int_type))) {
+        !h.is_null() && ((h.type() == real_type) || (h.type() == int_type))) {
+
+      map< string, mValue > origin = geometry["origin"].get_obj();
+      if(get_double(h) < 0) {
+	origin["z"] = get_double(origin["z"]) + get_double(h);
+	h = -get_double(h);
+	geometry["origin"] = origin;
+
+	double tmp = get_double(r1);
+	r1 = r2;
+	r2 = tmp;
+      }
         
-        TopoDS_Shape shape = BRepPrimAPI_MakeCone(get_double(bottom_radius), 
-                                                  get_double(top_radius), 
-                                                  get_double(height)).Shape();
+        TopoDS_Shape shape = BRepPrimAPI_MakeCone(get_double(r1), 
+                                                  get_double(r2), 
+                                                  get_double(h)).Shape();
         unmeshed_shapes[id] = applyTransforms(shape, geometry);
         return "ok";
     }
@@ -492,10 +540,10 @@ string create_cone(string id, map< string, mValue > geometry) {
 
 string create_wedge(string id, map< string, mValue > geometry) {
     map< string, mValue > parameters = geometry["parameters"].get_obj();
-    mValue x1 = parameters["x1"];
-    mValue x2 = parameters["x2"];
-    mValue y = parameters["y"];
-    mValue z = parameters["z"];
+    mValue x1 = parameters["u1"];
+    mValue x2 = parameters["u2"];
+    mValue y = parameters["v"];
+    mValue z = parameters["w"];
     if (!x1.is_null() && ((x1.type() == real_type) || (x1.type() == int_type))
         &&
         !x2.is_null() && ((x2.type() == real_type) || (x2.type() == int_type))
@@ -503,6 +551,13 @@ string create_wedge(string id, map< string, mValue > geometry) {
         !y.is_null() && ((y.type() == real_type) || (y.type() == int_type))
         &&
         !z.is_null() && ((z.type() == real_type) || (z.type() == int_type))) {
+
+      map< string, mValue > origin = geometry["origin"].get_obj();
+      if(get_double(z) < 0) {
+	origin["z"] = get_double(origin["z"]) + get_double(z);
+	z = -get_double(z);
+      }
+      geometry["origin"] = origin;
         
         TopoDS_Shape shape = BRepPrimAPI_MakeWedge(get_double(x1), 
                                                    get_double(y), 

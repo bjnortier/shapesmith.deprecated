@@ -58,20 +58,20 @@ validate_geom_test_() ->
      ?_assertEqual(ok,
 		   geom({struct, [{<<"type">>, <<"sphere">>},
 				  {<<"parameters">>, {struct, [
-							       {<<"radius">>, 1.2}
+							       {<<"r">>, 1.2}
 							      ]}}]})),
      ?_assertEqual(ok,
 		   geom({struct, [{<<"type">>, <<"union">>},
 				  {<<"children">>, [<<"abc">>, <<"123">>]}]})),
-     ?_assertEqual({error, {struct, [{<<"radius">>,<<"must be positive">>}]}},
+     ?_assertEqual({error, {struct, [{<<"r">>,<<"must be positive">>}]}},
 		   geom({struct, [{<<"type">>, <<"sphere">>},
 				  {<<"parameters">>, {struct, [
-							       {<<"radius">>, -0.3}
+							       {<<"r">>, -0.3}
 							      ]}}]})),
      ?_assertEqual({error, {struct, [{<<"factor">>,<<"must be positive">>}]}},
 		   geom({struct, [{<<"type">>, <<"sphere">>},
 				  {<<"parameters">>, {struct, [
-							       {<<"radius">>, 3}
+							       {<<"r">>, 3}
 							      ]}},
 				  {<<"transforms">>,
 				   [{struct, [{<<"type">>, <<"scale">>},
@@ -86,31 +86,31 @@ validate_geom_test_() ->
 
 validate_geom_type(<<"sphere">>, Props) ->
     validate_primitive(Props, [
-			       {<<"radius">>, fun positive/1}
+			       {<<"r">>, fun positive/1}
 			      ]);
 validate_geom_type(<<"cuboid">>, Props) ->
     validate_primitive(Props, [
-			       {<<"width">>, fun positive/1},
-			       {<<"depth">>, fun positive/1},
-			       {<<"height">>, fun positive/1}
-			      ]);
+				    {<<"u">>, fun not_zero/1},
+				    {<<"v">>, fun not_zero/1},
+				    {<<"w">>, fun not_zero/1}
+				   ]);
 validate_geom_type(<<"cylinder">>, Props) ->
     validate_primitive(Props, [
-			       {<<"radius">>, fun positive/1},
-			       {<<"height">>, fun positive/1}
+			       {<<"r">>, fun positive/1},
+			       {<<"h">>, fun not_zero/1}
 			      ]);
 validate_geom_type(<<"cone">>, Props) ->
     validate_primitive(Props, [
-			       {[<<"top_radius">>, <<"bottom_radius">>], fun one_zero_one_positive/1},
-			       {[<<"top_radius">>, <<"bottom_radius">>], fun not_equal/1},
-			       {<<"height">>, fun positive/1}
+			       {[<<"r1">>, <<"r2">>], fun one_zero_one_positive/1},
+			       {[<<"r1">>, <<"r2">>], fun not_equal/1},
+			       {<<"h">>, fun not_zero/1}
 			      ]);
 validate_geom_type(<<"wedge">>, Props) ->
     validate_primitive(Props, [
-			       {<<"x1">>, fun positive/1},
-			       {<<"x2">>, fun positive_or_zero/1},
-			       {<<"y">>, fun positive/1},
-			       {<<"z">>, fun positive/1}
+			       {<<"u1">>, fun positive/1},
+			       {<<"u2">>, fun positive_or_zero/1},
+			       {<<"v">>, fun positive/1},
+			       {<<"w">>, fun not_zero/1}
 			      ]);
 validate_geom_type(<<"torus">>, Props) ->
     validate_primitive(Props, [
@@ -151,22 +151,22 @@ validate_geom_type_test_() ->
      ?_assertEqual(
         ok, 
         validate_geom_type(<<"sphere">>, [{<<"parameters">>, 
-					   {struct, [{<<"radius">>, 0.1}]}}])),
+					   {struct, [{<<"r">>, 0.1}]}}])),
      ?_assertEqual(
-        {error, {struct, [{<<"radius">>, <<"not found">>}]}}, 
+        {error, {struct, [{<<"r">>, <<"not found">>}]}}, 
         validate_geom_type(<<"sphere">>, [{<<"parameters">>, 
 					   {struct, []}}])),
      ?_assertEqual(
-        {error, {struct, [{<<"radius">>, <<"must be positive">>}]}}, 
+        {error, {struct, [{<<"r">>, <<"must be positive">>}]}}, 
         validate_geom_type(<<"sphere">>, [{<<"parameters">>, 
-					   {struct, [{<<"radius">>, -4}]}}])),
+					   {struct, [{<<"r">>, -4}]}}])),
      ?_assertEqual(
-        {error, {struct, [{<<"width">>, <<"must be positive">>},
-			  {<<"height">>, <<"must be positive">>}]}}, 
+        {error, {struct, [{<<"u">>, <<"cannot be zero">>},
+			  {<<"w">>, <<"cannot be zero">>}]}}, 
         validate_geom_type(<<"cuboid">>, [{<<"parameters">>,
-					   {struct, [{<<"height">>, -4},
-						     {<<"depth">>, 3.1},
-						     {<<"width">>, -0.1}
+					   {struct, [{<<"u">>, 0},
+						     {<<"v">>, 3.1},
+						     {<<"w">>, 0}
 						    ]}}]))
     ].
 -endif.
@@ -326,6 +326,7 @@ validate_parameters_test_() ->
     ].
 -endif.
 
+
 validate_spec({struct, ParameterProps}, {Fields, CheckFn}) when is_list(Fields) ->
     Values = lists:foldr(fun(Field, Acc) ->
 				 case lists:keyfind(Field, 1, ParameterProps) of
@@ -400,6 +401,13 @@ not_equal([A, B]) when A =:= B ->
     {error, <<"can't be equal">>};
 not_equal(_) ->
     ok.
+
+not_zero(Value) when is_integer(Value) andalso Value =/= 0 ->
+    ok;
+not_zero(Value) when is_float(Value) andalso Value =/= 0 ->
+    ok;
+not_zero(_) ->
+    {error, <<"cannot be zero">>}.
 
 
 
