@@ -2,13 +2,25 @@
 <html>
   <head>
     <title>Shapesmith.net</title>
+    <style type="text/css">
+      body {
+      background-color: #080808;
+      font-family: Helvetica, Arial, Sans;
+      text-align: center; 
+      }
+   </style>
     <script type="text/javascript" src="js/lib/jquery-1.5.1.min.js"></script>
-
+    
   </head>
   <body>
 
+    <div style="margin-top: 100px">
+      <input id="newButton" type="button" value="New model"/>
+    </div>
+    
+
     <script type="text/javascript">
-      $(document).ready(function() {
+      $('#newButton').click(function() {
       $.ajax({
       type: 'POST',
       url: '/doc/',
