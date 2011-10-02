@@ -60,6 +60,12 @@ hex_test_() ->
 
 hashable({struct, Props}) ->
     {<<"type">>, Type} = lists:keyfind(<<"type">>, 1, Props),
+    OptionalOrigin = case lists:keyfind(<<"origin">>, 1, Props) of
+			 false -> 
+			     [];
+			 {_, Orgn} -> 
+			     [{<<"origin">>, Orgn}]
+		     end,
     Parameters = case lists:keyfind(<<"parameters">>, 1, Props) of
                      false -> 
                          {struct, []};
@@ -76,10 +82,9 @@ hashable({struct, Props}) ->
                      {_, Transfrms} -> 
                          Transfrms
                  end,
-    {struct, [{<<"type">>, Type},
-              {<<"parameters">>, Parameters},
-              {<<"children">>, FilteredChildren},
-              {<<"transforms">>, Transforms}]}.
+    {struct, [{<<"type">>, Type}] ++ OptionalOrigin ++ [{<<"parameters">>, Parameters},
+							{<<"children">>, FilteredChildren},
+							{<<"transforms">>, Transforms}]}.
 
 -ifdef(TEST).
 
@@ -89,6 +94,7 @@ hashable_simple_test_() ->
                       {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]},
     Geom2 = {struct, [{<<"type">>, <<"sphere">>},
                       {<<"id">>, <<"def">>},
+		      {<<"origin">>, {struct, [{<<"x">>, 0}, {<<"y">>, 0}, {<<"z">>, 0}]}},
                       {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]},
     [
      ?_assertEqual({struct, [{<<"type">>, <<"sphere">>},
@@ -97,7 +103,8 @@ hashable_simple_test_() ->
                              {<<"transforms">>, []}]},
                    hashable(Geom1)),
      ?_assertEqual({struct, [{<<"type">>, <<"sphere">>},
-                             {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}},
+			     {<<"origin">>, {struct, [{<<"x">>, 0}, {<<"y">>, 0}, {<<"z">>, 0}]}},
+			     {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}},
                              {<<"children">>, []},
                              {<<"transforms">>, []}]},
                    hashable(Geom2))

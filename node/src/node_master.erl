@@ -90,6 +90,7 @@ ensure_brep_exists(Id, Geometry, Hash, TopLevelFn) ->
 	    %% Purge the top level geometry. Also,
 	    %% Some brep may be left over if error occured and cleanup wasn't complete
 	    try 
+		node_brep_db:purge(WorkerPid, Hash),
 		node_brep_db:purge_all(WorkerPid)
 	    catch
 		A:B ->
