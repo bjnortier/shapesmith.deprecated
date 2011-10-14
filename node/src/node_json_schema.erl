@@ -28,55 +28,95 @@ validate_json({raw, Json}, {raw, Schema}) when is_list(Json) andalso is_list(Sch
     MochiJson = mochijson2:decode(Json),
     MochiSchema = mochijson2:decode(Schema),
     validate_json(MochiJson, MochiSchema);
-validate_json(MochiJson, {struct, SchemaFields}) ->
+validate_json(MochiJson, MochiSchema = {struct, SchemaFields}) ->
     case lists:keyfind(<<"type">>, 1, SchemaFields) of
 	false ->
-	    {error, not_root_type};
-	<<"object">> ->
-	    SchemaProperties = case lists:keyfind(<<"properties">>, 1, SchemaFields) of
-				   {<<"properties">>, P} ->
-				       P;
-				   _ ->
-				       {struct, []}
-			       end,
-	    validate_object(MochiJson, SchemaProperties);
+	    {error, no_type_defined};
+	{<<"type">>, <<"object">>} ->
+	    validate_object(MochiJson, MochiSchema);
 	{<<"type">>, Type} ->
-	    validate_type(MochiJson, Type)
+	    case validate_type(MochiJson, Type) of
+		ok ->
+		    ok;
+		Error ->
+		    [Error]
+	    end
     end.
 
 -ifdef(TEST).
 validate_spec_test_() ->
     %% 'Geo' sample from http://json-schema.org/
-    Schema = "{
+    GeoSchema = "{
 	\"description\" : \"A geographical coordinate\",
 	\"type\" : \"object\",
 	\"properties\" : {
 		\"latitude\" : { \"type\" : \"number\" },
 		\"longitude\" : { \"type\" : \"number\" }
 	}
-}",
+    }",
+    %% Nested object
+    NestedSchema = "{
+        \"type\" : \"object\",
+        \"properties\" : {
+           \"origin\" : { \"type\" : \"object\",
+                          \"properties\" : {
+                               \"x\" : { \"type\" : \"number\" }
+                           }
+           },
+           \"n\" : { \"type\" : \"number\" }
+        }
+    }",
+    %% Errors in multiple nested levels
+    
     [
-     ?_assertEqual(ok, validate_json({raw, "{}"}, {raw, Schema})),
-     ?_assertEqual(ok, validate_json({raw, "1.2"}, {raw, "{\"type\" : \"number\"}"}))
+     ?_assertEqual(ok, validate_json({raw, "{}"}, {raw, GeoSchema})),
+     ?_assertEqual(ok, validate_json({raw, "1.2"}, {raw, "{\"type\" : \"number\"}"})),
+     ?_assertEqual([{not_a_number,[5]}], 
+		   validate_json({raw, "[5]"}, {raw, "{\"type\" : \"number\"}"})),
+
+     ?_assertEqual(ok, validate_json({raw, "{\"origin\" : { \"x\" : 0.0 } }"}, 
+				     {raw, NestedSchema})),
+     ?_assertEqual([{<<"origin">>,[{<<"x">>,[{not_a_number,<<"something">>}]}]}],
+		   validate_json({raw, "{\"origin\" : { \"x\" : \"something\" } }"}, 
+				 {raw, NestedSchema})),
+     ?_assertEqual([{<<"origin">>,[{<<"x">>,[{not_a_number,<<"something">>}]}]},
+		    {<<"n">>,[{not_a_number,[]}]}], 
+		   validate_json({raw, "{\"origin\" : { \"x\" : \"something\" }, \"n\" : [] }"}, 
+				 {raw, NestedSchema}))
     ].
 
 -endif.
 
 
-validate_object({struct, ObjectProps}, {struct, SchemaProps}) ->
+validate_object({struct, ObjectProps}, {struct, SchemaFields}) ->
+    %%io:format("~n!! ~p~n~p~n", [ObjectProps, SchemaFields]),
+    SchemaProperties = case lists:keyfind(<<"properties">>, 1, SchemaFields) of
+			   {<<"properties">>, {struct, P}} ->
+			       P;
+			   _ ->
+			       []
+		       end,
+    AdditionalAllowed = case lists:keyfind(<<"additionalProperties">>, 1, SchemaFields) of
+			    false ->
+				true;
+			    {_, X} ->
+				X
+			end,
     ValidateValue = fun(Key, Value, SubSchema) ->
 			    case validate_json(Value, SubSchema) of
-				{error, Reason} ->
-				    {error, {Key, Reason}};
 				ok ->
-				    ok
+				    ok;
+				Errors ->
+				    {Key, Errors}
 			    end
 		    end,
     ValidateProperty = fun(Key, Value) ->
-			       case lists:keyfind(Key, 1, SchemaProps) of
-				   false -> 
+			       case {lists:keyfind(Key, 1, SchemaProperties), AdditionalAllowed} of
+				   {false, false} -> 
+				       {Key, property_not_in_schema};
+				   {false, true} ->
 				       ok;
-				   {Key, SubSchema} ->
+				   {{Key, SubSchema},_} ->
 				       ValidateValue(Key, Value, SubSchema)
 			       end
 		       end,
@@ -95,38 +135,42 @@ validate_object({struct, ObjectProps}, {struct, SchemaProps}) ->
 
 -ifdef(TEST).
 validate_object_test_() ->
-    EmptyPropertiesSchema = {struct, []},
-    LatLonPropertiesSchema = {struct, [{<<"latitude">>, 
-					{struct, [{<<"type">>, <<"number">>}]}},
-				       {<<"longitude">>, 
-					{struct, [{<<"type">>, <<"number">>}]}}]},
+    EmptyPropertiesSchema = {struct, [{<<"properties">>, {struct, []}}]},
+    NoAdditionalPropertiesSchema = {struct, [{<<"additionalProperties">>, false}]},
+    LatLonPropertiesSchema = {struct, [{<<"properties">>, 
+					{struct, [{<<"latitude">>, 
+						   {struct, [{<<"type">>, <<"number">>}]}},
+						  {<<"longitude">>, 
+						   {struct, [{<<"type">>, <<"number">>}]}}]}}]},
     [
      ?_assertEqual(ok, 
 		   validate_object({struct, []}, EmptyPropertiesSchema)),
 
      %% Undefined properties are not validated as per paragraph 5.4 of the specification
-     ?_assertEqual(ok, 
+     ?_assertEqual(ok,
 		   validate_object({struct, [{<<"lat">>, 10}]}, EmptyPropertiesSchema)),
+
+     %% No aditional properties
+     ?_assertEqual([{<<"lat">>, property_not_in_schema}],
+		   validate_object({struct, [{<<"lat">>, 10}]}, NoAdditionalPropertiesSchema)),
+
 
      %% Neither are required
      ?_assertEqual(ok, 
 		   validate_object({struct, []}, LatLonPropertiesSchema)),
      ?_assertEqual(ok, 
 		   validate_object({struct, [{<<"latitude">>, 1.2}]}, LatLonPropertiesSchema)),
-					      
+
      %% Single failure
-     ?_assertEqual([{error, {<<"latitude">>, {not_a_number ,<<"foo">>}}}],
+     ?_assertEqual([{<<"latitude">>, [{not_a_number ,<<"foo">>}]}],
 		   validate_object({struct, [{<<"latitude">>, <<"foo">>}]}, LatLonPropertiesSchema)),
      %% Multiple failures
-     ?_assertEqual([{error,{<<"latitude">>,{not_a_number,<<"foo">>}}},
-		    {error,{<<"latitude">>,{not_a_number,<<"bar">>}}}],
+     ?_assertEqual([{<<"latitude">>, [{not_a_number,<<"foo">>}]},
+		    {<<"latitude">>, [{not_a_number,<<"bar">>}]}],
 		   validate_object({struct, [{<<"latitude">>, <<"foo">>},
 					     {<<"latitude">>, <<"bar">>}]}, 
 				   LatLonPropertiesSchema))
-
-
     ].
-
 -endif.
 
 
@@ -145,18 +189,18 @@ validate_type_test_() ->
 -endif.
 
 validate_union_type(MochiJson, Types) ->
-    ValidationResult = lists:foldl(fun(Type, {error, _Reason}) ->
-					   validate_simple_type(MochiJson, Type);
-				      (_Type, ok) ->
-					   ok
+    ValidationResult = lists:foldl(fun(_Type, ok) ->
+					   ok;
+				      (Type, _Error) ->
+					   validate_simple_type(MochiJson, Type)
 				   end,
-				   {error, undefined},
+				   undefined,
 				   Types),
     case ValidationResult of
 	ok ->
 	    ok;
-	{error, _Reason} ->
-	    {error, {not_one_of, Types, MochiJson}}
+	_Reason ->
+	    {not_one_of, Types, MochiJson}
     end.
 
 -ifdef(TEST).
@@ -167,7 +211,7 @@ validate_union_type_test_() ->
      ?_assertEqual(ok, 
 		   validate_union_type(3.1, [<<"number">>, <<"null">>])),
 
-     ?_assertEqual({error, {not_one_of, [<<"number">>, null], <<"something">>}},
+     ?_assertEqual({not_one_of, [<<"number">>, null], <<"something">>},
 		   validate_union_type(<<"something">>, [<<"number">>, null]))
     ].
 -endif.    
@@ -184,57 +228,57 @@ validate_simple_type(null, <<"null">>) -> ok;
 validate_simple_type(MochiJson, <<"object">>) when is_tuple(MochiJson) -> ok;
 
 validate_simple_type(MochiJson, <<"string">>) ->
-    {error, {not_a_string, MochiJson}};
+    {not_a_string, MochiJson};
 validate_simple_type(MochiJson, <<"number">>) ->
-    {error, {not_a_number, MochiJson}};
+    {not_a_number, MochiJson};
 validate_simple_type(MochiJson, <<"integer">>) ->
-    {error, {not_an_integer, MochiJson}};
+    {not_an_integer, MochiJson};
 validate_simple_type(MochiJson, <<"boolean">>) ->
-    {error, {not_a_boolean, MochiJson}};
+    {not_a_boolean, MochiJson};
 validate_simple_type(MochiJson, <<"array">>) ->
-    {error, {not_an_array, MochiJson}};
+    {not_an_array, MochiJson};
 validate_simple_type(MochiJson, <<"null">>) ->
-    {error, {not_null, MochiJson}};
+    {not_null, MochiJson};
 validate_simple_type(MochiJson, <<"object">>) ->
-    {error, {not_an_object, MochiJson}};
+    {not_an_object, MochiJson};
 validate_simple_type(_MochiJson, Type) when is_binary(Type) ->
-    {error, {"unknown type", binary_to_list(Type)}};
+    {"unknown type", binary_to_list(Type)};
 validate_simple_type(_MochiJson, Type) ->
-    {error, {"invalid schema - type not a string", Type}}.
+    {"invalid schema - type not a string", Type}.
 
 
 -ifdef(TEST).
 validate_simple_type_test_() ->
     [
-     ?_assertEqual({error, {"unknown type", "real"}}, validate_simple_type([], <<"real">>)),
-     ?_assertEqual({error, {"invalid schema - type not a string", something}}, validate_simple_type([], something)),
-
-     ?_assertEqual({error, {not_a_string, []}}, validate_simple_type([], <<"string">>)),
-     ?_assertEqual({error, {not_a_string, null}}, validate_simple_type(null, <<"string">>)),
+     ?_assertEqual({"unknown type", "real"}, validate_simple_type([], <<"real">>)),
+     ?_assertEqual({"invalid schema - type not a string", something}, validate_simple_type([], something)),
+     
+     ?_assertEqual({not_a_string, []}, validate_simple_type([], <<"string">>)),
+     ?_assertEqual({not_a_string, null}, validate_simple_type(null, <<"string">>)),
      ?_assertEqual(ok, validate_simple_type(<<"abc">>, <<"string">>)),
-
-     ?_assertEqual({error, {not_a_number, <<"123">>}}, validate_simple_type(<<"123">>, <<"number">>)),
-     ?_assertEqual({error, {not_a_number, null}}, validate_simple_type(null, <<"number">>)),
+     
+     ?_assertEqual({not_a_number, <<"123">>}, validate_simple_type(<<"123">>, <<"number">>)),
+     ?_assertEqual({not_a_number, null}, validate_simple_type(null, <<"number">>)),
      ?_assertEqual(ok, validate_simple_type(1.3, <<"number">>)),
-
-     ?_assertEqual({error, {not_an_integer, 1.2}}, validate_simple_type(1.2, <<"integer">>)),
-     ?_assertEqual({error, {not_an_integer, null}}, validate_simple_type(null, <<"integer">>)),
+     
+     ?_assertEqual({not_an_integer, 1.2}, validate_simple_type(1.2, <<"integer">>)),
+     ?_assertEqual({not_an_integer, null}, validate_simple_type(null, <<"integer">>)),
      ?_assertEqual(ok, validate_simple_type(-132, <<"integer">>)),
-
-     ?_assertEqual({error, {not_a_boolean, [1,2]}}, validate_simple_type([1,2], <<"boolean">>)),
-     ?_assertEqual({error, {not_a_boolean, null}}, validate_simple_type(null, <<"boolean">>)),
+     
+     ?_assertEqual({not_a_boolean, [1,2]}, validate_simple_type([1,2], <<"boolean">>)),
+     ?_assertEqual({not_a_boolean, null}, validate_simple_type(null, <<"boolean">>)),
      ?_assertEqual(ok, validate_simple_type(true, <<"boolean">>)),
      ?_assertEqual(ok, validate_simple_type(false, <<"boolean">>)),
-
-     ?_assertEqual({error, {not_an_object, <<"abc">>}}, validate_simple_type(<<"abc">>, <<"object">>)),
-     ?_assertEqual({error, {not_an_object, null}}, validate_simple_type(null, <<"object">>)),
+     
+     ?_assertEqual({not_an_object, <<"abc">>}, validate_simple_type(<<"abc">>, <<"object">>)),
+     ?_assertEqual({not_an_object, null}, validate_simple_type(null, <<"object">>)),
      ?_assertEqual(ok, validate_simple_type({struct, []}, <<"object">>)),
-
-     ?_assertEqual({error, {not_an_array, <<"abc">>}}, validate_simple_type(<<"abc">>, <<"array">>)),
-     ?_assertEqual({error, {not_an_array, null}}, validate_simple_type(null, <<"array">>)),
+    
+     ?_assertEqual({not_an_array, <<"abc">>}, validate_simple_type(<<"abc">>, <<"array">>)),
+     ?_assertEqual({not_an_array, null}, validate_simple_type(null, <<"array">>)),
      ?_assertEqual(ok, validate_simple_type([], <<"array">>)),
 
-     ?_assertEqual({error, {not_null, 42}}, validate_simple_type(42, <<"null">>)),
+     ?_assertEqual({not_null, 42}, validate_simple_type(42, <<"null">>)),
      ?_assertEqual(ok, validate_simple_type(null, <<"null">>)),
 
      ?_assertEqual(ok, validate_simple_type(<<"a string">>, <<"any">>)),
