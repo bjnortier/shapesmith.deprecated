@@ -75,7 +75,7 @@ validate_object({struct, ObjectProps}, {struct, SchemaProps}) ->
     ValidateProperty = fun(Key, Value) ->
 			       case lists:keyfind(Key, 1, SchemaProps) of
 				   false -> 
-				       {error, {property_not_in_schema, Key}};
+				       ok;
 				   {Key, SubSchema} ->
 				       ValidateValue(Key, Value, SubSchema)
 			       end
@@ -104,9 +104,8 @@ validate_object_test_() ->
      ?_assertEqual(ok, 
 		   validate_object({struct, []}, EmptyPropertiesSchema)),
 
-     %% Undefined field
-
-     ?_assertEqual([{error, {property_not_in_schema, <<"lat">>}}], 
+     %% Undefined properties are not validated as per paragraph 5.4 of the specification
+     ?_assertEqual(ok, 
 		   validate_object({struct, [{<<"lat">>, 10}]}, EmptyPropertiesSchema)),
 
      %% Neither are required
