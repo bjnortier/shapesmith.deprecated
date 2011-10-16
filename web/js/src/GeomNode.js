@@ -5,6 +5,7 @@ function Transform() {
 
     this.editing = arguments[0].editing;
     this.type = arguments[0].type;
+    this.origin = arguments[0].origin;
     this.parameters = arguments[0].parameters;
 }
 
@@ -13,13 +14,15 @@ Transform.prototype.editableCopy = function() {
     for (key in this.parameters) {
         copiedParameters[key] = this.parameters[key];
     }
-    return new Transform({type : this.type,
-                          parameters : copiedParameters,
-                          editing : this.editing});
+    return new Transform({type: this.type,
+			  origin: this.origin,
+                          parameters: copiedParameters,
+                          editing: this.editing});
 }
 
 Transform.prototype.json = function() {
     return JSON.stringify({type: this.type,
+			   origin: this.origin,
                            parameters: this.parameters});
 }
 
@@ -41,7 +44,6 @@ function GeomNode() {
     this.transforms = transformDescriptions.map(function(transformDescription) {
 	return new Transform(transformDescription);
     });
-	
 
     if (arguments[1]) {
         if (!typeof(arguments[1]) == "object") {

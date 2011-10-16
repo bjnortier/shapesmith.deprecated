@@ -1,7 +1,22 @@
 function renderTransform(geomNode, transformIndex) {
-    var paramsArr = [];
     var transform = geomNode.transforms[transformIndex];
     var id = idForGeomNode(geomNode);
+    
+    // Origin & Orientation
+    var originTable = null;
+    if (transform.origin) {
+	var originArr = ['x', 'y', 'z'].map(function(key) {
+	    return {key: key, 
+		    value: geomNode.origin[key], 
+		    'edit-class': 'edit-transform target-' + id + '-' + transformIndex,
+		    editing: transform.editing}
+	});
+	var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}<input id="{{key}}" type="text" value="{{value}}"/>{{/editing}}</td></tr>{{/originArr}}</table>';
+	var originTable = $.mustache(originTemplate, {originArr : originArr});
+    }
+
+    // Params
+    var paramsArr = [];
     for (key in transform.parameters) {
         paramsArr.push({key: key,
                         value: transform.parameters[key],
@@ -9,13 +24,19 @@ function renderTransform(geomNode, transformIndex) {
                         editing: transform.editing
                        });
     }
-    
-    var template = '<table><tr><td>{{type}}{{^editing}}<img class="{{delete-class}}" src="/images/delete_button.png" alt="delete"/>{{/editing}}</td></tr><tr><td><table>{{#paramsArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}<input id="{{key}}" type="text" value="{{value}}">{{/editing}}</td></tr>{{/paramsArr}}</td></tr></table>{{#editing}}<tr><td><input id="transform-ok" type="submit" value="Ok"/><input id="transform-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}</table>';
-    var transformTable = $.mustache(template, {
+    var parametersTemplate = '<table>{{#paramsArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{clazz}}">{{value}}</span>{{/editing}}{{#editing}}<input id="{{key}}" type="text" value="{{value}}"/>{{/editing}}</td></tr>{{/paramsArr}}</table>';
+    var paramsTable = $.mustache(parametersTemplate, {paramsArr : paramsArr});
+
+
+    var template = '<table><tr><td>{{type}}{{^editing}}<img class="{{delete-class}}" src="/images/delete_button.png" alt="delete"/>{{/editing}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>       {{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input id="modal-ok" type="submit" value="Ok"/><input id="modal-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}</table>';
+
+    var view = {
         type: transform.type,
+	editing: transform.editing,
         'delete-class': 'delete-transform target-' + id + '-' + transformIndex,
-        paramsArr: paramsArr,
-        editing: transform.editing});
+	originTable: originTable,
+	paramsTable: paramsTable};
+    var transformTable = $.mustache(template, view);
     return transformTable;
 }
 
@@ -123,32 +144,54 @@ function TreeView() {
             }
         }
 
-        if (geomNode.editing) {
+	var transformBeingEdited; 
+	for (var i in geomNode.transforms) {
+	    if (geomNode.transforms[i].editing) {
+		transformBeingEdited = geomNode.transforms[i];
+	    }
+	}
+	
+	var okGeomFunction = function() {
+	    if (geomNode.path) {
+		for (key in geomNode.origin) {
+                    geomNode.origin[key] = parseFloat($('#' + key).val());
+		}
+		for (key in geomNode.parameters) {
+                    geomNode.parameters[key] = parseFloat($('#' + key).val());
+		}
+		return update_geom_command(precursor, geomNode);
+            } else {
+		var origin = {};
+		for (key in geomNode.origin) {
+                    origin[key] = parseFloat($('#' + key).val());
+		}
+		var parameters = {};
+		for (key in geomNode.parameters) {
+                    parameters[key] = parseFloat($('#' + key).val());
+		}
+		return create_geom_command(geomNode, {type: geomNode.type,
+						      origin: origin,
+                                                      parameters: parameters});
+            }
+	}
 
+	var okTransformFn = function() {
+	    for (key in transformBeingEdited.parameters) {
+		transformBeingEdited.parameters[key] = parseFloat($('#' + key).val());
+	    }
+	    return update_geom_command(precursor, geomNode);
+	}
+
+        if (geomNode.editing || transformBeingEdited) {
+	    
             $('#modal-ok').click(function() {
 
                 var cmd;
-                if (geomNode.path) {
-		    for (key in geomNode.origin) {
-                        geomNode.origin[key] = parseFloat($('#' + key).val());
-                    }
-                    for (key in geomNode.parameters) {
-                        geomNode.parameters[key] = parseFloat($('#' + key).val());
-                    }
-                    cmd = update_geom_command(precursor, geomNode);
-                } else {
-                    var origin = {};
-		    for (key in geomNode.origin) {
-                        origin[key] = parseFloat($('#' + key).val());
-                    }
-		    var parameters = {};
-                    for (key in geomNode.parameters) {
-                        parameters[key] = parseFloat($('#' + key).val());
-                    }
-                    cmd = create_geom_command(geomNode, {type: geomNode.type,
-							 origin: origin,
-                                                         parameters: parameters});
-                }
+		if (geomNode.editing) {
+                    cmd = okGeomFunction();
+		} else {
+		    cmd = okTransformFn();
+		}
                 command_stack.execute(cmd);
             });
 
@@ -184,24 +227,6 @@ function TreeView() {
         }
         if (!(geomNode.editing || anyTransformsEditing)) {
             hideNode($('#' + idForGeomNode(geomNode) + ' .show-hide-siblings'));
-        }
-
-        // Add the transform ok/cancel event functions. There can be only a 
-        // single prorotype transform on a GeomNode
-        for (var i in geomNode.transforms) {
-            if (geomNode.transforms[i].editing) {
-                var transform = geomNode.transforms[i];
-                $('#transform-ok').click(function() {
-                    for (key in transform.parameters) {
-                        transform.parameters[key] = parseFloat($('#' + key).val());
-                    }
-                    var cmd = update_geom_command(precursor, geomNode);
-                    command_stack.execute(cmd);
-                }); 
-                $('#transform-cancel').click(function() {
-                    geom_doc.replace(geomNode, precursor);
-                });
-            }
         }
 
         $("#geom-model-doc tr:nth-child(even)").addClass("even");

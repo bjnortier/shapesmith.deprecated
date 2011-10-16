@@ -42,9 +42,12 @@ geom(_) ->
 
 
 transform({struct, Props}) when is_list(Props) ->
+    io:format("~p~n", [Props]),
     case lists:keyfind(<<"type">>, 1, Props) of
         {<<"type">>, TransformType} ->
-            validate_transform_type(TransformType, Props);
+            X = validate_transform_type(TransformType, Props),
+	    io:format("~p~n", [X]),
+	    X;
         _ ->
             {error, {struct, [{<<"missing">>, <<"tranform type">>}]}}
     end;
@@ -54,9 +57,13 @@ transform(_) ->
 
 -ifdef(TEST).
 validate_geom_test_() ->
+    Origin = {struct, [{<<"x">>, 0},
+		       {<<"y">>, 0},
+		       {<<"z">>, 0}]},
     [
      ?_assertEqual(ok,
 		   geom({struct, [{<<"type">>, <<"sphere">>},
+				  {<<"origin">>, Origin},
 				  {<<"parameters">>, {struct, [
 							       {<<"r">>, 1.2}
 							      ]}}]})),
@@ -65,16 +72,19 @@ validate_geom_test_() ->
 				  {<<"children">>, [<<"abc">>, <<"123">>]}]})),
      ?_assertEqual({error, {struct, [{<<"r">>,<<"must be positive">>}]}},
 		   geom({struct, [{<<"type">>, <<"sphere">>},
+				  {<<"origin">>, Origin},
 				  {<<"parameters">>, {struct, [
 							       {<<"r">>, -0.3}
 							      ]}}]})),
      ?_assertEqual({error, {struct, [{<<"factor">>,<<"must be positive">>}]}},
 		   geom({struct, [{<<"type">>, <<"sphere">>},
+				  {<<"origin">>, Origin},
 				  {<<"parameters">>, {struct, [
 							       {<<"r">>, 3}
 							      ]}},
 				  {<<"transforms">>,
 				   [{struct, [{<<"type">>, <<"scale">>},
+					      {<<"origin">>, Origin},
 					      {<<"parameters">>, {struct, [{<<"x">>, 0.0},
 									   {<<"y">>, 3},
 									   {<<"z">>, 0.0},
@@ -127,12 +137,31 @@ validate_geom_type(_, _) ->
     {error, {struct, [{<<"invalid">>, <<"unknown geometry type">>}]}}.
 
 validate_primitive(Props, Specs) ->
-    case lists:keyfind(<<"parameters">>, 1, Props) of
+    case lists:keyfind(<<"origin">>, 1, Props) of
 	false ->
-	    {error, {struct, [{<<"missing">>, <<"parameters">>}]}};
-	{_, Parameters} ->
-	    validate_parameters(Parameters, Specs)
+	    {error, {struct, [{<<"missing">>, <<"origin">>}]}};
+	{_, Origin} ->
+	    case validate_origin(Origin) of
+		ok ->
+		    case lists:keyfind(<<"parameters">>, 1, Props) of
+			false ->
+			    {error, {struct, [{<<"missing">>, <<"parameters">>}]}};
+			{_, Parameters} ->
+			    validate_parameters(Parameters, Specs)
+		    end;
+		Error ->
+		    Error
+	    end
+		
     end.
+
+validate_origin(Origin) ->
+    validate_parameters(Origin, [
+				 {<<"x">>, fun number/1},
+				 {<<"y">>, fun number/1},
+				 {<<"z">>, fun number/1}
+				]).
+    
 
 validate_boolean(Props) ->
     case lists:keyfind(<<"children">>, 1, Props) of
@@ -147,23 +176,30 @@ validate_boolean(Props) ->
     
 -ifdef(TEST).
 validate_geom_type_test_() ->
+    Origin = {struct, [{<<"x">>, 0},
+		       {<<"y">>, 0},
+		       {<<"z">>, 0}]},
     [
      ?_assertEqual(
         ok, 
-        validate_geom_type(<<"sphere">>, [{<<"parameters">>, 
+        validate_geom_type(<<"sphere">>, [{<<"origin">>, Origin},
+					  {<<"parameters">>, 
 					   {struct, [{<<"r">>, 0.1}]}}])),
      ?_assertEqual(
         {error, {struct, [{<<"r">>, <<"not found">>}]}}, 
-        validate_geom_type(<<"sphere">>, [{<<"parameters">>, 
+        validate_geom_type(<<"sphere">>, [{<<"origin">>, Origin},
+					  {<<"parameters">>, 
 					   {struct, []}}])),
      ?_assertEqual(
         {error, {struct, [{<<"r">>, <<"must be positive">>}]}}, 
-        validate_geom_type(<<"sphere">>, [{<<"parameters">>, 
+        validate_geom_type(<<"sphere">>, [{<<"origin">>, Origin},
+					  {<<"parameters">>, 
 					   {struct, [{<<"r">>, -4}]}}])),
      ?_assertEqual(
         {error, {struct, [{<<"u">>, <<"cannot be zero">>},
 			  {<<"w">>, <<"cannot be zero">>}]}}, 
-        validate_geom_type(<<"cuboid">>, [{<<"parameters">>,
+        validate_geom_type(<<"cuboid">>, [{<<"origin">>, Origin},
+					  {<<"parameters">>,
 					   {struct, [{<<"u">>, 0},
 						     {<<"v">>, 3.1},
 						     {<<"w">>, 0}
@@ -172,54 +208,40 @@ validate_geom_type_test_() ->
 -endif.
 
 validate_transform_type(<<"translate">>, Props) ->
-    validate_transform_parameters(Props, [{<<"dx">>, fun number/1},
-					  {<<"dy">>, fun number/1},
-					  {<<"dz">>, fun number/1}
-					 ]);
+    validate_primitive(Props, [{<<"u">>, fun number/1},
+			       {<<"v">>, fun number/1},
+			       {<<"w">>, fun number/1}
+			      ]);
 validate_transform_type(<<"scale">>, Props) ->
-    validate_transform_parameters(Props, [{<<"x">>, fun number/1},
-					  {<<"y">>, fun number/1},
-					  {<<"z">>, fun number/1},
-					  {<<"factor">>, fun positive/1}
-					 ]);
+    validate_primitive(Props, [
+			       {<<"factor">>, fun positive/1}
+			      ]);
 validate_transform_type(<<"mirror">>, Props) ->
-    validate_transform_parameters(Props, [
-					  {<<"px">>, fun number/1},
-					  {<<"py">>, fun number/1},
-					  {<<"pz">>, fun number/1},
-					  {<<"vx">>, fun number/1},
-					  {<<"vy">>, fun number/1},
-					  {<<"vz">>, fun number/1}
-					 ]);
+    validate_primitive(Props, [
+			      ]);
 validate_transform_type(<<"rotate">>, Props) ->
-    validate_transform_parameters(Props, [
-					  {<<"px">>, fun number/1},
-					  {<<"py">>, fun number/1},
-					  {<<"pz">>, fun number/1},
-					  {<<"vx">>, fun number/1},
-					  {<<"vy">>, fun number/1},
-					  {<<"vz">>, fun number/1},
-					  {<<"angle">>, fun positive/1}
-					 ]);
+    validate_primitive(Props, [
+			       {<<"angle">>, fun positive/1}
+			      ]);
 validate_transform_type(<<"copy_translate">>, Props) ->
-    validate_transform_parameters(Props, [{<<"dx">>, fun number/1},
-					  {<<"dy">>, fun number/1},
-					  {<<"dz">>, fun number/1},
-					  {<<"n">>, fun positive_integer/1}
-					 ]);
+    validate_primitive(Props, [{<<"u">>, fun number/1},
+			       {<<"v">>, fun number/1},
+			       {<<"w">>, fun number/1},
+			       {<<"n">>, fun positive_integer/1}
+			      ]);
 validate_transform_type(<<"copy_rotate">>, Props) ->
-    validate_transform_parameters(Props, [
-					  {<<"px">>, fun number/1},
-					  {<<"py">>, fun number/1},
-					  {<<"pz">>, fun number/1},
-					  {<<"vx">>, fun number/1},
-					  {<<"vy">>, fun number/1},
-					  {<<"vz">>, fun number/1},
-					  {<<"angle">>, fun positive/1},
-					  {<<"n">>, fun positive_integer/1}
-					 ]);
+    validate_primitive(Props, [
+			       {<<"px">>, fun number/1},
+			       {<<"py">>, fun number/1},
+			       {<<"pz">>, fun number/1},
+			       {<<"vx">>, fun number/1},
+			       {<<"vy">>, fun number/1},
+			       {<<"vz">>, fun number/1},
+			       {<<"angle">>, fun positive/1},
+			       {<<"n">>, fun positive_integer/1}
+			      ]);
 validate_transform_type(<<"copy_mirror">>, Props) ->
-    validate_transform_parameters(Props, [
+    validate_primitive(Props, [
 					  {<<"px">>, fun number/1},
 					  {<<"py">>, fun number/1},
 					  {<<"pz">>, fun number/1},
@@ -230,38 +252,35 @@ validate_transform_type(<<"copy_mirror">>, Props) ->
 validate_transform_type(_, _) ->
     {error, {struct, [{<<"invalid">>, <<"transform">>}]}}.
 
-validate_transform_parameters(Props, Specs) ->
-    case lists:keyfind(<<"parameters">>, 1, Props) of
-	false ->
-	    {error, {struct, [{<<"missing">>, <<"parameters">>}]}};
-	{_, Parameters} ->
-	    validate_parameters(Parameters, Specs)
-    end.
 
     
 
 
 -ifdef(TEST).
 validate_transform_type_test_() ->
+    Origin = {struct, [{<<"x">>, 0},
+		       {<<"y">>, 0},
+		       {<<"z">>, 0}]},
     [
      ?_assertEqual(
         ok, 
-        validate_transform_type(<<"scale">>, [{<<"parameters">>, 
-						{struct, [{<<"x">>, 0.1},
-							  {<<"y">>, 0},
-							  {<<"z">>, -5},
-							  {<<"factor">>, 2}
-							 ]}}])),
+        validate_transform_type(<<"scale">>, [{<<"origin">>, Origin},
+					      {<<"parameters">>, 
+					       {struct, [{<<"x">>, 0.1},
+							 {<<"y">>, 0},
+							 {<<"z">>, -5},
+							 {<<"factor">>, 2}
+							]}}])),
      ?_assertEqual(
-        {error, {struct, [{<<"y">>, <<"must be a number">>},
-			  {<<"factor">>, <<"must be positive">>}
+        {error, {struct, [{<<"factor">>, <<"must be positive">>}
 			 ]}}, 
-        validate_transform_type(<<"scale">>, [{<<"parameters">>, 
-						{struct, [{<<"x">>, 0.1},
-							  {<<"y">>, <<"a">>},
-							  {<<"z">>, -5},
-							  {<<"factor">>, -0.1}
-							 ]}}]))
+        validate_transform_type(<<"scale">>, [{<<"origin">>, Origin},
+					      {<<"parameters">>, 
+					       {struct, [{<<"x">>, 0.1},
+							 {<<"y">>, <<"a">>},
+							 {<<"z">>, -5},
+							 {<<"factor">>, -0.1}
+							]}}]))
     ].
 -endif.
 

@@ -115,7 +115,6 @@ SS.constructors.cuboid = function(spec) {
 
 	var x = parseFloat($('#x').val());
 	var y = parseFloat($('#y').val());
-	var r = parseFloat($('#r').val());
 	var u = parseFloat($('#u').val());
 	var v = parseFloat($('#v').val());
 	var w = parseFloat($('#w').val());
@@ -824,3 +823,89 @@ SS.constructors.torus = function(spec) {
     return that;
 }
 
+SS.constructors.translate = function(spec) {
+
+    var my = {};
+    var geomNode = geom_doc.findByPath(spec.selected[0]);
+    var geometry = sceneView.createGeometry(geomNode.mesh);
+    var that = SS.constructors.origin(my);
+
+    var superUpdatePreview = that.updatePreview;
+    var updatePreview = function() {
+
+	superUpdatePreview();
+
+	var x = parseFloat($('#x').val());
+	var y = parseFloat($('#y').val());
+	var z = parseFloat($('#z').val());
+	var u = parseFloat($('#u').val()) || 0;
+	var v = parseFloat($('#v').val()) || 0;
+	var w = parseFloat($('#w').val()) || 0;
+
+	var materials = [SS.constructors.faceMaterial];
+	var mesh = new THREE.Mesh(geometry, materials);
+	mesh.position.x = u - x;
+	mesh.position.y = v - y;
+	mesh.position.z = w - z;
+	mesh.doubleSided = true;
+	my.previewGeometry.addChild(mesh);
+
+	my.previewGeometry.position.x = x;
+	my.previewGeometry.position.y = y;
+
+	sceneView.scene.addObject(my.previewGeometry);
+    }
+
+    var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
+    that.onWorkplaneCursorUpdated = function(event) {
+	
+	if (superOnWorkplaneCursorUpdated(event)) {
+	    updatePreview();
+	} else if ((my.focussed === 'u') || (my.focussed === 'v') || (my.focussed === 'w')) {
+	    var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
+	    var x = event.x, y = event.y;
+	    var u = x - originX, v = y - originY, w = 0;
+	    
+	    $('#u').val(u.toFixed(2));
+	    $('#v').val(v.toFixed(2));
+	    $('#w').val(w.toFixed(2));
+	    updatePreview();
+
+	} 
+    }
+
+    var superOnWorkplaneClicked = that.onWorkplaneClicked;
+    that.onWorkplaneClicked = function(event) {
+	superOnWorkplaneClicked({origin: 'u', u:'v', v:'w'});
+    }
+    
+    var superSetupValueHandlers = that.setupValueHandlers;
+    that.setupValueHandlers = function() {
+	superSetupValueHandlers(updatePreview);
+	$('#u').change(that.updatePreview);
+	$('#v').change(that.updatePreview);
+	$('#w').change(that.updatePreview);
+    }
+
+    var superSetupFocusHandlers = that.setupFocusHandlers;
+    that.setupFocusHandlers = function() {
+	superSetupFocusHandlers();
+
+	$('#u').focus(function() { my.focussed = 'u'; });
+	$('#u').blur(function()  { my.focussed = undefined; });
+
+	$('#v').focus(function() { my.focussed = 'v'; });
+	$('#v').blur(function()  { my.focussed = undefined; });
+
+	$('#w').focus(function() { my.focussed = 'w'; });
+	$('#w').blur(function()  { my.focussed = undefined; });
+    }
+
+    var superCreate = that.create;
+    that.create = function() {
+	superCreate();
+	$('#u').focus();
+    }
+
+    return that;
+}

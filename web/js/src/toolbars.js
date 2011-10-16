@@ -91,6 +91,7 @@ function create_transform(selected, type, keys) {
     replacement.transforms.push(new Transform({
         type: type,
         editing: true,
+	origin: {x: 0, y: 0, z: 0},
         parameters: transformParams
     }));
     geom_doc.replace(original, replacement);
@@ -178,7 +179,8 @@ $(document).ready(function() {
      */
     new Action("Translate", "/images/translate.png", 
                function(selected) { 
-		   create_transform(selected, "translate", ["dx", "dy", "dz"]); 
+		   create_transform(selected, "translate", ["u", "v", "w"]); 
+		   SS.constructors.translate({selected: selected}).create();
 	       }).render($("#transforms"));
     new Action("Scale", "/images/scale.png", 
                function(selected) { 

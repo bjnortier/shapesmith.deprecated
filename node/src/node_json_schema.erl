@@ -15,7 +15,6 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
-
 -module(node_json_schema).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([]).

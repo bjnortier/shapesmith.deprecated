@@ -376,11 +376,18 @@ SS.SceneView = function(container) {
     var add = function(geomNode) {
         if (geom_doc.isRoot(geomNode) && geomNode.mesh) {
 	    var geometry = createGeometry(geomNode.mesh);
-	    var color = unselectedColor;
+	    var color = unselectedColor, opacity = 1.0;
 	    if (geomNode.editing) {
 		color = 0x3F8FD2;
+		opacity = 0.5;
+	    } 
+	    for (index in geomNode.transforms) {
+		if (geomNode.transforms[index].editing) {
+		    color = 0x3F8FD2;
+		    opacity = 0.5;
+		}
 	    }
-	    var material = new THREE.MeshPhongMaterial( { ambient: 0x030303, color: color, specular: 0xccffcc, shininess: 100, shading: THREE.SmoothShading } );
+	    var material = new THREE.MeshPhongMaterial( { ambient: 0x030303, color: color, opacity: opacity,  specular: 0xccffcc, shininess: 50, shading: THREE.SmoothShading } );
 	    var mesh = new THREE.Mesh(geometry, material);
 	    mesh.doubleSided = true;
 	    mesh.name = geomNode.path;
@@ -453,6 +460,7 @@ SS.SceneView = function(container) {
     this.determinePositionPlane = determinePositionPlane;
     this.popupMenu = popupMenu;
     this.onMouseUp = onMouseUp;
+    this.createGeometry = createGeometry;
 
     return this;
 }
