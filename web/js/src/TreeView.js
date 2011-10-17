@@ -7,7 +7,7 @@ function renderTransform(geomNode, transformIndex) {
     if (transform.origin) {
 	var originArr = ['x', 'y', 'z'].map(function(key) {
 	    return {key: key, 
-		    value: geomNode.origin[key], 
+		    value: transform.origin[key], 
 		    'edit-class': 'edit-transform target-' + id + '-' + transformIndex,
 		    editing: transform.editing}
 	});
@@ -204,13 +204,11 @@ function TreeView() {
                 }
 	    }
 
-	    if (geomNode.editing) {
-		$(document).bind('keyup.editing', function(e) {
-		    if (e.keyCode == 27) { 
-			cancelFunction();
-		    }
-		});
-	    } 
+	    $(document).bind('keyup.editing', function(e) {
+		if (e.keyCode == 27) { 
+		    cancelFunction();
+		}
+	    });
 
             $('#modal-cancel').click(function() {
                 cancelFunction();

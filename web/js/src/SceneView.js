@@ -377,16 +377,17 @@ SS.SceneView = function(container) {
         if (geom_doc.isRoot(geomNode) && geomNode.mesh) {
 	    var geometry = createGeometry(geomNode.mesh);
 	    var color = unselectedColor, opacity = 1.0;
-	    if (geomNode.editing) {
-		color = 0x3F8FD2;
-		opacity = 0.5;
-	    } 
+	    var isEditing = geomNode.editing;
 	    for (index in geomNode.transforms) {
 		if (geomNode.transforms[index].editing) {
-		    color = 0x3F8FD2;
-		    opacity = 0.5;
+		    isEditing = true;
 		}
 	    }
+	    if (isEditing) {
+		color = 0x3F8FD2;
+		opacity = 0.2;
+	    }
+
 	    var material = new THREE.MeshPhongMaterial( { ambient: 0x030303, color: color, opacity: opacity,  specular: 0xccffcc, shininess: 50, shading: THREE.SmoothShading } );
 	    var mesh = new THREE.Mesh(geometry, material);
 	    mesh.doubleSided = true;

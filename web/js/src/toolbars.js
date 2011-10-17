@@ -75,6 +75,8 @@ function create_primitive(type, keys) {
 }
 
 function create_transform(selected, type, keys) {
+    selectionManager.deselectAll();
+
     if (selected.length != 1)  {
         alert("no object selected!");
         return;
@@ -88,10 +90,12 @@ function create_transform(selected, type, keys) {
     
     var original = geom_doc.findByPath(path);
     var replacement = original.editableCopy();
+    var origin = original.origin || {x: 0, y: 0, z: 0};
+    
     replacement.transforms.push(new Transform({
         type: type,
         editing: true,
-	origin: {x: 0, y: 0, z: 0},
+	origin: origin,
         parameters: transformParams
     }));
     geom_doc.replace(original, replacement);

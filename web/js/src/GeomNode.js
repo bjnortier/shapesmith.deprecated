@@ -58,10 +58,15 @@ function GeomNode() {
 
 GeomNode.prototype.editableCopy = function() {
 
-    var copiedOrigin = {};
-    for (key in this.origin) {
-        copiedOrigin[key] = this.origin[key];
+    var copiedOrigin = null;
+    if (this.origin) {
+	copiedOrigin = {};
+	for (key in this.origin) {
+            copiedOrigin[key] = this.origin[key];
+	}
+
     }
+
     var copiedParameters = {};
     for (key in this.parameters) {
         copiedParameters[key] = this.parameters[key];

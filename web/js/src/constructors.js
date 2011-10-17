@@ -15,6 +15,7 @@ SS.constructors.origin = function(my) {
 	if (my.focussed === 'origin') {
 	    $('#x').val(event.x);
 	    $('#y').val(event.y);
+	    $('#z').val(0);
 	    return true;
 	}
 	return false;
@@ -82,11 +83,6 @@ SS.constructors.origin = function(my) {
 
     that.create = function() {
 	that.edit();
-	var lastMousePosition = sceneView.workplane.getLastMousePosition();
-	var originX = lastMousePosition.x;
-	var originY = lastMousePosition.y;
-	$('#x').val(originX);
-	$('#y').val(originY);
     }
     
     that.dispose = function() {
@@ -102,11 +98,26 @@ SS.constructors.origin = function(my) {
     return that;
 }
 
+SS.constructors.primitive = function(my) {
+    var that = SS.constructors.origin(my);
+
+    var superCreate = that.create;
+    that.create = function() {
+	superCreate();
+	var lastMousePosition = sceneView.workplane.getLastMousePosition();
+	var originX = lastMousePosition.x;
+	var originY = lastMousePosition.y;
+	$('#x').val(originX);
+	$('#y').val(originY);
+    }
+
+    return that;
+}
 
 SS.constructors.cuboid = function(spec) {
 
     var my = {};
-    var that = SS.constructors.origin(my);
+    var that = SS.constructors.primitive(my);
 
     var superUpdatePreview = that.updatePreview;
     var updatePreview = function() {
@@ -231,7 +242,7 @@ SS.constructors.cuboid = function(spec) {
 SS.constructors.sphere = function() {
 
     var my = {};
-    var that = SS.constructors.origin(my);
+    var that = SS.constructors.primitive(my);
 
     var superUpdatePreview = that.updatePreview;
     var updatePreview = function() {
@@ -312,7 +323,7 @@ SS.constructors.sphere = function() {
 SS.constructors.cylinder = function(spec) {
 
     var my = {};
-    var that = SS.constructors.origin(my);
+    var that = SS.constructors.primitive(my);
 
     var superUpdatePreview = that.updatePreview;
     var updatePreview = function() {
@@ -422,7 +433,7 @@ SS.constructors.cylinder = function(spec) {
 SS.constructors.cone = function(spec) {
 
     var my = {};
-    var that = SS.constructors.origin(my);
+    var that = SS.constructors.primitive(my);
 
     var superUpdatePreview = that.updatePreview;
     var updatePreview = function() {
@@ -562,7 +573,7 @@ SS.constructors.cone = function(spec) {
 SS.constructors.wedge = function(spec) {
 
     var my = {};
-    var that = SS.constructors.origin(my);
+    var that = SS.constructors.primitive(my);
 
     var superUpdatePreview = that.updatePreview;
     var updatePreview = function() {
@@ -707,7 +718,7 @@ SS.constructors.wedge = function(spec) {
 SS.constructors.torus = function(spec) {
 
     var my = {};
-    var that = SS.constructors.origin(my);
+    var that = SS.constructors.primitive(my);
 
     var superUpdatePreview = that.updatePreview;
     var updatePreview = function() {
@@ -823,12 +834,23 @@ SS.constructors.torus = function(spec) {
     return that;
 }
 
+SS.constructors.transform = function(my) {
+    var that = SS.constructors.origin(my);
+
+    var superCreate = that.create;
+    that.create = function() {
+	superCreate();
+    }
+
+    return that;
+}
+
 SS.constructors.translate = function(spec) {
 
     var my = {};
     var geomNode = geom_doc.findByPath(spec.selected[0]);
     var geometry = sceneView.createGeometry(geomNode.mesh);
-    var that = SS.constructors.origin(my);
+    var that = SS.constructors.transform(my);
 
     var superUpdatePreview = that.updatePreview;
     var updatePreview = function() {
