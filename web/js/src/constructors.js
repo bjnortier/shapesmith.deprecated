@@ -927,6 +927,7 @@ SS.constructors.translate = function(spec) {
     that.create = function() {
 	superCreate();
 	$('#u').focus();
+	$('#n').val(0);
     }
 
     return that;

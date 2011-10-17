@@ -210,7 +210,8 @@ validate_geom_type_test_() ->
 validate_transform_type(<<"translate">>, Props) ->
     validate_primitive(Props, [{<<"u">>, fun number/1},
 			       {<<"v">>, fun number/1},
-			       {<<"w">>, fun number/1}
+			       {<<"w">>, fun number/1},
+			       {<<"n">>, fun positive_or_zero/1}
 			      ]);
 validate_transform_type(<<"scale">>, Props) ->
     validate_primitive(Props, [
@@ -222,12 +223,6 @@ validate_transform_type(<<"mirror">>, Props) ->
 validate_transform_type(<<"rotate">>, Props) ->
     validate_primitive(Props, [
 			       {<<"angle">>, fun positive/1}
-			      ]);
-validate_transform_type(<<"copy_translate">>, Props) ->
-    validate_primitive(Props, [{<<"u">>, fun number/1},
-			       {<<"v">>, fun number/1},
-			       {<<"w">>, fun number/1},
-			       {<<"n">>, fun positive_integer/1}
 			      ]);
 validate_transform_type(<<"copy_rotate">>, Props) ->
     validate_primitive(Props, [

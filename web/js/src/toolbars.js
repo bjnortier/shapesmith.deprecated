@@ -183,20 +183,20 @@ $(document).ready(function() {
      */
     new Action("Translate", "/images/translate.png", 
                function(selected) { 
-		   create_transform(selected, "translate", ["u", "v", "w"]); 
+		   create_transform(selected, "translate", ["u", "v", "w", "n"]); 
 		   SS.constructors.translate({selected: selected}).create();
 	       }).render($("#transforms"));
     new Action("Scale", "/images/scale.png", 
                function(selected) { 
-		   create_transform(selected, "scale", ["x", "y", "z", "factor"]); 
+		   create_transform(selected, "scale", ["factor"]); 
 	       }).render($("#transforms"));
     new Action("Rotate", "/images/rotate.png", 
                function(selected) { 
-		   create_transform(selected, "rotate", ["px", "py", "pz", "vx", "vy", "vz", "angle"]);
+		   create_transform(selected, "rotate", []);
 	       }).render($("#transforms"));
     new Action("Mirror", "/images/mirror.png", 
                function(selected) { 
-		   create_transform(selected, "mirror", ["px", "py", "pz", "vx", "vy", "vz"]); 
+		   create_transform(selected, "mirror", []); 
 	       }).render($("#transforms"));
 
     /*
@@ -206,17 +206,13 @@ $(document).ready(function() {
                function(selected) { 
 		   copy(selected)
 	       }).render($("#copyTransforms"));
-    new Action("Copy Translate", "/images/copy_translate.png", 
-               function(selected) { 
-		   create_transform(selected, "copy_translate", ["dx", "dy", "dz", "n"]); 
-	       }).render($("#copyTransforms"));
     new Action("Copy Rotate", "/images/copy_rotate.png", 
                function(selected) { 
-		   create_transform(selected, "copy_rotate", ["px", "py", "pz", "vx", "vy", "vz", "angle", "n"]);
+		   create_transform(selected, "copy_rotate", []);
 	       }).render($("#copyTransforms"));
     new Action("Copy Mirror", "/images/copy_mirror.png", 
                function(selected) { 
-		   create_transform(selected, "copy_mirror", ["px", "py", "pz", "vx", "vy", "vz"]); 
+		   create_transform(selected, "copy_mirror", []); 
 	       }).render($("#copyTransforms"));
 
 
