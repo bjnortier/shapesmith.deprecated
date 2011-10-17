@@ -192,11 +192,11 @@ $(document).ready(function() {
 	       }).render($("#transforms"));
     new Action("Rotate", "/images/rotate.png", 
                function(selected) { 
-		   create_transform(selected, "rotate", []);
+		   create_transform(selected, "rotate", ["px", "py", "pz", "vx", "vy", "vz", "angle"]);
 	       }).render($("#transforms"));
     new Action("Mirror", "/images/mirror.png", 
                function(selected) { 
-		   create_transform(selected, "mirror", []); 
+		   create_transform(selected, "mirror", ["px", "py", "pz", "vx", "vy", "vz"]); 
 	       }).render($("#transforms"));
 
     /*
@@ -208,11 +208,11 @@ $(document).ready(function() {
 	       }).render($("#copyTransforms"));
     new Action("Copy Rotate", "/images/copy_rotate.png", 
                function(selected) { 
-		   create_transform(selected, "copy_rotate", []);
+		   create_transform(selected, "copy_rotate", ["px", "py", "pz", "vx", "vy", "vz", "angle", "n"]);
 	       }).render($("#copyTransforms"));
     new Action("Copy Mirror", "/images/copy_mirror.png", 
                function(selected) { 
-		   create_transform(selected, "copy_mirror", []); 
+		   create_transform(selected, "copy_mirror", ["px", "py", "pz", "vx", "vy", "vz"]); 
 	       }).render($("#copyTransforms"));
 
 

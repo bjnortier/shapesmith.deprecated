@@ -222,6 +222,13 @@ validate_transform_type(<<"mirror">>, Props) ->
 			      ]);
 validate_transform_type(<<"rotate">>, Props) ->
     validate_primitive(Props, [
+			       {<<"px">>, fun number/1},
+			       {<<"py">>, fun number/1},
+			       {<<"pz">>, fun number/1},
+			       {<<"vx">>, fun number/1},
+			       {<<"vy">>, fun number/1},
+			       {<<"vz">>, fun number/1},
+			       {<<"angle">>, fun positive/1},
 			       {<<"angle">>, fun positive/1}
 			      ]);
 validate_transform_type(<<"copy_rotate">>, Props) ->
