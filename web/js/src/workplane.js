@@ -377,18 +377,22 @@ SS.Workplane = function(spec) {
 	    var gridX = Math.round(position.x);
 	    var gridY = Math.round(position.y);
 
-	    mouseOnWorkplane.x = gridX;
-	    mouseOnWorkplane.y = gridY;
+	    if (gridExtents.isInsideX(gridX) &&
+		gridExtents.isInsideY(gridY)) {
+		
+		mouseOnWorkplane.x = gridX;
+		mouseOnWorkplane.y = gridY;
+		
+		xPositionIndicator.update(gridX);
+		yPositionIndicator.update(gridY);
+		workplanePointer.update({x: gridX, y: gridY});
 
-	    xPositionIndicator.update(gridX);
-	    yPositionIndicator.update(gridY);
-	    workplanePointer.update({x: gridX, y: gridY});
-
-	    that.fire({type: 'workplaneCursorUpdated', 
+		that.fire({type: 'workplaneCursorUpdated', 
 		       x: gridX, 
 		       y: gridY,
 		       originalEvent: originalEvent
 		      });
+	    }
 	}
     }
 
