@@ -176,6 +176,9 @@ function TreeView() {
 	}
 
 	var okTransformFn = function() {
+	    for (key in transformBeingEdited.origin) {
+		transformBeingEdited.origin[key] = parseFloat($('#' + key).val());
+	    }
 	    for (key in transformBeingEdited.parameters) {
 		transformBeingEdited.parameters[key] = parseFloat($('#' + key).val());
 	    }

@@ -34,7 +34,6 @@ function delete_geom(selected) {
         alert("please select at least one object");
         return;
     }
-    var selected = selectionManager.getSelected();
     var nodes = selected.map(function(path) {
 	return geom_doc.findByPath(path);
     });
@@ -189,6 +188,7 @@ $(document).ready(function() {
     new Action("Scale", "/images/scale.png", 
                function(selected) { 
 		   create_transform(selected, "scale", ["factor"]); 
+		   SS.constructors.scale({selected: selected}).create();
 	       }).render($("#transforms"));
     new Action("Rotate", "/images/rotate.png", 
                function(selected) { 

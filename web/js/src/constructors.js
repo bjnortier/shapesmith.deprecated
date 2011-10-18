@@ -39,7 +39,7 @@ SS.constructors.origin = function(my) {
     }
 
     that.updatePreview = function() {
-
+	console.log('update');
 	if (my.previewGeometry) {
 	    sceneView.scene.removeObject(my.previewGeometry);
 	}
@@ -54,9 +54,9 @@ SS.constructors.origin = function(my) {
     }
 
     that.setupValueHandlers = function() {
-	$('#x').change(that.updatePreview);
-	$('#y').change(that.updatePreview);
-	$('#z').change(that.updatePreview);
+	$('#x').keyup(my.updatePreview);
+	$('#y').keyup(my.updatePreview);
+	$('#z').keyup(my.updatePreview);
     }
 
     that.setupFocusHandlers = function() {
@@ -124,8 +124,10 @@ SS.constructors.cuboid = function(spec) {
 
 	superUpdatePreview();
 
-	var x = parseFloat($('#x').val());
-	var y = parseFloat($('#y').val());
+	var x = parseFloat($('#x').val()) || 0.0;
+	var y = parseFloat($('#y').val()) || 0.0;
+	var z = parseFloat($('#z').val()) || 0.0;
+
 	var u = parseFloat($('#u').val());
 	var v = parseFloat($('#v').val());
 	var w = parseFloat($('#w').val());
@@ -159,10 +161,12 @@ SS.constructors.cuboid = function(spec) {
 
 	my.previewGeometry.position.x = x;
 	my.previewGeometry.position.y = y;
+	my.previewGeometry.position.z = z;
 
 	sceneView.scene.addObject(my.previewGeometry);
 	
     }
+    my.updatePreview = updatePreview;
 
     var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
     that.onWorkplaneCursorUpdated = function(event) {
@@ -211,9 +215,9 @@ SS.constructors.cuboid = function(spec) {
     var superSetupValueHandlers = that.setupValueHandlers;
     that.setupValueHandlers = function() {
 	superSetupValueHandlers(updatePreview);
-	$('#u').change(that.updatePreview);
-	$('#v').change(that.updatePreview);
-	$('#w').change(that.updatePreview);
+	$('#u').keyup(updatePreview);
+	$('#v').keyup(updatePreview);
+	$('#w').keyup(updatePreview);
     }
 
     var superSetupFocusHandlers = that.setupFocusHandlers;
@@ -249,9 +253,10 @@ SS.constructors.sphere = function() {
 
 	superUpdatePreview();
 	
-	var x = parseFloat($('#x').val());
-	var y = parseFloat($('#y').val());
-	var r = parseFloat($('#r').val());
+	var x = parseFloat($('#x').val()) || 0.0;
+	var y = parseFloat($('#y').val()) || 0.0;
+	var z = parseFloat($('#z').val()) || 0.0;
+	var r = parseFloat($('#r').val()) || 0.0;
 
 	var geometry = new THREE.SphereGeometry(r, 50, 10);
 	var sphere = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
@@ -269,8 +274,10 @@ SS.constructors.sphere = function() {
     
 	my.previewGeometry.position.x = x;
 	my.previewGeometry.position.y = y;
+	my.previewGeometry.position.z = z;
 	sceneView.scene.addObject(my.previewGeometry);
     }
+    my.updatePreview = updatePreview;
 
     var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
     that.onWorkplaneCursorUpdated = function(event) {
@@ -301,7 +308,7 @@ SS.constructors.sphere = function() {
     var superSetupValueHandlers = that.setupValueHandlers;
     that.setupValueHandlers = function() {
 	superSetupValueHandlers();
-	$('#r').change(updatePreview);
+	$('#r').keyup(updatePreview);
     }
 
     var superSetupFocusHandlers = that.setupFocusHandlers;
@@ -330,8 +337,10 @@ SS.constructors.cylinder = function(spec) {
 
 	superUpdatePreview();
 
-	var x = parseFloat($('#x').val());
-	var y = parseFloat($('#y').val());
+	var x = parseFloat($('#x').val()) || 0.0;
+	var y = parseFloat($('#y').val()) || 0.0;
+	var z = parseFloat($('#z').val()) || 0.0;
+
 	var r = parseFloat($('#r').val());
 	var h = parseFloat($('#h').val());
 
@@ -361,10 +370,12 @@ SS.constructors.cylinder = function(spec) {
 
 	my.previewGeometry.position.x = x;
 	my.previewGeometry.position.y = y;
+	my.previewGeometry.position.z = z;
 
 	sceneView.scene.addObject(my.previewGeometry);
 	
     }
+    my.updatePreview = updatePreview;
 
     var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
     that.onWorkplaneCursorUpdated = function(event) {
@@ -406,8 +417,8 @@ SS.constructors.cylinder = function(spec) {
     var superSetupValueHandlers = that.setupValueHandlers;
     that.setupValueHandlers = function() {
 	superSetupValueHandlers(updatePreview);
-	$('#r').change(updatePreview);
-	$('#h').change(updatePreview);
+	$('#r').keyup(updatePreview);
+	$('#h').keyup(updatePreview);
     }
 
     var superSetupFocusHandlers = that.setupFocusHandlers;
@@ -440,8 +451,10 @@ SS.constructors.cone = function(spec) {
 
 	superUpdatePreview();
 
-	var x = parseFloat($('#x').val());
-	var y = parseFloat($('#y').val());
+	var x = parseFloat($('#x').val()) || 0.0;
+	var y = parseFloat($('#y').val()) || 0.0;
+	var z = parseFloat($('#z').val()) || 0.0;
+
 	var r1 = parseFloat($('#r1').val());
 	var h = parseFloat($('#h').val());
 	var r2 = parseFloat($('#r2').val());
@@ -478,10 +491,12 @@ SS.constructors.cone = function(spec) {
 
 	my.previewGeometry.position.x = x;
 	my.previewGeometry.position.y = y;
+	my.previewGeometry.position.z = z;
 
 	sceneView.scene.addObject(my.previewGeometry);
 	
     }
+    my.updatePreview = updatePreview;
 
     var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
     that.onWorkplaneCursorUpdated = function(event) {
@@ -541,8 +556,9 @@ SS.constructors.cone = function(spec) {
     var superSetupValueHandlers = that.setupValueHandlers;
     that.setupValueHandlers = function() {
 	superSetupValueHandlers();
-	$('#r').change(updatePreview);
-	$('#h').change(updatePreview);
+	$('#r1').keyup(updatePreview);
+	$('#h').keyup(updatePreview);
+	$('#r2').keyup(updatePreview);
     }
 
     var superSetupFocusHandlers = that.setupFocusHandlers;
@@ -580,9 +596,9 @@ SS.constructors.wedge = function(spec) {
 
 	superUpdatePreview();
 
-	var x = parseFloat($('#x').val());
-	var y = parseFloat($('#y').val());
-	var r = parseFloat($('#r').val());
+	var x = parseFloat($('#x').val()) || 0.0;
+	var y = parseFloat($('#y').val()) || 0.0;
+	var z = parseFloat($('#z').val()) || 0.0;
 	var u1 = parseFloat($('#u1').val());
 	var u2 = parseFloat($('#u2').val());
 	var v = parseFloat($('#v').val());
@@ -627,10 +643,12 @@ SS.constructors.wedge = function(spec) {
 
 	my.previewGeometry.position.x = x;
 	my.previewGeometry.position.y = y;
+	my.previewGeometry.position.z = z;
 
 	sceneView.scene.addObject(my.previewGeometry);
 	
     }
+    my.updatePreview = updatePreview;
 
     var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
     that.onWorkplaneCursorUpdated = function(event) {
@@ -683,10 +701,10 @@ SS.constructors.wedge = function(spec) {
     var superSetupValueHandlers = that.setupValueHandlers;
     that.setupValueHandlers = function() {
 	superSetupValueHandlers(updatePreview);
-	$('#u1').change(that.updatePreview);
-	$('#v').change(that.updatePreview);
-	$('#u2').change(that.updatePreview);
-	$('#w').change(that.updatePreview);
+	$('#u1').keyup(updatePreview);
+	$('#v').keyup(updatePreview);
+	$('#u2').keyup(updatePreview);
+	$('#w').keyup(updatePreview);
     }
 
     var superSetupFocusHandlers = that.setupFocusHandlers;
@@ -725,8 +743,9 @@ SS.constructors.torus = function(spec) {
 
 	superUpdatePreview();
 
-	var x = parseFloat($('#x').val());
-	var y = parseFloat($('#y').val());
+	var x = parseFloat($('#x').val()) || 0.0;
+	var y = parseFloat($('#y').val()) || 0.0;
+	var z = parseFloat($('#z').val()) || 0.0;
 	var r1 = parseFloat($('#r1').val());
 	var r2 = parseFloat($('#r2').val());
 
@@ -766,10 +785,12 @@ SS.constructors.torus = function(spec) {
 
 	my.previewGeometry.position.x = x;
 	my.previewGeometry.position.y = y;
+	my.previewGeometry.position.z = z;
 
 	sceneView.scene.addObject(my.previewGeometry);
 	
     }
+    my.updatePreview = updatePreview;
 
     var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
     that.onWorkplaneCursorUpdated = function(event) {
@@ -810,8 +831,8 @@ SS.constructors.torus = function(spec) {
     var superSetupValueHandlers = that.setupValueHandlers;
     that.setupValueHandlers = function() {
 	superSetupValueHandlers(updatePreview);
-	$('#r1').change(updatePreview);
-	$('#r2').change(updatePreview);
+	$('#r1').keyup(updatePreview);
+	$('#r2').keyup(updatePreview);
     }
 
     var superSetupFocusHandlers = that.setupFocusHandlers;
@@ -834,32 +855,21 @@ SS.constructors.torus = function(spec) {
     return that;
 }
 
-SS.constructors.transform = function(my) {
-    var that = SS.constructors.origin(my);
-
-    var superCreate = that.create;
-    that.create = function() {
-	superCreate();
-    }
-
-    return that;
-}
-
 SS.constructors.translate = function(spec) {
 
     var my = {};
     var geomNode = geom_doc.findByPath(spec.selected[0]);
     var geometry = sceneView.createGeometry(geomNode.mesh);
-    var that = SS.constructors.transform(my);
+    var that = SS.constructors.origin(my);
 
     var superUpdatePreview = that.updatePreview;
     var updatePreview = function() {
 
 	superUpdatePreview();
 
-	var x = parseFloat($('#x').val());
-	var y = parseFloat($('#y').val());
-	var z = parseFloat($('#z').val());
+	var x = parseFloat($('#x').val()) || 0.0;
+	var y = parseFloat($('#y').val()) || 0.0;
+	var z = parseFloat($('#z').val()) || 0.0;
 	var u = parseFloat($('#u').val()) || 0;
 	var v = parseFloat($('#v').val()) || 0;
 	var w = parseFloat($('#w').val()) || 0;
@@ -874,9 +884,11 @@ SS.constructors.translate = function(spec) {
 
 	my.previewGeometry.position.x = x;
 	my.previewGeometry.position.y = y;
+	my.previewGeometry.position.z = z;
 
 	sceneView.scene.addObject(my.previewGeometry);
     }
+    my.updatePreview = updatePreview;
 
     var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
     that.onWorkplaneCursorUpdated = function(event) {
@@ -904,9 +916,9 @@ SS.constructors.translate = function(spec) {
     var superSetupValueHandlers = that.setupValueHandlers;
     that.setupValueHandlers = function() {
 	superSetupValueHandlers(updatePreview);
-	$('#u').change(that.updatePreview);
-	$('#v').change(that.updatePreview);
-	$('#w').change(that.updatePreview);
+	$('#u').keyup(updatePreview);
+	$('#v').keyup(updatePreview);
+	$('#w').keyup(updatePreview);
     }
 
     var superSetupFocusHandlers = that.setupFocusHandlers;
@@ -928,6 +940,84 @@ SS.constructors.translate = function(spec) {
 	superCreate();
 	$('#u').focus();
 	$('#n').val(0);
+    }
+
+    return that;
+}
+
+SS.constructors.scale = function(spec) {
+
+    var my = {};
+    var geomNode = geom_doc.findByPath(spec.selected[0]);
+    var geometry = sceneView.createGeometry(geomNode.mesh);
+    var originalPositions = geometry.vertices.map(function(vertex) {
+	return vertex.position;
+    });
+    var that = SS.constructors.origin(my);
+
+    var superUpdatePreview = that.updatePreview;
+    var updatePreview = function() {
+
+	superUpdatePreview();
+
+	var x = parseFloat($('#x').val()) || 0.0;
+	var y = parseFloat($('#y').val()) || 0.0;
+	var z = parseFloat($('#z').val()) || 0.0;
+	var factor = parseFloat($('#factor').val()) || 1.0;
+
+	var scaledGeometry = sceneView.createGeometry(geomNode.mesh);
+	scaledGeometry.vertices = originalPositions.map(function(position) {
+	    var position = position.clone();
+	    position.x = (position.x - x)*factor;
+	    position.y = (position.y - y)*factor;
+	    position.z = (position.z - z)*factor;
+	    return new THREE.Vertex(position);
+	});
+	scaledGeometry.computeCentroids();
+	scaledGeometry.computeFaceNormals();
+
+	var materials = [SS.constructors.faceMaterial];
+	var mesh = new THREE.Mesh(scaledGeometry, materials);
+
+	mesh.doubleSided = true;
+	my.previewGeometry.addChild(mesh);
+
+	my.previewGeometry.position.x = x;
+	my.previewGeometry.position.y = y;
+	my.previewGeometry.position.z = z;
+
+	sceneView.scene.addObject(my.previewGeometry);
+    }
+    my.updatePreview = updatePreview;
+
+    var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
+    that.onWorkplaneCursorUpdated = function(event) {
+	
+	if (superOnWorkplaneCursorUpdated(event)) {
+	    updatePreview();
+	} 
+    }
+
+    var superOnWorkplaneClicked = that.onWorkplaneClicked;
+    that.onWorkplaneClicked = function(event) {
+	superOnWorkplaneClicked({});
+    }
+    
+    var superSetupValueHandlers = that.setupValueHandlers;
+    that.setupValueHandlers = function() {
+	superSetupValueHandlers(updatePreview);
+	$('#factor').keyup(updatePreview);
+    }
+
+    var superSetupFocusHandlers = that.setupFocusHandlers;
+    that.setupFocusHandlers = function() {
+	superSetupFocusHandlers();
+    }
+
+    var superCreate = that.create;
+    that.create = function() {
+	superCreate();
+	$('#factor').val(1.0);
     }
 
     return that;
