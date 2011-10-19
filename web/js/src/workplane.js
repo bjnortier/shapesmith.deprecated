@@ -377,22 +377,21 @@ SS.Workplane = function(spec) {
 	    var gridX = Math.round(position.x);
 	    var gridY = Math.round(position.y);
 
-	    if (gridExtents.isInsideX(gridX) &&
-		gridExtents.isInsideY(gridY)) {
-		
-		mouseOnWorkplane.x = gridX;
-		mouseOnWorkplane.y = gridY;
-		
-		xPositionIndicator.update(gridX);
-		yPositionIndicator.update(gridY);
-		workplanePointer.update({x: gridX, y: gridY});
+	    // The reason for not limiting the events to only on the
+	    // workplane extents, is that it breaks specifying the 
+	    // height of e.g. cuboids
+	    mouseOnWorkplane.x = gridX;
+	    mouseOnWorkplane.y = gridY;
+	    
+	    xPositionIndicator.update(gridX);
+	    yPositionIndicator.update(gridY);
+	    workplanePointer.update({x: gridX, y: gridY});
 
-		that.fire({type: 'workplaneCursorUpdated', 
+	    that.fire({type: 'workplaneCursorUpdated', 
 		       x: gridX, 
 		       y: gridY,
 		       originalEvent: originalEvent
 		      });
-	    }
 	}
     }
 

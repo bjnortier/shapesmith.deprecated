@@ -217,40 +217,21 @@ validate_transform_type(<<"scale">>, Props) ->
     validate_primitive(Props, [
 			       {<<"factor">>, fun positive/1}
 			      ]);
-validate_transform_type(<<"mirror">>, Props) ->
-    validate_primitive(Props, [
-			      ]);
 validate_transform_type(<<"rotate">>, Props) ->
     validate_primitive(Props, [
-			       {<<"px">>, fun number/1},
-			       {<<"py">>, fun number/1},
-			       {<<"pz">>, fun number/1},
-			       {<<"vx">>, fun number/1},
-			       {<<"vy">>, fun number/1},
-			       {<<"vz">>, fun number/1},
+			       {<<"u">>, fun number/1},
+			       {<<"v">>, fun number/1},
+			       {<<"w">>, fun number/1},
 			       {<<"angle">>, fun positive/1},
-			       {<<"angle">>, fun positive/1}
+			       {<<"n">>, fun positive_or_zero/1}
 			      ]);
-validate_transform_type(<<"copy_rotate">>, Props) ->
+validate_transform_type(<<"mirror">>, Props) ->
     validate_primitive(Props, [
-			       {<<"px">>, fun number/1},
-			       {<<"py">>, fun number/1},
-			       {<<"pz">>, fun number/1},
-			       {<<"vx">>, fun number/1},
-			       {<<"vy">>, fun number/1},
-			       {<<"vz">>, fun number/1},
-			       {<<"angle">>, fun positive/1},
-			       {<<"n">>, fun positive_integer/1}
+			       {<<"u">>, fun number/1},
+			       {<<"v">>, fun number/1},
+			       {<<"w">>, fun number/1},
+			       {<<"n">>, fun zero_or_one/1}
 			      ]);
-validate_transform_type(<<"copy_mirror">>, Props) ->
-    validate_primitive(Props, [
-					  {<<"px">>, fun number/1},
-					  {<<"py">>, fun number/1},
-					  {<<"pz">>, fun number/1},
-					  {<<"vx">>, fun number/1},
-					  {<<"vy">>, fun number/1},
-					  {<<"vz">>, fun number/1}
-					 ]);
 validate_transform_type(_, _) ->
     {error, {struct, [{<<"invalid">>, <<"transform">>}]}}.
 
@@ -430,6 +411,12 @@ not_zero(Value) when is_float(Value) andalso Value =/= 0 ->
 not_zero(_) ->
     {error, <<"cannot be zero">>}.
 
+zero_or_one(Value) when is_integer(Value) andalso Value =:= 0 ->
+    ok;
+zero_or_one(Value) when is_integer(Value) andalso Value =:= 1 ->
+    ok;
+zero_or_one(_) ->
+    {error, <<"must be 0 or one">>}.
 
 
 -ifdef(TEST).

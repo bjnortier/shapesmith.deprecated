@@ -89,7 +89,10 @@ function create_transform(selected, type, keys) {
     
     var original = geom_doc.findByPath(path);
     var replacement = original.editableCopy();
-    var origin = original.origin || {x: 0, y: 0, z: 0};
+    var origin = {x: 0, y: 0, z: 0};
+    if ((type === 'translate') && (original.origin)) {
+	origin = original.origin;
+    }
     
     replacement.transforms.push(new Transform({
         type: type,
@@ -125,6 +128,10 @@ $(document).ready(function() {
     new Action("Delete", "images/trash.png", 
                function(selected) { 
 		   delete_geom(selected); 
+	       }).render($("#edit"));
+    new Action("Copy", "/images/copy.png", 
+               function(selected) { 
+		   copy(selected)
 	       }).render($("#edit"));
     new Action("Export to STL", "images/stl.png", 
                function(selected) { 
@@ -192,28 +199,15 @@ $(document).ready(function() {
 	       }).render($("#transforms"));
     new Action("Rotate", "/images/rotate.png", 
                function(selected) { 
-		   create_transform(selected, "rotate", ["px", "py", "pz", "vx", "vy", "vz", "angle"]);
+		   create_transform(selected, "rotate", ["u", "v", "w", "angle", "n"]);
+		   SS.constructors.rotate({selected: selected}).create();
 	       }).render($("#transforms"));
     new Action("Mirror", "/images/mirror.png", 
                function(selected) { 
-		   create_transform(selected, "mirror", ["px", "py", "pz", "vx", "vy", "vz"]); 
+		   create_transform(selected, "mirror", ["u", "v", "w", "n"]); 
+		   SS.constructors.mirror({selected: selected}).create();
 	       }).render($("#transforms"));
 
-    /*
-     * Copy & Transform
-     */
-    new Action("Copy", "/images/copy.png", 
-               function(selected) { 
-		   copy(selected)
-	       }).render($("#copyTransforms"));
-    new Action("Copy Rotate", "/images/copy_rotate.png", 
-               function(selected) { 
-		   create_transform(selected, "copy_rotate", ["px", "py", "pz", "vx", "vy", "vz", "angle", "n"]);
-	       }).render($("#copyTransforms"));
-    new Action("Copy Mirror", "/images/copy_mirror.png", 
-               function(selected) { 
-		   create_transform(selected, "copy_mirror", ["px", "py", "pz", "vx", "vy", "vz"]); 
-	       }).render($("#copyTransforms"));
 
 
 });

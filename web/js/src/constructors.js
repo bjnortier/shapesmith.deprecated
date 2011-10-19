@@ -5,6 +5,7 @@ SS.constructors = {};
 SS.constructors.lineColor = 0x66A1D2;
 SS.constructors.faceColor = 0x3F8FD2;
 SS.constructors.faceMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.faceColor, opacity: 0.5 } );
+SS.constructors.solidFaceMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.faceColor } );
 SS.constructors.lineMaterial = new THREE.LineBasicMaterial({ color: SS.constructors.lineColor, wireframe : true });
 SS.constructors.wireframeMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.lineColor, wireframe: true } )
 
@@ -39,7 +40,6 @@ SS.constructors.origin = function(my) {
     }
 
     that.updatePreview = function() {
-	console.log('update');
 	if (my.previewGeometry) {
 	    sceneView.scene.removeObject(my.previewGeometry);
 	}
@@ -238,6 +238,7 @@ SS.constructors.cuboid = function(spec) {
     that.create = function() {
 	superCreate();
 	$('#u').focus();
+	updatePreview();
     }
 
     return that;
@@ -256,7 +257,7 @@ SS.constructors.sphere = function() {
 	var x = parseFloat($('#x').val()) || 0.0;
 	var y = parseFloat($('#y').val()) || 0.0;
 	var z = parseFloat($('#z').val()) || 0.0;
-	var r = parseFloat($('#r').val()) || 0.0;
+	var r = parseFloat($('#r').val()) || 0.001;
 
 	var geometry = new THREE.SphereGeometry(r, 50, 10);
 	var sphere = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
@@ -322,6 +323,7 @@ SS.constructors.sphere = function() {
     that.create = function() {
 	superCreate();
 	$('#r').focus();
+	updatePreview();
     }
    
     return that;
@@ -436,6 +438,7 @@ SS.constructors.cylinder = function(spec) {
     that.create = function() {
 	superCreate();
 	$('#r').focus();
+	updatePreview();
     }
 
     return that;
@@ -580,6 +583,7 @@ SS.constructors.cone = function(spec) {
     that.create = function() {
 	superCreate();
 	$('#r1').focus();
+	updatePreview();
     }
 
     return that;
@@ -728,6 +732,7 @@ SS.constructors.wedge = function(spec) {
     that.create = function() {
 	superCreate();
 	$('#u1').focus();
+	updatePreview();
     }
 
     return that;
@@ -850,6 +855,7 @@ SS.constructors.torus = function(spec) {
     that.create = function() {
 	superCreate();
 	$('#r1').focus();
+	updatePreview();
     }
 
     return that;
@@ -940,6 +946,7 @@ SS.constructors.translate = function(spec) {
 	superCreate();
 	$('#u').focus();
 	$('#n').val(0);
+	updatePreview();
     }
 
     return that;
@@ -1018,6 +1025,199 @@ SS.constructors.scale = function(spec) {
     that.create = function() {
 	superCreate();
 	$('#factor').val(1.0);
+	updatePreview();
+    }
+
+    return that;
+}
+
+SS.constructors.rotate = function(spec) {
+
+    var my = {};
+    var geomNode = geom_doc.findByPath(spec.selected[0]);
+    var geometry = sceneView.createGeometry(geomNode.mesh);
+    var that = SS.constructors.origin(my);
+
+    var superUpdatePreview = that.updatePreview;
+    var updatePreview = function() {
+
+	superUpdatePreview();
+
+	var x = parseFloat($('#x').val()) || 0.0;
+	var y = parseFloat($('#y').val()) || 0.0;
+	var z = parseFloat($('#z').val()) || 0.0;
+	var u = parseFloat($('#u').val()) || 0.0;
+	var v = parseFloat($('#v').val()) || 0.0;
+	var w = parseFloat($('#w').val()) || 0.0;
+	var angle = parseFloat($('#angle').val()) || 0;
+	
+	var rotationVector = new THREE.Vector3(u, v, w).normalize();
+
+	var axisGeom = new THREE.Geometry();
+	var endPosition = rotationVector.clone().multiplyScalar(50);
+	axisGeom.vertices.push(new THREE.Vertex(new THREE.Vector3()));
+	axisGeom.vertices.push(new THREE.Vertex(endPosition));
+	var axis = new THREE.Line(axisGeom, SS.constructors.lineMaterial);
+
+	my.previewGeometry.addChild(axis);
+
+	var coneGeometry =  new THREE.CylinderGeometry(50, 0, 2, 5); 
+	var cone = new THREE.Mesh(coneGeometry, SS.constructors.solidFaceMaterial);
+	cone.doubleSided = true;
+	cone.position = endPosition;
+	cone.lookAt(rotationVector);
+
+	my.previewGeometry.addChild( cone );
+
+	my.previewGeometry.position.x = x;
+	my.previewGeometry.position.y = y;
+	my.previewGeometry.position.z = z;
+
+	sceneView.scene.addObject(my.previewGeometry);
+    }
+    my.updatePreview = updatePreview;
+
+    var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
+    that.onWorkplaneCursorUpdated = function(event) {
+	if (superOnWorkplaneCursorUpdated(event)) {
+	    updatePreview();
+	} 
+    }
+
+    var superOnWorkplaneClicked = that.onWorkplaneClicked;
+    that.onWorkplaneClicked = function(event) {
+	superOnWorkplaneClicked({origin: 'u', u:'v', v:'w', w:'angle'});
+    }
+    
+    var superSetupValueHandlers = that.setupValueHandlers;
+    that.setupValueHandlers = function() {
+	superSetupValueHandlers(updatePreview);
+	$('#u').keyup(updatePreview);
+	$('#v').keyup(updatePreview);
+	$('#w').keyup(updatePreview);
+	$('#angle').keyup(updatePreview);
+    }
+
+    var superSetupFocusHandlers = that.setupFocusHandlers;
+    that.setupFocusHandlers = function() {
+	superSetupFocusHandlers();
+
+	$('#u').focus(function() { my.focussed = 'u'; });
+	$('#u').blur(function()  { my.focussed = undefined; });
+
+	$('#v').focus(function() { my.focussed = 'v'; });
+	$('#v').blur(function()  { my.focussed = undefined; });
+
+	$('#w').focus(function() { my.focussed = 'w'; });
+	$('#w').blur(function()  { my.focussed = undefined; });
+	
+	$('#angle').focus(function() { my.focussed = 'angle'; });
+	$('#angle').blur(function()  { my.focussed = undefined; });
+    }
+
+    var superCreate = that.create;
+    that.create = function() {
+	superCreate();
+	$('#x').focus();
+	$('#u').val(0);
+	$('#v').val(0);
+	$('#w').val(1.0);
+	$('#n').val(0);
+	$('#angle').val(0);
+	updatePreview();
+    }
+
+    return that;
+}
+
+SS.constructors.mirror = function(spec) {
+
+    var my = {};
+    var geomNode = geom_doc.findByPath(spec.selected[0]);
+    var geometry = sceneView.createGeometry(geomNode.mesh);
+    var that = SS.constructors.origin(my);
+
+    var superUpdatePreview = that.updatePreview;
+    var updatePreview = function() {
+
+	superUpdatePreview();
+
+	var x = parseFloat($('#x').val()) || 0.0;
+	var y = parseFloat($('#y').val()) || 0.0;
+	var z = parseFloat($('#z').val()) || 0.0;
+	var u = parseFloat($('#u').val()) || 0.0;
+	var v = parseFloat($('#v').val()) || 0.0;
+	var w = parseFloat($('#w').val()) || 0.0;
+	
+	var rotationVector = new THREE.Vector3(u, v, w).normalize();
+
+	var axisGeom = new THREE.Geometry();
+	var endPosition = rotationVector.clone().multiplyScalar(50);
+	axisGeom.vertices.push(new THREE.Vertex(new THREE.Vector3()));
+	axisGeom.vertices.push(new THREE.Vertex(endPosition));
+	var axis = new THREE.Line(axisGeom, SS.constructors.lineMaterial);
+
+	my.previewGeometry.addChild(axis);
+
+	var coneGeometry =  new THREE.CylinderGeometry(50, 0, 2, 5); 
+	var cone = new THREE.Mesh(coneGeometry, SS.constructors.solidFaceMaterial);
+	cone.doubleSided = true;
+	cone.position = endPosition;
+	cone.lookAt(rotationVector);
+
+	my.previewGeometry.addChild( cone );
+
+	my.previewGeometry.position.x = x;
+	my.previewGeometry.position.y = y;
+	my.previewGeometry.position.z = z;
+
+	sceneView.scene.addObject(my.previewGeometry);
+    }
+    my.updatePreview = updatePreview;
+
+    var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
+    that.onWorkplaneCursorUpdated = function(event) {
+	if (superOnWorkplaneCursorUpdated(event)) {
+	    updatePreview();
+	} 
+    }
+
+    var superOnWorkplaneClicked = that.onWorkplaneClicked;
+    that.onWorkplaneClicked = function(event) {
+	superOnWorkplaneClicked({origin: 'u', u:'v', v:'w', w:'angle'});
+    }
+    
+    var superSetupValueHandlers = that.setupValueHandlers;
+    that.setupValueHandlers = function() {
+	superSetupValueHandlers(updatePreview);
+	$('#u').keyup(updatePreview);
+	$('#v').keyup(updatePreview);
+	$('#w').keyup(updatePreview);
+    }
+
+    var superSetupFocusHandlers = that.setupFocusHandlers;
+    that.setupFocusHandlers = function() {
+	superSetupFocusHandlers();
+
+	$('#u').focus(function() { my.focussed = 'u'; });
+	$('#u').blur(function()  { my.focussed = undefined; });
+
+	$('#v').focus(function() { my.focussed = 'v'; });
+	$('#v').blur(function()  { my.focussed = undefined; });
+
+	$('#w').focus(function() { my.focussed = 'w'; });
+	$('#w').blur(function()  { my.focussed = undefined; });
+    }
+
+    var superCreate = that.create;
+    that.create = function() {
+	superCreate();
+	$('#x').focus();
+	$('#u').val(0);
+	$('#v').val(0);
+	$('#w').val(1.0);
+	$('#n').val(0);
+	updatePreview();
     }
 
     return that;

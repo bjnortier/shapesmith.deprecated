@@ -274,51 +274,65 @@ TopoDS_Shape scale(map<string, mValue> transform, TopoDS_Shape shape) {
     return transformed_shape;
 }
 
-TopoDS_Shape mirror(map<string, mValue> transform, TopoDS_Shape shape) {
-    map< string, mValue > parameters = transform["parameters"].get_obj();
-    mValue px = parameters["px"];
-    mValue py = parameters["py"];
-    mValue pz = parameters["pz"];
-    mValue vx = parameters["vx"];
-    mValue vy = parameters["vy"];
-    mValue vz = parameters["vz"];
-    
-    gp_Trsf transformation = gp_Trsf();
-    transformation.SetMirror(gp_Ax1(gp_Pnt(get_double(px),
-                                           get_double(py),
-                                           get_double(pz)), 
-                                    gp_Dir(get_double(vx),
-                                           get_double(vy),
-                                           get_double(vz))));    
-    BRepBuilderAPI_Transform brep_transform(shape, transformation);
-    TopoDS_Shape transformed_shape = brep_transform.Shape();
-    
-    return transformed_shape;
-}
 
-TopoDS_Shape rotate(map<string, mValue> transform, TopoDS_Shape shape) {
-    map< string, mValue > parameters = transform["parameters"].get_obj();
-    mValue px = parameters["px"];
-    mValue py = parameters["py"];
-    mValue pz = parameters["pz"];
-    mValue vx = parameters["vx"];
-    mValue vy = parameters["vy"];
-    mValue vz = parameters["vz"];
+gp_Trsf rotateTransformation(double multiplier, map< string, mValue > origin, map< string, mValue > parameters) {
+    mValue x = origin["x"];
+    mValue y = origin["y"];
+    mValue z = origin["z"];
+    mValue u = parameters["u"];
+    mValue v = parameters["v"];
+    mValue w = parameters["w"];
     mValue angle = parameters["angle"];
     
     gp_Trsf transformation = gp_Trsf();
-    transformation.SetRotation(gp_Ax1(gp_Pnt(get_double(px),
-                                             get_double(py),
-                                             get_double(pz)), 
-                                      gp_Dir(get_double(vx),
-                                             get_double(vy),
-                                             get_double(vz))), 
-                               get_double(angle)/180*M_PI);
+    transformation.SetRotation(gp_Ax1(gp_Pnt(get_double(x),
+                                             get_double(y),
+                                             get_double(z)), 
+                                      gp_Dir(get_double(u),
+                                             get_double(v),
+                                             get_double(w))), 
+                               multiplier*get_double(angle)/180*M_PI);
     
+    return transformation;
+}
+    
+
+TopoDS_Shape rotate(map<string, mValue> transform, TopoDS_Shape shape) {
+    map< string, mValue > parameters = transform["parameters"].get_obj();
+    map< string, mValue > origin = transform["origin"].get_obj();
+    
+    gp_Trsf (*transformFn)(double,  map< string, mValue >, map< string, mValue >) = &rotateTransformation;
+    return copy_transform(shape, transformFn, origin, parameters);
+}
+
+TopoDS_Shape mirror(map<string, mValue> transform, TopoDS_Shape shape) {
+
+    map< string, mValue > parameters = transform["parameters"].get_obj();
+    map< string, mValue > origin = transform["origin"].get_obj();
+    
+    mValue x = origin["x"];
+    mValue y = origin["y"];
+    mValue z = origin["z"];
+    mValue u = parameters["u"];
+    mValue v = parameters["v"];
+    mValue w = parameters["w"];
+    int n = parameters["n"].get_int();
+    
+    gp_Trsf transformation = gp_Trsf();
+    transformation.SetMirror(gp_Ax1(gp_Pnt(get_double(x),
+                                           get_double(y),
+                                           get_double(z)), 
+                                    gp_Dir(get_double(u),
+                                           get_double(v),
+                                           get_double(w))));    
     BRepBuilderAPI_Transform brep_transform(shape, transformation);
     TopoDS_Shape transformed_shape = brep_transform.Shape();
-    
-    return transformed_shape;
+
+    if (n == 1) {
+	return BRepAlgoAPI_Fuse(transformed_shape, shape);
+    } else {
+	return transformed_shape;
+    }
 }
 
 TopoDS_Shape copy_mirror(map<string, mValue> transform, TopoDS_Shape shape) {
@@ -346,35 +360,6 @@ TopoDS_Shape copy_mirror(map<string, mValue> transform, TopoDS_Shape shape) {
 }
 
 
-gp_Trsf rotateTransformation(double multiplier, map< string, mValue > origin, map< string, mValue > parameters) {
-    mValue px = parameters["px"];
-    mValue py = parameters["py"];
-    mValue pz = parameters["pz"];
-    mValue vx = parameters["vx"];
-    mValue vy = parameters["vy"];
-    mValue vz = parameters["vz"];
-    mValue angle = parameters["angle"];
-    
-    gp_Trsf transformation = gp_Trsf();
-    transformation.SetRotation(gp_Ax1(gp_Pnt(get_double(px),
-                                             get_double(py),
-                                             get_double(pz)), 
-                                      gp_Dir(get_double(vx),
-                                             get_double(vy),
-                                             get_double(vz))), 
-                               multiplier*get_double(angle)/180*M_PI);
-    
-    return transformation;
-}
-    
-
-TopoDS_Shape copy_rotate(map<string, mValue> transform, TopoDS_Shape shape) {
-    map< string, mValue > parameters = transform["parameters"].get_obj();
-    map< string, mValue > origin = transform["origin"].get_obj();
-    
-    gp_Trsf (*transformFn)(double,  map< string, mValue >, map< string, mValue >) = &rotateTransformation;
-    return copy_transform(shape, transformFn, origin, parameters);
-}
 
 
 
@@ -392,16 +377,6 @@ TopoDS_Shape applyTransform(map<string, mValue> transform, TopoDS_Shape shape) {
     if (!transformType.is_null() && (transformType.type() == str_type) && (transformType.get_str() == string("mirror"))) {
         return mirror(transform, shape);
     }
-    
-    if (!transformType.is_null() && (transformType.type() == str_type) && (transformType.get_str() == string("copy_rotate"))) {
-        return copy_rotate(transform, shape);
-    }
-    if (!transformType.is_null() && (transformType.type() == str_type) && (transformType.get_str() == string("copy_mirror"))) {
-        return copy_mirror(transform, shape);
-    }
-    
-    
-    
     return shape;
 }
 
