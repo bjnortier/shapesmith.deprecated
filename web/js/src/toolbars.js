@@ -90,7 +90,7 @@ function create_transform(selected, type, keys) {
     var original = geom_doc.findByPath(path);
     var replacement = original.editableCopy();
     var origin = {x: 0, y: 0, z: 0};
-    if ((type === 'translate') && (original.origin)) {
+    if (((type === 'translate') || (type === 'scale')) && (original.origin)) {
 	origin = original.origin;
     }
     
