@@ -9,6 +9,3 @@ You can install your own verion of Shapesmith on MacOSX or Linux (Ubuntu recomme
 
 There is a twitter account for this project, [@shapesmith](http://www.twitter.com/shapesmith), and feel free to email me at bjnortier@shapesmith.net for encouragement, questions, bugs etc.
 
-<iframe src="http://player.vimeo.com/video/29986821" width="745" height="420" frameborder="0" webkitAllowFullScreen allowFullScreen></iframe>
-
-
