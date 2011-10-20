@@ -24,7 +24,7 @@ function renderTransform(geomNode, transformIndex) {
                         editing: transform.editing
                        });
     }
-    var parametersTemplate = '<table>{{#paramsArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{clazz}}">{{value}}</span>{{/editing}}{{#editing}}<input id="{{key}}" type="text" value="{{value}}"/>{{/editing}}</td></tr>{{/paramsArr}}</table>';
+    var parametersTemplate = '<table>{{#paramsArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}<input id="{{key}}" type="text" value="{{value}}"/>{{/editing}}</td></tr>{{/paramsArr}}</table>';
     var paramsTable = $.mustache(parametersTemplate, {paramsArr : paramsArr});
 
 
