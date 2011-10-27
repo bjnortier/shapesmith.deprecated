@@ -39,7 +39,10 @@ create_update(_Config) ->
 
     %% Create
     GeomJSONA = {struct, [{<<"type">>, <<"sphere">>},
-                          {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]},
+			  {<<"origin">>, {struct, [{<<"x">>, 0},
+						   {<<"y">>, 0},
+						   {<<"z">>, 0}]}},
+                          {<<"parameters">>, {struct, [{<<"r">>, 1.0}]}}]},
     {ok,{{"HTTP/1.1",200,_}, _, PostResponse}} = 
 	httpc:request(post, {"http://localhost:8001/geom/", [], "application/json", iolist_to_binary(mochijson2:encode(GeomJSONA))}, [], []),
     {struct, [{<<"path">>, PathBin}]} = mochijson2:decode(PostResponse),
@@ -47,7 +50,10 @@ create_update(_Config) ->
 
     %% Update
     GeomJSONB = {struct, [{<<"type">>, <<"sphere">>},
-                          {<<"parameters">>, {struct, [{<<"radius">>, 3.0}]}}]},
+			  {<<"origin">>, {struct, [{<<"x">>, 0},
+						   {<<"y">>, 0},
+						   {<<"z">>, 0}]}},
+                          {<<"parameters">>, {struct, [{<<"r">>, 3.0}]}}]},
     {ok,{{"HTTP/1.1",204,_}, _, _PutResponse}} = 
 	httpc:request(put, {"http://localhost:8001/geom/" ++ GeomId, [], "application/json", iolist_to_binary(mochijson2:encode(GeomJSONB))}, [], []),
     ok.
@@ -56,16 +62,22 @@ create_update(_Config) ->
 nested_geoms(_Config) ->
     %% Create
     GeomJSONA = {struct, [{<<"type">>, <<"sphere">>},
-                          {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]},
+			  {<<"origin">>, {struct, [{<<"x">>, 0},
+						   {<<"y">>, 0},
+						   {<<"z">>, 0}]}},
+                          {<<"parameters">>, {struct, [{<<"r">>, 1.0}]}}]},
     {ok,{{"HTTP/1.1",200,_}, _, PostAResponse}} = 
 	httpc:request(post, {"http://localhost:8001/geom/", [], "application/json", iolist_to_binary(mochijson2:encode(GeomJSONA))}, [], []),
     {struct, [{<<"path">>, PathABin}]} = mochijson2:decode(PostAResponse),
     "/geom/" ++ GeomIdA = binary_to_list(PathABin),
 
     GeomJSONB = {struct, [{<<"type">>, <<"cuboid">>},
-                          {<<"parameters">>, {struct, [{<<"width">>, 1.0},
-                                                       {<<"depth">>, 1.0},
-                                                       {<<"height">>, 1.0}]}}]},
+			  {<<"origin">>, {struct, [{<<"x">>, 0},
+						   {<<"y">>, 0},
+						   {<<"z">>, 0}]}},
+                          {<<"parameters">>, {struct, [{<<"u">>, 1.0},
+                                                       {<<"v">>, 1.0},
+                                                       {<<"w">>, 1.0}]}}]},
     
     {ok,{{"HTTP/1.1",200,_}, _, PostBResponse}} = 
 	httpc:request(post, {"http://localhost:8001/geom/", [], "application/json", iolist_to_binary(mochijson2:encode(GeomJSONB))}, [], []),
@@ -99,24 +111,32 @@ nested_geoms(_Config) ->
                   {<<"children">>, [
                                     {struct, [{<<"path">>, list_to_binary("/geom/" ++ GeomIdA)},
                                               {<<"type">>, <<"sphere">>},
-                                              {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]},
+					      {<<"origin">>, {struct, [{<<"x">>, 0},
+								       {<<"y">>, 0},
+								       {<<"z">>, 0}]}},
+                                              {<<"parameters">>, {struct, [{<<"r">>, 1.0}]}}]},
                                     {struct, [{<<"path">>, list_to_binary("/geom/" ++ GeomIdB)},
                                               {<<"type">>, <<"cuboid">>},
-                                              {<<"parameters">>, {struct, [{<<"width">>, 1.0},
-                                                                           {<<"depth">>, 1.0},
-                                    {<<"height">>, 1.0}]}}]}
+					      {<<"origin">>, {struct, [{<<"x">>, 0},
+								       {<<"y">>, 0},
+								       {<<"z">>, 0}]}},
+                                              {<<"parameters">>, {struct, [{<<"u">>, 1.0},
+                                                                           {<<"v">>, 1.0},
+									   {<<"w">>, 1.0}]}}]}
                                    ]}]},
     ExpectedResponse =  mochijson2:decode(GetResponse2),
-
     ok.
 
 validation_create(_Config) ->
     
     GeomJSONA = {struct, [{<<"type">>, <<"sphere">>},
-                          {<<"parameters">>, {struct, [{<<"radius">>, 0.0}]}}]},
+			  {<<"origin">>, {struct, [{<<"x">>, 0},
+						   {<<"y">>, 0},
+						   {<<"z">>, 0}]}},
+                          {<<"parameters">>, {struct, [{<<"r">>, 0.0}]}}]},
     {ok,{{"HTTP/1.1",400,_}, _, PostAResponse}} = 
 	httpc:request(post, {"http://localhost:8001/geom/", [], "application/json", iolist_to_binary(mochijson2:encode(GeomJSONA))}, [], []),
-    {struct, [{<<"validation">>, {struct, [{<<"radius">>, <<"must be positive">>}]}}]} = mochijson2:decode(PostAResponse),
+    {struct, [{<<"validation">>, {struct, [{<<"r">>, <<"must be positive">>}]}}]} = mochijson2:decode(PostAResponse),
 
     ok.
 
@@ -124,7 +144,10 @@ validation_update(_Config) ->
 
     %% Create
     GeomJSONA = {struct, [{<<"type">>, <<"sphere">>},
-                          {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]},
+			  {<<"origin">>, {struct, [{<<"x">>, 0},
+						   {<<"y">>, 0},
+						   {<<"z">>, 0}]}},
+                          {<<"parameters">>, {struct, [{<<"r">>, 1.0}]}}]},
     {ok,{{"HTTP/1.1",200,_}, _, PostResponse}} = 
 	httpc:request(post, {"http://localhost:8001/geom/", [], "application/json", iolist_to_binary(mochijson2:encode(GeomJSONA))}, [], []),
     {struct, [{<<"path">>, PathBin}]} = mochijson2:decode(PostResponse),
@@ -132,10 +155,13 @@ validation_update(_Config) ->
 
     %% Update
     GeomJSONB = {struct, [{<<"type">>, <<"sphere">>},
-                          {<<"parameters">>, {struct, [{<<"radius">>, -0.10}]}}]},
+			  {<<"origin">>, {struct, [{<<"x">>, 0},
+						   {<<"y">>, 0},
+						   {<<"z">>, 0}]}},
+                          {<<"parameters">>, {struct, [{<<"r">>, -0.10}]}}]},
     {ok,{{"HTTP/1.1",400,_}, _, PutResponse}} = 
 	httpc:request(put, {"http://localhost:8001/geom/" ++ GeomId, [], "application/json", iolist_to_binary(mochijson2:encode(GeomJSONB))}, [], []),
      {struct, [{<<"validation">>, 
-		{struct, [{<<"radius">>, <<"must be positive">>}]}}]} = mochijson2:decode(PutResponse),
+		{struct, [{<<"r">>, <<"must be positive">>}]}}]} = mochijson2:decode(PutResponse),
 
     ok.

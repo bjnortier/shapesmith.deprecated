@@ -45,7 +45,10 @@ end_per_testcase(_Testcase, _Config) ->
 
 create_simple(_Config) ->
     Geometry = {struct, [{<<"type">>, <<"sphere">>},
-                         {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]},
+			  {<<"origin">>, {struct, [{<<"x">>, 0},
+						   {<<"y">>, 0},
+						   {<<"z">>, 0}]}},
+                         {<<"parameters">>, {struct, [{<<"r">>, 1.0}]}}]},
     {ok, Id} = node_master:create_geom(Geometry),
     {ok, {struct, _}} = node_master:mesh_geom(Id),
     {ok, Stl} = node_master:stl(Id),
@@ -60,14 +63,25 @@ timeout(_Config) ->
 
 create_boolean(_Config) ->
     Geometry1 = {struct, [{<<"type">>, <<"sphere">>},
-                          {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]},
+			  {<<"origin">>, {struct, [{<<"x">>, 0},
+						   {<<"y">>, 0},
+						   {<<"z">>, 0}]}},
+                          {<<"parameters">>, {struct, [{<<"r">>, 1.0}]}}]},
     Geometry2 = {struct, [{<<"type">>, <<"sphere">>},
-                          {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}},
+			  {<<"origin">>, {struct, [{<<"x">>, 0},
+						   {<<"y">>, 0},
+						   {<<"z">>, 0}]}},
+                          {<<"parameters">>, {struct, [{<<"r">>, 1.0}]}},
                           {<<"transforms">>, [
                                               {struct, [{<<"type">>, <<"translate">>},
-                                                        {<<"parameters">>, {struct, [{<<"dx">>, 0.5},
-                                                                                     {<<"dy">>, 0.5},
-                                                                                     {<<"dz">>, 0.5}]}}]}
+							{<<"origin">>, {struct, [{<<"x">>, 0},
+										 {<<"y">>, 0},
+										 {<<"z">>, 0}]}},
+                                                        {<<"parameters">>, {struct, [{<<"u">>, 0.5},
+                                                                                     {<<"v">>, 0.5},
+                                                                                     {<<"w">>, 0.5},
+										     {<<"n">>, 0}
+										    ]}}]}
                                              ]}]},
 
     {ok, Id1} = node_master:create_geom(Geometry1),
@@ -89,7 +103,10 @@ create_boolean(_Config) ->
 parallel_workers(_Config) ->
     Results = pmap(fun(R) -> 
 			   Geom =  {struct,[{<<"type">>,<<"sphere">>}, 
-					    {<<"parameters">>,{struct,[{<<"radius">>, R}]}}]},
+					    {<<"origin">>, {struct, [{<<"x">>, 0},
+								     {<<"y">>, 0},
+								     {<<"z">>, 0}]}},
+					    {<<"parameters">>,{struct,[{<<"r">>, R}]}}]},
 			   node_master:create_geom(Geom) end, 
 		   lists:seq(1,10)),
     lists:map(fun(Result) ->
