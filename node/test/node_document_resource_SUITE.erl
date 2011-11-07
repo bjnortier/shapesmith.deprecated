@@ -47,7 +47,10 @@ save_simple(_Config) ->
 
     %% Create a geometry node
     GeomProps = [{<<"type">>, <<"sphere">>},
-                 {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}],
+		 {<<"origin">>, {struct, [{<<"x">>, 0},
+					  {<<"y">>, 0},
+					  {<<"z">>, 0}]}},
+                 {<<"parameters">>, {struct, [{<<"r">>, 1.0}]}}],
     {ok, GeomId} = node_geom_db:create({struct, GeomProps}),
 
     %% Simulate saving the geometry node, which includes the path

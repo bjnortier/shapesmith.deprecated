@@ -38,7 +38,10 @@ simple(_Config) ->
 
     %% Create
     GeomA = {struct, [{<<"type">>, <<"sphere">>},
-                      {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]},
+		      {<<"origin">>, {struct, [{<<"x">>, 0},
+					       {<<"y">>, 0},
+					       {<<"z">>, 0}]}},
+                      {<<"parameters">>, {struct, [{<<"r">>, 1.0}]}}]},
     {ok, Id} = node_master:create_geom(GeomA),
     
     %% Get
