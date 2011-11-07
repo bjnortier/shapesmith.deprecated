@@ -48,7 +48,11 @@ file_path(Context, Name) ->
                   $/ -> tl(Name);
                   _ -> Name
               end,
-    filename:join([Context#context.root, RelName]).
+    case mochiweb_util:safe_relative_path(RelName) of
+	undefined -> false;
+	RelPath ->
+	    filename:join([Context#context.root, RelPath])
+    end.
 
 file_exists(Context, Name) ->
     NamePath = file_path(Context, Name),
