@@ -356,7 +356,7 @@ SS.Workplane = function(spec) {
 
     var mouseOnWorkplane = {x: 0, y: 0}, scene = spec.scene;
 
-    var gridExtents        = SS.workplane.gridExtents({minX: -50, minY: -50, maxX: 50, maxY: 50, fadingWidth: 50});
+    var gridExtents        = SS.workplane.gridExtents({minX: -60, minY: -60, maxX: 60, maxY: 60, fadingWidth: 50});
     var workplanePointer   = SS.workplane.pointer({scene: scene, gridExtents: gridExtents});
     var xPositionIndicator = SS.workplane.xPositionIndicator({scene: scene, gridExtents: gridExtents});
     var yPositionIndicator = SS.workplane.yPositionIndicator({scene: scene, gridExtents: gridExtents});
