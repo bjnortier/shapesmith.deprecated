@@ -110,10 +110,10 @@ $(document).ready(function() {
     /*
      * Document
      */
-    /*new Action("Save", "images/save.png", 
+    new Action("Save", "images/save.png", 
                function() { 
 		   save(); 
-	       }).render($("#document"));*/
+	       }).render($("#document"));
     new Action("Undo", "images/undo.png", 
                function() { 
 		   command_stack.undo(); 

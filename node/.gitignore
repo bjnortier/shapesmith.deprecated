@@ -5,6 +5,7 @@ db/*.brep
 db/*.geom
 deps/
 priv/log/
+log/
 logs/
 test_db/
 db/*.geom

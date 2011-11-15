@@ -17,16 +17,16 @@
 
 -module(node_hash).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([hash_geometry/1]).
+-export([hash_geometry/1, hex/1]).
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
 hash_geometry(Geometry) ->
     Filtered = hashable(Geometry),
-    hex_binary(crypto:sha(term_to_binary(Filtered))).
+    hex(crypto:sha(term_to_binary(Filtered))).
 
-hex_binary(Binary) when is_binary(Binary) ->
+hex(Binary) when is_binary(Binary) ->
     lists:flatten([hex_octet(X) || X <- binary_to_list(Binary)]).
           
 
