@@ -36,14 +36,14 @@ create(WorkerPid, Hash, Geometry) ->
     case DB:exists(brep, Hash) of
         true ->
 
-            node_log:info("Creating BREP for ~p from file~n", [Hash]),
+            lager:info("Creating BREP for ~p from file~n", [Hash]),
 	    S11N = DB:get(brep, Hash),
             %% Insert into worker
-            Msg = {struct, [{<<"type">>, <<"deserialize">>},
-                            {<<"id">>, list_to_binary(Hash)},
-                            {<<"s11n">>, S11N}]},
-            case node_worker_pool:call(WorkerPid, mochijson2:encode(Msg)) of
-		"\"ok\"" ->
+            Msg = {[{<<"type">>, <<"deserialize">>},
+		    {<<"id">>, list_to_binary(Hash)},
+		    {<<"s11n">>, S11N}]},
+            case node_worker_pool:call(WorkerPid, jiffy:encode(Msg)) of
+		<<"\"ok\"">> ->
 		    ok;
 		{error, Reason} ->
 		    {error, Reason};
@@ -52,13 +52,12 @@ create(WorkerPid, Hash, Geometry) ->
 	    end;
 
         false ->
-            
-            node_log:info("Creating BREP for ~p using worker~n", [Hash]),
+            lager:info("Creating BREP for ~p using worker~n", [Hash]),
 
-            {struct, GeomProps} = Geometry,
+            {GeomProps} = Geometry,
             {<<"type">>, GeomType} = lists:keyfind(<<"type">>, 1, GeomProps),
 	    case create_type(WorkerPid, Hash, GeomType, Geometry) of
-		"\"ok\"" ->
+		<<"\"ok\"">> ->
 		    ok;
 		{error, Reason} ->
 		    {error, Reason};
@@ -75,9 +74,9 @@ purge(WorkerPid, Hash) ->
 	_ ->
 	    ok
     end,
-    node_log:info("Purging ~p~n", [Hash]),
-    Msg = {struct, [{<<"purge">>, list_to_binary(Hash)}]},
-    case node_worker_pool:call(WorkerPid, mochijson2:encode(Msg)) of
+    lager:info("Purging ~p~n", [Hash]),
+    Msg = {[{<<"purge">>, list_to_binary(Hash)}]},
+    case node_worker_pool:call(WorkerPid, jiffy:encode(Msg)) of
 	"true" ->
 	    ok;
 	{error, Reason} ->
@@ -88,8 +87,8 @@ purge(WorkerPid, Hash) ->
 
 purge_all(WorkerPid) ->
     Msg = <<"purge_all">>,
-    case node_worker_pool:call(WorkerPid, mochijson2:encode(Msg)) of
-	"\"ok\"" ->
+    case node_worker_pool:call(WorkerPid, jiffy:encode(Msg)) of
+	<<"\"ok\"">> ->
 	    ok;
 	{error, Reason} ->
 	    {error, Reason};
@@ -106,10 +105,10 @@ serialize(WorkerPid, Hash) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 serialize_to_disk(WorkerPid, Hash) ->
-    Msg = {struct, [{<<"type">>, <<"serialize">>},
-                    {<<"id">>, list_to_binary(Hash)}]},
-    {struct, [{<<"s11n">>, S11N}]} = mochijson2:decode(node_worker_pool:call(WorkerPid, mochijson2:encode(Msg))),
-    node_log:info("writing brep for ~p~n", [Hash]),
+    Msg = {[{<<"type">>, <<"serialize">>},
+	    {<<"id">>, list_to_binary(Hash)}]},
+    {[{<<"s11n">>, S11N}]} = jiffy:decode(node_worker_pool:call(WorkerPid, jiffy:encode(Msg))),
+    lager:info("writing brep for ~p~n", [Hash]),
     {ok, DB} = application:get_env(node, db_module),
     DB:put(brep, Hash, S11N).
     
@@ -125,7 +124,7 @@ create_type(WorkerPid, Hash, _, Geometry) ->
     worker_create(WorkerPid, Hash, Geometry).
 
 create_boolean(WorkerPid, Hash, Type, Geometry) ->
-    {struct, GeomProps} = Geometry,
+    {GeomProps} = Geometry,
     {<<"children">>, ChildIds} = lists:keyfind(<<"children">>, 1, GeomProps),
     ChildHashes = lists:map(fun(ChildId) ->
                                     ChildHash = node_geom_db:hash(binary_to_list(ChildId)),
@@ -137,13 +136,13 @@ create_boolean(WorkerPid, Hash, Type, Geometry) ->
                      false -> [];
                      {<<"transforms">>, T} -> T
                  end,
-    worker_create(WorkerPid, Hash, {struct, [{<<"type">>, Type},
-					     {<<"children">>, ChildHashes},
-					     {<<"transforms">>, Transforms}
-					    ]}).
+    worker_create(WorkerPid, Hash, {[{<<"type">>, Type},
+				     {<<"children">>, ChildHashes},
+				     {<<"transforms">>, Transforms}
+				    ]}).
 worker_create(WorkerPid, Hash, Geometry) ->
-    Msg = {struct, [{<<"type">>, <<"create">>},
-                    {<<"id">>, list_to_binary(Hash)},
-                    {<<"geometry">>, Geometry}
-                   ]},
-    node_worker_pool:call(WorkerPid, mochijson2:encode(Msg)).
+    Msg = {[{<<"type">>, <<"create">>},
+	    {<<"id">>, list_to_binary(Hash)},
+	    {<<"geometry">>, Geometry}
+	   ]},
+    node_worker_pool:call(WorkerPid, jiffy:encode(Msg)).

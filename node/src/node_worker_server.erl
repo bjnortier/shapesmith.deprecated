@@ -64,30 +64,29 @@ handle_call(stop, _From, State) ->
     Reply = stopped,
     {stop, Reason, Reply, State};
 handle_call({call, Msg}, _From, State) ->
-    %%io:format("MSG: ~p~n", [Msg]),
     Port = State#state.port,
     WorkerMaxTime = State#state.worker_max_time,
     Port ! {self(), {command, Msg}},
     receive
         {Port, {data, Data}} ->
-	    {reply, Data, State};
+	    {reply, list_to_binary(Data), State};
         {'EXIT', Port, Reason} ->
             {stop, {error, Reason}, State}
     after WorkerMaxTime ->
 	    {stop, {error, worker_timeout}, State}
     end;
 handle_call(Request, _From, State) ->
-    io:format("UNKNOWN node_worker_server:handle_call(~p)~n", [Request]),
+    lager:warning("UNKNOWN node_worker_server:handle_call(~p)~n", [Request]),
     {reply, ok, State}.
 
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
 handle_info({'EXIT', Port, Reason}, State) when Port =:= State#state.port->
-    io:format("node_worker_server port has exited: ~p~n", [Reason]),
+    lager:warning("node_worker_server port has exited: ~p~n", [Reason]),
     {stop, port_process_terminated, State};
 handle_info(Info, State) ->
-    io:format("INFO: [~p] ~p~n", [?MODULE, Info]),
+    lager:info("INFO: [~p] ~p~n", [?MODULE, Info]),
     {noreply, State}.
 
 terminate(Reason, State) ->
@@ -97,8 +96,8 @@ terminate(Reason, State) ->
     receive 
         {Port, closed} ->
             ok;
-        X ->
-            throw(X)
+        Err ->
+            throw(Err)
     after 5000 ->
             throw(no_close_received)
     end.

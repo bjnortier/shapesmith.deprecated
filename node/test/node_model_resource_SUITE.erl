@@ -98,7 +98,6 @@ save(_Config) ->
     %% Invalid master update
     {ok,{{"HTTP/1.1",400,_}, _, PostResponse1}} = 
 	httpc:request(put, {"http://localhost:8001/bjnortier/iphonedock/refs/master", [],  "application/json", jiffy:encode({[]})}, [], []),
-    io:format("!!!!!!!!!! ~p~n", [PostResponse1]),
     <<"only strings accepted">> = jiffy:decode(iolist_to_binary(PostResponse1)),
 
     %% Update master

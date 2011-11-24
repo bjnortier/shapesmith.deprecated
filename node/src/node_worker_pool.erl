@@ -60,7 +60,7 @@ handle_call(get_worker, _From, State) ->
     WorkerMaxTime = State#state.worker_max_time,
     case Available of
 	[] ->
-	    node_log:info("Waiting for worker... ~n"),
+	    lager:info("Waiting for worker... ~n"),
 	    receive
 		{finished, FinishedPid} ->
 		    {Pid, NewState} = get_next(return_worker_if_alive(State, FinishedPid)),
@@ -83,14 +83,14 @@ handle_cast(_Msg, State) ->
 handle_info({finished, Pid}, State) ->
     {noreply, return_worker_if_alive(State, Pid)};
 handle_info({'EXIT', Pid, Reason}, State) ->
-    node_log:error("Worker ~p exited. Reason: ~p~n", [Pid, Reason]),
+    lager:error("Worker ~p exited. Reason: ~p~n", [Pid, Reason]),
     NewWorkerPid = create_worker(),
     Available = State#state.available,
-    node_log:info("Available: ~p~n", [Available]),
+    lager:info("Available: ~p~n", [Available]),
     NewState = State#state{available = [NewWorkerPid|Available]},
     {noreply, NewState};
 handle_info(Info, State) ->
-    node_log:info("~p:handle_info: ~p~n", [?MODULE, Info]),
+    lager:info("~p:handle_info: ~p~n", [?MODULE, Info]),
     {noreply, State}.
 
 terminate(_Reason, _State) ->
@@ -112,16 +112,16 @@ create_worker() ->
 
 get_next(State) ->
     [Pid|Remaining] = State#state.available,
-    node_log:info("Next worker: ~p~n", [Pid]),
+    lager:info("Next worker: ~p~n", [Pid]),
     {Pid, State#state{ available = Remaining }}.
 
 return_worker_if_alive(State, Pid) ->
     case is_process_alive(Pid) of
 	true ->
-	    node_log:info("Returning worker ~p~n", [Pid]),
+	    lager:info("Returning worker ~p~n", [Pid]),
 	    State#state{ available = [Pid|State#state.available]};
 	false ->
-	    node_log:info("Ignoring dead worker ~p~n", [Pid]),
+	    lager:info("Ignoring dead worker ~p~n", [Pid]),
 	    State
     end.
 

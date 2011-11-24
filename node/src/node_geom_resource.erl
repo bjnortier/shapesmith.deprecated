@@ -34,14 +34,12 @@
 
 -include_lib("webmachine/include/webmachine.hrl").
 
-%% The incoming JSON is transformed to convert paths (e.g. "/geom/1") to
-%% ids for children
 -record(context, {id, geom_json}).
 
 init([]) -> {ok, #context{}}.
 
 allowed_methods(ReqData, Context) -> 
-    {['GET', 'POST', 'PUT'], ReqData, Context}.
+    {['GET', 'POST'], ReqData, Context}.
 
 resource_exists(ReqData, Context) ->
     case wrq:method(ReqData) of

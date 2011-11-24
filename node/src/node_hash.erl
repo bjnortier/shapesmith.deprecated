@@ -23,8 +23,7 @@
 -endif.
 
 hash_geometry(Geometry) ->
-    Filtered = hashable(Geometry),
-    hex(crypto:sha(term_to_binary(Filtered))).
+    hex(crypto:sha(jiffy:encode(Geometry))).
 
 hex(Binary) when is_binary(Binary) ->
     lists:flatten([hex_octet(X) || X <- binary_to_list(Binary)]).
@@ -56,107 +55,12 @@ hex_test_() ->
      ?_assertEqual("4c17", hex_binary(<<76, 23>>))
     ].
 
--endif.
-
-hashable({struct, Props}) ->
-    {<<"type">>, Type} = lists:keyfind(<<"type">>, 1, Props),
-    OptionalOrigin = case lists:keyfind(<<"origin">>, 1, Props) of
-			 false -> 
-			     [];
-			 {_, Orgn} -> 
-			     [{<<"origin">>, Orgn}]
-		     end,
-    Parameters = case lists:keyfind(<<"parameters">>, 1, Props) of
-                     false -> 
-                         {struct, []};
-                     {_, Params} -> 
-                         Params
-                 end,
-    FilteredChildren = case lists:keyfind(<<"children">>, 1, Props) of
-                           false -> [];
-                           {_, Children} -> 
-                               [hashable(X) || X <- Children]
-                       end,
-    Transforms = case  lists:keyfind(<<"transforms">>, 1, Props) of
-                     false -> [];
-                     {_, Transfrms} -> 
-                         Transfrms
-                 end,
-    {struct, [{<<"type">>, Type}] ++ OptionalOrigin ++ [{<<"parameters">>, Parameters},
-							{<<"children">>, FilteredChildren},
-							{<<"transforms">>, Transforms}]}.
-
--ifdef(TEST).
-
-hashable_simple_test_() ->
-    Geom1 = {struct, [{<<"type">>, <<"sphere">>},
-                      {<<"id">>, <<"abc">>},
-                      {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]},
-    Geom2 = {struct, [{<<"type">>, <<"sphere">>},
-                      {<<"id">>, <<"def">>},
-		      {<<"origin">>, {struct, [{<<"x">>, 0}, {<<"y">>, 0}, {<<"z">>, 0}]}},
-                      {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]},
+ordering_test_() ->
     [
-     ?_assertEqual({struct, [{<<"type">>, <<"sphere">>},
-                             {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}},
-                             {<<"children">>, []},
-                             {<<"transforms">>, []}]},
-                   hashable(Geom1)),
-     ?_assertEqual({struct, [{<<"type">>, <<"sphere">>},
-			     {<<"origin">>, {struct, [{<<"x">>, 0}, {<<"y">>, 0}, {<<"z">>, 0}]}},
-			     {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}},
-                             {<<"children">>, []},
-                             {<<"transforms">>, []}]},
-                   hashable(Geom2))
+     ?_assertEqual(hash_geometry({[{<<"a">>, 1.0}, {<<"b">>, -123}]})
+		   hash_geometry({[{<<"b">>, -123}, {<<"a">>, 1.0}]})),
+     ?_assertEqual(true, false) %% Add recursive testcase
     ].
-
-hashable_with_transforms_test_() ->
-    Geom1 = {struct, [{<<"type">>, <<"sphere">>},
-                      {<<"id">>, <<"abc">>},
-                      {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}},
-                      {<<"transforms">>, [{struct, [{<<"type">>, <<"translate">>}]}]}
-                     ]},
-    [
-     ?_assertEqual({struct, [{<<"type">>, <<"sphere">>},
-                             {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}},
-                             {<<"children">>, []},
-                             {<<"transforms">>, [{struct, [{<<"type">>, <<"translate">>}]}]}]},
-                   hashable(Geom1))
-    ].
-
-hashable_boolean_test_() ->
-    Geom1 = {struct, [{<<"type">>, <<"union">>},
-                      {<<"id">>, <<"abc">>},
-                      {<<"children">>, [
-                                        {struct, [{<<"type">>, <<"cuboid">>},
-                                                  {<<"id">>, <<"def">>},
-                                                  {<<"parameters">>, {struct, [{<<"x">>, 1.0}]}}]},
-                                        {struct, [{<<"type">>, <<"sphere">>},
-                                                  {<<"id">>, <<"rst">>},
-                                                  {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]}
-                                       ]}]},
-
-
-    [
-     ?_assertEqual(
-        {struct, [{<<"type">>, <<"union">>},
-                  {<<"parameters">>, {struct, []}},
-                  {<<"children">>, [
-                                    {struct, [{<<"type">>, <<"cuboid">>},
-                                              {<<"parameters">>, {struct, [{<<"x">>, 1.0}]}},
-                                              {<<"children">>, []},
-                                              {<<"transforms">>, []}]},
-                                    {struct, [{<<"type">>, <<"sphere">>},
-                                              {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}},
-                                              {<<"children">>, []},
-                                              {<<"transforms">>, []}]}
-                                   ]},
-                  {<<"transforms">>, []}
-                 ]},
-        hashable(Geom1))
-    ].
-
 
 -endif.
-
 
