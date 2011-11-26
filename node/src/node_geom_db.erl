@@ -33,7 +33,7 @@ create(Geometry) ->
 		{error, {validation, ErrorParams}};
 	ok ->
 	    {ok, DB} = application:get_env(node, db_module),
-	    SHA = node_hash:hash_geometry(Geometry),
+	    SHA = node_hash:hash_json(Geometry),
 	    ok = DB:put(geom, SHA, jiffy:encode(Geometry)),
 	    {ok, SHA}
     end.

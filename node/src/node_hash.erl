@@ -17,18 +17,17 @@
 
 -module(node_hash).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([hash_geometry/1, hex/1]).
+-export([hash_json/1, hex/1]).
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
-hash_geometry(Geometry) ->
-    hex(crypto:sha(jiffy:encode(Geometry))).
+hash_json(Geometry) ->
+    hex(crypto:sha(jiffy:encode(order_json(Geometry)))).
 
 hex(Binary) when is_binary(Binary) ->
     lists:flatten([hex_octet(X) || X <- binary_to_list(Binary)]).
           
-
 hex_octet(N) when N =< 9 ->
     [$0, $0 + N];
 hex_octet(N) when N > 15 ->
@@ -41,6 +40,18 @@ hex_nibble(N) when N =< 9 ->
 hex_nibble(N) ->
     [N - 10 + $a].
 
+order_json({Props}) when is_list(Props) ->
+    Sorted = lists:sort(fun({A, _}, {B, _}) ->
+				A < B
+			end,
+			Props),
+    {lists:map(fun({Key, Value}) ->
+		      {Key, order_json(Value)}
+	      end,
+	      Sorted)};
+order_json(X) ->
+    X.
+
 
 -ifdef(TEST).
 
@@ -49,17 +60,21 @@ hex_test_() ->
      ?_assertEqual("00", hex_octet(0)),
      ?_assertEqual("20", hex_octet(32)),
      ?_assertEqual("ff", hex_octet(255)),
-     ?_assertEqual("00", hex_binary(<<0>>)),
-     ?_assertEqual("10", hex_binary(<<16>>)),
-     ?_assertEqual("1000", hex_binary(<<16, 0>>)),
-     ?_assertEqual("4c17", hex_binary(<<76, 23>>))
+     ?_assertEqual("00", hex(<<0>>)),
+     ?_assertEqual("10", hex(<<16>>)),
+     ?_assertEqual("1000", hex(<<16, 0>>)),
+     ?_assertEqual("4c17", hex(<<76, 23>>))
     ].
 
 ordering_test_() ->
     [
-     ?_assertEqual(hash_geometry({[{<<"a">>, 1.0}, {<<"b">>, -123}]})
-		   hash_geometry({[{<<"b">>, -123}, {<<"a">>, 1.0}]})),
-     ?_assertEqual(true, false) %% Add recursive testcase
+     ?_assertEqual({[{<<"a">>, 2}, {<<"b">>, 1}]}, 
+		   order_json({[{<<"b">>, 1}, {<<"a">>, 2}]})),
+     ?_assertEqual({[{<<"a">>, 2}, {<<"b">>, {[{<<"x">>, 2}, {<<"z">>, 3}]} }]}, 
+		   order_json({[{<<"a">>, 2}, {<<"b">>, {[{<<"z">>, 3}, {<<"x">>, 2}]} }]})),
+
+     ?_assertEqual(hash_json({[{<<"a">>, 1.0}, {<<"b">>, -123}]}),
+		   hash_json({[{<<"b">>, -123}, {<<"a">>, 1.0}]}))
     ].
 
 -endif.

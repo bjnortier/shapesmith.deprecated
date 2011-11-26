@@ -71,8 +71,9 @@ accept_content(ReqData, Context) ->
     {ok, DB} = application:get_env(node, db_module),
 
     %% Create the commit
-    Root = jiffy:encode({[{<<"children">>, []}]}),
-    CommitHash = node_hash:hex(Root),
+    JSON = {[{<<"children">>, []}]},
+    Root = jiffy:encode(JSON),
+    CommitHash = node_hash:hash_json(JSON),
     DB:put(commit, CommitHash, Root),
     
     NewModel = {[{<<"refs">>, {[{<<"master">>, list_to_binary(CommitHash)}]}}]},

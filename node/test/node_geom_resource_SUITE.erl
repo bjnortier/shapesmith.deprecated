@@ -52,6 +52,7 @@ end_per_testcase(_Testcase, _Config) ->
     ok.
 
 creation(_Config) ->
+
     %% Create the model
     {ok,{{"HTTP/1.1",200,_}, _, PostResponse}} = 
 	httpc:request(put, {"http://localhost:8001/bjnortier/iphonedock/", [], "application/json", "{}"}, [], []),
@@ -71,7 +72,7 @@ creation(_Config) ->
     check_json_content_type(CreateHeaders),
     {[{<<"path">>, PathBin}]} = jiffy:decode(iolist_to_binary(PutResponse)),
     Path = binary_to_list(PathBin),
-    "/bjnortier/iphonedock/geom/" ++ Sha = Path,
+    "/bjnortier/iphonedock/geom/" ++ _Sha = Path,
 
     %% Get the created geometry
     {ok,{{"HTTP/1.1",200,_}, GetHeaders, GetResponse}} = 
