@@ -17,46 +17,41 @@
 
 -module(node_geom_db).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([exists/1, create/1, geometry/1, recursive_geometry/1]).
+-export([exists/3, create/3, get/3]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-exists(Sha) ->
+exists(User, Design, SHA) ->
     {ok, DB} = application:get_env(node, db_module),
-    DB:exists(geom, Sha).
+    DB:exists(node_bucket:name(User, Design), SHA).
 
-create(Geometry) ->
-    case node_validation:geom(Geometry) of
-	{error, ErrorParams} ->
-		{error, {validation, ErrorParams}};
-	ok ->
-	    {ok, DB} = application:get_env(node, db_module),
-	    SHA = node_hash:hash_json(Geometry),
-	    ok = DB:put(geom, SHA, jiffy:encode(Geometry)),
-	    {ok, SHA}
-    end.
-
-geometry(Sha) ->
+create(User, Design, Geometry) ->
     {ok, DB} = application:get_env(node, db_module),
-    jiffy:decode(DB:get(geom, Sha)).
+    SHA = node_hash:hash_json(Geometry),
+    ok = DB:put(node_bucket:name(User, Design), SHA, jiffy:encode(Geometry)),
+    {ok, SHA}.
 
-recursive_geometry(Id) ->
+get(User, Design, SHA) ->
     {ok, DB} = application:get_env(node, db_module),
-    {Props1} = DB:get(geom, Id),
-    Props2 = [{<<"id">>, list_to_binary(Id)}|Props1],
-    case lists:keyfind(<<"children">>, 1, Props2) of
-        false ->
-            {Props2};
-        {<<"children">>, ChildIds} ->
-            RecursiveChildren = lists:map(fun(ChildIdBin) ->
-						  ChildId = binary_to_list(ChildIdBin),
-						  recursive_geometry(ChildId)
-					  end,
-					  ChildIds),
-            {lists:keyreplace(<<"children">>, 1, Props2, {<<"children">>, RecursiveChildren})}
-    end.  
+    DB:get(node_bucket:name(User, Design), SHA).
+
+%% recursive_geometry(Id) ->
+%%     {ok, DB} = application:get_env(node, db_module),
+%%     {Props1} = DB:get(geom, Id),
+%%     Props2 = [{<<"id">>, list_to_binary(Id)}|Props1],
+%%     case lists:keyfind(<<"children">>, 1, Props2) of
+%%         false ->
+%%             {Props2};
+%%         {<<"children">>, ChildIds} ->
+%%             RecursiveChildren = lists:map(fun(ChildIdBin) ->
+%% 						  ChildId = binary_to_list(ChildIdBin),
+%% 						  recursive_geometry(ChildId)
+%% 					  end,
+%% 					  ChildIds),
+%%             {lists:keyreplace(<<"children">>, 1, Props2, {<<"children">>, RecursiveChildren})}
+%%     end.  
 
 
                                   

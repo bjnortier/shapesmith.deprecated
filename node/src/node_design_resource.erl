@@ -15,7 +15,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_model_resource).
+-module(node_design_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
 	 init/1, 

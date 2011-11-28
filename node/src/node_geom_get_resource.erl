@@ -28,24 +28,27 @@
 
 -include_lib("webmachine/include/webmachine.hrl").
 
--record(context, {sha}).
+-record(context, {adapter, user, design, sha}).
 
-init([]) -> {ok, #context{}}.
+init([{adapter_mod, Adapter}]) -> {ok, #context{adapter = Adapter}}.
 
 allowed_methods(ReqData, Context) -> 
     {['GET'], ReqData, Context}.
 
 resource_exists(ReqData, Context) ->
     SHA = wrq:path_info(sha, ReqData),
-    Exists = node_geom_db:exists(SHA),
-    {Exists, ReqData, Context#context{ sha = SHA}}.
+    User = wrq:path_info(user, ReqData),
+    Design = wrq:path_info(design, ReqData),
+    Adapter = Context#context.adapter,
+    Exists = Adapter:exists(User, Design, SHA),
+    {Exists, ReqData, Context#context{ user=User, design=Design, sha = SHA}}.
 
 content_types_provided(ReqData, Context) ->
     {[{"application/json", provide_content}], ReqData, Context}.
 
 provide_content(ReqData, Context) ->
-    SHA = Context#context.sha,
-    Geometry = node_master:geometry(SHA),
-    {jiffy:encode(Geometry), ReqData, Context}.
+    Adapter = Context#context.adapter,
+    Geometry = Adapter:get(Context#context.user, Context#context.design, Context#context.sha),
+    {Geometry, ReqData, Context}.
 
 

@@ -15,7 +15,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_model_resource_SUITE).
+-module(node_design_resource_SUITE).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -compile(export_all).
 -include_lib("common_test/include/ct.hrl").
@@ -74,7 +74,7 @@ create_new(_Config) ->
     {[{<<"refs">>, {[{<<"master">>, <<"7b226368696c6472656e223a5b5d7d">>}]}}]}
 	= jiffy:decode(iolist_to_binary(PostResponse)),
 
-    %% Get model
+    %% Get design
     {ok,{{"HTTP/1.1",200,_}, _, GetResponse1}} = 
 	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/", []}, [], []),
     {[{<<"refs">>, {[{<<"master">>, <<"7b226368696c6472656e223a5b5d7d">>}]}}]}
@@ -105,7 +105,7 @@ save(_Config) ->
 	httpc:request(put, {"http://localhost:8001/bjnortier/iphonedock/refs/master", [],  "application/json", jiffy:encode(<<"876abf32">>)}, [], []),
     <<"updated">> = jiffy:decode(iolist_to_binary(PostResponse2)),
 
-    %% Get model
+    %% Get design
     {ok,{{"HTTP/1.1",200,_}, _, GetResponse1}} = 
 	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/", []}, [], []),
     {[{<<"refs">>, {[{<<"master">>, <<"876abf32">>}]} }]}

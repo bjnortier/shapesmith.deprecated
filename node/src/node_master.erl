@@ -17,7 +17,7 @@
 
 -module(node_master).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([create_geom/1, mesh_geom/1, exists/1, geometry/1, recursive_geometry/1, stl/1]).
+-export([create_geom/3, mesh_geom/1, exists/1, geometry/1, recursive_geometry/1, stl/1]).
 -export([serialize_brep/1]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -33,18 +33,23 @@ geometry(Sha) ->
 recursive_geometry(Sha) ->
     node_geom_db:recursive_geometry(Sha).
 
-create_geom(Geometry) ->
-    case node_geom_db:create(Geometry) of
-	{ok, Sha} ->
-	    case ensure_brep_exists(Sha, Geometry, fun(_WorkerPid) -> ok end) of
-		ok ->
-		    {ok, Sha};
+create_geom(User, Design, Geometry) ->
+    case node_validation:geom(Geometry) of
+	{error, ErrorParams} ->
+		{error, {validation, ErrorParams}};
+	ok ->
+	    case node_geom_db:create(User, Design, Geometry) of
+		{ok, Sha} ->
+		    case ensure_brep_exists(Sha, Geometry, fun(_WorkerPid) -> ok end) of
+			ok ->
+			    {ok, Sha};
+			{error, Reason} ->
+			    lager:error("create_geom failed: ~p~n", [Reason]),
+			    {error, Reason}
+		    end;
 		{error, Reason} ->
-		    lager:error("create_geom failed: ~p~n", [Reason]),
 		    {error, Reason}
-	    end;
-	{error, Reason} ->
-	    {error, Reason}
+	    end
     end.
 
 mesh_geom(Sha) ->

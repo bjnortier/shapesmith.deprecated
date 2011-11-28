@@ -53,12 +53,6 @@ end_per_testcase(_Testcase, _Config) ->
 
 creation(_Config) ->
 
-    %% Create the model
-    {ok,{{"HTTP/1.1",200,_}, _, PostResponse}} = 
-	httpc:request(put, {"http://localhost:8001/bjnortier/iphonedock/", [], "application/json", "{}"}, [], []),
-    {[{<<"refs">>, {[{<<"master">>, _Commit}]}}]}
-	= jiffy:decode(iolist_to_binary(PostResponse)),
-
     %% Create geometry
     GeomJSON = {[{<<"type">>, <<"sphere">>},
 		 {<<"origin">>, {[{<<"x">>, 0},

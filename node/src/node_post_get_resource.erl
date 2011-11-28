@@ -15,7 +15,8 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_geom_post_resource).
+
+-module(node_post_get_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
          init/1, 
@@ -26,21 +27,20 @@
 	 allow_missing_post/2,
 	 create_path/2,
 	 resource_exists/2,
-         malformed_request/2
+         malformed_request/2,
+	 content_types_provided/2,
+	 provide_content/2
         ]).
 
 
 -include_lib("webmachine/include/webmachine.hrl").
 
--record(context, {adapter}).
+-record(context, {adapter, user, design}).
 
 init([{adapter_mod, Adapter}]) -> {ok, #context{adapter = Adapter}}.
 
 allowed_methods(ReqData, Context) -> 
-    {['POST'], ReqData, Context}.
-
-resource_exists(ReqData, Context) ->
-    {false, ReqData, Context}.
+    {['GET', 'POST'], ReqData, Context}.
 
 content_types_accepted(ReqData, Context) ->
     {[{"application/json", accept_content}], ReqData, Context}.
@@ -49,38 +49,61 @@ post_is_create(ReqData, Context) ->
     {true, ReqData, Context}. 
 
 allow_missing_post(ReqData, Context) ->
-    {true, ReqData, Context}.
+    {false, ReqData, Context}.
 
 create_path(ReqData, Context) ->
     {"not used", ReqData, Context}. 
 
 accept_content(ReqData, Context) ->
-    {true, wrq:set_resp_header("Content-type", "application/json", ReqData), Context}.
+    {true, ReqData, Context}.
 
 malformed_request(ReqData, Context) ->
+    Method = wrq:method(ReqData),
+    malformed_request(ReqData, Context, Method).
+
+malformed_request(ReqData, Context, 'GET') ->
+    {false, ReqData, Context};
+malformed_request(ReqData, Context, 'POST') ->
     Body = wrq:req_body(ReqData),
+    ReqData1 = wrq:set_resp_header("Content-type", "application/json", ReqData),
     try 
 	RequestJSON = jiffy:decode(Body),
-	User = wrq:path_info(user, ReqData),
-	Design = wrq:path_info(design, ReqData),
+	User = wrq:path_info(user, ReqData1),
+	Design = wrq:path_info(design, ReqData1),
 	Adapter = Context#context.adapter,
 	case Adapter:create(User, Design, RequestJSON) of
 	    {ok, ResponseJSON} ->
-		{false, wrq:set_resp_body(ResponseJSON, ReqData), Context};
+		{false, wrq:set_resp_body(ResponseJSON, ReqData1), Context};
 	    {error, ResponseJSON} ->
-		{true, wrq:set_resp_body(ResponseJSON, ReqData), Context};
+		{true, wrq:set_resp_body(ResponseJSON, ReqData1), Context};
 	    {error, Code, ResponseJSON} ->
-		{{halt, Code}, wrq:set_resp_body(ResponseJSON, ReqData), Context}
+		{{halt, Code}, wrq:set_resp_body(ResponseJSON, ReqData1), Context}
 	end
 
     catch
 	_:_ ->
             lager:warning("invalid JSON: ~p", [Body]),
-	    {true, wrq:set_resp_body(<<"\"invalid JSON\"">>, ReqData), Context}
+	    {true, wrq:set_resp_body(<<"\"invalid JSON\"">>, ReqData1), Context}
     end.
 
+resource_exists(ReqData, Context) ->
+    User = wrq:path_info(user, ReqData),
+    Design = wrq:path_info(design, ReqData),
+    Adapter = Context#context.adapter,
+    Exists = Adapter:exists(User, Design, "_design"),
+    Method = wrq:method(ReqData),
+    case {Method, Exists} of
+	{'GET', false} ->
+	    ReqData1 = wrq:set_resp_header("Content-Type", "application/json", ReqData),
+	    {false, wrq:set_resp_body(<<"\"not found\"">>, ReqData1), Context};
+	_ ->
+	    {Exists, ReqData, Context#context{ user=User, design=Design }}
+    end.
 
+content_types_provided(ReqData, Context) ->
+    {[{"application/json", provide_content}], ReqData, Context}.
 
-
-
-
+provide_content(ReqData, Context) ->
+    Adapter = Context#context.adapter,
+    Geometry = Adapter:get(Context#context.user, Context#context.design, "_design"),
+    {Geometry, ReqData, Context}.
