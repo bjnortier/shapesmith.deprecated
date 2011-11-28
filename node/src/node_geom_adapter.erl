@@ -15,7 +15,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_geom_store).
+-module(node_geom_adapter).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 
 -export([create/3, exists/3, get/3]).
@@ -24,22 +24,17 @@
 %%%                                 public                                   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-create(User, Design, Body) ->
-    case decode_json(Body) of
-	{ok, JSON} ->
-	    case node_master:create_geom(User, Design, JSON) of
-		{ok, Sha} ->
-		    Path = io_lib:format("/~s/~s/geom/~s", [User, Design, Sha]),
-		    Response = jiffy:encode({[{<<"path">>, iolist_to_binary(Path)}]}),
-		    {ok, Response};
-		{error, Reason = {validation, _}} ->
-		    {error, error_response(Reason)};
-		{error, Reason} ->
-		    {error, 500,error_response(Reason)}
-	    end;
-	invalid ->
-	    {error, <<"\"invalid json\"">>}
-end.
+create(User, Design, RequestJSON) ->
+    case node_master:create_geom(User, Design, RequestJSON) of
+	{ok, Sha} ->
+	    Path = io_lib:format("/~s/~s/geom/~s", [User, Design, Sha]),
+	    ResponseJSON = jiffy:encode({[{<<"path">>, iolist_to_binary(Path)}]}),
+	    {ok, ResponseJSON};
+	{error, Reason = {validation, _}} ->
+	    {error, error_response(Reason)};
+	{error, Reason} ->
+	    {error, 500,error_response(Reason)}
+    end.
 
 exists(User, Design, SHA) ->
     node_geom_db:exists(User, Design, SHA).
@@ -51,15 +46,6 @@ get(User, Design, SHA) ->
 %%%                                 private                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-decode_json(Body) ->
-    try 
-	{ok, jiffy:decode(Body)}
-    catch
-	_:_ ->
-            lager:warning("invalid JSON: ~p", [Body]),
-	    invalid
-    end.
-   
 error_response({validation, ErrorParams}) ->
     jiffy:encode({[{<<"validation">>, ErrorParams}]});
 error_response({error,worker_timeout}) ->

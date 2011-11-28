@@ -26,15 +26,16 @@ all() ->
 	[
 	 malformed_create,
 	 not_found,
-	 create_new,
-	 already_exists,
-	 save
+	 create_new
+	 %already_exists,
+	 %save
 	].
 
 init_per_suite(Config) ->
     ok = application:load(node),
     application:set_env(node, port, 8001),
     application:start(inets),
+    application:start(lager),
     ok = application:set_env(node, db_module, node_mem_db),
     ok = node:start(),
     Config.
@@ -42,6 +43,8 @@ init_per_suite(Config) ->
 end_per_suite(_Config) ->
     application:stop(node),
     application:unload(node),
+    application:stop(lager),
+    application:stop(inets),
     ok.
 
 init_per_testcase(_Testcase, Config) ->
@@ -53,45 +56,57 @@ end_per_testcase(_Testcase, _Config) ->
     ok.
 
 malformed_create(_Config) ->
-    {ok,{{"HTTP/1.1",400,_}, _, PostResponse1}} = 
-	httpc:request(put, {"http://localhost:8001/bjnortier/iphonedock/", [], "application/json", "[]"}, [], []),
-    "\"only {} accepted\"" = PostResponse1,
+    {ok,{{"HTTP/1.1",400,_}, ResponseHeaders1, PostResponse1}} = 
+	httpc:request(post, {"http://localhost:8001/bjnortier/iphonedock/", [], "application/json", "&@^%£$"}, [], []),
+    check_json_content_type(ResponseHeaders1),
+    <<"invalid JSON">> = jiffy:decode(iolist_to_binary(PostResponse1)),
 
-    {ok,{{"HTTP/1.1",400,_}, _, PostResponse2}} = 
-	httpc:request(put, {"http://localhost:8001/bjnortier/iphonedock/", [], "application/json", "@$&^%£^"}, [], []),
-    "\"invalid JSON\"" = PostResponse2.
+    {ok,{{"HTTP/1.1",400,_}, ResponseHeaders2, PostResponse2}} = 
+	httpc:request(post, {"http://localhost:8001/bjnortier/iphonedock/", [], "application/json", "[]"}, [], []),
+    <<"only {} accepted">> = jiffy:decode(iolist_to_binary(PostResponse2)),
+    check_json_content_type(ResponseHeaders2),
+    
+    ok.
 
 
 not_found(_Config) ->
-    {ok,{{"HTTP/1.1",404,_}, _, GetResponse}} = 
+    {ok,{{"HTTP/1.1",404,_}, GetResponseHeaders, GetResponse}} = 
 	httpc:request(get, {"http://localhost:8001/bjnortier/undefined/", []}, [], []),
-    "\"not found\"" = GetResponse.
+    check_json_content_type(GetResponseHeaders),
+    <<"not found">> = jiffy:decode(iolist_to_binary(GetResponse)).
 
 create_new(_Config) ->
     %% Create
-    {ok,{{"HTTP/1.1",200,_}, _, PostResponse}} = 
-	httpc:request(put, {"http://localhost:8001/bjnortier/iphonedock/", [], "application/json", "{}"}, [], []),
-    {[{<<"refs">>, {[{<<"master">>, <<"7b226368696c6472656e223a5b5d7d">>}]}}]}
-	= jiffy:decode(iolist_to_binary(PostResponse)),
+    {ok,{{"HTTP/1.1",200,_}, Headers1, PostResponse1}} = 
+	httpc:request(post, {"http://localhost:8001/bjnortier/iphonedock/", [], "application/json", "{}"}, [], []),
+    check_json_content_type(Headers1),
+    {[{<<"refs">>,
+       {[{<<"heads">>,
+	  {[{<<"master">>,
+	     <<"009c525d16ccfc06e955ad89766707da9a68504a">>}]}}]}}]}
+	= jiffy:decode(iolist_to_binary(PostResponse1)),
+
+    %% Cannot create more than once
+    {ok,{{"HTTP/1.1",400,_}, Headers2, PostResponse2}} = 
+	httpc:request(post, {"http://localhost:8001/bjnortier/iphonedock/", [], "application/json", "{}"}, [], []),
+    check_json_content_type(Headers2),
+    <<"already exists">> = jiffy:decode(iolist_to_binary(PostResponse2)),
 
     %% Get design
     {ok,{{"HTTP/1.1",200,_}, _, GetResponse1}} = 
 	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/", []}, [], []),
-    {[{<<"refs">>, {[{<<"master">>, <<"7b226368696c6472656e223a5b5d7d">>}]}}]}
+    {[{<<"refs">>,
+       {[{<<"heads">>,
+	  {[{<<"master">>,
+	     <<"009c525d16ccfc06e955ad89766707da9a68504a">>}]}}]}}]}
 	= jiffy:decode(iolist_to_binary(GetResponse1)),
     
     %% Get ref
     {ok,{{"HTTP/1.1",200,_}, _, GetResponse2}} = 
 	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/refs/master", []}, [], []),
     <<"7b226368696c6472656e223a5b5d7d">> = jiffy:decode(iolist_to_binary(GetResponse2)).
+
     
-
-already_exists(_Config) ->
-    create_new(_Config),
-    {ok,{{"HTTP/1.1",409,_}, _, PostResponse}} = 
-	httpc:request(put, {"http://localhost:8001/bjnortier/iphonedock/", [], "application/json", "{}"}, [], []),
-    <<"already exists">> = jiffy:decode(iolist_to_binary(PostResponse)).
-
 save(_Config) ->
     create_new(_Config),
 
@@ -115,4 +130,9 @@ save(_Config) ->
     {ok,{{"HTTP/1.1",200,_}, _, GetResponse2}} = 
 	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/refs/master", []}, [], []),
     <<"876abf32">> = jiffy:decode(iolist_to_binary(GetResponse2)).
+
+
+check_json_content_type(Headers) ->
+    {Headers, {_, "application/json"}} = {Headers, lists:keyfind("content-type", 1, Headers)}.
+
     

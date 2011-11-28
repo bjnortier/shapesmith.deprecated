@@ -15,43 +15,54 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_geom_db).
+-module(node_db).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([exists/3, create/3, get/3]).
+-export([exists/4, create/4, get/4, exists_refs/2, put_refs/3, get_refs/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-exists(User, Design, SHA) ->
+exists(User, Design, Type, SHA) ->
     {ok, DB} = application:get_env(node, db_module),
-    DB:exists(node_bucket:name(User, Design), SHA).
+    DB:exists(bucket(User, Design), key(Type, SHA)).
 
-create(User, Design, Geometry) ->
+create(User, Design, Type, JSON) ->
     {ok, DB} = application:get_env(node, db_module),
-    SHA = node_hash:hash_json(Geometry),
-    ok = DB:put(node_bucket:name(User, Design), SHA, jiffy:encode(Geometry)),
+    SHA = node_hash:hash_json(JSON),
+    ok = DB:put(bucket(User, Design), key(Type, SHA), jiffy:encode(JSON)),
     {ok, SHA}.
 
-get(User, Design, SHA) ->
+get(User, Design, Type, SHA) ->
     {ok, DB} = application:get_env(node, db_module),
-    DB:get(node_bucket:name(User, Design), SHA).
+    DB:get(bucket(User, Design), key(Type, SHA)).
 
-%% recursive_geometry(Id) ->
-%%     {ok, DB} = application:get_env(node, db_module),
-%%     {Props1} = DB:get(geom, Id),
-%%     Props2 = [{<<"id">>, list_to_binary(Id)}|Props1],
-%%     case lists:keyfind(<<"children">>, 1, Props2) of
-%%         false ->
-%%             {Props2};
-%%         {<<"children">>, ChildIds} ->
-%%             RecursiveChildren = lists:map(fun(ChildIdBin) ->
-%% 						  ChildId = binary_to_list(ChildIdBin),
-%% 						  recursive_geometry(ChildId)
-%% 					  end,
-%% 					  ChildIds),
-%%             {lists:keyreplace(<<"children">>, 1, Props2, {<<"children">>, RecursiveChildren})}
-%%     end.  
 
+exists_refs(User, Design) ->
+    {ok, DB} = application:get_env(node, db_module),
+    DB:exists(bucket(User, Design), "_refs").
+
+get_refs(User, Design) ->
+    {ok, DB} = application:get_env(node, db_module),
+    DB:get(bucket(User, Design), "_refs").
+
+put_refs(User, Design, JSON) ->
+    {ok, DB} = application:get_env(node, db_module),
+    DB:put(bucket(User, Design), "_refs", jiffy:encode(JSON)).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                              Private API                                  %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+key(geom, SHA) ->
+    "geom/" ++ SHA;
+key(commit, SHA) ->
+    "commit/" ++ SHA.
+
+bucket(User, Design) ->
+    User ++ "/" ++ Design.
+    
+    
 
                                   

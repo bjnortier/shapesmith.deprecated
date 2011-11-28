@@ -18,97 +18,93 @@
 -module(node_design_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
-	 init/1, 
+         init/1, 
          allowed_methods/2,
-	 content_types_provided/2,
-	 provide_content/2,
          content_types_accepted/2,
          accept_content/2,
+	 post_is_create/2,
+	 allow_missing_post/2,
+	 create_path/2,
 	 resource_exists/2,
-         malformed_request/2
+         malformed_request/2,
+	 content_types_provided/2,
+	 provide_content/2
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
+-record(context, {adapter, user, design, exists}).
 
--record(context, {model}).
-
-init([]) -> {ok, #context{model=undefined}}.
+init([{adapter_mod, Adapter}]) -> {ok, #context{adapter = Adapter}}.
 
 allowed_methods(ReqData, Context) -> 
-    {['GET', 'PUT'], ReqData, Context}.
+    ReqData1 = wrq:set_resp_header("Content-type", "application/json", ReqData),
+    {['GET', 'POST'], ReqData1, Context}.
+
+content_types_accepted(ReqData, Context) ->
+    {[{"application/json", accept_content}], ReqData, Context}.
+
+post_is_create(ReqData, Context) ->
+    {true, ReqData, Context}. 
+
+allow_missing_post(ReqData, Context) ->
+    {true, ReqData, Context}.
+
+create_path(ReqData, Context) ->
+    {"not used", ReqData, Context}. 
+
+accept_content(ReqData, Context) ->
+    {true, ReqData, Context}.
+
+malformed_request(ReqData, Context) ->
+    Method = wrq:method(ReqData),
+    User = wrq:path_info(user, ReqData),
+    Design = wrq:path_info(design, ReqData),
+    Adapter = Context#context.adapter,
+    Exists = Adapter:exists(User, Design),
+    Context1 = Context#context{ exists=Exists, user=User, design=Design },
+    malformed_request(ReqData, Context1, Method).
+
+malformed_request(ReqData, Context, 'GET') ->
+    {false, ReqData, Context};
+malformed_request(ReqData, Context = #context{ exists = true }, 'POST') ->
+    {true, wrq:set_resp_body(<<"\"already exists\"">>, ReqData), Context};
+malformed_request(ReqData, Context = #context{ exists = false }, 'POST') ->
+    Body = wrq:req_body(ReqData),
+    try 
+	RequestJSON = jiffy:decode(Body),
+	User = wrq:path_info(user, ReqData),
+	Design = wrq:path_info(design, ReqData),
+	Adapter = Context#context.adapter,
+	case Adapter:create(User, Design, RequestJSON) of
+	    {ok, ResponseJSON} ->
+		{false, wrq:set_resp_body(ResponseJSON, ReqData), Context};
+	    {error, ResponseJSON} ->
+		{true, wrq:set_resp_body(ResponseJSON, ReqData), Context};
+	    {error, Code, ResponseJSON} ->
+		{{halt, Code}, wrq:set_resp_body(ResponseJSON, ReqData), Context}
+	end
+
+    catch
+	throw:{error,{1,invalid_json}} ->
+            lager:warning("invalid JSON: ~p", [Body]),
+	    {true, wrq:set_resp_body(<<"\"invalid JSON\"">>, ReqData), Context};
+	Err:Reason ->
+	    lager:warning("Unexpected exception: ~p:~p", [Err, Reason]),
+	    {true,  wrq:set_resp_body(<<"\"internal error\"">>, ReqData), Context}
+    end.
 
 resource_exists(ReqData, Context) ->
-    resource_exists(ReqData, Context, wrq:method(ReqData)).
-
-resource_exists(ReqData, Context, 'GET') ->
-    {ok, DB} = application:get_env(node, db_module),
-    ModelKey = model_key(ReqData),
-    case DB:get(model, ModelKey) of
-	undefined ->
-	    {false, wrq:set_resp_body(jiffy:encode(<<"not found">>), ReqData), Context};
-	Model ->
-	    {true, ReqData, Context#context{model = Model}}
-    end;
-resource_exists(ReqData, Context, 'PUT') ->
-    {ok, DB} = application:get_env(node, db_module),
-    ModelKey = model_key(ReqData),
-    case DB:get(model, ModelKey) of
-	undefined ->
-	    {false, ReqData, Context};
+    Method = wrq:method(ReqData),
+    case {Method, Context#context.exists} of
+	{'GET', false} ->
+	    {false, wrq:set_resp_body(<<"\"not found\"">>, ReqData), Context};
 	_ ->
-	    {{halt, 409}, wrq:set_resp_body(jiffy:encode(<<"already exists">>), ReqData), Context}
+	    {Context#context.exists, ReqData, Context}
     end.
 
 content_types_provided(ReqData, Context) ->
     {[{"application/json", provide_content}], ReqData, Context}.
 
 provide_content(ReqData, Context) ->
-    {Context#context.model, ReqData, Context}.
-
-content_types_accepted(ReqData, Context) ->
-    {[{"application/json", accept_content}], ReqData, Context}.
-
-accept_content(ReqData, Context) ->
-    {ok, DB} = application:get_env(node, db_module),
-
-    %% Create the commit
-    JSON = {[{<<"children">>, []}]},
-    Root = jiffy:encode(JSON),
-    CommitHash = node_hash:hash_json(JSON),
-    DB:put(commit, CommitHash, Root),
-    
-    NewModel = {[{<<"refs">>, {[{<<"master">>, list_to_binary(CommitHash)}]}}]},
-    DB:put(model, model_key(ReqData), jiffy:encode(NewModel)),
-
-    {true, wrq:set_resp_body(jiffy:encode(NewModel), ReqData), Context}.
-
-malformed_request(ReqData, Context) ->
-    Method = wrq:method(ReqData),
-    malformed_request(ReqData, Context, Method).
-
-malformed_request(ReqData, Context, 'GET') ->
-    {false, ReqData, Context};
-malformed_request(ReqData, Context, 'PUT') ->
-    Body = wrq:req_body(ReqData),
-    try 
-	Json = jiffy:decode(iolist_to_binary(Body)),
-	case Json of
-	    {[]} ->
-		{false, ReqData, Context};
-	    _ ->
-		{true, wrq:set_resp_body(jiffy:encode(<<"only {} accepted">>), ReqData), Context}
-	end
-    catch
-	A:B ->
-	    lager:info("malformed request: ~p -> ~p:~p", [Body, A, B]),
-	    {true, wrq:set_resp_body(jiffy:encode(<<"invalid JSON">>), ReqData), Context}
-    end.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%                              PRIVATE                                     %%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-model_key(ReqData) ->
-    User = wrq:path_info(user, ReqData),
-    Model = wrq:path_info(model, ReqData),
-    lists:flatten(User ++ "/" ++ Model).
+    Adapter = Context#context.adapter,
+    Geometry = Adapter:get(Context#context.user, Context#context.design),
+    {Geometry, ReqData, Context}.
