@@ -30,13 +30,13 @@ create(User, Design, RequestJSON) ->
 	    JSON = {[{<<"children">>, []}]},
 	    {ok, CommitSHA} = node_db:create(User, Design, commit, JSON),
     
-	    Refs = {[{<<"refs">>, 
+	    Root = {[{<<"refs">>, 
 		      {[{<<"heads">>, 
 			 {[{<<"master">>, list_to_binary(CommitSHA)}]} 
 			}]}
 		     }]},
-	    ok = node_db:put_refs(User, Design, Refs),
-	    {ok, jiffy:encode(Refs)};
+	    ok = node_db:put_root(User, Design, Root),
+	    {ok, jiffy:encode(Root)};
 
 	_ ->
 	    {error, jiffy:encode(<<"only {} accepted">>)}
@@ -45,10 +45,10 @@ create(User, Design, RequestJSON) ->
 	    
 
 exists(User, Design) ->
-    node_db:exists_refs(User, Design).
+    node_db:exists_root(User, Design).
 
 get(User, Design) ->
-    node_db:get_refs(User, Design).
+    node_db:get_root(User, Design).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                 private                                  %%%

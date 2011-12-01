@@ -17,7 +17,7 @@
 
 -module(node_db).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([exists/4, create/4, get/4, exists_refs/2, put_refs/3, get_refs/2]).
+-export([exists/4, create/4, get/4, exists_root/2, put_root/3, get_root/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
@@ -38,17 +38,17 @@ get(User, Design, Type, SHA) ->
     DB:get(bucket(User, Design), key(Type, SHA)).
 
 
-exists_refs(User, Design) ->
+exists_root(User, Design) ->
     {ok, DB} = application:get_env(node, db_module),
-    DB:exists(bucket(User, Design), "_refs").
+    DB:exists(bucket(User, Design), "_root").
 
-get_refs(User, Design) ->
+get_root(User, Design) ->
     {ok, DB} = application:get_env(node, db_module),
-    DB:get(bucket(User, Design), "_refs").
+    DB:get(bucket(User, Design), "_root").
 
-put_refs(User, Design, JSON) ->
+put_root(User, Design, JSON) ->
     {ok, DB} = application:get_env(node, db_module),
-    DB:put(bucket(User, Design), "_refs", jiffy:encode(JSON)).
+    DB:put(bucket(User, Design), "_root", jiffy:encode(JSON)).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

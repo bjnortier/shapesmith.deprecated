@@ -29,78 +29,71 @@
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
 
--record(context, {model, commit, newref}).
+-record(context, {adapter, user, design, commit}).
 
-init([]) -> {ok, #context{model=undefined, commit=undefined, newref=undefined}}.
+init([{adapter_mod, Adapter}]) -> {ok, #context{adapter = Adapter}}.
 
 allowed_methods(ReqData, Context) -> 
     {['GET', 'PUT'], ReqData, Context}.
 
-resource_exists(ReqData, Context) ->
-    {ok, DB} = application:get_env(node, db_module),
-    ModelKey = model_key(ReqData),
-    RefKey = list_to_binary(wrq:path_info(ref, ReqData)),
-    case DB:get(model, ModelKey) of
-	undefined ->
-	    {false, wrq:set_resp_body(jiffy:encode(<<"model not found">>), ReqData), Context};
-	Model ->
-	    {[{<<"refs">>, {Refs}}]} = jiffy:decode(Model),
-	    case lists:keyfind(RefKey, 1, Refs) of
-		{_, Commit} ->
-		    {true, ReqData, Context#context{commit = Commit, model = Model}};
-		false ->
-		    {false, wrq:set_resp_body(jiffy:encode(<<"ref not found">>), ReqData), Context}
-	    end
-    end.
-
 content_types_provided(ReqData, Context) ->
     {[{"application/json", provide_content}], ReqData, Context}.
 
-provide_content(ReqData, Context) ->
-    {jiffy:encode(Context#context.commit), ReqData, Context}.
-
 content_types_accepted(ReqData, Context) ->
     {[{"application/json", accept_content}], ReqData, Context}.
-
-accept_content(ReqData, Context) ->
-    {ok, DB} = application:get_env(node, db_module),
-    RefKey = list_to_binary(wrq:path_info(ref, ReqData)),
-
-    {[{<<"refs">>, {Refs}}]} = jiffy:decode(Context#context.model),
-    NewRefs = lists:keyreplace(RefKey, 1, Refs, {RefKey, Context#context.newref}),
-    NewModel = {[{<<"refs">>, {NewRefs}}]},
-    DB:put(model, model_key(ReqData), jiffy:encode(NewModel)),
-
-    {true, wrq:set_resp_body(jiffy:encode(<<"updated">>), ReqData), Context}.
 
 malformed_request(ReqData, Context) ->
     Method = wrq:method(ReqData),
     malformed_request(ReqData, Context, Method).
 
 malformed_request(ReqData, Context, 'GET') ->
-    {false, ReqData, Context};
+    ReqData1 = wrq:set_resp_header("Content-Type", "application/json", ReqData),
+    {false, ReqData1, Context};
 malformed_request(ReqData, Context, 'PUT') ->
     Body = wrq:req_body(ReqData),
-    try 
-	JSON = jiffy:decode(iolist_to_binary(Body)),
-	case is_binary(JSON) of
-	    true ->
-		{false, ReqData, Context#context{newref = JSON}};
-	    false ->
-		{true, wrq:set_resp_body(jiffy:encode(<<"only strings accepted">>), ReqData), Context}
+    ReqData1 = wrq:set_resp_header("Content-type", "application/json", ReqData),
+    try
+	RequestJSON = jiffy:decode(Body),
+	User = wrq:path_info(user, ReqData1),
+	Design = wrq:path_info(design, ReqData1),
+	RefType = wrq:path_info(reftype, ReqData1),
+	Ref = wrq:path_info(ref, ReqData1),
+
+	Adapter = Context#context.adapter,
+	Result = Adapter:update(User, Design, RefType, Ref, RequestJSON),
+	lager:info("~p", [Result]),
+	case Result of
+	    {ok, ResponseJSON} ->
+		{false, wrq:set_resp_body(ResponseJSON, ReqData1), Context};
+	    {error, ResponseJSON} ->
+		{true, wrq:set_resp_body(ResponseJSON, ReqData1), Context};
+	    {error, Code, ResponseJSON} ->
+		{{halt, Code}, wrq:set_resp_body(ResponseJSON, ReqData1), Context}
 	end
+
     catch
-	A:B ->
-	    lager:info("malformed request: ~p -> ~p:~p", [Body, A, B]),
-	    {true, wrq:set_resp_body(jiffy:encode(<<"invalid JSON">>), ReqData), Context}
+	_:_ ->
+            lager:warning("invalid JSON: ~p", [Body]),
+	    {true, wrq:set_resp_body(<<"\"invalid JSON\"">>, ReqData1), Context}
     end.
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%                              PRIVATE                                     %%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+accept_content(ReqData, Context) ->
+    {true, ReqData, Context}.
 
-model_key(ReqData) ->
+resource_exists(ReqData, Context) ->
     User = wrq:path_info(user, ReqData),
-    Model = wrq:path_info(model, ReqData),
-    lists:flatten(User ++ "/" ++ Model).
+    Design = wrq:path_info(design, ReqData),
+    RefType = wrq:path_info(reftype, ReqData),
+    Ref = wrq:path_info(ref, ReqData),
+
+    Adapter = Context#context.adapter,
+    case Adapter:get(User, Design, RefType, Ref) of
+	undefined ->
+	    {false, ReqData, Context};
+	Commit ->
+	    {true, ReqData, Context#context{ commit = Commit }}
+    end.
+
+provide_content(ReqData, Context) ->
+    {jiffy:encode(Context#context.commit), ReqData, Context}.

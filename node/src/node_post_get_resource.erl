@@ -54,15 +54,13 @@ allow_missing_post(ReqData, Context) ->
 create_path(ReqData, Context) ->
     {"not used", ReqData, Context}. 
 
-accept_content(ReqData, Context) ->
-    {true, ReqData, Context}.
-
 malformed_request(ReqData, Context) ->
     Method = wrq:method(ReqData),
     malformed_request(ReqData, Context, Method).
 
 malformed_request(ReqData, Context, 'GET') ->
-    {false, ReqData, Context};
+    ReqData1 = wrq:set_resp_header("Content-Type", "application/json", ReqData),
+    {false, ReqData1, Context};
 malformed_request(ReqData, Context, 'POST') ->
     Body = wrq:req_body(ReqData),
     ReqData1 = wrq:set_resp_header("Content-type", "application/json", ReqData),
@@ -86,6 +84,7 @@ malformed_request(ReqData, Context, 'POST') ->
 	    {true, wrq:set_resp_body(<<"\"invalid JSON\"">>, ReqData1), Context}
     end.
 
+
 resource_exists(ReqData, Context) ->
     User = wrq:path_info(user, ReqData),
     Design = wrq:path_info(design, ReqData),
@@ -94,11 +93,14 @@ resource_exists(ReqData, Context) ->
     Method = wrq:method(ReqData),
     case {Method, Exists} of
 	{'GET', false} ->
-	    ReqData1 = wrq:set_resp_header("Content-Type", "application/json", ReqData),
-	    {false, wrq:set_resp_body(<<"\"not found\"">>, ReqData1), Context};
+	    {false, wrq:set_resp_body(<<"\"not found\"">>, ReqData), Context};
 	_ ->
 	    {Exists, ReqData, Context#context{ user=User, design=Design }}
     end.
+
+accept_content(ReqData, Context) ->
+    {true, ReqData, Context}.
+
 
 content_types_provided(ReqData, Context) ->
     {[{"application/json", provide_content}], ReqData, Context}.
