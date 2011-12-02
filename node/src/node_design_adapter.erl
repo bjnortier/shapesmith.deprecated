@@ -18,31 +18,31 @@
 -module(node_design_adapter).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 
--export([create/3, exists/2, get/2]).
+-export([validate/3, create/3, exists/2, get/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                 public                                   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-create(User, Design, RequestJSON) ->
+validate(User, Design, RequestJSON) ->
     case RequestJSON of
 	{[]} ->
-	    JSON = {[{<<"children">>, []}]},
-	    {ok, CommitSHA} = node_db:create(User, Design, commit, JSON),
-    
-	    Root = {[{<<"refs">>, 
-		      {[{<<"heads">>, 
-			 {[{<<"master">>, list_to_binary(CommitSHA)}]} 
-			}]}
-		     }]},
-	    ok = node_db:put_root(User, Design, Root),
-	    {ok, jiffy:encode(Root)};
-
+	    ok;
 	_ ->
 	    {error, jiffy:encode(<<"only {} accepted">>)}
-
     end.
-	    
+
+create(User, Design, RequestJSON) ->
+    JSON = {[{<<"children">>, []}]},
+    {ok, CommitSHA} = node_db:create(User, Design, commit, JSON),
+    
+    Root = {[{<<"refs">>, 
+	      {[{<<"heads">>, 
+		 {[{<<"master">>, list_to_binary(CommitSHA)}]} 
+		}]}
+	     }]},
+    ok = node_db:put_root(User, Design, Root),
+    {ok, jiffy:encode(Root)}.
 
 exists(User, Design) ->
     node_db:exists_root(User, Design).

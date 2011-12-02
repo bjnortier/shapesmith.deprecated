@@ -31,7 +31,7 @@
 	 provide_content/2
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
--record(context, {adapter, user, design, exists}).
+-record(context, {adapter, user, design, exists, request_json}).
 
 init([{adapter_mod, Adapter}]) -> {ok, #context{adapter = Adapter}}.
 
@@ -52,7 +52,17 @@ create_path(ReqData, Context) ->
     {"not used", ReqData, Context}. 
 
 accept_content(ReqData, Context) ->
-    {true, ReqData, Context}.
+    Adapter = Context#context.adapter,
+    User = wrq:path_info(user, ReqData),
+    Design = wrq:path_info(design, ReqData),
+    case Adapter:create(User, Design, ReqData) of
+	{ok, ResponseJSON} ->
+	    {true, wrq:set_resp_body(ResponseJSON, ReqData), Context};
+	{error, ResponseJSON} ->
+	    {false, wrq:set_resp_body(ResponseJSON, ReqData), Context};
+	{error, Code, ResponseJSON} ->
+	    {{halt, Code}, wrq:set_resp_body(ResponseJSON, ReqData), Context}
+    end.
 
 malformed_request(ReqData, Context) ->
     Method = wrq:method(ReqData),
@@ -74,9 +84,9 @@ malformed_request(ReqData, Context = #context{ exists = false }, 'POST') ->
 	User = wrq:path_info(user, ReqData),
 	Design = wrq:path_info(design, ReqData),
 	Adapter = Context#context.adapter,
-	case Adapter:create(User, Design, RequestJSON) of
-	    {ok, ResponseJSON} ->
-		{false, wrq:set_resp_body(ResponseJSON, ReqData), Context};
+	case Adapter:validate(User, Design, RequestJSON) of
+	    ok ->
+		{false, ReqData, Context#context{ request_json = RequestJSON }};
 	    {error, ResponseJSON} ->
 		{true, wrq:set_resp_body(ResponseJSON, ReqData), Context};
 	    {error, Code, ResponseJSON} ->
