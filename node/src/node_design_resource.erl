@@ -31,9 +31,10 @@
 	 provide_content/2
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
--record(context, {method, adapter, user, design, exists, request_json}).
+-record(context, {method, adapter, user, design, existing, request_json}).
 
-init([{adapter_mod, Adapter}]) -> {ok, #context{adapter=Adapter}}.
+init([{adapter_mod, Adapter}]) -> 
+    {ok, #context{adapter=Adapter }}.
 
 allowed_methods(ReqData, Context) -> 
     Context1 = Context#context{ method=wrq:method(ReqData),
@@ -58,18 +59,7 @@ create_path(ReqData, Context) ->
 
 malformed_request(ReqData, Context = #context{ method='GET' }) ->
     {false, ReqData, Context};
-malformed_request(ReqData, Context = #context{ exists=undefined, 
-					       user=User, 
-					       design=Design, 
-					       adapter=Adapter }) ->
-    Exists = Adapter:exists(User, Design),
-    Context1 = Context#context{ exists=Exists },
-    malformed_request(ReqData, Context1);
-malformed_request(ReqData, Context = #context{ exists = true, 
-					       method='POST'}) ->
-    {true, node_resource:json_response(<<"already exists">>, ReqData), Context};
-malformed_request(ReqData, Context = #context{ exists=false,
-					       method='POST',
+malformed_request(ReqData, Context = #context{ method='POST',
 					       user=User, 
 					       design=Design, 
 					       adapter=Adapter }) ->
@@ -94,24 +84,27 @@ malformed_request(ReqData, Context = #context{ exists=false,
 	    {true,  node_resource:json_response(<<"internal error">>, ReqData), Context}
     end.
 
+
 resource_exists(ReqData, Context = #context{ user=User, 
 					     design=Design,
 					     adapter=Adapter, 
 					     method=Method }) ->
-    Exists = Adapter:exists(User, Design),
-    Context1 = Context#context{ exists = Exists },
-    case {Method, Exists} of
-	{'GET', false} ->
+    Existing = Adapter:get(User, Design),
+    Context1 = Context#context{ existing = Existing },
+    case {Method, Existing} of
+	{'GET', undefined} ->
 	    {false, node_resource:json_response(<<"not found">>, ReqData), Context1};
 	_ ->
-	    {Exists, ReqData, Context1}
+	    {Existing =/= undefined, ReqData, Context1}
     end.
 
-accept_content(ReqData, Context=#context{ user=User, 
+accept_content(ReqData, Context=#context{ adapter=Adapter,
+					  user=User, 
 					  design=Design, 
-					  adapter=Adapter,
+					  existing=undefined,
 					  request_json=RequestJSON }) ->
 
+    
     case Adapter:create(User, Design, RequestJSON) of
 	{ok, ResponseJSON} ->
 	    {true, node_resource:json_response(ResponseJSON, ReqData), Context};
@@ -119,8 +112,11 @@ accept_content(ReqData, Context=#context{ user=User,
 	    {false, node_resource:json_response(ResponseJSON, ReqData), Context};
 	{error, Code, ResponseJSON} ->
 	    {{halt, Code}, node_resource:json_response(ResponseJSON, ReqData), Context}
-    end.
+    end;
+accept_content(ReqData, Context=#context{ existing=_Existing }) ->
+    {{halt, 400}, node_resource:json_response(<<"already exists">>, ReqData), Context}.
 
-provide_content(ReqData, Context = #context{ user=User, design=Design, adapter=Adapter }) ->
-    {jiffy:encode(Adapter:get(User, Design)), ReqData, Context}.
+
+provide_content(ReqData, Context = #context{ existing=Existing} ) ->
+    {jiffy:encode(Existing), ReqData, Context}.
 

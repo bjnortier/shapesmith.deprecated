@@ -37,7 +37,7 @@ get(User, Design, Type, SHA) ->
     {ok, DB} = application:get_env(node, db_module),
     case DB:get(bucket(User, Design), key(Type, SHA)) of
 	undefined ->
-	    throw(not_found);
+	    undefined;
 	EncodedJSON ->
 	    jiffy:decode(EncodedJSON)
     end.
@@ -51,7 +51,7 @@ get_root(User, Design) ->
     {ok, DB} = application:get_env(node, db_module),
     case DB:get(bucket(User, Design), "_root") of
 	undefined ->
-	    throw(not_found);
+	    undefined;
 	EncodedJSON ->
 	    jiffy:decode(EncodedJSON)
     end.

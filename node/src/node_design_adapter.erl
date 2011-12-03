@@ -18,7 +18,7 @@
 -module(node_design_adapter).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 
--export([validate/3, create/3, exists/2, get/2]).
+-export([validate/3, create/3, get/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                 public                                   %%%
@@ -43,9 +43,6 @@ create(User, Design, {[]}) ->
 	     }]},
     ok = node_db:put_root(User, Design, Root),
     {ok, Root}.
-
-exists(User, Design) ->
-    node_db:exists_root(User, Design).
 
 get(User, Design) ->
     node_db:get_root(User, Design).
