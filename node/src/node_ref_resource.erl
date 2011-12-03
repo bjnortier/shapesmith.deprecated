@@ -31,15 +31,16 @@
 
 -record(context, {method, adapter, user, design, ref_type, ref, existing, request_json}).
 
-init([{adapter_mod, Adapter}]) -> {ok, #context{adapter = Adapter}}.
+init([{adapter_mod, Adapter}]) -> 
+    {ok, #context{adapter = Adapter}}.
 
-allowed_methods(ReqData, Context) -> 
+allowed_methods(ReqData, Context = #context{ adapter=Adapter}) -> 
     Context1 = Context#context{ method=wrq:method(ReqData),
 				user=wrq:path_info(user, ReqData),
 				design=wrq:path_info(design, ReqData), 
 				ref_type=wrq:path_info(reftype, ReqData),
 				ref=wrq:path_info(ref, ReqData) },
-    {['GET', 'PUT'], ReqData, Context1}.
+    {Adapter:methods(), ReqData, Context1}.
 
 content_types_accepted(ReqData, Context) ->
     {[{"application/json", accept_content}], ReqData, Context}.

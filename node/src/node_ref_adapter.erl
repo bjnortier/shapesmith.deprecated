@@ -17,7 +17,7 @@
 
 -module(node_ref_adapter).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([validate/5, update/5, get/4]).
+-export([methods/0, validate/5, update/5, get/4]).
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
@@ -25,6 +25,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                 public                                   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+methods() ->
+    ['GET', 'PUT'].
 
 validate(_User, _Design, "heads", "master", NewCommitRef) when is_binary(NewCommitRef) ->
     ok;

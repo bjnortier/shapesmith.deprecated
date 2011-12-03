@@ -18,11 +18,14 @@
 -module(node_design_adapter).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 
--export([validate/3, create/3, get/2]).
+-export([methods/0, validate/3, create/3, get/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                 public                                   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+methods() ->
+    ['GET', 'POST'].
 
 validate(_User, _Design, RequestJSON) ->
     case RequestJSON of
