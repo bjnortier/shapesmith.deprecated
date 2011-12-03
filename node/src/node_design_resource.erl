@@ -31,16 +31,21 @@
 	 provide_content/2
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
--record(context, {adapter, user, design, exists, request_json}).
+-record(context, {method, adapter, user, design, exists, request_json}).
 
-init([{adapter_mod, Adapter}]) -> {ok, #context{adapter = Adapter}}.
+init([{adapter_mod, Adapter}]) -> {ok, #context{adapter=Adapter}}.
 
 allowed_methods(ReqData, Context) -> 
-    ReqData1 = wrq:set_resp_header("Content-type", "application/json", ReqData),
-    {['GET', 'POST'], ReqData1, Context}.
+    Context1 = Context#context{ method=wrq:method(ReqData),
+				user=wrq:path_info(user, ReqData),
+				design=wrq:path_info(design, ReqData) },
+    {['GET', 'POST'], ReqData, Context1}.
 
 content_types_accepted(ReqData, Context) ->
     {[{"application/json", accept_content}], ReqData, Context}.
+
+content_types_provided(ReqData, Context) ->
+    {[{"application/json", provide_content}], ReqData, Context}.
 
 post_is_create(ReqData, Context) ->
     {true, ReqData, Context}. 
@@ -51,70 +56,71 @@ allow_missing_post(ReqData, Context) ->
 create_path(ReqData, Context) ->
     {"not used", ReqData, Context}. 
 
-accept_content(ReqData, Context) ->
-    Adapter = Context#context.adapter,
-    User = wrq:path_info(user, ReqData),
-    Design = wrq:path_info(design, ReqData),
-    case Adapter:create(User, Design, ReqData) of
-	{ok, ResponseJSON} ->
-	    {true, wrq:set_resp_body(ResponseJSON, ReqData), Context};
-	{error, ResponseJSON} ->
-	    {false, wrq:set_resp_body(ResponseJSON, ReqData), Context};
-	{error, Code, ResponseJSON} ->
-	    {{halt, Code}, wrq:set_resp_body(ResponseJSON, ReqData), Context}
-    end.
-
-malformed_request(ReqData, Context) ->
-    Method = wrq:method(ReqData),
-    User = wrq:path_info(user, ReqData),
-    Design = wrq:path_info(design, ReqData),
-    Adapter = Context#context.adapter,
-    Exists = Adapter:exists(User, Design),
-    Context1 = Context#context{ exists=Exists, user=User, design=Design },
-    malformed_request(ReqData, Context1, Method).
-
-malformed_request(ReqData, Context, 'GET') ->
+malformed_request(ReqData, Context = #context{ method='GET' }) ->
     {false, ReqData, Context};
-malformed_request(ReqData, Context = #context{ exists = true }, 'POST') ->
-    {true, wrq:set_resp_body(<<"\"already exists\"">>, ReqData), Context};
-malformed_request(ReqData, Context = #context{ exists = false }, 'POST') ->
+malformed_request(ReqData, Context = #context{ exists=undefined, 
+					       user=User, 
+					       design=Design, 
+					       adapter=Adapter }) ->
+    Exists = Adapter:exists(User, Design),
+    Context1 = Context#context{ exists=Exists },
+    malformed_request(ReqData, Context1);
+malformed_request(ReqData, Context = #context{ exists = true, 
+					       method='POST'}) ->
+    {true, node_resource:json_response(<<"already exists">>, ReqData), Context};
+malformed_request(ReqData, Context = #context{ exists=false,
+					       method='POST',
+					       user=User, 
+					       design=Design, 
+					       adapter=Adapter }) ->
     Body = wrq:req_body(ReqData),
     try 
 	RequestJSON = jiffy:decode(Body),
-	User = wrq:path_info(user, ReqData),
-	Design = wrq:path_info(design, ReqData),
-	Adapter = Context#context.adapter,
 	case Adapter:validate(User, Design, RequestJSON) of
 	    ok ->
 		{false, ReqData, Context#context{ request_json = RequestJSON }};
 	    {error, ResponseJSON} ->
-		{true, wrq:set_resp_body(ResponseJSON, ReqData), Context};
+		{true, node_resource:json_response(ResponseJSON, ReqData), Context};
 	    {error, Code, ResponseJSON} ->
-		{{halt, Code}, wrq:set_resp_body(ResponseJSON, ReqData), Context}
+		{{halt, Code}, node_resource:json_response(ResponseJSON, ReqData), Context}
 	end
 
     catch
 	throw:{error,{1,invalid_json}} ->
             lager:warning("invalid JSON: ~p", [Body]),
-	    {true, wrq:set_resp_body(<<"\"invalid JSON\"">>, ReqData), Context};
+	    {true, node_resource:json_response(<<"invalid JSON">>, ReqData), Context};
 	Err:Reason ->
-	    lager:warning("Unexpected exception: ~p:~p", [Err, Reason]),
-	    {true,  wrq:set_resp_body(<<"\"internal error\"">>, ReqData), Context}
+	    lager:warning("Unexpected exception during validate: ~p:~p", [Err, Reason]),
+	    {true,  node_resource:json_response(<<"internal error">>, ReqData), Context}
     end.
 
-resource_exists(ReqData, Context) ->
-    Method = wrq:method(ReqData),
-    case {Method, Context#context.exists} of
+resource_exists(ReqData, Context = #context{ user=User, 
+					     design=Design,
+					     adapter=Adapter, 
+					     method=Method }) ->
+    Exists = Adapter:exists(User, Design),
+    Context1 = Context#context{ exists = Exists },
+    case {Method, Exists} of
 	{'GET', false} ->
-	    {false, wrq:set_resp_body(<<"\"not found\"">>, ReqData), Context};
+	    {false, node_resource:json_response(<<"not found">>, ReqData), Context1};
 	_ ->
-	    {Context#context.exists, ReqData, Context}
+	    {Exists, ReqData, Context1}
     end.
 
-content_types_provided(ReqData, Context) ->
-    {[{"application/json", provide_content}], ReqData, Context}.
+accept_content(ReqData, Context=#context{ user=User, 
+					  design=Design, 
+					  adapter=Adapter,
+					  request_json=RequestJSON }) ->
 
-provide_content(ReqData, Context) ->
-    Adapter = Context#context.adapter,
-    Geometry = Adapter:get(Context#context.user, Context#context.design),
-    {Geometry, ReqData, Context}.
+    case Adapter:create(User, Design, RequestJSON) of
+	{ok, ResponseJSON} ->
+	    {true, node_resource:json_response(ResponseJSON, ReqData), Context};
+	{error, ResponseJSON} ->
+	    {false, node_resource:json_response(ResponseJSON, ReqData), Context};
+	{error, Code, ResponseJSON} ->
+	    {{halt, Code}, node_resource:json_response(ResponseJSON, ReqData), Context}
+    end.
+
+provide_content(ReqData, Context = #context{ user=User, design=Design, adapter=Adapter }) ->
+    {jiffy:encode(Adapter:get(User, Design)), ReqData, Context}.
+

@@ -17,10 +17,9 @@
 
 -module(node_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([init/1, to_html/2]).
--include_lib("webmachine/include/webmachine.hrl").
+-export([json_response/2]).
 
-init([]) -> {ok, undefined}.
+json_response(JSON, ReqData) ->
+    wrq:set_resp_header("Content-type", "application/json", 
+			wrq:set_resp_body(jiffy:encode(JSON), ReqData)).
 
-to_html(ReqData, State) ->
-    {"<html><body>Hello, new world</body></html>", ReqData, State}.

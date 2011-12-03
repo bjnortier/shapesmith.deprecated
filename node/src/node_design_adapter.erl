@@ -24,15 +24,15 @@
 %%%                                 public                                   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-validate(User, Design, RequestJSON) ->
+validate(_User, _Design, RequestJSON) ->
     case RequestJSON of
 	{[]} ->
 	    ok;
 	_ ->
-	    {error, jiffy:encode(<<"only {} accepted">>)}
+	    {error, <<"only {} accepted">>}
     end.
 
-create(User, Design, RequestJSON) ->
+create(User, Design, {[]}) ->
     JSON = {[{<<"children">>, []}]},
     {ok, CommitSHA} = node_db:create(User, Design, commit, JSON),
     
@@ -42,7 +42,7 @@ create(User, Design, RequestJSON) ->
 		}]}
 	     }]},
     ok = node_db:put_root(User, Design, Root),
-    {ok, jiffy:encode(Root)}.
+    {ok, Root}.
 
 exists(User, Design) ->
     node_db:exists_root(User, Design).

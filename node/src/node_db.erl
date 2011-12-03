@@ -35,7 +35,12 @@ create(User, Design, Type, JSON) ->
 
 get(User, Design, Type, SHA) ->
     {ok, DB} = application:get_env(node, db_module),
-    DB:get(bucket(User, Design), key(Type, SHA)).
+    case DB:get(bucket(User, Design), key(Type, SHA)) of
+	undefined ->
+	    throw(not_found);
+	EncodedJSON ->
+	    jiffy:decode(EncodedJSON)
+    end.
 
 
 exists_root(User, Design) ->
@@ -44,7 +49,12 @@ exists_root(User, Design) ->
 
 get_root(User, Design) ->
     {ok, DB} = application:get_env(node, db_module),
-    DB:get(bucket(User, Design), "_root").
+    case DB:get(bucket(User, Design), "_root") of
+	undefined ->
+	    throw(not_found);
+	EncodedJSON ->
+	    jiffy:decode(EncodedJSON)
+    end.
 
 put_root(User, Design, JSON) ->
     {ok, DB} = application:get_env(node, db_module),

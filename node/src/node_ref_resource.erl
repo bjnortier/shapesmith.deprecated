@@ -29,71 +29,87 @@
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
 
--record(context, {adapter, user, design, commit}).
+-record(context, {method, adapter, user, design, ref_type, ref, request_json}).
 
 init([{adapter_mod, Adapter}]) -> {ok, #context{adapter = Adapter}}.
 
 allowed_methods(ReqData, Context) -> 
-    {['GET', 'PUT'], ReqData, Context}.
-
-content_types_provided(ReqData, Context) ->
-    {[{"application/json", provide_content}], ReqData, Context}.
+    Context1 = Context#context{ method=wrq:method(ReqData),
+				user=wrq:path_info(user, ReqData),
+				design=wrq:path_info(design, ReqData), 
+				ref_type=wrq:path_info(reftype, ReqData),
+				ref=wrq:path_info(ref, ReqData) },
+    {['GET', 'PUT'], ReqData, Context1}.
 
 content_types_accepted(ReqData, Context) ->
     {[{"application/json", accept_content}], ReqData, Context}.
 
-malformed_request(ReqData, Context) ->
-    Method = wrq:method(ReqData),
-    malformed_request(ReqData, Context, Method).
+content_types_provided(ReqData, Context) ->
+    {[{"application/json", provide_content}], ReqData, Context}.
 
-malformed_request(ReqData, Context, 'GET') ->
-    ReqData1 = wrq:set_resp_header("Content-Type", "application/json", ReqData),
-    {false, ReqData1, Context};
-malformed_request(ReqData, Context, 'PUT') ->
+malformed_request(ReqData, Context = #context{ method='GET'}) ->
+    {false, ReqData, Context};
+malformed_request(ReqData, Context = #context{ adapter=Adapter, 
+					       user=User, 
+					       design=Design,
+					       ref_type=RefType,
+					       ref=Ref,
+					       method='PUT'}) ->
     Body = wrq:req_body(ReqData),
-    ReqData1 = wrq:set_resp_header("Content-type", "application/json", ReqData),
     try
 	RequestJSON = jiffy:decode(Body),
-	User = wrq:path_info(user, ReqData1),
-	Design = wrq:path_info(design, ReqData1),
-	RefType = wrq:path_info(reftype, ReqData1),
-	Ref = wrq:path_info(ref, ReqData1),
-
-	Adapter = Context#context.adapter,
-	Result = Adapter:update(User, Design, RefType, Ref, RequestJSON),
-	lager:info("~p", [Result]),
-	case Result of
-	    {ok, ResponseJSON} ->
-		{false, wrq:set_resp_body(ResponseJSON, ReqData1), Context};
+	case Adapter:validate(User, Design, RefType, Ref, RequestJSON) of
+	    ok ->
+		{false, ReqData, Context#context{ request_json = RequestJSON }};
 	    {error, ResponseJSON} ->
-		{true, wrq:set_resp_body(ResponseJSON, ReqData1), Context};
+		{true, node_resource:json_response(ResponseJSON, ReqData), Context};
 	    {error, Code, ResponseJSON} ->
-		{{halt, Code}, wrq:set_resp_body(ResponseJSON, ReqData1), Context}
+		{{halt, Code}, node_resource:json_response(ResponseJSON, ReqData), Context}
 	end
 
     catch
 	_:_ ->
             lager:warning("invalid JSON: ~p", [Body]),
-	    {true, wrq:set_resp_body(<<"\"invalid JSON\"">>, ReqData1), Context}
+	    {true, node_resource:json_response(<<"invalid JSON">>, ReqData), Context}
     end.
 
 
-accept_content(ReqData, Context) ->
-    {true, ReqData, Context}.
+resource_exists(ReqData, Context = #context{ adapter=Adapter, 
+					     method=Method,
+					     user=User, 
+					     design=Design,
+					     ref_type=RefType,
+					     ref=Ref }) ->
 
-resource_exists(ReqData, Context) ->
-    User = wrq:path_info(user, ReqData),
-    Design = wrq:path_info(design, ReqData),
-    RefType = wrq:path_info(reftype, ReqData),
-    Ref = wrq:path_info(ref, ReqData),
-
-    Adapter = Context#context.adapter,
-    case Adapter:get(User, Design, RefType, Ref) of
-	undefined ->
-	    {false, ReqData, Context};
-	Commit ->
-	    {true, ReqData, Context#context{ commit = Commit }}
+    Exists = Adapter:exists(User, Design, RefType, Ref),
+    case {Method, Exists} of
+	{'GET', false} ->
+	    {false, node_resource:json_response(<<"not found">>, ReqData), Context};
+	_ ->
+	    {Exists, ReqData, Context}
     end.
 
-provide_content(ReqData, Context) ->
-    {jiffy:encode(Context#context.commit), ReqData, Context}.
+accept_content(ReqData, Context = #context{ adapter=Adapter, 
+					  user=User, 
+					  design=Design,
+					  ref_type=RefType,
+					  ref=Ref,
+					  request_json=RequestJSON }) ->
+
+    case Adapter:update(User, Design, RefType, Ref, RequestJSON) of
+	{ok, ResponseJSON} ->
+	    {true, node_resource:json_response(ResponseJSON, ReqData), Context};
+	{error, ResponseJSON} ->
+	    {false, node_resource:json_response(ResponseJSON, ReqData), Context};
+	{error, Code, ResponseJSON} ->
+	    {{halt, Code}, node_resource:json_response(ResponseJSON, ReqData), Context}
+    end.
+
+
+provide_content(ReqData,  Context = #context{ adapter=Adapter, 
+					      user=User, 
+					      design=Design,
+					      ref_type=RefType,
+					      ref=Ref }) ->
+    {jiffy:encode(Adapter:get(User, Design, RefType, Ref)), ReqData, Context}.
+

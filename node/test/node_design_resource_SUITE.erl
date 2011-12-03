@@ -24,7 +24,7 @@ suite() -> [{timetrap,{minutes,1}}].
 
 all() ->
 	[
-	 malformed_create,
+	 validate,
 	 not_found,
 	 create_new,
 	 save
@@ -54,7 +54,7 @@ end_per_testcase(_Testcase, _Config) ->
     node_mem_db:stop(),
     ok.
 
-malformed_create(_Config) ->
+validate(_Config) ->
     {ok,{{"HTTP/1.1",400,_}, ResponseHeaders1, PostResponse1}} = 
 	httpc:request(post, {"http://localhost:8001/bjnortier/iphonedock/", [], "application/json", "&@^%£$"}, [], []),
     check_json_content_type(ResponseHeaders1),
@@ -112,24 +112,25 @@ save(_Config) ->
     %% Invalid master update
     {ok,{{"HTTP/1.1",400,_}, _, PutResponse1}} = 
 	httpc:request(put, {"http://localhost:8001/bjnortier/iphonedock/refs/heads/master", [],  "application/json", "{}"}, [], []),
-    <<"only strings allowed">> = jiffy:decode(iolist_to_binary(PutResponse1)),
+    <<"string commit SHA expected">> = jiffy:decode(iolist_to_binary(PutResponse1)),
 
     %% Update master
     {ok,{{"HTTP/1.1",200,_}, _, PutResponse2}} = 
 	httpc:request(put, {"http://localhost:8001/bjnortier/iphonedock/refs/heads/master", [],  "application/json", <<"\"876abf32\"">>}, [], []),
     <<"updated">> = jiffy:decode(iolist_to_binary(PutResponse2)),
 
-    %% %% Get design
-    %% {ok,{{"HTTP/1.1",200,_}, _, GetResponse1}} = 
-    %% 	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/", []}, [], []),
-    %% {[{<<"refs">>, {[{<<"master">>, <<"876abf32">>}]} }]}
-    %% 	= jiffy:decode(iolist_to_binary(GetResponse1)),
+    %% Get design
+    {ok,{{"HTTP/1.1",200,_}, _, GetResponse1}} = 
+     	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/", []}, [], []),
+    {[{<<"refs">>,
+       {[{<<"heads">>,
+	  {[{<<"master">>,<<"876abf32">>}]}}]}}]}
+     	= jiffy:decode(iolist_to_binary(GetResponse1)),
     
-    %% %% Get ref
-    %% {ok,{{"HTTP/1.1",200,_}, _, GetResponse2}} = 
-    %% 	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/refs/heads/master", []}, [], []),
-    %% <<"876abf32">> = jiffy:decode(iolist_to_binary(GetResponse2)).
-    ok.
+    %% Get ref
+    {ok,{{"HTTP/1.1",200,_}, _, GetResponse2}} = 
+    	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/refs/heads/master", []}, [], []),
+    <<"876abf32">> = jiffy:decode(iolist_to_binary(GetResponse2)).
 
 
 check_json_content_type(Headers) ->

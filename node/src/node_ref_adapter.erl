@@ -17,7 +17,7 @@
 
 -module(node_ref_adapter).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([update/5, exists/4, get/4]).
+-export([validate/5, update/5, exists/4, get/4]).
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
@@ -26,21 +26,24 @@
 %%%                                 public                                   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
+validate(_User, _Design, "heads", "master", NewCommitRef) when is_binary(NewCommitRef) ->
+    ok;
+validate(_User, _Design, _RefType, _Ref, NewCommitRef) when is_binary(NewCommitRef) ->
+    {error, <<"only \"heads\" and \"master\" supported">>};
+validate(_User, _Design, _RefType, _Ref, _NewCommitRef) ->
+    {error, <<"string commit SHA expected">>}.
+
+
 exists(User, Design, RefType, Ref) ->
     case get(User, Design, RefType, Ref) of
 	undefined ->
 	    false;
-	Ref -> Ref
+	_Commit -> 
+	    true
     end.
 
 get(User, Design, RefType, Ref) ->
-    Root = node_db:get_root(User, Design),
-    get_from_root(RefType, Ref, Root).
-
-get_from_root(_RefType, _Ref, undefined) -> 
-    undefined;
-get_from_root(RefType, Ref, Root) -> 
-    {RootProps} = jiffy:decode(Root),
+    {RootProps} = node_db:get_root(User, Design),
     {Refs} =  case lists:keyfind(<<"refs">>, 1, RootProps) of
 		  {_, R} -> R;
 		  false -> {[]}
@@ -54,10 +57,9 @@ get_from_root(RefType, Ref, Root) ->
 	{_, Commit} -> Commit
     end.
 
-
 update(User, Design, RefType, Ref, NewCommitRef) when is_binary(NewCommitRef) ->
     Root = node_db:get_root(User, Design),
-    {RootProps} = jiffy:decode(Root),
+    {RootProps} = Root,
     {Refs} =  case lists:keyfind(<<"refs">>, 1, RootProps) of
 		  {_, R} -> R;
 		  false -> {[]}
@@ -71,10 +73,7 @@ update(User, Design, RefType, Ref, NewCommitRef) when is_binary(NewCommitRef) ->
     NewRootProps = lists:keyreplace(<<"refs">>, 1, RootProps, {<<"refs">>, {NewRefs}}),
     ok = node_db:put_root(User, Design, {NewRootProps}),
     lager:info("Updated ~s/~s ~s/~s: ~p", [User, Design, RefType, RefType, jiffy:encode({NewRootProps})]),
-    {ok, jiffy:encode(<<"updated">>)};
-update(_User, _Design, _RefType, _Ref, _NewCommitRef) ->
-    {error, jiffy:encode(<<"only strings allowed">>)}.
-
+    {ok, <<"updated">>}.
 
 
 -ifdef(TEST).
@@ -86,7 +85,11 @@ get_test_() ->
 	     meck:expect(node_db, 
 			 get_root, 
 			 fun("bjnortier", "iphonedock") -> 
-				 <<"{\"refs\":{\"heads\":{\"master\":\"009c\"}}}">>
+				 {[{<<"refs">>, 
+				    {[{<<"heads">>,
+				       {[{<<"master">>, <<"009c">>}]} 
+				      }]} 
+				   }]}
 			 end)
      end, 
      fun(_) -> 
