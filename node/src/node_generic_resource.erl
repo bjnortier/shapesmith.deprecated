@@ -15,17 +15,20 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_ref_resource).
+-module(node_generic_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
 	 init/1, 
          allowed_methods/2,
-	 content_types_provided/2,
-	 provide_content/2,
+	 post_is_create/2,
+	 allow_missing_post/2,
+	 create_path/2,
          content_types_accepted/2,
-         accept_content/2,
+	 content_types_provided/2,
 	 resource_exists/2,
-         malformed_request/2
+         malformed_request/2,
+         accept_content/2,
+	 provide_content/2
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
 -record(context, {method, adapter, user, design, existing, request_json}).
@@ -44,6 +47,15 @@ content_types_accepted(ReqData, Context) ->
 
 content_types_provided(ReqData, Context) ->
     {[{"application/json", provide_content}], ReqData, Context}.
+
+post_is_create(ReqData, Context) ->
+    {true, ReqData, Context}. 
+
+allow_missing_post(ReqData, Context) ->
+    {true, ReqData, Context}.
+
+create_path(ReqData, Context) ->
+    {"not used", ReqData, Context}. 
 
 malformed_request(ReqData, Context = #context{ method='GET'}) ->
     {false, ReqData, Context};

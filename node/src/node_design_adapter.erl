@@ -18,7 +18,7 @@
 -module(node_design_adapter).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 
--export([methods/0, validate/3, create/3, get/2]).
+-export([methods/0, validate/4, create/4, get/3]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                 public                                   %%%
@@ -27,7 +27,7 @@
 methods() ->
     ['GET', 'POST'].
 
-validate(_User, _Design, RequestJSON) ->
+validate(_ReqData, _User, _Design, RequestJSON) ->
     case RequestJSON of
 	{[]} ->
 	    ok;
@@ -35,22 +35,22 @@ validate(_User, _Design, RequestJSON) ->
 	    {error, <<"only {} accepted">>}
     end.
 
-create(User, Design, {[]}) ->
+create(_ReqData, User, Design, {[]}) ->
     JSON = {[{<<"children">>, []}]},
-    {ok, CommitSHA} = node_db:create(User, Design, commit, JSON),
-    
-    Root = {[{<<"refs">>, 
-	      {[{<<"heads">>, 
-		 {[{<<"master">>, list_to_binary(CommitSHA)}]} 
-		}]}
-	     }]},
-    ok = node_db:put_root(User, Design, Root),
-    {ok, Root}.
+    case node_db:get_root(User, Design) of
+	undefined ->
+	    {ok, CommitSHA} = node_db:create(User, Design, commit, JSON),
+	    Root = {[{<<"refs">>, 
+		      {[{<<"heads">>, 
+			 {[{<<"master">>, list_to_binary(CommitSHA)}]} 
+			}]}
+		     }]},
+	    ok = node_db:put_root(User, Design, Root),
+	    {ok, Root};
+	_ ->
+	    {error, 400, <<"already exists">>}
+    end.
 
-get(User, Design) ->
+get(_ReqData, User, Design) ->
     node_db:get_root(User, Design).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%                                 private                                  %%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 

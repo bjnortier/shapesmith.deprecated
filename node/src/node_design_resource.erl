@@ -59,8 +59,7 @@ create_path(ReqData, Context) ->
 
 malformed_request(ReqData, Context = #context{ method='GET' }) ->
     {false, ReqData, Context};
-malformed_request(ReqData, Context = #context{ method='POST',
-					       user=User, 
+malformed_request(ReqData, Context = #context{ user=User, 
 					       design=Design, 
 					       adapter=Adapter }) ->
     Body = wrq:req_body(ReqData),
@@ -101,7 +100,6 @@ resource_exists(ReqData, Context = #context{ user=User,
 accept_content(ReqData, Context=#context{ adapter=Adapter,
 					  user=User, 
 					  design=Design, 
-					  existing=undefined,
 					  request_json=RequestJSON }) ->
 
     
@@ -112,9 +110,7 @@ accept_content(ReqData, Context=#context{ adapter=Adapter,
 	    {false, node_resource:json_response(ResponseJSON, ReqData), Context};
 	{error, Code, ResponseJSON} ->
 	    {{halt, Code}, node_resource:json_response(ResponseJSON, ReqData), Context}
-    end;
-accept_content(ReqData, Context=#context{ existing=_Existing }) ->
-    {{halt, 400}, node_resource:json_response(<<"already exists">>, ReqData), Context}.
+    end.
 
 
 provide_content(ReqData, Context = #context{ existing=Existing} ) ->
