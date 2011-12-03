@@ -29,7 +29,7 @@
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
 
--record(context, {method, adapter, user, design, ref_type, ref, existing, request_json}).
+-record(context, {method, adapter, user, design, existing, request_json}).
 
 init([{adapter_mod, Adapter}]) -> 
     {ok, #context{adapter = Adapter}}.
@@ -37,9 +37,7 @@ init([{adapter_mod, Adapter}]) ->
 allowed_methods(ReqData, Context = #context{ adapter=Adapter}) -> 
     Context1 = Context#context{ method=wrq:method(ReqData),
 				user=wrq:path_info(user, ReqData),
-				design=wrq:path_info(design, ReqData), 
-				ref_type=wrq:path_info(reftype, ReqData),
-				ref=wrq:path_info(ref, ReqData) },
+				design=wrq:path_info(design, ReqData) },
     {Adapter:methods(), ReqData, Context1}.
 
 content_types_accepted(ReqData, Context) ->
@@ -53,13 +51,11 @@ malformed_request(ReqData, Context = #context{ method='GET'}) ->
 malformed_request(ReqData, Context = #context{ adapter=Adapter, 
 					       user=User, 
 					       design=Design,
-					       ref_type=RefType,
-					       ref=Ref,
 					       method='PUT'}) ->
     Body = wrq:req_body(ReqData),
     try
 	RequestJSON = jiffy:decode(Body),
-	case Adapter:validate(User, Design, RefType, Ref, RequestJSON) of
+	case Adapter:validate(ReqData, User, Design, RequestJSON) of
 	    ok ->
 		{false, ReqData, Context#context{ request_json = RequestJSON }};
 	    {error, ResponseJSON} ->
@@ -81,11 +77,9 @@ malformed_request(ReqData, Context = #context{ adapter=Adapter,
 resource_exists(ReqData, Context = #context{ adapter=Adapter, 
 					     method=Method,
 					     user=User, 
-					     design=Design,
-					     ref_type=RefType,
-					     ref=Ref }) ->
+					     design=Design }) ->
 
-    Existing = Adapter:get(User, Design, RefType, Ref),
+    Existing = Adapter:get(ReqData, User, Design),
     Context1 = Context#context{ existing = Existing },
     case {Method, Existing} of
 	{'GET', undefined} ->
@@ -97,11 +91,9 @@ resource_exists(ReqData, Context = #context{ adapter=Adapter,
 accept_content(ReqData, Context = #context{ adapter=Adapter, 
 					    user=User, 
 					    design=Design,
-					    ref_type=RefType,
-					    ref=Ref,
 					    request_json=RequestJSON }) ->
 
-    case Adapter:update(User, Design, RefType, Ref, RequestJSON) of
+    case Adapter:update(ReqData, User, Design, RequestJSON) of
 	{ok, ResponseJSON} ->
 	    {true, node_resource:json_response(ResponseJSON, ReqData), Context};
 	{error, ResponseJSON} ->

@@ -17,7 +17,7 @@
 
 -module(node_ref_adapter).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([methods/0, validate/5, update/5, get/4]).
+-export([methods/0, validate/4, update/4, get/3]).
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
@@ -29,6 +29,11 @@
 methods() ->
     ['GET', 'PUT'].
 
+validate(ReqData, User, Design, NewCommitRef) ->
+    RefType = wrq:path_info(reftype, ReqData),
+    Ref = wrq:path_info(ref, ReqData),
+    validate(User, Design, RefType, Ref, NewCommitRef).
+
 validate(_User, _Design, "heads", "master", NewCommitRef) when is_binary(NewCommitRef) ->
     ok;
 validate(_User, _Design, _RefType, _Ref, NewCommitRef) when is_binary(NewCommitRef) ->
@@ -37,7 +42,9 @@ validate(_User, _Design, _RefType, _Ref, _NewCommitRef) ->
     {error, <<"string commit SHA expected">>}.
 
 
-get(User, Design, RefType, Ref) ->
+get(ReqData, User, Design) ->
+    RefType = wrq:path_info(reftype, ReqData),
+    Ref = wrq:path_info(ref, ReqData),
     {RootProps} = node_db:get_root(User, Design),
     {Refs} =  case lists:keyfind(<<"refs">>, 1, RootProps) of
 		  {_, R} -> R;
@@ -52,7 +59,9 @@ get(User, Design, RefType, Ref) ->
 	{_, Commit} -> Commit
     end.
 
-update(User, Design, RefType, Ref, NewCommitRef) when is_binary(NewCommitRef) ->
+update(ReqData, User, Design, NewCommitRef) when is_binary(NewCommitRef) ->
+    RefType = wrq:path_info(reftype, ReqData),
+    Ref = wrq:path_info(ref, ReqData),
     Root = node_db:get_root(User, Design),
     {RootProps} = Root,
     {Refs} =  case lists:keyfind(<<"refs">>, 1, RootProps) of
