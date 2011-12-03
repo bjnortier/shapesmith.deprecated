@@ -29,7 +29,7 @@
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
 
--record(context, {method, adapter, user, design, ref_type, ref, request_json}).
+-record(context, {method, adapter, user, design, ref_type, ref, existing, request_json}).
 
 init([{adapter_mod, Adapter}]) -> {ok, #context{adapter = Adapter}}.
 
@@ -68,9 +68,12 @@ malformed_request(ReqData, Context = #context{ adapter=Adapter,
 	end
 
     catch
-	_:_ ->
+	throw:{error,{1,invalid_json}} ->
             lager:warning("invalid JSON: ~p", [Body]),
-	    {true, node_resource:json_response(<<"invalid JSON">>, ReqData), Context}
+	    {true, node_resource:json_response(<<"invalid JSON">>, ReqData), Context};
+	Err:Reason ->
+	    lager:warning("Unexpected exception during validate: ~p:~p", [Err, Reason]),
+	    {true,  node_resource:json_response(<<"internal error">>, ReqData), Context}
     end.
 
 
@@ -81,20 +84,21 @@ resource_exists(ReqData, Context = #context{ adapter=Adapter,
 					     ref_type=RefType,
 					     ref=Ref }) ->
 
-    Exists = Adapter:exists(User, Design, RefType, Ref),
-    case {Method, Exists} of
-	{'GET', false} ->
-	    {false, node_resource:json_response(<<"not found">>, ReqData), Context};
+    Existing = Adapter:get(User, Design, RefType, Ref),
+    Context1 = Context#context{ existing = Existing },
+    case {Method, Existing} of
+	{'GET', undefined} ->
+	    {false, node_resource:json_response(<<"not found">>, ReqData), Context1};
 	_ ->
-	    {Exists, ReqData, Context}
+	    {Existing =/= undefined, ReqData, Context1}
     end.
 
 accept_content(ReqData, Context = #context{ adapter=Adapter, 
-					  user=User, 
-					  design=Design,
-					  ref_type=RefType,
-					  ref=Ref,
-					  request_json=RequestJSON }) ->
+					    user=User, 
+					    design=Design,
+					    ref_type=RefType,
+					    ref=Ref,
+					    request_json=RequestJSON }) ->
 
     case Adapter:update(User, Design, RefType, Ref, RequestJSON) of
 	{ok, ResponseJSON} ->
@@ -105,11 +109,6 @@ accept_content(ReqData, Context = #context{ adapter=Adapter,
 	    {{halt, Code}, node_resource:json_response(ResponseJSON, ReqData), Context}
     end.
 
-
-provide_content(ReqData,  Context = #context{ adapter=Adapter, 
-					      user=User, 
-					      design=Design,
-					      ref_type=RefType,
-					      ref=Ref }) ->
-    {jiffy:encode(Adapter:get(User, Design, RefType, Ref)), ReqData, Context}.
+provide_content(ReqData, Context = #context{ existing=Existing} ) ->
+    {jiffy:encode(Existing), ReqData, Context}.
 

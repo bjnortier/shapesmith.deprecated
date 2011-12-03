@@ -17,7 +17,7 @@
 
 -module(node_ref_adapter).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([validate/5, update/5, exists/4, get/4]).
+-export([validate/5, update/5, get/4]).
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
@@ -33,14 +33,6 @@ validate(_User, _Design, _RefType, _Ref, NewCommitRef) when is_binary(NewCommitR
 validate(_User, _Design, _RefType, _Ref, _NewCommitRef) ->
     {error, <<"string commit SHA expected">>}.
 
-
-exists(User, Design, RefType, Ref) ->
-    case get(User, Design, RefType, Ref) of
-	undefined ->
-	    false;
-	_Commit -> 
-	    true
-    end.
 
 get(User, Design, RefType, Ref) ->
     {RootProps} = node_db:get_root(User, Design),
