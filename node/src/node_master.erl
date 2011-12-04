@@ -17,7 +17,7 @@
 
 -module(node_master).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([create_geom/3, mesh_geom/1, exists/1, geometry/1, recursive_geometry/1, stl/1]).
+-export([create_geom/3, mesh_geom/1, stl/1]).
 -export([serialize_brep/1]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
