@@ -24,32 +24,21 @@
 %%%                              Public API                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-exists(Sha) ->
-    node_geom_db:exists(Sha).
-
-geometry(Sha) ->
-    node_geom_db:geometry(Sha).
-
 recursive_geometry(Sha) ->
     node_geom_db:recursive_geometry(Sha).
 
 create_geom(User, Design, Geometry) ->
-    case node_validation:geom(Geometry) of
-	{error, ErrorParams} ->
-		{error, {validation, ErrorParams}};
-	ok ->
-	    case node_geom_db:create(User, Design, Geometry) of
-		{ok, Sha} ->
-		    case ensure_brep_exists(Sha, Geometry, fun(_WorkerPid) -> ok end) of
-			ok ->
-			    {ok, Sha};
-			{error, Reason} ->
-			    lager:error("create_geom failed: ~p~n", [Reason]),
-			    {error, Reason}
-		    end;
+    case node_db:create(User, Design, geom, Geometry) of
+	{ok, SHA} ->
+	    case ensure_brep_exists(SHA, Geometry, fun(_WorkerPid) -> ok end) of
+		ok ->
+		    {ok, SHA};
 		{error, Reason} ->
+		    lager:error("create_geom failed: ~p~n", [Reason]),
 		    {error, Reason}
-	    end
+	    end;
+	{error, Reason} ->
+	    {error, Reason}
     end.
 
 mesh_geom(Sha) ->

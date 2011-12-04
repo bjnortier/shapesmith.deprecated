@@ -18,38 +18,55 @@
 -module(node_geom_adapter).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 
--export([create/3, exists/3, get/3]).
+-export([methods/1, validate/4, create/4, exists/3, get/3]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                 public                                   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-create(User, Design, RequestJSON) ->
-    case node_master:create_geom(User, Design, RequestJSON) of
-	{ok, Sha} ->
-	    Path = io_lib:format("/~s/~s/geom/~s", [User, Design, Sha]),
-	    ResponseJSON = jiffy:encode({[{<<"path">>, iolist_to_binary(Path)}]}),
-	    {ok, ResponseJSON};
-	{error, Reason = {validation, _}} ->
-	    {error, error_response(Reason)};
-	{error, Reason} ->
-	    {error, 500,error_response(Reason)}
+methods(ReqData) ->
+    case wrq:path_info(sha, ReqData) of
+	undefined -> 
+	    ['POST'];
+	_ ->
+	    ['GET']
     end.
 
-exists(User, Design, SHA) ->
-    node_geom_db:exists(User, Design, SHA).
+validate(_ReqData, _User, _Design, Geometry) ->
+    case node_validation:geom(Geometry) of
+	ok ->
+	    ok;
+	{error, ErrorParams} ->
+	    {error, {[{<<"validation">>, ErrorParams}]}}
+    end.
 
-get(User, Design, SHA) ->
-    node_geom_db:get(User, Design, SHA).
+create(_ReqData, User, Design, RequestJSON) ->
+    case node_master:create_geom(User, Design, RequestJSON) of
+	{ok, SHA} ->
+	    Path = io_lib:format("/~s/~s/geom/~s", [User, Design, SHA]),
+	    ResponseJSON = {[{<<"path">>, iolist_to_binary(Path)}]},
+	    {ok, ResponseJSON};
+	{error,worker_timeout} ->
+	    {error, 500, {[{<<"error">>, <<"timeout">>}]}};
+	{error, Reason} ->
+	    lager:error("Geometry create failed: ~p", [Reason]),
+	    {error, 500, {[{<<"error">>, <<"internal error">>}]} }
+    end.
+
+exists(ReqData, User, Design) ->
+    case wrq:path_info(sha, ReqData) of
+	undefined ->
+	    false;
+	SHA ->
+	    node_db:exists(User, Design, geom, SHA)
+    end.
+
+get(ReqData, User, Design) ->
+    SHA = wrq:path_info(sha, ReqData),
+    node_db:get(User, Design, geom, SHA).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                 private                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-error_response({validation, ErrorParams}) ->
-    jiffy:encode({[{<<"validation">>, ErrorParams}]});
-error_response({error,worker_timeout}) ->
-    jiffy:encode({[{<<"error">>, <<"timeout">>}]});
-error_response(_) ->
-    jiffy:encode({[{<<"error">>, <<"internal error">>}]}).
 

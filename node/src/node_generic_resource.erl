@@ -40,7 +40,7 @@ allowed_methods(ReqData, Context = #context{ adapter=Adapter}) ->
     Context1 = Context#context{ method=wrq:method(ReqData),
 				user=wrq:path_info(user, ReqData),
 				design=wrq:path_info(design, ReqData) },
-    {Adapter:methods(), ReqData, Context1}.
+    {Adapter:methods(ReqData), ReqData, Context1}.
 
 content_types_accepted(ReqData, Context) ->
     {[{"application/json", accept_content}], ReqData, Context}.

@@ -17,7 +17,7 @@
 
 -module(node_ref_adapter).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([methods/0, validate/4, update/4, get/3]).
+-export([methods/1, validate/4, update/4, get/3]).
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
@@ -26,7 +26,7 @@
 %%%                                 public                                   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-methods() ->
+methods(_ReqData) ->
     ['GET', 'PUT'].
 
 validate(ReqData, User, Design, NewCommitRef) ->

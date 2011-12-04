@@ -66,7 +66,7 @@ creation(_Config) ->
     check_json_content_type(CreateHeaders),
     {[{<<"path">>, PathBin}]} = jiffy:decode(iolist_to_binary(PutResponse)),
     Path = binary_to_list(PathBin),
-    "/bjnortier/iphonedock/geom/" ++ _Sha = Path,
+    "/bjnortier/iphonedock/geom/" ++ _SHA = Path,
 
     %% Get the created geometry
     {ok,{{"HTTP/1.1",200,_}, GetHeaders, GetResponse}} = 
@@ -85,11 +85,12 @@ validation(_Config) ->
 				  {<<"y">>, 0},
 				  {<<"z">>, 0}]}},
 		 {<<"parameters">>, {[{<<"r">>, -1.0}]}}]},
-    EncodedJSON = iolist_to_binary(jiffy:encode(GeomJSON)),
+    EncodedJSON = jiffy:encode(GeomJSON),
     URL = "http://localhost:8001/bjnortier/iphonedock/geom/",
     
-    {ok,{{"HTTP/1.1",400,_}, _, PutResponse}} = 
+    {ok,{{"HTTP/1.1",400,_}, Headers, PutResponse}} = 
      	httpc:request(post, {URL, [], "application/json", EncodedJSON}, [], []),
+    check_json_content_type(Headers),
     
     {[{<<"validation">>, {[{<<"r">>, <<"must be positive">>}]}}]} 
      	= jiffy:decode(iolist_to_binary(PutResponse)),
