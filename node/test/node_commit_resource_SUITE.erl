@@ -14,7 +14,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_geom_resource_SUITE).
+-module(node_commit_resource_SUITE).
 -compile(export_all).
 
 -include_lib("common_test/include/ct.hrl").
@@ -23,8 +23,8 @@ suite() -> [{timetrap,{minutes,1}}].
 
 all() ->
 	[
-	 creation,
-	 validation
+	 validation,
+	 creation
 	].
 
 init_per_suite(Config) ->
@@ -51,49 +51,48 @@ end_per_testcase(_Testcase, _Config) ->
     node_mem_db:stop(),
     ok.
 
+validation(_Config) ->
+    Pairs = [{ <<"abd45">>, <<"commit must be an object">>},
+             { {[{<<"geoms">>, [<<"ab13">>]}]}, <<"no parent commit specified">>},
+             { {[{<<"geoms">>, []}, {<<"parent">>, []}]}, <<"parent commit must be a string">>},
+             { {[{<<"parent">>, <<"ab13">>}]}, <<"no geoms specified">>},
+             { {[{<<"geoms">>, <<"ab18276c">>}]}, <<"geoms must be an array">>}
+            ],
+    
+    lists:map(fun({Commit, ValidationError}) ->
+                      URL = "http://localhost:8001/bjnortier/iphonedock/commit/",
+                      
+                      {ok,{{"HTTP/1.1",400,_}, Headers, Response}} = 
+                      httpc:request(post, {URL, [], "application/json", jiffy:encode(Commit)}, [], []),
+                      check_json_content_type(Headers),
+                      {[{<<"validation">>, ValidationError}]} 
+                          = jiffy:decode(iolist_to_binary(Response))
+              end,
+              Pairs).
+
 creation(_Config) ->
 
     %% Create geometry
-    GeomJSON = {[{<<"type">>, <<"sphere">>},
-		 {<<"origin">>, {[{<<"x">>, 0},
-				  {<<"y">>, 0},
-				  {<<"z">>, 0}]}},
-		 {<<"parameters">>, {[{<<"r">>, 1.1}]}}]},
-    CreateURL = "http://localhost:8001/bjnortier/iphonedock/geom/", 
+    Commit = {[{<<"parent">>, <<"abc56">>},
+               {<<"geoms">>, [<<"ab3f1">>, <<"9a0eb">>]}]},
+    CreateURL = "http://localhost:8001/bjnortier/iphonedock/commit/", 
     {ok,{{"HTTP/1.1",200,_}, CreateHeaders, PostResponse}} = 
-	httpc:request(post, {CreateURL, [], "application/json", jiffy:encode(GeomJSON)}, [], []),
+	httpc:request(post, {CreateURL, [], "application/json", jiffy:encode(Commit)}, [], []),
 
     check_json_content_type(CreateHeaders),
     {[{<<"path">>, PathBin}]} = jiffy:decode(iolist_to_binary(PostResponse)),
     Path = binary_to_list(PathBin),
-    "/bjnortier/iphonedock/geom/" ++ _SHA = Path,
+    "/bjnortier/iphonedock/commit/" ++ _SHA = Path,
 
-    %% Get the created geometry
+    %% Get the created commit
     {ok,{{"HTTP/1.1",200,_}, GetHeaders, GetResponse}} = 
 	httpc:request(get, {"http://localhost:8001" ++ Path, []}, [], []),
     check_json_content_type(GetHeaders),
 
     %% It's the same as the original
-    GeomJSON = jiffy:decode(iolist_to_binary(GetResponse)),
+    Commit = jiffy:decode(iolist_to_binary(GetResponse)),
 
     ok.
-
-validation(_Config) ->
-
-    GeomJSON = {[{<<"type">>, <<"sphere">>},
-		 {<<"origin">>, {[{<<"x">>, 0},
-				  {<<"y">>, 0},
-				  {<<"z">>, 0}]}},
-		 {<<"parameters">>, {[{<<"r">>, -1.0}]}}]},
-    EncodedJSON = jiffy:encode(GeomJSON),
-    URL = "http://localhost:8001/bjnortier/iphonedock/geom/",
-    
-    {ok,{{"HTTP/1.1",400,_}, Headers, Response}} = 
-     	httpc:request(post, {URL, [], "application/json", EncodedJSON}, [], []),
-    check_json_content_type(Headers),
-    
-    {[{<<"validation">>, {[{<<"r">>, <<"must be positive">>}]}}]} 
-     	= jiffy:decode(iolist_to_binary(Response)).
 
 check_json_content_type(Headers) ->
     {Headers, {_, "application/json"}} = {Headers, lists:keyfind("content-type", 1, Headers)}.

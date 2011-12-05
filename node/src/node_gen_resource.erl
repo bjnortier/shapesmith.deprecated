@@ -75,9 +75,10 @@ malformed_request(ReqData, Context = #context{ adapter=Adapter,
 	end
 
     catch
-	throw:{error,{1,invalid_json}} ->
+	throw:{error,{Pos,invalid_json}} ->
             lager:warning("invalid JSON: ~p", [Body]),
-	    {true, node_resource:json_response(<<"invalid JSON">>, ReqData), Context};
+	    {true, node_resource:json_response({[{<<"invalid JSON">>, Body},
+						 {<<"position">>, Pos}]}, ReqData), Context};
 	Err:Reason ->
 	    lager:warning("Unexpected exception during validate: ~p:~p", [Err, Reason]),
 	    {true,  node_resource:json_response(<<"internal error">>, ReqData), Context}

@@ -24,46 +24,46 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 -type bucket() :: binary().
--type id() :: list().
--type value() :: term().
+-type id() :: binary().
+-type value() :: binary().
 
 -spec exists(bucket(), id()) -> true | false.
 exists(Bucket, Id) ->
     get(Bucket, Id) =/= undefined.
 
 -spec get(bucket(), id()) -> undefined | value().
-get(Bucket, Id) ->
+get(Bucket, Id) when is_binary(Bucket) andalso is_binary(Id)->
     Client = get_client(),
-    case riakc_pb_socket:get(Client, Bucket, list_to_binary(Id)) of
+    case riakc_pb_socket:get(Client, Bucket, Id) of
 	{error, notfound} ->
 	    riakc_pb_socket:stop(Client),
 	    undefined;
 	{ok, Obj} ->
-	    Result = binary_to_term(riakc_obj:get_value(Obj)),
+	    Result = riakc_obj:get_value(Obj),
 	    riakc_pb_socket:stop(Client),
 	    Result
     end.
 
 -spec create(bucket(), value()) -> id().
-create(Bucket, Value) ->
+create(Bucket, Value)  when is_binary(Bucket) andalso is_binary(Value)  ->
     Id = node_uuid:uuid(),
-    Obj = riakc_obj:new(Bucket, list_to_binary(Id), term_to_binary(Value)),
+    Obj = riakc_obj:new(Bucket, Id, Value),
     Client = get_client(),
     ok = riakc_pb_socket:put(Client, Obj),
     riakc_pb_socket:stop(Client),
     Id.
     
 -spec put(bucket(), id(), value()) -> {error, notfound} | ok.
-put(Bucket, Id, Value) ->
+put(Bucket, Id, Value)  when is_binary(Bucket) andalso is_binary(Id) andalso is_binary(Value) ->
     Client = get_client(),
-    case riakc_pb_socket:get(Client, Bucket, list_to_binary(Id)) of
+    case riakc_pb_socket:get(Client, Bucket, Id) of
 	{error, notfound} ->
-	    Obj = riakc_obj:new(Bucket, list_to_binary(Id), term_to_binary(Value)),
+	    Obj = riakc_obj:new(Bucket, Id, Value),
 	    ok = riakc_pb_socket:put(Client, Obj),
 	    riakc_pb_socket:stop(Client),
 	    ok;
 	{ok, ObjA} ->
-	    ObjB = riakc_obj:update_value(ObjA, term_to_binary(Value)),
+	    ObjB = riakc_obj:update_value(ObjA, Value),
 	    ok = riakc_pb_socket:put(Client, ObjB),
 	    riakc_pb_socket:stop(Client),
 	    ok

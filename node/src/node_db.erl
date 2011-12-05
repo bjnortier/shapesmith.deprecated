@@ -66,12 +66,12 @@ put_root(User, Design, JSON) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 key(geom, SHA) ->
-    "geom/" ++ SHA;
+    list_to_binary("geom/" ++ SHA);
 key(commit, SHA) ->
-    "commit/" ++ SHA.
+    list_to_binary("commit/" ++ SHA).
 
 bucket(User, Design) ->
-    User ++ "/" ++ Design.
+    list_to_binary(User ++ "/" ++ Design).
     
     
 

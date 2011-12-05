@@ -15,7 +15,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_geom_adapter).
+-module(node_commit_adapter).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 
 -export([methods/1, validate/4, create/4, get/3]).
@@ -32,37 +32,50 @@ methods(ReqData) ->
 	    ['GET']
     end.
 
-validate(_ReqData, _User, _Design, Geometry) ->
-    case node_validation:geom(Geometry) of
-	ok ->
+validate(_ReqData, _User, _Design, {Props}) ->
+    case {validate_geoms(Props), validate_parent(Props)} of
+    	{ok, ok} ->
+    	    ok;
+    	{{error, GeomError}, _} ->
+    	    {error, {[{<<"validation">>, GeomError}]}};
+    	{ok, {error, ParentError}} ->
+    	    {error, {[{<<"validation">>, ParentError}]}}
+    end;
+validate(_ReqData, _User, _Design, _) ->
+    {error, {[{<<"validation">>, <<"commit must be an object">>}]}}.
+
+validate_geoms(Props) ->
+    case lists:keyfind(<<"geoms">>, 1, Props) of 
+	false ->
+	    {error, <<"no geoms specified">>};
+	{<<"geoms">>, X} when is_list(X) ->
 	    ok;
-	{error, ErrorParams} ->
-	    {error, {[{<<"validation">>, ErrorParams}]}}
+	_ ->
+	    {error, <<"geoms must be an array">>}
+    end.
+
+validate_parent(Props) ->
+    case lists:keyfind(<<"parent">>, 1, Props) of 
+	false ->
+	    {error, <<"no parent commit specified">>};
+	{<<"parent">>, X} when is_binary(X) ->
+	    ok;
+	_ ->
+	    {error, <<"parent commit must be a string">>}
     end.
 
 create(_ReqData, User, Design, RequestJSON) ->
-    case node_master:create_geom(User, Design, RequestJSON) of
-	{ok, SHA} ->
-	    Path = io_lib:format("/~s/~s/geom/~s", [User, Design, SHA]),
-	    ResponseJSON = {[{<<"path">>, iolist_to_binary(Path)}]},
-	    {ok, ResponseJSON};
-	{error,worker_timeout} ->
-	    {error, 500, {[{<<"error">>, <<"timeout">>}]}};
-	{error, Reason} ->
-	    lager:error("Geometry create failed: ~p", [Reason]),
-	    {error, 500, {[{<<"error">>, <<"internal error">>}]} }
-    end.
+    {ok, SHA} = node_db:create(User, Design, commit, RequestJSON),
+    Path = io_lib:format("/~s/~s/commit/~s", [User, Design, SHA]),
+    ResponseJSON = {[{<<"path">>, iolist_to_binary(Path)}]},
+    {ok, ResponseJSON}.
 
 get(ReqData, User, Design) ->
     case wrq:path_info(sha, ReqData) of
 	undefined ->
 	    undefined;
 	SHA ->
-	    node_db:get(User, Design, geom, SHA)
+	    node_db:get(User, Design, commit, SHA)
     end.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%                                 private                                  %%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 

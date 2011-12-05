@@ -68,12 +68,12 @@ create(WorkerPid, Hash, Geometry) ->
 
 purge(WorkerPid, Hash) ->
     {ok, DB} = application:get_env(node, db_module),
-    case DB:exists(brep, Hash) of
-	false ->
-	    ok = serialize_to_disk(WorkerPid, Hash);
-	_ ->
-	    ok
-    end,
+    %% case DB:exists(<<"brep">>, list_to_binary(Hash)) of
+    %% 	false ->
+    %% 	    ok = serialize_to_disk(WorkerPid, Hash);
+    %% 	_ ->
+    %% 	    ok
+    %% end,
     lager:info("Purging ~p~n", [Hash]),
     Msg = {[{<<"purge">>, list_to_binary(Hash)}]},
     case node_worker_pool:call(WorkerPid, jiffy:encode(Msg)) of
