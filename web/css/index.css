@@ -13,15 +13,11 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 0.5em;
 }
 
+.header {
+    border-bottom-left-radius: 7px;
+    border-bottom-right-radius: 7px;
 
-.logged-in-user {
-    padding: 10px;
-    text-align: right;
-}
-
-.logged-in-user span {
     background-color: #0b5fa5;
-    padding: 10px;
     border-bottom: 1px solid #3f8fd2;
     background: -webkit-gradient(linear, left top, left bottom, from(#25547b), to(#0b5fa5));
     background: -webkit-linear-gradient(top, #25547b, #0b5fa5);
@@ -31,18 +27,24 @@ h1, h2, h3, h4, h5, h6 {
 
 }
 
+.logo {
+    text-align: left;
+}
+
+.logged-in-user {
+    text-align: right;
+    padding-top: 24px;
+}
+
 .logged-in-user .separator {
-    color: #3f8fd2;
+    color: #043c6b;
     text-shadow: rgba(0,0,0,.4) 0 1px 0;
 }
 
-.logged-in-user .username {
-    border-bottom-left-radius: 7px;
+.logged-in-user span {
+    padding-left: 10px;
 }
 
-.logged-in-user .logout {
-    border-bottom-right-radius: 7px;
-}
 
 .logged-in-user a {
     color: white;
@@ -55,13 +57,23 @@ h1, h2, h3, h4, h5, h6 {
     text-decoration: underline;
 }
 
-input {
+.design-name {
     border-radius: 7px;
     border: solid thin white;
-    padding: 10px;
-    font-size: 12pt;
-    width: 230px;
+    background: white;
+}
+
+.design-name input {
+    font-size: 15px;
+    border-radius: 7px;
     vertical-align: middle;
+    border: none;
+    padding: 10px;
+    width: 300px;
+}
+
+.design-name input:focus {
+    outline: none;
 }
 
 
@@ -74,14 +86,9 @@ input {
     background: -moz-linear-gradient(top, #2dd700, #1d8b00);
     background: -ms-linear-gradient(top, #2dd700, #1d8b00);
     background: -o-linear-gradient(top, #2dd700, #1d8b00);
-    padding: 9px 10px;
-    margin-left: 18px;
-    -webkit-border-radius: 7px;
-    -moz-border-radius: 7px;
+    padding: 10px;
     border-radius: 7px;
-    -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
-    -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
-    box-shadow: rgba(0,0,0,1) 0 1px 0;
+    -webkit-box-shadow: #666666 1px 1px 7px;
     text-shadow: rgba(0,0,0,.4) 0 1px 0;
     color: #eeeeee;
     font-size: 19px;
@@ -99,22 +106,8 @@ input {
     background: #f2f5f2;
 }
 
-.designs {
-    border-top: 1px solid #c5ffc2;
-    padding: 9.5px 19px;
-    -webkit-border-radius: 7px;
-    -moz-border-radius: 7px;
-    border-radius: 7px;
-    -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
-    -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
-    box-shadow: rgba(0,0,0,1) 0 1px 0;
-    text-shadow: rgba(0,0,0,.4) 0 1px 0;
-    color: #eeeeee;
-    font-size: 19px;
-    text-decoration: none;
-}
 
-.designs-top {
+.designs .top {
     border-top: 1px solid #3f8fd2;
     border-bottom: 1px solid #043c6b;
 
@@ -125,7 +118,6 @@ input {
     background: -moz-linear-gradient(top, #0b5fa5, #25547b);
     background: -ms-linear-gradient(top, #0b5fa5, #25547b);
     background: -o-linear-gradient(top, #25547b, #25547b);
-
 
     padding: 10px;
     border-top-left-radius: 7px;
@@ -151,7 +143,7 @@ input {
 }
 
 
-.design-last {
+.designs .design:last-child {
     border-right: 1px solid #333333;
     border-left: 1px solid #333333;
     border-bottom: 1px solid #333333;

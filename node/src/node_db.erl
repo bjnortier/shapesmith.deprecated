@@ -45,11 +45,11 @@ get(User, Design, Type, SHA) ->
 
 exists_root(User, Design) ->
     {ok, DB} = application:get_env(node, db_module),
-    DB:exists(bucket(User, Design), "_root").
+    DB:exists(bucket(User, Design), <<"_root">>).
 
 get_root(User, Design) ->
     {ok, DB} = application:get_env(node, db_module),
-    case DB:get(bucket(User, Design), "_root") of
+    case DB:get(bucket(User, Design), <<"_root">>) of
 	undefined ->
 	    undefined;
 	EncodedJSON ->
@@ -58,7 +58,7 @@ get_root(User, Design) ->
 
 put_root(User, Design, JSON) ->
     {ok, DB} = application:get_env(node, db_module),
-    DB:put(bucket(User, Design), "_root", jiffy:encode(JSON)).
+    DB:put(bucket(User, Design), <<"_root">>, jiffy:encode(JSON)).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

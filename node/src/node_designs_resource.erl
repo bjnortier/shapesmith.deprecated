@@ -15,16 +15,30 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_home_redirect_resource).
+-module(node_designs_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([init/1, resource_exists/2, moved_temporarily/2, previously_existed/2]).
+-export([
+	 init/1, 
+         allowed_methods/2,
+	 content_types_provided/2,
+	 resource_exists/2,
+	 provide_content/2
+        ]).
+
 -include_lib("webmachine/include/webmachine.hrl").
 
-init([]) -> {ok, undefined}.
+init([]) -> 
+    {ok, {}}.
 
-moved_temporarily(ReqData, Context) ->
-    {{true, "/web/designs.html"}, ReqData, Context}.
+allowed_methods(ReqData, Context) -> 
+    {['GET'], ReqData, Context}.
 
-previously_existed(ReqData, Context) -> {true, ReqData, Context}.
+content_types_provided(ReqData, Context) ->
+    {[{"text/html", provide_content}], ReqData, Context}.
 
-resource_exists(ReqData, Context) -> {false, ReqData, Context}.
+resource_exists(ReqData, Context) ->
+    {true, ReqData, Context}.
+
+provide_content(ReqData, Context) ->
+    {mustache:render(node_views_designs), ReqData, Context}.
+
