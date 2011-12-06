@@ -27,9 +27,11 @@
 methods(_ReqData) ->
     ['GET', 'POST'].
 
-validate(_ReqData, _User, _Design, RequestJSON) ->
-    case RequestJSON of
-	{[]} ->
+validate(_ReqData, _User, Design, RequestJSON) ->
+    case {re:run(Design, "^[a-zA-Z0-9-_\.]+$"), RequestJSON} of
+	{nomatch, _} ->
+	    {error, <<"design can only contain letters, numbers, dashes, underscores and dots">>};
+	{{match, _}, {[]}} ->
 	    ok;
 	_ ->
 	    {error, <<"only {} accepted">>}
