@@ -41,27 +41,6 @@ init(ConfigProps) ->
 allowed_methods(ReqData, Context) ->
     {['GET'], ReqData, Context}.
 
-file_path(_Context, []) ->
-    false;
-file_path(Context, Name) ->
-    RelName = case hd(Name) of
-                  $/ -> tl(Name);
-                  _ -> Name
-              end,
-    case mochiweb_util:safe_relative_path(RelName) of
-	undefined -> false;
-	RelPath ->
-	    filename:join([Context#context.root, RelPath])
-    end.
-
-file_exists(Context, Name) ->
-    NamePath = file_path(Context, Name),
-    case filelib:is_regular(NamePath) of 
-        true ->
-            {true, NamePath};
-        false ->
-            false
-    end.
 
 resource_exists(ReqData, Context) ->
     Path = wrq:path(ReqData),
@@ -88,6 +67,28 @@ maybe_fetch_object(Context, Path) ->
             end;
         _Body ->
             {true, Context}
+    end.
+
+file_exists(Context, Name) ->
+    NamePath = file_path(Context, Name),
+    case filelib:is_regular(NamePath) of 
+        true ->
+            {true, NamePath};
+        false ->
+            false
+    end.
+
+file_path(_Context, []) ->
+    false;
+file_path(Context, Name) ->
+    RelName = case hd(Name) of
+                  $/ -> tl(Name);
+                  _ -> Name
+              end,
+    case mochiweb_util:safe_relative_path(RelName) of
+	undefined -> false;
+	RelPath ->
+	    filename:join([Context#context.root, RelPath])
     end.
 
 content_types_provided(ReqData, Context) ->

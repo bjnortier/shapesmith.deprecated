@@ -1,0 +1,165 @@
+body {
+    background-color: #080808;
+    background-position: 100% -50%;
+    background-repeat: no-repeat;
+    color: #eeeeee;
+    font-family: Helvetica, Arial, sans-serif;
+    font-style: normal;
+}
+
+
+h1, h2, h3, h4, h5, h6 {
+    font-style: bold;
+    margin-bottom: 0.5em;
+}
+
+
+.logged-in-user {
+    padding: 10px;
+    text-align: right;
+}
+
+.logged-in-user span {
+    background-color: #0b5fa5;
+    padding: 10px;
+    border-bottom: 1px solid #3f8fd2;
+    background: -webkit-gradient(linear, left top, left bottom, from(#25547b), to(#0b5fa5));
+    background: -webkit-linear-gradient(top, #25547b, #0b5fa5);
+    background: -moz-linear-gradient(top, #25547b, #0b5fa5);
+    background: -ms-linear-gradient(top, #25547b, #0b5fa5);
+    background: -o-linear-gradient(top, #25547b, #0b5fa5);
+
+}
+
+.logged-in-user .separator {
+    color: #3f8fd2;
+    text-shadow: rgba(0,0,0,.4) 0 1px 0;
+}
+
+.logged-in-user .username {
+    border-bottom-left-radius: 7px;
+}
+
+.logged-in-user .logout {
+    border-bottom-right-radius: 7px;
+}
+
+.logged-in-user a {
+    color: white;
+    text-decoration: none;
+    font-weight:400;
+    text-shadow: rgba(0,0,0,.4) 0 1px 0;
+}
+
+.logged-in-user a:hover {
+    text-decoration: underline;
+}
+
+input {
+    border-radius: 7px;
+    border: solid thin white;
+    padding: 10px;
+    font-size: 12pt;
+    width: 230px;
+    vertical-align: middle;
+}
+
+
+/* http://css-tricks.com/examples/ButtonMaker/# */
+.button {
+    border-top: 1px solid #c5ffc2;
+    background: #1d8b00;
+    background: -webkit-gradient(linear, left top, left bottom, from(#2dd700), to(#1d8b00));
+    background: -webkit-linear-gradient(top, #2dd700, #1d8b00);
+    background: -moz-linear-gradient(top, #2dd700, #1d8b00);
+    background: -ms-linear-gradient(top, #2dd700, #1d8b00);
+    background: -o-linear-gradient(top, #2dd700, #1d8b00);
+    padding: 9px 10px;
+    margin-left: 18px;
+    -webkit-border-radius: 7px;
+    -moz-border-radius: 7px;
+    border-radius: 7px;
+    -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+    -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
+    box-shadow: rgba(0,0,0,1) 0 1px 0;
+    text-shadow: rgba(0,0,0,.4) 0 1px 0;
+    color: #eeeeee;
+    font-size: 19px;
+    text-decoration: none;
+    vertical-align: middle;
+    text-align: center;
+}
+.button:hover {
+    border-top-color: #fafafa;
+    background: #f0fc00;
+    color: #080808;
+}
+.button:active {
+    border-top-color: #f2f5f2;
+    background: #f2f5f2;
+}
+
+.designs {
+    border-top: 1px solid #c5ffc2;
+    padding: 9.5px 19px;
+    -webkit-border-radius: 7px;
+    -moz-border-radius: 7px;
+    border-radius: 7px;
+    -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+    -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
+    box-shadow: rgba(0,0,0,1) 0 1px 0;
+    text-shadow: rgba(0,0,0,.4) 0 1px 0;
+    color: #eeeeee;
+    font-size: 19px;
+    text-decoration: none;
+}
+
+.designs-top {
+    border-top: 1px solid #3f8fd2;
+    border-bottom: 1px solid #043c6b;
+
+    background-color: #0b5fa5;
+
+    background: -webkit-gradient(linear, left top, left bottom, from(#0b5fa5), to(#25547b));
+    background: -webkit-linear-gradient(top, #0b5fa5, #25547b);
+    background: -moz-linear-gradient(top, #0b5fa5, #25547b);
+    background: -ms-linear-gradient(top, #0b5fa5, #25547b);
+    background: -o-linear-gradient(top, #25547b, #25547b);
+
+
+    padding: 10px;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    text-shadow: rgba(0,0,0,.4) 0 1px 0;
+}
+
+.design {
+    padding: 10px;
+    background: #000000;
+    border-right: 1px solid #333333;
+    border-left: 1px solid #333333;
+}
+
+.design a {
+    color: #3f8fd2;
+    text-decoration: none;
+    font-weight:400;
+}
+
+.design a:hover {
+    text-decoration: underline;
+}
+
+
+.design-last {
+    border-right: 1px solid #333333;
+    border-left: 1px solid #333333;
+    border-bottom: 1px solid #333333;
+    border-bottom-left-radius: 7px;
+    border-bottom-right-radius: 7px;
+    text-shadow: rgba(0,0,0,.4) 0 1px 0;
+}
+	
+
+
+

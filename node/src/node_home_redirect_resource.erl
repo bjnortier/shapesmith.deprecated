@@ -23,7 +23,7 @@
 init([]) -> {ok, undefined}.
 
 moved_temporarily(ReqData, Context) ->
-    {{true, "/index.html"}, ReqData, Context}.
+    {{true, "/web/index.html"}, ReqData, Context}.
 
 previously_existed(ReqData, Context) -> {true, ReqData, Context}.
 
