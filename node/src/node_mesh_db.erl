@@ -27,14 +27,14 @@ mesh(WorkerPid, Hash) ->
     node_log:info("meshing hash:~p~n", [Hash]),
     case node_worker_pool:call(
 	   WorkerPid,
-	   mochijson2:encode(
-	     {struct, [{<<"tesselate">>, list_to_binary(Hash)}]})) of
+	   jiffy:encode(
+	     {[{<<"tesselate">>, list_to_binary(Hash)}]})) of
 
 	{error, Reason} ->
 	    {error, Reason};
 	JSON ->
-	    case mochijson2:decode(JSON) of
-		{struct, [{<<"error">>, E}]} ->
+	    case jiffy:decode(JSON) of
+		{[{<<"error">>, E}]} ->
 		    {error, E};
 		Result ->
 		    {ok, Result}

@@ -110,7 +110,7 @@ $(document).ready(function() {
     /*
      * Document
      */
-    new Action("Save", "images/save.png", 
+    /*new Action("Save", "images/save.png", 
                function() { 
 		   save(); 
 	       }).render($("#document"));
@@ -121,7 +121,7 @@ $(document).ready(function() {
     new Action("Redo", "images/redo.png", 
                function() { 
 		   command_stack.redo(); 
-	       }).render($("#document"));
+	       }).render($("#document"));*/
     
 
     // Edit

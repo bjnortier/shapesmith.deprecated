@@ -42,7 +42,8 @@ resource_exists(ReqData, Context) ->
 provide_content(ReqData, Context) ->
     User = wrq:path_info(user, ReqData),
     Designs = lists:map(fun(Name) ->
-				[{name, binary_to_list(Name)}]
+				[{name, binary_to_list(Name)},
+				 {username, User}]
 			end,
 			node_db:get_designs(User)),
 

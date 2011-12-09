@@ -22,14 +22,3 @@ function clearMessages() {
 }
 
 
-function showSpinner() {
-    if ($('#progress-container').children().size() == 0) {
-        $('#progress-container').append(
-	    '<div id="progress"><img src="images/progress-spinner.gif" alt="in progress"/></div>');
-    }
-    $('#progress').show();
-}
-
-function hideSpinner() {
-    $('#progress').hide();
-}

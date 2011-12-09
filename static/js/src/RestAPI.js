@@ -1,3 +1,4 @@
+var SS = SS || {};
 
 function error_response(responseText) {
     var error;
@@ -90,30 +91,31 @@ function update_geom_command(fromNode, toNode) {
 
 function create_geom_command(prototype, geometry) {
     
-    var id;
     var geomNode;
     
     var doFn = function() {
         $.ajax({
             type: 'POST',
-            url: '/geom/',
+            url: '/' + SS.session.username + '/' + SS.session.design + '/geom/',
             contentType: 'application/json',
             data: JSON.stringify(geometry),
 	    dataType: 'json',
-            success: function(nodeData){
-                var path = nodeData.path;
-                id = idForGeomPath(nodeData.path);
+            success: function(result) {
+		console.log(result);
+		var sha = result.SHA;
+		var path = result.path;
                 $.ajax({
                     type: 'GET',
-                    url: '/mesh/' + id,
+                    url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
 		    dataType: 'json',
                     success: function(mesh) {
                         geomNode = new GeomNode({
-                            type : geometry.type,
-                            path : path,
-			    origin: geometry.origin,
+                            type       : geometry.type,
+                            sha        : sha,
+			    path       : path,
+			    origin     : geometry.origin,
                             parameters : geometry.parameters,
-                            mesh : mesh})
+                            mesh       : mesh})
                         selectionManager.deselectAll();
                         geom_doc.replace(prototype, geomNode);
                         command_stack.inProgressSuccess();
@@ -340,45 +342,96 @@ function save() {
     });
 }
 
-function load(docId) {
-    showSpinner();
+SS.load_ref = function(ref) {
+    SS.spinner.show();
     $.ajax({
+        type: 'GET',
+        url: '/' + SS.session.username + '/' + SS.session.design,
+        dataType: 'json',
+        success: function(root) { 
+	    SS.spinner.hide();
+	    var node = root.refs;
+	    var splitRef = ref.split('.');
+	    for (key in splitRef) {
+		node = node[splitRef[key]];
+	    }
+	    SS.load_commit(node);
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    SS.spinner.hide();
+            error_response(jqXHR.responseText);
+	}
+    });
+}
+
+SS.load_commit = function(commit) {
+    console.log('Load commit: ' + commit);
+    SS.spinner.show();
+    $.ajax({
+        type: 'GET',
+        url: '/' + SS.session.username + '/' + SS.session.design + '/commit/' + commit,
+        dataType: 'json',
+	success: function(design) { 
+	    SS.spinner.hide();
+	    console.log('Load design: ' + JSON.stringify(design));
+	    var children = design.children;
+	    children.map(function(child) {
+		SS.load_child(child);
+	    });
+			 
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    SS.spinner.hide();
+            error_response(jqXHR.responseText);
+	}
+    });
+}
+
+SS.load_child = function(child) {
+    console.info('Loading child: ' + child);
+}
+    
+    
+/*    $.ajax({
         type: 'GET',
         url: '/doc/' + docId,
         dataType: 'json',
         success: function(geomPaths) {
-	    hideSpinner();
-            geomPaths.map(function(path) {
-		showSpinner();
-                $.ajax({
-                    type: 'GET',
-                    url: path + '?recursive=true',
-                    dataType: 'json',
-                    success: function(geomJson) {
-                        var newNode = GeomNode.fromDeepJson(geomJson);
-                        $.ajax({
-                            type: 'GET',
-                            url: '/mesh/' + idForGeomPath(path),
-                            success: function(mesh) {
-                                newNode.mesh = mesh;
-                                geom_doc.add(newNode);
-				hideSpinner();
-                            },
+		geomPaths.map(function(path) {
+		    SS.withSpinner(function() {
+			$.ajax({
+			    type: 'GET',
+			    url: path + '?recursive=true',
+			    dataType: 'json',
+			    success: function(geomJson) {
+				var newNode = GeomNode.fromDeepJson(geomJson);
+				$.ajax({
+				    type: 'GET',
+				    url: '/mesh/' + idForGeomPath(path),
+				    success: function(mesh) {
+					newNode.mesh = mesh;
+					geom_doc.add(newNode);
+					hideSpinner();
+				    },
+				    error: function(jqXHR, textStatus, errorThrown) {
+					error_response(jqXHR.responseText);
+					hideSpinner();
+				    }
+				});
+				
+			    },
 			    error: function(jqXHR, textStatus, errorThrown) {
 				error_response(jqXHR.responseText);
-			    }
-                        });
-
-                    },
-		    error: function(jqXHR, textStatus, errorThrown) {
-			error_response(jqXHR.responseText);
+				hideSpinner();
 		    }
                 });
             });
+	    SS.spinner.hide()
+
         },
         error: function(jqXHR, textStatus, errorThrown) {
             error_response(jqXHR.responseText);
+	    hideSpinner();
         }
-    });
+    });*/
 
-}

@@ -1,6 +1,5 @@
 function renderTransform(geomNode, transformIndex) {
     var transform = geomNode.transforms[transformIndex];
-    var id = idForGeomNode(geomNode);
     
     // Origin & Orientation
     var originTable = null;
@@ -8,7 +7,7 @@ function renderTransform(geomNode, transformIndex) {
 	var originArr = ['x', 'y', 'z'].map(function(key) {
 	    return {key: key, 
 		    value: transform.origin[key], 
-		    'edit-class': 'edit-transform target-' + id + '-' + transformIndex,
+		    'edit-class': 'edit-transform target-' + geomNode.sha + '-' + transformIndex,
 		    editing: transform.editing}
 	});
 	var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}<input id="{{key}}" type="text" value="{{value}}"/>{{/editing}}</td></tr>{{/originArr}}</table>';
@@ -40,22 +39,13 @@ function renderTransform(geomNode, transformIndex) {
     return transformTable;
 }
 
-function idForGeomNode(geomNode) {
-    var id = 'editing_id';
-    if (geomNode.path) {
-        id = idForGeomPath(geomNode.path);
-    }
-    return id;
-}
 
-function idForGeomPath(path) {
-    var pattern = /^\/geom\/(.*)$/;
+function shaForGeomPath(path) {
+    var pattern = /^\/.*\/.*\/geom\/(.*)$/;
     return path.match(pattern)[1];
 }
 
 function renderNode(geomNode) {
-
-    var geomNodeId = idForGeomNode(geomNode);
 
     // Origin & Orientation
     var originTable = null;
@@ -63,7 +53,7 @@ function renderNode(geomNode) {
 	var originArr = ['x', 'y', 'z'].map(function(key) {
 	    return {key: key, 
 		    value: geomNode.origin[key], 
-		    clazz: 'edit-geom target-' + geomNodeId,
+		    clazz: 'edit-geom target-' + geomNode.sha,
 		    editing: geomNode.editing}
 	});
 	var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{clazz}}">{{value}}</span>{{/editing}}{{#editing}}<input id="{{key}}" type="text" value="{{value}}"/>{{/editing}}</td></tr>{{/originArr}}</table>';
@@ -82,7 +72,7 @@ function renderNode(geomNode) {
 
             paramsArr.push({key: key,
                             value: geomNode.parameters[key],
-                            clazz: 'edit-geom target-' + geomNodeId,
+                            clazz: 'edit-geom target-' + geomNode.sha,
                             editing: geomNode.editing
                            });
         }
@@ -99,15 +89,15 @@ function renderNode(geomNode) {
     // Children
     var childTables = geomNode.children.map(renderNode);
     
-    var childTemplate = '<table id="{{id}}"><tr><td><img class="show-hide-siblings siblings-showing" src="/images/arrow_showing.png"></img>{{^editing}}<span class="{{clazz}}">{{type}}</span>{{/editing}}{{#editing}}{{type}}{{/editing}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input id="modal-ok" type="submit" value="Ok"/><input id="modal-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>';
+    var childTemplate = '<table id="{{sha}}"><tr><td><img class="show-hide-siblings siblings-showing" src="/images/arrow_showing.png"></img>{{^editing}}<span class="{{clazz}}">{{type}}</span>{{/editing}}{{#editing}}{{type}}{{/editing}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input id="modal-ok" type="submit" value="Ok"/><input id="modal-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>';
 
     var view = {type: geomNode.type,
                 editing: geomNode.editing,
-                id: geomNodeId,
+		sha: geomNode.sha,
 		originTable: originTable,
                 paramsTable: paramsTable,
                 transformRows: transformRows,
-                clazz: 'select-geom target-' + geomNodeId,
+                clazz: 'select-geom target-' + geomNode.sha,
                 children: childTables
                };
     var nodeTableContents = $.mustache(childTemplate, view);
@@ -227,7 +217,7 @@ function TreeView() {
             }
         }
         if (!(geomNode.editing || anyTransformsEditing)) {
-            hideNode($('#' + idForGeomNode(geomNode) + ' .show-hide-siblings'));
+            hideNode($('#' + geomNode.sha + ' .show-hide-siblings'));
         }
 
         $("#geom-model-doc tr:nth-child(even)").addClass("even");
@@ -311,7 +301,7 @@ function TreeView() {
 
 
         // Show/Hide
-        $('#' + idForGeomNode(geomNode) + ' .show-hide-siblings').click(function() {
+        $('#' + geomNode.sha + ' .show-hide-siblings').click(function() {
             toggleShowHide(this);
             return false;
         });
@@ -351,8 +341,7 @@ function TreeView() {
 	    SS.constructors.active && SS.constructors.active.dispose();
 
             var geomNode = event.remove;
-            var id = idForGeomNode(geomNode);
-            $('#' + id).remove();
+            $('#' + geomNode.sha).remove();
             delete this.domNodeLookup[geomNode];
         }
 
@@ -363,7 +352,7 @@ function TreeView() {
             var original = event.replace.original;
             var replacement = event.replace.replacement;
             var nodeTable = renderNode(replacement);
-            $('#' + idForGeomNode(original)).replaceWith(nodeTable);
+            $('#' + original.sha).replaceWith(nodeTable);
             this.addEvents(original, replacement);
         }
     }
@@ -372,7 +361,7 @@ function TreeView() {
         if (event.deselected) {
             var deselected = event.deselected;
             for (var i in deselected) {
-                var id = idForGeomPath(deselected[i]);
+                var sha = shaForGeomPath(deselected[i]);
                 $('#' + id + ' > tbody > tr:nth-child(1)').removeClass('selected');
             }
         }

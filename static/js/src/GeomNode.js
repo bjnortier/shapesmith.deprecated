@@ -35,6 +35,7 @@ function GeomNode() {
     this.editing = arguments[0].editing;
     this.type = arguments[0].type;
     this.path = arguments[0].path;
+    this.sha = arguments[0].sha;
     this.origin = arguments[0].origin;
     this.parameters = arguments[0].parameters;
     this.mesh = arguments[0].mesh;
@@ -77,6 +78,7 @@ GeomNode.prototype.editableCopy = function() {
         
     var newNode = new GeomNode({type : this.type,
                                 path : this.path,
+				sha : this.sha,
 				origin: copiedOrigin,
                                 parameters : copiedParameters,
                                 transforms : copiedTransforms,

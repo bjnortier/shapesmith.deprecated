@@ -41,7 +41,9 @@ resource_exists(ReqData, Context) ->
 
 provide_content(ReqData, Context) ->
     User = wrq:path_info(user, ReqData),
-    WalrusContext =  [{username, User}], 
+    Design = wrq:path_info(design, ReqData),
+    WalrusContext =  [{username, User},
+		      {design, Design}],
     Rendered = node_walrus:render_template(node_views_modeller, WalrusContext),
     {Rendered, node_resource:prevent_caching(ReqData), Context}.
 

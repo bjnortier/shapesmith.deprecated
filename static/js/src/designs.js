@@ -42,7 +42,7 @@ $('#create-design-button').click(function() {
 	contentType: 'application/json',
 	success: function(response) {
 	    console.log(response);
-	    window.location.href = "/{{username}}/" + newDesignName + "/modeller.html?ref=heads.master";
+	    window.location.href = '/' + SS.session.username + '/' + newDesignName + "/modeller.html?ref=heads.master";
 	},
 	error: function(response) {
 	    SS.new_name_error(JSON.parse(response.responseText));

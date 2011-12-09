@@ -64,19 +64,23 @@ creation(_Config) ->
 	httpc:request(post, {CreateURL, [], "application/json", jiffy:encode(GeomJSON)}, [], []),
 
     check_json_content_type(CreateHeaders),
-    {[{<<"path">>, PathBin}]} = jiffy:decode(iolist_to_binary(PostResponse)),
+    {[{<<"path">>, PathBin},
+      {<<"SHA">>, SHABin}]} = jiffy:decode(iolist_to_binary(PostResponse)),
     Path = binary_to_list(PathBin),
-    "/bjnortier/iphonedock/geom/" ++ _SHA = Path,
+    SHA = binary_to_list(SHABin),
+    "/bjnortier/iphonedock/geom/" ++ SHA = Path,
 
     %% Get the created geometry
     {ok,{{"HTTP/1.1",200,_}, GetHeaders, GetResponse}} = 
 	httpc:request(get, {"http://localhost:8001" ++ Path, []}, [], []),
     check_json_content_type(GetHeaders),
-
-    %% It's the same as the original
     GeomJSON = jiffy:decode(iolist_to_binary(GetResponse)),
 
-    ok.
+    %% Get the mesh for the geometry
+    {ok,{{"HTTP/1.1",200,_}, MeshHeaders, MeshResponse}} = 
+	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/mesh/" ++ SHA, []}, [], []),
+    check_json_content_type(MeshHeaders),
+    [] == jiffy:decode(iolist_to_binary(MeshResponse)).
 
 validation(_Config) ->
 

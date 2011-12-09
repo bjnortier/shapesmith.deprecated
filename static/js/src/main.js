@@ -1,7 +1,5 @@
 var command_stack = new CommandStack();
 
-command_stack.showSpinner = showSpinner;
-command_stack.hideSpinner = hideSpinner;
 command_stack.renderErrorMessage = renderErrorMessage;
 command_stack.clearMessages = clearMessages;
 
@@ -27,10 +25,13 @@ selectionManager.addListener(function(event) {
 $(document).ready(function() {
     var ref = $.getQueryParam("ref");
     if (ref) {
+	SS.load_ref(ref);
+	return;
     }
     var commit = $.getQueryParam("commit");
     if (commit) {
-	load(commit);
+	SS.load_commit(commit);
+	return;
     }
     alert('no commit defined!');
     return;

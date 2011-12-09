@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/static/css/1140.css" type="text/css" media="screen" />
-    <link rel="stylesheet" href="/static/css/index.css" type="text/css"  media="screen" />
+    <link rel="stylesheet" href="/static/css/designs.css" type="text/css"  media="screen" />
     
     <!--css3-mediaqueries-js - http://code.google.com/p/css3-mediaqueries-js/ - Enables media queries in some unsupported browsers-->
     <script src="/static/js/lib/css3-mediaqueries.js" type="text/javascript"></script>
@@ -64,7 +64,7 @@
 	  {{#designs}}
 	  <div class="design" id="design-{{name}}">
 	    <span class="label">
-	      <a href="/{{username}}/{{design}}/modeller.html?ref=heads.master">{{name}}</a>
+	      <a href="/{{username}}/{{name}}/modeller.html?ref=heads.master">{{name}}</a>
 	    </span>
 	    <span	id="delete-button-{{name}}" class="delete-button">
 	    </span>

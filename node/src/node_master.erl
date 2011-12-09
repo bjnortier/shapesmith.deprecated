@@ -17,7 +17,7 @@
 
 -module(node_master).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([create_geom/3, mesh_geom/1, stl/1]).
+-export([create_geom/3, mesh_geom/3, stl/1]).
 -export([serialize_brep/1]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -41,10 +41,10 @@ create_geom(User, Design, Geometry) ->
 	    {error, Reason}
     end.
 
-mesh_geom(Sha) ->
-    Geometry = node_geom_db:geometry(Sha),
-    ensure_brep_exists(Sha, Geometry, fun(WorkerPid) -> 
-					      node_mesh_db:mesh(WorkerPid, Sha) 
+mesh_geom(User, Design, SHA) ->
+    Geometry = node_db:get(User, Design, geom, SHA),
+    ensure_brep_exists(SHA, Geometry, fun(WorkerPid) -> 
+					      node_mesh_db:mesh(WorkerPid, SHA) 
 				      end).
 
 serialize_brep(Sha) ->
@@ -104,6 +104,7 @@ ensure_child_breps_exist(WorkerPid, [{Sha, Geometry}|Rest], NodeFn) ->
 		     false ->
 			 %% We need to create the children
 			 get_child_nodes(Geometry)
+			 
 		 end,
     case ensure_child_breps_exist(WorkerPid, ChildNodes, fun(_WorkerPid) -> ok end) of
 	ok ->

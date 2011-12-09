@@ -26,14 +26,15 @@
 
 
 is_serialized(Hash) ->
-    {ok, DB} = application:get_env(node, db_module),
-    DB:exists(brep, Hash).
+    false.
+    %% {ok, DB} = application:get_env(node, db_module),
+    %% DB:exists(brep, Hash).
 
 create(WorkerPid, Hash, Geometry) ->
     %% If the serialized BREP exists, use that. Otherwise
     %% create using the worker
     {ok, DB} = application:get_env(node, db_module),
-    case DB:exists(brep, Hash) of
+    case false of %DB:exists(brep, Hash) of
         true ->
 
             lager:info("Creating BREP for ~p from file~n", [Hash]),

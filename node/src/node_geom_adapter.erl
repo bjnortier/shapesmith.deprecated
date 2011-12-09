@@ -44,7 +44,8 @@ create(_ReqData, User, Design, RequestJSON) ->
     case node_master:create_geom(User, Design, RequestJSON) of
 	{ok, SHA} ->
 	    Path = io_lib:format("/~s/~s/geom/~s", [User, Design, SHA]),
-	    ResponseJSON = {[{<<"path">>, iolist_to_binary(Path)}]},
+	    ResponseJSON = {[{<<"path">>, iolist_to_binary(Path)},
+			     {<<"SHA">>, list_to_binary(SHA)}]},
 	    {ok, ResponseJSON};
 	{error,worker_timeout} ->
 	    {error, 500, {[{<<"error">>, <<"timeout">>}]}};
