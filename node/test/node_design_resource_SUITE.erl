@@ -128,7 +128,13 @@ create_new(_Config) ->
     %% Get ref
     {ok,{{"HTTP/1.1",200,_}, _, GetResponse2}} = 
 	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/refs/heads/master", []}, [], []),
-    <<"009c525d16ccfc06e955ad89766707da9a68504a">> = jiffy:decode(iolist_to_binary(GetResponse2)).
+    <<"009c525d16ccfc06e955ad89766707da9a68504a">> = jiffy:decode(iolist_to_binary(GetResponse2)),
+    
+    %% Get user designs
+    {ok,{{"HTTP/1.1",200,_}, _, GetResponse3}} = 
+	httpc:request(get, {"http://localhost:8001/bjnortier/", []}, [], []),
+    {[{<<"designs">>,[<<"iphonedock">>]}]} = jiffy:decode(iolist_to_binary(GetResponse3)).
+    
 
     
 save(_Config) ->

@@ -25,10 +25,14 @@ selectionManager.addListener(function(event) {
 });
 
 $(document).ready(function() {
-    var docId = $.getQueryParam("docid");
-    if (docId == undefined) {
-        alert('no document defined!');
-        return;
+    var ref = $.getQueryParam("ref");
+    if (ref) {
     }
-    load(docId);
+    var commit = $.getQueryParam("commit");
+    if (commit) {
+	load(commit);
+    }
+    alert('no commit defined!');
+    return;
+
 });

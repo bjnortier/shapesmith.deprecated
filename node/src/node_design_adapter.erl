@@ -38,16 +38,16 @@ validate(_ReqData, _User, Design, RequestJSON) ->
     end.
 
 create(_ReqData, User, Design, {[]}) ->
-    JSON = {[{<<"children">>, []}]},
     case node_db:get_root(User, Design) of
 	undefined ->
-	    {ok, CommitSHA} = node_db:create(User, Design, commit, JSON),
+	    {ok, CommitSHA} = node_db:create(User, Design, commit, {[{<<"children">>, []}]}),
 	    Root = {[{<<"refs">>, 
 		      {[{<<"heads">>, 
 			 {[{<<"master">>, list_to_binary(CommitSHA)}]} 
 			}]}
 		     }]},
 	    ok = node_db:put_root(User, Design, Root),
+	    ok = node_db:add_design(User, Design),
 	    {ok, Root};
 	_ ->
 	    {error, 400, <<"already exists">>}

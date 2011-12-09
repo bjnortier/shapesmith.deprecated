@@ -15,7 +15,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_riak_db).
+-module(node_disk_db).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([exists/2, get/2, put/3]).
 
@@ -29,44 +29,35 @@
 
 -spec exists(bucket(), id()) -> true | false.
 exists(Bucket, Id) ->
-    get(Bucket, Id) =/= undefined.
+    filelib:is_regular(filename(Bucket, Id)).
+
 
 -spec get(bucket(), id()) -> undefined | value().
-get(Bucket, Id) when is_binary(Bucket) andalso is_binary(Id)->
-    Client = get_client(),
-    case riakc_pb_socket:get(Client, Bucket, Id) of
-	{error, notfound} ->
-	    riakc_pb_socket:stop(Client),
+get(Bucket, Id) ->
+    case file:read_file(filename(Bucket, Id)) of
+	{error,enoent} -> 
 	    undefined;
-	{ok, Obj} ->
-	    Result = riakc_obj:get_value(Obj),
-	    riakc_pb_socket:stop(Client),
-	    Result
+	{ok, Contents} ->
+	    Contents
     end.
     
 -spec put(bucket(), id(), value()) -> {error, notfound} | ok.
-put(Bucket, Id, Value)  when is_binary(Bucket) andalso is_binary(Id) andalso is_binary(Value) ->
-    Client = get_client(),
-    case riakc_pb_socket:get(Client, Bucket, Id) of
-	{error, notfound} ->
-	    Obj = riakc_obj:new(Bucket, Id, Value),
-	    ok = riakc_pb_socket:put(Client, Obj),
-	    riakc_pb_socket:stop(Client),
-	    ok;
-	{ok, ObjA} ->
-	    ObjB = riakc_obj:update_value(ObjA, Value),
-	    ok = riakc_pb_socket:put(Client, ObjB),
-	    riakc_pb_socket:stop(Client),
-	    ok
-    end.
+put(Bucket, Id, Value)  when is_binary(Bucket) 
+			     andalso is_binary(Id) 
+			     andalso is_binary(Value) ->
+    Filename = filename(Bucket, Id),
+    io:format("~p", [Filename]),
+    filelib:ensure_dir(Filename),
+    ok = file:write_file(Filename, Value).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                               Private                                    %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-get_client() ->
-    {ok, {Host, Port}} = application:get_env(node, riak_host),
-    {ok, Pid} = riakc_pb_socket:start_link(Host, Port),
-    Pid.
+filename(Bucket, Id) ->
+    {ok, DbDir} = application:get_env(node, disk_db_dir),
+    filename:join(
+      [filename:dirname(code:which(?MODULE)),
+       "..", DbDir, binary_to_list(Bucket), binary_to_list(Id)]).
 

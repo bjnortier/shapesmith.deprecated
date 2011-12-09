@@ -15,7 +15,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_designs_resource).
+-module(node_modeller_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
 	 init/1, 
@@ -42,8 +42,7 @@ resource_exists(ReqData, Context) ->
 provide_content(ReqData, Context) ->
     User = wrq:path_info(user, ReqData),
     Designs = lists:map(fun binary_to_list/1, node_db:get_designs(User)),
-    MustacheCtx = dict:from_list([{designs, [dict:from_list([{design, Design}]) || Design <- Designs]},
-				  {username, User}]),
-    TFun = mustache:compile(node_views_designs),
-    {mustache:render(node_views_designs, TFun, MustacheCtx), ReqData, Context}.
+    MustacheCtx = dict:from_list([{designs, [dict:from_list([{design, Design}]) || Design <- Designs]}]),
+    TFun = mustache:compile(node_views_modeller),
+    {mustache:render(node_views_modeller, TFun, MustacheCtx), ReqData, Context}.
 

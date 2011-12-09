@@ -41,7 +41,8 @@
 						   ]}
 			     ]}
 		 ]},
-	 {db_module, node_riak_db},
+	 {db_module, node_disk_db},
+	 {disk_db_dir, "db"},
 	 {riak_host, {"127.0.0.1", 8087}},
          {port, 8000}]}
  ]}.

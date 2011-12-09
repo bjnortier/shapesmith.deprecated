@@ -23,8 +23,10 @@
 init([]) -> {ok, undefined}.
 
 moved_temporarily(ReqData, Context) ->
-    {{true, "/web/designs.html"}, ReqData, Context}.
+    {{true, "/local/designs.html"}, ReqData, Context}.
 
-previously_existed(ReqData, Context) -> {true, ReqData, Context}.
+previously_existed(ReqData, Context) -> 
+    {true, ReqData, Context}.
 
-resource_exists(ReqData, Context) -> {false, ReqData, Context}.
+resource_exists(ReqData, Context) -> 
+    {false, ReqData, Context}.

@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Shapesmith.net</title>
+    
+    <link href="/static/css/style.css" rel="stylesheet" type="text/css"/>
+
+    <script type="text/javascript" src="/static/js/lib/jquery-1.5.1.min.js"></script>
+    <script type="text/javascript" src="/static/js/lib/jquery.mustache.js"></script>
+    <script type="text/javascript" src="/static/js/lib/jquery.getQueryParam.1.0.0.min.js"></script>
+    <script type="text/javascript" src="/static/js/src/ext.js"></script>
+    <script type="text/javascript" src="/static/js/lib/RequestAnimationFrame.js"></script>
+    <script type="text/javascript" src="/static/js/lib/Detector.js"></script>
+    <script type="text/javascript" src="/static/js/lib/Three.js"></script>
+   <script type="text/javascript" src="/static/js/lib/helvetiker_bold.typeface.js"></script>
+
+   
+  </head>
+<body oncontextmenu="return false;">
+  <div id="scene"></div>
+  <div id="container">
+    <div id="progress-container"></div>
+    <div id="messages-container"></div>
+    <div id="toolWheel"></div>
+    <div class="toolbar" id="document"></div>
+   <div id="toolbarStaging">
+     <div class="toolbar" id="edit"></div>
+     <div class="toolbar" id="primitives"></div>
+      <div class="toolbar" id="boolean"></div>
+      <div class="toolbar" id="transforms"></div>
+   </div>
+    <div id="geom-model-doc"></div>
+    
+  </div>
+
+  <script type="text/javascript" src="/static/js/src/WedgeGeometry.js"></script>
+  <script type="text/javascript" src="/static/js/src/Observable.js"></script>
+  <script type="text/javascript" src="/static/js/src/evented.js"></script>
+  <script type="text/javascript" src="/static/js/src/Messages.js"></script>
+  <script type="text/javascript" src="/static/js/src/Command.js"></script>
+  <script type="text/javascript" src="/static/js/src/GeomNode.js"></script>
+  <script type="text/javascript" src="/static/js/src/GeomDocument.js"></script>
+  <script type="text/javascript" src="/static/js/src/constructors.js"></script>
+  
+  <script type="text/javascript" src="/static/js/src/TreeView.js"></script>
+  <script type="text/javascript" src="/static/js/src/workplane.js"></script>
+  <script type="text/javascript" src="/static/js/src/popupmenu.js"></script>
+  <script type="text/javascript" src="/static/js/src/SceneView.js"></script>
+  <script type="text/javascript">
+
+    if(!Detector.webgl){
+    Detector.addGetWebGLMessage();
+    } else {
+    var container = document.getElementById('scene');
+    var sceneView = new SS.SceneView(container);
+    sceneView.animate();
+    }
+
+  </script>
+  
+  <script type="text/javascript" src="/static/js/src/SelectionManager.js"></script>
+  <script type="text/javascript" src="/static/js/src/toolbars.js"></script>
+  <script type="text/javascript" src="/static/js/src/RestAPI.js"></script>
+  <script type="text/javascript" src="/static/js/src/main.js"></script>
+
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-22797822-1']);
+    _gaq.push(['_setDomainName', '.shapesmith.net']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+
+</body>
+</html>

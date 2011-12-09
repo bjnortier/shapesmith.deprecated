@@ -129,7 +129,7 @@ $(document).ready(function() {
                function(selected) { 
 		   delete_geom(selected); 
 	       }).render($("#edit"));
-    new Action("Copy", "/images/copy.png", 
+    new Action("Copy", "/static/images/copy.png", 
                function(selected) { 
 		   copy(selected)
 	       }).render($("#edit"));
@@ -143,32 +143,32 @@ $(document).ready(function() {
     /*
      * Primitives
      */
-    new Action("Cuboid", "/images/cuboid.png", 
+    new Action("Cuboid", "/static/images/cuboid.png", 
                function() { 
 		   create_primitive("cuboid",  ["u", "v", "w"]); 
 		   SS.constructors.cuboid().create();
 	       }).render($("#primitives"));
-    new Action("Sphere", "/images/sphere.png", 
+    new Action("Sphere", "/static/images/sphere.png", 
                function() { 
 		   create_primitive("sphere", ["r"]); 
 		   SS.constructors.sphere().create();
 	       }).render($("#primitives"));
-    new Action("Cylinder", "/images/cylinder.png", 
+    new Action("Cylinder", "/static/images/cylinder.png", 
                function() { 
 		   create_primitive("cylinder", ["r", "h"]); 
 		   SS.constructors.cylinder().create();
 	       }).render($("#primitives"));
-    new Action("Cone", "/images/cone.png", 
+    new Action("Cone", "/static/images/cone.png", 
                function() { 
 		   create_primitive("cone", ["r1", "h", "r2"]); 
 		   SS.constructors.cone().create();
 	       }).render($("#primitives"));
-    new Action("Wedge", "/images/wedge.png", 
+    new Action("Wedge", "/static/images/wedge.png", 
                function() { 
 		   create_primitive("wedge", ["u1", "v", "u2", "w"]); 
 		   SS.constructors.wedge().create();
 	       }).render($("#primitives"));
-    new Action("Torus", "/images/torus.png", 
+    new Action("Torus", "/static/images/torus.png", 
                function() { 
 		   create_primitive("torus", ["r1", "r2"]); 
 		   SS.constructors.torus().create();
@@ -177,32 +177,32 @@ $(document).ready(function() {
     /*
      * Booleans
      */
-    new Action("Union", "/images/union.png", 
+    new Action("Union", "/static/images/union.png", 
                function(selected) { boolean(selected, "union"); }).render($("#boolean"));
-    new Action("Subtract", "/images/diff.png", 
+    new Action("Subtract", "/static/images/diff.png", 
                function(selected) { boolean(selected, "subtract"); }).render($("#boolean"));
-    new Action("Intersect", "/images/intersect.png", 
+    new Action("Intersect", "/static/images/intersect.png", 
                function(selected) { boolean(selected, "intersect"); }).render($("#boolean"));
     
     /*
      * Transformations
      */
-    new Action("Translate", "/images/translate.png", 
+    new Action("Translate", "/static/images/translate.png", 
                function(selected) { 
 		   create_transform(selected, "translate", ["u", "v", "w", "n"]); 
 		   SS.constructors.translate({selected: selected}).create();
 	       }).render($("#transforms"));
-    new Action("Scale", "/images/scale.png", 
+    new Action("Scale", "/static/images/scale.png", 
                function(selected) { 
 		   create_transform(selected, "scale", ["factor"]); 
 		   SS.constructors.scale({selected: selected}).create();
 	       }).render($("#transforms"));
-    new Action("Rotate", "/images/rotate.png", 
+    new Action("Rotate", "/static/images/rotate.png", 
                function(selected) { 
 		   create_transform(selected, "rotate", ["u", "v", "w", "angle", "n"]);
 		   SS.constructors.rotate({selected: selected}).create();
 	       }).render($("#transforms"));
-    new Action("Mirror", "/images/mirror.png", 
+    new Action("Mirror", "/static/images/mirror.png", 
                function(selected) { 
 		   create_transform(selected, "mirror", ["u", "v", "w", "n"]); 
 		   SS.constructors.mirror({selected: selected}).create();

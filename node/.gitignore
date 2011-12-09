@@ -1,13 +1,10 @@
+erl_crash.dump
 ebin/
-db/*.stl
-db/*.doc
-db/*.brep
-db/*.geom
+db/*
 deps/
 priv/log/
 log/
 logs/
 test_db/
-db/*.geom
 test/*.beam
-.eunit/
+.eunit/db/*

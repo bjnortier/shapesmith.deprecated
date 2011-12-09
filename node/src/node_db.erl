@@ -18,6 +18,7 @@
 -module(node_db).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([exists/4, create/4, get/4, exists_root/2, put_root/3, get_root/2]).
+-export([get_designs/1, add_design/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
@@ -60,6 +61,27 @@ put_root(User, Design, JSON) ->
     {ok, DB} = application:get_env(node, db_module),
     DB:put(bucket(User, Design), <<"_root">>, jiffy:encode(JSON)).
 
+get_designs(User) ->
+    {ok, DB} = application:get_env(node, db_module),
+    case DB:get(bucket(User), <<"_designs">>) of
+	undefined ->
+	    [];
+	EncodedJSON ->
+	    jiffy:decode(EncodedJSON)
+    end.
+
+add_design(User, Design) ->
+    {ok, DB} = application:get_env(node, db_module),
+    ExistingDesigns = case DB:get(bucket(User), <<"_designs">>) of
+			  undefined ->
+			      [];
+			  EncodedJSON ->
+			     jiffy:decode(EncodedJSON)
+		      end,
+    NewDesigns = ExistingDesigns ++ [list_to_binary(Design)],
+    DB:put(bucket(User), <<"_designs">>, jiffy:encode(NewDesigns)).
+    
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Private API                                  %%%
@@ -72,6 +94,10 @@ key(commit, SHA) ->
 
 bucket(User, Design) ->
     list_to_binary(User ++ "/" ++ Design).
+
+bucket(User) ->
+    list_to_binary(User).
+
     
     
 

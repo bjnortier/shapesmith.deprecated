@@ -15,19 +15,19 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_uuid).
+-module(node_user_adapter).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([uuid/0]).
 
-to_digit(N) when N < 10 -> $0 + N;
-to_digit(N)             -> $a + N-10.
+-export([methods/1, get/3]).
 
-to_hex([]) ->
-    [];
-to_hex(Bin) when is_binary(Bin) ->
-    to_hex(binary_to_list(Bin));
-to_hex([H|T]) ->
-    [to_digit(H div 16), to_digit(H rem 16) | to_hex(T)].
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                                 public                                   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-uuid() ->
-    to_hex(crypto:rand_bytes(16)).
+methods(_ReqData) ->
+    ['GET'].
+
+
+get(_ReqData, User, undefined) ->
+    {[{<<"designs">>, node_db:get_designs(User)}]}.
+
