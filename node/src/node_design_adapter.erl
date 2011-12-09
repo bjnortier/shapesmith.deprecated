@@ -18,14 +18,14 @@
 -module(node_design_adapter).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 
--export([methods/1, validate/4, create/4, get/3]).
+-export([methods/1, validate/4, create/4, get/3, delete/3]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                 public                                   %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 methods(_ReqData) ->
-    ['GET', 'POST'].
+    ['GET', 'POST', 'DELETE'].
 
 validate(_ReqData, _User, Design, RequestJSON) ->
     case {re:run(Design, "^[a-zA-Z0-9-_\.]+$"), RequestJSON} of
@@ -56,3 +56,6 @@ create(_ReqData, User, Design, {[]}) ->
 get(_ReqData, User, Design) ->
     node_db:get_root(User, Design).
 
+delete(_ReqData, User, Design) ->
+    node_db:delete_root(User, Design),
+    node_db:remove_design(User, Design).

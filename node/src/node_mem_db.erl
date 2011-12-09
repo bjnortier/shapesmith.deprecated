@@ -20,7 +20,7 @@
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 -export([start_link/0, stop/0]).
--export([exists/2, get/2, put/3]).
+-export([exists/2, get/2, put/3, delete/2]).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -40,7 +40,10 @@ get(Bucket, Id) ->
 
 put(Bucket, Id, Value) ->
     gen_server:call(?MODULE, {put, Bucket, Id, Value}).
-    
+
+delete(Bucket, Id) ->
+    gen_server:call(?MODULE, {delete, Bucket, Id}).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              gen_server                                  %%%
@@ -68,6 +71,9 @@ handle_call({put, Bucket, Id, Value}, _From, State) ->
 		   false -> 
 		       [{{Bucket, Id}, Value}|State]
 	       end,
+    {reply, ok, NewState};
+handle_call({delete, Bucket, Id}, _From, State) ->
+    NewState = lists:keydelete({Bucket, Id}, 1, State),
     {reply, ok, NewState};
 handle_call(stop, _From, State) ->
     {stop, normal, stopped, State};

@@ -28,7 +28,8 @@
 	 resource_exists/2,
          malformed_request/2,
          accept_content/2,
-	 provide_content/2
+	 provide_content/2,
+	 delete_resource/2
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
 -record(context, {method, adapter, user, design, existing, request_json}).
@@ -57,6 +58,8 @@ allow_missing_post(ReqData, Context) ->
 create_path(ReqData, Context) ->
     {"not used", ReqData, Context}. 
 
+malformed_request(ReqData, Context = #context{ method='DELETE'}) ->
+    {false, ReqData, Context};
 malformed_request(ReqData, Context = #context{ method='GET'}) ->
     {false, ReqData, Context};
 malformed_request(ReqData, Context = #context{ adapter=Adapter, 
@@ -130,3 +133,8 @@ create_or_update_response({error, Code, ResponseJSON}, ReqData, Context) ->
 provide_content(ReqData, Context = #context{ existing=Existing} ) ->
     {jiffy:encode(Existing), ReqData, Context}.
 
+delete_resource(ReqData, Context = #context{adapter=Adapter, 
+					    user=User, 
+					    design=Design}) ->
+    ok = Adapter:delete(ReqData, User, Design),
+    {true, node_resource:json_response(<<"deleted">>, ReqData), Context}.

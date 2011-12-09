@@ -41,9 +41,15 @@ resource_exists(ReqData, Context) ->
 
 provide_content(ReqData, Context) ->
     User = wrq:path_info(user, ReqData),
-    Designs = lists:map(fun binary_to_list/1, node_db:get_designs(User)),
-    MustacheCtx = dict:from_list([{designs, [dict:from_list([{design, Design}]) || Design <- Designs]},
-				  {username, User}]),
-    TFun = mustache:compile(node_views_designs),
-    {mustache:render(node_views_designs, TFun, MustacheCtx), ReqData, Context}.
+    Designs = lists:map(fun(Name) ->
+				[{name, binary_to_list(Name)}]
+			end,
+			node_db:get_designs(User)),
+
+    WalrusContext =  [{username, User}, 
+		      {designs, Designs}],
+    Rendered = node_walrus:render_template(node_views_designs, WalrusContext),
+    {Rendered, node_resource:prevent_caching(ReqData), Context}.
+
+
 

@@ -17,9 +17,12 @@
 
 -module(node_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([json_response/2]).
+-export([json_response/2, prevent_caching/1]).
 
 json_response(JSON, ReqData) ->
     wrq:set_resp_header("Content-type", "application/json", 
 			wrq:set_resp_body(jiffy:encode(JSON), ReqData)).
 
+prevent_caching(ReqData) ->
+    wrq:set_resp_header(
+      "Cache-Control", "no-cache, must-revalidate", ReqData).

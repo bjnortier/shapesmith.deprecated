@@ -1,5 +1,6 @@
 erl_crash.dump
-ebin/
+ebin/*.beam
+ebin/*.app
 db/*
 deps/
 priv/log/

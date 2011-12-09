@@ -17,8 +17,9 @@
 
 -module(node_db).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([exists/4, create/4, get/4, exists_root/2, put_root/3, get_root/2]).
--export([get_designs/1, add_design/2]).
+-export([exists/4, create/4, get/4]).
+-export([exists_root/2, put_root/3, get_root/2, delete_root/2]).
+-export([get_designs/1, add_design/2, remove_design/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
@@ -61,6 +62,10 @@ put_root(User, Design, JSON) ->
     {ok, DB} = application:get_env(node, db_module),
     DB:put(bucket(User, Design), <<"_root">>, jiffy:encode(JSON)).
 
+delete_root(User, Design) ->
+    {ok, DB} = application:get_env(node, db_module),
+    DB:delete(bucket(User, Design), <<"_root">>).
+
 get_designs(User) ->
     {ok, DB} = application:get_env(node, db_module),
     case DB:get(bucket(User), <<"_designs">>) of
@@ -80,7 +85,17 @@ add_design(User, Design) ->
 		      end,
     NewDesigns = ExistingDesigns ++ [list_to_binary(Design)],
     DB:put(bucket(User), <<"_designs">>, jiffy:encode(NewDesigns)).
-    
+
+remove_design(User, Design) ->
+    {ok, DB} = application:get_env(node, db_module),
+    ExistingDesigns = case DB:get(bucket(User), <<"_designs">>) of
+			  undefined ->
+			      [];
+			  EncodedJSON ->
+			     jiffy:decode(EncodedJSON)
+		      end,
+    RemainingDesigns = lists:delete(list_to_binary(Design), ExistingDesigns),
+    DB:put(bucket(User), <<"_designs">>, jiffy:encode(RemainingDesigns)).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

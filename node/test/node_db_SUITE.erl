@@ -78,4 +78,6 @@ test(DB) ->
     <<1,2,3>> = DB:get(Bucket, Id),
     DB:put(Bucket, Id, <<4,5,6>>),
     <<4,5,6>> = DB:get(Bucket, Id),
+    ok = DB:delete(Bucket, Id),
+    undefined = DB:get(Bucket, Id),
     ok.

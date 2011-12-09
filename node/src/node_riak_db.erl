@@ -17,7 +17,7 @@
 
 -module(node_riak_db).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([exists/2, get/2, put/3]).
+-export([exists/2, get/2, put/3, delete/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
@@ -59,6 +59,13 @@ put(Bucket, Id, Value)  when is_binary(Bucket) andalso is_binary(Id) andalso is_
 	    riakc_pb_socket:stop(Client),
 	    ok
     end.
+
+-spec delete(bucket(), id()) -> undefined | value().
+delete(Bucket, Id) when is_binary(Bucket) andalso is_binary(Id)->
+    Client = get_client(),
+    ok = riakc_pb_socket:delete(Client, Bucket, Id),
+    riakc_pb_socket:stop(Client),
+    ok.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

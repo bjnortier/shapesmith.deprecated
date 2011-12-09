@@ -28,7 +28,8 @@ all() ->
 	 validate_design,
 	 not_found,
 	 create_new,
-	 save
+	 save,
+	 delete
 	].
 
 init_per_suite(Config) ->
@@ -134,8 +135,45 @@ create_new(_Config) ->
     {ok,{{"HTTP/1.1",200,_}, _, GetResponse3}} = 
 	httpc:request(get, {"http://localhost:8001/bjnortier/", []}, [], []),
     {[{<<"designs">>,[<<"iphonedock">>]}]} = jiffy:decode(iolist_to_binary(GetResponse3)).
-    
 
+delete(_Config) ->
+    %% Create design
+    {ok,{{"HTTP/1.1",200,_}, Headers1, PostResponse1}} = 
+	httpc:request(post, {"http://localhost:8001/bjnortier/iphonedock/", [], "application/json", "{}"}, [], []),
+    check_json_content_type(Headers1),
+    ?EMPTY_DESIGN = jiffy:decode(iolist_to_binary(PostResponse1)),
+
+
+    %% Create geometry
+    GeomJSON = {[{<<"type">>, <<"sphere">>},
+		 {<<"origin">>, {[{<<"x">>, 0},
+				  {<<"y">>, 0},
+				  {<<"z">>, 0}]}},
+		 {<<"parameters">>, {[{<<"r">>, 1.1}]}}]},
+    CreateURL = "http://localhost:8001/bjnortier/iphonedock/geom/", 
+    {ok,{{"HTTP/1.1",200,_}, CreateHeaders, PostResponse}} = 
+	httpc:request(post, {CreateURL, [], "application/json", jiffy:encode(GeomJSON)}, [], []),
+    check_json_content_type(CreateHeaders),
+    {[{<<"path">>, PathBin}]} = jiffy:decode(iolist_to_binary(PostResponse)),
+    Path = binary_to_list(PathBin),
+    "/bjnortier/iphonedock/geom/" ++ _SHA = Path,
+
+    %% Delete the design
+    {ok,{{"HTTP/1.1",200,_}, DeleteHeaders, DeleteResponse}} = 
+	httpc:request(delete, {"http://localhost:8001/bjnortier/iphonedock/", []}, [], []),
+    check_json_content_type(DeleteHeaders),
+    <<"deleted">> = jiffy:decode(iolist_to_binary(DeleteResponse)),
+
+    %% Get user's designs
+    {ok,{{"HTTP/1.1",200,_}, GetHeaders1, GetResponse1}} = 
+     	httpc:request(get, {"http://localhost:8001/bjnortier/", []}, [], []),
+    check_json_content_type(GetHeaders1),
+    {[{<<"designs">>, []}]} = jiffy:decode(iolist_to_binary(GetResponse1)),
+
+    %% Get design - not found
+    {ok,{{"HTTP/1.1",404,_}, GetHeaders2, GetResponse2}} = 
+     	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/", []}, [], []),
+    ok.
     
 save(_Config) ->
     create_new(_Config),

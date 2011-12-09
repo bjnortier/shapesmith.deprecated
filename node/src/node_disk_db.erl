@@ -17,7 +17,7 @@
 
 -module(node_disk_db).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([exists/2, get/2, put/3]).
+-export([exists/2, get/2, put/3, delete/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
@@ -41,14 +41,20 @@ get(Bucket, Id) ->
 	    Contents
     end.
     
--spec put(bucket(), id(), value()) -> {error, notfound} | ok.
+-spec put(bucket(), id(), value()) -> ok.
 put(Bucket, Id, Value)  when is_binary(Bucket) 
 			     andalso is_binary(Id) 
 			     andalso is_binary(Value) ->
     Filename = filename(Bucket, Id),
-    io:format("~p", [Filename]),
     filelib:ensure_dir(Filename),
     ok = file:write_file(Filename, Value).
+
+-spec delete(bucket(), id()) -> ok.
+delete(Bucket, Id) when is_binary(Bucket) 
+			andalso is_binary(Id) ->
+    Filename = filename(Bucket, Id),
+    filelib:ensure_dir(Filename),
+    ok = file:delete(Filename).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
