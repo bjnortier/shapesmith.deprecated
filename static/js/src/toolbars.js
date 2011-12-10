@@ -43,17 +43,23 @@ function delete_geom(selected) {
 	for (var i in nodes) {
             geom_doc.remove(nodes[i]);
 	}
-	command_stack.inProgressSuccess();
+	command_stack.commit();
     }
 
     var undoFn = function() {
 	for (var i in nodes) {
             geom_doc.add(nodes[i]);
 	}
-	command_stack.inProgressSuccess();
+	command_stack.success();
     }
 
-    var redoFn = doFn;
+    var redoFn = function() {
+	for (var i in nodes) {
+            geom_doc.remove(nodes[i]);
+	}
+	command_stack.success();
+    }
+
     var cmd = new Command(doFn, undoFn, redoFn);
     command_stack.execute(cmd);
 
