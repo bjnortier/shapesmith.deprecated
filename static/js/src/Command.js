@@ -32,13 +32,13 @@ function CommandStack(ss) {
 	if (undoStack.peek() && undoStack.peek().fromCommit === commit) {
 	    console.info('UNDO: ' + undoStack.peek().fromCommit);
 	    this.undo();
-	    return;
+	    return true;
 	}
 	
 	if (redoStack.peek() && redoStack.peek().toCommit === commit) {
 	    console.info('REDO: ' + redoStack.peek().toCommit);
 	    this.redo();
-	    return;
+	    return true;
 	}
     }
 

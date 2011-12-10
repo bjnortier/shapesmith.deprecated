@@ -23,11 +23,4 @@ selectionManager.addListener(function(event) {
 });
 
 $(document).ready(function() {
-    var commit = $.getQueryParam("commit");
-    if (commit) {
-	SS.load_commit(commit);
-	return;
-    }
-    alert('no commit defined!');
-    return;  
 });

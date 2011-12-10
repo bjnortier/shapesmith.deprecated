@@ -367,7 +367,10 @@ SS.commit = function() {
 window.onpopstate = function(event) {  
     var commit = $.getQueryParam("commit");
     SS.session.commit = commit;
-    command_stack.pop(commit);
+    if (!command_stack.pop(commit)) {
+	// No command stack available - load from disk
+	SS.load_commit(commit);
+    }
 };
 
 SS.load_commit = function(commit) {
