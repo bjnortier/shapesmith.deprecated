@@ -48,9 +48,6 @@ mesh_geom(User, Design, SHA) ->
 			       node_mesh_db:mesh(WorkerPid, SHA) 
 		       end).
 
-%% serialize_brep(Sha) ->
-%%     Geometry = node_geom_db:geometry(Sha),
-%%     ensure_brep_exists(Sha, Geometry, fun(_WorkerPid) -> ok end).
 
 stl(User, Design, SHA) ->
     Geometry = node_db:get(User, Design, geom, SHA),
@@ -95,7 +92,6 @@ try_with_logging(Mod, Fn, Args) ->
 ensure_child_breps_exist(_, _, _, [], _) ->
     ok;
 ensure_child_breps_exist(User, Design, WorkerPid, [{SHA, Geometry}|Rest], NodeFn) ->
-    lager:info("Ensure child BRep exists ~p~n", [SHA]),
     ChildNodes = case node_brep_db:is_serialized(SHA) of
 		     true ->
 			 [];

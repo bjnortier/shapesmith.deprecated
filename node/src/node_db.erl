@@ -20,6 +20,7 @@
 -export([exists/4, create/4, get/4]).
 -export([exists_root/2, put_root/3, get_root/2, delete_root/2]).
 -export([get_designs/1, add_design/2, remove_design/2]).
+-export([get_brep/1, exists_brep/1, put_brep/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
@@ -96,6 +97,23 @@ remove_design(User, Design) ->
 		      end,
     RemainingDesigns = lists:delete(list_to_binary(Design), ExistingDesigns),
     DB:put(bucket(User), <<"_designs">>, jiffy:encode(RemainingDesigns)).
+
+exists_brep(SHA) when is_list(SHA) ->
+    {ok, DB} = application:get_env(node, db_module),
+    DB:exists(<<"_brep">>, list_to_binary(SHA)).
+
+get_brep(SHA) when is_list(SHA) ->
+    {ok, DB} = application:get_env(node, db_module),
+    case DB:get(<<"_brep">>, list_to_binary(SHA)) of
+	undefined ->
+	    undefined;
+	BRep ->
+	    BRep
+    end.
+
+put_brep(SHA, BRep) when is_list(SHA) andalso is_binary(BRep) ->
+    {ok, DB} = application:get_env(node, db_module),
+    DB:put(<<"_brep">>, list_to_binary(SHA), BRep).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

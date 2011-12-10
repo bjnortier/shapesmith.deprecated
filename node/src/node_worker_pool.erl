@@ -60,7 +60,6 @@ handle_call(get_worker, _From, State) ->
     WorkerMaxTime = State#state.worker_max_time,
     case Available of
 	[] ->
-	    lager:info("Waiting for worker... ~n"),
 	    receive
 		{finished, FinishedPid} ->
 		    {Pid, NewState} = get_next(return_worker_if_alive(State, FinishedPid)),
@@ -112,13 +111,11 @@ create_worker() ->
 
 get_next(State) ->
     [Pid|Remaining] = State#state.available,
-    lager:info("Next worker: ~p~n", [Pid]),
     {Pid, State#state{ available = Remaining }}.
 
 return_worker_if_alive(State, Pid) ->
     case is_process_alive(Pid) of
 	true ->
-	    lager:info("Returning worker ~p~n", [Pid]),
 	    State#state{ available = [Pid|State#state.available]};
 	false ->
 	    lager:info("Ignoring dead worker ~p~n", [Pid]),

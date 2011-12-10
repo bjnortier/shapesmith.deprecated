@@ -25,34 +25,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 
-is_serialized(_SHA) ->
-    false.
-    %% {ok, DB} = application:get_env(node, db_module),
-    %% DB:exists(brep, Hash).
+is_serialized(SHA) ->
+    node_db:exists_brep(SHA).
 
 create(WorkerPid, SHA, Geometry) ->
     %% If the SHA BREP exists, use that. Otherwise
     %% create using the worker
-    {ok, DB} = application:get_env(node, db_module),
-    case false of %DB:exists(brep, Hash) of
-        true ->
+    case node_db:get_brep(SHA) of
 
-            lager:info("Creating BREP for ~p from file~n", [SHA]),
-	    S11N = DB:get(brep, SHA),
-            %% Insert into worker
-            Msg = {[{<<"type">>, <<"deserialize">>},
-		    {<<"id">>, list_to_binary(SHA)},
-		    {<<"s11n">>, S11N}]},
-            case node_worker_pool:call(WorkerPid, jiffy:encode(Msg)) of
-		<<"\"ok\"">> ->
-		    ok;
-		{error, Reason} ->
-		    {error, Reason};
-		ErrorMsg ->
-		    {error, ErrorMsg}
-	    end;
-
-        false ->
+        undefined ->
             lager:info("Creating BREP for ~p using worker~n", [SHA]),
 
             {GeomProps} = Geometry,
@@ -64,19 +45,32 @@ create(WorkerPid, SHA, Geometry) ->
 		    {error, Reason};
 		ErrorMsg ->
 		    {error, ErrorMsg}
+	    end;
+
+        S11N ->
+
+            lager:info("Creating BREP for ~p from file~n", [SHA]),
+            Msg = {[{<<"type">>, <<"deserialize">>},
+		    {<<"id">>, list_to_binary(SHA)},
+		    {<<"s11n">>, S11N}]},
+            case node_worker_pool:call(WorkerPid, jiffy:encode(Msg)) of
+		<<"\"ok\"">> ->
+		    ok;
+		{error, Reason} ->
+		    {error, Reason};
+		ErrorMsg ->
+		    {error, ErrorMsg}
 	    end
     end.
 
-purge(WorkerPid, Hash) ->
-    %% {ok, DB} = application:get_env(node, db_module),
-    %% case DB:exists(<<"brep">>, list_to_binary(Hash)) of
-    %% 	false ->
-    %% 	    ok = serialize_to_disk(WorkerPid, Hash);
-    %% 	_ ->
-    %% 	    ok
-    %% end,
-    lager:info("Purging ~p~n", [Hash]),
-    Msg = {[{<<"purge">>, list_to_binary(Hash)}]},
+purge(WorkerPid, SHA) ->
+    case node_db:exists_brep(SHA) of
+	false ->
+	    ok = serialize_to_disk(WorkerPid, SHA);
+	_ ->
+	    ok
+    end,
+    Msg = {[{<<"purge">>, list_to_binary(SHA)}]},
     case node_worker_pool:call(WorkerPid, jiffy:encode(Msg)) of
 	"true" ->
 	    ok;
@@ -109,9 +103,7 @@ serialize_to_disk(WorkerPid, SHA) ->
     Msg = {[{<<"type">>, <<"serialize">>},
 	    {<<"id">>, list_to_binary(SHA)}]},
     {[{<<"s11n">>, S11N}]} = jiffy:decode(node_worker_pool:call(WorkerPid, jiffy:encode(Msg))),
-    lager:info("writing brep for ~p~n", [SHA]),
-    {ok, DB} = application:get_env(node, db_module),
-    DB:put(brep, SHA, S11N).
+    node_db:put_brep(SHA, S11N).
     
 
 create_type(WorkerPid, SHA, <<"union">>, Geometry) ->

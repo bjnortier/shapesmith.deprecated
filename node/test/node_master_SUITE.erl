@@ -24,6 +24,7 @@ end_per_suite(_Config) ->
     
 
 init_per_testcase(Testcase, Config) ->
+    ok = application:start(lager),
     ok = application:load(node),
     ok = application:set_env(node, port, 8001),
     ok = application:set_env(node, db_module, node_mem_db),
@@ -41,6 +42,7 @@ end_per_testcase(_Testcase, _Config) ->
     node_mem_db:stop(),
     application:stop(node),
     ok = application:unload(node),
+    ok = application:stop(lager),
     ok.
 
 create_simple(_Config) ->
