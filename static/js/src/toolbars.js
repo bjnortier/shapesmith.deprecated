@@ -34,8 +34,8 @@ function delete_geom(selected) {
         alert("please select at least one object");
         return;
     }
-    var nodes = selected.map(function(path) {
-	return geom_doc.findByPath(path);
+    var nodes = selected.map(function(sha) {
+	return geom_doc.findBySHA(sha);
     });
     selectionManager.deselectAll();
 
@@ -86,9 +86,9 @@ function create_transform(selected, type, keys) {
         transformParams[keys[i]] = null;
     }
     
-    var path = selected[0];
+    var sha = selected[0];
     
-    var original = geom_doc.findByPath(path);
+    var original = geom_doc.findBySHA(sha);
     var replacement = original.editableCopy();
     var origin = {x: 0, y: 0, z: 0};
     if (((type === 'translate') || (type === 'scale')) && (original.origin)) {

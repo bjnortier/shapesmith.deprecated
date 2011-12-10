@@ -9,68 +9,89 @@ function Command(executeFn, undoFn, redoFn) {
     this.redo = function() { redoFn(); };
 }
 
-function CommandStack() {
-    var commands = [];
-    var last_executed_index = -1;
+function CommandStack(ss) {
     var successFn;
+    var commandInProgress;
 
-    this.showSpinner = function() {}
-    this.hideSpinner = function() {}
-    this.renderErrorMessage = function(message) {}
-    this.clearMessages = function() {}
+    var undoStack = new Stack();
+    var redoStack = new Stack();
+    var ss = ss;
+
+    this.renderErrorMessage = function(message) {
+    }
+
+    this.clearMessages = function() {
+    }
+
+    this.commit = function() {
+	commandInProgress.fromCommit = SS.session.commit;
+	ss.commit();
+    }
+
+    this.pop = function(commit) {
+	if (undoStack.peek() && undoStack.peek().fromCommit === commit) {
+	    console.info('UNDO: ' + undoStack.peek().fromCommit);
+	    this.undo();
+	    return;
+	}
+	
+	if (redoStack.peek() && redoStack.peek().toCommit === commit) {
+	    console.info('REDO: ' + redoStack.peek().toCommit);
+	    this.redo();
+	    return;
+	}
+    }
 
     this.execute = function(command) {
-        this.showSpinner();
         successFn = function() {
-            commands.splice(last_executed_index + 1, commands.length - (last_executed_index) - 1);
-            commands.push(command);
-            last_executed_index  += 1;
+	    command.toCommit = ss.session.commit;
+	    undoStack.push(command);
         }
+	ss.spinner.show();
+	commandInProgress = command;
         command.execute();
     }
 
     this.undo = function() {
 	if (!this.canUndo()) {
-	    this.renderErrorMessage({string:"Nothing to undo"});
-	    return;
+	    throw "Nothing to undo";
 	}
-        this.showSpinner();
+	ss.spinner.show();
         successFn = function() {
-            last_executed_index -= 1;
+	    redoStack.push(undoStack.pop());
         }
-        commands[last_executed_index].undo();
+	undoStack.peek().undo();
     }
 
     this.redo = function() {
 	if (!this.canRedo()) {
-	    this.renderErrorMessage({string:"Nothing to redo"});
-	    return;
+	    throw "Nothing to redo";
 	}
-        this.showSpinner();
+	ss.spinner.show();
         successFn = function() {
-            last_executed_index += 1;
+	    undoStack.push(redoStack.pop());
         }
-        commands[last_executed_index + 1].redo();
+	redoStack.peek().redo();
     };
 
     this.canUndo = function() {
-        return last_executed_index >= 0;
+	return undoStack.peek() !== undefined;
     };
 
     this.canRedo = function() {
-        return last_executed_index < commands.length - 1;
+	return redoStack.peek() !== undefined;
     };
 
     
-    this.inProgressSuccess = function() {
+    this.success = function() {
         successFn();
+	ss.spinner.hide();
 	this.clearMessages();
-        this.hideSpinner();
     }
 
-    this.inProgressFailure = function(error) {
+    this.error = function(error) {
 	this.renderErrorMessage(error);
-        this.hideSpinner();
+	ss.spinner.hide();
     }
     
 }

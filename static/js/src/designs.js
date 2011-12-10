@@ -42,12 +42,33 @@ $('#create-design-button').click(function() {
 	contentType: 'application/json',
 	success: function(response) {
 	    console.log(response);
-	    window.location.href = '/' + SS.session.username + '/' + newDesignName + "/modeller.html?ref=heads.master";
+	    window.location.href = '/' + SS.session.username + '/' + newDesignName + '/modeller.html?commit=' + response.refs.heads.master;
 	},
 	error: function(response) {
 	    SS.new_name_error(JSON.parse(response.responseText));
         }
     });
+    return false;
+});
+
+$('.load-design').click(function() {
+    var designRootUrl = this.href;
+    console.info(designRootUrl);
+    
+    $.ajax({
+        type: 'GET',
+        url: designRootUrl,
+        dataType: 'json',
+        success: function(root) { 
+	    var commit = root.refs.heads.master;
+	    window.location = designRootUrl + 'modeller.html?commit=' + commit;
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+            console.error(jqXHR.responseText);
+	}
+    });
+
+    return false;
 });
 
 

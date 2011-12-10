@@ -64,7 +64,7 @@
 	  {{#designs}}
 	  <div class="design" id="design-{{name}}">
 	    <span class="label">
-	      <a href="/{{username}}/{{name}}/modeller.html?ref=heads.master">{{name}}</a>
+	      <a class="load-design" href="/{{username}}/{{name}}/">{{name}}</a>
 	    </span>
 	    <span	id="delete-button-{{name}}" class="delete-button">
 	    </span>

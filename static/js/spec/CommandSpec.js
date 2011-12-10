@@ -31,22 +31,40 @@ describe("Command", function() {
 });
 
 describe("CommandStack", function() {
+
+    var spinnerShowing = false;
+    var ss = {
+	spinner : {
+	    show : function() {
+		spinnerShowing = true;
+	    },
+	    hide  : function() {
+		spinnerShowing = false;
+	    }
+	},
+	session : {
+	    commit : 1
+	},
+	commit : function() {
+	    
+	}
+    };
     
-    var stack = new CommandStack();
+    var stack = new CommandStack(ss);
     var a = 0;
 
     var cmd = new Command(
         function() {
             a += 1;
-	    stack.inProgressSuccess();
+	    stack.success();
         },
         function() {
             a -= 1;
-	    stack.inProgressSuccess();
+	    stack.success();
         },
         function() {
             a += 1;
-	    stack.inProgressSuccess();
+	    stack.success();
         }
     );
     
