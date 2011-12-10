@@ -32,7 +32,7 @@ get(ReqData, User, Design) ->
 	{ok, Mesh} ->
 	    Mesh;
 	{error, Err} ->
-	    node_log:error("Meshing failed: ~p~n", [Err]),
+	    lager:error("Meshing failed: ~p~n", [Err]),
 	    Error= {[{<<"error">>, <<"Could not mesh geometry">>}]},
 	    {error, Error}
     end.

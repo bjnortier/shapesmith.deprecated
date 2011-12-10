@@ -24,7 +24,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 mesh(WorkerPid, Hash) ->
-    node_log:info("meshing hash:~p~n", [Hash]),
+    lager:info("meshing hash:~p~n", [Hash]),
     case node_worker_pool:call(
 	   WorkerPid,
 	   jiffy:encode(

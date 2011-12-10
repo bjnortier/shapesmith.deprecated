@@ -18,6 +18,7 @@
 -module(node_master).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([create_geom/3, mesh_geom/3, stl/3]).
+-export([ensure_child_breps_exist/5]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
@@ -68,13 +69,8 @@ ensure_brep_exists(User, Design, SHA, Geometry, TopLevelFn) ->
 	{error, Error} ->
 	    {error, Error};
 	WorkerPid ->
-	    Result = try 
-			 ensure_child_breps_exist(User, Design, WorkerPid, [{SHA, Geometry}], TopLevelFn)
-			     
-		     catch Type:Exception ->
-			     node_log:error("??? Exception on ensure_child_breps_exist: ~p:~p~n", [Type, Exception]),
-		      	     {error, {Type, Exception}}
-		     end,
+	    Result = try_with_logging(node_master, ensure_child_breps_exist, 
+				      [User, Design, WorkerPid, [{SHA, Geometry}], TopLevelFn]),
 	    %% Purge the top level geometry. Also,
 	    %% Some brep may be left over if error occured and cleanup wasn't complete
 	    try_with_logging(node_brep_db, purge, [WorkerPid, SHA]),
@@ -84,13 +80,15 @@ ensure_brep_exists(User, Design, SHA, Geometry, TopLevelFn) ->
 	    
     end.
 
+    
 try_with_logging(Mod, Fn, Args) ->
     try 
 	apply(Mod, Fn, Args)
     catch
-	a:b ->
-	    node_log:error("Exception on ~p:~p(~p) in ensure_child_breps_exist: ~p:~p~n",
-			   [Mod, Fn, Args, a, b])
+	Type:Exception ->
+	    lager:error("Exception on ~p:~p(~p) in ensure_child_breps_exist: ~p:~p~n",
+			[Mod, Fn, Args, Type, Exception]),
+	    {error, {Type, Exception}}
     end.
     
 
