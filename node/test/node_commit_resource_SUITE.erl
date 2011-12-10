@@ -80,9 +80,11 @@ creation(_Config) ->
 	httpc:request(post, {CreateURL, [], "application/json", jiffy:encode(Commit)}, [], []),
 
     check_json_content_type(CreateHeaders),
-    {[{<<"path">>, PathBin}]} = jiffy:decode(iolist_to_binary(PostResponse)),
+    {[{<<"path">>, PathBin},
+      {<<"SHA">>, SHABin}]} = jiffy:decode(iolist_to_binary(PostResponse)),
     Path = binary_to_list(PathBin),
-    "/bjnortier/iphonedock/commit/" ++ _SHA = Path,
+    SHA = binary_to_list(SHABin),
+    "/bjnortier/iphonedock/commit/" ++ SHA = Path,
 
     %% Get the created commit
     {ok,{{"HTTP/1.1",200,_}, GetHeaders, GetResponse}} = 

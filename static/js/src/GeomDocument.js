@@ -12,6 +12,13 @@ function GeomDocument() {
         this.notify({add: node});
     }
 
+    this.removeAll = function() {
+	for (index in this.rootNodes) {
+	    this.notify({remove: this.rootNodes[index]});
+	}
+	this.rootNodes = [];
+    }
+
     this.remove = function(node) {
         this.rootNodes.splice(this.rootNodes.indexOf(node),1);
         this.notify({remove: node});
@@ -33,10 +40,10 @@ function GeomDocument() {
                                replacement : replacement}});
     }
 
-    this.removeByPath = function(path) {
+    this.removeBySHA = function(sha) {
         var toRemove = [];
         for (var i in this.rootNodes) {
-            if (this.rootNodes[i].path == path) {
+            if (this.rootNodes[i].sha == sha) {
                 toRemove.push(this.rootNodes[i]);
             }
         }
@@ -45,9 +52,9 @@ function GeomDocument() {
         }
     }
 
-    this.findByPath = function(path) {
+    this.findBySHA = function(sha) {
         var recurFn = function(geomNode) {
-            if (geomNode.path == path) {
+            if (geomNode.sha == sha) {
                 return geomNode;
             } else {
                 for (var i in geomNode.children) {

@@ -119,6 +119,7 @@ function create_geom_command(prototype, geometry) {
                         selectionManager.deselectAll();
                         geom_doc.replace(prototype, geomNode);
                         command_stack.inProgressSuccess();
+			SS.commit();
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
 			error_response(jqXHR.responseText);
@@ -318,29 +319,73 @@ function copy(selected) {
     
 }
 
-function save() {
-    var docId = $.getQueryParam("docid");
-    var rootPaths = geom_doc.rootNodes.filter(function(x) {
-        return !x.editing;
-    }).map(function(x) {
-        return x.path;
-    });
-    showSpinner();
+SS.save = function() {
+    SS.spinner.show();
+    
     $.ajax({
         type: 'PUT',
-        url: '/doc/' + docId,
+        url: '/' + SS.session.username + '/' + SS.session.design + '/refs/heads/master/',
         contentType: 'application/json',
-        data: JSON.stringify(rootPaths),
-        success: function() {
-	    renderSuccessMessage('Saved');
-	    hideSpinner();
+        data: JSON.stringify(SS.session.commit),
+        success: function(response) {
+	    console.info('SAVE: ' + SS.session.commit);
+	    var url = window.location.origin + window.location.pathname + '?ref=heads.master';
+	    SS.spinner.hide();
         },
         error: function(jqXHR, textStatus, errorThrown) {
             error_response(jqXHR.responseText);
-	    hideSpinner();
+	    SS.spinner.hide();
         }
     });
 }
+
+SS.commit = function() {
+    SS.spinner.show();
+    var rootSHAs = geom_doc.rootNodes.filter(function(x) {
+        return !x.editing;
+    }).map(function(x) {
+        return x.sha;
+    });
+    var json = {'geoms' : rootSHAs,
+		'parent' : SS.session.commit};
+    $.ajax({
+        type: 'POST',
+        url: '/' + SS.session.username + '/' + SS.session.design + '/commit/',
+        contentType: 'application/json',
+        data: JSON.stringify(json),
+        success: function(response) {
+	    var commit = response.SHA;
+	    console.info('COMMIT: ' + commit + ' geoms: ' + rootSHAs);
+
+	    var url = window.location.origin + window.location.pathname + '?commit=' + commit;
+	    history.pushState({commit: commit}, SS.session.design, url);
+	    SS.session.commit = commit;
+	    SS.spinner.hide();
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            error_response(jqXHR.responseText);
+	    SS.spinner.hide();
+        }
+    });
+}
+
+window.onpopstate = function(event) {  
+    console.info('POP State - location: ' + document.location + ', state: ' + JSON.stringify(event.state));
+
+    var ref = $.getQueryParam("ref");
+    if (ref) {
+	SS.load_ref(ref);
+	return;
+    }
+    var commit = $.getQueryParam("commit");
+    if (commit) {
+	SS.load_commit(commit);
+	return;
+    }
+    alert('no commit defined!');
+    return;  
+}; 
+
 
 SS.load_ref = function(ref) {
     SS.spinner.show();
@@ -365,6 +410,8 @@ SS.load_ref = function(ref) {
 }
 
 SS.load_commit = function(commit) {
+    geom_doc.removeAll();
+    SS.session.commit = commit;
     console.log('Load commit: ' + commit);
     SS.spinner.show();
     $.ajax({
@@ -374,9 +421,9 @@ SS.load_commit = function(commit) {
 	success: function(design) { 
 	    SS.spinner.hide();
 	    console.log('Load design: ' + JSON.stringify(design));
-	    var children = design.children;
-	    children.map(function(child) {
-		SS.load_child(child);
+	    var geoms = design.geoms;
+	    geoms.map(function(geom) {
+		SS.load_geom(geom);
 	    });
 			 
 	},
@@ -387,51 +434,37 @@ SS.load_commit = function(commit) {
     });
 }
 
-SS.load_child = function(child) {
-    console.info('Loading child: ' + child);
+
+SS.load_geom = function(sha) {
+    console.info('Loading geom: ' + sha);
+    SS.spinner.show();
+
+    $.ajax({
+	type: 'GET',
+	url: '/' + SS.session.username + '/' + SS.session.design + '/geom/' + sha,
+	dataType: 'json',
+	success: function(geomJson) {
+	    var newNode = new GeomNode(geomJson);
+	    newNode.sha = sha;
+	    $.ajax({
+		type: 'GET',
+		url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
+		success: function(mesh) {
+		    newNode.mesh = mesh;
+		    geom_doc.add(newNode);
+		    SS.spinner.hide();
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+		    error_response(jqXHR.responseText);
+		    SS.spinner.hide();
+		}
+	    });
+	    
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    error_response(jqXHR.responseText);
+	    SS.spinner.hide();
+	}
+    });
 }
     
-    
-/*    $.ajax({
-        type: 'GET',
-        url: '/doc/' + docId,
-        dataType: 'json',
-        success: function(geomPaths) {
-		geomPaths.map(function(path) {
-		    SS.withSpinner(function() {
-			$.ajax({
-			    type: 'GET',
-			    url: path + '?recursive=true',
-			    dataType: 'json',
-			    success: function(geomJson) {
-				var newNode = GeomNode.fromDeepJson(geomJson);
-				$.ajax({
-				    type: 'GET',
-				    url: '/mesh/' + idForGeomPath(path),
-				    success: function(mesh) {
-					newNode.mesh = mesh;
-					geom_doc.add(newNode);
-					hideSpinner();
-				    },
-				    error: function(jqXHR, textStatus, errorThrown) {
-					error_response(jqXHR.responseText);
-					hideSpinner();
-				    }
-				});
-				
-			    },
-			    error: function(jqXHR, textStatus, errorThrown) {
-				error_response(jqXHR.responseText);
-				hideSpinner();
-		    }
-                });
-            });
-	    SS.spinner.hide()
-
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            error_response(jqXHR.responseText);
-	    hideSpinner();
-        }
-    });*/
-

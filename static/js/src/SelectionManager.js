@@ -14,52 +14,52 @@ function SelectionManager() {
         return selected.length;
     }
 
-    this.shiftPick = function(path) {
+    this.shiftPick = function(sha) {
 	var alreadySelected = false;
         for (var i in selected) {
-            if (selected[i] == path) {
+            if (selected[i] == sha) {
                 alreadySelected = true;
             } 
         }
 
         if (alreadySelected) {
-            this.deselectPath(path);
+            this.deselectSHA(sha);
         } else  {
-            this.selectPath(path);
+            this.selectSHA(sha);
         }
     }
     
-    this.pick = function(path) {
-        this.selectOnly(path);
+    this.pick = function(sha) {
+        this.selectOnly(sha);
     }
 
-    this.selectPath = function(path) {
-        selected.push(path);
-        this.notify({selected : [path]});
+    this.selectSHA = function(sha) {
+        selected.push(sha);
+        this.notify({selected : [sha]});
     }
     
-    this.deselectPath = function(path) {
-        selected.splice(selected.indexOf(path), 1);
-        this.notify({deselected : [path]});
+    this.deselectSHA = function(sha) {
+        selected.splice(selected.indexOf(sha), 1);
+        this.notify({deselected : [sha]});
     }
 
-    this.selectOnly = function(path) {
+    this.selectOnly = function(sha) {
         var deselected = [];
         var found = false;
         for (var i in selected) {
-            if (selected[i] == path) {
+            if (selected[i] == sha) {
                 found = true;
             } else {
                 deselected.push(selected[i]);
             }
         }
-        selected = [path];
+        selected = [sha];
         
 	if (deselected.length > 0) {
             this.notify({deselected : deselected});
 	}
         if (!found) {
-            this.notify({selected : [path]});
+            this.notify({selected : [sha]});
         }
     }
     

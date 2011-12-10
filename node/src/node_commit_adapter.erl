@@ -67,7 +67,8 @@ validate_parent(Props) ->
 create(_ReqData, User, Design, RequestJSON) ->
     {ok, SHA} = node_db:create(User, Design, commit, RequestJSON),
     Path = io_lib:format("/~s/~s/commit/~s", [User, Design, SHA]),
-    ResponseJSON = {[{<<"path">>, iolist_to_binary(Path)}]},
+    ResponseJSON = {[{<<"path">>, iolist_to_binary(Path)},
+		     {<<"SHA">>, list_to_binary(SHA)}]},
     {ok, ResponseJSON}.
 
 get(ReqData, User, Design) ->

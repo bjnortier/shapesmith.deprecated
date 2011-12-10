@@ -19,7 +19,7 @@ function renderTransform(geomNode, transformIndex) {
     for (key in transform.parameters) {
         paramsArr.push({key: key,
                         value: transform.parameters[key],
-                        'edit-class': 'edit-transform target-' + id + '-' + transformIndex,
+                        'edit-class': 'edit-transform target-' + geomNode.sha + '-' + transformIndex,
                         editing: transform.editing
                        });
     }
@@ -27,23 +27,18 @@ function renderTransform(geomNode, transformIndex) {
     var paramsTable = $.mustache(parametersTemplate, {paramsArr : paramsArr});
 
 
-    var template = '<table><tr><td>{{type}}{{^editing}}<img class="{{delete-class}}" src="/images/delete_button.png" alt="delete"/>{{/editing}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>       {{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input id="modal-ok" type="submit" value="Ok"/><input id="modal-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}</table>';
+    var template = '<table><tr><td>{{type}}{{^editing}}<img class="{{delete-class}}" src="/static/images/delete_button.png" alt="delete"/>{{/editing}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>       {{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input id="modal-ok" type="submit" value="Ok"/><input id="modal-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}</table>';
 
     var view = {
         type: transform.type,
 	editing: transform.editing,
-        'delete-class': 'delete-transform target-' + id + '-' + transformIndex,
+        'delete-class': 'delete-transform target-' + geomNode.sha + '-' + transformIndex,
 	originTable: originTable,
 	paramsTable: paramsTable};
     var transformTable = $.mustache(template, view);
     return transformTable;
 }
 
-
-function shaForGeomPath(path) {
-    var pattern = /^\/.*\/.*\/geom\/(.*)$/;
-    return path.match(pattern)[1];
-}
 
 function renderNode(geomNode) {
 
@@ -89,7 +84,7 @@ function renderNode(geomNode) {
     // Children
     var childTables = geomNode.children.map(renderNode);
     
-    var childTemplate = '<table id="{{sha}}"><tr><td><img class="show-hide-siblings siblings-showing" src="/images/arrow_showing.png"></img>{{^editing}}<span class="{{clazz}}">{{type}}</span>{{/editing}}{{#editing}}{{type}}{{/editing}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input id="modal-ok" type="submit" value="Ok"/><input id="modal-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>';
+    var childTemplate = '<table id="{{sha}}"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img>{{^editing}}<span class="{{clazz}}">{{type}}</span>{{/editing}}{{#editing}}{{type}}{{/editing}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input id="modal-ok" type="submit" value="Ok"/><input id="modal-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>';
 
     var view = {type: geomNode.type,
                 editing: geomNode.editing,
@@ -113,14 +108,14 @@ function TreeView() {
     this.addEvents = function(precursor, geomNode) {
 
         var hideNode = function(nodeElement) {
-            nodeElement.attr('src', '/images/arrow_hidden.png');
+            nodeElement.attr('src', '/static/images/arrow_hidden.png');
             nodeElement.removeClass('siblings-showing');
             var otherRows = nodeElement.parent().parent().siblings();
             otherRows.hide();
         }
 
         var showNode = function(nodeElement) {
-            nodeElement.attr('src', '/images/arrow_showing.png');
+            nodeElement.attr('src', '/static/images/arrow_showing.png');
             nodeElement.addClass('siblings-showing');
             var otherRows = nodeElement.parent().parent().siblings();
             otherRows.show();
@@ -142,7 +137,7 @@ function TreeView() {
 	}
 	
 	var okGeomFunction = function() {
-	    if (geomNode.path) {
+	    if (geomNode.sha !== "_preview") {
 		for (key in geomNode.origin) {
                     geomNode.origin[key] = parseFloat($('#' + key).val());
 		}
@@ -189,7 +184,7 @@ function TreeView() {
             });
 
 	    var cancelFunction = function() {
-		if (geomNode.path) {
+		if (geomNode.sha !== "_preview") {
                     geom_doc.replace(geomNode, precursor);
                 } else {
                     // It's a new node, remove it
@@ -224,54 +219,54 @@ function TreeView() {
         $("#geom-model-doc tr:nth-child(odd)").addClass("odd");
 
         $('.select-geom').click(function(event) {
-            var id;
+            var sha;
             var pattern = /^target-(.*)$/;
             var classes = $(this).attr('class').split(' ');
             for (var i in classes) {
                 var match = classes[i].match(pattern);
                 if (match) {
-                    id = match[1];
+                    sha = match[1];
                 }
             }
-            if (!id) {
+            if (!sha) {
                 throw Error('id for editing could not be determined');
             }
-            selectionManager.pick('/geom/' + id);
+            selectionManager.pick(sha);
         });
 
         // Edit geom
         $('.edit-geom').dblclick(function() { 
 
-            var id;
+            var sha;
             var pattern = /^target-(.*)$/;
             var classes = $(this).attr('class').split(' ');
             for (var i in classes) {
                 var match = classes[i].match(pattern);
                 if (match) {
-                    id = match[1];
+                    sha = match[1];
                 }
             }
-            if (!id) {
+            if (!sha) {
                 throw Error('id for editing could not be determined');
             }
-	    that.edit(id);
+	    that.edit(sha);
         });
 	
 
         // Edit transform
         $('.edit-transform').dblclick(function() { 
-            var id;
+            var sha;
             var transformIndex;
             var pattern = /^target-(.*)-(.*)$/;
             var classes = $(this).attr('class').split(' ');
             for (var i in classes) {
                 var match = classes[i].match(pattern);
                 if (match) {
-                    id = match[1];
+                    sha = match[1];
                     transformIndex = match[2];
                 }
             }
-            var geomNode = geom_doc.findByPath('/geom/' + id);
+            var geomNode = geom_doc.findBySHA(sha);
             var editingNode = geomNode.editableCopy();
             editingNode.transforms[transformIndex].editing = true;
             geom_doc.replace(geomNode, editingNode);
@@ -279,18 +274,18 @@ function TreeView() {
 
         // Delete transform
         $('.delete-transform').click(function() {
-            var id;
+            var sha;
             var transformIndex;
             var pattern = /^target-(.*)-(.*)$/;
             var classes = $(this).attr('class').split(' ');
             for (var i in classes) {
                 var match = classes[i].match(pattern);
                 if (match) {
-                    id = match[1];
+                    sha = match[1];
                     transformIndex = match[2];
                 }
             }
-            var geomNode = geom_doc.findByPath('/geom/' + id);
+            var geomNode = geom_doc.findBySHA(sha);
             var editingNode = geomNode.editableCopy();
             editingNode.transforms.splice(transformIndex, 1);
             geom_doc.replace(geomNode, editingNode);
@@ -308,10 +303,10 @@ function TreeView() {
         
     }
 
-    this.edit = function(id) {
+    this.edit = function(sha) {
 	selectionManager.deselectAll();
 
-	var geomNode = geom_doc.findByPath('/geom/' + id);
+	var geomNode = geom_doc.findBySHA(sha);
         var editingNode = geomNode.editableCopy();
         editingNode.editing = true;
         geom_doc.replace(geomNode, editingNode);
@@ -361,15 +356,15 @@ function TreeView() {
         if (event.deselected) {
             var deselected = event.deselected;
             for (var i in deselected) {
-                var sha = shaForGeomPath(deselected[i]);
-                $('#' + id + ' > tbody > tr:nth-child(1)').removeClass('selected');
+                var sha = deselected[i];
+                $('#' + sha + ' > tbody > tr:nth-child(1)').removeClass('selected');
             }
         }
         if (event.selected) {
             var selected = event.selected;
             for (var i in selected) {
-                var id = idForGeomPath(selected[i]);
-                $('#' + id + ' > tbody > tr:nth-child(1)').addClass('selected');
+                var id = selected[i];
+                $('#' + sha + ' > tbody > tr:nth-child(1)').addClass('selected');
             }
         }
 

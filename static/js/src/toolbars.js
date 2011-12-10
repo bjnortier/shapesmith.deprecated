@@ -69,6 +69,7 @@ function create_primitive(type, keys) {
     geom_doc.add(new GeomNode({
         type: type,
         editing: true,
+	sha: "_preview",
 	origin: {x: 0, y: 0, z: 0},
         parameters: geometryParams}));
 }
@@ -110,11 +111,11 @@ $(document).ready(function() {
     /*
      * Document
      */
-    /*new Action("Save", "images/save.png", 
+    new Action("Save", "/static/images/save.png", 
                function() { 
-		   save(); 
+		   SS.save(); 
 	       }).render($("#document"));
-    new Action("Undo", "images/undo.png", 
+    /*new Action("Undo", "images/undo.png", 
                function() { 
 		   command_stack.undo(); 
 	       }).render($("#document"));
@@ -125,7 +126,7 @@ $(document).ready(function() {
     
 
     // Edit
-    new Action("Delete", "images/trash.png", 
+    new Action("Delete", "/static/images/trash.png", 
                function(selected) { 
 		   delete_geom(selected); 
 	       }).render($("#edit"));
@@ -133,7 +134,7 @@ $(document).ready(function() {
                function(selected) { 
 		   copy(selected)
 	       }).render($("#edit"));
-    new Action("Export to STL", "images/stl.png", 
+    new Action("Export to STL", "/static/images/stl.png", 
                function(selected) { 
 		   var pattern = /^\/geom\/(.*)$/;
 		   var id = selectionManager.getSelected()[0].match(pattern)[1];

@@ -133,7 +133,6 @@ create_or_update_response({error, Code, ResponseJSON}, ReqData, Context) ->
     
 
 provide_content(ReqData, Context = #context{ existing=Existing} ) ->
-    lager:info("!!!! ~p", [Existing]),
     {jiffy:encode(Existing), ReqData, Context}.
 
 delete_resource(ReqData, Context = #context{adapter=Adapter, 

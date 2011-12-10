@@ -12,7 +12,7 @@ SS.SceneView = function(container) {
     var targetOnDown = { azimuth: target.azimuth, elevation: target.elevation };
     var distance = 1000, distanceTarget = 400;
 
-    var pathToModel = {};
+    var shaToModel = {};
     var unselectedColor = 0x00dd00, selectedColor = 0xdddd00;
     var panning = false, rotating = false, threshhold = 10; // inside this threshold is a single click
 
@@ -62,10 +62,9 @@ SS.SceneView = function(container) {
 	container.addEventListener('dblclick', function() {
 	    popupMenu.cancel();
 	    if (selectionManager.size() == 1) {
-		var editPath = selectionManager.getSelected()[0];
-		var id = idForGeomPath(editPath);
+		var sha = selectionManager.getSelected()[0];
 
-		$('#' + id + ' > tbody > tr:nth-child(1)').addClass('selected');
+		$('#' + sha + ' > tbody > tr:nth-child(1)').addClass('selected');
 		treeView.edit(id);
 	    }
 	    
@@ -215,21 +214,21 @@ SS.SceneView = function(container) {
 	ray.direction = mouse3D.subSelf(camera.position).normalize();
 	var intersects = ray.intersectScene(scene);
 
-	var foundObjectPath = null;
+	var foundObjectSHA = null;
 	if (intersects.length > 0) {
 	    for (var i in intersects) {
 		if (intersects[i].object.name) {
-		    foundObjectPath = intersects[i].object.name;
+		    foundObjectSHA = intersects[i].object.name;
 		    break;
 		}
 	    }
 	}
 
-	if (foundObjectPath) {
+	if (foundObjectSHA) {
 	    if (event.shiftKey) {
-		selectionManager.shiftPick(foundObjectPath);
+		selectionManager.shiftPick(foundObjectSHA);
 	    } else {
-		selectionManager.pick(foundObjectPath);
+		selectionManager.pick(foundObjectSHA);
 	    }
 	} else {
 	    selectionManager.deselectAll();
@@ -391,31 +390,31 @@ SS.SceneView = function(container) {
 	    var material = new THREE.MeshPhongMaterial( { ambient: 0x030303, color: color, opacity: opacity,  specular: 0xccffcc, shininess: 50, shading: THREE.SmoothShading } );
 	    var mesh = new THREE.Mesh(geometry, material);
 	    mesh.doubleSided = true;
-	    mesh.name = geomNode.path;
+	    mesh.name = geomNode.sha;
 	    scene.addObject(mesh);
-	    pathToModel[geomNode.path] = mesh;
+	    shaToModel[geomNode.sha] = mesh;
         }
     }
 
     var remove = function(geomNode) {
-        if (geomNode.path) {
-	    var mesh = pathToModel[geomNode.path];
+        if (geomNode.sha !== "_preview") {
+	    var mesh = shaToModel[geomNode.sha];
 	    scene.removeObject(mesh);
-	    delete pathToModel[geomNode.path];
+	    delete shaToModel[geomNode.sha];
         }
     }
 
     this.selectionUpdated = function(event) {
         if (event.deselected) {
             for (var i in event.deselected) {
-                var path = event.deselected[i];
-		pathToModel[path].materials[0].color.setHex(unselectedColor);
+                var sha = event.deselected[i];
+		shaToModel[sha].materials[0].color.setHex(unselectedColor);
             }
         }
         if (event.selected) {
             for (var i in event.selected) {
-                var path = event.selected[i];
-		pathToModel[path].materials[0].color.setHex(selectedColor);
+                var sha = event.selected[i];
+		shaToModel[sha].materials[0].color.setHex(selectedColor);
 		
             }
         }

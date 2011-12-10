@@ -40,7 +40,7 @@ validate(_ReqData, _User, Design, RequestJSON) ->
 create(_ReqData, User, Design, {[]}) ->
     case node_db:get_root(User, Design) of
 	undefined ->
-	    {ok, CommitSHA} = node_db:create(User, Design, commit, {[{<<"children">>, []}]}),
+	    {ok, CommitSHA} = node_db:create(User, Design, commit, {[{<<"geoms">>, []}]}),
 	    Root = {[{<<"refs">>, 
 		      {[{<<"heads">>, 
 			 {[{<<"master">>, list_to_binary(CommitSHA)}]} 
