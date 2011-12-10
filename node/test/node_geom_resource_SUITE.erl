@@ -134,7 +134,7 @@ boolean(_Config) ->
     {ok,{{"HTTP/1.1",200,_}, _, BoolResponse}} = 
 	httpc:request(post, {CreateURL, [], "application/json", jiffy:encode(Bool)}, [], []),
     {[{<<"path">>, _},
-      {<<"SHA">>, SHABoolBin}]} = jiffy:decode(iolist_to_binary(BoolResponse)).
+      {<<"SHA">>, _SHABoolBin}]} = jiffy:decode(iolist_to_binary(BoolResponse)).
 
 
 check_json_content_type(Headers) ->

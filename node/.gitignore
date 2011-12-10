@@ -8,4 +8,5 @@ log/
 logs/
 test_db/
 test/*.beam
-.eunit/db/*
+.eunit/
+

@@ -37,17 +37,17 @@ simple(_Config) ->
 	httpc:request(get, {"http://localhost:8001/mesh/abc", []}, [], []),
 
     %% Create
-    GeomA = {struct, [{<<"type">>, <<"sphere">>},
-		      {<<"origin">>, {struct, [{<<"x">>, 0},
-					       {<<"y">>, 0},
-					       {<<"z">>, 0}]}},
-                      {<<"parameters">>, {struct, [{<<"r">>, 1.0}]}}]},
-    {ok, Id} = node_master:create_geom(GeomA),
+    GeomA = {[{<<"type">>, <<"sphere">>},
+	      {<<"origin">>, {[{<<"x">>, 0},
+			       {<<"y">>, 0},
+			       {<<"z">>, 0}]}},
+	      {<<"parameters">>, {[{<<"r">>, 1.0}]}}]},
+    {ok, Id} = node_master:create_geom("bjnortier", "iphonedock", GeomA),
     
     %% Get
     {ok,{{"HTTP/1.1",200,_}, _, GetResponse}} = 
-	httpc:request(get, {"http://localhost:8001/mesh/" ++ Id, []}, [], []),
-    {struct, _} = mochijson2:decode(GetResponse),
+	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/mesh/" ++ Id, []}, [], []),
+    {_} = jiffy:decode(iolist_to_binary(GetResponse)),
 
     ok.
     

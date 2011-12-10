@@ -43,12 +43,12 @@ mesh(WorkerPid, Hash) ->
 
 stl(WorkerPid, Hash) ->
     Filename = filename:join(["/tmp", Hash ++ ".stl"]),
-    Msg = {struct, [{<<"type">>, <<"stl">>},
-                    {<<"id">>, list_to_binary(Hash)},
-                    {<<"filename">>, list_to_binary(Filename)}
-                   ]},
-    case node_worker_pool:call(WorkerPid, mochijson2:encode(Msg)) of
-	"\"ok\"" ->
+    Msg = {[{<<"type">>, <<"stl">>},
+	    {<<"id">>, list_to_binary(Hash)},
+	    {<<"filename">>, list_to_binary(Filename)}
+	   ]},
+    case node_worker_pool:call(WorkerPid, jiffy:encode(Msg)) of
+	<<"\"ok\"">> ->
 	    file:read_file(Filename);
 	{error, Reason} ->
 	    {error, Reason}

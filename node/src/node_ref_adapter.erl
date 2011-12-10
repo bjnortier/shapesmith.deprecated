@@ -76,7 +76,7 @@ update(ReqData, User, Design, NewCommitRef) when is_binary(NewCommitRef) ->
     NewRefs = lists:keyreplace(list_to_binary(RefType), 1, Refs, {list_to_binary(RefType), {NewCommits}}),
     NewRootProps = lists:keyreplace(<<"refs">>, 1, RootProps, {<<"refs">>, {NewRefs}}),
     ok = node_db:put_root(User, Design, {NewRootProps}),
-    lager:info("Updated ~s/~s ~s/~s: ~p", [User, Design, RefType, RefType, jiffy:encode({NewRootProps})]),
+io:format("Updated ~s/~s ~s/~s: ~p", [User, Design, RefType, RefType, jiffy:encode({NewRootProps})]),
     {ok, <<"updated">>}.
 
 
@@ -85,9 +85,15 @@ update(ReqData, User, Design, NewCommitRef) when is_binary(NewCommitRef) ->
 get_test_() ->
     {setup, 
      fun() -> 
+	     meck:new(wrq),
+	     meck:expect(wrq, path_info,
+	     		 fun(reftype, {}) ->
+	     			 "heads";
+	     		    (ref, {}) ->
+	     			 "master"
+	     		 end),
 	     meck:new(node_db),
-	     meck:expect(node_db, 
-			 get_root, 
+	     meck:expect(node_db, get_root, 
 			 fun("bjnortier", "iphonedock") -> 
 				 {[{<<"refs">>, 
 				    {[{<<"heads">>,
@@ -97,36 +103,54 @@ get_test_() ->
 			 end)
      end, 
      fun(_) -> 
-	     meck:unload(node_db)
+	     meck:unload(node_db),
+	     meck:unload(wrq)
      end,
      [
-      ?_assertEqual(<<"009c">>, get("bjnortier", "iphonedock", "heads", "master")),
-      ?_assert(meck:validate(node_db))
+      ?_assertEqual(<<"009c">>, get({}, "bjnortier", "iphonedock")),
+      ?_assert(meck:validate(node_db)),
+      ?_assert(meck:validate(wrq))
      ]
     }.
 
 update_test_() ->
     {setup, 
      fun() -> 
+	     meck:new(wrq),
+	     meck:expect(wrq, path_info,
+	     		 fun(reftype, {}) ->
+	     			 "heads";
+	     		    (ref, {}) ->
+	     			 "master"
+	     		 end),
 	     meck:new(node_db),
-	     meck:expect(node_db, 
-			 get_root, 
+	     meck:expect(node_db, get_root, 
 			 fun("bjnortier", "iphonedock") -> 
-				 <<"{\"refs\":{\"heads\":{\"master\":\"009c\"}}}">>
+				 {[{<<"refs">>, 
+				    {[{<<"heads">>,
+				       {[{<<"master">>, <<"009c">>}]} 
+				      }]} 
+				   }]}
 			 end),
-	     meck:expect(node_db, 
-			 put_root, 
-			 fun("bjnortier", "iphonedock", <<"{\"refs\":{\"heads\":{\"master\":\"af56\"}}}">>) ->
-			    ok
+	     meck:expect(node_db, put_root, 
+			 fun("bjnortier", "iphonedock", 
+			     {[{<<"refs">>, 
+				{[{<<"heads">>,
+				   {[{<<"master">>, <<"af56">>}]} 
+				  }]} 
+			       }]}) ->
+				 ok
 			 end)
 	     
      end, 
      fun(_) -> 
-	     meck:unload(node_db)
+	     meck:unload(node_db),
+	     meck:unload(wrq)
      end,
      [
-      ?_assertEqual(ok, update("bjnortier", "iphonedock", "heads", "master", <<"af56">>)),
-      ?_assert(meck:validate(node_db))
+      ?_assertEqual({ok,<<"updated">>}, update({}, "bjnortier", "iphonedock", <<"af56">>)),
+      ?_assert(meck:validate(node_db)),
+      ?_assert(meck:validate(wrq))
      ]
     }.
 

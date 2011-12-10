@@ -59,7 +59,7 @@ end_per_testcase(_Testcase, _Config) ->
 -define(EMPTY_DESIGN, {[{<<"refs">>,
 			 {[{<<"heads">>,
 			    {[{<<"master">>,
-			       <<"009c525d16ccfc06e955ad89766707da9a68504a">>}]}}]}}]}).
+			       <<"8a7ad9f7c827053faabaf84772081809317a1732">>}]}}]}}]}).
 
 validate_design(_Config) ->
     
@@ -120,21 +120,18 @@ create_new(_Config) ->
     %% Get design
     {ok,{{"HTTP/1.1",200,_}, _, GetResponse1}} = 
 	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/", []}, [], []),
-    {[{<<"refs">>,
-       {[{<<"heads">>,
-	  {[{<<"master">>,
-	     <<"009c525d16ccfc06e955ad89766707da9a68504a">>}]}}]}}]}
-	= jiffy:decode(iolist_to_binary(GetResponse1)),
+    ?EMPTY_DESIGN = jiffy:decode(iolist_to_binary(GetResponse1)),
     
     %% Get ref
     {ok,{{"HTTP/1.1",200,_}, _, GetResponse2}} = 
 	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/refs/heads/master", []}, [], []),
-    <<"009c525d16ccfc06e955ad89766707da9a68504a">> = jiffy:decode(iolist_to_binary(GetResponse2)),
+    <<"8a7ad9f7c827053faabaf84772081809317a1732">> = jiffy:decode(iolist_to_binary(GetResponse2)),
     
     %% Get user designs
     {ok,{{"HTTP/1.1",200,_}, _, GetResponse3}} = 
 	httpc:request(get, {"http://localhost:8001/bjnortier/", []}, [], []),
     {[{<<"designs">>,[<<"iphonedock">>]}]} = jiffy:decode(iolist_to_binary(GetResponse3)).
+
 
 delete(_Config) ->
     %% Create design
@@ -154,9 +151,11 @@ delete(_Config) ->
     {ok,{{"HTTP/1.1",200,_}, CreateHeaders, PostResponse}} = 
 	httpc:request(post, {CreateURL, [], "application/json", jiffy:encode(GeomJSON)}, [], []),
     check_json_content_type(CreateHeaders),
-    {[{<<"path">>, PathBin}]} = jiffy:decode(iolist_to_binary(PostResponse)),
+    {[{<<"path">>, PathBin},
+      {<<"SHA">>, SHABin}]} = jiffy:decode(iolist_to_binary(PostResponse)),
     Path = binary_to_list(PathBin),
-    "/bjnortier/iphonedock/geom/" ++ _SHA = Path,
+    SHA = binary_to_list(SHABin),
+    "/bjnortier/iphonedock/geom/" ++ SHA = Path,
 
     %% Delete the design
     {ok,{{"HTTP/1.1",200,_}, DeleteHeaders, DeleteResponse}} = 
@@ -171,7 +170,7 @@ delete(_Config) ->
     {[{<<"designs">>, []}]} = jiffy:decode(iolist_to_binary(GetResponse1)),
 
     %% Get design - not found
-    {ok,{{"HTTP/1.1",404,_}, GetHeaders2, GetResponse2}} = 
+    {ok,{{"HTTP/1.1",404,_}, _GetHeaders2, _GetResponse2}} = 
      	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/", []}, [], []),
     ok.
     

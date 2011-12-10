@@ -44,73 +44,73 @@ end_per_testcase(_Testcase, _Config) ->
     ok.
 
 create_simple(_Config) ->
-    Geometry = {struct, [{<<"type">>, <<"sphere">>},
-			  {<<"origin">>, {struct, [{<<"x">>, 0},
-						   {<<"y">>, 0},
-						   {<<"z">>, 0}]}},
-                         {<<"parameters">>, {struct, [{<<"r">>, 1.0}]}}]},
-    {ok, Id} = node_master:create_geom(Geometry),
-    {ok, {struct, _}} = node_master:mesh_geom(Id),
-    {ok, Stl} = node_master:stl(Id),
+    Geometry = {[{<<"type">>, <<"sphere">>},
+		 {<<"origin">>, {[{<<"x">>, 0},
+				  {<<"y">>, 0},
+				  {<<"z">>, 0}]}},
+		 {<<"parameters">>, {[{<<"r">>, 1.0}]}}]},
+    {ok, SHA} = node_master:create_geom("bjnortier", "iphonedock", Geometry),
+    {ok, {_}} = node_master:mesh_geom("bjnortier", "iphonedock", SHA),
+    {ok, Stl} = node_master:stl("bjnortier", "iphonedock", SHA),
     true = is_binary(Stl),
     ok.
 
 timeout(_Config) ->
-    Geometry = {struct, [{<<"type">>, <<"sphere">>},
-                         {<<"parameters">>, {struct, [{<<"radius">>, 1.0}]}}]},
-    {error, _} = node_master:create_geom(Geometry),
+    Geometry = {[{<<"type">>, <<"sphere">>},
+		 {<<"parameters">>, {[{<<"radius">>, 1.0}]}}]},
+    {error, _} = node_master:create_geom("bjnortier", "iphonedock", Geometry),
     ok.
 
 create_boolean(_Config) ->
-    Geometry1 = {struct, [{<<"type">>, <<"sphere">>},
-			  {<<"origin">>, {struct, [{<<"x">>, 0},
-						   {<<"y">>, 0},
-						   {<<"z">>, 0}]}},
-                          {<<"parameters">>, {struct, [{<<"r">>, 1.0}]}}]},
-    Geometry2 = {struct, [{<<"type">>, <<"sphere">>},
-			  {<<"origin">>, {struct, [{<<"x">>, 0},
-						   {<<"y">>, 0},
-						   {<<"z">>, 0}]}},
-                          {<<"parameters">>, {struct, [{<<"r">>, 1.0}]}},
-                          {<<"transforms">>, [
-                                              {struct, [{<<"type">>, <<"translate">>},
-							{<<"origin">>, {struct, [{<<"x">>, 0},
-										 {<<"y">>, 0},
-										 {<<"z">>, 0}]}},
-                                                        {<<"parameters">>, {struct, [{<<"u">>, 0.5},
-                                                                                     {<<"v">>, 0.5},
-                                                                                     {<<"w">>, 0.5},
-										     {<<"n">>, 0}
-										    ]}}]}
-                                             ]}]},
+    Geometry1 = {[{<<"type">>, <<"sphere">>},
+		  {<<"origin">>, {[{<<"x">>, 0},
+				   {<<"y">>, 0},
+				   {<<"z">>, 0}]}},
+		  {<<"parameters">>, {[{<<"r">>, 1.0}]}}]},
+    Geometry2 = {[{<<"type">>, <<"sphere">>},
+		  {<<"origin">>, {[{<<"x">>, 0},
+				   {<<"y">>, 0},
+				   {<<"z">>, 0}]}},
+		  {<<"parameters">>, {[{<<"r">>, 1.0}]}},
+		  {<<"transforms">>, [
+				      {[{<<"type">>, <<"translate">>},
+					{<<"origin">>, {[{<<"x">>, 0},
+							 {<<"y">>, 0},
+							 {<<"z">>, 0}]}},
+					{<<"parameters">>, {[{<<"u">>, 0.5},
+							     {<<"v">>, 0.5},
+							     {<<"w">>, 0.5},
+							     {<<"n">>, 0}
+							    ]}}]}
+				     ]}]},
 
-    {ok, Id1} = node_master:create_geom(Geometry1),
-    {ok, Id2} = node_master:create_geom(Geometry2),
+    {ok, SHA1} = node_master:create_geom("bjnortier", "iphonedock", Geometry1),
+    {ok, SHA2} = node_master:create_geom("bjnortier", "iphonedock", Geometry2),
 
-    Geometry3 = {struct, [{<<"type">>, <<"union">>},
-                          {<<"children">>, [
-                                            list_to_binary(Id1),
-                                            list_to_binary(Id2)
-                                           ]}]},
-    {ok, Id3} = node_master:create_geom(Geometry3),
+    Geometry3 = {[{<<"type">>, <<"union">>},
+		  {<<"children">>, [
+				    list_to_binary(SHA1),
+				    list_to_binary(SHA2)
+				   ]}]},
+    {ok, SHA3} = node_master:create_geom("bjnortier", "iphonedock", Geometry3),
 
-    {ok, {struct, _}} = node_master:mesh_geom(Id3),
-    {ok, Stl} = node_master:stl(Id3),
+    {ok, _} = node_master:mesh_geom("bjnortier", "iphonedock", SHA3),
+    {ok, Stl} = node_master:stl("bjnortier", "iphonedock", SHA3),
     true = is_binary(Stl),
 
     ok.
 
 parallel_workers(_Config) ->
     Results = pmap(fun(R) -> 
-			   Geom =  {struct,[{<<"type">>,<<"sphere">>}, 
-					    {<<"origin">>, {struct, [{<<"x">>, 0},
-								     {<<"y">>, 0},
-								     {<<"z">>, 0}]}},
-					    {<<"parameters">>,{struct,[{<<"r">>, R}]}}]},
-			   node_master:create_geom(Geom) end, 
+			   Geom =  {[{<<"type">>,<<"sphere">>}, 
+				     {<<"origin">>, {[{<<"x">>, 0},
+						      {<<"y">>, 0},
+						      {<<"z">>, 0}]}},
+				     {<<"parameters">>,{[{<<"r">>, R}]}}]},
+			   node_master:create_geom("bjnortier", "iphonedock", Geom) end, 
 		   lists:seq(1,10)),
     lists:map(fun(Result) ->
-		      {ok, _Id} = Result
+		      {ok, _SHA} = Result
 	      end,
 	      Results).
     
