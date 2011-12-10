@@ -23,8 +23,9 @@ suite() -> [{timetrap,{minutes,1}}].
 
 all() ->
 	[
+	 validation,
 	 creation,
-	 validation
+         boolean
 	].
 
 init_per_suite(Config) ->
@@ -50,6 +51,24 @@ init_per_testcase(_Testcase, Config) ->
 end_per_testcase(_Testcase, _Config) ->
     node_mem_db:stop(),
     ok.
+
+validation(_Config) ->
+
+    GeomJSON = {[{<<"type">>, <<"sphere">>},
+		 {<<"origin">>, {[{<<"x">>, 0},
+				  {<<"y">>, 0},
+				  {<<"z">>, 0}]}},
+		 {<<"parameters">>, {[{<<"r">>, -1.0}]}}]},
+    EncodedJSON = jiffy:encode(GeomJSON),
+    URL = "http://localhost:8001/bjnortier/iphonedock/geom/",
+    
+    {ok,{{"HTTP/1.1",400,_}, Headers, Response}} = 
+     	httpc:request(post, {URL, [], "application/json", EncodedJSON}, [], []),
+    check_json_content_type(Headers),
+    
+    {[{<<"validation">>, {[{<<"r">>, <<"must be positive">>}]}}]} 
+     	= jiffy:decode(iolist_to_binary(Response)).
+
 
 creation(_Config) ->
 
@@ -82,22 +101,41 @@ creation(_Config) ->
     check_json_content_type(MeshHeaders),
     [] == jiffy:decode(iolist_to_binary(MeshResponse)).
 
-validation(_Config) ->
 
-    GeomJSON = {[{<<"type">>, <<"sphere">>},
-		 {<<"origin">>, {[{<<"x">>, 0},
-				  {<<"y">>, 0},
-				  {<<"z">>, 0}]}},
-		 {<<"parameters">>, {[{<<"r">>, -1.0}]}}]},
-    EncodedJSON = jiffy:encode(GeomJSON),
-    URL = "http://localhost:8001/bjnortier/iphonedock/geom/",
+boolean(_Config) ->
+
+    CreateURL = "http://localhost:8001/bjnortier/iphonedock/geom/", 
+
+    GeomA = {[{<<"type">>, <<"sphere">>},
+              {<<"origin">>, {[{<<"x">>, 0},
+                               {<<"y">>, 0},
+                               {<<"z">>, 0}]}},
+              {<<"parameters">>, {[{<<"r">>, 1.1}]}}]},
     
-    {ok,{{"HTTP/1.1",400,_}, Headers, Response}} = 
-     	httpc:request(post, {URL, [], "application/json", EncodedJSON}, [], []),
-    check_json_content_type(Headers),
+    {ok,{{"HTTP/1.1",200,_}, _, ResponseA}} = 
+	httpc:request(post, {CreateURL, [], "application/json", jiffy:encode(GeomA)}, [], []),
+    {[{<<"path">>, _},
+      {<<"SHA">>, SHAABin}]} = jiffy:decode(iolist_to_binary(ResponseA)),
+
+    GeomB = {[{<<"type">>, <<"sphere">>},
+              {<<"origin">>, {[{<<"x">>, 0},
+                               {<<"y">>, 0.5},
+                               {<<"z">>, 0}]}},
+              {<<"parameters">>, {[{<<"r">>, 1.1}]}}]},
     
-    {[{<<"validation">>, {[{<<"r">>, <<"must be positive">>}]}}]} 
-     	= jiffy:decode(iolist_to_binary(Response)).
+    {ok,{{"HTTP/1.1",200,_}, _, ResponseB}} = 
+	httpc:request(post, {CreateURL, [], "application/json", jiffy:encode(GeomB)}, [], []),
+    {[{<<"path">>, _},
+      {<<"SHA">>, SHABBin}]} = jiffy:decode(iolist_to_binary(ResponseB)),
+
+    Bool = {[{<<"type">>, <<"union">>},
+             {<<"children">>, [SHAABin, SHABBin]}]},
+    
+    {ok,{{"HTTP/1.1",200,_}, _, BoolResponse}} = 
+	httpc:request(post, {CreateURL, [], "application/json", jiffy:encode(Bool)}, [], []),
+    {[{<<"path">>, _},
+      {<<"SHA">>, SHABoolBin}]} = jiffy:decode(iolist_to_binary(BoolResponse)).
+
 
 check_json_content_type(Headers) ->
     {Headers, {_, "application/json"}} = {Headers, lists:keyfind("content-type", 1, Headers)}.

@@ -99,7 +99,6 @@ function create_geom_command(prototype, geometry) {
             data: JSON.stringify(geometry),
 	    dataType: 'json',
             success: function(result) {
-		console.log(result);
 		var sha = result.SHA;
 		var path = result.path;
                 $.ajax({
@@ -107,14 +106,13 @@ function create_geom_command(prototype, geometry) {
                     url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
 		    dataType: 'json',
                     success: function(mesh) {
-                        geomNode = new GeomNode({
-                            type       : geometry.type,
-                            sha        : sha,
-			    path       : path,
-			    origin     : geometry.origin,
-                            parameters : geometry.parameters,
-                            mesh       : mesh})
                         selectionManager.deselectAll();
+
+                        geomNode = new GeomNode(geometry);
+                        geomNode.mesh = mesh;
+			geomNode.sha  = sha;
+			geomNode.path = path;
+
                         geom_doc.replace(prototype, geomNode);
                         command_stack.commit();
                     },
@@ -154,63 +152,65 @@ function boolean(selected, type) {
         }
     }
 
-    var id;
+    var sha;
     var boolNode;
     var childNodes;
 
     var doFn = function() {
         var geometry = {type: type,
-                        children: selected
-                       };
-        
+                        children: selected};
         $.ajax({
             type: "POST",
-            url: "/geom/",
+	    url: '/' + SS.session.username + '/' + SS.session.design + '/geom/',
             contentType: "application/json",
             data: JSON.stringify(geometry),
-            success: function(nodeData) {
-                var path = nodeData.path;
-                id = id = idForGeomPath(nodeData.path);
+            success: function(result) {
+		var sha = result.SHA;
+		var path = result.path;
                 $.ajax({
                     type: "GET",
-                    url: '/mesh/' + id,
+                    url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
                     success: function(mesh) {
 			selectionManager.deselectAll();
-                        childNodes = selected.map(function(x) {
-                            var node = geom_doc.findByPath(x);
+
+                        childNodes = selected.map(function(sha) {
+                            var node = geom_doc.findBySHA(sha);
                             geom_doc.remove(node);
                             return node;
                         });
-                        geometry["path"] = path;
+
                         boolNode = new GeomNode(geometry, childNodes);
                         boolNode.mesh = mesh;
+			boolNode.sha  = sha;
+			boolNode.path = path;
+
                         geom_doc.add(boolNode);
-			command_stack.inProgressSuccess();
+			command_stack.commit();
                     },
 		    error: function(jqXHR, textStatus, errorThrown) {
-			error_response(jqXHR.responseText);
+			command_stack.error(jqXHR.responseText);
 		    }
                 });
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                error_response(jqXHR.responseText);
+                command_stack.error(jqXHR.responseText);
             }
         })};
 
     var undoFn = function() {
         geom_doc.remove(boolNode);
-        childNodes.reverse().map(function(x) {
-            geom_doc.add(x);
+        childNodes.reverse().map(function(child) {
+            geom_doc.add(child);
         });
-	command_stack.inProgressSuccess();
+	command_stack.success();
     }
 
     var redoFn = function() {
-        childNodes.map(function(x) {
-            geom_doc.remove(x);
+        childNodes.map(function(child) {
+            geom_doc.remove(child);
         });
         geom_doc.add(boolNode);
-	command_stack.inProgressSuccess();
+	command_stack.success();
     }
 
     var cmd = new Command(doFn, undoFn, redoFn);

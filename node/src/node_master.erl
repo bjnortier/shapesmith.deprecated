@@ -17,20 +17,19 @@
 
 -module(node_master).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([create_geom/3, mesh_geom/3, stl/1]).
--export([serialize_brep/1]).
+-export([create_geom/3, mesh_geom/3, stl/3]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-recursive_geometry(Sha) ->
-    node_geom_db:recursive_geometry(Sha).
+%% recursive_geometry(Sha) ->
+%%     node_geom_db:recursive_geometry(Sha).
 
 create_geom(User, Design, Geometry) ->
     case node_db:create(User, Design, geom, Geometry) of
 	{ok, SHA} ->
-	    case ensure_brep_exists(SHA, Geometry, fun(_WorkerPid) -> ok end) of
+	    case ensure_brep_exists(User, Design, SHA, Geometry, fun(_WorkerPid) -> ok end) of
 		ok ->
 		    {ok, SHA};
 		{error, Reason} ->
@@ -43,40 +42,42 @@ create_geom(User, Design, Geometry) ->
 
 mesh_geom(User, Design, SHA) ->
     Geometry = node_db:get(User, Design, geom, SHA),
-    ensure_brep_exists(SHA, Geometry, fun(WorkerPid) -> 
-					      node_mesh_db:mesh(WorkerPid, SHA) 
-				      end).
+    ensure_brep_exists(User, Design, SHA, Geometry, 
+		       fun(WorkerPid) -> 
+			       node_mesh_db:mesh(WorkerPid, SHA) 
+		       end).
 
-serialize_brep(Sha) ->
-    Geometry = node_geom_db:geometry(Sha),
-    ensure_brep_exists(Sha, Geometry, fun(_WorkerPid) -> ok end).
+%% serialize_brep(Sha) ->
+%%     Geometry = node_geom_db:geometry(Sha),
+%%     ensure_brep_exists(Sha, Geometry, fun(_WorkerPid) -> ok end).
 
-stl(Sha) ->
-    Geometry = node_geom_db:geometry(Sha),
-    ensure_brep_exists(Sha, Geometry, fun(WorkerPid) -> 
-					      node_mesh_db:stl(WorkerPid, Sha) 
-				      end).
+stl(User, Design, SHA) ->
+    Geometry = node_db:get(User, Design, geom, SHA),
+    ensure_brep_exists(User, Design, SHA, Geometry, 
+		       fun(WorkerPid) -> 
+			       node_mesh_db:stl(WorkerPid, SHA) 
+		       end).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                 private                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-ensure_brep_exists(Sha, Geometry, TopLevelFn) ->
+ensure_brep_exists(User, Design, SHA, Geometry, TopLevelFn) ->
     case node_worker_pool:get_worker() of
 	{error, Error} ->
 	    {error, Error};
 	WorkerPid ->
 	    Result = try 
-			 ensure_child_breps_exist(WorkerPid, [{Sha, Geometry}], TopLevelFn)
-		     catch
-			 Type:Exception ->
-			     node_log:error("Exception on ensure_child_breps_exist: ~p:~p~n", [Type, Exception]),
-			     {error, {Type, Exception}}
+			 ensure_child_breps_exist(User, Design, WorkerPid, [{SHA, Geometry}], TopLevelFn)
+			     
+		     catch Type:Exception ->
+			     node_log:error("??? Exception on ensure_child_breps_exist: ~p:~p~n", [Type, Exception]),
+		      	     {error, {Type, Exception}}
 		     end,
 	    %% Purge the top level geometry. Also,
 	    %% Some brep may be left over if error occured and cleanup wasn't complete
-	    try_with_logging(node_brep_db, purge, [WorkerPid, Sha]),
+	    try_with_logging(node_brep_db, purge, [WorkerPid, SHA]),
 	    try_with_logging(node_brep_db, purge_all, [WorkerPid]),
 	    node_worker_pool:return_worker(WorkerPid),
 	    Result
@@ -88,31 +89,31 @@ try_with_logging(Mod, Fn, Args) ->
 	apply(Mod, Fn, Args)
     catch
 	a:b ->
-%Err:Reason ->
-	    node_log:error("Exception on ~p:~p(~p) in ensure_child_breps_exist: ~p:~p~n", [Mod, Fn, Args, a, b])
+	    node_log:error("Exception on ~p:~p(~p) in ensure_child_breps_exist: ~p:~p~n",
+			   [Mod, Fn, Args, a, b])
     end.
     
 
-ensure_child_breps_exist(_, [], _) ->
+ensure_child_breps_exist(_, _, _, [], _) ->
     ok;
-ensure_child_breps_exist(WorkerPid, [{Sha, Geometry}|Rest], NodeFn) ->
-    node_log:info("Ensure child BRep exists ~p~n", [Sha]),
-    
-    ChildNodes = case node_brep_db:is_serialized(Sha) of
+ensure_child_breps_exist(User, Design, WorkerPid, [{SHA, Geometry}|Rest], NodeFn) ->
+    lager:info("Ensure child BRep exists ~p~n", [SHA]),
+    ChildNodes = case node_brep_db:is_serialized(SHA) of
 		     true ->
 			 [];
 		     false ->
 			 %% We need to create the children
-			 get_child_nodes(Geometry)
+			 get_child_nodes(User, Design, Geometry)
 			 
 		 end,
-    case ensure_child_breps_exist(WorkerPid, ChildNodes, fun(_WorkerPid) -> ok end) of
+    case ensure_child_breps_exist(User, Design, WorkerPid, ChildNodes, 
+				  fun(_WorkerPid) -> ok end) of
 	ok ->
-	    case node_brep_db:create(WorkerPid, Sha, Geometry) of
+	    case node_brep_db:create(WorkerPid, SHA, Geometry) of
 		ok ->
 		    Result = NodeFn(WorkerPid),
 		    purge_nodes(WorkerPid, ChildNodes),
-		    ensure_child_breps_exist(WorkerPid, Rest, NodeFn),
+		    ensure_child_breps_exist(User, Design, WorkerPid, Rest, NodeFn),
 		    Result;
 
 		{error, R1} ->
@@ -125,24 +126,23 @@ ensure_child_breps_exist(WorkerPid, [{Sha, Geometry}|Rest], NodeFn) ->
     end.
     
 
-get_child_nodes(Geometry) ->
+get_child_nodes(User, Design, Geometry) ->
     {GeomProps} = Geometry,
     case lists:keyfind(<<"children">>, 1, GeomProps) of
 	false ->
 	    [];
 	{<<"children">>, Children} ->
-	    lists:map(fun(ChildIdBin) ->
-			      ChildId = binary_to_list(ChildIdBin),
-			      ChildGeometry = node_geom_db:geometry(ChildId),
-			      ChildHash = node_geom_db:hash(ChildId),
-			      {ChildId, ChildGeometry, ChildHash}
+	    lists:map(fun(ChildSHABin) ->
+			      ChildSHA = binary_to_list(ChildSHABin),
+			      ChildGeometry = node_db:get(User, Design, geom, ChildSHA),
+			      {ChildSHA, ChildGeometry}
 		      end,
 		      Children)
     end.
 
 purge_nodes(WorkerPid, Nodes) ->
-    lists:map(fun({_,_,Hash}) ->
-		      node_brep_db:purge(WorkerPid, Hash)
+    lists:map(fun({SHA,_}) ->
+		      node_brep_db:purge(WorkerPid, SHA)
 	      end,
 	      Nodes),
     ok.

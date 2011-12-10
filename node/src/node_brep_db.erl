@@ -25,23 +25,23 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 
-is_serialized(Hash) ->
+is_serialized(_SHA) ->
     false.
     %% {ok, DB} = application:get_env(node, db_module),
     %% DB:exists(brep, Hash).
 
-create(WorkerPid, Hash, Geometry) ->
-    %% If the serialized BREP exists, use that. Otherwise
+create(WorkerPid, SHA, Geometry) ->
+    %% If the SHA BREP exists, use that. Otherwise
     %% create using the worker
     {ok, DB} = application:get_env(node, db_module),
     case false of %DB:exists(brep, Hash) of
         true ->
 
-            lager:info("Creating BREP for ~p from file~n", [Hash]),
-	    S11N = DB:get(brep, Hash),
+            lager:info("Creating BREP for ~p from file~n", [SHA]),
+	    S11N = DB:get(brep, SHA),
             %% Insert into worker
             Msg = {[{<<"type">>, <<"deserialize">>},
-		    {<<"id">>, list_to_binary(Hash)},
+		    {<<"id">>, list_to_binary(SHA)},
 		    {<<"s11n">>, S11N}]},
             case node_worker_pool:call(WorkerPid, jiffy:encode(Msg)) of
 		<<"\"ok\"">> ->
@@ -53,11 +53,11 @@ create(WorkerPid, Hash, Geometry) ->
 	    end;
 
         false ->
-            lager:info("Creating BREP for ~p using worker~n", [Hash]),
+            lager:info("Creating BREP for ~p using worker~n", [SHA]),
 
             {GeomProps} = Geometry,
             {<<"type">>, GeomType} = lists:keyfind(<<"type">>, 1, GeomProps),
-	    case create_type(WorkerPid, Hash, GeomType, Geometry) of
+	    case create_type(WorkerPid, SHA, GeomType, Geometry) of
 		<<"\"ok\"">> ->
 		    ok;
 		{error, Reason} ->
@@ -68,7 +68,7 @@ create(WorkerPid, Hash, Geometry) ->
     end.
 
 purge(WorkerPid, Hash) ->
-    {ok, DB} = application:get_env(node, db_module),
+    %% {ok, DB} = application:get_env(node, db_module),
     %% case DB:exists(<<"brep">>, list_to_binary(Hash)) of
     %% 	false ->
     %% 	    ok = serialize_to_disk(WorkerPid, Hash);
@@ -105,45 +105,40 @@ serialize(WorkerPid, Hash) ->
 %%%                                 private                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-serialize_to_disk(WorkerPid, Hash) ->
+serialize_to_disk(WorkerPid, SHA) ->
     Msg = {[{<<"type">>, <<"serialize">>},
-	    {<<"id">>, list_to_binary(Hash)}]},
+	    {<<"id">>, list_to_binary(SHA)}]},
     {[{<<"s11n">>, S11N}]} = jiffy:decode(node_worker_pool:call(WorkerPid, jiffy:encode(Msg))),
-    lager:info("writing brep for ~p~n", [Hash]),
+    lager:info("writing brep for ~p~n", [SHA]),
     {ok, DB} = application:get_env(node, db_module),
-    DB:put(brep, Hash, S11N).
+    DB:put(brep, SHA, S11N).
     
 
-create_type(WorkerPid, Hash, <<"union">>, Geometry) ->
-    create_boolean(WorkerPid, Hash, <<"union">>, Geometry);
-create_type(WorkerPid, Hash, <<"subtract">>, Geometry) ->
-    create_boolean(WorkerPid, Hash, <<"subtract">>, Geometry);
-create_type(WorkerPid, Hash, <<"intersect">>, Geometry) ->
-    create_boolean(WorkerPid, Hash, <<"intersect">>, Geometry);
+create_type(WorkerPid, SHA, <<"union">>, Geometry) ->
+    create_boolean(WorkerPid, SHA, <<"union">>, Geometry);
+create_type(WorkerPid, SHA, <<"subtract">>, Geometry) ->
+    create_boolean(WorkerPid, SHA, <<"subtract">>, Geometry);
+create_type(WorkerPid, SHA, <<"intersect">>, Geometry) ->
+    create_boolean(WorkerPid, SHA, <<"intersect">>, Geometry);
 %% Non-bool pass through
-create_type(WorkerPid, Hash, _, Geometry) ->
-    worker_create(WorkerPid, Hash, Geometry).
+create_type(WorkerPid, SHA, _, Geometry) ->
+    worker_create(WorkerPid, SHA, Geometry).
 
-create_boolean(WorkerPid, Hash, Type, Geometry) ->
+create_boolean(WorkerPid, SHA, Type, Geometry) ->
     {GeomProps} = Geometry,
-    {<<"children">>, ChildIds} = lists:keyfind(<<"children">>, 1, GeomProps),
-    ChildHashes = lists:map(fun(ChildId) ->
-                                    ChildHash = node_geom_db:hash(binary_to_list(ChildId)),
-                                    list_to_binary(ChildHash)
-                            end,
-                            ChildIds),
-
+    {<<"children">>, ChildSHAs} = lists:keyfind(<<"children">>, 1, GeomProps),
     Transforms = case lists:keyfind(<<"transforms">>, 1, GeomProps) of
                      false -> [];
                      {<<"transforms">>, T} -> T
                  end,
-    worker_create(WorkerPid, Hash, {[{<<"type">>, Type},
-				     {<<"children">>, ChildHashes},
+    worker_create(WorkerPid, SHA, {[{<<"type">>, Type},
+				     {<<"children">>, ChildSHAs},
 				     {<<"transforms">>, Transforms}
 				    ]}).
-worker_create(WorkerPid, Hash, Geometry) ->
+
+worker_create(WorkerPid, SHA, Geometry) ->
     Msg = {[{<<"type">>, <<"create">>},
-	    {<<"id">>, list_to_binary(Hash)},
+	    {<<"id">>, list_to_binary(SHA)},
 	    {<<"geometry">>, Geometry}
 	   ]},
     node_worker_pool:call(WorkerPid, jiffy:encode(Msg)).

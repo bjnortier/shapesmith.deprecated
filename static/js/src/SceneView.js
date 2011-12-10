@@ -65,7 +65,7 @@ SS.SceneView = function(container) {
 		var sha = selectionManager.getSelected()[0];
 
 		$('#' + sha + ' > tbody > tr:nth-child(1)').addClass('selected');
-		treeView.edit(id);
+		treeView.edit(sha);
 	    }
 	    
 	});
