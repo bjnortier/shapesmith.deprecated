@@ -30,13 +30,15 @@
     <div id="progress-container"></div>
     <div id="messages-container"></div>
     <div id="toolWheel"></div>
-    <div class="toolbar" id="document"></div>
-   <div id="toolbarStaging">
-     <div class="toolbar" id="edit"></div>
-     <div class="toolbar" id="primitives"></div>
+    <div id="top-bar">{{design}}
+      <img id="action_save" src="/static/images/save22x22_transparent.png" title="Save this design"/>
+    </div>
+    <div id="toolbarStaging">
+      <div class="toolbar" id="edit"></div>
+      <div class="toolbar" id="primitives"></div>
       <div class="toolbar" id="boolean"></div>
       <div class="toolbar" id="transforms"></div>
-   </div>
+    </div>
     <div id="geom-model-doc"></div>
     
   </div>
@@ -44,8 +46,7 @@
   <script type="text/javascript" src="/static/js/src/WedgeGeometry.js"></script>
   <script type="text/javascript" src="/static/js/src/Observable.js"></script>
   <script type="text/javascript" src="/static/js/src/Spinner.js"></script>
-
-  
+ 
   <script type="text/javascript" src="/static/js/src/evented.js"></script>
   <script type="text/javascript" src="/static/js/src/Messages.js"></script>
   <script type="text/javascript" src="/static/js/src/Stack.js"></script>
@@ -61,11 +62,11 @@
   <script type="text/javascript">
 
     if(!Detector.webgl){
-    Detector.addGetWebGLMessage();
+      Detector.addGetWebGLMessage();
     } else {
-    var container = document.getElementById('scene');
-    var sceneView = new SS.SceneView(container);
-    sceneView.animate();
+      var container = document.getElementById('scene');
+      var sceneView = new SS.SceneView(container);
+      sceneView.animate();
     }
 
   </script>

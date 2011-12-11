@@ -114,23 +114,6 @@ function create_transform(selected, type, keys) {
 
 $(document).ready(function() {
 
-    /*
-     * Document
-     */
-    new Action("Save", "/static/images/save.png", 
-               function() { 
-		   SS.save(); 
-	       }).render($("#document"));
-    /*new Action("Undo", "images/undo.png", 
-               function() { 
-		   command_stack.undo(); 
-	       }).render($("#document"));
-    new Action("Redo", "images/redo.png", 
-               function() { 
-		   command_stack.redo(); 
-	       }).render($("#document"));*/
-    
-
     // Edit
     new Action("Delete", "/static/images/trash.png", 
                function(selected) { 
@@ -215,7 +198,16 @@ $(document).ready(function() {
 		   SS.constructors.mirror({selected: selected}).create();
 	       }).render($("#transforms"));
 
-
-
 });
 
+
+
+$('#action_save').mouseenter(function() {
+    this.src = '/static/images/save22x22.png';
+});
+$('#action_save').mouseleave(function() {
+    this.src = '/static/images/save22x22_transparent.png';
+});
+$('#action_save').click(function() {
+    SS.save();
+});
