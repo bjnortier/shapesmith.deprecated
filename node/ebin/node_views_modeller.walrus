@@ -26,23 +26,22 @@
   </head>
 <body oncontextmenu="return false;">
   <div id="scene"></div>
-  <div id="container">
-    <div id="progress-container"></div>
-    <div id="messages-container"></div>
-    <div id="toolWheel"></div>
-    <div id="top-bar">{{design}}
-      <img id="action_save" src="/static/images/save22x22_transparent.png" title="Save this design"/>
-    </div>
-    <div id="toolbarStaging">
-      <div class="toolbar" id="edit"></div>
-      <div class="toolbar" id="primitives"></div>
-      <div class="toolbar" id="boolean"></div>
-      <div class="toolbar" id="transforms"></div>
-    </div>
-    <div id="geom-model-doc"></div>
-    
+  <img id="logo" src="/static/images/logo_small.png"/>
+  <div id="progress-container"></div>
+  <div id="messages-container"></div>
+  <div id="toolWheel"></div>
+  <div id="top-bar">{{design}}
+    <img id="action_save" src="/static/images/save22x22_transparent.png" title="Save this design"/>
   </div>
-
+  <div id="toolbarStaging">
+    <div class="toolbar" id="edit"></div>
+    <div class="toolbar" id="primitives"></div>
+    <div class="toolbar" id="boolean"></div>
+    <div class="toolbar" id="transforms"></div>
+  </div>
+  <div id="geom-model-doc"></div>
+    
+  
   <script type="text/javascript" src="/static/js/src/WedgeGeometry.js"></script>
   <script type="text/javascript" src="/static/js/src/Observable.js"></script>
   <script type="text/javascript" src="/static/js/src/Spinner.js"></script>
