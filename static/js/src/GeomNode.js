@@ -44,14 +44,24 @@ SS.resetGeomCounter = function() {
 
 function GeomNode() {
 
+    var that = this;
+    var updateId = function(geomNode) {
+	geomNode.id = SS.nextGeomCounter() + '_' + geomNode.sha;
+    };
+
+    this.setSHA = function(sha) {
+	that.sha = sha;
+	updateId(that);
+    }
+
     if (!arguments[0].type) {
         throw new Error("type is not defined");
     }
 
     this.editing = arguments[0].editing;
     this.type = arguments[0].type;
-    this.id = SS.nextGeomCounter() + '_' + arguments[0].sha;
     this.sha = arguments[0].sha;
+    updateId(this);
 
     this.origin = arguments[0].origin;
     this.parameters = arguments[0].parameters;
@@ -98,7 +108,6 @@ GeomNode.prototype.editableCopy = function() {
     });
         
     var newNode = new GeomNode({type : this.type,
-				sha : this.sha,
 				origin: copiedOrigin,
                                 parameters : copiedParameters,
                                 transforms : copiedTransforms,

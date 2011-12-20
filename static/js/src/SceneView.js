@@ -397,11 +397,11 @@ SS.SceneView = function(container) {
     }
 
     var remove = function(geomNode) {
-        if (!geomNode.isPreview()) {
-	    var mesh = idToModel[geomNode.id];
+	var mesh = idToModel[geomNode.id];
+	if (mesh) {
 	    scene.removeObject(mesh);
 	    delete idToModel[geomNode.id];
-        }
+	}
     }
 
     this.selectionUpdated = function(event) {

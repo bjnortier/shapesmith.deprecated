@@ -12,13 +12,25 @@ describe("GeomNode", function() {
 
         var node = new GeomNode({type: "cuboid", sha: 'b3cf'});
         expect(node.type).toEqual("cuboid");
-	expect(node.id).toEqual('1/b3cf');
+	expect(node.id).toEqual('1_b3cf');
 	expect(node.sha).toEqual('b3cf');
 
         expect(node.toShallowJson).toBeDefined();
         expect(JSON.parse(node.toShallowJson())).toEqual({type: "cuboid", 
                                                           children: [],
                                                           transforms: []});
+    });
+
+
+    it("can have its SHA updated", function() {
+
+        var node = new GeomNode({type: "cuboid", sha: 'b3cf'});
+	expect(node.sha).toEqual('b3cf');
+
+	node.setSHA('a2f1');
+	expect(node.sha).toEqual('a2f1');
+	
+
     });
 
     it("can have empty parameters", function() {
@@ -46,7 +58,7 @@ describe("GeomNode", function() {
 
         expect(JSON.parse(parentNode.toShallowJson())).toEqual(
             {type: "union",
-             children: ['1/44e', '2/1ba'],
+             children: ['1_44e', '2_1ba'],
              transforms: []});
         
         expect(JSON.parse(parentNode.toDeepJson())).toEqual(

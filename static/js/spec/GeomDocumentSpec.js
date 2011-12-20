@@ -49,8 +49,8 @@ describe('GeomDocument', function() {
         doc.add(node1);
         doc.add(node2);
         
-        expect(doc.findById('1/a1')).toEqual(node1);
-        expect(doc.findById('2/b2')).toEqual(node2);
+        expect(doc.findById(node1.id)).toEqual(node1);
+        expect(doc.findById(node2.id)).toEqual(node2);
     });
 
     it('can be used to find child nodes', function() {
@@ -58,8 +58,8 @@ describe('GeomDocument', function() {
         var node2 = new GeomNode({type: 'cuboid', sha: 'b2'}, [node1]);
         doc.add(node2);
         
-        expect(doc.findById('1/a1')).toEqual(node1);
-        expect(doc.findById('2/b2')).toEqual(node2);
+        expect(doc.findById(node1.id)).toEqual(node1);
+        expect(doc.findById(node2.id)).toEqual(node2);
     });
 
     it('can be used to determine the ancestors of a node', function() {

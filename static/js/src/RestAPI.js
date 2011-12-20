@@ -1,35 +1,62 @@
 var SS = SS || {};
 
-function error_response(responseText) {
-    var error;
-    try {
-	var error = JSON.parse(responseText);
-	$('tr.field').removeClass('validation-error');
-	if (error.validation) {
-	    for (var i in error.validation) {
-		$('#' + i).parents('tr.field').addClass('validation-error');
-	    }
-	}
-    } catch (e) {
-	error = {exception: e};
-    }
-    command_stack.inProgressFailure(error);
-}
-
-
 function update_geom_command(fromNode, toNode) {
     
-    var chainedPutFn = function(fromChain, toChain) {
-        // TODO: Replace with array copy
-        fromChain = fromChain.map(function(x) { return x });
-        toChain = toChain.map(function(x) { return x });
+    var doFn = function() {
+
+	$.ajax({
+            type: 'POST',
+            url: '/' + SS.session.username + '/' + SS.session.design + '/geom/',
+            contentType: 'application/json',
+            data: toNode.toShallowJson(),
+	    dataType: 'json',
+            success: function(result) {
+		var sha = result.SHA;
+                $.ajax({
+                    type: 'GET',
+                    url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
+		    dataType: 'json',
+                    success: function(mesh) {
+                        selectionManager.deselectAll();
+
+                        toNode.mesh = mesh;
+			toNode.setSHA(sha);
+
+                        geom_doc.replace(fromNode, toNode);
+                        command_stack.commit();
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+			command_stack.error(jqXHR.responseText);
+                    }
+                });
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                command_stack.error(jqXHR.responseText);
+            }
+        });
+
+    };
+
+    var undoFn = function() {
+	
+    };
+
+    var redoFn = function() {
+	
+    };
+
+    
+    /*var chainedPostFn = function(fromChain, toChain) {
+
+        fromChain = fromChain.slice(0);
+        toChain = toChain.slice(0);
         var nextTo = toChain.splice(0,1)[0];
         var nextFrom = fromChain.splice(0,1)[0];
 	selectionManager.deselectAll();
         if (nextTo) {
             $.ajax({
-                type: 'PUT',
-                url: nextTo.path,
+		type: 'POST',
+		url: '/' + SS.session.username + '/' + SS.session.design + '/geom/',
                 contentType: 'application/json',
                 data: nextTo.toShallowJson(),
                 success: function(nodeData) {
@@ -51,17 +78,17 @@ function update_geom_command(fromNode, toNode) {
                             success: function(mesh) {
                                 nextTo.mesh = mesh;
                                 geom_doc.replace(nextFrom, nextTo);
-				command_stack.inProgressSuccess();
+				command_stack.success();
                             },
 			    error: function(jqXHR, textStatus, errorThrown) {
-				error_response(jqXHR.responseText);
+				command_stack.error(jqXHR.responseText);
 			    }
 
                         });
                     }
                 },
 		error: function(jqXHR, textStatus, errorThrown) {
-		    error_response(jqXHR.responseText);
+		    command_stack.error(jqXHR.responseText);
                 }
             });
         }
@@ -83,7 +110,7 @@ function update_geom_command(fromNode, toNode) {
     };
     var redoFn = function() {
         chainedPutFn(fromChain, toChain);
-    }
+    }*/
 
     return new Command(doFn, undoFn, redoFn);
 }
@@ -92,7 +119,7 @@ function update_geom_command(fromNode, toNode) {
 function create_geom_command(prototype, geometry) {
     var geomNode;
     var doFn = function() {
-        $.ajax({
+         $.ajax({
             type: 'POST',
             url: '/' + SS.session.username + '/' + SS.session.design + '/geom/',
             contentType: 'application/json',
@@ -100,7 +127,6 @@ function create_geom_command(prototype, geometry) {
 	    dataType: 'json',
             success: function(result) {
 		var sha = result.SHA;
-		var path = result.path;
                 $.ajax({
                     type: 'GET',
                     url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
@@ -111,7 +137,6 @@ function create_geom_command(prototype, geometry) {
 			geometry.sha = sha;
                         geomNode = new GeomNode(geometry);
                         geomNode.mesh = mesh;
-			geomNode.path = path;
 
                         geom_doc.replace(prototype, geomNode);
                         command_stack.commit();

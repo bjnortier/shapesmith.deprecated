@@ -184,11 +184,10 @@ function TreeView() {
             });
 
 	    var cancelFunction = function() {
-		if (geomNode.isPreview()) {
-		    // It's a new node, remove it
-                    geom_doc.remove(geomNode);
+		if (precursor) {
+		    geom_doc.replace(geomNode, precursor);
                 } else {
-                    geom_doc.replace(geomNode, precursor);
+                    geom_doc.remove(geomNode);
                 }
 	    }
 
@@ -292,8 +291,6 @@ function TreeView() {
             var cmd = update_geom_command(geomNode, editingNode);
             command_stack.execute(cmd);
         });
-
-
 
         // Show/Hide
         $('#' + geomNode.id + ' .show-hide-siblings').click(function() {
