@@ -130,11 +130,20 @@ boolean(_Config) ->
 
     Bool = {[{<<"type">>, <<"union">>},
              {<<"children">>, [SHAABin, SHABBin]}]},
-    
+
     {ok,{{"HTTP/1.1",200,_}, _, BoolResponse}} = 
 	httpc:request(post, {CreateURL, [], "application/json", jiffy:encode(Bool)}, [], []),
     {[{<<"path">>, _},
-      {<<"SHA">>, _SHABoolBin}]} = jiffy:decode(iolist_to_binary(BoolResponse)).
+      {<<"SHA">>, SHABoolBin}]} = jiffy:decode(iolist_to_binary(BoolResponse)),
+
+    BoolSHA = binary_to_list(SHABoolBin),
+
+    {ok,{{"HTTP/1.1",200,_}, BoolGetHeaders, BoolGetResponse}} = 
+	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/geom/" ++ BoolSHA ++ "?recursive=true", []}, [], []),
+    check_json_content_type(BoolGetHeaders),
+    {[{<<"type">>, <<"union">>},
+      {<<"children">>, [GeomA, GeomB]}]} 
+        = jiffy:decode(iolist_to_binary(BoolGetResponse)).
 
 
 check_json_content_type(Headers) ->

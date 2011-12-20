@@ -55,15 +55,37 @@ create(_ReqData, User, Design, RequestJSON) ->
     end.
 
 get(ReqData, User, Design) ->
-    case wrq:path_info(sha, ReqData) of
-	undefined ->
+    Recursive = case wrq:get_qs_value("recursive", "false", ReqData) of
+		    "true" -> true;
+		    _ -> false
+		end,
+    case {wrq:path_info(sha, ReqData), Recursive} of
+	{undefined, _} ->
 	    undefined;
-	SHA ->
-	    node_db:get(User, Design, geom, SHA)
+	{SHA, false} ->
+	    node_db:get(User, Design, geom, SHA);
+	{SHA, true} ->
+	    recursive_geom_get(User, Design, SHA)
     end.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                 private                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+recursive_geom_get(User, Design, SHA) ->
+    Geom = node_db:get(User, Design, geom, SHA),
+    {Props} = Geom,
+    ChildSHAs = case lists:keyfind(<<"children">>, 1, Props) of
+		    false -> [];
+		    {_, SHAs} -> SHAs
+		end,
+    RecursiveChildren = lists:map(fun(ChildSHABin) ->
+					  ChildSHA = binary_to_list(ChildSHABin),
+					  recursive_geom_get(User, Design, ChildSHA)
+				  end,
+				  ChildSHAs),
+    NewProps = lists:keyreplace(<<"children">>, 1, Props, 
+				{<<"children">>, RecursiveChildren}),
+    {NewProps}.
 
 

@@ -432,11 +432,11 @@ SS.load_geom = function(sha) {
 
     $.ajax({
 	type: 'GET',
-	url: '/' + SS.session.username + '/' + SS.session.design + '/geom/' + sha,
+	url: '/' + SS.session.username + '/' + SS.session.design + '/geom/' + sha + '?recursive=true',
 	dataType: 'json',
 	success: function(geomJson) {
 	    geomJson.sha = sha;
-	    var newNode = new GeomNode(geomJson);
+	    var newNode = GeomNode.fromDeepJson(geomJson);
 	    $.ajax({
 		type: 'GET',
 		url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
