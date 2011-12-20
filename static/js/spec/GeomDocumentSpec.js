@@ -3,6 +3,7 @@ describe('GeomDocument', function() {
     var doc;
     beforeEach(function() {
         doc = new GeomDocument();
+	SS.resetGeomCounter();
     });
 
     it('should be empty on creation', function() {
@@ -11,8 +12,8 @@ describe('GeomDocument', function() {
 
     it('can accept and reject root nodes', function() {
         
-        var node1 = new GeomNode({type: 'sphere'});
-        var node2 = new GeomNode({type: 'cuboid'});
+        var node1 = new GeomNode({type: 'sphere', sha: 'ee3'});
+        var node2 = new GeomNode({type: 'cuboid', sha: '1ed'});
         doc.add(node1);
         doc.add(node2);
         expect(doc.rootNodes.length).toEqual(2);
@@ -38,7 +39,7 @@ describe('GeomDocument', function() {
         var child2 = new GeomNode({type: 'cuboid', sha: 'a4'});
 
         doc.replace(child, child2);
-        expect(doc.findBySHA(child2.sha)).toEqual(child2);
+        expect(doc.findById(child2.id)).toEqual(child2);
         expect(doc.ancestors(child2)).toEqual([parent, grandparent]);
     });
     
@@ -48,8 +49,8 @@ describe('GeomDocument', function() {
         doc.add(node1);
         doc.add(node2);
         
-        expect(doc.findBySHA('a1')).toEqual(node1);
-        expect(doc.findBySHA('b2')).toEqual(node2);
+        expect(doc.findById('1/a1')).toEqual(node1);
+        expect(doc.findById('2/b2')).toEqual(node2);
     });
 
     it('can be used to find child nodes', function() {
@@ -57,14 +58,14 @@ describe('GeomDocument', function() {
         var node2 = new GeomNode({type: 'cuboid', sha: 'b2'}, [node1]);
         doc.add(node2);
         
-        expect(doc.findBySHA('a1')).toEqual(node1);
-        expect(doc.findBySHA('b2')).toEqual(node2);
+        expect(doc.findById('1/a1')).toEqual(node1);
+        expect(doc.findById('2/b2')).toEqual(node2);
     });
 
     it('can be used to determine the ancestors of a node', function() {
-        var child = new GeomNode({type: 'cuboid', path: '/3'});
-        var parent = new GeomNode({type: 'cuboid', path: '/2'}, [child]);
-        var grandparent = new GeomNode({type: 'sphere', path: '/1'}, [parent]);
+        var child = new GeomNode({type: 'cuboid', sha: 'e3f'});
+        var parent = new GeomNode({type: 'cuboid', sha: '2b1'}, [child]);
+        var grandparent = new GeomNode({type: 'sphere', sha: 'c12'}, [parent]);
 
         doc.add(grandparent);
         
@@ -74,16 +75,16 @@ describe('GeomDocument', function() {
 
 
         expect(function() {
-            doc.ancestors(new GeomNode({type: 'cuboid'}));
+            doc.ancestors(new GeomNode({type: 'cuboid', sha: '4dd'}));
         }).toThrow("node not found");
     });
 
     it('can be serialised to json', function() {
 
-        var child = new GeomNode({type: 'cuboid', path: '/3'});
-        var parent = new GeomNode({type: 'boolean', path: '/2'}, [child]);
-        var grandparent = new GeomNode({type: 'boolean', path: '/1'}, [parent]);
-        var another = new GeomNode({type: 'sphere', path: '/4'});
+        var child = new GeomNode({type: 'cuboid', sha: '1'});
+        var parent = new GeomNode({type: 'boolean', sha: '2'}, [child]);
+        var grandparent = new GeomNode({type: 'boolean', sha: '3'}, [parent]);
+        var another = new GeomNode({type: 'sphere', sha: '4'});
         doc.add(grandparent);
         doc.add(another);
 

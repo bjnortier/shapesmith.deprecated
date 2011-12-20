@@ -40,10 +40,10 @@ function GeomDocument() {
                                replacement : replacement}});
     }
 
-    this.removeBySHA = function(sha) {
+    this.removeById = function(id) {
         var toRemove = [];
         for (var i in this.rootNodes) {
-            if (this.rootNodes[i].sha == sha) {
+            if (this.rootNodes[i].id == id) {
                 toRemove.push(this.rootNodes[i]);
             }
         }
@@ -52,9 +52,9 @@ function GeomDocument() {
         }
     }
 
-    this.findBySHA = function(sha) {
+    this.findById = function(id) {
         var recurFn = function(geomNode) {
-            if (geomNode.sha == sha) {
+            if (geomNode.id == id) {
                 return geomNode;
             } else {
                 for (var i in geomNode.children) {

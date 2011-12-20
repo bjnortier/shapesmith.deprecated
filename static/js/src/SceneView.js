@@ -12,7 +12,7 @@ SS.SceneView = function(container) {
     var targetOnDown = { azimuth: target.azimuth, elevation: target.elevation };
     var distance = 1000, distanceTarget = 400;
 
-    var shaToModel = {};
+    var idToModel = {};
     var unselectedColor = 0x00dd00, selectedColor = 0xdddd00;
     var panning = false, rotating = false, threshhold = 10; // inside this threshold is a single click
 
@@ -62,10 +62,10 @@ SS.SceneView = function(container) {
 	container.addEventListener('dblclick', function() {
 	    popupMenu.cancel();
 	    if (selectionManager.size() == 1) {
-		var sha = selectionManager.getSelected()[0];
+		var id = selectionManager.getSelected()[0];
 
-		$('#' + sha + ' > tbody > tr:nth-child(1)').addClass('selected');
-		treeView.edit(sha);
+		$('#' + id + ' > tbody > tr:nth-child(1)').addClass('selected');
+		treeView.edit(id);
 	    }
 	    
 	});
@@ -214,21 +214,21 @@ SS.SceneView = function(container) {
 	ray.direction = mouse3D.subSelf(camera.position).normalize();
 	var intersects = ray.intersectScene(scene);
 
-	var foundObjectSHA = null;
+	var foundObjectId = null;
 	if (intersects.length > 0) {
 	    for (var i in intersects) {
 		if (intersects[i].object.name) {
-		    foundObjectSHA = intersects[i].object.name;
+		    foundObjectId = intersects[i].object.name;
 		    break;
 		}
 	    }
 	}
 
-	if (foundObjectSHA) {
+	if (foundObjectId) {
 	    if (event.shiftKey) {
-		selectionManager.shiftPick(foundObjectSHA);
+		selectionManager.shiftPick(foundObjectId);
 	    } else {
-		selectionManager.pick(foundObjectSHA);
+		selectionManager.pick(foundObjectId);
 	    }
 	} else {
 	    selectionManager.deselectAll();
@@ -390,31 +390,31 @@ SS.SceneView = function(container) {
 	    var material = new THREE.MeshPhongMaterial( { ambient: 0x030303, color: color, opacity: opacity,  specular: 0xccffcc, shininess: 50, shading: THREE.SmoothShading } );
 	    var mesh = new THREE.Mesh(geometry, material);
 	    mesh.doubleSided = true;
-	    mesh.name = geomNode.sha;
+	    mesh.name = geomNode.id;
 	    scene.addObject(mesh);
-	    shaToModel[geomNode.sha] = mesh;
+	    idToModel[geomNode.id] = mesh;
         }
     }
 
     var remove = function(geomNode) {
-        if (geomNode.sha !== "_preview") {
-	    var mesh = shaToModel[geomNode.sha];
+        if (!geomNode.isPreview()) {
+	    var mesh = idToModel[geomNode.id];
 	    scene.removeObject(mesh);
-	    delete shaToModel[geomNode.sha];
+	    delete idToModel[geomNode.id];
         }
     }
 
     this.selectionUpdated = function(event) {
         if (event.deselected) {
             for (var i in event.deselected) {
-                var sha = event.deselected[i];
-		shaToModel[sha].materials[0].color.setHex(unselectedColor);
+                var id = event.deselected[i];
+		idToModel[id].materials[0].color.setHex(unselectedColor);
             }
         }
         if (event.selected) {
             for (var i in event.selected) {
-                var sha = event.selected[i];
-		shaToModel[sha].materials[0].color.setHex(selectedColor);
+                var id = event.selected[i];
+		idToModel[id].materials[0].color.setHex(selectedColor);
 		
             }
         }

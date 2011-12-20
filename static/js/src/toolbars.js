@@ -34,8 +34,8 @@ function delete_geom(selected) {
         alert("please select at least one object");
         return;
     }
-    var nodes = selected.map(function(sha) {
-	return geom_doc.findBySHA(sha);
+    var nodes = selected.map(function(id) {
+	return geom_doc.findById(id);
     });
     selectionManager.deselectAll();
 
@@ -75,7 +75,6 @@ function create_primitive(type, keys) {
     geom_doc.add(new GeomNode({
         type: type,
         editing: true,
-	sha: "_preview",
 	origin: {x: 0, y: 0, z: 0},
         parameters: geometryParams}));
 }
@@ -92,9 +91,9 @@ function create_transform(selected, type, keys) {
         transformParams[keys[i]] = null;
     }
     
-    var sha = selected[0];
+    var id = selected[0];
     
-    var original = geom_doc.findBySHA(sha);
+    var original = geom_doc.findById(id);
     var replacement = original.editableCopy();
     var origin = {x: 0, y: 0, z: 0};
     if (((type === 'translate') || (type === 'scale')) && (original.origin)) {

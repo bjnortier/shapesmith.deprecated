@@ -1,3 +1,5 @@
+var SS = SS || {};
+
 function Transform() {
     if (!arguments[0].type) {
         throw new Error("type is not defined");
@@ -26,6 +28,20 @@ Transform.prototype.json = function() {
                            parameters: this.parameters});
 }
 
+SS.createNextGeomNodeCounter = function() {
+    var count = 0;
+    var closure = function() {
+	++count;
+	return count;
+    }
+    return closure;
+}
+
+SS.nextGeomCounter = SS.createNextGeomNodeCounter();
+SS.resetGeomCounter = function() {
+    SS.nextGeomCounter = SS.createNextGeomNodeCounter();
+}
+
 function GeomNode() {
 
     if (!arguments[0].type) {
@@ -34,8 +50,9 @@ function GeomNode() {
 
     this.editing = arguments[0].editing;
     this.type = arguments[0].type;
-    this.path = arguments[0].path;
+    this.id = SS.nextGeomCounter() + '/' + arguments[0].sha;
     this.sha = arguments[0].sha;
+
     this.origin = arguments[0].origin;
     this.parameters = arguments[0].parameters;
     this.mesh = arguments[0].mesh;
@@ -57,6 +74,11 @@ function GeomNode() {
     }
 }
 
+GeomNode.prototype.isPreview = function() {
+    return this.sha === undefined;
+}
+
+
 GeomNode.prototype.editableCopy = function() {
 
     var copiedOrigin = null;
@@ -77,7 +99,7 @@ GeomNode.prototype.editableCopy = function() {
         
     var newNode = new GeomNode({type : this.type,
                                 path : this.path,
-				sha : this.sha,
+				id : this.id,
 				origin: copiedOrigin,
                                 parameters : copiedParameters,
                                 transforms : copiedTransforms,
@@ -96,7 +118,7 @@ GeomNode.prototype.toShallowJson = function() {
 			   origin: this.origin,
                            parameters: this.parameters,
                            children: this.children.map(function(child) {
-                               return child.path;
+                               return child.id;
                            }),
                            transforms: this.transforms.map(function(tx) {
                                return JSON.parse(tx.json());
@@ -129,3 +151,4 @@ GeomNode.fromDeepJson = function(json) {
     }
     return geomNode;
 }
+

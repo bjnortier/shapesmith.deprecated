@@ -108,9 +108,9 @@ function create_geom_command(prototype, geometry) {
                     success: function(mesh) {
                         selectionManager.deselectAll();
 
+			geometry.sha = sha;
                         geomNode = new GeomNode(geometry);
                         geomNode.mesh = mesh;
-			geomNode.sha  = sha;
 			geomNode.path = path;
 
                         geom_doc.replace(prototype, geomNode);
@@ -158,7 +158,11 @@ function boolean(selected, type) {
 
     var doFn = function() {
         var geometry = {type: type,
-                        children: selected};
+                        children: selected.map(function(id) {
+			    var pattern = /^([0-9]+)\/(.*)$/;
+			    var match = id.match(pattern);
+			    return match[2];
+			})};
         $.ajax({
             type: "POST",
 	    url: '/' + SS.session.username + '/' + SS.session.design + '/geom/',
@@ -173,16 +177,14 @@ function boolean(selected, type) {
                     success: function(mesh) {
 			selectionManager.deselectAll();
 
-                        childNodes = selected.map(function(sha) {
-                            var node = geom_doc.findBySHA(sha);
+                        childNodes = selected.map(function(id) {
+                            var node = geom_doc.findById(id);
                             geom_doc.remove(node);
                             return node;
                         });
 
                         boolNode = new GeomNode(geometry, childNodes);
                         boolNode.mesh = mesh;
-			boolNode.sha  = sha;
-			boolNode.path = path;
 
                         geom_doc.add(boolNode);
 			command_stack.commit();
@@ -408,8 +410,8 @@ SS.load_geom = function(sha) {
 	url: '/' + SS.session.username + '/' + SS.session.design + '/geom/' + sha,
 	dataType: 'json',
 	success: function(geomJson) {
+	    geomJson.sha = sha;
 	    var newNode = new GeomNode(geomJson);
-	    newNode.sha = sha;
 	    $.ajax({
 		type: 'GET',
 		url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,

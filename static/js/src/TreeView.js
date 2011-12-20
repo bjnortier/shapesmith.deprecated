@@ -7,7 +7,7 @@ function renderTransform(geomNode, transformIndex) {
 	var originArr = ['x', 'y', 'z'].map(function(key) {
 	    return {key: key, 
 		    value: transform.origin[key], 
-		    'edit-class': 'edit-transform target-' + geomNode.sha + '-' + transformIndex,
+		    'edit-class': 'edit-transform target-' + geomNode.id + '-' + transformIndex,
 		    editing: transform.editing}
 	});
 	var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}<input id="{{key}}" type="text" value="{{value}}"/>{{/editing}}</td></tr>{{/originArr}}</table>';
@@ -19,7 +19,7 @@ function renderTransform(geomNode, transformIndex) {
     for (key in transform.parameters) {
         paramsArr.push({key: key,
                         value: transform.parameters[key],
-                        'edit-class': 'edit-transform target-' + geomNode.sha + '-' + transformIndex,
+                        'edit-class': 'edit-transform target-' + geomNode.id + '-' + transformIndex,
                         editing: transform.editing
                        });
     }
@@ -32,7 +32,7 @@ function renderTransform(geomNode, transformIndex) {
     var view = {
         type: transform.type,
 	editing: transform.editing,
-        'delete-class': 'delete-transform target-' + geomNode.sha + '-' + transformIndex,
+        'delete-class': 'delete-transform target-' + geomNode.id + '-' + transformIndex,
 	originTable: originTable,
 	paramsTable: paramsTable};
     var transformTable = $.mustache(template, view);
@@ -48,7 +48,7 @@ function renderNode(geomNode) {
 	var originArr = ['x', 'y', 'z'].map(function(key) {
 	    return {key: key, 
 		    value: geomNode.origin[key], 
-		    clazz: 'edit-geom target-' + geomNode.sha,
+		    clazz: 'edit-geom target-' + geomNode.id,
 		    editing: geomNode.editing}
 	});
 	var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{clazz}}">{{value}}</span>{{/editing}}{{#editing}}<input id="{{key}}" type="text" value="{{value}}"/>{{/editing}}</td></tr>{{/originArr}}</table>';
@@ -67,7 +67,7 @@ function renderNode(geomNode) {
 
             paramsArr.push({key: key,
                             value: geomNode.parameters[key],
-                            clazz: 'edit-geom target-' + geomNode.sha,
+                            clazz: 'edit-geom target-' + geomNode.id,
                             editing: geomNode.editing
                            });
         }
@@ -84,15 +84,15 @@ function renderNode(geomNode) {
     // Children
     var childTables = geomNode.children.map(renderNode);
     
-    var childTemplate = '<table id="{{sha}}"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img>{{^editing}}<span class="{{clazz}}">{{type}}</span>{{/editing}}{{#editing}}{{type}}{{/editing}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input id="modal-ok" type="submit" value="Ok"/><input id="modal-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>';
+    var childTemplate = '<table id="{{id}}"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img>{{^editing}}<span class="{{clazz}}">{{type}}</span>{{/editing}}{{#editing}}{{type}}{{/editing}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input id="modal-ok" type="submit" value="Ok"/><input id="modal-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>';
 
     var view = {type: geomNode.type,
                 editing: geomNode.editing,
-		sha: geomNode.sha,
+		id: geomNode.id,
 		originTable: originTable,
                 paramsTable: paramsTable,
                 transformRows: transformRows,
-                clazz: 'select-geom target-' + geomNode.sha,
+                clazz: 'select-geom target-' + geomNode.id,
                 children: childTables
                };
     var nodeTableContents = $.mustache(childTemplate, view);
@@ -137,7 +137,7 @@ function TreeView() {
 	}
 	
 	var okGeomFunction = function() {
-	    if (geomNode.sha !== "_preview") {
+	    if (!geomNode.isPreview()) {
 		for (key in geomNode.origin) {
                     geomNode.origin[key] = parseFloat($('#' + key).val());
 		}
@@ -184,11 +184,11 @@ function TreeView() {
             });
 
 	    var cancelFunction = function() {
-		if (geomNode.sha !== "_preview") {
-                    geom_doc.replace(geomNode, precursor);
-                } else {
-                    // It's a new node, remove it
+		if (geomNode.isPreview()) {
+		    // It's a new node, remove it
                     geom_doc.remove(geomNode);
+                } else {
+                    geom_doc.replace(geomNode, precursor);
                 }
 	    }
 
@@ -212,61 +212,61 @@ function TreeView() {
             }
         }
         if (!(geomNode.editing || anyTransformsEditing)) {
-            hideNode($('#' + geomNode.sha + ' .show-hide-siblings'));
+            hideNode($('#' + geomNode.id + ' .show-hide-siblings'));
         }
 
         $("#geom-model-doc tr:nth-child(even)").addClass("even");
         $("#geom-model-doc tr:nth-child(odd)").addClass("odd");
 
         $('.select-geom').click(function(event) {
-            var sha;
+            var id;
             var pattern = /^target-(.*)$/;
             var classes = $(this).attr('class').split(' ');
             for (var i in classes) {
                 var match = classes[i].match(pattern);
                 if (match) {
-                    sha = match[1];
+                    id = match[1];
                 }
             }
-            if (!sha) {
+            if (!id) {
                 throw Error('id for editing could not be determined');
             }
-            selectionManager.pick(sha);
+            selectionManager.pick(id);
         });
 
         // Edit geom
         $('.edit-geom').dblclick(function() { 
 
-            var sha;
+            var id;
             var pattern = /^target-(.*)$/;
             var classes = $(this).attr('class').split(' ');
             for (var i in classes) {
                 var match = classes[i].match(pattern);
                 if (match) {
-                    sha = match[1];
+                    id = match[1];
                 }
             }
-            if (!sha) {
+            if (!id) {
                 throw Error('id for editing could not be determined');
             }
-	    that.edit(sha);
+	    that.edit(id);
         });
 	
 
         // Edit transform
         $('.edit-transform').dblclick(function() { 
-            var sha;
+            var id;
             var transformIndex;
             var pattern = /^target-(.*)-(.*)$/;
             var classes = $(this).attr('class').split(' ');
             for (var i in classes) {
                 var match = classes[i].match(pattern);
                 if (match) {
-                    sha = match[1];
+                    id = match[1];
                     transformIndex = match[2];
                 }
             }
-            var geomNode = geom_doc.findBySHA(sha);
+            var geomNode = geom_doc.findById(id);
             var editingNode = geomNode.editableCopy();
             editingNode.transforms[transformIndex].editing = true;
             geom_doc.replace(geomNode, editingNode);
@@ -274,18 +274,18 @@ function TreeView() {
 
         // Delete transform
         $('.delete-transform').click(function() {
-            var sha;
+            var id;
             var transformIndex;
             var pattern = /^target-(.*)-(.*)$/;
             var classes = $(this).attr('class').split(' ');
             for (var i in classes) {
                 var match = classes[i].match(pattern);
                 if (match) {
-                    sha = match[1];
+                    id = match[1];
                     transformIndex = match[2];
                 }
             }
-            var geomNode = geom_doc.findBySHA(sha);
+            var geomNode = geom_doc.findById(id);
             var editingNode = geomNode.editableCopy();
             editingNode.transforms.splice(transformIndex, 1);
             geom_doc.replace(geomNode, editingNode);
@@ -296,17 +296,17 @@ function TreeView() {
 
 
         // Show/Hide
-        $('#' + geomNode.sha + ' .show-hide-siblings').click(function() {
+        $('#' + geomNode.id + ' .show-hide-siblings').click(function() {
             toggleShowHide(this);
             return false;
         });
         
     }
 
-    this.edit = function(sha) {
+    this.edit = function(id) {
 	selectionManager.deselectAll();
 
-	var geomNode = geom_doc.findBySHA(sha);
+	var geomNode = geom_doc.findById(id);
         var editingNode = geomNode.editableCopy();
         editingNode.editing = true;
         geom_doc.replace(geomNode, editingNode);
@@ -336,7 +336,7 @@ function TreeView() {
 	    SS.constructors.active && SS.constructors.active.dispose();
 
             var geomNode = event.remove;
-            $('#' + geomNode.sha).remove();
+            $('#' + geomNode.id).remove();
             delete this.domNodeLookup[geomNode];
         }
 
@@ -347,7 +347,7 @@ function TreeView() {
             var original = event.replace.original;
             var replacement = event.replace.replacement;
             var nodeTable = renderNode(replacement);
-            $('#' + original.sha).replaceWith(nodeTable);
+            $('#' + original.id).replaceWith(nodeTable);
             this.addEvents(original, replacement);
         }
     }
@@ -356,15 +356,15 @@ function TreeView() {
         if (event.deselected) {
             var deselected = event.deselected;
             for (var i in deselected) {
-                var sha = deselected[i];
-                $('#' + sha + ' > tbody > tr:nth-child(1)').removeClass('selected');
+                var id = deselected[i];
+                $('#' + id + ' > tbody > tr:nth-child(1)').removeClass('selected');
             }
         }
         if (event.selected) {
             var selected = event.selected;
             for (var i in selected) {
                 var id = selected[i];
-                $('#' + sha + ' > tbody > tr:nth-child(1)').addClass('selected');
+                $('#' + id + ' > tbody > tr:nth-child(1)').addClass('selected');
             }
         }
 

@@ -7,7 +7,7 @@ describe("Command", function() {
 
     it("should modify a document", function() {
 
-        var node = new GeomNode({type: "cuboid"});
+        var node = new GeomNode({type: "cuboid", sha: '1'});
         
         var command = new Command(
             function() {
