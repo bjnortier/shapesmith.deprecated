@@ -50,7 +50,7 @@ function GeomNode() {
 
     this.editing = arguments[0].editing;
     this.type = arguments[0].type;
-    this.id = SS.nextGeomCounter() + '/' + arguments[0].sha;
+    this.id = SS.nextGeomCounter() + '_' + arguments[0].sha;
     this.sha = arguments[0].sha;
 
     this.origin = arguments[0].origin;
@@ -98,8 +98,7 @@ GeomNode.prototype.editableCopy = function() {
     });
         
     var newNode = new GeomNode({type : this.type,
-                                path : this.path,
-				id : this.id,
+				sha : this.sha,
 				origin: copiedOrigin,
                                 parameters : copiedParameters,
                                 transforms : copiedTransforms,

@@ -159,7 +159,7 @@ function boolean(selected, type) {
     var doFn = function() {
         var geometry = {type: type,
                         children: selected.map(function(id) {
-			    var pattern = /^([0-9]+)\/(.*)$/;
+			    var pattern = /^([0-9]+)_(.*)$/;
 			    var match = id.match(pattern);
 			    return match[2];
 			})};
@@ -170,7 +170,7 @@ function boolean(selected, type) {
             data: JSON.stringify(geometry),
             success: function(result) {
 		var sha = result.SHA;
-		var path = result.path;
+		geometry.sha = sha;
                 $.ajax({
                     type: "GET",
                     url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
