@@ -164,6 +164,7 @@ function TreeView() {
 	    for (key in transformBeingEdited.parameters) {
 		transformBeingEdited.parameters[key] = parseFloat($('#' + key).val());
 	    }
+	    geom_doc.replace(geomNode, precursor);
 	    return update_geom_command(precursor, geomNode);
 	}
 
@@ -268,7 +269,6 @@ function TreeView() {
             geom_doc.replace(geomNode, editingNode);
         });
 
-        // Delete transform
         $('.delete-transform').click(function() {
             var id;
             var transformIndex;
@@ -284,7 +284,6 @@ function TreeView() {
             var geomNode = geom_doc.findById(id);
             var editingNode = geomNode.editableCopy();
             editingNode.transforms.splice(transformIndex, 1);
-            geom_doc.replace(geomNode, editingNode);
             var cmd = update_geom_command(geomNode, editingNode);
             command_stack.execute(cmd);
         });

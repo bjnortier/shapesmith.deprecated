@@ -864,7 +864,7 @@ SS.constructors.torus = function(spec) {
 SS.constructors.translate = function(spec) {
 
     var my = {};
-    var geomNode = geom_doc.findByPath(spec.selected[0]);
+    var geomNode = spec.geomNode;
     var geometry = sceneView.createGeometry(geomNode.mesh);
     var that = SS.constructors.origin(my);
 
@@ -955,7 +955,7 @@ SS.constructors.translate = function(spec) {
 SS.constructors.scale = function(spec) {
 
     var my = {};
-    var geomNode = geom_doc.findByPath(spec.selected[0]);
+    var geomNode = spec.geomNode;
     var geometry = sceneView.createGeometry(geomNode.mesh);
     var originalPositions = geometry.vertices.map(function(vertex) {
 	return vertex.position;
@@ -1034,7 +1034,7 @@ SS.constructors.scale = function(spec) {
 SS.constructors.rotate = function(spec) {
 
     var my = {};
-    var geomNode = geom_doc.findByPath(spec.selected[0]);
+    var geomNode = spec.geomNode;
     var geometry = sceneView.createGeometry(geomNode.mesh);
     var that = SS.constructors.origin(my);
 
@@ -1133,7 +1133,7 @@ SS.constructors.rotate = function(spec) {
 SS.constructors.mirror = function(spec) {
 
     var my = {};
-    var geomNode = geom_doc.findByPath(spec.selected[0]);
+    var geomNode = spec.geomNode;
     var geometry = sceneView.createGeometry(geomNode.mesh);
     var that = SS.constructors.origin(my);
 

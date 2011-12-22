@@ -76,6 +76,4 @@ function SelectionManager() {
     }
 
 }
-var selectionManager = new SelectionManager();
-Observable.makeObservable(selectionManager);
 

@@ -210,97 +210,36 @@ function boolean(selected, type) {
     command_stack.execute(cmd);
 }
 
-function copyNode(node, finishedFn) {
-
-    var remaining = node.children.length;
-    var copiedChildren = node.children.map(function(child) {
-	return {};
-    });
-
-    var nodeCopyFn = function() {
-
-	var geometry = JSON.parse(node.toShallowJson());
-	geometry.children = copiedChildren.map(function(copiedChild) {
-	    return copiedChild.path;
-	});
-
-	$.ajax({
-	    type: 'POST',
-	    url: '/geom/',
-	    contentType: 'application/json',
-	    data: JSON.stringify(geometry),
-	    dataType: 'json',
-	    success: function(nodeData) {
-		var path = nodeData.path;
-		var newNode = new GeomNode({
-                    type : geometry.type,
-                    path : path,
-                    origin : geometry.origin,
-                    parameters : geometry.parameters,
-		    transforms : geometry.transforms
-		}, copiedChildren);
-		finishedFn(newNode);
-	    }, 
-	    error: function(jqXHR, textStatus, errorThrown) {
-		error_response(jqXHR.responseText);
-		command_stack.inProgressFailure();
-	    }
-	});
-    };
-
-    if (remaining == 0) {
-	nodeCopyFn();
-    } else {
-	$.map(node.children, function(childNode, childIndex) {
-	    var finishedFn = function(newChildNode) {
-		copiedChildren.splice(childIndex - 1, 1, newChildNode);
-		--remaining;
-		if (remaining == 0) {
-		    nodeCopyFn()
-		}
-	    };
-	    copyNode(childNode, finishedFn);
-	    ++childIndex;
-	});
-    }
-}
-
 function copy(selected) {
     if (selected.length !== 1)  {
         alert("must have 1 object selected");
         return;
     }
 
-    var path = selected[0];
-    var node = geom_doc.findByPath(path);
+    var id = selected[0];
+    var node = geom_doc.findById(id);
+    var newNode;
     
     var doFn = function() {
 
-	copyNode(node, function(copiedNode) {
-            id = idForGeomPath(copiedNode.path);
-            $.ajax({
-		type: 'GET',
-		url: '/mesh/' + id,
-		dataType: 'json',
-		success: function(mesh) {
-		    copiedNode.mesh = mesh;
-                    geom_doc.add(copiedNode);
-                    command_stack.inProgressSuccess();
-		},
-		error: function(jqXHR, textStatus, errorThrown) {
-		    error_response(jqXHR.responseText);
-		}
-            });
-	});
-
+	var copyWithChildren = function(node) {
+	    var copiedChildren = node.children.map(function(child) {
+		return new GeomNode(child);
+	    });
+	    return new GeomNode(node, copiedChildren);
+	};
+	
+	newNode = copyWithChildren(node);
+	geom_doc.add(newNode);
+	command_stack.commit();
     };
     var undoFn = function() {
-        geom_doc.remove(copyNode);
-	command_stack.inProgressSuccess();
+        geom_doc.remove(newNode);
+	command_stack.success();
     }
     var redoFn = function() {
-        geom_doc.add(copyNode);
-	command_stack.inProgressSuccess();
+        geom_doc.add(newNode);
+	command_stack.success();
     }
 
     var cmd = new Command(doFn, undoFn, redoFn);

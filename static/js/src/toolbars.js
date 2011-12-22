@@ -107,7 +107,7 @@ function create_transform(selected, type, keys) {
         parameters: transformParams
     }));
     geom_doc.replace(original, replacement);
-       
+    return replacement;
 }
 
 
@@ -178,23 +178,23 @@ $(document).ready(function() {
      */
     new Action("Translate", "/static/images/translate.png", 
                function(selected) { 
-		   create_transform(selected, "translate", ["u", "v", "w", "n"]); 
-		   SS.constructors.translate({selected: selected}).create();
+		   var editingNode = create_transform(selected, "translate", ["u", "v", "w", "n"]); 
+		   SS.constructors.translate({geomNode: editingNode}).create();
 	       }).render($("#transforms"));
     new Action("Scale", "/static/images/scale.png", 
                function(selected) { 
-		   create_transform(selected, "scale", ["factor"]); 
-		   SS.constructors.scale({selected: selected}).create();
+		   var editingNode = create_transform(selected, "scale", ["factor"]); 
+		   SS.constructors.scale({geomNode: editingNode}).create();
 	       }).render($("#transforms"));
     new Action("Rotate", "/static/images/rotate.png", 
                function(selected) { 
-		   create_transform(selected, "rotate", ["u", "v", "w", "angle", "n"]);
-		   SS.constructors.rotate({selected: selected}).create();
+		   var editingNode = create_transform(selected, "rotate", ["u", "v", "w", "angle", "n"]);
+		   SS.constructors.rotate({geomNode: editingNode}).create();
 	       }).render($("#transforms"));
     new Action("Mirror", "/static/images/mirror.png", 
                function(selected) { 
-		   create_transform(selected, "mirror", ["u", "v", "w", "n"]); 
-		   SS.constructors.mirror({selected: selected}).create();
+		   var editingNode = create_transform(selected, "mirror", ["u", "v", "w", "n"]); 
+		   SS.constructors.mirror({geomNode: editingNode}).create();
 	       }).render($("#transforms"));
 
 });

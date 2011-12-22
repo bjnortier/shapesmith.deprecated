@@ -1,3 +1,7 @@
+var selectionManager = new SelectionManager();
+Observable.makeObservable(selectionManager);
+
+SS.selectionManager = selectionManager;
 var command_stack = new CommandStack(SS);
 
 command_stack.renderErrorMessage = renderErrorMessage;

@@ -45,7 +45,7 @@ function CommandStack(ss) {
     this.execute = function(command) {
 
         successFn = function() {
-	    selectionManager.deselectAll();
+	    ss.selectionManager.deselectAll();
 	    command.toCommit = ss.session.commit;
 	    undoStack.push(command);
         }
@@ -55,7 +55,7 @@ function CommandStack(ss) {
     }
 
     this.undo = function() {
-	selectionManager.deselectAll();
+	ss.selectionManager.deselectAll();
 
 	if (!this.canUndo()) {
 	    throw "Nothing to undo";
@@ -68,7 +68,7 @@ function CommandStack(ss) {
     }
 
     this.redo = function() {
-	selectionManager.deselectAll();
+	ss.selectionManager.deselectAll();
 
 	if (!this.canRedo()) {
 	    throw "Nothing to redo";

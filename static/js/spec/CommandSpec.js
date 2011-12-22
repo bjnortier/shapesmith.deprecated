@@ -47,6 +47,10 @@ describe("CommandStack", function() {
 	},
 	commit : function() {
 	    
+	},
+	selectionManager : {
+	    deselectAll : function() {
+	    }
 	}
     };
     

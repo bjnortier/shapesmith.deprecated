@@ -33,6 +33,19 @@ describe("GeomNode", function() {
 
     });
 
+    it("can be copied", function() {
+
+        var node = new GeomNode({type: "cuboid", sha: 'b3cf'});
+	expect(node.sha).toEqual('b3cf');
+	expect(node.id).toEqual('1_b3cf');
+
+	var copy = new GeomNode(node);
+	expect(copy.sha).toEqual('b3cf');
+	expect(copy.id).toEqual('2_b3cf');
+	
+
+    });
+
     it("can have empty parameters", function() {
 
         var node = new GeomNode({type: "union", sha: '123'});
