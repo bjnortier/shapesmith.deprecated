@@ -1,84 +1,52 @@
 var SS = SS || {};
 
 function update_geom_command(fromNode, toNode) {
-    
-    var doFn = function() {
 
-	$.ajax({
-            type: 'POST',
-            url: '/' + SS.session.username + '/' + SS.session.design + '/geom/',
-            contentType: 'application/json',
-            data: toNode.toShallowJson(),
-	    dataType: 'json',
-            success: function(result) {
-		var sha = result.SHA;
-                $.ajax({
-                    type: 'GET',
-                    url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
-		    dataType: 'json',
-                    success: function(mesh) {
-                        selectionManager.deselectAll();
+    var chainedPostFn = function(index, fromChain, toChain) {
 
-                        toNode.mesh = mesh;
-			toNode.setSHA(sha);
+        var nextFrom = fromChain[index];
+        var nextTo = toChain[index];
 
-                        geom_doc.replace(fromNode, toNode);
-                        command_stack.commit();
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-			command_stack.error(jqXHR.responseText);
-                    }
-                });
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                command_stack.error(jqXHR.responseText);
-            }
-        });
-
-    };
-
-    var undoFn = function() {
-	
-    };
-
-    var redoFn = function() {
-	
-    };
-
-    
-    /*var chainedPostFn = function(fromChain, toChain) {
-
-        fromChain = fromChain.slice(0);
-        toChain = toChain.slice(0);
-        var nextTo = toChain.splice(0,1)[0];
-        var nextFrom = fromChain.splice(0,1)[0];
-	selectionManager.deselectAll();
         if (nextTo) {
             $.ajax({
 		type: 'POST',
 		url: '/' + SS.session.username + '/' + SS.session.design + '/geom/',
                 contentType: 'application/json',
                 data: nextTo.toShallowJson(),
-                success: function(nodeData) {
-                    if (nextTo.editing) {
-                        nextTo.editing = false;
-                    }
+		dataType: 'json',
+                success: function(result) {
+		    var sha = result.SHA;
+		    nextTo.setSHA(sha);
+                    nextTo.editing = false;
                     for (var i in nextTo.transforms) {
-                        if (nextTo.transforms[i].editing) {
-                            nextTo.transforms[i].editing = false;
-                        }
+                        nextTo.transforms[i].editing = false;
                     }
-                    if (toChain.length > 0) {
-                        chainedPutFn(fromChain, toChain);
+
+		    // Update the children of the next boolean node
+		    // with the new SHA
+		    if (index + 1 < fromChain.length) {
+			var oldChildSHA = nextFrom.sha;
+			var newChildSHA = nextTo.sha;
+			var foundChildIndex = -1;
+			for (var childIndex in fromChain[index+1].children) {
+			    if (fromChain[index+1].children[childIndex].sha == oldChildSHA) {
+				foundChildIndex = childIndex;
+			    }
+			}
+			toChain[index+1].children.splice(foundChildIndex, 1, nextTo);
+		    }
+
+                    if (index + 1 < fromChain.length) {
+                        chainedPostFn(index + 1, fromChain, toChain);
                     } else {
                         // No more -> update the root node
                         $.ajax({
                             type: 'GET',
-                            url: '/mesh/' + idForGeomPath(nextFrom.path),
+			    url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
                             success: function(mesh) {
                                 nextTo.mesh = mesh;
                                 geom_doc.replace(nextFrom, nextTo);
-				command_stack.success();
+				command_stack.commit();
                             },
 			    error: function(jqXHR, textStatus, errorThrown) {
 				command_stack.error(jqXHR.responseText);
@@ -94,23 +62,25 @@ function update_geom_command(fromNode, toNode) {
         }
     }
 
-    var ancestors = geom_doc.ancestors(toNode);
-    var ancestorCopies = ancestors.map(function(ancestor) {
+    var fromAncestors = geom_doc.ancestors(fromNode);
+    var toAncestors = fromAncestors.map(function(ancestor) {
         return ancestor.editableCopy();
     });
 
-    var toChain = [toNode].concat(ancestors);
-    var fromChain = [fromNode].concat(ancestorCopies);
+    var fromChain = [fromNode].concat(fromAncestors);
+    var toChain = [toNode].concat(toAncestors);
 
     var doFn = function() {
-        chainedPutFn(fromChain, toChain);
+        chainedPostFn(0, fromChain, toChain);
     };
     var undoFn = function() {
-        chainedPutFn(toChain, fromChain);
+	geom_doc.replace(toChain[toChain.length - 1], fromChain[fromChain.length - 1]);
+	command_stack.success();
     };
     var redoFn = function() {
-        chainedPutFn(fromChain, toChain);
-    }*/
+	geom_doc.replace(fromChain[toChain.length - 1], toChain[fromChain.length - 1]);
+	command_stack.success();
+    }
 
     return new Command(doFn, undoFn, redoFn);
 }
@@ -132,8 +102,6 @@ function create_geom_command(prototype, geometry) {
                     url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
 		    dataType: 'json',
                     success: function(mesh) {
-                        selectionManager.deselectAll();
-
 			geometry.sha = sha;
                         geomNode = new GeomNode(geometry);
                         geomNode.mesh = mesh;
@@ -167,7 +135,7 @@ function create_geom_command(prototype, geometry) {
 function boolean(selected, type) {
     if ((type == 'union') || (type == 'intersect')) {
         if (selected.length <= 1)  {
-            alert("must have > 2 object selected!");
+            alert("must have 2 or more objects selected!");
             return;
         }
     } else if (type =='subtract') {
@@ -200,8 +168,6 @@ function boolean(selected, type) {
                     type: "GET",
                     url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
                     success: function(mesh) {
-			selectionManager.deselectAll();
-
                         childNodes = selected.map(function(id) {
                             var node = geom_doc.findById(id);
                             geom_doc.remove(node);
@@ -318,7 +284,6 @@ function copy(selected) {
 		dataType: 'json',
 		success: function(mesh) {
 		    copiedNode.mesh = mesh;
-                    selectionManager.deselectAll();
                     geom_doc.add(copiedNode);
                     command_stack.inProgressSuccess();
 		},
@@ -434,9 +399,8 @@ SS.load_geom = function(sha) {
 	type: 'GET',
 	url: '/' + SS.session.username + '/' + SS.session.design + '/geom/' + sha + '?recursive=true',
 	dataType: 'json',
-	success: function(geomJson) {
-	    geomJson.sha = sha;
-	    var newNode = GeomNode.fromDeepJson(geomJson);
+	success: function(json) {
+	    var newNode = GeomNode.fromDeepJson(json);
 	    $.ajax({
 		type: 'GET',
 		url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,

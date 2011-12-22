@@ -86,6 +86,7 @@ recursive_geom_get(User, Design, SHA) ->
 				  ChildSHAs),
     NewProps = lists:keyreplace(<<"children">>, 1, Props, 
 				{<<"children">>, RecursiveChildren}),
-    {NewProps}.
+    {[{<<"sha">>, list_to_binary(SHA)},
+      {<<"geometry">>, {NewProps}}]}.
 
 

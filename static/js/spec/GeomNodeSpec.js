@@ -41,9 +41,6 @@ describe("GeomNode", function() {
                                                           children: [],
                                                           transforms: []});
 
-        expect(JSON.parse(node.toDeepJson())).toEqual({type: "union",
-                                                       children: [],
-                                                       transforms: []});
     });
 
     it("can have children", function() {
@@ -58,25 +55,43 @@ describe("GeomNode", function() {
 
         expect(JSON.parse(parentNode.toShallowJson())).toEqual(
             {type: "union",
-             children: ['1_44e', '2_1ba'],
+             children: ['44e', '1ba'],
              transforms: []});
-        
-        expect(JSON.parse(parentNode.toDeepJson())).toEqual(
-            {type: "union",
-             children: [
-                 {type: 'sphere',
-                  children: [],
-                  transforms: [],
-                  parameters: {x: 1.0}},
-                 {type: 'cuboid',
-                  children: [],
-                  transforms: []}
-             ],
-             transforms: []});
-
 
     });
 
+    it("can be deserialised", function() {
+	var child1 = new GeomNode({type: "sphere", sha: '44e', parameters: {x: 1.0}});
+        var child2 = new GeomNode({type: "cuboid", sha: '1ba'});
+        var parentNode = new GeomNode({type: "union", sha: '0f3'}, [child1, child2]);
+	
+	var child1FromJson = GeomNode.fromDeepJson(
+	    {sha: '44e',
+	     geometry: {type: 'sphere',
+			parameters: {x:1.0}}});
+	expect(child1FromJson.sha).toEqual('44e');
+	expect(child1FromJson.type).toEqual(child1.type);
+	expect(child1FromJson.parameters).toEqual(child1.parameters);
+
+	var parentFromJson = GeomNode.fromDeepJson(
+	    {sha: '0f3',
+	     geometry: {type: 'union',
+			children: [{sha: '44e',
+				    geometry: {type: 'sphere',
+					       parameters: {x:1.0}}},
+				   {sha: '1ba',
+				    geometry: {type: 'cuboid'}}
+				  ]}});
+	expect(parentFromJson.sha).toEqual('0f3');
+	expect(parentFromJson.children[0].sha).toEqual('44e');
+	expect(parentFromJson.children[0].type).toEqual(child1.type);
+	expect(parentFromJson.children[0].parameters).toEqual(child1.parameters);
+	expect(parentFromJson.children[1].sha).toEqual('1ba');
+	expect(parentFromJson.children[1].type).toEqual(child2.type);
+
+
+
+    });
     
 
 

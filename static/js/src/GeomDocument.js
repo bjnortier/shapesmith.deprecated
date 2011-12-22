@@ -102,13 +102,6 @@ function GeomDocument() {
         throw Error("node not found");
     }
 
-    this.toJson = function() {
-
-        return this.rootNodes.map(function(x) {
-            return JSON.parse(x.toDeepJson());
-        });
-    }
-
     this.getPreviewNode = function() {
 	for(i in this.rootNodes) {
 	    if (this.rootNodes[i].editing) {

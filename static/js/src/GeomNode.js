@@ -58,9 +58,10 @@ function GeomNode() {
         throw new Error("type is not defined");
     }
 
-    this.editing = arguments[0].editing;
+    this.editing = arguments[0].editing || false;
     this.type = arguments[0].type;
     this.sha = arguments[0].sha;
+    this.precursorSHA = arguments[0].precursorSHA;
     updateId(this);
 
     this.origin = arguments[0].origin;
@@ -112,6 +113,7 @@ GeomNode.prototype.editableCopy = function() {
                                 parameters : copiedParameters,
                                 transforms : copiedTransforms,
                                 mesh : this.mesh,
+				precursorSHA : this.sha,
                                }, this.children);
     return newNode;
 }
@@ -121,28 +123,12 @@ GeomNode.prototype.editableCopy = function() {
     
 GeomNode.prototype.toShallowJson = function() {
     // No need to do somethign special with parameters if they are not 
-    // defined, as JSON.stringigy simply ignores those fields
-    return JSON.stringify({type: this.type,
-			   origin: this.origin,
-                           parameters: this.parameters,
-                           children: this.children.map(function(child) {
-                               return child.id;
-                           }),
-                           transforms: this.transforms.map(function(tx) {
-                               return JSON.parse(tx.json());
-                           })});
-}
-
-
-// TODO: Double json create/parse occurring here
-GeomNode.prototype.toDeepJson = function() {
-    // No need to do somethign special with parameters if they are not 
     // defined, as JSON.stringify simply ignores those fields
     return JSON.stringify({type: this.type,
 			   origin: this.origin,
                            parameters: this.parameters,
                            children: this.children.map(function(child) {
-                               return JSON.parse(child.toDeepJson());
+                               return child.sha;
                            }),
                            transforms: this.transforms.map(function(tx) {
                                return JSON.parse(tx.json());
@@ -150,13 +136,30 @@ GeomNode.prototype.toDeepJson = function() {
 }
 
 GeomNode.fromDeepJson = function(json) {
-    // Recursively create nodes if the children are json
-    var geomNode = new GeomNode(json);
-    if (json.children && (json.children.length > 0) && (typeof(json.children[0]) == "object")) {
-        geomNode.children = json.children.map(function(childJson) {
+    var geometry = json.geometry;
+    var jsonChildren = json.geometry.children;
+    if (json.geometry.children) {
+	delete json.geometry.children;
+    }
+    geometry.sha = json.sha;
+    var geomNode = new GeomNode(geometry);
+    
+    if (jsonChildren && 
+	(jsonChildren.length > 0)) {
+
+        geomNode.children = jsonChildren.map(function(childJson) {
             return GeomNode.fromDeepJson(childJson);
         });
     }
     return geomNode;
 }
+
+GeomNode.prototype.isBoolean = function() {
+    return ((this.type == 'union')
+            ||
+            (this.type == 'subtract')
+            ||
+            (this.type == 'subtract'));
+}
+
 

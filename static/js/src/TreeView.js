@@ -57,11 +57,7 @@ function renderNode(geomNode) {
 
     // Params
     var paramsArr = [];
-    if (!((geomNode.type == 'union')
-          ||
-          (geomNode.type == 'subtract')
-          ||
-          (geomNode.type == 'subtract'))) {
+    if (!geomNode.isBoolean()) {
 
         for (key in geomNode.parameters) {
 
@@ -137,13 +133,14 @@ function TreeView() {
 	}
 	
 	var okGeomFunction = function() {
-	    if (!geomNode.isPreview()) {
+	    if (precursor) {
 		for (key in geomNode.origin) {
                     geomNode.origin[key] = parseFloat($('#' + key).val());
 		}
 		for (key in geomNode.parameters) {
                     geomNode.parameters[key] = parseFloat($('#' + key).val());
 		}
+		geom_doc.replace(geomNode, precursor);
 		return update_geom_command(precursor, geomNode);
             } else {
 		var origin = {};
@@ -304,12 +301,14 @@ function TreeView() {
 	selectionManager.deselectAll();
 
 	var geomNode = geom_doc.findById(id);
-        var editingNode = geomNode.editableCopy();
-        editingNode.editing = true;
-        geom_doc.replace(geomNode, editingNode);
-
-	if (SS.constructors[geomNode.type]) {
-	    SS.constructors[geomNode.type]().edit();
+	if (!geomNode.isBoolean()) {
+            var editingNode = geomNode.editableCopy();
+            editingNode.editing = true;
+            geom_doc.replace(geomNode, editingNode);
+	    
+	    if (SS.constructors[geomNode.type]) {
+		SS.constructors[geomNode.type]().edit();
+	    }
 	}
     }
 				 

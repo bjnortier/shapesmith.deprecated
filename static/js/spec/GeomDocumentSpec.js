@@ -79,24 +79,4 @@ describe('GeomDocument', function() {
         }).toThrow("node not found");
     });
 
-    it('can be serialised to json', function() {
-
-        var child = new GeomNode({type: 'cuboid', sha: '1'});
-        var parent = new GeomNode({type: 'boolean', sha: '2'}, [child]);
-        var grandparent = new GeomNode({type: 'boolean', sha: '3'}, [parent]);
-        var another = new GeomNode({type: 'sphere', sha: '4'});
-        doc.add(grandparent);
-        doc.add(another);
-
-        var serialized = doc.toJson();
-        expect(serialized).toEqual([
-            { type : 'sphere', children : [], transforms : [] }, 
-            { type : 'boolean', children : [ 
-                { type : 'boolean', children : [ 
-                    { type : 'cuboid', children : [], transforms : [] } ],
-                  transforms : [] } ], 
-              transforms : [] }
-        ]);
-    });
-
 });
