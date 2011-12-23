@@ -45,6 +45,7 @@ function update_geom_command(fromNode, toNode) {
 			    url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
                             success: function(mesh) {
                                 nextTo.mesh = mesh;
+				selectionManager.deselectAll();
                                 geom_doc.replace(nextFrom, nextTo);
 				command_stack.commit();
                             },
@@ -168,6 +169,8 @@ function boolean(selected, type) {
                     type: "GET",
                     url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
                     success: function(mesh) {
+			selectionManager.deselectAll();
+
                         childNodes = selected.map(function(id) {
                             var node = geom_doc.findById(id);
                             geom_doc.remove(node);
@@ -230,6 +233,7 @@ function copy(selected) {
 	};
 	
 	newNode = copyWithChildren(node);
+	selectionManager.deselectAll();
 	geom_doc.add(newNode);
 	command_stack.commit();
     };

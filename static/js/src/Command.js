@@ -45,7 +45,6 @@ function CommandStack(ss) {
     this.execute = function(command) {
 
         successFn = function() {
-	    ss.selectionManager.deselectAll();
 	    command.toCommit = ss.session.commit;
 	    undoStack.push(command);
         }

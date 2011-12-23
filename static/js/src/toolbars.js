@@ -37,7 +37,6 @@ function delete_geom(selected) {
     var nodes = selected.map(function(id) {
 	return geom_doc.findById(id);
     });
-    selectionManager.deselectAll();
 
     var doFn = function() {
 	for (var i in nodes) {
@@ -80,8 +79,6 @@ function create_primitive(type, keys) {
 }
 
 function create_transform(selected, type, keys) {
-    selectionManager.deselectAll();
-
     if (selected.length != 1)  {
         alert("no object selected!");
         return;
