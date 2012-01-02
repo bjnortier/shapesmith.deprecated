@@ -33,6 +33,8 @@ init_per_suite(Config) ->
     Config.
 
 end_per_suite(_Config) ->
+    application:stop(node),
+    application:unload(node),
     ok.
 
 init_per_testcase(in_mem, Config) ->

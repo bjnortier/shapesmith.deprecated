@@ -35,10 +35,11 @@
        <div class="fourcol">
 	 <div class="field">
 	   <div class="field-inner">
-	     <input placeholder="{{placeholder}}" class="field" id="{{name}}"/>
+	     <input placeholder="{{placeholder}}" class="field"
+	     id="{{name}}" type="{{type}}"/>
+	     <div class="errors" id="{{name}}-errors">
+	     </div>
 	   </div>
-	 </div>
-	 <div class="errors" id="{{name}}-errors">
 	 </div>
        </div>
        <div class="fivecol last"></div>
@@ -58,7 +59,7 @@
     
  </body>
 
-  <script type="text/javascript" src="/static/js/src/signup_email.js">
+  <script type="text/javascript" src="/static/js/src/signup.js">
 </script>
   <script type="text/javascript">
 

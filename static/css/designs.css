@@ -87,13 +87,14 @@ input.field, div#create-design-button {
     margin-top: 10px;
 }
 
-#design-name-errors, errors {
+#design-name-errors, .errors {
     border: solid thin red;
     border-radius: 4px;
     font-size: 15px;
     padding: 10px;
     padding-top: 20px;
     margin-top: -10px;
+    margin-right: -20px;
     color: red;
     display: none;
 }

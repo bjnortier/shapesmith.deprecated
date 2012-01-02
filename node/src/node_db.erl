@@ -76,7 +76,7 @@ create_user(User, Password, EmailAddress) ->
 		 "" -> 
 		     Props1;
 		 _ ->
-		     [{<<"email-address">>, EmailAddress}|Props1]
+		     [{<<"email-address">>, list_to_binary(EmailAddress)}|Props1]
 	     end,
     case DB:exists(bucket(User), <<"_user">>) of
 	false ->

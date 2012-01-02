@@ -60,11 +60,11 @@ validate_required(_Config) ->
     PostBody = jiffy:encode({[]}),
 
     {ok,{{"HTTP/1.1",400,_}, ResponseHeaders, PostResponse}} = 
-	httpc:request(post, {"http://localhost:8001/signup_email", [], "application/json", PostBody}, [], []),
+	httpc:request(post, {"http://localhost:8001/signup", [], "application/json", PostBody}, [], []),
     check_json_content_type(ResponseHeaders),
     {[{<<"username">>, <<"required">>},
-      {<<"password-1">>, <<"required">>},
-      {<<"password-2">>, <<"required">>}
+      {<<"password1">>, <<"required">>},
+      {<<"password2">>, <<"required">>}
      ]} 
 	= jiffy:decode(iolist_to_binary(PostResponse)),
     
@@ -72,12 +72,12 @@ validate_required(_Config) ->
 
 validate_username(_Config) ->
     PostBody = jiffy:encode({[{<<"username">>, <<"&^%">>},
-			      {<<"password-1">>, <<"abc">>},
-			      {<<"password-2">>, <<"abc">>}
+			      {<<"password1">>, <<"abc">>},
+			      {<<"password2">>, <<"abc">>}
 			     ]}),
 
     {ok,{{"HTTP/1.1",400,_}, ResponseHeaders, PostResponse}} = 
-	httpc:request(post, {"http://localhost:8001/signup_email", [], "application/json", PostBody}, [], []),
+	httpc:request(post, {"http://localhost:8001/signup", [], "application/json", PostBody}, [], []),
     check_json_content_type(ResponseHeaders),
     {[{<<"username">>, <<"can only contain letters, numbers, dots, dashes and underscores">>}]} 
 	= jiffy:decode(iolist_to_binary(PostResponse)),
@@ -93,11 +93,11 @@ validate_email(_Config) ->
     lists:map(fun(InvalidAddress) ->
 		      
 		      {ok,{{"HTTP/1.1",400,_}, ResponseHeaders, PostResponse}} = 
-			  httpc:request(post, {"http://localhost:8001/signup_email", [], "application/json", 
-					       jiffy:encode({[{<<"username">>, <<"bjnortier">>}, {<<"password-1">>, <<"x">>}, {<<"password-2">>, <<"x">>}, {<<"email-address">>, InvalidAddress}
+			  httpc:request(post, {"http://localhost:8001/signup", [], "application/json", 
+					       jiffy:encode({[{<<"username">>, <<"bjnortier">>}, {<<"password1">>, <<"x">>}, {<<"password2">>, <<"x">>}, {<<"emailAddress">>, InvalidAddress}
 															   ]})}, [], []),
 		      check_json_content_type(ResponseHeaders),
-		      {[{<<"email-address">>, <<"invalid email address">>}]} 
+		      {[{<<"emailAddress">>, <<"invalid email address">>}]} 
 			  = jiffy:decode(iolist_to_binary(PostResponse))
 	      end,
 	      InvalidAddresses).
@@ -105,33 +105,33 @@ validate_email(_Config) ->
 
 validate_password(_Config) ->
     PostBody = jiffy:encode({[{<<"username">>, <<"bjnortier">>},
-			      {<<"password-1">>, <<"abc">>},
-			      {<<"password-2">>, <<"abe">>}
+			      {<<"password1">>, <<"abc">>},
+			      {<<"password2">>, <<"abe">>}
 			     ]}),
 
     {ok,{{"HTTP/1.1",400,_}, ResponseHeaders, PostResponse}} = 
-	httpc:request(post, {"http://localhost:8001/signup_email", [], "application/json", PostBody}, [], []),
+	httpc:request(post, {"http://localhost:8001/signup", [], "application/json", PostBody}, [], []),
     check_json_content_type(ResponseHeaders),
-    {[{<<"password-2">>, <<"doesn't match">>}]} 
+    {[{<<"password2">>, <<"doesn't match">>}]} 
 	= jiffy:decode(iolist_to_binary(PostResponse)),
     
     ok.
     
 create_user(_Config) ->
     PostBody = jiffy:encode({[{<<"username">>, <<"bjnortier">>},
-			      {<<"password-1">>, <<"abc">>},
-			      {<<"password-2">>, <<"abc">>}
+			      {<<"password1">>, <<"abc">>},
+			      {<<"password2">>, <<"abc">>}
 			     ]}),
 
     {ok,{{"HTTP/1.1",200,_}, ResponseHeaders, PostResponse}} = 
-	httpc:request(post, {"http://localhost:8001/signup_email", [], "application/json", PostBody}, [], []),
+	httpc:request(post, {"http://localhost:8001/signup", [], "application/json", PostBody}, [], []),
     check_json_content_type(ResponseHeaders),
     <<"created">> = jiffy:decode(iolist_to_binary(PostResponse)),
     
     {ok,{{"HTTP/1.1",409,_}, ResponseHeaders2, PostResponse2}} = 
-	httpc:request(post, {"http://localhost:8001/signup_email", [], "application/json", PostBody}, [], []),
+	httpc:request(post, {"http://localhost:8001/signup", [], "application/json", PostBody}, [], []),
     check_json_content_type(ResponseHeaders2),
-    <<"already exists">> = jiffy:decode(iolist_to_binary(PostResponse2)).
+    {[{<<"username">>, <<"sorry - this username is already used">>}]} = jiffy:decode(iolist_to_binary(PostResponse2)).
 
 check_json_content_type(Headers) ->
     {Headers, {_, "application/json"}} = {Headers, lists:keyfind("content-type", 1, Headers)}.

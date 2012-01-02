@@ -15,7 +15,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_signup_email_resource).
+-module(node_signup_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
 	 init/1, 
@@ -51,12 +51,12 @@ resource_exists(ReqData, Context) ->
 
 provide_content(ReqData, Context) ->
     WalrusContext = [{fields, [
-			       [{name, "username"}, {placeholder, "username"}],
-			       [{name, "email-address"}, {placeholder, "email address (optional)"}],
-			       [{name, "password-1"}, {placeholder, "password"}],
-			       [{name, "password-2"}, {placeholder, "repeat password"}]
+			       [{name, "username"}, {placeholder, "username"}, {type, "text"}],
+			       [{name, "emailAddress"}, {placeholder, "email address (optional)"}, {type, "email"}],
+			       [{name, "password1"}, {placeholder, "password"}, {type, "password"}],
+			       [{name, "password2"}, {placeholder, "repeat password"}, {type, "password"}]
 			      ]}],
-    Rendered = node_walrus:render_template(node_views_signup_email, WalrusContext),
+    Rendered = node_walrus:render_template(node_views_signup, WalrusContext),
     {Rendered, ReqData, Context}.
 
 content_types_accepted(ReqData, Context) ->
@@ -98,8 +98,8 @@ accept_content(ReqData, Context) ->
     Body = wrq:req_body(ReqData),
     {Props} = jiffy:decode(Body),
     {_, Username} = lists:keyfind(<<"username">>, 1, Props),
-    {_, Password} = lists:keyfind(<<"password-1">>, 1, Props),
-    EmailAddress = case lists:keyfind(<<"email-address">>, 1, Props) of
+    {_, Password} = lists:keyfind(<<"password1">>, 1, Props),
+    EmailAddress = case lists:keyfind(<<"emailAddress">>, 1, Props) of
 		       {_, Addr} ->
 			   Addr;
 		       false ->
@@ -111,7 +111,7 @@ accept_content(ReqData, Context) ->
 	ok ->
 	    {true, node_resource:json_response(<<"created">>, ReqData), Context};
 	already_exists ->
-	    {{halt, 409}, node_resource:json_response(<<"already exists">>, ReqData), Context}
+	    {{halt, 409}, node_resource:json_response({[{<<"username">>, <<"sorry - this username is already used">>}]}, ReqData), Context}
     end.
 
 validate([Hd|Rest], JSON) ->
@@ -125,11 +125,16 @@ validate([], _JSON) ->
     ok.
 
 validate_required({Props}) ->
-    RequiredFields = [<<"username">>, <<"password-1">>, <<"password-2">>],
+    RequiredFields = [<<"username">>, <<"password1">>, <<"password2">>],
     Missing = lists:foldr(fun(Field, Acc) ->
 				  case lists:keyfind(Field, 1, Props) of
-				      {_, _} ->
-					  Acc;
+				      {_, Value} ->
+					  case string:strip(binary_to_list(Value)) of
+					      "" ->
+						  [{Field, <<"required">>}|Acc];
+					      _ ->
+						  Acc
+					  end;
 				      false ->
 					  [{Field, <<"required">>}|Acc]
 				  end
@@ -155,26 +160,31 @@ validate_username({Props}) ->
     end.
 
 validate_passwords({Props}) ->
-    {_, Password1} = lists:keyfind(<<"password-1">>, 1, Props),
-    {_, Password2} = lists:keyfind(<<"password-2">>, 1, Props),
+    {_, Password1} = lists:keyfind(<<"password1">>, 1, Props),
+    {_, Password2} = lists:keyfind(<<"password2">>, 1, Props),
     if
 	Password1 =:= Password2 ->
 	    ok;
 	true ->
-	    {error, {[{<<"password-2">>, <<"doesn't match">>}]}}
+	    {error, {[{<<"password2">>, <<"doesn't match">>}]}}
     end.
     
 
 validate_email({Props}) ->
-    case lists:keyfind(<<"email-address">>, 1, Props) of
+    case lists:keyfind(<<"emailAddress">>, 1, Props) of
 	{_, EmailAddress} ->
 	    String = string:strip(binary_to_list(EmailAddress)),
-	    Pattern = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$",
-	    case re:run(String, Pattern, [caseless]) of
-		{match,[_]} ->
+	    case String of
+		"" ->
 		    ok;
-		nomatch ->
-		    {error, {[{<<"email-address">>, <<"invalid email address">>}]}}
+		_ ->
+		    Pattern = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$",
+		    case re:run(String, Pattern, [caseless]) of
+			{match,[_]} ->
+			    ok;
+			nomatch ->
+			    {error, {[{<<"emailAddress">>, <<"invalid email address">>}]}}
+		    end
 	    end;
 	_ ->
 	    ok
@@ -185,13 +195,16 @@ validate_email({Props}) ->
 validate_required_test_() ->
     [
      ?_assertEqual({error, {[{<<"username">>, <<"required">>},
-			     {<<"password-1">>, <<"required">>},
-			     {<<"password-2">>, <<"required">>}]}},
+			     {<<"password1">>, <<"required">>},
+			     {<<"password2">>, <<"required">>}]}},
 		   validate_required({[]})),
      ?_assertEqual({error, {[{<<"username">>, <<"required">>},
-			     {<<"password-2">>, <<"required">>}]}},
-		   validate_required({[{<<"password-1">>, <<"abc">>}]}))
-
+			     {<<"password2">>, <<"required">>}]}},
+		   validate_required({[{<<"password1">>, <<"abc">>}]})),
+     ?_assertEqual({error, {[{<<"username">>, <<"required">>},
+			     {<<"password2">>, <<"required">>}]}},
+		   validate_required({[{<<"username">>, <<"">>},
+				       {<<"password1">>, <<"xx">>}]}))
     ].
 
 validate_username_test_() ->
@@ -209,34 +222,32 @@ validate_username_test_() ->
 
 validate_email_test_() ->
     [
-     ?_assertEqual({error, {[{<<"email-address">>, <<"invalid email address">>}]}}, 
-		   validate_email({[{<<"email-address">>,
+     ?_assertEqual({error, {[{<<"emailAddress">>, <<"invalid email address">>}]}}, 
+		   validate_email({[{<<"emailAddress">>,
 				     <<"bjnortier@gmail">>}]})),
-     ?_assertEqual({error, {[{<<"email-address">>, <<"invalid email address">>}]}}, 
-		   validate_email({[{<<"email-address">>,
+     ?_assertEqual({error, {[{<<"emailAddress">>, <<"invalid email address">>}]}}, 
+		   validate_email({[{<<"emailAddress">>,
 				     <<"bjnortier@">>}]})),
-     ?_assertEqual({error, {[{<<"email-address">>, <<"invalid email address">>}]}}, 
-		   validate_email({[{<<"email-address">>,
+     ?_assertEqual({error, {[{<<"emailAddress">>, <<"invalid email address">>}]}}, 
+		   validate_email({[{<<"emailAddress">>,
 				     <<"bjnortier">>}]})),
-     ?_assertEqual({error, {[{<<"email-address">>, <<"invalid email address">>}]}}, 
-		   validate_email({[{<<"email-address">>,
-				     <<"">>}]})),
-
-     ?_assertEqual(ok, validate_email({[{<<"email-address">>,
+     ?_assertEqual(ok, validate_email({[{<<"emailAddress">>,
+					 <<"">>}]})),
+     ?_assertEqual(ok, validate_email({[{<<"emailAddress">>,
 					 <<"bjnortier@gmail.com">>}]})),
-     ?_assertEqual(ok, validate_email({[{<<"email-address">>,
+     ?_assertEqual(ok, validate_email({[{<<"emailAddress">>,
 					 <<"  bjnortier@gmail.com   ">>}]}))
     ].
 
 validate_password_test_() ->
     [
-     ?_assertEqual({error, {[{<<"password-2">>, <<"doesn't match">>}]}},
-		   validate_passwords({[{<<"password-1">>, <<"abc">>},
-					{<<"password-2">>, <<"ab">>}
+     ?_assertEqual({error, {[{<<"password2">>, <<"doesn't match">>}]}},
+		   validate_passwords({[{<<"password1">>, <<"abc">>},
+					{<<"password2">>, <<"ab">>}
 				       ]})),
      ?_assertEqual(ok,
-		   validate_passwords({[{<<"password-1">>, <<"abc">>},
-					{<<"password-2">>, <<"abc">>}
+		   validate_passwords({[{<<"password1">>, <<"abc">>},
+					{<<"password2">>, <<"abc">>}
 				       ]}))
     ].
 
