@@ -46,7 +46,7 @@
        <div class="threecol"></div>
        <div class="fourcol">
 	 <div id="design-name">
-	   <input placeholder="new design name" id="new-name" required="required"></input>
+	   <input placeholder="new design name" class="field" id="new-name" required="required"></input>
 	 </div>
 	 <div id="design-name-errors">
 	 </div>

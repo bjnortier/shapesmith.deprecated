@@ -19,6 +19,7 @@
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([exists/4, create/4, get/4]).
 -export([exists_root/2, put_root/3, get_root/2, delete_root/2]).
+-export([create_user/3]).
 -export([get_designs/1, add_design/2, remove_design/2]).
 -export([get_brep/1, exists_brep/1, put_brep/2]).
 
@@ -45,7 +46,6 @@ get(User, Design, Type, SHA) ->
 	    jiffy:decode(EncodedJSON)
     end.
 
-
 exists_root(User, Design) ->
     {ok, DB} = application:get_env(node, db_module),
     DB:exists(bucket(User, Design), <<"_root">>).
@@ -66,6 +66,25 @@ put_root(User, Design, JSON) ->
 delete_root(User, Design) ->
     {ok, DB} = application:get_env(node, db_module),
     DB:delete(bucket(User, Design), <<"_root">>).
+
+
+create_user(User, Password, EmailAddress) ->
+    {ok, DB} = application:get_env(node, db_module),
+    BCryptPassword = bcrypt:hashpw(Password, bcrypt:gen_salt()),
+    Props1 = [{<<"password[bcrypt]">>, list_to_binary(BCryptPassword)}],
+    Props2 = case EmailAddress of
+		 "" -> 
+		     Props1;
+		 _ ->
+		     [{<<"email-address">>, EmailAddress}|Props1]
+	     end,
+    case DB:exists(bucket(User), <<"_user">>) of
+	false ->
+	    DB:put(bucket(User), <<"_user">>, jiffy:encode({Props2})),
+	    ok;
+	true ->
+	    already_exists
+    end.
 
 get_designs(User) ->
     {ok, DB} = application:get_env(node, db_module),

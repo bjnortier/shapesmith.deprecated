@@ -22,7 +22,7 @@ SS.update_empty = function() {
     }    
 }
 
-SS.new_name_error = function(error) {
+SS.render_design_name_error = function(error) {
     $('#new-name').css('border', 'solid thin red');
     $('#design-name-errors').text(error)
     $('#design-name-errors').show();
@@ -31,8 +31,8 @@ SS.new_name_error = function(error) {
 $('#create-design-button').click(function() {
     var newDesignName = $('#new-name').val().trim();
     if (newDesignName === "") {
-	SS.new_name_error('Required');
-	return;
+	SS.render_design_name_error('please choose a name for the design');
+	return false;
     }
     $.ajax({
         type: 'POST',
@@ -45,7 +45,7 @@ $('#create-design-button').click(function() {
 	    window.location.href = '/' + SS.session.username + '/' + newDesignName + '/modeller.html?commit=' + response.refs.heads.master;
 	},
 	error: function(response) {
-	    SS.new_name_error(JSON.parse(response.responseText));
+	    SS.render_design_name_error(JSON.parse(response.responseText));
         }
     });
     return false;

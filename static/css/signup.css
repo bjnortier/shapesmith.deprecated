@@ -61,33 +61,25 @@ h2 {
     text-decoration: underline;
 }
 
-#design-name input, .field input {
+
+#design-name input {
     font-size: 15px;
     border-radius: 4px;
     vertical-align: middle;
     border: none;
-    width: 100%;
     padding: 10px;
+    width: 300px;
 }
-
-.field-inner {
-    padding: 0px;
-    margin-left: 0px;
-    margin-top: -10px;
-    margin-right: 20px;
-    margin-bottom: 10px;
-}
-
 
 #design-name input:focus {
     outline: none;
 }
 
-input.field, div#create-design-button {
+input#new-name, div#create-design-button {
     margin-top: 10px;
 }
 
-#design-name-errors, errors {
+#design-name-errors {
     border: solid thin red;
     border-radius: 4px;
     font-size: 15px;
@@ -97,6 +89,7 @@ input.field, div#create-design-button {
     color: red;
     display: none;
 }
+
 
 /* http://css-tricks.com/examples/ButtonMaker/# */
 .button {
