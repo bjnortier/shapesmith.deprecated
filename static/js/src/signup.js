@@ -1,15 +1,3 @@
-var SS = SS || {};
-
-SS.render_errors = function(errors) {
-    $('.errors').hide();
-    for (key in errors) {
-	var id = '#' + key + '-errors'
-	$(id).css('border', 'solid thin red');
-	$(id).text(errors[key]);
-	$(id).show();
-    }
-}
-
 $('#signup-button').click(function() {
     var username = $('#username').val().trim();
     var emailAddress = $('#emailAddress').val().trim();
@@ -37,12 +25,3 @@ $('#signup-button').click(function() {
     return false;
 });
 
-$(document).ready(function() {
-    var sameSizeFn = function() {
-        $('#email-address').width($('#email-address-field').width() - 20);
-	$('#email-address').height($('#email-address-button').height());
-	$('#email-address-errors').width($('#email-address-field').width() - 20);
-    };
-    $(window).resize(sameSizeFn);
-    sameSizeFn();
-});

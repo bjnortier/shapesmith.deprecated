@@ -2,9 +2,10 @@ body {
     background-color: #080808;
     background-position: 100% -50%;
     background-repeat: no-repeat;
-    color: #eeeeee;
+    color: #f9f9f9;
     font-family: Helvetica, Arial, sans-serif;
     font-style: normal;
+    font-size: 15px;
 }
 
 
@@ -15,6 +16,10 @@ h1, h2, h3, h4, h5, h6 {
 
 h2 {
     font-weight: normal;
+}
+
+a {
+    color: yellow;
 }
 
 .header {
@@ -61,13 +66,13 @@ h2 {
     text-decoration: underline;
 }
 
-#design-name input, .field input {
-    font-size: 15px;
+.field input {
     border-radius: 4px;
     vertical-align: middle;
     border: none;
     width: 100%;
     padding: 10px;
+    font-size: 15px;
 }
 
 .field-inner {
@@ -79,15 +84,15 @@ h2 {
 }
 
 
-#design-name input:focus {
+input:focus {
     outline: none;
 }
 
-input.field, div#create-design-button {
+input.field {
     margin-top: 10px;
 }
 
-#design-name-errors, .errors {
+.errors {
     border: solid thin red;
     border-radius: 4px;
     font-size: 15px;

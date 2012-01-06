@@ -18,40 +18,49 @@
     <div class="container">
 
      <div class="row">
-       <div class="threecol"></div>
-       <div class="threecol">
+       <div class="fourcol"></div>
+       <div class="fourcol">
 	 <span class="logo"><a href="/"><img src="/static/images/logo_small.png"/></a></span>
        </div>
-       <div class="threecol">
-       </div>
-       <div class="threecol last"></div>
+      <div class="fourcol last"></div>
      </div>
      
      <div class="row">&nbsp;</div>
 
+     <div class="row">
+       <div class="fourcol"></div>
+       <div class="fourcol">
+	 Create an account in one easy step. Already have an account?
+	 <a href="/signin">Sign in here</a>.
+       </div>
+       <div class="fourcol last"></div>
+     </div>
+
+     <div class="row">&nbsp;</div>
+
+
      {{#fields}}
      <div class="row">
-       <div class="threecol"></div>
+       <div class="fourcol"></div>
        <div class="fourcol">
 	 <div class="field">
 	   <div class="field-inner">
-	     <input placeholder="{{placeholder}}" class="field"
-	     id="{{name}}" type="{{type}}"/>
+	     <input placeholder="{{placeholder}}" class="field" id="{{name}}" type="{{type}}"/>
 	     <div class="errors" id="{{name}}-errors">
 	     </div>
 	   </div>
 	 </div>
        </div>
-       <div class="fivecol last"></div>
+       <div class="fourcol last"></div>
      </div>
     {{/fields}}
    
      <div class="row">
-       <div class="fivecol"></div>
-       <div class="twocol">
-	 <div id="signup-button" class="button">Sign up</div>
+       <div class="fourcol"></div>
+       <div class="fourcol">
+	 <div id="signup-button" class="button">create my account</div>
        </div>
-       <div class="threecol last">
+       <div class="fourcol last">
       </div>
      </div>
      
@@ -59,8 +68,8 @@
     
  </body>
 
-  <script type="text/javascript" src="/static/js/src/signup.js">
-</script>
+  <script type="text/javascript" src="/static/js/src/errors.js"></script>
+  <script type="text/javascript" src="/static/js/src/signup.js"></script>
   <script type="text/javascript">
 
     var _gaq = _gaq || [];

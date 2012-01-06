@@ -25,11 +25,11 @@
     <div class="container">
 
      <div class="row">
-	<div class="threecol"></div>
-	<div class="threecol">
+	<div class="fourcol"></div>
+	<div class="fourcol">
 	    <span class="logo"><a href="/"><img src="/static/images/logo_small.png"/></a></span>
 	</div>
-	<div class="threecol">
+	<div class="twocol">
 	  <div class="logged-in-user">
 	    {{#session}}
 	    <span class="username">{{username}}</span>
@@ -37,28 +37,35 @@
 	    {{/session}}
 	  </div>
 	</div>
-	<div class="threecol last"></div>
+	<div class="twocol last"></div>
      </div>
 
      <div class="row">&nbsp;</div>
     
      <div class="row">
-       <div class="threecol"></div>
+       <div class="fourcol"></div>
        <div class="fourcol">
-	 <div id="design-name">
-	   <input placeholder="new design name" class="field" id="new-name" required="required"></input>
-	 </div>
-	 <div id="design-name-errors">
+	 <div class="field">
+	   <div class="field-inner">
+	     <input placeholder="new design name" class="field" id="newDesignName" required="required"></input>
+	     <div class="errors" id="newDesignName-errors">
+	     </div>
+	   </div>
 	 </div>
        </div>
-       <div class="twocol"><div id="create-design-button" class="button">create</div></div>
-       <div class="threecol last"></div>
+       <div class="fourcol last"></div>
      </div>
      
-      <div class="row">&nbsp;</div>
-   
-      <div class="row">
-	<div class="threecol"></div>
+     <div class="row">
+       <div class="fourcol"></div>
+       <div class="fourcol"><div id="create-design-button" class="button">create new design</div></div>
+       <div class="fourcol last"></div>
+     </div>
+     
+     <div class="row">&nbsp;</div>
+
+    <div class="row">
+	<div class="fourcol"></div>
 	<div class="fourcol designs">
 	  <div class="top"><span class="label">my designs</span></div>
 	  {{#designs}}
@@ -76,13 +83,15 @@
 	  </div>
 	  {{/designs}}
 	</div>
-	<div class="fivecolcol last"></div>
+	<div class="fourcol last"></div>
      </div>
    </div>
     
  </body>
 
+  <script type="text/javascript" src="/static/js/src/errors.js"></script>
   <script type="text/javascript" src="/static/js/src/designs.js"></script>
+
   <script type="text/javascript">
 
     var _gaq = _gaq || [];

@@ -22,16 +22,10 @@ SS.update_empty = function() {
     }    
 }
 
-SS.render_design_name_error = function(error) {
-    $('#new-name').css('border', 'solid thin red');
-    $('#design-name-errors').text(error)
-    $('#design-name-errors').show();
-}
-
 $('#create-design-button').click(function() {
-    var newDesignName = $('#new-name').val().trim();
+    var newDesignName = $('#newDesignName').val().trim();
     if (newDesignName === "") {
-	SS.render_design_name_error('please choose a name for the design');
+	SS.render_errors({newDesignName: 'please choose a name for the design'});
 	return false;
     }
     $.ajax({
@@ -42,10 +36,10 @@ $('#create-design-button').click(function() {
 	contentType: 'application/json',
 	success: function(response) {
 	    console.log(response);
-	    window.location.href = '/' + SS.session.username + '/' + newDesignName + '/modeller.html?commit=' + response.refs.heads.master;
+	    window.location.href = '/' + SS.session.username + '/' + newDesignName + '/modeller?commit=' + response.refs.heads.master;
 	},
 	error: function(response) {
-	    SS.render_design_name_error(JSON.parse(response.responseText));
+	    SS.render_errors(JSON.parse(response.responseText));
         }
     });
     return false;
@@ -61,7 +55,7 @@ $('.load-design').click(function() {
         dataType: 'json',
         success: function(root) { 
 	    var commit = root.refs.heads.master;
-	    window.location = designRootUrl + 'modeller.html?commit=' + commit;
+	    window.location = designRootUrl + 'modeller?commit=' + commit;
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
             console.error(jqXHR.responseText);
@@ -73,13 +67,5 @@ $('.load-design').click(function() {
 
 
 $(document).ready(function() {
-    var sameSizeFn = function() {
-        $('#new-name').width($('#design-name').width() - 20);
-        $('#new-name').height($('#create-design-button').height());
-        $('#design-name-errors').width($('#design-name').width() - 20);
-    };
-    $(window).resize(sameSizeFn);
-    sameSizeFn();
     SS.update_empty();
-    
 });
