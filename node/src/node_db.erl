@@ -19,9 +19,12 @@
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([exists/4, create/4, get/4]).
 -export([exists_root/2, put_root/3, get_root/2, delete_root/2]).
--export([create_user/3]).
+-export([create_user/3, validate_password/2]).
 -export([get_designs/1, add_design/2, remove_design/2]).
 -export([get_brep/1, exists_brep/1, put_brep/2]).
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
@@ -70,20 +73,39 @@ delete_root(User, Design) ->
 
 create_user(User, Password, EmailAddress) ->
     {ok, DB} = application:get_env(node, db_module),
-    BCryptPassword = bcrypt:hashpw(Password, bcrypt:gen_salt()),
-    Props1 = [{<<"password[bcrypt]">>, list_to_binary(BCryptPassword)}],
-    Props2 = case EmailAddress of
-		 "" -> 
-		     Props1;
-		 _ ->
-		     [{<<"email-address">>, list_to_binary(EmailAddress)}|Props1]
-	     end,
     case DB:exists(bucket(User), <<"_user">>) of
-	false ->
-	    DB:put(bucket(User), <<"_user">>, jiffy:encode({Props2})),
-	    ok;
-	true ->
-	    already_exists
+    	false ->
+	    {ok, Salt} = node_bcrypt:gen_salt(),
+	    {ok, Hash} = node_bcrypt:hashpw(Password, Salt),
+	    Props1 = [{<<"password[bcrypt]">>, list_to_binary(Hash)}],
+	    Props2 = case EmailAddress of
+			 "" -> 
+			     Props1;
+			 _ ->
+			     [{<<"email-address">>, list_to_binary(EmailAddress)}|Props1]
+		     end,
+
+    	    DB:put(bucket(User), <<"_user">>, jiffy:encode({Props2})),
+    	    ok;
+    	true ->
+    	    already_exists
+    end.
+
+validate_password(User, Password) ->
+    {ok, DB} = application:get_env(node, db_module),
+    case DB:get(bucket(User), <<"_user">>) of
+	undefined ->
+	    user_doesnt_exist;
+	UserJSON ->
+	    {Props} = jiffy:decode(UserJSON),
+	    {_, BCryptHashBin} = lists:keyfind(<<"password[bcrypt]">>, 1, Props),
+	    BCryptHash = binary_to_list(BCryptHashBin),
+	    case node_bcrypt:hashpw(Password, BCryptHash) of
+		{ok, BCryptHash} ->
+		    ok;
+		_ ->
+		    invalid_password
+	    end
     end.
 
 get_designs(User) ->
@@ -151,6 +173,127 @@ bucket(User) ->
     list_to_binary(User).
 
     
-    
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                              UNIT TESTS                                  %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+ 
+
+-ifdef(TEST).
+
+user_exists_test_() ->
+    {setup, 
+     fun() -> 
+	     meck:new(application, [unstick]),
+	     meck:new(db),
+	     meck:expect(application, get_env, fun(node, db_module) -> {ok, db} end),
+	     meck:expect(db, exists, fun(<<"bjnortier">>, <<"_user">>) -> true end)
+     end, 
+     fun(_) -> 
+	     meck:unload(db),
+	     meck:unload(application)
+     end,
+     [
+      ?_assertEqual(already_exists, create_user("bjnortier", "123", "a@b.com")),
+      ?_assert(meck:validate(application)),
+      ?_assert(meck:validate(db))
+     ]
+    }.
+
+create_user_with_email_test_() ->
+    {setup, 
+     fun() -> 
+	     meck:new(application, [unstick]),
+	     meck:new(node_bcrypt),
+	     meck:new(db),
+
+	     meck:expect(application, get_env, fun(node, db_module) -> {ok, db} end),
+	     meck:expect(db, exists, fun(<<"bjnortier">>, <<"_user">>) -> false end),
+	     meck:expect(node_bcrypt, gen_salt, fun() -> {ok, "salt"} end),
+	     meck:expect(node_bcrypt, hashpw, fun("password", "salt") -> {ok, "hash"} end),
+	     meck:expect(db, put, fun(<<"bjnortier">>, <<"_user">>, 
+				      <<"{\"email-address\":\"a@b.com\",\"password[bcrypt]\":\"hash\"}">>) ->
+					  ok 
+				  end)
+     end, 
+     fun(_) -> 
+	     meck:unload(node_bcrypt),
+	     meck:unload(db),
+	     meck:unload(application)
+     end,
+     [
+      ?_assertEqual(ok, create_user("bjnortier", "password", "a@b.com")),
+      ?_assert(meck:validate(application)),
+      ?_assert(meck:validate(db)),
+      ?_assert(meck:validate(node_bcrypt))
+     ]
+    }.
+
+
+create_user_without_email_test_() ->
+    {setup, 
+     fun() -> 
+	     meck:new(application, [unstick]),
+	     meck:new(node_bcrypt),
+	     meck:new(db),
+
+	     meck:expect(application, get_env, fun(node, db_module) -> {ok, db} end),
+	     meck:expect(db, exists, fun(<<"bjnortier">>, <<"_user">>) -> false end),
+	     meck:expect(node_bcrypt, gen_salt, fun() -> {ok, "salt"} end),
+	     meck:expect(node_bcrypt, hashpw, fun("password", "salt") -> {ok, "hash"} end),
+	     meck:expect(db, put, fun(<<"bjnortier">>, <<"_user">>, 
+				      <<"{\"password[bcrypt]\":\"hash\"}">>) ->
+					  ok 
+				  end)
+     end, 
+     fun(_) -> 
+	     meck:unload(node_bcrypt),
+	     meck:unload(db),
+	     meck:unload(application)
+     end,
+     [
+      ?_assertEqual(ok, create_user("bjnortier", "password", "")),
+      ?_assert(meck:validate(application)),
+      ?_assert(meck:validate(db)),
+      ?_assert(meck:validate(node_bcrypt))
+     ]
+    }.
+
+
+validate_password_test_() ->
+    {setup, 
+     fun() -> 
+	     meck:new(application, [unstick]),
+	     meck:new(db),
+	     meck:new(node_bcrypt),
+
+	     meck:expect(application, get_env, fun(node, db_module) -> {ok, db} end),
+	     meck:expect(db, get, fun(<<"bjnortier">>, <<"_user">>) -> 
+					  <<"{\"password[bcrypt]\":\"hash\"}">>;
+				     (<<"foo">>, <<"_user">>) ->
+					  undefined
+				  end),
+
+	     meck:expect(node_bcrypt, hashpw, fun("password", "hash") -> 
+						      {ok, "hash"} ;
+						 ("wrong_password", "hash") ->
+						      {ok, "rubbish"}
+					      end)
+     end, 
+     fun(_) -> 
+	     meck:unload(db),
+	     meck:unload(node_bcrypt),
+	     meck:unload(application)
+     end,
+     [
+      ?_assertEqual(ok, validate_password("bjnortier", "password")),
+      ?_assertEqual(user_doesnt_exist, validate_password("foo", "password")),
+      ?_assertEqual(invalid_password, validate_password("bjnortier", "wrong_password")),
+      ?_assert(meck:validate(application)),
+      ?_assert(meck:validate(db)),
+      ?_assert(meck:validate(node_bcrypt))
+     ]
+    }.
+
+-endif.
 
                                   

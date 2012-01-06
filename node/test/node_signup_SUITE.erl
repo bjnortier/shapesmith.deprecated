@@ -28,14 +28,12 @@ all() ->
 	 validate_username,
 	 validate_email,
 	 validate_password,
-	 create_user
+	 signup_signin
 	].
 
 init_per_suite(Config) ->
     ok = application:load(node),
     application:set_env(node, port, 8001),
-    application:start(inets),
-    application:start(lager),
     ok = application:set_env(node, db_module, node_mem_db),
     ok = node:start(),
     Config.
@@ -43,8 +41,6 @@ init_per_suite(Config) ->
 end_per_suite(_Config) ->
     application:stop(node),
     application:unload(node),
-    application:stop(lager),
-    application:stop(inets),
     ok.
 
 init_per_testcase(_Testcase, Config) ->
@@ -117,7 +113,7 @@ validate_password(_Config) ->
     
     ok.
     
-create_user(_Config) ->
+signup_signin(_Config) ->
     PostBody = jiffy:encode({[{<<"username">>, <<"bjnortier">>},
 			      {<<"password1">>, <<"abc">>},
 			      {<<"password2">>, <<"abc">>}
@@ -131,7 +127,28 @@ create_user(_Config) ->
     {ok,{{"HTTP/1.1",409,_}, ResponseHeaders2, PostResponse2}} = 
 	httpc:request(post, {"http://localhost:8001/signup", [], "application/json", PostBody}, [], []),
     check_json_content_type(ResponseHeaders2),
-    {[{<<"username">>, <<"sorry - this username is already used">>}]} = jiffy:decode(iolist_to_binary(PostResponse2)).
+    {[{<<"username">>, <<"sorry - this username is already used">>}]} = jiffy:decode(iolist_to_binary(PostResponse2)),
+
+    FailedSigninPostBody = jiffy:encode({[{<<"username">>, <<"bjnortier">>},
+					  {<<"password">>, <<"123">>}
+					 ]}),
+    {ok,{{"HTTP/1.1",200,_}, FailedSigninResponseHeaders, FailedSigninResponse}} = 
+	httpc:request(post, {"http://localhost:8001/signin", [], "application/json", FailedSigninPostBody}, [], []),
+    check_json_content_type(ResponseHeaders),
+    {[{<<"password">>, <<"username/password combination is invalid">>}]} =
+	jiffy:decode(iolist_to_binary(FailedSigninResponse)),
+
+    SigninPostBody = jiffy:encode({[{<<"username">>, <<"bjnortier">>},
+				    {<<"password">>, <<"abc">>}
+				   ]}),
+    {ok,{{"HTTP/1.1",200,_}, SigninResponseHeaders, SuccessfulSigninResponse}} = 
+	httpc:request(post, {"http://localhost:8001/signin", [], "application/json", SigninPostBody}, [], []),
+    check_json_content_type(ResponseHeaders),
+    %%{"Set-Cookie", _Token} = lists:keyfind("Set-Cookie", 1, SigninResponseHeaders),
+    {[{<<"redirect">>, <<"/bjnortier/designs">>}]} = jiffy:decode(iolist_to_binary(SuccessfulSigninResponse)).
+
+
+    
 
 check_json_content_type(Headers) ->
     {Headers, {_, "application/json"}} = {Headers, lists:keyfind("content-type", 1, Headers)}.

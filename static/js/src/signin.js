@@ -1,15 +1,11 @@
-$('#signup-button').click(function() {
+$('#signin-button').click(function() {
     var username = $('#username').val().trim();
-    var emailAddress = $('#emailAddress').val().trim();
-    var password1 = $('#password1').val().trim();
-    var password2 = $('#password2').val().trim();
+    var password = $('#password').val().trim();
     var postJson = {username: username,
-		    emailAddress: emailAddress,
-		    password1: password1,
-		    password2: password2};
+		    password: password};
     $.ajax({
         type: 'POST',
-	url: '/signup/',
+	url: '/signin/',
 	data: JSON.stringify(postJson),
 	dataType: 'json',
 	contentType: 'application/json',

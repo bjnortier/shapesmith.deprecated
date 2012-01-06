@@ -17,7 +17,7 @@
 
 -module(node).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([start/0, start_link/0, stop/0]).
+-export([start/0, stop/0]).
 
 ensure_started(App) ->
     case application:start(App) of
@@ -27,20 +27,13 @@ ensure_started(App) ->
             ok
     end.
 
-%% @spec start_link() -> {ok,Pid::pid()}
-%% @doc Starts the app for inclusion in a supervisor tree
-start_link() ->
-    ensure_started(crypto),
-    ensure_started(mochiweb),
-    application:set_env(webmachine, webmachine_logger_module, 
-                        webmachine_logger),
-    ensure_started(webmachine),
-    node_sup:start_link().
-
 %% @spec start() -> ok
 %% @doc Start the node server.
 start() ->
+    ensure_started(inets),
     ensure_started(crypto),
+    ensure_started(bcrypt),
+    ensure_started(lager),
     ensure_started(mochiweb),
     application:set_env(webmachine, webmachine_logger_module, 
                         webmachine_logger),
@@ -53,5 +46,8 @@ stop() ->
     Res = application:stop(node),
     application:stop(webmachine),
     application:stop(mochiweb),
+    application:stop(lager),
+    application:stop(bcrypt),
     application:stop(crypto),
+    application:stop(inets),
     Res.
