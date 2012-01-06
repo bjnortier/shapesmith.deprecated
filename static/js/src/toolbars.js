@@ -199,10 +199,10 @@ $(document).ready(function() {
 
 
 $('#action_save').mouseenter(function() {
-    this.src = '/static/images/save22x22.png';
+    this.src = '/static/images/save22x22_lit.png';
 });
 $('#action_save').mouseleave(function() {
-    this.src = '/static/images/save22x22_transparent.png';
+    this.src = '/static/images/save22x22.png';
 });
 $('#action_save').click(function() {
     SS.save();

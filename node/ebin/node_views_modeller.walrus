@@ -31,7 +31,7 @@
   <div id="messages-container"></div>
   <div id="toolWheel"></div>
   <div id="top-bar">{{design}}
-    <img id="action_save" src="/static/images/save22x22_transparent.png" title="Save this design"/>
+    <img id="action_save" src="/static/images/save22x22.png" title="Save this design"/>
   </div>
   <div id="toolbarStaging">
     <div class="toolbar" id="edit"></div>

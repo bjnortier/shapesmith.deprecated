@@ -17,10 +17,10 @@
 
 -module(node_home_redirect_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([init/1, moved_temporarily/2]).
+-export([init/1, to_html/2]).
 -include_lib("webmachine/include/webmachine.hrl").
 
 init([]) -> {ok, undefined}.
 
-moved_temporarily(ReqData, Context) ->
-    {{true, "/local/designs"}, ReqData, Context}.
+to_html(ReqData, Context) ->
+    {{halt, 302}, wrq:set_resp_header("Location", "/local/designs", ReqData), Context}.
