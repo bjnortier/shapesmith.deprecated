@@ -129,7 +129,7 @@ create_new(_Config) ->
     
     %% Get user designs
     {ok,{{"HTTP/1.1",200,_}, _, GetResponse3}} = 
-	httpc:request(get, {"http://localhost:8001/bjnortier/", []}, [], []),
+	httpc:request(get, {"http://localhost:8001/user/bjnortier/", []}, [], []),
     {[{<<"designs">>,[<<"iphonedock">>]}]} = jiffy:decode(iolist_to_binary(GetResponse3)).
 
 
@@ -165,7 +165,7 @@ delete(_Config) ->
 
     %% Get user's designs
     {ok,{{"HTTP/1.1",200,_}, GetHeaders1, GetResponse1}} = 
-     	httpc:request(get, {"http://localhost:8001/bjnortier/", []}, [], []),
+     	httpc:request(get, {"http://localhost:8001/user/bjnortier/", []}, [], []),
     check_json_content_type(GetHeaders1),
     {[{<<"designs">>, []}]} = jiffy:decode(iolist_to_binary(GetResponse1)),
 

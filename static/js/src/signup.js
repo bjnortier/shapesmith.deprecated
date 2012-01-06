@@ -16,7 +16,7 @@ $('#signup-button').click(function() {
 	success: function(response) {
 	    $('#email-address').css('border', 'none');
 	    $('#email-address-errors').hide();
-	    console.log(response);
+	    window.location.href = '/' + username + '/designs';
 	},
 	error: function(response) {
 	    SS.render_errors(JSON.parse(response.responseText));
