@@ -19,6 +19,7 @@
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
 	 init/1, 
+	 is_authorized/2,
          allowed_methods/2,
 	 content_types_provided/2,
 	 resource_exists/2,
@@ -26,6 +27,7 @@
         ]).
 
 -include_lib("webmachine/include/webmachine.hrl").
+-include("include/node_auth.hrl").
 
 init([]) -> 
     {ok, {}}.

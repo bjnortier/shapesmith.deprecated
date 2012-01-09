@@ -19,19 +19,21 @@
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
 	 init/1, 
+	 is_authorized/2,
          allowed_methods/2,
 	 post_is_create/2,
 	 allow_missing_post/2,
-	 create_path/2,
          content_types_accepted/2,
 	 content_types_provided/2,
 	 resource_exists/2,
          malformed_request/2,
+	 process_post/2,
          accept_content/2,
 	 provide_content/2,
 	 delete_resource/2
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
+-include("include/node_auth.hrl").
 -record(context, {method, adapter, user, design, existing, request_json}).
 
 init([{adapter_mod, Adapter}]) -> 
@@ -50,13 +52,10 @@ content_types_provided(ReqData, Context) ->
     {[{"application/json", provide_content}], ReqData, Context}.
 
 post_is_create(ReqData, Context) ->
-    {true, ReqData, Context}. 
+    {false, ReqData, Context}. 
 
 allow_missing_post(ReqData, Context) ->
     {true, ReqData, Context}.
-
-create_path(ReqData, Context) ->
-    {"not used", ReqData, Context}. 
 
 malformed_request(ReqData, Context = #context{ method='DELETE'}) ->
     {false, ReqData, Context};
@@ -104,6 +103,16 @@ resource_exists(ReqData, Context = #context{ adapter=Adapter,
 	    {Existing =/= undefined, ReqData, Context1}
     end.
 
+process_post(ReqData, Context = #context{ method='POST',
+					  adapter=Adapter, 
+					  user=User, 
+					  design=Design,
+					  request_json=RequestJSON }) ->
+    create_or_update_response(Adapter:create(ReqData, User, Design, RequestJSON),
+			      ReqData,
+			      Context).
+
+
 accept_content(ReqData, Context = #context{ method='PUT',
 					    adapter=Adapter, 
 					    user=User, 
@@ -112,17 +121,7 @@ accept_content(ReqData, Context = #context{ method='PUT',
     
     create_or_update_response(Adapter:update(ReqData, User, Design, RequestJSON),
 			      ReqData,
-			      Context);
-accept_content(ReqData, Context = #context{ method='POST',
-					    adapter=Adapter, 
-					    user=User, 
-					    design=Design,
-					    request_json=RequestJSON }) ->
-    
-    create_or_update_response(Adapter:create(ReqData, User, Design, RequestJSON),
-			      ReqData,
 			      Context).
-
 
 create_or_update_response({ok, ResponseJSON}, ReqData, Context) ->
     {true, node_resource:json_response(ResponseJSON, ReqData), Context};

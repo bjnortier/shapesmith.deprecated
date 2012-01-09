@@ -20,12 +20,13 @@
 -export([
 	 init/1, 
          allowed_methods/2,
+	 is_authorized/2,
 	 content_types_provided/2,
 	 resource_exists/2,
 	 provide_content/2
         ]).
-
 -include_lib("webmachine/include/webmachine.hrl").
+-include("include/node_auth.hrl").
 
 init([]) -> 
     {ok, {}}.

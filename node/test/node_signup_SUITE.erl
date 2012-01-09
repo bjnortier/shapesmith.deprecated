@@ -35,6 +35,7 @@ init_per_suite(Config) ->
     ok = application:load(node),
     application:set_env(node, port, 8001),
     ok = application:set_env(node, db_module, node_mem_db),
+    ok = application:set_env(node, auth_module, node_session_auth),
     ok = node:start(),
     Config.
 
@@ -114,41 +115,58 @@ validate_password(_Config) ->
     ok.
     
 signup_signin(_Config) ->
+    httpc:set_options([{cookies, enabled}]),
     PostBody = jiffy:encode({[{<<"username">>, <<"bjnortier">>},
 			      {<<"password1">>, <<"abc">>},
 			      {<<"password2">>, <<"abc">>}
 			     ]}),
 
-    {ok,{{"HTTP/1.1",200,_}, ResponseHeaders, PostResponse}} = 
-	httpc:request(post, {"http://localhost:8001/signup", [], "application/json", PostBody}, [], []),
+    {ok,{{"HTTP/1.1",201,_}, ResponseHeaders, PostResponse}} = 
+	httpc:request(post, {"http://localhost.shapesmith.net:8001/signup", [], "application/json", PostBody}, [], []),
     check_json_content_type(ResponseHeaders),
     <<"created">> = jiffy:decode(iolist_to_binary(PostResponse)),
-    
     {ok,{{"HTTP/1.1",409,_}, ResponseHeaders2, PostResponse2}} = 
-	httpc:request(post, {"http://localhost:8001/signup", [], "application/json", PostBody}, [], []),
+	httpc:request(post, {"http://localhost.shapesmith.net:8001/signup", [], "application/json", PostBody}, [], []),
     check_json_content_type(ResponseHeaders2),
     {[{<<"username">>, <<"sorry - this username is already used">>}]} = jiffy:decode(iolist_to_binary(PostResponse2)),
 
+    httpc:reset_cookies(),
+
+    %% Failed signin
     FailedSigninPostBody = jiffy:encode({[{<<"username">>, <<"bjnortier">>},
 					  {<<"password">>, <<"123">>}
 					 ]}),
-    {ok,{{"HTTP/1.1",200,_}, FailedSigninResponseHeaders, FailedSigninResponse}} = 
-	httpc:request(post, {"http://localhost:8001/signin", [], "application/json", FailedSigninPostBody}, [], []),
+    {ok,{{"HTTP/1.1",403,_}, FailedSigninResponseHeaders, FailedSigninResponse}} = 
+	httpc:request(post, {"http://localhost.shapesmith.net:8001/signin", [], "application/json", FailedSigninPostBody}, [], []),
     check_json_content_type(ResponseHeaders),
     {[{<<"password">>, <<"username/password combination is invalid">>}]} =
 	jiffy:decode(iolist_to_binary(FailedSigninResponse)),
 
+    {ok,{{"HTTP/1.1",302,_}, _, _}} = 
+	httpc:request(get, {"http://localhost.shapesmith.net:8001/bjnortier/designs/", []}, 
+		      [{autoredirect, false}], []),
+    {ok,{{"HTTP/1.1",302,_}, _, _}} = 
+	httpc:request(post, {"http://localhost:8001/bjnortier/iphonedock/", [], "application/json", "{}"}, [], []),
+    {ok,{{"HTTP/1.1",302,_}, _, _}} = 
+	httpc:request(get, {"http://localhost.shapesmith.net:8001/bjnortier/iphonedock", []}, 
+		      [{autoredirect, false}], []),
+    
+    %% Successful signin
     SigninPostBody = jiffy:encode({[{<<"username">>, <<"bjnortier">>},
 				    {<<"password">>, <<"abc">>}
 				   ]}),
-    {ok,{{"HTTP/1.1",200,_}, SigninResponseHeaders, SuccessfulSigninResponse}} = 
-	httpc:request(post, {"http://localhost:8001/signin", [], "application/json", SigninPostBody}, [], []),
+    {ok,{{"HTTP/1.1",201,_}, SigninResponseHeaders, SuccessfulSigninResponse}} = 
+	httpc:request(post, {"http://localhost.shapesmith.net:8001/signin", [], "application/json", SigninPostBody}, [], []),
     check_json_content_type(ResponseHeaders),
-    %%{"Set-Cookie", _Token} = lists:keyfind("Set-Cookie", 1, SigninResponseHeaders),
-    {[{<<"redirect">>, <<"/bjnortier/designs">>}]} = jiffy:decode(iolist_to_binary(SuccessfulSigninResponse)).
-
-
+    {[{<<"redirect">>, <<"/bjnortier/designs">>}]} = jiffy:decode(iolist_to_binary(SuccessfulSigninResponse)),
     
+    {ok,{{"HTTP/1.1",200,_}, _, _}} = 
+	httpc:request(get, {"http://localhost.shapesmith.net:8001/bjnortier/designs/", []}, [], []),
+    {ok,{{"HTTP/1.1",200,_}, _, _}} = 
+	httpc:request(post, {"http://localhost.shapesmith.net:8001/bjnortier/foo/", [], "application/json", "{}"}, [], []),
+    {ok,{{"HTTP/1.1",200,_}, _, _}} = 
+	httpc:request(get, {"http://localhost.shapesmith.net:8001/bjnortier/foo", []}, [], []).
+
 
 check_json_content_type(Headers) ->
     {Headers, {_, "application/json"}} = {Headers, lists:keyfind("content-type", 1, Headers)}.

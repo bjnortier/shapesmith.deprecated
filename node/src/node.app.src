@@ -43,6 +43,7 @@
 		 ]},
 	 {db_module, node_disk_db},
 	 {disk_db_dir, "db"},
+	 {auth_module, node_local_auth},
 	 {riak_host, {"127.0.0.1", 8087}},
          {port, 8000}]}
  ]}.

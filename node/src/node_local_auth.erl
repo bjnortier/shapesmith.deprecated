@@ -1,4 +1,3 @@
-%% -*- mode: erlang -*-
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil -*-
 %% ex: ts=4 sw=4 et
 %% Copyright 2011 Benjamin Nortier
@@ -15,24 +14,11 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_mesh_adapter).
--author('Benjamin Nortier <bjnortier@gmail.com>').
--export([
-	 methods/1, 
-	 get/3
-        ]).
+-module(node_local_auth).
+-export([session_username/1, create_session/1]).
 
-methods(_ReqData) ->
-    ['GET'].
+session_username(_ReqData) ->
+    "local".
 
-get(ReqData, User, Design) ->
-    SHA = wrq:path_info(sha, ReqData),
-    case node_master:mesh_geom(User, Design, SHA) of
-	{ok, Mesh} ->
-	    Mesh;
-	{error, Err} ->
-	    lager:error("Meshing failed: ~p~n", [Err]),
-	    Error= {[{<<"error">>, <<"Could not mesh geometry">>}]},
-	    {error, Error}
-    end.
-
+create_session(_Username) ->
+    throw(local_auth_should_not_create_a_session).

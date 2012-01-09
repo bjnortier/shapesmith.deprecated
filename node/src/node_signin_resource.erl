@@ -20,6 +20,7 @@
 -export([
 	 init/1, 
          allowed_methods/2,
+	 is_authorized/2,
 	 content_types_provided/2,
 	 resource_exists/2,
 	 provide_content/2,
@@ -30,7 +31,7 @@
 	 malformed_request/2
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
--record(context, {method, email_address}).
+-record(context, {method}).
 
 init([]) -> 
     {ok, #context{}}.
@@ -38,6 +39,11 @@ init([]) ->
 allowed_methods(ReqData, Context) -> 
     Context1 = Context#context{ method=wrq:method(ReqData) },
     {['GET', 'POST'], ReqData, Context1}.
+
+is_authorized(ReqData, Context = #context{ method='GET'}) ->
+    node_resource:redirect_to_designs_if_username_known(ReqData, Context);
+is_authorized(ReqData, Context) ->
+    {true, ReqData, Context}.
 
 content_types_provided(ReqData, Context) ->
     {[{"text/html", provide_content}], ReqData, Context}.
@@ -88,13 +94,16 @@ malformed_request(ReqData, Context = #context{ method='POST'}) ->
 accept_content(ReqData, Context) ->
     Body = wrq:req_body(ReqData),
     {Props} = jiffy:decode(Body),
-    {_, Username} = lists:keyfind(<<"username">>, 1, Props),
-    {_, Password} = lists:keyfind(<<"password">>, 1, Props),
-    case node_db:validate_password(binary_to_list(Username), 
-				   binary_to_list(Password)) of
+    {_, UsernameBin} = lists:keyfind(<<"username">>, 1, Props),
+    {_, PasswordBin} = lists:keyfind(<<"password">>, 1, Props),
+    Username = binary_to_list(UsernameBin),
+    Password = binary_to_list(PasswordBin),
+    case node_db:validate_password(Username, Password) of
 	ok ->
-	    Redirect = "/" ++ binary_to_list(Username) ++ "/designs",
-	    {true, node_resource:json_response({[{<<"redirect">>, list_to_binary(Redirect)}]}, ReqData), Context};
+	    Redirect = "/" ++ Username ++ "/designs",
+	    ReqData1 = node_resource:create_session(ReqData, Username),
+	    {true, node_resource:json_response({[{<<"redirect">>, list_to_binary(Redirect)}]}, 
+					       ReqData1), Context};
 	_ ->
 	    Response = {[{<<"password">>, <<"username/password combination is invalid">>}]},
 	    {{halt, 403}, node_resource:json_response(Response, ReqData), Context}

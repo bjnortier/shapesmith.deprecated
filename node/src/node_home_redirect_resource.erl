@@ -17,10 +17,20 @@
 
 -module(node_home_redirect_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([init/1, to_html/2]).
+-export([init/1, 
+	 to_html/2]).
 -include_lib("webmachine/include/webmachine.hrl").
 
 init([]) -> {ok, undefined}.
 
 to_html(ReqData, Context) ->
-    {{halt, 302}, wrq:set_resp_header("Location", "/local/designs", ReqData), Context}.
+    {ok, AuthModule} = application:get_env(node, auth_module),
+    BaseURL = node_resource:base_url(ReqData),
+    case AuthModule:session_username(ReqData) of
+	undefined ->
+	    Location = node_resource:base_url(ReqData) ++ "/signin",
+	    {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context};
+	Username ->
+	    Location = BaseURL ++ "/" ++ Username ++ "/designs",
+	    {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context}
+    end.

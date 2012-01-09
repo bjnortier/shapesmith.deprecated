@@ -20,6 +20,7 @@
 -export([
 	 init/1, 
          allowed_methods/2,
+	 is_authorized/2,
 	 content_types_provided/2,
 	 resource_exists/2,
 	 provide_content/2,
@@ -34,7 +35,7 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--record(context, {method, email_address}).
+-record(context, {method}).
 
 init([]) -> 
     {ok, #context{}}.
@@ -42,6 +43,11 @@ init([]) ->
 allowed_methods(ReqData, Context) -> 
     Context1 = Context#context{ method=wrq:method(ReqData) },
     {['GET', 'POST'], ReqData, Context1}.
+
+is_authorized(ReqData, Context = #context{ method='GET'}) ->
+    node_resource:redirect_to_designs_if_username_known(ReqData, Context);
+is_authorized(ReqData, Context) ->
+    {true, ReqData, Context}.
 
 content_types_provided(ReqData, Context) ->
     {[{"text/html", provide_content}], ReqData, Context}.
@@ -97,19 +103,22 @@ malformed_request(ReqData, Context = #context{ method='POST'}) ->
 accept_content(ReqData, Context) ->
     Body = wrq:req_body(ReqData),
     {Props} = jiffy:decode(Body),
-    {_, Username} = lists:keyfind(<<"username">>, 1, Props),
-    {_, Password} = lists:keyfind(<<"password1">>, 1, Props),
+    {_, UsernameBin} = lists:keyfind(<<"username">>, 1, Props),
+    {_, PasswordBin} = lists:keyfind(<<"password1">>, 1, Props),
+
+    Username = binary_to_list(UsernameBin),
+    Password = binary_to_list(PasswordBin),
     EmailAddress = case lists:keyfind(<<"emailAddress">>, 1, Props) of
 		       {_, Addr} ->
-			   Addr;
+			   binary_to_list(Addr);
 		       false ->
-			   <<"">>
+			   ""
 		   end,
-    case node_db:create_user(binary_to_list(Username), 
-			     binary_to_list(Password), 
-			     binary_to_list(EmailAddress)) of
+    
+    case node_db:create_user(Username, Password, EmailAddress) of
 	ok ->
-	    {true, node_resource:json_response(<<"created">>, ReqData), Context};
+	    ReqData1 = node_resource:create_session(ReqData, Username),
+	    {true, node_resource:json_response(<<"created">>, ReqData1), Context};
 	already_exists ->
 	    {{halt, 409}, node_resource:json_response({[{<<"username">>, <<"sorry - this username is already used">>}]}, ReqData), Context}
     end.
