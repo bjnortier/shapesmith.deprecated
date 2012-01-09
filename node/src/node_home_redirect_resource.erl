@@ -31,6 +31,5 @@ to_html(ReqData, Context) ->
 	    Location = node_resource:base_url(ReqData) ++ "/signin",
 	    {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context};
 	Username ->
-	    Location = BaseURL ++ "/" ++ Username ++ "/designs",
-	    {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context}
+	    node_resource:redirect_to_designs_if_username_known(ReqData, Context)
     end.

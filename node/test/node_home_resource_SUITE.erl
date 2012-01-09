@@ -56,7 +56,7 @@ end_per_testcase(_Testcase, _Config) ->
 redirect_to_local_designs(_Config) ->
     {ok,{{"HTTP/1.1",302,_}, Headers, _Response}} = 
 	httpc:request(get, {"http://localhost:8001/", []}, [{autoredirect, false}], []),
-    {_, "http://localhost:8001/local/designs"} = lists:keyfind("location", 1, Headers).
+    {_, "http://localhost:8001/local/designs/"} = lists:keyfind("location", 1, Headers).
 
 redirect_to_session_designs(_Config) ->
     PostBody = jiffy:encode({[{<<"username">>, <<"bjnortier">>},
@@ -70,5 +70,5 @@ redirect_to_session_designs(_Config) ->
 
     {ok,{{"HTTP/1.1",302,_}, Headers, _Response}} = 
 	httpc:request(get, {"http://localhost.shapesmith.net:8001/", []}, [{autoredirect, false}], []),
-    {_, "http://localhost.shapesmith.net:8001/bjnortier/designs"} = lists:keyfind("location", 1, Headers).
+    {_, "http://localhost.shapesmith.net:8001/bjnortier/designs/"} = lists:keyfind("location", 1, Headers).
 
