@@ -4,7 +4,14 @@ is_authorized(ReqData, Context) ->
         undefined ->
 	    Location = node_resource:base_url(ReqData) ++ "/signin",
 	    {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context};
-        _Username ->
-	    {true, ReqData, Context}
+        Username ->
+	    User = wrq:path_info(user, ReqData),
+	    if 
+		User =:= Username ->
+		    {true, ReqData, Context};
+		true ->	    
+		    Location = node_resource:base_url(ReqData) ++ "/signin",
+		    {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context}
+	    end
     end.
 

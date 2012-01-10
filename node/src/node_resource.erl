@@ -48,3 +48,6 @@ redirect_to_designs_if_username_known(ReqData, Context) ->
 	    Location = node_resource:base_url(ReqData) ++ "/" ++ Username ++ "/designs/",
 	    {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context}
     end.
+
+
+	    

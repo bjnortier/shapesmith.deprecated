@@ -12,7 +12,7 @@ body {
     font-size: 85%;
     line-height: 1em; /*color: #393939;*/
     color: #444444;
-    background-color: #080808;
+    background-color: #020202;
 }
 
 
@@ -71,32 +71,80 @@ img#logo {
     bottom: 0px;
 }
 
-#top-bar {
-    margin-left: auto;
-    margin-right: auto;
-    width: 200px;
-
-    color: white;
-
-    border-bottom: 1px solid #3f8fd2;
-    background-color: #0b5fa5;
-
-    background: -webkit-gradient(linear, left top, left bottom, from(#0b5fa5), to(#25547b));
-    background: -webkit-linear-gradient(top, #0b5fa5, #25547b);
-    background: -moz-linear-gradient(top, #0b5fa5, #25547b);
-    background: -ms-linear-gradient(top, #0b5fa5, #25547b);
-    background: -o-linear-gradient(top, #25547b, #25547b);
-
-    padding: 10px;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    position: relative;
+#design-details {
+    position: absolute;
+    left: 0;
+    top: 10px;
 }
 
-#action_save {
+#session {
     position: absolute;
-    right: 10px;
-    top: 5px;
+    top: 10px;
+    right: 0;
+    text-align: right;
+}
+
+.top-menu span {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.top-menu {
+    color: #eeeeee;
+    padding: 5px;
+}
+
+.top-menu span.action {
+    padding: 5px;
+    border-radius: 5px;
+
+    border: 1px solid #333333;
+    background-color: #333333;
+    text-shadow: 1px 0px #666666;
+
+    background: linear-gradient(top, #333333, #111111);
+    background: -webkit-linear-gradient(top, #333333, #111111);
+    background: -moz-linear-gradient(top, #333333, #111111);
+    background: -ms-linear-gradient(top, #333333, #111111);
+    background: -o-linear-gradient(top, #333333, #111111);
+}
+
+.top-menu span.action:hover {
+    background: none;
+    border: solid thin #043c6b;
+
+    border-top: solid thin #66a1d2;
+    border-left: solid thin #0b5fa5;
+    border-right: solid thin #0b5fa5;
+
+    background: -webkit-gradient(linear, left top, left bottom, from(#3f8fd2), to(#25547b));
+    background: -webkit-linear-gradient(top, #3f8fd2, #0b5fa5);
+    background: -moz-linear-gradient(top, #3f8fd2, #25547b);
+    background: -ms-linear-gradient(top, #3f8fd2, #25547b);
+    background: -o-linear-gradient(top, #3f8fd2, #25547b);
+
+}
+
+.top-menu a {
+    color: white;
+    text-decoration: none;
+}
+
+.top-menu span {
+    opacity: 1;
+}
+
+/*.top-menu:hover > span, #design-name, #username {
+    opacity: 1;
+    -webkit-transition: opacity 0.1s linear;
+}*/
+
+#action-save {
+    cursor: pointer;
+}
+
+#design-name {
+    margin-top: -5px;
 }
 
 .toolbar {
@@ -144,8 +192,6 @@ img#logo {
 #geom-model-doc table tr.validation-error {
     background-color: #c00;
 }
-
-
 
 #geom-model-doc table tr.selected {
     background-color: #eeee00;

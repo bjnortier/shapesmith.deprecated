@@ -26,18 +26,17 @@
 
      <div class="row">
 	<div class="fourcol"></div>
-	<div class="fourcol">
+	<div class="twocol">
 	    <span class="logo"><a href="/"><img src="/static/images/logo_small.png"/></a></span>
 	</div>
 	<div class="twocol">
 	  <div class="logged-in-user">
 	    {{#session}}
-	    <span class="username">{{username}}</span>
-	    <span class="separator">|</span><span class="logout"><a href="">log out</a></span>
+	    <span class="logout"><a href="/signout">log out</a></span>
 	    {{/session}}
 	  </div>
 	</div>
-	<div class="twocol last"></div>
+	<div class="fourcol last"></div>
      </div>
 
      <div class="row">&nbsp;</div>
@@ -69,15 +68,14 @@
 	<div class="fourcol designs">
 	  <div class="top"><span class="label">my designs</span></div>
 	  {{#designs}}
-	  <div class="design" id="design-{{name}}">
-	    <span class="label">
-	      <a class="load-design" href="/{{username}}/{{name}}/">{{name}}</a>
-	    </span>
-	    <span	id="delete-button-{{name}}" class="delete-button">
+	  <div class="design" id="design-{{name}}" onclick="SS.load_design('{{username}}', '{{name}}')">
+	    <span class="label">{{name}}</span>
+	    <span id="delete-button-{{name}}" class="delete-button">
 	    </span>
 	    <script type="text/javascript">
 	      $('#delete-button-{{name}}').click(function() {
-	      SS.delete_design('{{name}}');
+	      SS.delete_design('{{name}}', 'design-{{name}}');
+	      return false;
 	      });
 	    </script>
 	  </div>

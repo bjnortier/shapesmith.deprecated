@@ -1,4 +1,22 @@
 
+SS.load_design = function(username, name) {
+    var designUrl = '/' + username + '/' + name + '/';
+    $.ajax({
+        type: 'GET',
+        url: designUrl,
+        dataType: 'json',
+        success: function(root) { 
+	    var commit = root.refs.heads.master;
+	    window.location = designUrl + 'modeller?commit=' + commit;
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+            console.error(jqXHR.responseText);
+	}
+    });
+
+    return false;
+}
+
 SS.delete_design = function(name) {
     var answer = confirm ("This will permanently delete the design. Are you sure?")
     if (answer) {
@@ -45,25 +63,6 @@ $('#create-design-button').click(function() {
     return false;
 });
 
-$('.load-design').click(function() {
-    var designRootUrl = this.href;
-    console.info(designRootUrl);
-    
-    $.ajax({
-        type: 'GET',
-        url: designRootUrl,
-        dataType: 'json',
-        success: function(root) { 
-	    var commit = root.refs.heads.master;
-	    window.location = designRootUrl + 'modeller?commit=' + commit;
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-            console.error(jqXHR.responseText);
-	}
-    });
-
-    return false;
-});
 
 
 $(document).ready(function() {

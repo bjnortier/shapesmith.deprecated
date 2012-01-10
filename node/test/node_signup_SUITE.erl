@@ -28,7 +28,7 @@ all() ->
 	 validate_username,
 	 validate_email,
 	 validate_password,
-	 signup_signin
+	 signup_signin_signout
 	].
 
 init_per_suite(Config) ->
@@ -114,7 +114,7 @@ validate_password(_Config) ->
     
     ok.
     
-signup_signin(_Config) ->
+signup_signin_signout(_Config) ->
     httpc:set_options([{cookies, enabled}]),
     PostBody = jiffy:encode({[{<<"username">>, <<"bjnortier">>},
 			      {<<"password1">>, <<"abc">>},
@@ -136,7 +136,7 @@ signup_signin(_Config) ->
     FailedSigninPostBody = jiffy:encode({[{<<"username">>, <<"bjnortier">>},
 					  {<<"password">>, <<"123">>}
 					 ]}),
-    {ok,{{"HTTP/1.1",403,_}, FailedSigninResponseHeaders, FailedSigninResponse}} = 
+    {ok,{{"HTTP/1.1",403,_}, _, FailedSigninResponse}} = 
 	httpc:request(post, {"http://localhost.shapesmith.net:8001/signin", [], "application/json", FailedSigninPostBody}, [], []),
     check_json_content_type(ResponseHeaders),
     {[{<<"password">>, <<"username/password combination is invalid">>}]} =
@@ -158,14 +158,34 @@ signup_signin(_Config) ->
     {ok,{{"HTTP/1.1",201,_}, SigninResponseHeaders, SuccessfulSigninResponse}} = 
 	httpc:request(post, {"http://localhost.shapesmith.net:8001/signin", [], "application/json", SigninPostBody}, [], []),
     check_json_content_type(ResponseHeaders),
+    {_, SetCookie} = lists:keyfind("set-cookie", 1, SigninResponseHeaders),
+    [SessionCookie, "Domain=.shapesmith.net"," Path=/"] = string:tokens(SetCookie, ";"),
     {[{<<"redirect">>, <<"/bjnortier/designs">>}]} = jiffy:decode(iolist_to_binary(SuccessfulSigninResponse)),
     
     {ok,{{"HTTP/1.1",200,_}, _, _}} = 
 	httpc:request(get, {"http://localhost.shapesmith.net:8001/bjnortier/designs/", []}, [], []),
     {ok,{{"HTTP/1.1",200,_}, _, _}} = 
-	httpc:request(post, {"http://localhost.shapesmith.net:8001/bjnortier/foo/", [], "application/json", "{}"}, [], []),
+	httpc:request(post, {"http://localhost.shapesmith.net:8001/bjnortier/designA/", [], "application/json", "{}"}, [], []),
     {ok,{{"HTTP/1.1",200,_}, _, _}} = 
-	httpc:request(get, {"http://localhost.shapesmith.net:8001/bjnortier/foo", []}, [], []).
+	httpc:request(get, {"http://localhost.shapesmith.net:8001/bjnortier/designA", []}, [], []),
+    {ok,{{"HTTP/1.1",302,_}, _, _}} = 
+	httpc:request(get, {"http://localhost.shapesmith.net:8001/foo/designB", []}, [{autoredirect, false}], []),
+
+    %% Signout
+    httpc:reset_cookies(),
+    {ok,{{"HTTP/1.1",200,_}, _, _}} = 
+	httpc:request(get, {"http://localhost.shapesmith.net:8001/bjnortier/designs/", [{"set-cookie", SessionCookie}]}, [], []),
+
+    {ok,{{"HTTP/1.1",302,_}, SignoutHeaders, _}} = 
+	httpc:request(get, {"http://localhost.shapesmith.net:8001/signout", []}, [{autoredirect, false}], []),
+    {_, "http://localhost.shapesmith.net:8001"} = lists:keyfind("location", 1, SignoutHeaders),
+
+    {ok,{{"HTTP/1.1",302,_}, _, _}} = 
+	httpc:request(get, {"http://localhost.shapesmith.net:8001/bjnortier/designs/", [{"set-cookie", SessionCookie}]}, [{autoredirect, false}], []),
+
+
+    ok.
+
 
 
 check_json_content_type(Headers) ->

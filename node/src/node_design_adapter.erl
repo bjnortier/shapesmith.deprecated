@@ -28,9 +28,10 @@ methods(_ReqData) ->
     ['GET', 'POST', 'DELETE'].
 
 validate(_ReqData, _User, Design, RequestJSON) ->
-    case {re:run(Design, "^[a-zA-Z0-9-_\.]+$"), RequestJSON} of
+    case {re:run(Design, "^[a-zA-Z0-9-_]+$"), RequestJSON} of
 	{nomatch, _} ->
-	    {error, <<"design can only contain letters, numbers, dashes, underscores and dots">>};
+	    {error, {[{<<"newDesignName">>, 
+		       <<"design name can only contain letters, numbers, dashes and underscores">>}]}};
 	{{match, _}, {[]}} ->
 	    ok;
 	_ ->
@@ -50,7 +51,7 @@ create(_ReqData, User, Design, {[]}) ->
 	    ok = node_db:add_design(User, Design),
 	    {ok, Root};
 	_ ->
-	    {error, 400, <<"already exists">>}
+	    {error, 400, {[{<<"newDesignName">>, <<"already exists">>}]}}
     end.
 
 get(_ReqData, User, Design) ->

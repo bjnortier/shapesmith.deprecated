@@ -28,6 +28,8 @@ methods(_ReqData) ->
 get(ReqData, User, Design) ->
     SHA = wrq:path_info(sha, ReqData),
     case node_master:mesh_geom(User, Design, SHA) of
+	geometry_doesnt_exist ->
+	    undefined;
 	{ok, Mesh} ->
 	    Mesh;
 	{error, Err} ->

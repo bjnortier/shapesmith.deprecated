@@ -34,7 +34,7 @@ end_per_testcase(_Testcase, _Config) ->
 simple(_Config) ->
     %% Not found
     {ok,{{"HTTP/1.1",404,_}, _, _}} = 
-	httpc:request(get, {"http://localhost:8001/mesh/abc", []}, [], []),
+     	httpc:request(get, {"http://localhost:8001/local/iphonedock/mesh/abc", []}, [], []),
 
     %% Create
     GeomA = {[{<<"type">>, <<"sphere">>},
@@ -42,11 +42,11 @@ simple(_Config) ->
 			       {<<"y">>, 0},
 			       {<<"z">>, 0}]}},
 	      {<<"parameters">>, {[{<<"r">>, 1.0}]}}]},
-    {ok, Id} = node_master:create_geom("bjnortier", "iphonedock", GeomA),
+    {ok, Id} = node_master:create_geom("local", "iphonedock", GeomA),
     
     %% Get
     {ok,{{"HTTP/1.1",200,_}, _, GetResponse}} = 
-	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/mesh/" ++ Id, []}, [], []),
+	httpc:request(get, {"http://localhost:8001/local/iphonedock/mesh/" ++ Id, []}, [], []),
     {_} = jiffy:decode(iolist_to_binary(GetResponse)),
 
     ok.

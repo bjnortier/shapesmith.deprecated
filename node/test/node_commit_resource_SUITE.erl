@@ -31,14 +31,10 @@ init_per_suite(Config) ->
     ok = application:load(node),
     application:set_env(node, port, 8001),
     application:set_env(node, db_module, node_mem_db),
-    application:start(inets),
-    application:start(lager),
     ok = node:start(),
     Config.
 
 end_per_suite(_Config) ->
-    application:stop(lager),
-    application:stop(inets),
     application:stop(node),
     application:unload(node),
     ok.
@@ -75,7 +71,7 @@ creation(_Config) ->
     %% Create geometry
     Commit = {[{<<"parent">>, <<"abc56">>},
                {<<"geoms">>, [<<"ab3f1">>, <<"9a0eb">>]}]},
-    CreateURL = "http://localhost:8001/bjnortier/iphonedock/commit/", 
+    CreateURL = "http://localhost:8001/local/iphonedock/commit/", 
     {ok,{{"HTTP/1.1",200,_}, CreateHeaders, PostResponse}} = 
 	httpc:request(post, {CreateURL, [], "application/json", jiffy:encode(Commit)}, [], []),
 
@@ -84,7 +80,7 @@ creation(_Config) ->
       {<<"SHA">>, SHABin}]} = jiffy:decode(iolist_to_binary(PostResponse)),
     Path = binary_to_list(PathBin),
     SHA = binary_to_list(SHABin),
-    "/bjnortier/iphonedock/commit/" ++ SHA = Path,
+    "/local/iphonedock/commit/" ++ SHA = Path,
 
     %% Get the created commit
     {ok,{{"HTTP/1.1",200,_}, GetHeaders, GetResponse}} = 

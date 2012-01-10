@@ -15,7 +15,10 @@
 %%   limitations under the License.
 
 -module(node_session_auth).
--export([session_username/1, create_session/1]).
+-export([session_username/1, 
+         create_session/1, 
+         delete_session/1, 
+         add_session_walrus_ctx/2]).
 
     
 session_username(ReqData) ->
@@ -42,6 +45,16 @@ create_session(Username) ->
     {ok, DB} = application:get_env(node, db_module),
     ok = DB:put(<<"_sessions">>, list_to_binary(SessionSHA), jiffy:encode(JSON)),
     SessionSHA.
+
+delete_session(SessionSHA) ->
+    {ok, DB} = application:get_env(node, db_module),
+    DB:delete(<<"_sessions">>, list_to_binary(SessionSHA)),
+    ok.
+
+add_session_walrus_ctx(User, WalrusContext) ->
+    [{session, [[{username, User}]]}|WalrusContext].
+		      
+    
 
     
     

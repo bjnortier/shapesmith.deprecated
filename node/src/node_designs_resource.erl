@@ -48,9 +48,13 @@ provide_content(ReqData, Context) ->
 			end,
 			node_db:get_designs(User)),
 
-    WalrusContext =  [{username, User}, 
+    WalrusContext =  [{username, User},
 		      {designs, Designs}],
-    Rendered = node_walrus:render_template(node_views_designs, WalrusContext),
+
+    {ok, AuthModule} = application:get_env(node, auth_module),
+    WalrusContext1 = AuthModule:add_session_walrus_ctx(User, WalrusContext),
+
+    Rendered = node_walrus:render_template(node_views_designs, WalrusContext1),
     {Rendered, node_resource:prevent_caching(ReqData), Context}.
 
 

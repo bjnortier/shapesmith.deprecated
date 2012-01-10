@@ -4,9 +4,11 @@ $('#signup-button').click(function() {
     var password1 = $('#password1').val().trim();
     var password2 = $('#password2').val().trim();
     var postJson = {username: username,
-		    emailAddress: emailAddress,
 		    password1: password1,
 		    password2: password2};
+    if (emailAddress) {
+	postJson.emailAddress = emailAddress;
+    }
     $.ajax({
         type: 'POST',
 	url: '/signup/',

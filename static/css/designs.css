@@ -159,16 +159,7 @@ input.field {
     background: #000000;
     border-right: 1px solid #333333;
     border-left: 1px solid #333333;
-}
-
-.design a {
-    color: #3f8fd2;
-    text-decoration: none;
-    font-weight:400;
-}
-
-.design a:hover {
-    text-decoration: underline;
+    
 }
 
 .design {
@@ -200,6 +191,7 @@ input.field {
 .design:hover {
     background: #1c1c1c;
     color: white;
+    cursor: pointer;
 }
 
 .design:hover a {

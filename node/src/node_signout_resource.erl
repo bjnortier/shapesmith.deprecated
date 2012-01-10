@@ -1,4 +1,4 @@
-%% -*- mode: erlang -*-
+ %% -*- mode: erlang -*-
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil -*-
 %% ex: ts=4 sw=4 et
 %% Copyright 2011 Benjamin Nortier
@@ -15,22 +15,19 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_modeller_resource).
+-module(node_signout_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
 	 init/1, 
-	 is_authorized/2,
          allowed_methods/2,
 	 content_types_provided/2,
 	 resource_exists/2,
 	 provide_content/2
         ]).
-
 -include_lib("webmachine/include/webmachine.hrl").
--include("include/node_auth.hrl").
 
 init([]) -> 
-    {ok, {}}.
+    {ok, []}.
 
 allowed_methods(ReqData, Context) -> 
     {['GET'], ReqData, Context}.
@@ -42,14 +39,12 @@ resource_exists(ReqData, Context) ->
     {true, ReqData, Context}.
 
 provide_content(ReqData, Context) ->
-    User = wrq:path_info(user, ReqData),
-    Design = wrq:path_info(design, ReqData),
-    WalrusContext =  [{username, User},
-		      {design, Design}],
-
-    {ok, AuthModule} = application:get_env(node, auth_module),
-    WalrusContext1 = AuthModule:add_session_walrus_ctx(User, WalrusContext),
-
-    Rendered = node_walrus:render_template(node_views_modeller, WalrusContext1),
-    {Rendered, node_resource:prevent_caching(ReqData), Context}.
-
+    case wrq:get_cookie_value("session", ReqData) of
+	undefined ->
+	    ok;
+	SessionSHA ->
+	    {ok, AuthModule} = application:get_env(node, auth_module),
+	    AuthModule:delete_session(SessionSHA)
+    end,
+    Location = node_resource:base_url(ReqData),
+    {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context}.

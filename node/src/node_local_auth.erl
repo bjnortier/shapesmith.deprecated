@@ -15,10 +15,19 @@
 %%   limitations under the License.
 
 -module(node_local_auth).
--export([session_username/1, create_session/1]).
+-export([session_username/1, 
+         create_session/1, 
+         delete_session/1, 
+         add_session_walrus_ctx/2]).
 
 session_username(_ReqData) ->
     "local".
 
 create_session(_Username) ->
     throw(local_auth_should_not_create_a_session).
+
+delete_session(_SessionSHA) ->
+    ok.
+
+add_session_walrus_ctx(_User, WalrusContext) ->
+    WalrusContext.

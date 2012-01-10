@@ -182,18 +182,14 @@ validate_passwords({Props}) ->
 validate_email({Props}) ->
     case lists:keyfind(<<"emailAddress">>, 1, Props) of
 	{_, EmailAddress} ->
-	    String = string:strip(binary_to_list(EmailAddress)),
-	    case String of
-		"" ->
+	    String = binary_to_list(EmailAddress),
+	    %% From http://html5.org/tools/web-apps-tracker?from=6883&to=6884
+            Pattern = "^[a-zA-Z0-9.!#$%&amp;'*+-/=?\\^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$",
+	    case re:run(String, Pattern, [caseless]) of
+		{match,[_]} ->
 		    ok;
-		_ ->
-		    Pattern = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$",
-		    case re:run(String, Pattern, [caseless]) of
-			{match,[_]} ->
-			    ok;
-			nomatch ->
-			    {error, {[{<<"emailAddress">>, <<"invalid email address">>}]}}
-		    end
+		nomatch ->
+		    {error, {[{<<"emailAddress">>, <<"invalid email address">>}]}}
 	    end;
 	_ ->
 	    ok
@@ -230,22 +226,16 @@ validate_username_test_() ->
     ].
 
 validate_email_test_() ->
+    Invalid = {error, {[{<<"emailAddress">>, <<"invalid email address">>}]}},
     [
-     ?_assertEqual({error, {[{<<"emailAddress">>, <<"invalid email address">>}]}}, 
-		   validate_email({[{<<"emailAddress">>,
-				     <<"bjnortier@gmail">>}]})),
-     ?_assertEqual({error, {[{<<"emailAddress">>, <<"invalid email address">>}]}}, 
-		   validate_email({[{<<"emailAddress">>,
-				     <<"bjnortier@">>}]})),
-     ?_assertEqual({error, {[{<<"emailAddress">>, <<"invalid email address">>}]}}, 
-		   validate_email({[{<<"emailAddress">>,
-				     <<"bjnortier">>}]})),
-     ?_assertEqual(ok, validate_email({[{<<"emailAddress">>,
-					 <<"">>}]})),
-     ?_assertEqual(ok, validate_email({[{<<"emailAddress">>,
-					 <<"bjnortier@gmail.com">>}]})),
-     ?_assertEqual(ok, validate_email({[{<<"emailAddress">>,
-					 <<"  bjnortier@gmail.com   ">>}]}))
+     ?_assertEqual(Invalid, validate_email({[{<<"emailAddress">>, <<"bjnortier@">>}]})),
+     ?_assertEqual(Invalid, validate_email({[{<<"emailAddress">>, <<"bjnortier">>}]})),
+     ?_assertEqual(Invalid, validate_email({[{<<"emailAddress">>, <<"">>}]})), 
+     ?_assertEqual(Invalid, validate_email({[{<<"emailAddress">>, <<" bjnortier@gmail.com ">>}]})),
+     ?_assertEqual(ok, validate_email({[{<<"emailAddress">>, <<"bjnortier@gmail.com">>}]})),
+     %% Weird, but correct according to the spec
+     %% http://www.whatwg.org/specs/web-apps/current-work/multipage/states-of-the-type-attribute.html#e-mail-state-(type=email)
+     ?_assertEqual(ok, validate_email({[{<<"emailAddress">>, <<"bjnortier@gmail">>}]}))
     ].
 
 validate_password_test_() ->
