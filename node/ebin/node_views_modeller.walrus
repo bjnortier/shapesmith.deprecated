@@ -31,7 +31,7 @@
   <div id="messages-container"></div>
   <div id="black-overlay"></div>
   <div id="thingiverse-export">
-    <div class="heading">Export to thingiverse</div>
+    <div class="heading">Export to Thingiverse</div>
     <div class="form">
       <form method="POST" action="http://www.thingiverse.com/api/upload"  id="thingiyverse-export-form">
 	<input type="hidden" name="url" value="{{public_stl_url_base_64}}"/>
