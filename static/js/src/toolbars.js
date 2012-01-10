@@ -119,12 +119,6 @@ $(document).ready(function() {
                function(selected) { 
 		   copy(selected)
 	       }).render($("#edit"));
-    new Action("Export to STL", "/static/images/stl.png", 
-               function(selected) { 
-		   var pattern = /^\/geom\/(.*)$/;
-		   var id = selectionManager.getSelected()[0].match(pattern)[1];
-		   window.location = '/stl/' + id; 
-	       }).render($("#edit"));
 
     /*
      * Primitives
@@ -199,4 +193,9 @@ $(document).ready(function() {
 
 $('#action-save').click(function() {
     SS.save();
+});
+
+
+$('#action-export-stl').click(function() {
+    window.location = '/' + SS.session.username + '/' + SS.session.design + '/stl/' + SS.session.commit + '/';
 });

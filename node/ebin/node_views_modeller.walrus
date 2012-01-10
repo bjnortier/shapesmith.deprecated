@@ -33,6 +33,7 @@
   <div class="top-menu" id="design-details">
     <span id="design-name">{{design}}</span>
     <span class="action" id="action-save">save</span>
+    <span class="action" id="action-export-stl">stl</span>
   </div>
   <div class="top-menu" id="session">
     <span class="action"><a href="/{{username}}/designs">my designs</a></span>
