@@ -27,7 +27,8 @@ to_html(ReqData, Context) ->
     {ok, AuthModule} = application:get_env(node, auth_module),
     case AuthModule:session_username(ReqData) of
 	undefined ->
-	    Location = node_resource:base_url(ReqData) ++ "/signin",
+	    {ok, Host} = application:get_env(node, host),
+	    Location = Host ++ "/signin",
 	    {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context};
 	_Username ->
 	    node_resource:redirect_to_designs_if_username_known(ReqData, Context)

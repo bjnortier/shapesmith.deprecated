@@ -46,8 +46,10 @@ resource_exists(ReqData, Context) ->
 provide_content(ReqData, Context) ->
     User = wrq:path_info(user, ReqData),
     Design = wrq:path_info(design, ReqData),
+    Commit = wrq:get_qs_value("commit", ReqData),
     WalrusContext =  [{username, User},
-		      {design, Design}],
+		      {design, Design},
+		      {commit, Commit}],
 
     {ok, AuthModule} = application:get_env(node, auth_module),
     WalrusContext1 = AuthModule:add_session_walrus_ctx(User, WalrusContext),

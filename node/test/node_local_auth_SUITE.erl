@@ -30,6 +30,7 @@ all() ->
 init_per_suite(Config) ->
     ok = application:load(node),
     application:set_env(node, port, 8001),
+    application:set_env(node, host, "http://localhost:8001"),
     ok = application:set_env(node, auth_module, node_local_auth),
     ok = node:start(),
     Config.

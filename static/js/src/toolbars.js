@@ -195,7 +195,23 @@ $('#action-save').click(function() {
     SS.save();
 });
 
-
 $('#action-export-stl').click(function() {
     window.location = '/' + SS.session.username + '/' + SS.session.design + '/stl/' + SS.session.commit + '/';
+});
+
+$('#action-export-thingiverse').click(function() {
+    $('#black-overlay').show();
+    $('#thingiverse-export').show();
+});
+
+$('#thingiverse-export input.ok').click(function() {
+    $('#black-overlay').hide();
+    $('#thingiverse-export').hide();
+    return true;
+});
+
+$('#thingiverse-export input.cancel').click(function() {
+    $('#black-overlay').hide();
+    $('#thingiverse-export').hide();
+    return false;
 });

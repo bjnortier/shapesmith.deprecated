@@ -20,7 +20,6 @@
 -export([json_response/2, 
 	 prevent_caching/1, 
 	 create_session/2,
-	 base_url/1, 
 	 redirect_to_signin_if_not_authorized/2,
 	 forbidden_if_not_authorized/2,
 	 redirect_to_designs_if_username_known/2]).
@@ -39,25 +38,21 @@ prevent_caching(ReqData) ->
     wrq:set_resp_header(
       "Cache-Control", "no-cache, must-revalidate", ReqData).
 
-base_url(ReqData) ->
-    Scheme = atom_to_list(ReqData#wm_reqdata.scheme),
-    Host = string:join(lists:reverse(wrq:host_tokens(ReqData)), "."),
-    Port = integer_to_list(wrq:port(ReqData)),
-    Scheme ++ "://" ++ Host ++ ":" ++ Port.
-
 redirect_to_designs_if_username_known(ReqData, Context) ->
     {ok, AuthModule} = application:get_env(node, auth_module),
     case AuthModule:session_username(ReqData) of
         undefined ->
 	    {true, ReqData, Context};
         Username ->
-	    Location = node_resource:base_url(ReqData) ++ "/" ++ Username ++ "/designs/",
+	    {ok, Host} = application:get_env(node, host),
+	    Location = Host ++ "/" ++ Username ++ "/designs/",
 	    {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context}
     end.
 
 
 redirect_to_signin_if_not_authorized(ReqData, Context) ->
-    Location = node_resource:base_url(ReqData) ++ "/signin",
+    {ok, Host} = application:get_env(node, host),
+    Location = Host ++ "/signin",
     is_authorized_common(ReqData, Context, 302, wrq:set_resp_header("Location", Location, ReqData)).
 	    
 forbidden_if_not_authorized(ReqData, Context) ->

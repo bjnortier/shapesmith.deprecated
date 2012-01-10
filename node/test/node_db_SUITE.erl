@@ -43,6 +43,7 @@ init_per_testcase(in_mem, Config) ->
 init_per_testcase(riak, Config) ->
     ok = application:load(node),
     application:set_env(node, port, 8001),
+    application:set_env(node, riak_host, {"127.0.0.1", 8087}),
     application:start(inets),
     ok = node:start(),
     Config;

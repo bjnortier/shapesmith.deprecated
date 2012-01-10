@@ -46,5 +46,5 @@ provide_content(ReqData, Context) ->
 	    {ok, AuthModule} = application:get_env(node, auth_module),
 	    AuthModule:delete_session(SessionSHA)
     end,
-    Location = node_resource:base_url(ReqData),
-    {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context}.
+    {ok, Host} = application:get_env(node, host),
+    {{halt, 302}, wrq:set_resp_header("Location", Host, ReqData), Context}.

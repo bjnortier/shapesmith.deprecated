@@ -29,15 +29,41 @@
   <img id="logo" src="/static/images/logo_small.png"/>
   <div id="progress-container"></div>
   <div id="messages-container"></div>
+  <div id="black-overlay"></div>
+  <div id="thingiverse-export">
+    <div class="heading">Export to thingiverse</div>
+    <div class="form">
+      <form method="POST" action="http://www.thingiverse.com/api/upload">
+	<input type="hidden" name="url" value="{{commit}}"/>
+	<input type="hidden" name="service" value="Shapesmith"/>
+	<input type="hidden" name="service_url" value="aHR0cDovL3NoYXBlc21pdGgubmV0">
+	<div class="inner1">
+	  <input type="text" placeholder="name" name="name" value="{{design}}"/><br>
+	</div>
+	<div class="inner1">
+	  <textarea placeholder="description" name="description" value=""></textarea><br>
+	</div>
+	<div class="inner2">
+	  <input class="ok" type="submit" value="export"/>
+	</div>
+	<div class="inner2">
+	  <input class="cancel" type="submit" value="cancel"/>
+	</div>
+    </form>
+    </div>
+    <div class="footer"></div>
+  </div>
   <div id="toolWheel"></div>
   <div class="top-menu" id="design-details">
     <span id="design-name">{{design}}</span>
     <span class="action" id="action-save">save</span>
     <div id="exports">
-      <span class="action">export</span>
+      <span class="action">export&hellip;</span>
       <div id="export-options">
 	<span class="action" id="action-export-stl">stl</span>
-	<span class="action" id="action-export-stl">thingiverse</span>
+	{{#session}}
+	<span class="action" id="action-export-thingiverse">thingiverse</span>
+	{{/session}}
       </div>
     </div>
   </div>

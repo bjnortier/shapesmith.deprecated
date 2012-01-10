@@ -30,7 +30,8 @@ all() ->
 
 init_per_suite(Config) ->
     ok = application:load(node),
-    application:set_env(node, port, 8001),
+    application:set_env(node, port, 8001), 
+    application:set_env(node, host, "http://localhost.shapesmith.net:8001"),
     ok = application:set_env(node, db_module, node_mem_db),
     {ok, _} = node_mem_db:start(),
     Config.
@@ -55,8 +56,8 @@ end_per_testcase(_Testcase, _Config) ->
 
 redirect_to_local_designs(_Config) ->
     {ok,{{"HTTP/1.1",302,_}, Headers, _Response}} = 
-	httpc:request(get, {"http://localhost:8001/", []}, [{autoredirect, false}], []),
-    {_, "http://localhost:8001/local/designs/"} = lists:keyfind("location", 1, Headers).
+	httpc:request(get, {"http://localhost.shapesmith.net:8001/", []}, [{autoredirect, false}], []),
+    {_, "http://localhost.shapesmith.net:8001/local/designs/"} = lists:keyfind("location", 1, Headers).
 
 redirect_to_session_designs(_Config) ->
     PostBody = jiffy:encode({[{<<"username">>, <<"bjnortier">>},
