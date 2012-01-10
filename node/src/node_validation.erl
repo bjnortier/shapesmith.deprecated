@@ -381,10 +381,6 @@ positive_or_zero(_) ->
     {error, <<"must be positive">>}.
 
 
-positive_integer(Value) when is_integer(Value) andalso Value > 0 ->
-    ok;
-positive_integer(_) ->
-    {error, <<"must be a positive integer">>}.
 
 number(Value) when is_integer(Value) orelse is_float(Value) ->
     ok;
@@ -427,8 +423,6 @@ validate_spec_test_() ->
                    validate_spec({[{<<"a">>, 0}]}, {<<"a">>, fun positive/1})),
      ?_assertEqual({<<"a">>, <<"not found">>}, 
                    validate_spec({[]}, {<<"a">>, fun positive/1})),
-     ?_assertEqual({<<"a">>, <<"must be a positive integer">>}, 
-                   validate_spec({[{<<"a">>, 0}]}, {<<"a">>, fun positive_integer/1})),
      ?_assertEqual({<<"a">>, <<"must be a number">>}, 
                    validate_spec({[{<<"a">>, <<"x">>}]}, {<<"a">>, fun number/1})),
      ?_assertEqual([{<<"a">>, <<"one must be positive">>},
