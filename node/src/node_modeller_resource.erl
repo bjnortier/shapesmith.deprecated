@@ -19,21 +19,23 @@
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
 	 init/1, 
-	 is_authorized/2,
          allowed_methods/2,
+	 is_authorized/2,
 	 content_types_provided/2,
 	 resource_exists/2,
 	 provide_content/2
         ]).
 
 -include_lib("webmachine/include/webmachine.hrl").
--include("include/node_auth.hrl").
 
 init([]) -> 
     {ok, {}}.
 
 allowed_methods(ReqData, Context) -> 
     {['GET'], ReqData, Context}.
+
+is_authorized(ReqData, Context) ->
+    node_resource:redirect_to_signin_if_not_authorized(ReqData, Context).
 
 content_types_provided(ReqData, Context) ->
     {[{"text/html", provide_content}], ReqData, Context}.

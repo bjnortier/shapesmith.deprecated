@@ -20,6 +20,7 @@
 -export([
          init/1, 
          allowed_methods/2,
+	 is_authorized/2,
 	 content_types_provided/2,
 	 provide_content/2,
 	 resource_exists/2
@@ -32,6 +33,9 @@ init([]) -> {ok, #context{}}.
 
 allowed_methods(ReqData, Context) -> 
     {['GET'], ReqData, Context}.
+
+is_authorized(ReqData, Context) ->
+    node_resource:forbidden_if_not_authorized(ReqData, Context).
 
 resource_exists(ReqData, Context) ->
     SHA = wrq:path_info(sha, ReqData),

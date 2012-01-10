@@ -17,7 +17,13 @@
 
 -module(node_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([json_response/2, prevent_caching/1, create_session/2, base_url/1, redirect_to_designs_if_username_known/2]).
+-export([json_response/2, 
+	 prevent_caching/1, 
+	 create_session/2,
+	 base_url/1, 
+	 redirect_to_signin_if_not_authorized/2,
+	 forbidden_if_not_authorized/2,
+	 redirect_to_designs_if_username_known/2]).
 -include_lib("webmachine/include/webmachine.hrl").
 
 json_response(JSON, ReqData) ->
@@ -50,4 +56,24 @@ redirect_to_designs_if_username_known(ReqData, Context) ->
     end.
 
 
+redirect_to_signin_if_not_authorized(ReqData, Context) ->
+    Location = node_resource:base_url(ReqData) ++ "/signin",
+    is_authorized_common(ReqData, Context, 302, wrq:set_resp_header("Location", Location, ReqData)).
 	    
+forbidden_if_not_authorized(ReqData, Context) ->
+    is_authorized_common(ReqData, Context, 403, ReqData).
+
+is_authorized_common(ReqData, Context, Code, NotAuthorisedReqData) ->
+    {ok, AuthModule} = application:get_env(node, auth_module),
+    case AuthModule:session_username(ReqData) of
+        undefined ->
+	    {{halt, Code}, NotAuthorisedReqData, Context};
+        Username ->
+	    User = wrq:path_info(user, ReqData),
+	    if 
+		User =:= Username ->
+		    {true, ReqData, Context};
+		true ->	    
+		    {{halt, Code}, NotAuthorisedReqData, Context}
+	    end
+    end.

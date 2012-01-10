@@ -19,8 +19,8 @@
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
 	 init/1, 
-	 is_authorized/2,
          allowed_methods/2,
+	 is_authorized/2,
 	 post_is_create/2,
 	 allow_missing_post/2,
          content_types_accepted/2,
@@ -33,7 +33,6 @@
 	 delete_resource/2
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
--include("include/node_auth.hrl").
 -record(context, {method, adapter, user, design, existing, request_json}).
 
 init([{adapter_mod, Adapter}]) -> 
@@ -44,6 +43,9 @@ allowed_methods(ReqData, Context = #context{ adapter=Adapter}) ->
 				user=wrq:path_info(user, ReqData),
 				design=wrq:path_info(design, ReqData) },
     {Adapter:methods(ReqData), ReqData, Context1}.
+
+is_authorized(ReqData, Context) ->
+    node_resource:forbidden_if_not_authorized(ReqData, Context).
 
 content_types_accepted(ReqData, Context) ->
     {[{"application/json", accept_content}], ReqData, Context}.

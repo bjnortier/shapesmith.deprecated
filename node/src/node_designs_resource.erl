@@ -26,13 +26,15 @@
 	 provide_content/2
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
--include("include/node_auth.hrl").
 
 init([]) -> 
     {ok, {}}.
 
 allowed_methods(ReqData, Context) -> 
     {['GET'], ReqData, Context}.
+
+is_authorized(ReqData, Context) ->
+    node_resource:redirect_to_signin_if_not_authorized(ReqData, Context).
 
 content_types_provided(ReqData, Context) ->
     {[{"text/html", provide_content}], ReqData, Context}.

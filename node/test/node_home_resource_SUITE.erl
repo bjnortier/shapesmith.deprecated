@@ -65,7 +65,7 @@ redirect_to_session_designs(_Config) ->
 			     ]}),
 
     httpc:set_options([{cookies, enabled}]),
-    {ok,{{"HTTP/1.1",201,_}, ResponseHeaders, PostResponse}} = 
+    {ok,{{"HTTP/1.1",201,_}, _, _}} = 
 	httpc:request(post, {"http://localhost.shapesmith.net:8001/signup", [], "application/json", PostBody}, [], []),
 
     {ok,{{"HTTP/1.1",302,_}, Headers, _Response}} = 

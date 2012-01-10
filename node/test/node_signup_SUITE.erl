@@ -145,9 +145,9 @@ signup_signin_signout(_Config) ->
     {ok,{{"HTTP/1.1",302,_}, _, _}} = 
 	httpc:request(get, {"http://localhost.shapesmith.net:8001/bjnortier/designs/", []}, 
 		      [{autoredirect, false}], []),
-    {ok,{{"HTTP/1.1",302,_}, _, _}} = 
+    {ok,{{"HTTP/1.1",403,_}, _, _}} = 
 	httpc:request(post, {"http://localhost:8001/bjnortier/iphonedock/", [], "application/json", "{}"}, [], []),
-    {ok,{{"HTTP/1.1",302,_}, _, _}} = 
+    {ok,{{"HTTP/1.1",403,_}, _, _}} = 
 	httpc:request(get, {"http://localhost.shapesmith.net:8001/bjnortier/iphonedock", []}, 
 		      [{autoredirect, false}], []),
     
@@ -168,7 +168,7 @@ signup_signin_signout(_Config) ->
 	httpc:request(post, {"http://localhost.shapesmith.net:8001/bjnortier/designA/", [], "application/json", "{}"}, [], []),
     {ok,{{"HTTP/1.1",200,_}, _, _}} = 
 	httpc:request(get, {"http://localhost.shapesmith.net:8001/bjnortier/designA", []}, [], []),
-    {ok,{{"HTTP/1.1",302,_}, _, _}} = 
+    {ok,{{"HTTP/1.1",403,_}, _, _}} = 
 	httpc:request(get, {"http://localhost.shapesmith.net:8001/foo/designB", []}, [{autoredirect, false}], []),
 
     %% Signout

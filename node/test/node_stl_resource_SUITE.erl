@@ -7,27 +7,37 @@ suite() -> [{timetrap,{minutes,1}}].
 
 all() ->
 	[
-	 export
+	 export,
+	 forbidden
 	].
 
 init_per_suite(Config) ->
+    Config.
+
+end_per_suite(_Config) ->
+    ok.
+
+init_per_testcase(export, Config) ->
+    {ok, _} = node_mem_db:start_link(),
     ok = application:load(node),
     application:set_env(node, port, 8001),
     application:set_env(node, db_module, node_mem_db),
     ok = node:start(),
-    Config.
-
-end_per_suite(_Config) ->
-    application:stop(node),
-    application:unload(node),
-    ok.
-
-init_per_testcase(_Testcase, Config) ->
+    Config;
+init_per_testcase(forbidden, Config) ->
     {ok, _} = node_mem_db:start_link(),
+    ok = application:load(node),
+    application:set_env(node, port, 8001),
+    application:set_env(node, db_module, node_mem_db),
+    application:set_env(node, auth_module, node_session_auth),
+    ok = node:start(),
     Config.
+
 
 end_per_testcase(_Testcase, _Config) ->
     node_mem_db:stop(),
+    application:stop(node),
+    application:unload(node),
     ok.
 
 
@@ -50,7 +60,7 @@ export(_Config) ->
     Commit = {[{<<"parent">>, <<"not_used">>},
                {<<"geoms">>, [GeomSHABin]}]},
     CommitCreateURL = "http://localhost:8001/local/iphonedock/commit/", 
-    {ok,{{"HTTP/1.1",200,_}, CreateHeaders, PostResponse}} = 
+    {ok,{{"HTTP/1.1",200,_}, _, PostResponse}} = 
 	httpc:request(post, {CommitCreateURL, [], "application/json", jiffy:encode(Commit)}, [], []),
     {[{<<"path">>, _},
       {<<"SHA">>, CommitSHABin}]} = jiffy:decode(iolist_to_binary(PostResponse)),
@@ -63,3 +73,7 @@ export(_Config) ->
 
     ok.
     
+
+forbidden(_Config) ->
+    {ok,{{"HTTP/1.1",403,_}, _, _NotFoundResponse}} = 
+      	httpc:request(get, {"http://localhost:8001/local/iphonedock/stl/abc", []}, [], []).
