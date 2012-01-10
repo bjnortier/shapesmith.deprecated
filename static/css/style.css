@@ -139,6 +139,22 @@ img#logo {
     -webkit-transition: opacity 0.1s linear;
 }*/
 
+#exports {
+    display: inline;
+}
+
+#export-options {
+    display: inline;
+}
+
+div#export-options {
+    display:none;
+}
+
+#exports:hover div#export-options {
+    display:inline;
+}
+
 #action-save {
     cursor: pointer;
 }
