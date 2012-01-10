@@ -22,6 +22,7 @@
 -export([create_user/3, validate_password/2]).
 -export([get_designs/1, add_design/2, remove_design/2]).
 -export([get_brep/1, exists_brep/1, put_brep/2]).
+-export([publish_stl/3, is_published_stl/3]).
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
@@ -138,6 +139,27 @@ remove_design(User, Design) ->
 		      end,
     RemainingDesigns = lists:delete(list_to_binary(Design), ExistingDesigns),
     DB:put(bucket(User), <<"_designs">>, jiffy:encode(RemainingDesigns)).
+
+publish_stl(User, Design, CommitSHA) ->
+    {ok, DB} = application:get_env(node, db_module),
+    Key = <<"_stls_published">>, 
+    case DB:get(bucket(User, Design), Key) of
+	undefined ->
+	    DB:put(bucket(User, Design), Key, jiffy:encode([list_to_binary(CommitSHA)]));
+	SHAsJSON ->
+	    SHAs = jiffy:decode(SHAsJSON),
+	    DB:put(bucket(User, Design), Key, jiffy:encode([list_to_binary(CommitSHA)|SHAs]))
+    end.
+
+is_published_stl(User, Design, CommitSHA) ->
+    {ok, DB} = application:get_env(node, db_module),	    
+    Key = <<"_stls_published">>, 
+    case DB:get(bucket(User, Design), Key) of
+	undefined ->
+	    false;
+	PublishedSHAsJSON ->
+	    lists:member(list_to_binary(CommitSHA), jiffy:decode(PublishedSHAsJSON))
+    end.
 
 exists_brep(SHA) when is_list(SHA) ->
     {ok, DB} = application:get_env(node, db_module),

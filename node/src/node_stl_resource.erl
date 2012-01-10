@@ -27,28 +27,36 @@
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
 
--record(context, {user, design, commit_JSON}).
+-record(context, {method, user, design, commit_SHA, commit_JSON }).
 
 init([]) -> {ok, #context{}}.
 
 allowed_methods(ReqData, Context) -> 
-    {['GET'], ReqData, Context}.
+    Context1 = Context#context{ method=wrq:method(ReqData),
+				user=wrq:path_info(user, ReqData),
+				design=wrq:path_info(design, ReqData),
+				commit_SHA=wrq:path_info(sha, ReqData)},
+    {['GET'], ReqData, Context1}.
 
-is_authorized(ReqData, Context) ->
-    node_resource:forbidden_if_not_authorized(ReqData, Context).
+is_authorized(ReqData, Context = #context{ user = User,
+					   design = Design,
+					   commit_SHA = CommitSHA}) ->
+    case node_db:is_published_stl(User, Design, CommitSHA) of
+	true ->
+	    {true, ReqData, Context};
+	false ->
+	    node_resource:forbidden_if_not_authorized(ReqData, Context)
+    end.
 
-resource_exists(ReqData, Context) ->
-    SHA = wrq:path_info(sha, ReqData),
-    User = wrq:path_info(user, ReqData),
-    Design = wrq:path_info(design, ReqData),
+resource_exists(ReqData, Context = #context{ user = User,
+					     design = Design,
+					     commit_SHA = CommitSHA}) ->
 
-    case node_db:get(User, Design, commit, SHA) of
+    case node_db:get(User, Design, commit, CommitSHA) of
 	undefined ->
 	    {false, ReqData, Context};
 	CommitJSON ->
-	    {true, ReqData, Context#context{ user = User, 
-					     design = Design,
-					     commit_JSON = CommitJSON }}
+	    {true, ReqData, Context#context{ commit_JSON = CommitJSON }}
     end.
 
 content_types_provided(ReqData, Context) ->
@@ -56,7 +64,7 @@ content_types_provided(ReqData, Context) ->
 
 provide_content(ReqData, Context = #context{ user = User,
 					     design = Design,
-					     commit_JSON = CommitJSON } ) ->
+					     commit_JSON = CommitJSON} ) ->
     {CommitProps} = CommitJSON,
     {_, Geoms} = lists:keyfind(<<"geoms">>, 1, CommitProps),
     Facets = lists:map(fun(GeomSHABin) ->

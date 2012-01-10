@@ -17,14 +17,7 @@ init_per_suite(Config) ->
 end_per_suite(_Config) ->
     ok.
 
-init_per_testcase(export, Config) ->
-    {ok, _} = node_mem_db:start_link(),
-    ok = application:load(node),
-    application:set_env(node, port, 8001),
-    application:set_env(node, db_module, node_mem_db),
-    ok = node:start(),
-    Config;
-init_per_testcase(forbidden, Config) ->
+init_per_testcase(_, Config) ->
     {ok, _} = node_mem_db:start_link(),
     ok = application:load(node),
     application:set_env(node, port, 8001),
@@ -42,11 +35,24 @@ end_per_testcase(_Testcase, _Config) ->
 
 
 export(_Config) ->
+
+    %% Signup
+    httpc:set_options([{cookies, enabled}]),
+    PostBody = jiffy:encode({[{<<"username">>, <<"bjnortier">>},
+			      {<<"password1">>, <<"abc">>},
+			      {<<"password2">>, <<"abc">>}
+			     ]}),
+    
+    {ok,{{"HTTP/1.1",201,_}, _, _}} = 
+	httpc:request(post, {"http://localhost.shapesmith.net:8001/signup", [], "application/json", PostBody}, [], []),
+    
     %% Not found
     {ok,{{"HTTP/1.1",404,_}, _, _NotFoundResponse}} = 
-      	httpc:request(get, {"http://localhost:8001/local/iphonedock/stl/abc", []}, [], []),
+      	httpc:request(get, {"http://localhost.shapesmith.net:8001/bjnortier/iphonedock/stl/abc", []}, [], []),
 
-    GeomCreateURL = "http://localhost:8001/local/iphonedock/geom/", 
+    
+    %% Create Geom
+    GeomCreateURL = "http://localhost.shapesmith.net:8001/bjnortier/iphonedock/geom/", 
     GeomA = {[{<<"type">>, <<"cuboid">>},
               {<<"origin">>, {[{<<"x">>, 0}, {<<"y">>, 0}, {<<"z">>, 0}]}},
               {<<"parameters">>, {[{<<"u">>, 1}, {<<"v">>, 1}, {<<"w">>, 1}]}}]},
@@ -59,7 +65,7 @@ export(_Config) ->
     %% Create commit
     Commit = {[{<<"parent">>, <<"not_used">>},
                {<<"geoms">>, [GeomSHABin]}]},
-    CommitCreateURL = "http://localhost:8001/local/iphonedock/commit/", 
+    CommitCreateURL = "http://localhost.shapesmith.net:8001/bjnortier/iphonedock/commit/", 
     {ok,{{"HTTP/1.1",200,_}, _, PostResponse}} = 
 	httpc:request(post, {CommitCreateURL, [], "application/json", jiffy:encode(Commit)}, [], []),
     {[{<<"path">>, _},
@@ -68,12 +74,35 @@ export(_Config) ->
     
     %% Get
     {ok,{{"HTTP/1.1",200,_}, _, GetResponse}} = 
-     	httpc:request(get, {"http://localhost:8001/local/iphonedock/stl/" ++ CommitSHA, []}, [], []),
+     	httpc:request(get, {"http://localhost.shapesmith.net:8001/bjnortier/iphonedock/stl/" ++ CommitSHA, []}, [], []),
     "solid " ++ _ = GetResponse,
+
+    %% Cannot get before publishing
+    httpc:reset_cookies(),
+    {ok,{{"HTTP/1.1",403,_}, _, _}} = 
+     	httpc:request(get, {"http://localhost.shapesmith.net:8001/bjnortier/iphonedock/stl/" ++ CommitSHA, []}, [], []),
+
+    %% Sign in
+    SigninPostBody = jiffy:encode({[{<<"username">>, <<"bjnortier">>},
+				     {<<"password">>, <<"abc">>}
+				    ]}),
+    {ok,{{"HTTP/1.1",201,_}, _, _}} = 
+	httpc:request(post, {"http://localhost.shapesmith.net:8001/signin", [], "application/json", SigninPostBody}, [], []),
+
+    %% Publish
+    {ok,{{"HTTP/1.1",200,_}, _, _}} = 
+	httpc:request(post, {"http://localhost.shapesmith.net:8001/bjnortier/iphonedock/stl/publish/" ++ CommitSHA, [], "application/json", "{}"}, [], []),
+    
+    %% Can access without auth
+    httpc:reset_cookies(),
+    {ok,{{"HTTP/1.1",200,_}, _, _}} = 
+     	httpc:request(get, {"http://localhost.shapesmith.net:8001/bjnortier/iphonedock/stl/" ++ CommitSHA, []}, [], []),
 
     ok.
     
-
 forbidden(_Config) ->
     {ok,{{"HTTP/1.1",403,_}, _, _NotFoundResponse}} = 
-      	httpc:request(get, {"http://localhost:8001/local/iphonedock/stl/abc", []}, [], []).
+      	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/stl/abc", []}, [], []).
+
+    
+    

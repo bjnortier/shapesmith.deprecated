@@ -204,10 +204,28 @@ $('#action-export-thingiverse').click(function() {
     $('#thingiverse-export').show();
 });
 
+$('form#thingiverse-export').submit(function() {
+    $('input[type=submit]', this).attr('disabled', 'disabled');
+});
+
 $('#thingiverse-export input.ok').click(function() {
-    $('#black-overlay').hide();
-    $('#thingiverse-export').hide();
-    return true;
+    $('#thingiverse-export input.ok').attr('disabled', 'disabled');
+    $.ajax({
+        type: 'POST',
+        url: '/' + SS.session.username + '/' + SS.session.design + '/stl/publish/' + SS.session.commit, 
+	data: JSON.stringify({}),
+	success: function(design) { 
+	    $('#thingiyverse-export-form').submit();
+	    $('#black-overlay').hide();
+	    $('#thingiverse-export').hide();
+	    $('#thingiverse-export input.ok').removeAttr("disabled");
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    alert(jqXHR.responseText);
+	    $('#thingiverse-export input.ok').removeAttr("disabled");
+	}
+    });
+    return false;
 });
 
 $('#thingiverse-export input.cancel').click(function() {
