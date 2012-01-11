@@ -102,7 +102,7 @@
   <script type="text/javascript">
 
     if(!Detector.webgl){
-      Detector.addGetWebGLMessage();
+      Detector.addGetWebGLMessage({id: 'webgl-detector'});
     } else {
       var container = document.getElementById('scene');
       var sceneView = new SS.SceneView(container);

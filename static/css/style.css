@@ -15,6 +15,17 @@ body {
     background-color: #020202;
 }
 
+#webgl-detector {
+    font-family: monospace;
+    font-fsize: 13px;
+    text-align: center;
+    background: #eee;
+    color: #000;
+    padding: 1em;
+    width: 475px;
+    margin: 5em auto 0;
+    border-radius: 5px;
+}
 
 #progress {
     position: absolute;
