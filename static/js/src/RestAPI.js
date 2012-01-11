@@ -1,6 +1,6 @@
 var SS = SS || {};
 
-function update_geom_command(fromNode, toNode) {
+function update_geom_command(originalNode, editedNode) {
 
     var chainedPostFn = function(index, fromChain, toChain) {
 
@@ -25,13 +25,16 @@ function update_geom_command(fromNode, toNode) {
 		    // Update the children of the next boolean node
 		    // with the new SHA
 		    if (index + 1 < fromChain.length) {
-			var oldChildSHA = nextFrom.sha;
-			var newChildSHA = nextTo.sha;
 			var foundChildIndex = -1;
-			for (var childIndex in fromChain[index+1].children) {
-			    if (fromChain[index+1].children[childIndex].sha == oldChildSHA) {
+			var fromParent = fromChain[index+1];
+			for (var childIndex in fromParent.children) {
+			    if ((fromParent.children[childIndex] == nextFrom) ||
+				(fromParent.children[childIndex] == editedNode)) {
 				foundChildIndex = childIndex;
 			    }
+			}
+			if (foundChildIndex === -1) {
+			    throw('child not found');
 			}
 			toChain[index+1].children.splice(foundChildIndex, 1, nextTo);
 		    }
@@ -46,7 +49,14 @@ function update_geom_command(fromNode, toNode) {
                             success: function(mesh) {
                                 nextTo.mesh = mesh;
 				selectionManager.deselectAll();
-                                geom_doc.replace(nextFrom, nextTo);
+				// If the 'to' node is the preview node, or node that 
+				// was edited, that one is to be replaced, not the original
+				// node
+				if (index == 0) {
+				    geom_doc.replace(editedNode, nextTo);
+				} else {
+                                    geom_doc.replace(nextFrom, nextTo);
+				}
 				command_stack.commit();
                             },
 			    error: function(jqXHR, textStatus, errorThrown) {
@@ -63,13 +73,14 @@ function update_geom_command(fromNode, toNode) {
         }
     }
 
-    var fromAncestors = geom_doc.ancestors(fromNode);
+    // toNode is the preview node so will be in the geom doc
+    var fromAncestors = geom_doc.ancestors(editedNode);
     var toAncestors = fromAncestors.map(function(ancestor) {
         return ancestor.editableCopy();
     });
 
-    var fromChain = [fromNode].concat(fromAncestors);
-    var toChain = [toNode].concat(toAncestors);
+    var fromChain = [originalNode].concat(fromAncestors);
+    var toChain = [editedNode.editableCopy()].concat(toAncestors);
 
     var doFn = function() {
         chainedPostFn(0, fromChain, toChain);
@@ -262,6 +273,7 @@ SS.save = function() {
         success: function(response) {
 	    console.info('SAVE: ' + SS.session.commit);
 	    var url = window.location.origin + window.location.pathname + '?ref=heads.master';
+	    SS.renderInfoMessage('Saved');
 	    SS.spinner.hide();
         },
         error: function(jqXHR, textStatus, errorThrown) {

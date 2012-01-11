@@ -55,16 +55,73 @@ body {
     margin-left: auto;
     margin-right: auto;
     text-align: center;
+}
+
+
+#messages-container li {
+    border-left: solid thin #777777;
+    border-right: solid thin #777777;
+    border-bottom: solid thin #777777;
+    padding: 5px;
+    list-style-type: none
+}
+
+#messages-container li.info {
+    background-color: #0b5fa5;
+}
+
+#messages-container li.error {
+    background-color: #fb000d;
+}
+
+#messages-container li.info:last-child {
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+
+    background: -webkit-gradient(linear, left top, left bottom, from(#0b5fa5), to(#25547b));
+    background: -webkit-linear-gradient(top, #0b5fa5, #25547b);
+    background: -moz-linear-gradient(top, #0b5fa5, #25547b);
+    background: -ms-linear-gradient(top, #0b5fa5, #25547b);
+    background: -o-linear-gradient(top, #25547b, #25547b);
+}
+
+#messages-container li.error:last-child {
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+
+    background: -webkit-gradient(linear, left top, left bottom, from(#fb000d), to(#a30008));
+    background: -webkit-linear-gradient(top, #fb000d, #a30008);
+    background: -moz-linear-gradient(top, #fb000d, #a30008);
+    background: -ms-linear-gradient(top, #fb000d, #a30008);
+    background: -o-linear-gradient(top, #fb000d, #a30008);
+}
+
+#messages-container li {
+    color: white;
+    position: relative;
+}
+
+#messages-container .delete-button {
+    position: absolute;
+    right: 5px;
+    top: 4px;
+    width: 16px;
+    height: 16px;
+    display: none;
+    background: no-repeat url("/static/images/delete_button_gray.png");
     
 }
 
-#messages-container div.error {
-    color: red;
+#messages-container li:hover .delete-button {
+    display: inline;
 }
 
-#messages-container div.info {
-    color: white;
+#messages-container .delete-button:hover {
+    display: inline;
+    background: no-repeat url("/static/images/delete_button_red.png");
+
 }
+
 
 #toolWheel {
     position: fixed;

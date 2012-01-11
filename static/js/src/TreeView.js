@@ -144,7 +144,7 @@ function TreeView() {
 		for (key in geomNode.parameters) {
                     geomNode.parameters[key] = parseFloat($('#' + key).val());
 		}
-		geom_doc.replace(geomNode, precursor);
+		//geom_doc.replace(geomNode, precursor);
 		return update_geom_command(precursor, geomNode);
             } else {
 		var origin = {};
@@ -168,7 +168,7 @@ function TreeView() {
 	    for (key in transformBeingEdited.parameters) {
 		transformBeingEdited.parameters[key] = parseFloat($('#' + key).val());
 	    }
-	    geom_doc.replace(geomNode, precursor);
+	    //geom_doc.replace(geomNode, precursor);
 	    return update_geom_command(precursor, geomNode);
 	}
 

@@ -28,7 +28,7 @@
   <div id="scene"></div>
   <img id="logo" src="/static/images/logo_small.png"/>
   <div id="progress-container"></div>
-  <div id="messages-container"></div>
+  <div id="messages-container"><ol></ol></div>
   <div id="black-overlay"></div>
   <div id="thingiverse-export">
     <div class="heading">Export to Thingiverse</div>
