@@ -61,7 +61,6 @@ function GeomNode() {
     this.editing = arguments[0].editing || false;
     this.type = arguments[0].type;
     this.sha = arguments[0].sha;
-    this.precursorSHA = arguments[0].precursorSHA;
     updateId(this);
 
     this.origin = arguments[0].origin;
@@ -113,7 +112,6 @@ GeomNode.prototype.editableCopy = function() {
                                 parameters : copiedParameters,
                                 transforms : copiedTransforms,
                                 mesh : this.mesh,
-				precursorSHA : this.sha,
                                }, this.children);
     return newNode;
 }
