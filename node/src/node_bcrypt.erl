@@ -15,26 +15,15 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_mesh_adapter).
--author('Benjamin Nortier <bjnortier@gmail.com>').
--export([
-	 methods/1, 
-	 get/3
-        ]).
 
-methods(_ReqData) ->
-    ['GET'].
+%% Mocking with Meck created some problems with bcrypt (perhaps because of the C functions?), 
+%% so this module is a proxy for the bcrypt library. 
 
-get(ReqData, User, Design) ->
-    SHA = wrq:path_info(sha, ReqData),
-    case node_master:mesh_geom(User, Design, SHA) of
-	geometry_doesnt_exist ->
-	    undefined;
-	{ok, Mesh} ->
-	    Mesh;
-	{error, Err} ->
-	    lager:error("Meshing failed: ~p~n", [Err]),
-	    Error= {[{<<"error">>, <<"Could not mesh geometry">>}]},
-	    {error, Error}
-    end.
+-module(node_bcrypt).
+-export([hashpw/2, gen_salt/0]).
 
+hashpw(Password, SaltOrHash) ->
+    bcrypt:hashpw(Password, SaltOrHash).
+
+gen_salt() ->
+    bcrypt:gen_salt().

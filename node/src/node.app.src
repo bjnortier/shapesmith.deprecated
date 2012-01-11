@@ -43,6 +43,7 @@
 		 ]},
 	 {db_module, node_disk_db},
 	 {disk_db_dir, "db"},
-	 {riak_host, {"127.0.0.1", 8087}},
+	 {auth_module, node_local_auth},
+	 {host, "http://localhost.shapesmith.net:8000"},
          {port, 8000}]}
  ]}.

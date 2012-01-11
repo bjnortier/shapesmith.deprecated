@@ -34,22 +34,22 @@ describe("CommandStack", function() {
 
     var spinnerShowing = false;
     var ss = {
-	spinner : {
-	    show : function() {
+	spinner: {
+	    show: function() {
 		spinnerShowing = true;
 	    },
-	    hide  : function() {
+	    hide: function() {
 		spinnerShowing = false;
 	    }
 	},
-	session : {
-	    commit : 1
+	session: {
+	    commit: 1
 	},
-	commit : function() {
-	    
-	},
-	selectionManager : {
-	    deselectAll : function() {
+	commit : function() {},
+	renderErrorMessage: function() {},
+	clearMessages: function() {}
+	selectionManager: {
+	    deselectAll: function() {
 	    }
 	}
     };

@@ -82,13 +82,17 @@ function renderNode(geomNode) {
     
     var childTemplate = '<table id="{{id}}"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img>{{^editing}}<span class="{{clazz}}">{{type}}</span>{{/editing}}{{#editing}}{{type}}{{/editing}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input id="modal-ok" type="submit" value="Ok"/><input id="modal-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>';
 
+    var clazz = geom_doc.isRoot(geomNode) ? 
+	'select-geom target-' + geomNode.id : 
+	'target-' + geomNode.id;
+	
     var view = {type: geomNode.type,
                 editing: geomNode.editing,
 		id: geomNode.id,
 		originTable: originTable,
                 paramsTable: paramsTable,
                 transformRows: transformRows,
-                clazz: 'select-geom target-' + geomNode.id,
+                clazz: clazz,
                 children: childTables
                };
     var nodeTableContents = $.mustache(childTemplate, view);
@@ -140,7 +144,7 @@ function TreeView() {
 		for (key in geomNode.parameters) {
                     geomNode.parameters[key] = parseFloat($('#' + key).val());
 		}
-		geom_doc.replace(geomNode, precursor);
+		//geom_doc.replace(geomNode, precursor);
 		return update_geom_command(precursor, geomNode);
             } else {
 		var origin = {};
@@ -164,7 +168,7 @@ function TreeView() {
 	    for (key in transformBeingEdited.parameters) {
 		transformBeingEdited.parameters[key] = parseFloat($('#' + key).val());
 	    }
-	    geom_doc.replace(geomNode, precursor);
+	    //geom_doc.replace(geomNode, precursor);
 	    return update_geom_command(precursor, geomNode);
 	}
 
@@ -228,7 +232,7 @@ function TreeView() {
             if (!id) {
                 throw Error('id for editing could not be determined');
             }
-            selectionManager.pick(id);
+	    selectionManager.pick(id);
         });
 
         // Edit geom

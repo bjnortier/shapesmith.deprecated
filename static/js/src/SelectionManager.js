@@ -71,9 +71,5 @@ function SelectionManager() {
         }
     }
     
-    this.geomDocUpdated = function(event) {
-	this.deselectAll();
-    }
-
 }
 

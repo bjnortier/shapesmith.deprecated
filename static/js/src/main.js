@@ -4,9 +4,6 @@ Observable.makeObservable(selectionManager);
 SS.selectionManager = selectionManager;
 var command_stack = new CommandStack(SS);
 
-command_stack.renderErrorMessage = renderErrorMessage;
-command_stack.clearMessages = clearMessages;
-
 var geom_doc = new GeomDocument();
 var treeView = new TreeView();
 
@@ -20,11 +17,8 @@ selectionManager.addListener(function(event) {
 
 geom_doc.addListener(function(event) {
     sceneView.geomDocUpdated(event);
-    selectionManager.geomDocUpdated(event);
 });
 selectionManager.addListener(function(event) {
     sceneView.selectionUpdated(event);
 });
 
-$(document).ready(function() {
-});

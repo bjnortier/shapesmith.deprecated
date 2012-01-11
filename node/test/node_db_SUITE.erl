@@ -33,6 +33,8 @@ init_per_suite(Config) ->
     Config.
 
 end_per_suite(_Config) ->
+    application:stop(node),
+    application:unload(node),
     ok.
 
 init_per_testcase(in_mem, Config) ->
@@ -41,6 +43,7 @@ init_per_testcase(in_mem, Config) ->
 init_per_testcase(riak, Config) ->
     ok = application:load(node),
     application:set_env(node, port, 8001),
+    application:set_env(node, riak_host, {"127.0.0.1", 8087}),
     application:start(inets),
     ok = node:start(),
     Config;
@@ -78,6 +81,9 @@ test(DB) ->
     <<1,2,3>> = DB:get(Bucket, Id),
     DB:put(Bucket, Id, <<4,5,6>>),
     <<4,5,6>> = DB:get(Bucket, Id),
+    ok = DB:delete(Bucket, Id),
+    undefined = DB:get(Bucket, Id),
+    ok = DB:put(Bucket, Id, <<1,2,3>>),
     ok = DB:delete(Bucket, Id),
     undefined = DB:get(Bucket, Id),
     ok.

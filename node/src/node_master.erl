@@ -42,11 +42,15 @@ create_geom(User, Design, Geometry) ->
     end.
 
 mesh_geom(User, Design, SHA) ->
-    Geometry = node_db:get(User, Design, geom, SHA),
-    ensure_brep_exists(User, Design, SHA, Geometry, 
-		       fun(WorkerPid) -> 
-			       node_mesh_db:mesh(WorkerPid, SHA) 
-		       end).
+    case node_db:get(User, Design, geom, SHA) of
+	undefined ->
+	    geometry_doesnt_exist;
+	Geometry ->
+	    ensure_brep_exists(User, Design, SHA, Geometry, 
+			       fun(WorkerPid) -> 
+				       node_mesh_db:mesh(WorkerPid, SHA) 
+			       end)
+    end.
 
 
 stl(User, Design, SHA) ->

@@ -60,7 +60,7 @@ validation(_Config) ->
 				  {<<"z">>, 0}]}},
 		 {<<"parameters">>, {[{<<"r">>, -1.0}]}}]},
     EncodedJSON = jiffy:encode(GeomJSON),
-    URL = "http://localhost:8001/bjnortier/iphonedock/geom/",
+    URL = "http://localhost:8001/local/iphonedock/geom/",
     
     {ok,{{"HTTP/1.1",400,_}, Headers, Response}} = 
      	httpc:request(post, {URL, [], "application/json", EncodedJSON}, [], []),
@@ -78,7 +78,7 @@ creation(_Config) ->
 				  {<<"y">>, 0},
 				  {<<"z">>, 0}]}},
 		 {<<"parameters">>, {[{<<"r">>, 1.1}]}}]},
-    CreateURL = "http://localhost:8001/bjnortier/iphonedock/geom/", 
+    CreateURL = "http://localhost:8001/local/iphonedock/geom/", 
     {ok,{{"HTTP/1.1",200,_}, CreateHeaders, PostResponse}} = 
 	httpc:request(post, {CreateURL, [], "application/json", jiffy:encode(GeomJSON)}, [], []),
 
@@ -87,7 +87,7 @@ creation(_Config) ->
       {<<"SHA">>, SHABin}]} = jiffy:decode(iolist_to_binary(PostResponse)),
     Path = binary_to_list(PathBin),
     SHA = binary_to_list(SHABin),
-    "/bjnortier/iphonedock/geom/" ++ SHA = Path,
+    "/local/iphonedock/geom/" ++ SHA = Path,
 
     %% Get the created geometry
     {ok,{{"HTTP/1.1",200,_}, GetHeaders, GetResponse}} = 
@@ -97,14 +97,14 @@ creation(_Config) ->
 
     %% Get the mesh for the geometry
     {ok,{{"HTTP/1.1",200,_}, MeshHeaders, MeshResponse}} = 
-	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/mesh/" ++ SHA, []}, [], []),
+	httpc:request(get, {"http://localhost:8001/local/iphonedock/mesh/" ++ SHA, []}, [], []),
     check_json_content_type(MeshHeaders),
     [] == jiffy:decode(iolist_to_binary(MeshResponse)).
 
 
 boolean(_Config) ->
 
-    CreateURL = "http://localhost:8001/bjnortier/iphonedock/geom/", 
+    CreateURL = "http://localhost:8001/local/iphonedock/geom/", 
 
     GeomA = {[{<<"type">>, <<"sphere">>},
               {<<"origin">>, {[{<<"x">>, 0},
@@ -139,7 +139,7 @@ boolean(_Config) ->
     BoolSHA = binary_to_list(SHABoolBin),
 
     {ok,{{"HTTP/1.1",200,_}, BoolGetHeaders, BoolGetResponse}} = 
-	httpc:request(get, {"http://localhost:8001/bjnortier/iphonedock/geom/" ++ BoolSHA ++ "?recursive=true", []}, [], []),
+	httpc:request(get, {"http://localhost:8001/local/iphonedock/geom/" ++ BoolSHA ++ "?recursive=true", []}, [], []),
     check_json_content_type(BoolGetHeaders),
     {[{<<"sha">>, SHABoolBin},
       {<<"geometry">>, 

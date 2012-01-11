@@ -117,13 +117,15 @@ update_test_() ->
     {setup, 
      fun() -> 
 	     meck:new(wrq),
+	     meck:new(node_db),
+
 	     meck:expect(wrq, path_info,
 	     		 fun(reftype, {}) ->
 	     			 "heads";
 	     		    (ref, {}) ->
 	     			 "master"
 	     		 end),
-	     meck:new(node_db),
+
 	     meck:expect(node_db, get_root, 
 			 fun("bjnortier", "iphonedock") -> 
 				 {[{<<"refs">>, 
@@ -141,11 +143,12 @@ update_test_() ->
 			       }]}) ->
 				 ok
 			 end)
-	     
+
      end, 
      fun(_) -> 
-	     meck:unload(node_db),
-	     meck:unload(wrq)
+	     meck:unload(wrq),
+	     meck:unload(node_db)
+
      end,
      [
       ?_assertEqual({ok,<<"updated">>}, update({}, "bjnortier", "iphonedock", <<"af56">>)),
@@ -153,5 +156,6 @@ update_test_() ->
       ?_assert(meck:validate(wrq))
      ]
     }.
+
 
 -endif.

@@ -17,16 +17,19 @@
 
 -module(node_home_redirect_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([init/1, resource_exists/2, moved_temporarily/2, previously_existed/2]).
+-export([init/1, 
+	 to_html/2]).
 -include_lib("webmachine/include/webmachine.hrl").
 
 init([]) -> {ok, undefined}.
 
-moved_temporarily(ReqData, Context) ->
-    {{true, "/local/designs.html"}, ReqData, Context}.
-
-previously_existed(ReqData, Context) -> 
-    {true, ReqData, Context}.
-
-resource_exists(ReqData, Context) -> 
-    {false, ReqData, Context}.
+to_html(ReqData, Context) ->
+    {ok, AuthModule} = application:get_env(node, auth_module),
+    case AuthModule:session_username(ReqData) of
+	undefined ->
+	    {ok, Host} = application:get_env(node, host),
+	    Location = Host ++ "/signin",
+	    {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context};
+	_Username ->
+	    node_resource:redirect_to_designs_if_username_known(ReqData, Context)
+    end.

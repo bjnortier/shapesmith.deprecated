@@ -15,26 +15,28 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_mesh_adapter).
+-module(node_publish_stl_adapter).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([
-	 methods/1, 
-	 get/3
-        ]).
+
+-export([methods/1, validate/4, get/3, create/4]).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                                 public                                   %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 methods(_ReqData) ->
-    ['GET'].
+    ['POST'].
 
-get(ReqData, User, Design) ->
-    SHA = wrq:path_info(sha, ReqData),
-    case node_master:mesh_geom(User, Design, SHA) of
-	geometry_doesnt_exist ->
-	    undefined;
-	{ok, Mesh} ->
-	    Mesh;
-	{error, Err} ->
-	    lager:error("Meshing failed: ~p~n", [Err]),
-	    Error= {[{<<"error">>, <<"Could not mesh geometry">>}]},
-	    {error, Error}
-    end.
+validate(_ReqData, _User, _Design, _) ->
+    ok.
+
+create(ReqData, User, Design, _) ->
+    CommitSHA = wrq:path_info(sha, ReqData),
+    ok = node_db:publish_stl(User, Design, CommitSHA),
+    {ok, <<"published">>}.
+
+get(_ReqData, _User, _Design) ->
+    undefined.
+
+
 

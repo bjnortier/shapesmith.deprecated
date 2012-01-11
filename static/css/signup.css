@@ -2,10 +2,9 @@ body {
     background-color: #080808;
     background-position: 100% -50%;
     background-repeat: no-repeat;
-    color: #f9f9f9;
+    color: #eeeeee;
     font-family: Helvetica, Arial, sans-serif;
     font-style: normal;
-    font-size: 15px;
 }
 
 
@@ -16,10 +15,6 @@ h1, h2, h3, h4, h5, h6 {
 
 h2 {
     font-weight: normal;
-}
-
-a {
-    color: yellow;
 }
 
 .header {
@@ -66,43 +61,35 @@ a {
     text-decoration: underline;
 }
 
-.field input {
+
+#design-name input {
+    font-size: 15px;
     border-radius: 4px;
     vertical-align: middle;
     border: none;
-    width: 100%;
     padding: 10px;
-    font-size: 15px;
+    width: 300px;
 }
 
-.field-inner {
-    padding: 0px;
-    margin-left: 0px;
-    margin-top: -10px;
-    margin-right: 20px;
-    margin-bottom: 10px;
-}
-
-
-input:focus {
+#design-name input:focus {
     outline: none;
 }
 
-input.field {
+input#new-name, div#create-design-button {
     margin-top: 10px;
 }
 
-.errors {
+#design-name-errors {
     border: solid thin red;
     border-radius: 4px;
     font-size: 15px;
     padding: 10px;
     padding-top: 20px;
     margin-top: -10px;
-    margin-right: -20px;
     color: red;
     display: none;
 }
+
 
 /* http://css-tricks.com/examples/ButtonMaker/# */
 .button {
@@ -118,7 +105,7 @@ input.field {
     /*box-shadow: #666666 1px 1px 7px;*/
     /*text-shadow: rgba(0,0,0,.4) 0 1px 0;*/
     color: #eeeeee;
-    font-size: 15px;
+    font-size: 19px;
     text-decoration: none;
     vertical-align: middle;
     text-align: center;
@@ -159,7 +146,16 @@ input.field {
     background: #000000;
     border-right: 1px solid #333333;
     border-left: 1px solid #333333;
-    
+}
+
+.design a {
+    color: #3f8fd2;
+    text-decoration: none;
+    font-weight:400;
+}
+
+.design a:hover {
+    text-decoration: underline;
 }
 
 .design {
@@ -191,7 +187,6 @@ input.field {
 .design:hover {
     background: #1c1c1c;
     color: white;
-    cursor: pointer;
 }
 
 .design:hover a {

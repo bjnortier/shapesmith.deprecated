@@ -204,10 +204,10 @@ SS.workplane.grid = function(spec) {
 	axes = [new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry(), 
 		new THREE.Geometry(), new THREE.Geometry()];
 	axes[0].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	axes[0].vertices.push(new THREE.Vertex(new THREE.Vector3(500, 0, 0)));
+	axes[0].vertices.push(new THREE.Vertex(new THREE.Vector3(gridExtents.maxX + gridExtents.fadingWidth, 0, 0)));
 
 	axes[1].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	axes[1].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 500, 0)));
+	axes[1].vertices.push(new THREE.Vertex(new THREE.Vector3(0, gridExtents.maxY + gridExtents.fadingWidth, 0)));
 
 	axes[2].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
 	axes[2].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 500)));

@@ -37,7 +37,6 @@ function delete_geom(selected) {
     var nodes = selected.map(function(id) {
 	return geom_doc.findById(id);
     });
-    selectionManager.deselectAll();
 
     var doFn = function() {
 	for (var i in nodes) {
@@ -80,8 +79,6 @@ function create_primitive(type, keys) {
 }
 
 function create_transform(selected, type, keys) {
-    selectionManager.deselectAll();
-
     if (selected.length != 1)  {
         alert("no object selected!");
         return;
@@ -121,12 +118,6 @@ $(document).ready(function() {
     new Action("Copy", "/static/images/copy.png", 
                function(selected) { 
 		   copy(selected)
-	       }).render($("#edit"));
-    new Action("Export to STL", "/static/images/stl.png", 
-               function(selected) { 
-		   var pattern = /^\/geom\/(.*)$/;
-		   var id = selectionManager.getSelected()[0].match(pattern)[1];
-		   window.location = '/stl/' + id; 
 	       }).render($("#edit"));
 
     /*
@@ -200,13 +191,45 @@ $(document).ready(function() {
 });
 
 
-
-$('#action_save').mouseenter(function() {
-    this.src = '/static/images/save22x22.png';
-});
-$('#action_save').mouseleave(function() {
-    this.src = '/static/images/save22x22_transparent.png';
-});
-$('#action_save').click(function() {
+$('#action-save').click(function() {
     SS.save();
+});
+
+$('#action-export-stl').click(function() {
+    window.location = '/' + SS.session.username + '/' + SS.session.design + '/stl/' + SS.session.commit + '/';
+});
+
+$('#action-export-thingiverse').click(function() {
+    $('#black-overlay').show();
+    $('#thingiverse-export').show();
+});
+
+$('form#thingiverse-export').submit(function() {
+    $('input[type=submit]', this).attr('disabled', 'disabled');
+});
+
+$('#thingiverse-export input.ok').click(function() {
+    $('#thingiverse-export input.ok').attr('disabled', 'disabled');
+    $.ajax({
+        type: 'POST',
+        url: '/' + SS.session.username + '/' + SS.session.design + '/stl/publish/' + SS.session.commit, 
+	data: JSON.stringify({}),
+	success: function(design) { 
+	    $('#thingiyverse-export-form').submit();
+	    $('#black-overlay').hide();
+	    $('#thingiverse-export').hide();
+	    $('#thingiverse-export input.ok').removeAttr("disabled");
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    alert(jqXHR.responseText);
+	    $('#thingiverse-export input.ok').removeAttr("disabled");
+	}
+    });
+    return false;
+});
+
+$('#thingiverse-export input.cancel').click(function() {
+    $('#black-overlay').hide();
+    $('#thingiverse-export').hide();
+    return false;
 });

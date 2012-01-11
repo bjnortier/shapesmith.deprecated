@@ -22,8 +22,8 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
-hash_json(Geometry) ->
-    hex(crypto:sha(jiffy:encode(order_json(Geometry)))).
+hash_json(JSON) ->
+    hex(crypto:sha(jiffy:encode(order_json(JSON)))).
 
 hex(Binary) when is_binary(Binary) ->
     lists:flatten([hex_octet(X) || X <- binary_to_list(Binary)]).

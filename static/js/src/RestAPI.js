@@ -1,6 +1,6 @@
 var SS = SS || {};
 
-function update_geom_command(fromNode, toNode) {
+function update_geom_command(originalNode, editedNode) {
 
     var chainedPostFn = function(index, fromChain, toChain) {
 
@@ -25,13 +25,16 @@ function update_geom_command(fromNode, toNode) {
 		    // Update the children of the next boolean node
 		    // with the new SHA
 		    if (index + 1 < fromChain.length) {
-			var oldChildSHA = nextFrom.sha;
-			var newChildSHA = nextTo.sha;
 			var foundChildIndex = -1;
-			for (var childIndex in fromChain[index+1].children) {
-			    if (fromChain[index+1].children[childIndex].sha == oldChildSHA) {
+			var fromParent = fromChain[index+1];
+			for (var childIndex in fromParent.children) {
+			    if ((fromParent.children[childIndex] == nextFrom) ||
+				(fromParent.children[childIndex] == editedNode)) {
 				foundChildIndex = childIndex;
 			    }
+			}
+			if (foundChildIndex === -1) {
+			    throw('child not found');
 			}
 			toChain[index+1].children.splice(foundChildIndex, 1, nextTo);
 		    }
@@ -45,7 +48,15 @@ function update_geom_command(fromNode, toNode) {
 			    url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
                             success: function(mesh) {
                                 nextTo.mesh = mesh;
-                                geom_doc.replace(nextFrom, nextTo);
+				selectionManager.deselectAll();
+				// If the 'to' node is the preview node, or node that 
+				// was edited, that one is to be replaced, not the original
+				// node
+				if (index == 0) {
+				    geom_doc.replace(editedNode, nextTo);
+				} else {
+                                    geom_doc.replace(nextFrom, nextTo);
+				}
 				command_stack.commit();
                             },
 			    error: function(jqXHR, textStatus, errorThrown) {
@@ -62,13 +73,14 @@ function update_geom_command(fromNode, toNode) {
         }
     }
 
-    var fromAncestors = geom_doc.ancestors(fromNode);
+    // toNode is the preview node so will be in the geom doc
+    var fromAncestors = geom_doc.ancestors(editedNode);
     var toAncestors = fromAncestors.map(function(ancestor) {
         return ancestor.editableCopy();
     });
 
-    var fromChain = [fromNode].concat(fromAncestors);
-    var toChain = [toNode].concat(toAncestors);
+    var fromChain = [originalNode].concat(fromAncestors);
+    var toChain = [editedNode.editableCopy()].concat(toAncestors);
 
     var doFn = function() {
         chainedPostFn(0, fromChain, toChain);
@@ -168,6 +180,8 @@ function boolean(selected, type) {
                     type: "GET",
                     url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
                     success: function(mesh) {
+			selectionManager.deselectAll();
+
                         childNodes = selected.map(function(id) {
                             var node = geom_doc.findById(id);
                             geom_doc.remove(node);
@@ -230,6 +244,7 @@ function copy(selected) {
 	};
 	
 	newNode = copyWithChildren(node);
+	selectionManager.deselectAll();
 	geom_doc.add(newNode);
 	command_stack.commit();
     };
@@ -258,6 +273,7 @@ SS.save = function() {
         success: function(response) {
 	    console.info('SAVE: ' + SS.session.commit);
 	    var url = window.location.origin + window.location.pathname + '?ref=heads.master';
+	    SS.renderInfoMessage('Saved');
 	    SS.spinner.hide();
         },
         error: function(jqXHR, textStatus, errorThrown) {
@@ -284,7 +300,7 @@ SS.commit = function() {
 	    var commit = response.SHA;
 	    console.info('COMMIT: ' + commit);
 
-	    var url = window.location.origin + window.location.pathname + '?commit=' + commit;
+	    var url = window.location.pathname + '?commit=' + commit;
 	    history.pushState({commit: commit}, SS.session.design, url);
 	    SS.session.commit = commit;
 	    command_stack.success();
@@ -295,14 +311,33 @@ SS.commit = function() {
     });
 }
 
-window.onpopstate = function(event) {  
-    var commit = $.getQueryParam("commit");
+/*
+ * This is a pain. Chrome and Firefox have differrent behaviour for window.onpopstate().
+ * Firefox will NOT generate the event when there is no session state available (e.g.
+ * on a new page load). Chrome will generate and event, but Firefox will not. Hence
+ * the need to $(document).ready() and the workaround variable.
+ */
+
+SS.loadCommitFromStateOrParam = function(state) {
+    var commit = (state && state.commit) || $.getQueryParam("commit");
     SS.session.commit = commit;
     if (!command_stack.pop(commit)) {
 	// No command stack available - load from disk
 	SS.load_commit(commit);
     }
 };
+
+window.onpopstate = function(event) { 
+    SS.loadCommitFromStateOrParam(event.state);
+};
+
+$(document).ready(function() {
+    // Only necessary in FF since. See above comment.
+    if (navigator.userAgent.indexOf("Firefox") != -1) {
+	SS.loadCommitFromStateOrParam(undefined);
+    }
+});
+
 
 SS.load_commit = function(commit) {
     geom_doc.removeAll();
