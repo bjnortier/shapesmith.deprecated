@@ -21,7 +21,7 @@ var SS = SS || {};
     SS.renderErrorMessage = function(error) {
 	var error;
 	try {
-	    var error = JSON.parse("{");
+	    var error = JSON.parse(error);
 	    $('tr.field').removeClass('validation-error');
 	    if (error.validation) {
 		for (var i in error.validation) {
