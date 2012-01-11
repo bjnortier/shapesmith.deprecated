@@ -25,5 +25,3 @@ selectionManager.addListener(function(event) {
     sceneView.selectionUpdated(event);
 });
 
-$(document).ready(function() {
-});

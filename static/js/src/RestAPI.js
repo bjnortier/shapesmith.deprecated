@@ -288,7 +288,7 @@ SS.commit = function() {
 	    var commit = response.SHA;
 	    console.info('COMMIT: ' + commit);
 
-	    var url = window.location.origin + window.location.pathname + '?commit=' + commit;
+	    var url = window.location.pathname + '?commit=' + commit;
 	    history.pushState({commit: commit}, SS.session.design, url);
 	    SS.session.commit = commit;
 	    command_stack.success();
@@ -299,14 +299,33 @@ SS.commit = function() {
     });
 }
 
-window.onpopstate = function(event) {  
-    var commit = $.getQueryParam("commit");
+/*
+ * This is a pain. Chrome and Firefox have differrent behaviour for window.onpopstate().
+ * Firefox will NOT generate the event when there is no session state available (e.g.
+ * on a new page load). Chrome will generate and event, but Firefox will not. Hence
+ * the need to $(document).ready() and the workaround variable.
+ */
+
+SS.loadCommitFromStateOrParam = function(state) {
+    var commit = (state && state.commit) || $.getQueryParam("commit");
     SS.session.commit = commit;
     if (!command_stack.pop(commit)) {
 	// No command stack available - load from disk
 	SS.load_commit(commit);
     }
 };
+
+window.onpopstate = function(event) { 
+    SS.loadCommitFromStateOrParam(event.state);
+};
+
+$(document).ready(function() {
+    // Only necessary in FF since. See above comment.
+    if (navigator.userAgent.indexOf("Firefox") != -1) {
+	SS.loadCommitFromStateOrParam(undefined);
+    }
+});
+
 
 SS.load_commit = function(commit) {
     geom_doc.removeAll();
