@@ -2,6 +2,7 @@ var SS = SS || {};
 
 function update_geom_command(originalNode, nodeInDoc, replacement) {
 
+    selectionManager.deselectAll();
     var chainedPostFn = function(index, fromChain, toChain) {
 
         var nextFrom = fromChain[index];
