@@ -1,4 +1,19 @@
-function renderErrorMessage(error) {
+var SS = SS || {};
+
+SS.renderErrorMessage = function(error) {
+    var error;
+    try {
+	var error = JSON.parse(error);
+	$('tr.field').removeClass('validation-error');
+	if (error.validation) {
+	    for (var i in error.validation) {
+		$('#' + i).parents('tr.field').addClass('validation-error');
+	    }
+	}
+    } catch (e) {
+	error = {exception: e};
+    }
+
     $('#messages-container').empty();
     if (error.validation) {
 	// No need for a message as there is already validation feedback
@@ -10,15 +25,9 @@ function renderErrorMessage(error) {
     } else {
 	$('#messages-container').append('<div class="error">Oops. An unknown problem occurred</div>');
     }
-}
+};
 
-function renderSuccessMessage(message) {
-    $('#messages-container').empty();
-    $('#messages-container').append('<div class="info">' + message + '</div>');
-}
-
-function clearMessages() {
+SS.clearMessages = function() {
     $('#messages-container').empty();
 }
-
 

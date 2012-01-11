@@ -16,12 +16,7 @@ function CommandStack(ss) {
     var undoStack = new Stack();
     var redoStack = new Stack();
     var ss = ss;
-
-    this.renderErrorMessage = function(message) {
-    }
-
-    this.clearMessages = function() {
-    }
+    var that = this;
 
     this.commit = function() {
 	commandInProgress.fromCommit = SS.session.commit;
@@ -91,11 +86,11 @@ function CommandStack(ss) {
     this.success = function() {
         successFn();
 	ss.spinner.hide();
-	this.clearMessages();
+	SS.clearMessages();
     }
 
     this.error = function(error) {
-	this.renderErrorMessage(error);
+	SS.renderErrorMessage(error);
 	ss.spinner.hide();
     }
     
