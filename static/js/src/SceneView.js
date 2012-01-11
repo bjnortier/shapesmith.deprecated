@@ -51,8 +51,9 @@ SS.SceneView = function(container) {
 
 	container.addEventListener('mousedown', onMouseDown, false);
 	container.addEventListener('mousewheel', onMouseWheel, false);
+	container.addEventListener('DOMMouseScroll', onMouseWheel, false);
 	container.addEventListener('mousemove', onMouseMove, false);
-	document.addEventListener('keydown', onDocumentKeyDown, false);
+	window.addEventListener('keydown', onDocumentKeyDown, false);
 	container.addEventListener('mouseover', function() {
 	    overRenderer = true;
 	}, false);
@@ -269,8 +270,14 @@ SS.SceneView = function(container) {
 
     function onMouseWheel(event) {
 	event.preventDefault();
+	console.info(overRenderer);
 	if (overRenderer) {
-	    zoom(event.wheelDeltaY * 0.05);
+	    if (event.wheelDeltaY) {
+		zoom(event.wheelDeltaY * 0.05);
+	    }
+	    if (event.detail) {
+		zoom(-event.detail*60 * 0.05);
+	    }
 	}
 	return false;
     }
