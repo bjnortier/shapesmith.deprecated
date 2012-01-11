@@ -103,6 +103,7 @@ function create_transform(selected, type, keys) {
 	origin: origin,
         parameters: transformParams
     }));
+    selectionManager.deselectAll();
     geom_doc.replace(original, replacement);
     return replacement;
 }

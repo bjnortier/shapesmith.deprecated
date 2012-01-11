@@ -144,8 +144,7 @@ function TreeView() {
 		for (key in geomNode.parameters) {
                     geomNode.parameters[key] = parseFloat($('#' + key).val());
 		}
-		//geom_doc.replace(geomNode, precursor);
-		return update_geom_command(precursor, geomNode);
+		return update_geom_command(precursor, geomNode, geomNode);
             } else {
 		var origin = {};
 		for (key in geomNode.origin) {
@@ -169,7 +168,7 @@ function TreeView() {
 		transformBeingEdited.parameters[key] = parseFloat($('#' + key).val());
 	    }
 	    //geom_doc.replace(geomNode, precursor);
-	    return update_geom_command(precursor, geomNode);
+	    return update_geom_command(precursor, geomNode, geomNode);
 	}
 
         if (geomNode.editing || transformBeingEdited) {
@@ -237,6 +236,7 @@ function TreeView() {
 
         // Edit geom
         $('.edit-geom').dblclick(function() { 
+	    selectionManager.deselectAll();
 
             var id;
             var pattern = /^target-(.*)$/;
@@ -256,6 +256,7 @@ function TreeView() {
 
         // Edit transform
         $('.edit-transform').dblclick(function() { 
+	    selectionManager.deselectAll();
             var id;
             var transformIndex;
             var pattern = /^target-(.*)-(.*)$/;
@@ -288,7 +289,7 @@ function TreeView() {
             var geomNode = geom_doc.findById(id);
             var editingNode = geomNode.editableCopy();
             editingNode.transforms.splice(transformIndex, 1);
-            var cmd = update_geom_command(geomNode, editingNode);
+            var cmd = update_geom_command(geomNode, geomNode, editingNode);
             command_stack.execute(cmd);
         });
 

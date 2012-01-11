@@ -270,7 +270,6 @@ SS.SceneView = function(container) {
 
     function onMouseWheel(event) {
 	event.preventDefault();
-	console.info(overRenderer);
 	if (overRenderer) {
 	    if (event.wheelDeltaY) {
 		zoom(event.wheelDeltaY * 0.05);
@@ -283,7 +282,6 @@ SS.SceneView = function(container) {
     }
 
     function onDocumentKeyDown(event) {
-	console.log(event.keyIdentifier + ':' + event.keyCode);
 	switch (event.keyCode) {
 	case 187:
 	case 107:

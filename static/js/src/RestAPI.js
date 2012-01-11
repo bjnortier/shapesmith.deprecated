@@ -1,6 +1,6 @@
 var SS = SS || {};
 
-function update_geom_command(originalNode, editedNode) {
+function update_geom_command(originalNode, nodeInDoc, replacement) {
 
     var chainedPostFn = function(index, fromChain, toChain) {
 
@@ -29,7 +29,7 @@ function update_geom_command(originalNode, editedNode) {
 			var fromParent = fromChain[index+1];
 			for (var childIndex in fromParent.children) {
 			    if ((fromParent.children[childIndex] == nextFrom) ||
-				(fromParent.children[childIndex] == editedNode)) {
+				(fromParent.children[childIndex] == replacement)) {
 				foundChildIndex = childIndex;
 			    }
 			}
@@ -48,12 +48,12 @@ function update_geom_command(originalNode, editedNode) {
 			    url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
                             success: function(mesh) {
                                 nextTo.mesh = mesh;
-				selectionManager.deselectAll();
+
 				// If the 'to' node is the preview node, or node that 
 				// was edited, that one is to be replaced, not the original
 				// node
 				if (index == 0) {
-				    geom_doc.replace(editedNode, nextTo);
+				    geom_doc.replace(nodeInDoc, nextTo);
 				} else {
                                     geom_doc.replace(nextFrom, nextTo);
 				}
@@ -74,13 +74,13 @@ function update_geom_command(originalNode, editedNode) {
     }
 
     // toNode is the preview node so will be in the geom doc
-    var fromAncestors = geom_doc.ancestors(editedNode);
+    var fromAncestors = geom_doc.ancestors(nodeInDoc);
     var toAncestors = fromAncestors.map(function(ancestor) {
         return ancestor.editableCopy();
     });
 
     var fromChain = [originalNode].concat(fromAncestors);
-    var toChain = [editedNode.editableCopy()].concat(toAncestors);
+    var toChain = [replacement.editableCopy()].concat(toAncestors);
 
     var doFn = function() {
         chainedPostFn(0, fromChain, toChain);
