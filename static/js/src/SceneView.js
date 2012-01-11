@@ -283,16 +283,20 @@ SS.SceneView = function(container) {
     }
 
     function onDocumentKeyDown(event) {
+	console.log(event.keyIdentifier + ':' + event.keyCode);
 	switch (event.keyCode) {
-	case 38:
+	case 187:
+	case 107:
             zoom(100);
             event.preventDefault();
             break;
-	case 40:
+	case 189:
+	case 109:
             zoom(-100);
             event.preventDefault();
             break;
 	}
+	return false;
     }
 
     function onWindowResize(event) {
