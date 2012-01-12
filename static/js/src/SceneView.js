@@ -117,7 +117,6 @@ SS.SceneView = function(container) {
 	    }
 
 	    if (panning || rotating) {
-		container.style.cursor = 'move';
 		popupMenu.cancel()
 	    } 
 
@@ -260,7 +259,6 @@ SS.SceneView = function(container) {
 
 	mouseOnDown = null;
 	container.removeEventListener('mouseup', onMouseUp, false);
-	container.style.cursor = 'auto';
     }
 
     function onMouseOut(event) {

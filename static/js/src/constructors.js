@@ -75,7 +75,11 @@ SS.constructors.origin = function(my) {
     that.edit = function() {
 	that.setupValueHandlers();
 	that.setupFocusHandlers();
-	sceneView.workplane.on('workplaneCursorUpdated', that.onWorkplaneCursorUpdated);
+	sceneView.workplane.on('workplaneCursorUpdated', function(event) {
+	    if (event.originalEvent.shiftKey) {
+		that.onWorkplaneCursorUpdated(event);
+	    }
+	});
 	sceneView.workplane.on('workplaneClicked', that.onWorkplaneClicked);
 
 	SS.constructors.active = that;
