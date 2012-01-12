@@ -46,7 +46,3 @@ var SS = SS || {};
 })();
 
 
-SS.clearMessages = function() {
-    $('#messages-container').empty();
-}
-

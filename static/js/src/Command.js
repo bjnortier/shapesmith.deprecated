@@ -86,7 +86,6 @@ function CommandStack(ss) {
     this.success = function() {
         successFn();
 	ss.spinner.hide();
-	SS.clearMessages();
     }
 
     this.error = function(error) {
