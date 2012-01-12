@@ -25,7 +25,7 @@ suite() -> [{timetrap,{minutes,1}}].
 all() ->
 	[
          in_mem,
-	 riak,
+	 %% Not for normal users riak,
 	 disk
 	].
 

@@ -5,16 +5,25 @@ Prerequisites
 -------------
 
  * MacOSX or Ubuntu Linux (other variants of Linux should be fine, but there are not specific instructions for installing the dependencies on these yet).
- * Riak 0.14.1 http://downloads.basho.com/riak/CURRENT/
- * Erlang R14B3 recommended, but R14B* should work
+ * Erlang R14 or R15.
  * Libraries for OpenCASCADE, Erlang etc: *Follow the instructions for installing these in either INSTALL.MacOSX or INSTALL.Ubuntu*
+
+Install libraries
+-----------------
+
+ * Refer to the MacOSX or Ubuntu install instructions
+
+Install Erlang
+--------------
+
+ * Refer to the MacOSX or Ubuntu install instructions
 
 Install OCE v 0.4
 -----------------
  
  * git clone https://github.com/tpaviot/oce.git
  * cd oce
- * git checkout -b 0.4.0 OCE-0.4.0
+ * git checkout -b 0. 4.0 OCE-0.4.0
  * mkdir build
  * cd build
  * cmake ..

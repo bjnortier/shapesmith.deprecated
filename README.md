@@ -1,11 +1,17 @@
-Shapesmith 0.2.1
-================
+Shapesmith 0.3.RC1
+==================
 
-Shapesmith is a browser-based 3D design application that aims to be a powerful, parametric applicaiton that is open and extensible.
-
-Although you can design models and export them for printing, Shapesmith is *still a preview* and should be regarded as such.
+Shapesmith is a browser-based 3D modelling application that aims to be powerful, parametric, open and extensible.
 
 You can install your own verion of Shapesmith on MacOSX or Linux (Ubuntu recommended), please consult the INSTALL.md file. There is also a recent version running on [shapesmith.net](http://shapesmith.net) for you to look at.
 
-There is a twitter account for this project, [@shapesmith](http://www.twitter.com/shapesmith), and feel free to email me at bjnortier@shapesmith.net for encouragement, questions, bugs etc.
+There are two mailing lists, 
+ * shapesmith-user@googlegroups.com for user questions, suggestions, bug reports etc. 
+ * shapesmith-dev@googlegroups.com for developer questions, discussions etc. that are beyond the interest of users.
+
+There is also a twitter account for this project, [@shapesmith](http://www.twitter.com/shapesmith).
+
+Feel free to email me personally at bjnortier@shapesmith.net
+
+Benjamin Nortier
 
