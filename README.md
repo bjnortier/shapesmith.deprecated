@@ -1,4 +1,4 @@
-Shapesmith 0.3.RC1
+Shapesmith 0.3.RC3
 ==================
 
 Shapesmith is a browser-based 3D modelling application that aims to be powerful, parametric, open and extensible.
