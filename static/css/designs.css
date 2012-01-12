@@ -211,6 +211,9 @@ input.field {
     color: #333333;
 }
 	
-
+#spinner {
+    padding: 5px;
+    text-align: center;
+}
 
 
