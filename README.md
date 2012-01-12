@@ -14,5 +14,6 @@ There is also a twitter account for this project, [@shapesmith](http://www.twitt
 
 Feel free to email me personally at bjnortier@shapesmith.net
 
+Build something
 Benjamin Nortier
 
