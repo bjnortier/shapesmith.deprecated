@@ -5,7 +5,8 @@ Shapesmith is a browser-based 3D modelling application that aims to be powerful,
 
 You can install your own verion of Shapesmith on MacOSX or Linux (Ubuntu recommended), please consult the INSTALL.md file. There is also a recent version running on [shapesmith.net](http://shapesmith.net) for you to look at.
 
-There are two mailing lists, 
+There are two mailing lists:
+
  * shapesmith-user@googlegroups.com for user questions, suggestions, bug reports etc. 
  * shapesmith-dev@googlegroups.com for developer questions, discussions etc. that are beyond the interest of users.
 

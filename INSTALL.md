@@ -57,11 +57,18 @@ Build the Erlang application
 
  * cd shapesmith/node
  * make
- * ./rebar eunit ct skip_deps=true # This runs the tests. Make sure riak is running before you run tests
- 
+
+NB. Because of the cookies used in the session authentication tests, add the following line to the /etc/hosts file:
+
+``127.0.0.1       localhost.shapesmith.net``
+
+Run the tests:
+
+ * ./rebar eunit ct skip_deps=true # This runs the tests. 
+
 If all the tests pass, run shapesmith:
 
- * ./start.sh
+ * ./start-dev.sh
 
 Point your browser to
 

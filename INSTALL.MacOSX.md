@@ -7,10 +7,10 @@
 
 ## Install Erlang
 
- * (Recommended) Install Erlang R15 from the DMH provided by Erlang Solutions: http://www.erlang-solutions.com/section/132/download-erlang-otp
+ * (Recommended) Install Erlang R15 from the Disk Image provided by Erlang Solutions: http://www.erlang-solutions.com/section/132/download-erlang-otp
 
  OR
 
- * Install it form source as described in INSTALL.MacOSXErlangFromSource.md
+ * Install it from source as described in INSTALL.MacOSXErlangFromSource.md
 
 
