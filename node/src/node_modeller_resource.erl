@@ -48,7 +48,7 @@ provide_content(ReqData, Context) ->
     Design = wrq:path_info(design, ReqData),
     Commit = wrq:get_qs_value("commit", ReqData),
     {ok, Host} = application:get_env(node, host),
-    PublicSTLUrl = lists:flatten(io_lib:format("~s/~s/~s/stl/~s", [Host, User, Design, Commit])),
+    PublicSTLUrl = lists:flatten(io_lib:format("~s/~s/~s/stl/~s.stl", [Host, User, Design, Commit])),
     PublicSTLUrlBase64 = base64:encode_to_string(PublicSTLUrl),
     WalrusContext =  [{username, User},
 		      {design, Design},
