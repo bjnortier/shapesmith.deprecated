@@ -18,7 +18,8 @@
       var SS = SS || {};
       SS.session = {
         username: '{{username}}',
-        design:   '{{design}}'
+        design:   '{{design}}',
+        host:     '{{host}}'
 
       }
     </script>
@@ -34,7 +35,7 @@
     <div class="heading">Export to Thingiverse</div>
     <div class="form">
       <form method="POST" action="http://www.thingiverse.com/api/upload"  id="thingiyverse-export-form">
-	<input type="hidden" name="url" value="{{public_stl_url_base_64}}"/>
+	<input id="public_stl_location_b64" type="hidden" name="url" value=""/>
 	<input type="hidden" name="service" value="Shapesmith"/>
 	<input type="hidden" name="service_url" value="aHR0cDovL3NoYXBlc21pdGgubmV0">
 	<div class="inner1">

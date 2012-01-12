@@ -216,6 +216,8 @@ $('#thingiverse-export input.ok').click(function() {
         url: '/' + SS.session.username + '/' + SS.session.design + '/stl/publish/' + SS.session.commit, 
 	data: JSON.stringify({}),
 	success: function(design) { 
+	    var publicSTLUrl = SS.session.host + '/' + SS.session.username + '/' + SS.session.design + '/stl/' + SS.session.commit + '.stl';
+	    $('#public_stl_location_b64').val(window.btoa(publicSTLUrl));
 	    $('#thingiyverse-export-form').submit();
 	    $('#black-overlay').hide();
 	    $('#thingiverse-export').hide();
