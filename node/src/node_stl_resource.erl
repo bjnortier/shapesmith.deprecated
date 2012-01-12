@@ -32,10 +32,14 @@
 init([]) -> {ok, #context{}}.
 
 allowed_methods(ReqData, Context) -> 
+    Commit = case string:tokens(wrq:path_info(sha, ReqData), ".") of
+		 [C, "stl"] -> C;
+		 C -> C
+	     end,
     Context1 = Context#context{ method=wrq:method(ReqData),
 				user=wrq:path_info(user, ReqData),
 				design=wrq:path_info(design, ReqData),
-				commit_SHA=wrq:path_info(sha, ReqData)},
+				commit_SHA=Commit},
     {['GET'], ReqData, Context1}.
 
 is_authorized(ReqData, Context = #context{ user = User,
