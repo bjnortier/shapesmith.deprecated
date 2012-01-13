@@ -40,13 +40,26 @@ validate(_ReqData, _User, _Design, Geometry) ->
 	    {error, {[{<<"validation">>, ErrorParams}]}}
     end.
 
-create(_ReqData, User, Design, RequestJSON) ->
-    case node_master:create_geom(User, Design, RequestJSON) of
+create(ReqData, User, Design, RequestJSON) ->
+    ShaOrShaAndMesh = case wrq:get_qs_value("mesh", "false", ReqData) of
+			  "true" ->
+			      node_master:create_and_mesh_geom(User, Design, RequestJSON);
+			  _ ->
+			      node_master:create_geom(User, Design, RequestJSON) 
+		      end,
+    case ShaOrShaAndMesh of
 	{ok, SHA} ->
 	    Path = io_lib:format("/~s/~s/geom/~s", [User, Design, SHA]),
 	    ResponseJSON = {[{<<"path">>, iolist_to_binary(Path)},
 			     {<<"SHA">>, list_to_binary(SHA)}]},
 	    {ok, ResponseJSON};
+	{ok, SHA, Mesh} ->
+	    Path = io_lib:format("/~s/~s/geom/~s", [User, Design, SHA]),
+	    ResponseJSON = {[{<<"path">>, iolist_to_binary(Path)},
+			     {<<"mesh">>, Mesh},
+			     {<<"SHA">>, list_to_binary(SHA)}]},
+	    {ok, ResponseJSON};
+
 	{error,worker_timeout} ->
 	    {error, 500, {[{<<"error">>, <<"timeout">>}]}};
 	{error, Reason} ->

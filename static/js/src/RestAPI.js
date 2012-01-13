@@ -9,9 +9,13 @@ function update_geom_command(originalNode, nodeInDoc, replacement) {
         var nextTo = toChain[index];
 
         if (nextTo) {
+	    var isLast = !(index + 1 < fromChain.length);
+	    var createUrl = isLast ? 
+		'/' + SS.session.username + '/' + SS.session.design + '/geom?mesh=true' :
+		'/' + SS.session.username + '/' + SS.session.design + '/geom/';
             $.ajax({
 		type: 'POST',
-		url: '/' + SS.session.username + '/' + SS.session.design + '/geom/',
+		url: createUrl,
                 contentType: 'application/json',
                 data: nextTo.toShallowJson(),
 		dataType: 'json',
@@ -44,27 +48,17 @@ function update_geom_command(originalNode, nodeInDoc, replacement) {
                         chainedPostFn(index + 1, fromChain, toChain);
                     } else {
                         // No more -> update the root node
-                        $.ajax({
-                            type: 'GET',
-			    url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
-                            success: function(mesh) {
-                                nextTo.mesh = mesh;
+                        nextTo.mesh = result.mesh;
 
-				// If the 'to' node is the preview node, or node that 
-				// was edited, that one is to be replaced, not the original
-				// node
-				if (index == 0) {
-				    geom_doc.replace(nodeInDoc, nextTo);
-				} else {
-                                    geom_doc.replace(nextFrom, nextTo);
-				}
-				command_stack.commit();
-                            },
-			    error: function(jqXHR, textStatus, errorThrown) {
-				command_stack.error(jqXHR.responseText);
-			    }
-
-                        });
+			// If the 'to' node is the preview node, or node that 
+			// was edited, that one is to be replaced, not the original
+			// node
+			if (index == 0) {
+			    geom_doc.replace(nodeInDoc, nextTo);
+			} else {
+                            geom_doc.replace(nextFrom, nextTo);
+			}
+			command_stack.commit();
                     }
                 },
 		error: function(jqXHR, textStatus, errorThrown) {
@@ -104,28 +98,17 @@ function create_geom_command(prototype, geometry) {
     var doFn = function() {
          $.ajax({
             type: 'POST',
-            url: '/' + SS.session.username + '/' + SS.session.design + '/geom/',
+            url: '/' + SS.session.username + '/' + SS.session.design + '/geom?mesh=true',
             contentType: 'application/json',
             data: JSON.stringify(geometry),
 	    dataType: 'json',
             success: function(result) {
-		var sha = result.SHA;
-                $.ajax({
-                    type: 'GET',
-                    url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
-		    dataType: 'json',
-                    success: function(mesh) {
-			geometry.sha = sha;
-                        geomNode = new GeomNode(geometry);
-                        geomNode.mesh = mesh;
+   		geometry.sha = result.SHA;
+                geomNode = new GeomNode(geometry);
+                geomNode.mesh = result.mesh;
 
-                        geom_doc.replace(prototype, geomNode);
-                        command_stack.commit();
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-			command_stack.error(jqXHR.responseText);
-                    }
-                });
+                geom_doc.replace(prototype, geomNode);
+                command_stack.commit();
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 command_stack.error(jqXHR.responseText);
@@ -171,34 +154,26 @@ function boolean(selected, type) {
 			})};
         $.ajax({
             type: "POST",
-	    url: '/' + SS.session.username + '/' + SS.session.design + '/geom/',
+	    url: '/' + SS.session.username + '/' + SS.session.design + '/geom?mesh=true',
             contentType: "application/json",
             data: JSON.stringify(geometry),
             success: function(result) {
+		selectionManager.deselectAll();
+
 		var sha = result.SHA;
 		geometry.sha = sha;
-                $.ajax({
-                    type: "GET",
-                    url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
-                    success: function(mesh) {
-			selectionManager.deselectAll();
-
-                        childNodes = selected.map(function(id) {
-                            var node = geom_doc.findById(id);
-                            geom_doc.remove(node);
-                            return node;
-                        });
-
-                        boolNode = new GeomNode(geometry, childNodes);
-                        boolNode.mesh = mesh;
-
-                        geom_doc.add(boolNode);
-			command_stack.commit();
-                    },
-		    error: function(jqXHR, textStatus, errorThrown) {
-			command_stack.error(jqXHR.responseText);
-		    }
+		
+                childNodes = selected.map(function(id) {
+                    var node = geom_doc.findById(id);
+                    geom_doc.remove(node);
+                    return node;
                 });
+
+                boolNode = new GeomNode(geometry, childNodes);
+                boolNode.mesh = result.mesh;
+		
+                geom_doc.add(boolNode);
+		command_stack.commit();
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 command_stack.error(jqXHR.responseText);

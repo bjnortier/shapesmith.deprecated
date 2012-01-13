@@ -17,15 +17,12 @@
 
 -module(node_master).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([create_geom/3, mesh_geom/3, stl/3]).
+-export([create_geom/3, mesh_geom/3, create_and_mesh_geom/3, stl/3]).
 -export([ensure_child_breps_exist/5]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-
-%% recursive_geometry(Sha) ->
-%%     node_geom_db:recursive_geometry(Sha).
 
 create_geom(User, Design, Geometry) ->
     case node_db:create(User, Design, geom, Geometry) of
@@ -52,7 +49,24 @@ mesh_geom(User, Design, SHA) ->
 			       end)
     end.
 
+create_and_mesh_geom(User, Design, Geometry) ->
+    case node_db:create(User, Design, geom, Geometry) of
+	{ok, SHA} ->
+	    case ensure_brep_exists(User, Design, SHA, Geometry, 
+				    fun(WorkerPid) -> 
+					    node_mesh_db:mesh(WorkerPid, SHA)  
+				    end) of
 
+		{ok, Mesh} ->
+		    {ok, SHA, Mesh};
+		{error, Reason} ->
+		    lager:error("create_and_mesh_geom failed: ~p~n", [Reason]),
+		    {error, Reason}
+	    end;
+	{error, Reason} ->
+	    {error, Reason}
+    end.
+	    
 stl(User, Design, SHA) ->
     Geometry = node_db:get(User, Design, geom, SHA),
     ensure_brep_exists(User, Design, SHA, Geometry, 

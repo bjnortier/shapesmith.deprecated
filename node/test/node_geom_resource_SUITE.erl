@@ -89,6 +89,18 @@ creation(_Config) ->
     SHA = binary_to_list(SHABin),
     "/local/iphonedock/geom/" ++ SHA = Path,
 
+    %% Create and mesh
+    {ok,{{"HTTP/1.1",200,_}, CreateHeaders2, PostResponse2}} = 
+	httpc:request(post, {CreateURL ++ "?mesh=true", [], "application/json", jiffy:encode(GeomJSON)}, [], []),
+
+    check_json_content_type(CreateHeaders2),
+    {[{<<"path">>, PathBin},
+      {<<"mesh">>, _},
+      {<<"SHA">>, SHABin}]} = jiffy:decode(iolist_to_binary(PostResponse2)),
+    Path = binary_to_list(PathBin),
+    SHA = binary_to_list(SHABin),
+    "/local/iphonedock/geom/" ++ SHA = Path,
+
     %% Get the created geometry
     {ok,{{"HTTP/1.1",200,_}, GetHeaders, GetResponse}} = 
 	httpc:request(get, {"http://localhost:8001" ++ Path, []}, [], []),
