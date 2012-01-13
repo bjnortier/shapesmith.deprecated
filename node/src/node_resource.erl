@@ -56,7 +56,7 @@ redirect_to_signin_if_not_authorized(ReqData, Context) ->
     is_authorized_common(ReqData, Context, 302, wrq:set_resp_header("Location", Location, ReqData)).
 	    
 forbidden_if_not_authorized(ReqData, Context) ->
-    is_authorized_common(ReqData, Context, 403, ReqData).
+    is_authorized_common(ReqData, Context, 403, node_resource:json_response({[{<<"error">>, <<"Please sign in.">>}]}, ReqData)).
 
 is_authorized_common(ReqData, Context, Code, NotAuthorisedReqData) ->
     {ok, AuthModule} = application:get_env(node, auth_module),
