@@ -30,6 +30,8 @@ function Action(label, iconPath, fn) {
 }
 
 function delete_geom(selected) {
+    selectionManager.deselectAll();
+
     if (selected.length == 0)  {
         alert("please select at least one object");
         return;
