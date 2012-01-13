@@ -102,7 +102,7 @@ void mesh(string id) {
     }
         
     if (numFaces > 0) {
-        BRepMesh().Mesh(shape, 0.125);
+        BRepMesh().Mesh(shape, 1.0);
     }
     
     meshed_shapes[id] = unmeshed_shapes[id];
