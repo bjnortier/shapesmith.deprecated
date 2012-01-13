@@ -63,7 +63,7 @@
       <div id="export-options">
 	<span class="action" id="action-export-stl">stl</span>
 	{{#session}}
-	<span class="action" id="action-export-thingiverse">thingiverse</span>
+	<!--<span class="action" id="action-export-thingiverse">thingiverse</span>-->
 	{{/session}}
       </div>
     </div>
