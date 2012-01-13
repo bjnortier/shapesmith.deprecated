@@ -60,8 +60,8 @@ create(ReqData, User, Design, RequestJSON) ->
 			     {<<"SHA">>, list_to_binary(SHA)}]},
 	    {ok, ResponseJSON};
 
-	{error,worker_timeout} ->
-	    {error, 500, {[{<<"error">>, <<"timeout">>}]}};
+	{error,{'EXIT',{timeout,_}}} ->
+	    {error, 500, {[{<<"error">>, <<"This operation took too long.">>}]}};
 	{error, Reason} ->
 	    lager:error("Geometry create failed: ~p", [Reason]),
 	    {error, 500, {[{<<"error">>, <<"internal error">>}]} }

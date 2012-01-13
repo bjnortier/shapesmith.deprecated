@@ -38,7 +38,7 @@ call(Pid, Msg) when is_list(Msg) andalso length(Msg) > 0 ->
 call(_Pid, Msg) when is_list(Msg)  ->
     {error, empty_msg};
 call(Pid, Msg) when is_binary(Msg) andalso size(Msg) > 0 ->
-    gen_server:call(Pid, {call, Msg});
+    gen_server:call(Pid, {call, Msg}, infinity);
 call(_Pid, Msg) when is_binary(Msg) ->
     {error, empty_msg};
 call(_, _Msg) ->
