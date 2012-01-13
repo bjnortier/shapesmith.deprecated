@@ -98,7 +98,9 @@ resource_exists(ReqData, Context = #context{ adapter=Adapter,
     Context1 = Context#context{ existing = Existing },
     case {Method, Existing} of
 	{_, {error, ErrorJSON}} ->
-	    {halt, node_resource:json_response(ErrorJSON), ReqData, Context};
+	    {halt, node_resource:json_response(ErrorJSON, ReqData), Context};
+	{_, {error, Code, ErrorJSON}} ->
+	    {halt, Code, node_resource:json_response(ErrorJSON, ReqData), Context};
 	{'GET', undefined} ->
 	    {false, node_resource:json_response(<<"not found">>, ReqData), Context1};
 	_ ->

@@ -253,8 +253,8 @@ SS.save = function() {
 	    SS.spinner.hide();
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            error_response(jqXHR.responseText);
 	    SS.spinner.hide();
+	    SS.renderErrorMessage(jqXHR.responseText);
         }
     });
 }
@@ -282,7 +282,7 @@ SS.commit = function() {
 	    command_stack.success();
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            error_response(jqXHR.responseText);
+	    command_stack.error(jqXHR.responseText);
         }
     });
 }
@@ -335,7 +335,7 @@ SS.load_commit = function(commit) {
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 	    SS.spinner.hide();
-            error_response(jqXHR.responseText);
+	    SS.renderErrorMessage(jqXHR.responseText);
 	}
     });
 }
@@ -360,15 +360,15 @@ SS.load_geom = function(sha) {
 		    SS.spinner.hide();
 		},
 		error: function(jqXHR, textStatus, errorThrown) {
-		    error_response(jqXHR.responseText);
 		    SS.spinner.hide();
+		    SS.renderErrorMessage(jqXHR.responseText);
 		}
 	    });
 	    
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
-	    error_response(jqXHR.responseText);
 	    SS.spinner.hide();
+	    SS.renderErrorMessage(jqXHR.responseText);
 	}
     });
 }
