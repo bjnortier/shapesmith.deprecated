@@ -3,7 +3,7 @@ project (worker)
 
 # The version number.
 set (worker_VERSION_MAJOR 0)
-set (worker_VERSION_MINOR 1)
+set (worker_VERSION_MINOR 2)
 
 # configure a header file to pass some of the CMake settings
 # to the source code
@@ -22,6 +22,16 @@ include_directories("/opt/local/include")
 
 # add the executable
 add_executable(worker src/worker.cxx src/base64.cpp)
+
+# Unit tests
+enable_testing()
+
+# http://www.cmake.org/cmake/help/cmake-2-8-docs.html
+find_package(GTest REQUIRED)
+
+add_executable(sample test/sample.cc)
+GTEST_ADD_TESTS(sample "" test/sample.cc)
+target_link_libraries(sample ${GTEST_BOTH_LIBRARIES})
 
 set(CMAKE_CXX_FLAGS "-DHAVE_CONFIG_H")
 
