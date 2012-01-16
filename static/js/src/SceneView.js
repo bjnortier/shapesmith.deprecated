@@ -280,17 +280,19 @@ SS.SceneView = function(container) {
     }
 
     function onDocumentKeyDown(event) {
-	switch (event.keyCode) {
-	case 187:
-	case 107:
-            zoom(100);
-            event.preventDefault();
-            break;
-	case 189:
-	case 109:
-            zoom(-100);
-            event.preventDefault();
-            break;
+	if (overRenderer) {
+	    switch (event.keyCode) {
+	    case 187:
+	    case 107:
+		zoom(100);
+		event.preventDefault();
+		break;
+	    case 189:
+	    case 109:
+		zoom(-100);
+		event.preventDefault();
+		break;
+	    }
 	}
 	return false;
     }
