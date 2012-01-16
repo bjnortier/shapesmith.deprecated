@@ -15,13 +15,15 @@ configure_file (
 # add the binary tree to the search path for include files
 # so that we will find TutorialConfig.h
 include_directories("${PROJECT_BINARY_DIR}")
-include_directories("include")
+include_directories("include")	
 include_directories("/usr/local/include")
 include_directories("/usr/local/inc")
 include_directories("/opt/local/include")
 
 # add the executable
-add_executable(worker src/worker.cxx src/base64.cpp)
+add_executable(worker	
+    src/worker.cxx 
+    src/base64.cpp)
 
 # Unit tests
 enable_testing()
@@ -29,12 +31,18 @@ enable_testing()
 # http://www.cmake.org/cmake/help/cmake-2-8-docs.html
 find_package(GTest REQUIRED)
 
-add_executable(sample test/sample.cc)
-GTEST_ADD_TESTS(sample "" test/sample.cc)
-target_link_libraries(sample ${GTEST_BOTH_LIBRARIES})
+add_executable(run-tests 
+    src/Line.cxx
+    test/line.cc)
+GTEST_ADD_TESTS(run-tests "" test/line.cc)
+target_link_libraries(run-tests ${GTEST_BOTH_LIBRARIES})
 
 set(CMAKE_CXX_FLAGS "-DHAVE_CONFIG_H")
 
-target_link_libraries(worker -L/opt/local/lib -ljson_spirit -lpthread -lTKernel -lPTKernel -lTKMath -lTKService -lTKV3d -lTKBRep -lTKSTL -lTKShapeSchema -lTKGeomBase -lTKGeomAlgo -lTKXSBase -lTKPShape -lTKShHealing -lTKHLR -lTKTopAlgo -lTKMesh -lTKPrim -lTKCDF -lTKBool -lTKBO -lTKOffset)
+set(ALL_LIBS "-L/opt/local/lib -ljson_spirit -lpthread -lPTKernel -lTKAdvTools -lTKBin -lTKBinL -lTKBinTObj -lTKBinXCAF -lTKBO -lTKBool -lTKBRep -lTKCAF -lTKCDF -lTKernel -lTKFeat -lTKFillet -lTKG2d -lTKG3d -lTKGeomAlgo -lTKGeomBase -lTKHLR -lTKIGES -lTKLCAF -lTKMath -lTKMesh -lTKMeshVS -lTKNIS -lTKOffset -lTKOpenGl -lTKPCAF -lTKPLCAF -lTKPrim -lTKPShape -lTKService -lTKShapeSchema -lTKShHealing -lTKStdLSchema  -lTKStdSchema -lTKSTEP -lTKSTEP209 -lTKSTEPAttr -lTKSTEPBase -lTKSTL -lTKTopAlgo -lTKV2d -lTKV3d -lTKXMesh -lTKXml -lTKXmlL -lTKXmlTObj -lTKXmlXCAF -lTKXSBase")
+
+target_link_libraries(worker ${ALL_LIBS})
+target_link_libraries(run-tests ${ALL_LIBS})
+
 
 
