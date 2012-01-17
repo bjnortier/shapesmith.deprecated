@@ -26,6 +26,7 @@ add_executable(worker
     src/Geometry.cxx    
     src/Transform.cxx
     src/Util.cxx
+    src/Tesselate.cxx
     src/base64.cpp)
 
 # Unit tests
