@@ -1,3 +1,6 @@
+#ifndef SS_GEOMETRY
+#define SS_GEOMETRY
+
 #include <json_spirit.h>
 #include "OCC.h"
 
@@ -80,3 +83,4 @@ public:
     ~Intersect();
 };
 
+#endif

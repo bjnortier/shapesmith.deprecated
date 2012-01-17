@@ -23,7 +23,9 @@ include_directories("/opt/local/include")
 # add the executable
 add_executable(worker	
     src/worker.cxx 
-    src/Geometry.cxx
+    src/Geometry.cxx    
+    src/Transform.cxx
+    src/Util.cxx
     src/base64.cpp)
 
 # Unit tests

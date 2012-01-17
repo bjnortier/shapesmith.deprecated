@@ -1,10 +1,13 @@
+#ifndef SS_UTIL
+#define SS_UTIL
+
+#include <json_spirit.h>
+
+using namespace json_spirit;
+
 class Util {
 public:
-    static double to_d(mValue value) {
-        if (value.type() == int_type) {
-            return (double)value.get_int();
-        } else {
-            return value.get_real();
-        }
-    }
+    static double to_d(mValue value);
 };
+
+#endif

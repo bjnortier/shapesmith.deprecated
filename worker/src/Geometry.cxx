@@ -1,5 +1,6 @@
 #include "Geometry.h"
 #include "Transform.h"
+#include "Util.h"
 
 TopoDS_Shape Geometry3D::shape() {
     return shape_;
