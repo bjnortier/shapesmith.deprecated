@@ -1,14 +1,15 @@
+#include "CompositeShape.h"   
 #include "Geometry.h"
 #include "Tesselate.h"
 #include "Transform.h"
 #include "Util.h"
 
 
-TopoDS_Shape Shape::shape() {
+TopoDS_Shape Builder::shape() {
     return shape_;
 }
 
-void Shape::ApplyOrigin(map< string, mValue > json) {
+void Builder::ApplyOrigin(map< string, mValue > json) {
     if (!json["origin"].is_null()) {
         map< string, mValue > origin = json["origin"].get_obj();
         double x = Util::to_d(origin["x"]);
@@ -22,7 +23,7 @@ void Shape::ApplyOrigin(map< string, mValue > json) {
     }
 }
 
-void Shape::ApplyTransform(map< string, mValue > transformJson) {
+void Builder::ApplyTransform(map< string, mValue > transformJson) {
     string transformType = transformJson["type"].get_str();
     map< string, mValue > origin = transformJson["origin"].get_obj();
     map< string, mValue > parameters = transformJson["parameters"].get_obj();
@@ -47,7 +48,7 @@ void Shape::ApplyTransform(map< string, mValue > transformJson) {
     throw "transform type not found";
 }
 
-void Shape::ApplyTransforms(map< string, mValue > json) {
+void Builder::ApplyTransforms(map< string, mValue > json) {
     if (!json["transforms"].is_null()) {
         mArray transforms = json["transforms"].get_array();
         for (unsigned int k = 0; k < transforms.size(); ++k) {
@@ -57,15 +58,9 @@ void Shape::ApplyTransforms(map< string, mValue > json) {
     } 
 }
 
-void Shape::ToOriginTransformAndMesh(map< string, mValue > json) {
-    this->ApplyOrigin(json);
-    this->ApplyTransforms(json);
-    this->Mesh();
-}
+#pragma mark 3D builders
 
-#pragma mark 3D shapes
-
-void Shape3D::Mesh() {
+void Builder3D::Mesh() {
     TopExp_Explorer Ex; 
     int numFaces = 0;
     for (Ex.Init(shape_, TopAbs_FACE); Ex.More(); Ex.Next()) { 
@@ -77,12 +72,13 @@ void Shape3D::Mesh() {
     }
 }
 
-mValue Shape3D::Tesselate() {
-    auto_ptr<Tesselator3D> tesselator(new Tesselator3D(shape_));
-    return tesselator->tesselate();
+void Builder3D::PostProcess(map< string, mValue > json) {
+    this->ApplyOrigin(json);
+    this->ApplyTransforms(json);
+    this->Mesh();
 }
 
-Cuboid::Cuboid(map< string, mValue > json) {
+CuboidBuilder::CuboidBuilder(map< string, mValue > json) {
     map< string, mValue > parameters = json["parameters"].get_obj();
     double width = Util::to_d(parameters["u"]);
     double depth = Util::to_d(parameters["v"]);
@@ -107,17 +103,17 @@ Cuboid::Cuboid(map< string, mValue > json) {
     json["origin"] = origin;
 	 
     shape_ = BRepPrimAPI_MakeBox(width, depth, height).Shape();
-    ToOriginTransformAndMesh(json);
+    PostProcess(json);
 }
 
-Sphere::Sphere(map< string, mValue > json) {
+SphereBuilder::SphereBuilder(map< string, mValue > json) {
     map< string, mValue > parameters = json["parameters"].get_obj();
     double radius = Util::to_d(parameters["r"]);
     shape_ = BRepPrimAPI_MakeSphere(radius).Shape();
-    ToOriginTransformAndMesh(json);    
+    PostProcess(json);    
 }
 
-Cylinder::Cylinder(map< string, mValue > json) {
+CylinderBuilder::CylinderBuilder(map< string, mValue > json) {
     map< string, mValue > parameters = json["parameters"].get_obj();
     double r = Util::to_d(parameters["r"]);
     double h = Util::to_d(parameters["h"]);
@@ -130,10 +126,10 @@ Cylinder::Cylinder(map< string, mValue > json) {
     json["origin"] = origin;
     
     shape_ = BRepPrimAPI_MakeCylinder(r, h).Shape() ;
-    ToOriginTransformAndMesh(json);
+    PostProcess(json);
 }
 
-Cone::Cone(map< string, mValue > json) {
+ConeBuilder::ConeBuilder(map< string, mValue > json) {
     map< string, mValue > parameters = json["parameters"].get_obj();
     double r1 = Util::to_d(parameters["r1"]);
     double r2 = Util::to_d(parameters["r2"]);
@@ -148,10 +144,10 @@ Cone::Cone(map< string, mValue > json) {
     json["origin"] = origin;
         
     shape_ = BRepPrimAPI_MakeCone(r1, r2, h).Shape();
-    ToOriginTransformAndMesh(json);
+    PostProcess(json);
 }
 
-Wedge::Wedge(map< string, mValue > json) {
+WedgeBuilder::WedgeBuilder(map< string, mValue > json) {
     map< string, mValue > parameters = json["parameters"].get_obj();
     double u1 = Util::to_d(parameters["u1"]);
     double u2 = Util::to_d(parameters["u2"]);
@@ -165,45 +161,41 @@ Wedge::Wedge(map< string, mValue > json) {
     }
     json["origin"] = origin;
     shape_ = BRepPrimAPI_MakeWedge(u1, v, w, u2).Shape();                                                
-    ToOriginTransformAndMesh(json);
+    PostProcess(json);
 }
 
 
-Torus::Torus(map< string, mValue > json) {
+TorusBuilder::TorusBuilder(map< string, mValue > json) {
     map< string, mValue > parameters = json["parameters"].get_obj();
     double r1 = Util::to_d(parameters["r1"]);
     double r2 = Util::to_d(parameters["r2"]);
     shape_ =BRepPrimAPI_MakeTorus(r1, r2).Shape();
-    ToOriginTransformAndMesh(json);
+    PostProcess(json);
 }
 
-#pragma mark 1D Shapes
+#pragma mark 1D Builders
 
-void Shape1D::Mesh() {
-    // Do nothing. Tesselation is done on-demand.
+void Builder1D::PostProcess(map< string, mValue > json) {
+    this->ApplyOrigin(json);
+    this->ApplyTransforms(json);
 }
 
-mValue Shape1D::Tesselate() {
-    auto_ptr<Tesselator1D> tesselator(new Tesselator1D(shape_));
-    return tesselator->tesselate();
-}
-
-Ellipse1D::Ellipse1D(map< string, mValue > json) {
+Ellipse1DBuilder::Ellipse1DBuilder(map< string, mValue > json) {
     gp_Elips ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), 50.0, 20.0);
 	shape_ = BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI*2).Edge();
 }
 
 
-#pragma mark Boolean
+#pragma mark Boolean builders
 
-Boolean::Boolean(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boolean_op function) {
+BooleanBuilder::BooleanBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boolean_op function) {
     vector<TopoDS_Shape>::iterator it = shapes.begin();
     shape_ = *it;
     ++it;
     for ( ; it < shapes.end(); ++it ) {
 	shape_ = function(*it, shape_);
     }
-    ToOriginTransformAndMesh(json);
+    PostProcess(json);
 }
 
 TopoDS_Shape fuse(const TopoDS_Shape& a, const TopoDS_Shape& b) {
@@ -218,14 +210,14 @@ TopoDS_Shape cut(const TopoDS_Shape& a, const TopoDS_Shape& b) {
     return BRepAlgoAPI_Cut(a,b);
 }
 
-Union::Union(map< string, mValue > json, vector<TopoDS_Shape>& shapes) 
-    : Boolean(json, shapes, &fuse) {
+UnionBuilder::UnionBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes) 
+    : BooleanBuilder(json, shapes, &fuse) {
 }
 
-Intersect::Intersect(map< string, mValue > json, vector<TopoDS_Shape>& shapes) 
-    : Boolean(json, shapes, &common) {
+IntersectBuilder::IntersectBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes) 
+    : BooleanBuilder(json, shapes, &common) {
 }
 
-Subtract::Subtract(map< string, mValue > json, vector<TopoDS_Shape>& shapes) 
-    : Boolean(json, shapes, &cut) {
+SubtractBuilder::SubtractBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes) 
+    : BooleanBuilder(json, shapes, &cut) {
 }

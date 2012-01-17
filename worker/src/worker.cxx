@@ -55,8 +55,8 @@ TopoDS_Shape find_shape(string id) {
 #pragma mark Geometry
 
 template < typename T > string create_primitive(string id, map< string, mValue > json) {
-    std::auto_ptr<Shape> geometry(new T(json));
-    shapes[id] = geometry->shape();
+    std::auto_ptr<Builder> builder(new T(json));
+    shapes[id] = builder->shape();
     return "ok";
 }
 
@@ -68,8 +68,8 @@ template < typename T > string create_boolean(string id, map< string, mValue > j
         childShapes.push_back(childShape);
     }
     
-    std::auto_ptr<Shape3D> geometry(new T(json, childShapes));
-    shapes[id] = geometry->shape();
+    std::auto_ptr<Builder> builder(new T(json, childShapes));
+    shapes[id] = builder->shape();
     return "ok";
 }
 
@@ -78,29 +78,29 @@ string create_geometry(string id, map< string, mValue > json) {
     
     // 3D Primitives
     if (geomType == "cuboid") {
-        return create_primitive<Cuboid>(id, json);
+        return create_primitive<CuboidBuilder>(id, json);
     } else if (geomType == "sphere") {
-        return create_primitive<Sphere>(id, json);
+        return create_primitive<SphereBuilder>(id, json);
     } else if (geomType == "cylinder") {
-        return create_primitive<Cylinder>(id, json);
+        return create_primitive<CylinderBuilder>(id, json);
     } else if (geomType == "cone") {
-        return create_primitive<Cone>(id, json);
+        return create_primitive<ConeBuilder>(id, json);
     } else if (geomType == "wedge") {
-        return create_primitive<Wedge>(id, json);
+        return create_primitive<WedgeBuilder>(id, json);
     } else if (geomType == "torus") {
-        return create_primitive<Torus>(id, json);
+        return create_primitive<TorusBuilder>(id, json);
     
     // 1D Primitives
     } else if (geomType == "ellipse") {
-        return create_primitive<Ellipse1D>(id, json);
+        return create_primitive<Ellipse1DBuilder>(id, json);
     
     // Booleans
     } else if (geomType == "union") {
-        return create_boolean<Union>(id, json);
+        return create_boolean<UnionBuilder>(id, json);
     } else if (geomType == "subtract") {
-        return create_boolean<Subtract>(id, json);
+        return create_boolean<SubtractBuilder>(id, json);
     } else if (geomType == "intersect") {
-        return create_boolean<Intersect>(id, json);
+        return create_boolean<IntersectBuilder>(id, json);
     }
     return "geometry type not found";
 }

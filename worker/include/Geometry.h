@@ -7,114 +7,107 @@
 using namespace std;
 using namespace json_spirit;
 
-class CompositeShape {
-};
-
-class Shape {
-private:
+class Builder {
+protected:
+    TopoDS_Shape shape_;
+    
     void ApplyOrigin(map< string, mValue > json);
     void ApplyTransform(map< string, mValue > json);
     void ApplyTransforms(map< string, mValue > json);
-    virtual void Mesh() = 0;
-    
-protected:
-    TopoDS_Shape shape_;
-    void ToOriginTransformAndMesh(map< string, mValue > json);
+    virtual void PostProcess(map< string, mValue > json) = 0;
     
 public:
     TopoDS_Shape shape();
-    virtual mValue Tesselate() = 0;
-
     
 };
 
 #pragma mark 3D primitives
 
-class Shape3D : public Shape {
+class Builder3D : public Builder {
+private:
+    void Mesh();
 protected:
-    virtual void Mesh();
-    virtual mValue Tesselate();
+    virtual void PostProcess(map< string, mValue > json);
 public:
-    Shape3D() {};
+    Builder3D() {};
     
 };
 
-class Cuboid : public Shape3D {
+class CuboidBuilder : public Builder3D {
 
 public:
-    Cuboid(map< string, mValue > json);
-    ~Cuboid();
+    CuboidBuilder(map< string, mValue > json);
+    ~CuboidBuilder();
 };
 
-class Sphere : public Shape3D {
+class SphereBuilder : public Builder3D {
 public:
-    Sphere(map< string, mValue > json);
-    ~Sphere();
+    SphereBuilder(map< string, mValue > json);
+    ~SphereBuilder();
 };
 
-class Cylinder : public Shape3D {
+class CylinderBuilder : public Builder3D {
 public:
-    Cylinder(map< string, mValue > json);
-    ~Cylinder();
+    CylinderBuilder(map< string, mValue > json);
+    ~CylinderBuilder();
 };
 
-class Cone : public Shape3D {
+class ConeBuilder : public Builder3D {
 public:
-    Cone(map< string, mValue > json);
-    ~Cone();
+    ConeBuilder(map< string, mValue > json);
+    ~ConeBuilder();
 };
 
-class Wedge : public Shape3D {
+class WedgeBuilder : public Builder3D {
 public:
-    Wedge(map< string, mValue > json);
-    ~Wedge();
+    WedgeBuilder(map< string, mValue > json);
+    ~WedgeBuilder();
 };
 
-class Torus : public Shape3D {
+class TorusBuilder : public Builder3D {
 public:
-    Torus(map< string, mValue > json);
-    ~Torus();
+    TorusBuilder(map< string, mValue > json);
+    ~TorusBuilder();
 };
 
 #pragma mark 1D Primitives
 
-class Shape1D : public Shape {
+class Builder1D : public Builder {
 protected:
-    virtual void Mesh();
-    virtual mValue Tesselate();
+    virtual void PostProcess(map< string, mValue > json);
 };
 
-class Ellipse1D : public Shape1D {
+class Ellipse1DBuilder : public Builder1D {
 public:
-    Ellipse1D(map< string, mValue > json);
-    ~Ellipse1D();
+    Ellipse1DBuilder(map< string, mValue > json);
+    ~Ellipse1DBuilder();
 };
 
 #pragma mark Booleans
 
 typedef TopoDS_Shape (*boolean_op)(const TopoDS_Shape&, const TopoDS_Shape&);
 
-class Boolean : public Shape3D {
+class BooleanBuilder : public Builder3D {
 public:
-    Boolean(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boolean_op fn);
+    BooleanBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boolean_op fn);
 };
 
-class Union : public Boolean {
+class UnionBuilder : public BooleanBuilder {
 public:
-    Union(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
-    ~Union();
+    UnionBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
+    ~UnionBuilder();
 };
 
-class Subtract : public Boolean {
+class SubtractBuilder : public BooleanBuilder {
 public:
-    Subtract(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
-    ~Subtract();
+    SubtractBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
+    ~SubtractBuilder();
 };
 
-class Intersect : public Boolean {
+class IntersectBuilder : public BooleanBuilder {
 public:
-    Intersect(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
-    ~Intersect();
+    IntersectBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
+    ~IntersectBuilder();
 };
 
 #endif
