@@ -5,13 +5,17 @@ using namespace std;
 using namespace json_spirit;
 
 class Geometry3D {
+private:
+    void ApplyOrigin(map< string, mValue > json);
+    void ApplyTransform(map< string, mValue > json);
+    void ApplyTransforms(map< string, mValue > json);
+
 protected:
     TopoDS_Shape shape_;
+    void ApplyOriginAndTransforms(map< string, mValue > json);
 
 public:
-    TopoDS_Shape get_shape() {
-	return shape_;
-    }
+    TopoDS_Shape shape();
 };
 
 class Cuboid : public Geometry3D {
@@ -55,24 +59,24 @@ typedef TopoDS_Shape (*boolean_op)(const TopoDS_Shape&, const TopoDS_Shape&);
 
 class Boolean : public Geometry3D {
 public:
-    Boolean(vector<TopoDS_Shape>& shapes, boolean_op fn);
+    Boolean(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boolean_op fn);
 };
 
 class Union : public Boolean {
 public:
-    Union(vector<TopoDS_Shape>& shapes);
+    Union(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
     ~Union();
 };
 
 class Subtract : public Boolean {
 public:
-    Subtract(vector<TopoDS_Shape>& shapes);
+    Subtract(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
     ~Subtract();
 };
 
 class Intersect : public Boolean {
 public:
-    Intersect(vector<TopoDS_Shape>& shapes);
+    Intersect(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
     ~Intersect();
 };
 

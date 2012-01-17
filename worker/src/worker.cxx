@@ -27,6 +27,7 @@
 #include "base64.h"
 #include "Line.h"
 #include "Geometry.h"
+#include "Transform.h"
 
 using namespace std;
 using namespace json_spirit;
@@ -141,234 +142,11 @@ double get_double(mValue value) {
         return value.get_real();
     }
 }
-
-#pragma mark Transforms
-
-
-TopoDS_Shape copy_transform(TopoDS_Shape shape, 
-                            gp_Trsf (*transformFn)(double, map< string, mValue >, map< string, mValue >), 
-			    map< string, mValue > origin,
-                            map< string, mValue > parameters) {
-
-    int n = parameters["n"].get_int();
-
-    if(n == 0) {
-        gp_Trsf transformation = transformFn(1.0, origin, parameters);
-        BRepBuilderAPI_Transform brep_transform(shape, transformation);
-	return brep_transform.Shape();
-    }
-    
-    TopoDS_Shape copies[n + 1]; // worst case memory requirement
-    copies[0] = shape;
-    
-    int remaining = n;
-    int grouping = 1;
-    float multiplier = 1.0;
-    int index = 1;
-    
-    while (remaining > 0) {
-        
-        int group_index = (int)(log(grouping)/log(2));
-        TopoDS_Shape obj_to_copy = copies[group_index];
-        
-        gp_Trsf transformation = transformFn(multiplier, origin, parameters);
-        BRepBuilderAPI_Transform brep_transform(obj_to_copy, transformation);
-        copies[index] = BRepAlgoAPI_Fuse(brep_transform.Shape(),
-                                         copies[index - 1]).Shape();
-        
-        multiplier = multiplier + grouping;
-        remaining = remaining - grouping;
-        ++index;
-        
-        if ((grouping * 2) < remaining) {
-            grouping = grouping * 2;
-        } else if (grouping > remaining) {
-            grouping = grouping / 2;
-        }
-    }
-    
-    return copies[index - 1];
-}
-
-
-gp_Trsf translateTransformation(double multiplier, map< string, mValue > origin, map< string, mValue > parameters) {
-    mValue x = origin["x"];
-    mValue y = origin["y"];
-    mValue z = origin["z"];
-    mValue u = parameters["u"];
-    mValue v = parameters["v"];
-    mValue w = parameters["w"];
-    
-    gp_Trsf transformation = gp_Trsf();
-    transformation.SetTranslation(gp_Vec(multiplier*get_double(u), 
-					 multiplier*get_double(v), 
-                                         multiplier*get_double(w)));
-    return transformation;
-}
-
-TopoDS_Shape translate(map<string, mValue> transform, TopoDS_Shape shape) {
-    map< string, mValue > parameters = transform["parameters"].get_obj();
-    map< string, mValue > origin = transform["origin"].get_obj();
-    
-    gp_Trsf (*transformFn)(double, map< string, mValue >, map< string, mValue >) = &translateTransformation;
-    return copy_transform(shape, transformFn, origin, parameters);
-}
-
-TopoDS_Shape scale(map<string, mValue> transform, TopoDS_Shape shape) {
-    map< string, mValue > origin = transform["origin"].get_obj();
-    mValue x = origin["x"];
-    mValue y = origin["y"];
-    mValue z = origin["z"];
-
-    map< string, mValue > parameters = transform["parameters"].get_obj();
-    mValue factor = parameters["factor"];
-    
-    gp_Trsf transformation = gp_Trsf();
-    transformation.SetScale(gp_Pnt(get_double(x), 
-                                   get_double(y), 
-                                   get_double(z)), 
-                            get_double(factor));
-    
-    BRepBuilderAPI_Transform brep_transform(shape, transformation);
-    TopoDS_Shape transformed_shape = brep_transform.Shape();
-    
-    return transformed_shape;
-}
-
-
-gp_Trsf rotateTransformation(double multiplier, map< string, mValue > origin, map< string, mValue > parameters) {
-    mValue x = origin["x"];
-    mValue y = origin["y"];
-    mValue z = origin["z"];
-    mValue u = parameters["u"];
-    mValue v = parameters["v"];
-    mValue w = parameters["w"];
-    mValue angle = parameters["angle"];
-    
-    gp_Trsf transformation = gp_Trsf();
-    transformation.SetRotation(gp_Ax1(gp_Pnt(get_double(x),
-                                             get_double(y),
-                                             get_double(z)), 
-                                      gp_Dir(get_double(u),
-                                             get_double(v),
-                                             get_double(w))), 
-                               multiplier*get_double(angle)/180*M_PI);
-    
-    return transformation;
-}
-    
-
-TopoDS_Shape rotate(map<string, mValue> transform, TopoDS_Shape shape) {
-    map< string, mValue > parameters = transform["parameters"].get_obj();
-    map< string, mValue > origin = transform["origin"].get_obj();
-    
-    gp_Trsf (*transformFn)(double,  map< string, mValue >, map< string, mValue >) = &rotateTransformation;
-    return copy_transform(shape, transformFn, origin, parameters);
-}
-
-TopoDS_Shape mirror(map<string, mValue> transform, TopoDS_Shape shape) {
-
-    map< string, mValue > parameters = transform["parameters"].get_obj();
-    map< string, mValue > origin = transform["origin"].get_obj();
-    
-    mValue x = origin["x"];
-    mValue y = origin["y"];
-    mValue z = origin["z"];
-    mValue u = parameters["u"];
-    mValue v = parameters["v"];
-    mValue w = parameters["w"];
-    int n = parameters["n"].get_int();
-    
-    gp_Trsf transformation = gp_Trsf();
-    transformation.SetMirror(gp_Ax1(gp_Pnt(get_double(x),
-                                           get_double(y),
-                                           get_double(z)), 
-                                    gp_Dir(get_double(u),
-                                           get_double(v),
-                                           get_double(w))));    
-    BRepBuilderAPI_Transform brep_transform(shape, transformation);
-    TopoDS_Shape transformed_shape = brep_transform.Shape();
-
-    if (n == 1) {
-	return BRepAlgoAPI_Fuse(transformed_shape, shape);
-    } else {
-	return transformed_shape;
-    }
-}
-
-TopoDS_Shape copy_mirror(map<string, mValue> transform, TopoDS_Shape shape) {
-    map< string, mValue > parameters = transform["parameters"].get_obj();
-    mValue px = parameters["px"];
-    mValue py = parameters["py"];
-    mValue pz = parameters["pz"];
-    mValue vx = parameters["vx"];
-    mValue vy = parameters["vy"];
-    mValue vz = parameters["vz"];
-    
-    gp_Trsf transformation = gp_Trsf();
-    transformation.SetMirror(gp_Ax1(gp_Pnt(get_double(px),
-                                           get_double(py),
-                                           get_double(pz)), 
-                                    gp_Dir(get_double(vx),
-                                           get_double(vy),
-                                           get_double(vz)))); 
-    
-    BRepBuilderAPI_Transform brep_transform(shape, transformation);
-    TopoDS_Shape transformed_shape = brep_transform.Shape();
-    
-    TopoDS_Shape result = BRepAlgoAPI_Fuse(transformed_shape, shape);
-    return result;
-}
-
-
-TopoDS_Shape applyTransform(map<string, mValue> transform, TopoDS_Shape shape) {
-    mValue transformType = transform["type"];
-    if (!transformType.is_null() && (transformType.type() == str_type) && (transformType.get_str() == string("translate"))) {
-        return translate(transform, shape);
-    }
-    if (!transformType.is_null() && (transformType.type() == str_type) && (transformType.get_str() == string("scale"))) {
-        return scale(transform, shape);
-    }
-    if (!transformType.is_null() && (transformType.type() == str_type) && (transformType.get_str() == string("rotate"))) {
-        return rotate(transform, shape);
-    }
-    if (!transformType.is_null() && (transformType.type() == str_type) && (transformType.get_str() == string("mirror"))) {
-        return mirror(transform, shape);
-    }
-    return shape;
-}
-
-TopoDS_Shape applyTransforms(TopoDS_Shape shape, map< string, mValue > geometry) {
-    TopoDS_Shape transformedShape = shape;
-    
-    if (!geometry["origin"].is_null()) {
-        map< string, mValue > origin = geometry["origin"].get_obj();
-        mValue x = origin["x"];
-        mValue y = origin["y"];
-        mValue z = origin["z"];
-        gp_Trsf transformation = gp_Trsf();
-        transformation.SetTranslation(gp_Vec(get_double(x), get_double(y), get_double(z)));
-        
-        BRepBuilderAPI_Transform brep_transform(shape, transformation);
-        transformedShape = brep_transform.Shape();
-    }
-    
-    if (!geometry["transforms"].is_null() && (geometry["transforms"].type() == array_type)) {
-        mArray transforms = geometry["transforms"].get_array();
-        for (unsigned int k = 0; k < transforms.size(); ++k) {
-            mValue transform2 = transforms[k];
-            transformedShape = applyTransform(transform2.get_obj(), transformedShape);
-        }
-    } 
-    return transformedShape;
-}
-
-    
 #pragma mark Primitives
 
 template < typename T > string create_primitive(string id, map< string, mValue > json) {
     std::auto_ptr<Geometry3D> geometry(new T(json));
-    unmeshed_shapes[id] = applyTransforms(geometry->get_shape(), json);
+    unmeshed_shapes[id] = geometry->shape();
     return "ok";
 }
 
@@ -382,8 +160,8 @@ template < typename T > string create_boolean(string id, map< string, mValue > j
 	shapes.push_back(childShape);
     }
     
-    std::auto_ptr<Geometry3D> geometry(new T(shapes));
-    unmeshed_shapes[id] = applyTransforms(geometry->get_shape(), json);
+    std::auto_ptr<Geometry3D> geometry(new T(json, shapes));
+    unmeshed_shapes[id] = geometry->shape();
     return "ok";
 }
 
