@@ -129,18 +129,6 @@ function create_geom_command(prototype, geometry) {
 
 
 function boolean(selected, type) {
-    if ((type == 'union') || (type == 'intersect')) {
-        if (selected.length <= 1)  {
-            alert("must have 2 or more objects selected!");
-            return;
-        }
-    } else if (type =='subtract') {
-        if (selected.length != 2)  {
-            alert("must have 2 object selected!");
-            return;
-        }
-    }
-
     var sha;
     var boolNode;
     var childNodes;

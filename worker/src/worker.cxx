@@ -25,6 +25,8 @@
 #include "OCC.h"
 #include "WorkerConfig.h"
 #include "base64.h"
+#include "Line.h"
+#include "Geometry.h"
 
 using namespace std;
 using namespace json_spirit;
@@ -319,9 +321,6 @@ TopoDS_Shape copy_mirror(map<string, mValue> transform, TopoDS_Shape shape) {
 }
 
 
-
-
-
 TopoDS_Shape applyTransform(map<string, mValue> transform, TopoDS_Shape shape) {
     mValue transformType = transform["type"];
     if (!transformType.is_null() && (transformType.type() == str_type) && (transformType.get_str() == string("translate"))) {
@@ -356,7 +355,6 @@ TopoDS_Shape applyTransforms(TopoDS_Shape shape, map< string, mValue > geometry)
     
     if (!geometry["transforms"].is_null() && (geometry["transforms"].type() == array_type)) {
         mArray transforms = geometry["transforms"].get_array();
-        vector< mValue >::iterator it;
         for (unsigned int k = 0; k < transforms.size(); ++k) {
             mValue transform2 = transforms[k];
             transformedShape = applyTransform(transform2.get_obj(), transformedShape);
@@ -368,237 +366,52 @@ TopoDS_Shape applyTransforms(TopoDS_Shape shape, map< string, mValue > geometry)
     
 #pragma mark Primitives
 
-string create_cuboid(string id, map< string, mValue > geometry) {
-    map< string, mValue > parameters = geometry["parameters"].get_obj();
-    mValue width = parameters["u"];
-    mValue depth = parameters["v"];
-    mValue height = parameters["w"];
-    if (!width.is_null() && ((width.type() == real_type) || (width.type() == int_type))
-        &&
-        !depth.is_null() && ((depth.type() == real_type) || (depth.type() == int_type))
-        &&
-        !height.is_null() && ((height.type() == real_type) || (height.type() == int_type))) {
-      
-      map< string, mValue > origin = geometry["origin"].get_obj();
-      if(get_double(width) < 0) {
-	origin["x"] = get_double(origin["x"]) + get_double(width);
-	width = -get_double(width);
-      }
-
-      if(get_double(depth) < 0) {
-	origin["y"] = get_double(origin["y"]) + get_double(depth);
-	depth = -get_double(depth);
-      }
-      
-      if(get_double(height) < 0) {
-	origin["z"] = get_double(origin["z"]) + get_double(height);
-	height = -get_double(height);
-      }
-      geometry["origin"] = origin;
-        
-      TopoDS_Shape shape = BRepPrimAPI_MakeBox(get_double(width), 
-					       get_double(depth), 
-					       get_double(height)).Shape();
-        
-      unmeshed_shapes[id] = applyTransforms(shape, geometry);
-      return "ok";
-    }
-    return "invalid geometry parameters";
-}
-
-string create_sphere(string id, map< string, mValue > geometry) {
-    map< string, mValue > parameters = geometry["parameters"].get_obj();
-    mValue radius = parameters["r"];
-    if (!radius.is_null() && ((radius.type() == real_type) || (radius.type() == int_type))) {
-        TopoDS_Shape shape = BRepPrimAPI_MakeSphere(get_double(radius)).Shape();
-        unmeshed_shapes[id] = applyTransforms(shape, geometry);
-        return "ok";
-    }
-    return "invalid geometry parameters";
-}
-
-string create_cylinder(string id, map< string, mValue > geometry) {
-    map< string, mValue > parameters = geometry["parameters"].get_obj();
-    mValue r = parameters["r"];
-    mValue h = parameters["h"];
-    if (!r.is_null() && ((r.type() == real_type) || (r.type() == int_type))
-        &&
-        !h.is_null() && ((h.type() == real_type) || (h.type() == int_type))) {
-
-      map< string, mValue > origin = geometry["origin"].get_obj();
-      if(get_double(h) < 0) {
-	origin["z"] = get_double(origin["z"]) + get_double(h);
-	h = -get_double(h);
-	geometry["origin"] = origin;
-      }
-        
-        TopoDS_Shape shape = BRepPrimAPI_MakeCylinder(get_double(r), 
-                                                      get_double(h)).Shape();
-        unmeshed_shapes[id] = applyTransforms(shape, geometry);
-        return "ok";
-    }
-    return "invalid geometry parameters";
-}
-
-string create_cone(string id, map< string, mValue > geometry) {
-    map< string, mValue > parameters = geometry["parameters"].get_obj();
-    mValue r1 = parameters["r1"];
-    mValue r2 = parameters["r2"];
-    mValue h = parameters["h"];
-    if (!r1.is_null() && ((r1.type() == real_type) || (r1.type() == int_type))
-        &&
-        !r2.is_null() && ((r2.type() == real_type) || (r2.type() == int_type))
-        &&
-        !h.is_null() && ((h.type() == real_type) || (h.type() == int_type))) {
-
-      map< string, mValue > origin = geometry["origin"].get_obj();
-      if(get_double(h) < 0) {
-	origin["z"] = get_double(origin["z"]) + get_double(h);
-	h = -get_double(h);
-	geometry["origin"] = origin;
-
-	double tmp = get_double(r1);
-	r1 = r2;
-	r2 = tmp;
-      }
-        
-        TopoDS_Shape shape = BRepPrimAPI_MakeCone(get_double(r1), 
-                                                  get_double(r2), 
-                                                  get_double(h)).Shape();
-        unmeshed_shapes[id] = applyTransforms(shape, geometry);
-        return "ok";
-    }
-    return "invalid geometry parameters";
-}
-
-string create_wedge(string id, map< string, mValue > geometry) {
-    map< string, mValue > parameters = geometry["parameters"].get_obj();
-    mValue x1 = parameters["u1"];
-    mValue x2 = parameters["u2"];
-    mValue y = parameters["v"];
-    mValue z = parameters["w"];
-    if (!x1.is_null() && ((x1.type() == real_type) || (x1.type() == int_type))
-        &&
-        !x2.is_null() && ((x2.type() == real_type) || (x2.type() == int_type))
-        &&
-        !y.is_null() && ((y.type() == real_type) || (y.type() == int_type))
-        &&
-        !z.is_null() && ((z.type() == real_type) || (z.type() == int_type))) {
-
-      map< string, mValue > origin = geometry["origin"].get_obj();
-      if(get_double(z) < 0) {
-	origin["z"] = get_double(origin["z"]) + get_double(z);
-	z = -get_double(z);
-      }
-      geometry["origin"] = origin;
-        
-        TopoDS_Shape shape = BRepPrimAPI_MakeWedge(get_double(x1), 
-                                                   get_double(y), 
-                                                   get_double(z), 
-                                                   get_double(x2)).Shape();
-        unmeshed_shapes[id] = applyTransforms(shape, geometry);
-        return "ok";
-    }
-    return "invalid geometry parameters";
-}
-
-string create_torus(string id, map< string, mValue > geometry) {
-    map< string, mValue > parameters = geometry["parameters"].get_obj();
-    mValue r1 = parameters["r1"];
-    mValue r2 = parameters["r2"];
-    if (!r1.is_null() && ((r1.type() == real_type) || (r1.type() == int_type))
-        &&
-        !r2.is_null() && ((r2.type() == real_type) || (r2.type() == int_type))) {
-        
-        TopoDS_Shape shape = BRepPrimAPI_MakeTorus(get_double(r1), 
-                                                   get_double(r2)).Shape();
-        unmeshed_shapes[id] = applyTransforms(shape, geometry);
-        return "ok";
-    }
-    return "invalid geometry parameters";
+template < typename T > string create_primitive(string id, map< string, mValue > json) {
+    std::auto_ptr<Geometry3D> geometry(new T(json));
+    unmeshed_shapes[id] = applyTransforms(geometry->get_shape(), json);
+    return "ok";
 }
 
 #pragma mark Boolean
 
-string create_union(string id, map< string, mValue > geometry) {
-    mArray children = geometry["children"].get_array();
-    if (children.size() < 2) {
-        return("invalid children");
+template < typename T > string create_boolean(string id, map< string, mValue > json) {
+    mArray children = json["children"].get_array();
+    vector<TopoDS_Shape> shapes;
+    for (unsigned int k = 0; k < children.size(); ++k) {
+	TopoDS_Shape childShape = find_shape(children[k].get_str());
+	shapes.push_back(childShape);
     }
     
-    TopoDS_Shape boolean_shape = BRepAlgoAPI_Fuse(find_shape(children[0].get_str()), 
-                                                  find_shape(children[1].get_str())).Shape();
-    for (unsigned int i = 2; i < children.size(); ++i) {
-        boolean_shape = BRepAlgoAPI_Fuse(boolean_shape,
-                                         find_shape(children[i].get_str())).Shape();
-    }
-    unmeshed_shapes[id] = applyTransforms(boolean_shape, geometry);
-    return "ok";
-}
-
-string create_intersect(string id, map< string, mValue > geometry) {
-    mArray children = geometry["children"].get_array();
-    if (children.size() < 2) {
-        return("invalid children");
-    }
-    
-    TopoDS_Shape boolean_shape = BRepAlgoAPI_Common(find_shape(children[0].get_str()), 
-                                                    find_shape(children[1].get_str())).Shape();
-    for (unsigned int i = 2; i < children.size(); ++i) {
-        boolean_shape = BRepAlgoAPI_Common(boolean_shape,
-                                           find_shape(children[i].get_str())).Shape();
-    }
-    unmeshed_shapes[id] = applyTransforms(boolean_shape, geometry);
-    return "ok";
-}
-
-string create_subtract(string id, map< string, mValue > geometry) {
-    mArray children = geometry["children"].get_array();
-    if (children.size() != 2) {
-        return("only 2 children supported");
-    }
-    
-    TopoDS_Shape boolean_shape = BRepAlgoAPI_Cut(find_shape(children[1].get_str()), 
-                                                 find_shape(children[0].get_str())).Shape();
-    unmeshed_shapes[id] = applyTransforms(boolean_shape, geometry);
+    std::auto_ptr<Geometry3D> geometry(new T(shapes));
+    unmeshed_shapes[id] = applyTransforms(geometry->get_shape(), json);
     return "ok";
 }
 
 string create_geometry(string id, map< string, mValue > geometry) {
-    mValue geomType = geometry["type"];
-    /*
-     * Primitives
-     */
-    TopoDS_Shape shape;
-    if (!geomType.is_null() && (geomType.type() == str_type) && (geomType.get_str() == string("cuboid"))) {
-        return create_cuboid(id, geometry);
+    string geomType = geometry["type"].get_str();
+
+    // Primitives
+    if (geomType == "cuboid") {
+	return create_primitive<Cuboid>(id, geometry);
+    } else if (geomType == "sphere") {
+        return create_primitive<Sphere>(id, geometry);
+    } else if (geomType == "cylinder") {
+        return create_primitive<Cylinder>(id, geometry);
+    } else if (geomType == "cone") {
+        return create_primitive<Cone>(id, geometry);
+    } else if (geomType == "wedge") {
+        return create_primitive<Wedge>(id, geometry);
+    } else if (geomType == "torus") {
+        return create_primitive<Torus>(id, geometry);
     } 
-    if (!geomType.is_null() && (geomType.type() == str_type) && (geomType.get_str() == string("sphere"))) {
-        return create_sphere(id, geometry);
-    } 
-    if (!geomType.is_null() && (geomType.type() == str_type) && (geomType.get_str() == string("cylinder"))) {
-        return create_cylinder(id, geometry);
-    } 
-    if (!geomType.is_null() && (geomType.type() == str_type) && (geomType.get_str() == string("cone"))) {
-        return create_cone(id, geometry);
-    } 
-    if (!geomType.is_null() && (geomType.type() == str_type) && (geomType.get_str() == string("wedge"))) {
-        return create_wedge(id, geometry);
-    } 
-    if (!geomType.is_null() && (geomType.type() == str_type) && (geomType.get_str() == string("torus"))) {
-        return create_torus(id, geometry);
-    } 
-    /*
-     * Booleans
-     */
-    if (!geomType.is_null() && (geomType.type() == str_type) && (geomType.get_str() == string("union"))) {
-        return create_union(id, geometry);
-    }
-    if (!geomType.is_null() && (geomType.type() == str_type) && (geomType.get_str() == string("subtract"))) {
-        return create_subtract(id, geometry);
-    }
-    if (!geomType.is_null() && (geomType.type() == str_type) && (geomType.get_str() == string("intersect"))) {
-        return create_intersect(id, geometry);
+
+    // Booleans
+    else if (geomType == "union") {
+        return create_boolean<Union>(id, geometry);
+    } else if (geomType == "subtract") {
+        return create_boolean<Subtract>(id, geometry);
+    } else if (geomType == "intersect") {
+        return create_boolean<Intersect>(id, geometry);
     }
     return "geometry type not found";
 }
@@ -673,7 +486,7 @@ int main (int argc, char *argv[]) {
                     write_cmd(output.c_str(), output.size());
                     continue;
                 }
-                
+
                 mValue tesselateId = objMap["tesselate"];
                 if (!tesselateId.is_null() && (tesselateId.type() == str_type)) {
                     
@@ -882,6 +695,25 @@ int main (int argc, char *argv[]) {
                     string output = write(response);
                     write_cmd(output.c_str(), output.size());
                     continue;
+                }
+
+		if (message == "ellipse") {
+                    
+		    Ellipse ellipse = Ellipse(1.0, 0.5);
+		    std::vector<gp_Pnt> mesh = ellipse.mesh();
+		    mArray positions;
+		    
+		    for ( vector<gp_Pnt>::iterator it=mesh.begin() ; it < mesh.end(); it++ ) {
+			positions.push_back((*it).X());
+			positions.push_back((*it).Y());
+			positions.push_back((*it).Z());
+		    }
+		    mObject result;
+		    result["positions"] = positions;
+
+		    string output = write(result);
+		    write_cmd(output.c_str(), output.size());
+		    continue;
                 }
 	    }
             

@@ -18,7 +18,8 @@ TEST(LineTest, Ellipse) {
  
     ASSERT_FALSE(ellipse.getShape().IsNull());
     
-    ASSERT_EQ(ellipse.mesh(), 1);
+    std::vector<gp_Pnt> mesh = ellipse.mesh();
+    ASSERT_EQ(mesh.size(), 1);
     
 }
 

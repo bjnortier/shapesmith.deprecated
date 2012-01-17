@@ -1,4 +1,6 @@
 #include <math.h>
+#include <iostream>
+#include <vector>
 
 #include "OCC.h"
 
@@ -32,7 +34,7 @@ class Ellipse {
     
 public:
     Ellipse(double majorRadius, double minorRadius) {
-	gp_Elips ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(1,0,0)), majorRadius, minorRadius);
+	gp_Elips ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), majorRadius, minorRadius);
 	shape = BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI/2).Edge();
     }
 
@@ -40,15 +42,18 @@ public:
 	return shape;
     }
 
-    int mesh() {
+    std::vector<gp_Pnt> mesh() {
 
 	BRepAdaptor_Curve curve_adaptor(shape);
 	GCPnts_UniformDeflection discretizer;
-	discretizer.Initialize(curve_adaptor, 0.005);
+	discretizer.Initialize(curve_adaptor, 0.001);
+
+	std::vector<gp_Pnt> vertices;
 	for (int i = 0; i < discretizer.NbPoints(); i++) {
 	    gp_Pnt pt = curve_adaptor.Value(discretizer.Parameter(i + 1));
+	    vertices.push_back(pt);
 	}
-	return discretizer.NbPoints();
+	return vertices;
     }
 };
 
