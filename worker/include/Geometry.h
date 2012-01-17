@@ -12,10 +12,11 @@ private:
     void ApplyOrigin(map< string, mValue > json);
     void ApplyTransform(map< string, mValue > json);
     void ApplyTransforms(map< string, mValue > json);
+    void Mesh();
 
 protected:
     TopoDS_Shape shape_;
-    void ApplyOriginAndTransforms(map< string, mValue > json);
+    void ToOriginTransformAndMesh(map< string, mValue > json);
 
 public:
     TopoDS_Shape shape();

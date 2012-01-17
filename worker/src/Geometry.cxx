@@ -55,9 +55,23 @@ void Geometry3D::ApplyTransforms(map< string, mValue > json) {
     } 
 }
 
-void Geometry3D::ApplyOriginAndTransforms(map< string, mValue > json) {
+void Geometry3D::ToOriginTransformAndMesh(map< string, mValue > json) {
     this->ApplyOrigin(json);
     this->ApplyTransforms(json);
+    this->Mesh();
+}
+
+void Geometry3D::Mesh() {
+    TopExp_Explorer Ex; 
+    int numFaces = 0;
+    for (Ex.Init(shape_, TopAbs_FACE); Ex.More(); Ex.Next()) { 
+        ++numFaces;
+    }
+    
+    if (numFaces > 0) {
+        BRepMesh().Mesh(shape_, 1.0);
+    }
+
 }
 
 Cuboid::Cuboid(map< string, mValue > json) {
@@ -85,14 +99,14 @@ Cuboid::Cuboid(map< string, mValue > json) {
     json["origin"] = origin;
 	 
     shape_ = BRepPrimAPI_MakeBox(width, depth, height).Shape();
-    ApplyOriginAndTransforms(json);
+    ToOriginTransformAndMesh(json);
 }
 
 Sphere::Sphere(map< string, mValue > json) {
     map< string, mValue > parameters = json["parameters"].get_obj();
     double radius = Util::to_d(parameters["r"]);
     shape_ = BRepPrimAPI_MakeSphere(radius).Shape();
-    ApplyOriginAndTransforms(json);    
+    ToOriginTransformAndMesh(json);    
 }
 
 Cylinder::Cylinder(map< string, mValue > json) {
@@ -108,7 +122,7 @@ Cylinder::Cylinder(map< string, mValue > json) {
     json["origin"] = origin;
     
     shape_ = BRepPrimAPI_MakeCylinder(r, h).Shape() ;
-    ApplyOriginAndTransforms(json);
+    ToOriginTransformAndMesh(json);
 }
 
 Cone::Cone(map< string, mValue > json) {
@@ -126,7 +140,7 @@ Cone::Cone(map< string, mValue > json) {
     json["origin"] = origin;
         
     shape_ = BRepPrimAPI_MakeCone(r1, r2, h).Shape();
-    ApplyOriginAndTransforms(json);
+    ToOriginTransformAndMesh(json);
 }
 
 Wedge::Wedge(map< string, mValue > json) {
@@ -143,7 +157,7 @@ Wedge::Wedge(map< string, mValue > json) {
     }
     json["origin"] = origin;
     shape_ = BRepPrimAPI_MakeWedge(u1, v, w, u2).Shape();                                                
-    ApplyOriginAndTransforms(json);
+    ToOriginTransformAndMesh(json);
 }
 
 
@@ -152,7 +166,7 @@ Torus::Torus(map< string, mValue > json) {
     double r1 = Util::to_d(parameters["r1"]);
     double r2 = Util::to_d(parameters["r2"]);
     shape_ =BRepPrimAPI_MakeTorus(r1, r2).Shape();
-    ApplyOriginAndTransforms(json);
+    ToOriginTransformAndMesh(json);
 }
 
 Boolean::Boolean(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boolean_op function) {
@@ -162,7 +176,7 @@ Boolean::Boolean(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boole
     for ( ; it < shapes.end(); ++it ) {
 	shape_ = function(*it, shape_);
     }
-    ApplyOriginAndTransforms(json);
+    ToOriginTransformAndMesh(json);
 }
 
 TopoDS_Shape fuse(const TopoDS_Shape& a, const TopoDS_Shape& b) {

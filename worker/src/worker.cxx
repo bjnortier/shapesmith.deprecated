@@ -36,45 +36,25 @@ using namespace json_spirit;
 // TODO: compress 1.00000000 into 1.0 etc. Also reduce precision
 
 
-map< string, TopoDS_Shape > unmeshed_shapes = map< string, TopoDS_Shape >();
-map< string, TopoDS_Shape > meshed_shapes = map< string, TopoDS_Shape >();
+map< string, TopoDS_Shape > shapes = map< string, TopoDS_Shape >();
+
+struct not_found : std::exception { 
+    char const* what() const throw() {
+        return "not_found";
+    }
+};
 
 TopoDS_Shape find_shape(string id) {
-    map< string, TopoDS_Shape >::iterator meshedIt = meshed_shapes.find(id);
-    if (meshedIt != meshed_shapes.end()) {
-        return (*meshedIt).second;
-    } 
-    
-    map< string, TopoDS_Shape >::iterator unmeshedIt = unmeshed_shapes.find(id);
-    if (unmeshedIt != unmeshed_shapes.end()) {
-        return (*unmeshedIt).second;
+    map< string, TopoDS_Shape >::iterator it = shapes.find(id);
+    if (it != shapes.end()) {
+        return (*it).second;
     }
-    return TopoDS_Shape();
-}
-
-void mesh(string id) {
-    TopoDS_Shape shape = unmeshed_shapes[id];
-
-    // If we mesh a shape that has no faces, e.g. an empty intersect,
-    // Meshing generates an exception
-    TopExp_Explorer Ex; 
-    int numFaces = 0;
-    for (Ex.Init(shape,TopAbs_FACE); Ex.More(); Ex.Next()) { 
-        ++numFaces;
-    }
-        
-    if (numFaces > 0) {
-        BRepMesh().Mesh(shape, 1.0);
-    }
-    
-    meshed_shapes[id] = unmeshed_shapes[id];
-    unmeshed_shapes.erase(id);
-}
-    
+    throw not_found();
+}    
     
 mValue tesselate(string id) {
     
-    TopoDS_Shape shape = meshed_shapes[id];
+    TopoDS_Shape shape = find_shape(id);
     
     mArray indices;
     mArray positions;
@@ -134,43 +114,33 @@ mValue tesselate(string id) {
     return result;
 }
 
-double get_double(mValue value) {
-    if (value.type() == int_type) {
-        return (double)value.get_int();
-    } else {
-        
-        return value.get_real();
-    }
-}
-#pragma mark Primitives
+#pragma mark Geometry
 
 template < typename T > string create_primitive(string id, map< string, mValue > json) {
     std::auto_ptr<Geometry3D> geometry(new T(json));
-    unmeshed_shapes[id] = geometry->shape();
+    shapes[id] = geometry->shape();
     return "ok";
 }
 
-#pragma mark Boolean
-
 template < typename T > string create_boolean(string id, map< string, mValue > json) {
     mArray children = json["children"].get_array();
-    vector<TopoDS_Shape> shapes;
+    vector<TopoDS_Shape> childShapes;
     for (unsigned int k = 0; k < children.size(); ++k) {
-	TopoDS_Shape childShape = find_shape(children[k].get_str());
-	shapes.push_back(childShape);
+        TopoDS_Shape childShape = find_shape(children[k].get_str());
+        childShapes.push_back(childShape);
     }
     
-    std::auto_ptr<Geometry3D> geometry(new T(json, shapes));
-    unmeshed_shapes[id] = geometry->shape();
+    std::auto_ptr<Geometry3D> geometry(new T(json, childShapes));
+    shapes[id] = geometry->shape();
     return "ok";
 }
 
 string create_geometry(string id, map< string, mValue > geometry) {
     string geomType = geometry["type"].get_str();
-
+    
     // Primitives
     if (geomType == "cuboid") {
-	return create_primitive<Cuboid>(id, geometry);
+        return create_primitive<Cuboid>(id, geometry);
     } else if (geomType == "sphere") {
         return create_primitive<Sphere>(id, geometry);
     } else if (geomType == "cylinder") {
@@ -182,7 +152,7 @@ string create_geometry(string id, map< string, mValue > geometry) {
     } else if (geomType == "torus") {
         return create_primitive<Torus>(id, geometry);
     } 
-
+    
     // Booleans
     else if (geomType == "union") {
         return create_boolean<Union>(id, geometry);
@@ -193,6 +163,8 @@ string create_geometry(string id, map< string, mValue > geometry) {
     }
     return "geometry type not found";
 }
+
+#pragma mark Buffer reading & writing
 
 int read_exact(unsigned char *buf, int len) {
     int i, got=0;
@@ -232,6 +204,8 @@ int write_cmd(const char *buf, int len) {
     return write_exact(buf, len);
 }
 
+#pragma mark main()
+
 int main (int argc, char *argv[]) {
     
     unsigned char buf[1024*1024];
@@ -268,22 +242,11 @@ int main (int argc, char *argv[]) {
                 mValue tesselateId = objMap["tesselate"];
                 if (!tesselateId.is_null() && (tesselateId.type() == str_type)) {
                     
-                    mValue response;
-                    if (unmeshed_shapes.find(tesselateId.get_str()) != unmeshed_shapes.end()) {
-                        // Mesh it first
-                        mesh(tesselateId.get_str());
-                    }
                     
-                    // It should now be in the map of meshed shapes
-                    if (meshed_shapes.find(tesselateId.get_str()) != meshed_shapes.end()) {
-                        response = tesselate(tesselateId.get_str());
+                    mValue response;
+                    TopoDS_Shape shape = find_shape(tesselateId.get_str());
+                    response = tesselate(tesselateId.get_str());
                         
-                    } else {
-                        mObject error;
-                        error["error"] = "not_found";
-                        response = error;
-                        
-                    }
                     string output = write(response);
                     write_cmd(output.c_str(), output.size());
                     continue;
@@ -293,9 +256,7 @@ int main (int argc, char *argv[]) {
                 if (!existsId.is_null() && (existsId.type() == str_type)) {
                     
                     
-                    mValue response = !((unmeshed_shapes.find(existsId.get_str()) == unmeshed_shapes.end())
-                                        &&
-                                        (meshed_shapes.find(existsId.get_str()) == meshed_shapes.end()));
+                    mValue response = !(shapes.find(existsId.get_str()) == shapes.end());
                     string output = write(response);
                     write_cmd(output.c_str(), output.size());
                     continue;
@@ -304,18 +265,11 @@ int main (int argc, char *argv[]) {
                 mValue purgeId = objMap["purge"];
                 if (!purgeId.is_null() && (purgeId.type() == str_type)) {
                     
-                    mValue response = true;
-                    
-                    map< string, TopoDS_Shape >::iterator it = unmeshed_shapes.find(purgeId.get_str());
-                    if (it != unmeshed_shapes.end()) {
-                        unmeshed_shapes.erase(it);
+                    mValue response = false;
+                    map< string, TopoDS_Shape >::iterator it = shapes.find(purgeId.get_str());
+                    if (it != shapes.end()) {
+                        shapes.erase(it);
                         response = true;
-                    } else {
-                        it = meshed_shapes.find(purgeId.get_str());
-                        if (it != meshed_shapes.end()) {
-                            meshed_shapes.erase(it);
-                            response = true;
-                        }
                     }
                     
                     string output = write(response);
@@ -331,24 +285,13 @@ int main (int argc, char *argv[]) {
                     && 
                     !filename.is_null() && (filename.type() == str_type)) {
                     
-                    mValue response;
-                    TopoDS_Shape potentialShape = find_shape(id.get_str());
-                    if (potentialShape.IsNull()) {
-                        
-                        mObject error;
-                        error["error"] = "not_found";
-                        response = error;
-
-                    } else {
+                    TopoDS_Shape shape = find_shape(id.get_str());
+                    string filenameStr = filename.get_str();
                     
-                        string filenameStr = filename.get_str();
-                        TopoDS_Shape shape = potentialShape;
-                        
-                        StlAPI_Writer writer;
-                        writer.Write(shape, filenameStr.c_str());
-                        
-                        response = mValue("ok");
-                    }
+                    StlAPI_Writer writer;
+                    writer.Write(shape, filenameStr.c_str());
+                    
+                    mValue response = mValue("ok");
                     string output = write(response);
                     write_cmd(output.c_str(), output.size());
                     continue;
@@ -358,20 +301,8 @@ int main (int argc, char *argv[]) {
                     &&
                     !id.is_null() && (id.type() == str_type)) {
                     
-                    // Mesh it first if it is not meshed
-                    if (unmeshed_shapes.find(id.get_str()) != unmeshed_shapes.end()) {
-                        mesh(id.get_str());
-                    }
-                        
-                    if (meshed_shapes.find(id.get_str()) == meshed_shapes.end()) {
-                        mObject error;
-                        error["error"] = "not_found";
-                        string output = write(error);
-                        write_cmd(output.c_str(), output.size());
-                        continue;
-                    }
+                    TopoDS_Shape shape = find_shape(id.get_str());
                     
-                    TopoDS_Shape shape = meshed_shapes[id.get_str()];
                     char fileName[50];
                     sprintf(fileName, "/tmp/%s.bin", id.get_str().c_str());
                     
@@ -450,7 +381,7 @@ int main (int argc, char *argv[]) {
                     TopoDS_Shape resultingShape;
                     MgtBRep::Translate(aPShape, aMap, resultingShape, MgtBRep_WithTriangle);
                     
-                    meshed_shapes[id.get_str()] = resultingShape;
+                    shapes[id.get_str()] = resultingShape;
                     
                     mValue response = mValue("ok");
                     string output = write(response);
@@ -461,39 +392,38 @@ int main (int argc, char *argv[]) {
                 
             }
 
-	    if (value.type() == str_type) {
+            if (value.type() == str_type) {
     	        string message = value.get_str();
-
-		if (message == "purge_all") {
+                
+                if (message == "purge_all") {
                     
-		    unmeshed_shapes = map< string, TopoDS_Shape >();
-		    meshed_shapes = map< string, TopoDS_Shape >();
-
-		    mValue response = mValue("ok");
+                    shapes = map< string, TopoDS_Shape >();
+                    
+                    mValue response = mValue("ok");
                     string output = write(response);
                     write_cmd(output.c_str(), output.size());
                     continue;
                 }
-
-		if (message == "ellipse") {
+                
+                if (message == "ellipse") {
                     
-		    Ellipse ellipse = Ellipse(1.0, 0.5);
-		    std::vector<gp_Pnt> mesh = ellipse.mesh();
-		    mArray positions;
-		    
-		    for ( vector<gp_Pnt>::iterator it=mesh.begin() ; it < mesh.end(); it++ ) {
-			positions.push_back((*it).X());
-			positions.push_back((*it).Y());
-			positions.push_back((*it).Z());
-		    }
-		    mObject result;
-		    result["positions"] = positions;
-
-		    string output = write(result);
-		    write_cmd(output.c_str(), output.size());
-		    continue;
+                    Ellipse ellipse = Ellipse(1.0, 0.5);
+                    std::vector<gp_Pnt> mesh = ellipse.mesh();
+                    mArray positions;
+                    
+                    for ( vector<gp_Pnt>::iterator it=mesh.begin() ; it < mesh.end(); it++ ) {
+                        positions.push_back((*it).X());
+                        positions.push_back((*it).Y());
+                        positions.push_back((*it).Z());
+                    }
+                    mObject result;
+                    result["positions"] = positions;
+                    
+                    string output = write(result);
+                    write_cmd(output.c_str(), output.size());
+                    continue;
                 }
-	    }
+            }
             
             mObject error;
             error["error"] = "unknown message";
