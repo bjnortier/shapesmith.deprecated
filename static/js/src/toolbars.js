@@ -130,32 +130,37 @@ $(document).ready(function() {
                function() { 
 		   create_primitive("cuboid",  ["u", "v", "w"]); 
 		   SS.constructors.cuboid().create();
-	       }).render($("#primitives"));
+	       }).render($("#3Dprimitives"));
     new Action("Sphere", "/static/images/sphere.png", 
                function() { 
 		   create_primitive("sphere", ["r"]); 
 		   SS.constructors.sphere().create();
-	       }).render($("#primitives"));
+	       }).render($("#3Dprimitives"));
     new Action("Cylinder", "/static/images/cylinder.png", 
                function() { 
 		   create_primitive("cylinder", ["r", "h"]); 
 		   SS.constructors.cylinder().create();
-	       }).render($("#primitives"));
+	       }).render($("#3Dprimitives"));
     new Action("Cone", "/static/images/cone.png", 
                function() { 
 		   create_primitive("cone", ["r1", "h", "r2"]); 
 		   SS.constructors.cone().create();
-	       }).render($("#primitives"));
+	       }).render($("#3Dprimitives"));
     new Action("Wedge", "/static/images/wedge.png", 
                function() { 
 		   create_primitive("wedge", ["u1", "v", "u2", "w"]); 
 		   SS.constructors.wedge().create();
-	       }).render($("#primitives"));
+	       }).render($("#3Dprimitives"));
     new Action("Torus", "/static/images/torus.png", 
                function() { 
 		   create_primitive("torus", ["r1", "r2"]); 
 		   SS.constructors.torus().create();
-	       }).render($("#primitives"));
+	       }).render($("#3Dprimitives"));
+
+    new Action("Ellipse", "/static/images/cuboid.png", 
+               function() { 
+		   create_primitive("ellipse",  ["r1", "r2"]); 
+	       }).render($("#1Dprimitives"));
     
     /*
      * Booleans

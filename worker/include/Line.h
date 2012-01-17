@@ -34,26 +34,26 @@ class Ellipse {
     
 public:
     Ellipse(double majorRadius, double minorRadius) {
-	gp_Elips ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), majorRadius, minorRadius);
-	shape = BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI/2).Edge();
+        gp_Elips ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), majorRadius, minorRadius);
+        shape = BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI/2).Edge();
     }
-
+    
     TopoDS_Shape getShape() {
-	return shape;
+        return shape;
     }
-
+    
     std::vector<gp_Pnt> mesh() {
-
-	BRepAdaptor_Curve curve_adaptor(shape);
-	GCPnts_UniformDeflection discretizer;
-	discretizer.Initialize(curve_adaptor, 0.001);
-
-	std::vector<gp_Pnt> vertices;
-	for (int i = 0; i < discretizer.NbPoints(); i++) {
-	    gp_Pnt pt = curve_adaptor.Value(discretizer.Parameter(i + 1));
-	    vertices.push_back(pt);
-	}
-	return vertices;
+        
+        BRepAdaptor_Curve curve_adaptor(shape);
+        GCPnts_UniformDeflection discretizer;
+        discretizer.Initialize(curve_adaptor, 0.001);
+        
+        std::vector<gp_Pnt> vertices;
+        for (int i = 0; i < discretizer.NbPoints(); i++) {
+            gp_Pnt pt = curve_adaptor.Value(discretizer.Parameter(i + 1));
+            vertices.push_back(pt);
+        }
+        return vertices;
     }
 };
 

@@ -1,12 +1,14 @@
 #include "Geometry.h"
+#include "Tesselate.h"
 #include "Transform.h"
 #include "Util.h"
 
-TopoDS_Shape Geometry3D::shape() {
+
+TopoDS_Shape Shape::shape() {
     return shape_;
 }
 
-void Geometry3D::ApplyOrigin(map< string, mValue > json) {
+void Shape::ApplyOrigin(map< string, mValue > json) {
     if (!json["origin"].is_null()) {
         map< string, mValue > origin = json["origin"].get_obj();
         double x = Util::to_d(origin["x"]);
@@ -20,7 +22,7 @@ void Geometry3D::ApplyOrigin(map< string, mValue > json) {
     }
 }
 
-void Geometry3D::ApplyTransform(map< string, mValue > transformJson) {
+void Shape::ApplyTransform(map< string, mValue > transformJson) {
     string transformType = transformJson["type"].get_str();
     map< string, mValue > origin = transformJson["origin"].get_obj();
     map< string, mValue > parameters = transformJson["parameters"].get_obj();
@@ -45,7 +47,7 @@ void Geometry3D::ApplyTransform(map< string, mValue > transformJson) {
     throw "transform type not found";
 }
 
-void Geometry3D::ApplyTransforms(map< string, mValue > json) {
+void Shape::ApplyTransforms(map< string, mValue > json) {
     if (!json["transforms"].is_null()) {
         mArray transforms = json["transforms"].get_array();
         for (unsigned int k = 0; k < transforms.size(); ++k) {
@@ -55,13 +57,15 @@ void Geometry3D::ApplyTransforms(map< string, mValue > json) {
     } 
 }
 
-void Geometry3D::ToOriginTransformAndMesh(map< string, mValue > json) {
+void Shape::ToOriginTransformAndMesh(map< string, mValue > json) {
     this->ApplyOrigin(json);
     this->ApplyTransforms(json);
     this->Mesh();
 }
 
-void Geometry3D::Mesh() {
+#pragma mark 3D shapes
+
+void Shape3D::Mesh() {
     TopExp_Explorer Ex; 
     int numFaces = 0;
     for (Ex.Init(shape_, TopAbs_FACE); Ex.More(); Ex.Next()) { 
@@ -71,7 +75,11 @@ void Geometry3D::Mesh() {
     if (numFaces > 0) {
         BRepMesh().Mesh(shape_, 1.0);
     }
+}
 
+mValue Shape3D::Tesselate() {
+    auto_ptr<Tesselator3D> tesselator(new Tesselator3D(shape_));
+    return tesselator->tesselate();
 }
 
 Cuboid::Cuboid(map< string, mValue > json) {
@@ -168,6 +176,25 @@ Torus::Torus(map< string, mValue > json) {
     shape_ =BRepPrimAPI_MakeTorus(r1, r2).Shape();
     ToOriginTransformAndMesh(json);
 }
+
+#pragma mark 1D Shapes
+
+void Shape1D::Mesh() {
+    // Do nothing. Tesselation is done on-demand.
+}
+
+mValue Shape1D::Tesselate() {
+    auto_ptr<Tesselator1D> tesselator(new Tesselator1D(shape_));
+    return tesselator->tesselate();
+}
+
+Ellipse1D::Ellipse1D(map< string, mValue > json) {
+    gp_Elips ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), 50.0, 20.0);
+	shape_ = BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI*2).Edge();
+}
+
+
+#pragma mark Boolean
 
 Boolean::Boolean(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boolean_op function) {
     vector<TopoDS_Shape>::iterator it = shapes.begin();

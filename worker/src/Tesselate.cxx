@@ -6,6 +6,35 @@
 using namespace json_spirit;
 using namespace std;
 
+Tesselator1D::Tesselator1D(TopoDS_Shape shape)  {
+    shape_ = shape;
+}
+
+mValue Tesselator1D::tesselate() {
+    
+    mArray positions;
+    TopExp_Explorer Ex;
+    for (Ex.Init(shape_,TopAbs_EDGE); Ex.More(); Ex.Next()) { 
+        TopoDS_Edge edge = TopoDS::Edge(Ex.Current());
+        
+        BRepAdaptor_Curve curve_adaptor(edge);
+        GCPnts_UniformDeflection discretizer;
+        discretizer.Initialize(curve_adaptor, 0.001);
+        
+        for (int i = 0; i < discretizer.NbPoints(); i++) {
+            gp_Pnt pt = curve_adaptor.Value(discretizer.Parameter(i + 1));
+            positions.push_back(pt.X());
+            positions.push_back(pt.Y());
+            positions.push_back(pt.Z());
+        }
+    }
+    
+    mObject result;
+    result["primitive"] = "polyline";
+    result["positions"] = positions;
+    return result;
+}
+
 Tesselator3D::Tesselator3D(TopoDS_Shape shape)  {
     shape_ = shape;
 }

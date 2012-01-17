@@ -126,6 +126,11 @@ validate_geom_type(<<"torus">>, Props) ->
 			       {<<"r1">>, fun positive/1},
 			       {<<"r2">>, fun positive/1}
 			      ]);
+validate_geom_type(<<"ellipse">>, Props) ->
+    validate_primitive(Props, [
+			       {<<"r1">>, fun positive/1},
+			       {<<"r2">>, fun positive/1}
+			      ]);
 validate_geom_type(<<"union">>, Props) ->
     validate_boolean(Props);
 validate_geom_type(<<"subtract">>, Props) ->

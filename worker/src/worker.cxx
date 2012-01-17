@@ -36,7 +36,6 @@ using namespace json_spirit;
 // TODO: Tesselate in parallel
 // TODO: compress 1.00000000 into 1.0 etc. Also reduce precision
 
-
 map< string, TopoDS_Shape > shapes = map< string, TopoDS_Shape >();
 
 struct not_found : std::exception { 
@@ -56,7 +55,7 @@ TopoDS_Shape find_shape(string id) {
 #pragma mark Geometry
 
 template < typename T > string create_primitive(string id, map< string, mValue > json) {
-    std::auto_ptr<Geometry3D> geometry(new T(json));
+    std::auto_ptr<Shape> geometry(new T(json));
     shapes[id] = geometry->shape();
     return "ok";
 }
@@ -69,36 +68,39 @@ template < typename T > string create_boolean(string id, map< string, mValue > j
         childShapes.push_back(childShape);
     }
     
-    std::auto_ptr<Geometry3D> geometry(new T(json, childShapes));
+    std::auto_ptr<Shape3D> geometry(new T(json, childShapes));
     shapes[id] = geometry->shape();
     return "ok";
 }
 
-string create_geometry(string id, map< string, mValue > geometry) {
-    string geomType = geometry["type"].get_str();
+string create_geometry(string id, map< string, mValue > json) {
+    string geomType = json["type"].get_str();
     
-    // Primitives
+    // 3D Primitives
     if (geomType == "cuboid") {
-        return create_primitive<Cuboid>(id, geometry);
+        return create_primitive<Cuboid>(id, json);
     } else if (geomType == "sphere") {
-        return create_primitive<Sphere>(id, geometry);
+        return create_primitive<Sphere>(id, json);
     } else if (geomType == "cylinder") {
-        return create_primitive<Cylinder>(id, geometry);
+        return create_primitive<Cylinder>(id, json);
     } else if (geomType == "cone") {
-        return create_primitive<Cone>(id, geometry);
+        return create_primitive<Cone>(id, json);
     } else if (geomType == "wedge") {
-        return create_primitive<Wedge>(id, geometry);
+        return create_primitive<Wedge>(id, json);
     } else if (geomType == "torus") {
-        return create_primitive<Torus>(id, geometry);
-    } 
+        return create_primitive<Torus>(id, json);
+    
+    // 1D Primitives
+    } else if (geomType == "ellipse") {
+        return create_primitive<Ellipse1D>(id, json);
     
     // Booleans
-    else if (geomType == "union") {
-        return create_boolean<Union>(id, geometry);
+    } else if (geomType == "union") {
+        return create_boolean<Union>(id, json);
     } else if (geomType == "subtract") {
-        return create_boolean<Subtract>(id, geometry);
+        return create_boolean<Subtract>(id, json);
     } else if (geomType == "intersect") {
-        return create_boolean<Intersect>(id, geometry);
+        return create_boolean<Intersect>(id, json);
     }
     return "geometry type not found";
 }
@@ -192,7 +194,6 @@ int main (int argc, char *argv[]) {
                 
                 mValue existsId = objMap["exists"];
                 if (!existsId.is_null() && (existsId.type() == str_type)) {
-                    
                     
                     mValue response = !(shapes.find(existsId.get_str()) == shapes.end());
                     string output = write(response);
@@ -343,24 +344,6 @@ int main (int argc, char *argv[]) {
                     continue;
                 }
                 
-                if (message == "ellipse") {
-                    
-                    Ellipse ellipse = Ellipse(1.0, 0.5);
-                    std::vector<gp_Pnt> mesh = ellipse.mesh();
-                    mArray positions;
-                    
-                    for ( vector<gp_Pnt>::iterator it=mesh.begin() ; it < mesh.end(); it++ ) {
-                        positions.push_back((*it).X());
-                        positions.push_back((*it).Y());
-                        positions.push_back((*it).Z());
-                    }
-                    mObject result;
-                    result["positions"] = positions;
-                    
-                    string output = write(result);
-                    write_cmd(output.c_str(), output.size());
-                    continue;
-                }
             }
             
             mObject error;
