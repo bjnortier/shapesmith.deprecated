@@ -10,7 +10,7 @@ Tesselator1D::Tesselator1D(TopoDS_Shape shape)  {
     shape_ = shape;
 }
 
-mValue Tesselator1D::tesselate() {
+mValue Tesselator1D::Tesselate() {
     
     mArray positions;
     TopExp_Explorer Ex;
@@ -39,7 +39,7 @@ Tesselator3D::Tesselator3D(TopoDS_Shape shape)  {
     shape_ = shape;
 }
 
-mValue Tesselator3D::tesselate() {
+mValue Tesselator3D::Tesselate() {
     
     mArray indices;
     mArray positions;

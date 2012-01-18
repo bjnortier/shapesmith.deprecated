@@ -97,14 +97,14 @@ ensure_brep_exists(User, Design, SHA, Geometry, TopLevelFn) ->
 
     
 try_with_logging(Mod, Fn, Args) ->
-    try 
-	apply(Mod, Fn, Args)
-    catch
-	Type:Exception ->
-	    lager:error("Exception on ~p:~p(~p) in ensure_child_breps_exist: ~p:~p~n",
-			[Mod, Fn, Args, Type, Exception]),
-	    {error, {Type, Exception}}
-    end.
+    %try 
+    apply(Mod, Fn, Args).
+    %catch
+    %%     Type:Exception ->
+    %%         lager:error("Exception on ~p:~p(~p) in ensure_child_breps_exist: ~p:~p~n",
+    %%     		[Mod, Fn, Args, Type, Exception]),
+    %%         {error, {Type, Exception}}
+    %% end.
     
 
 ensure_child_breps_exist(_, _, _, [], _) ->

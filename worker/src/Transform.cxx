@@ -8,13 +8,13 @@ using namespace std;
 using namespace json_spirit;
 
 
-Transform::Transform(TopoDS_Shape shape) {
-    shape_ = shape;
+Transform::Transform(CompositeShape composite_shape) {
+    composite_shape_ = composite_shape;
 }
     
-TopoDS_Shape Rotate::apply(double multiplier, 
-                           map< string, mValue > origin, 
-                           map< string, mValue > parameters) {
+CompositeShape Rotate::apply(double multiplier, 
+                             map< string, mValue > origin, 
+                            map< string, mValue > parameters) {
     
     double x = Util::to_d(origin["x"]);
     double y = Util::to_d(origin["y"]);
@@ -27,11 +27,17 @@ TopoDS_Shape Rotate::apply(double multiplier,
     gp_Trsf transformation = gp_Trsf();
     transformation.SetRotation(gp_Ax1(gp_Pnt(x,y,z), gp_Dir(u,v,w)),
                                multiplier*Util::to_d(angle)/180*M_PI);
-    BRepBuilderAPI_Transform brep_transform(shape_, transformation);
-    return brep_transform.Shape();
+    
+    composite_shape_.set_three_d_shape(                                          
+        BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
+    composite_shape_.set_two_d_shape(                                          
+        BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
+    composite_shape_.set_one_d_shape(
+        BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
+    return composite_shape_;
 }
 
-TopoDS_Shape Scale::apply(double multiplier, 
+CompositeShape Scale::apply(double multiplier, 
                           map< string, mValue > origin, 
                           map< string, mValue > parameters) {
     
@@ -42,11 +48,15 @@ TopoDS_Shape Scale::apply(double multiplier,
     
     gp_Trsf transformation = gp_Trsf();
     transformation.SetScale(gp_Pnt(x, y, z), factor);
-    BRepBuilderAPI_Transform brep_transform(shape_, transformation);
-    return brep_transform.Shape();
+    
+    composite_shape_.set_three_d_shape(BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
+    composite_shape_.set_two_d_shape(BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
+    composite_shape_.set_one_d_shape(BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
+    return composite_shape_;
+
 }
 
-TopoDS_Shape Mirror::apply(double multiplier, 
+CompositeShape Mirror::apply(double multiplier, 
                            map< string, mValue > origin, 
                            map< string, mValue > parameters) {
     
@@ -59,11 +69,14 @@ TopoDS_Shape Mirror::apply(double multiplier,
     
     gp_Trsf transformation = gp_Trsf();
     transformation.SetMirror(gp_Ax1(gp_Pnt(x, y, z), gp_Dir(u, v, w)));
-    BRepBuilderAPI_Transform brep_transform(shape_, transformation);
-    return brep_transform.Shape();
+    
+    composite_shape_.set_three_d_shape(BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
+    composite_shape_.set_two_d_shape(BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
+    composite_shape_.set_one_d_shape(BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
+    return composite_shape_;
 }
 
-TopoDS_Shape Translate::apply(double multiplier, 
+CompositeShape Translate::apply(double multiplier, 
                               map< string, mValue > origin, 
                               map< string, mValue > parameters) {
     
@@ -76,7 +89,10 @@ TopoDS_Shape Translate::apply(double multiplier,
                                          multiplier*v, 
                                          multiplier*w));
     
-    BRepBuilderAPI_Transform brep_transform(shape_, transformation);
-    return brep_transform.Shape();
+    composite_shape_.set_three_d_shape(BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
+    composite_shape_.set_two_d_shape(BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
+    composite_shape_.set_one_d_shape(BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
+    return composite_shape_;
+
 }
 

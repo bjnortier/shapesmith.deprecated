@@ -20,15 +20,9 @@ include_directories("/usr/local/include")
 include_directories("/usr/local/inc")
 include_directories("/opt/local/include")
 
-# add the executable
-add_executable(worker	
-    src/worker.cxx 
-    src/CompositeShape.cxx
-    src/Geometry.cxx    
-    src/Transform.cxx
-    src/Util.cxx
-    src/Tesselate.cxx
-    src/base64.cpp)
+set(ALL_CLASSES src/worker.cxx  src/CompositeShape.cxx src/Geometry.cxx src/Transform.cxx src/Util.cxx src/Tesselate.cxx src/base64.cpp)
+
+add_executable(worker  src/worker.cxx ${ALL_CLASSES})
 
 # Unit tests
 enable_testing()
@@ -37,7 +31,6 @@ enable_testing()
 find_package(GTest REQUIRED)
 
 add_executable(run-tests 
-    src/Line.cxx
     test/line.cc)
 GTEST_ADD_TESTS(run-tests "" test/line.cc)
 target_link_libraries(run-tests ${GTEST_BOTH_LIBRARIES})

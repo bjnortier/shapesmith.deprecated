@@ -9,7 +9,7 @@ using namespace json_spirit;
 
 class Builder {
 protected:
-    TopoDS_Shape shape_;
+    CompositeShape composite_shape_;
     
     void ApplyOrigin(map< string, mValue > json);
     void ApplyTransform(map< string, mValue > json);
@@ -17,7 +17,7 @@ protected:
     virtual void PostProcess(map< string, mValue > json) = 0;
     
 public:
-    TopoDS_Shape shape();
+    CompositeShape composite_shape();
     
 };
 
@@ -89,24 +89,24 @@ typedef TopoDS_Shape (*boolean_op)(const TopoDS_Shape&, const TopoDS_Shape&);
 
 class BooleanBuilder : public Builder3D {
 public:
-    BooleanBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boolean_op fn);
+    BooleanBuilder(map< string, mValue > json, vector<CompositeShape>& shapes, boolean_op fn);
 };
 
 class UnionBuilder : public BooleanBuilder {
 public:
-    UnionBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
+    UnionBuilder(map< string, mValue > json, vector<CompositeShape>& shapes);
     ~UnionBuilder();
 };
 
 class SubtractBuilder : public BooleanBuilder {
 public:
-    SubtractBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
+    SubtractBuilder(map< string, mValue > json, vector<CompositeShape>& shapes);
     ~SubtractBuilder();
 };
 
 class IntersectBuilder : public BooleanBuilder {
 public:
-    IntersectBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
+    IntersectBuilder(map< string, mValue > json, vector<CompositeShape>& shapes);
     ~IntersectBuilder();
 };
 

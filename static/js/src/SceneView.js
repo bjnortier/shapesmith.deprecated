@@ -430,6 +430,10 @@ SS.SceneView = function(container) {
     }
 
     var createGeometry = function(mesh) {
+        return create3DGeometry(mesh['3d']);
+    }
+
+    var create3DGeometry = function(mesh) {
 	var geometry = new THREE.Geometry();
 
 	for (var i = 0; i  < mesh.positions.length/3; ++i) {

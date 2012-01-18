@@ -5,8 +5,8 @@
 #include "Util.h"
 
 
-TopoDS_Shape Builder::shape() {
-    return shape_;
+CompositeShape Builder::composite_shape() {
+    return composite_shape_;
 }
 
 void Builder::ApplyOrigin(map< string, mValue > json) {
@@ -18,8 +18,11 @@ void Builder::ApplyOrigin(map< string, mValue > json) {
         gp_Trsf transformation = gp_Trsf();
         transformation.SetTranslation(gp_Vec(x,y,z));
         
-        BRepBuilderAPI_Transform brep_transform(shape_, transformation);
-        shape_ = brep_transform.Shape();
+        composite_shape_.set_three_d_shape(                                          BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
+        composite_shape_.set_two_d_shape(                                          
+            BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
+        composite_shape_.set_one_d_shape(
+            BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
     }
 }
 
@@ -29,20 +32,20 @@ void Builder::ApplyTransform(map< string, mValue > transformJson) {
     map< string, mValue > parameters = transformJson["parameters"].get_obj();
     
     if (transformType == "rotate") {
-        auto_ptr< Transformer<Rotate> > transformer(new Transformer<Rotate>(shape_, origin, parameters));
-        shape_ = transformer->transformed_shape();
+        auto_ptr< Transformer<Rotate> > transformer(new Transformer<Rotate>(composite_shape_, origin, parameters));
+        composite_shape_ = transformer->transformed_shape();
         return;
     } else if (transformType == "scale") {
-        auto_ptr< Transformer<Scale> > transformer(new Transformer<Scale>(shape_, origin, parameters));
-        shape_ = transformer->transformed_shape();
+        auto_ptr< Transformer<Scale> > transformer(new Transformer<Scale>(composite_shape_, origin, parameters));
+        composite_shape_ = transformer->transformed_shape();
         return;
     } else if (transformType == "translate") {
-        auto_ptr< Transformer<Translate> > transformer(new Transformer<Translate>(shape_, origin, parameters));
-        shape_ = transformer->transformed_shape();
+        auto_ptr< Transformer<Translate> > transformer(new Transformer<Translate>(composite_shape_, origin, parameters));
+        composite_shape_ = transformer->transformed_shape();
         return;
     } else if (transformType == "mirror") {
-        auto_ptr< Transformer<Mirror> > transformer(new Transformer<Mirror>(shape_, origin, parameters));
-        shape_ = transformer->transformed_shape();
+        auto_ptr< Transformer<Mirror> > transformer(new Transformer<Mirror>(composite_shape_, origin, parameters));
+        composite_shape_ = transformer->transformed_shape();
         return;
     }
     throw "transform type not found";
@@ -63,12 +66,12 @@ void Builder::ApplyTransforms(map< string, mValue > json) {
 void Builder3D::Mesh() {
     TopExp_Explorer Ex; 
     int numFaces = 0;
-    for (Ex.Init(shape_, TopAbs_FACE); Ex.More(); Ex.Next()) { 
+    for (Ex.Init(composite_shape_.three_d_shape(), TopAbs_FACE); Ex.More(); Ex.Next()) { 
         ++numFaces;
     }
     
     if (numFaces > 0) {
-        BRepMesh().Mesh(shape_, 1.0);
+        BRepMesh().Mesh(composite_shape_.three_d_shape(), 1.0);
     }
 }
 
@@ -102,14 +105,14 @@ CuboidBuilder::CuboidBuilder(map< string, mValue > json) {
     }
     json["origin"] = origin;
 	 
-    shape_ = BRepPrimAPI_MakeBox(width, depth, height).Shape();
+    composite_shape_.set_three_d_shape(BRepPrimAPI_MakeBox(width, depth, height).Shape());
     PostProcess(json);
 }
 
 SphereBuilder::SphereBuilder(map< string, mValue > json) {
     map< string, mValue > parameters = json["parameters"].get_obj();
     double radius = Util::to_d(parameters["r"]);
-    shape_ = BRepPrimAPI_MakeSphere(radius).Shape();
+    composite_shape_.set_three_d_shape(BRepPrimAPI_MakeSphere(radius).Shape());
     PostProcess(json);    
 }
 
@@ -125,7 +128,7 @@ CylinderBuilder::CylinderBuilder(map< string, mValue > json) {
     }
     json["origin"] = origin;
     
-    shape_ = BRepPrimAPI_MakeCylinder(r, h).Shape() ;
+    composite_shape_.set_three_d_shape(BRepPrimAPI_MakeCylinder(r, h).Shape());
     PostProcess(json);
 }
 
@@ -143,7 +146,7 @@ ConeBuilder::ConeBuilder(map< string, mValue > json) {
     }
     json["origin"] = origin;
         
-    shape_ = BRepPrimAPI_MakeCone(r1, r2, h).Shape();
+    composite_shape_.set_three_d_shape(BRepPrimAPI_MakeCone(r1, r2, h).Shape());
     PostProcess(json);
 }
 
@@ -160,7 +163,7 @@ WedgeBuilder::WedgeBuilder(map< string, mValue > json) {
 	w = -w;
     }
     json["origin"] = origin;
-    shape_ = BRepPrimAPI_MakeWedge(u1, v, w, u2).Shape();                                                
+    composite_shape_.set_three_d_shape(BRepPrimAPI_MakeWedge(u1, v, w, u2).Shape());                                         
     PostProcess(json);
 }
 
@@ -169,7 +172,7 @@ TorusBuilder::TorusBuilder(map< string, mValue > json) {
     map< string, mValue > parameters = json["parameters"].get_obj();
     double r1 = Util::to_d(parameters["r1"]);
     double r2 = Util::to_d(parameters["r2"]);
-    shape_ =BRepPrimAPI_MakeTorus(r1, r2).Shape();
+    composite_shape_.set_three_d_shape(BRepPrimAPI_MakeTorus(r1, r2).Shape());
     PostProcess(json);
 }
 
@@ -182,18 +185,19 @@ void Builder1D::PostProcess(map< string, mValue > json) {
 
 Ellipse1DBuilder::Ellipse1DBuilder(map< string, mValue > json) {
     gp_Elips ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), 50.0, 20.0);
-	shape_ = BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI*2).Edge();
+	composite_shape_.set_two_d_shape(BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI*2).Edge());
 }
 
 
 #pragma mark Boolean builders
 
-BooleanBuilder::BooleanBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boolean_op function) {
-    vector<TopoDS_Shape>::iterator it = shapes.begin();
-    shape_ = *it;
+BooleanBuilder::BooleanBuilder(map< string, mValue > json, vector<CompositeShape>& shapes, boolean_op function) {
+    vector<CompositeShape>::iterator it = shapes.begin();
+    composite_shape_.set_three_d_shape((*it).three_d_shape());
     ++it;
     for ( ; it < shapes.end(); ++it ) {
-	shape_ = function(*it, shape_);
+        composite_shape_.set_three_d_shape(function((*it).three_d_shape(), 
+                                                    composite_shape_.three_d_shape()));
     }
     PostProcess(json);
 }
@@ -210,14 +214,14 @@ TopoDS_Shape cut(const TopoDS_Shape& a, const TopoDS_Shape& b) {
     return BRepAlgoAPI_Cut(a,b);
 }
 
-UnionBuilder::UnionBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes) 
+UnionBuilder::UnionBuilder(map< string, mValue > json, vector<CompositeShape>& shapes) 
     : BooleanBuilder(json, shapes, &fuse) {
 }
 
-IntersectBuilder::IntersectBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes) 
+IntersectBuilder::IntersectBuilder(map< string, mValue > json, vector<CompositeShape>& shapes) 
     : BooleanBuilder(json, shapes, &common) {
 }
 
-SubtractBuilder::SubtractBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes) 
+SubtractBuilder::SubtractBuilder(map< string, mValue > json, vector<CompositeShape>& shapes) 
     : BooleanBuilder(json, shapes, &cut) {
 }

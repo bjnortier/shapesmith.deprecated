@@ -148,7 +148,12 @@ publish_stl(User, Design, CommitSHA) ->
 	    DB:put(bucket(User, Design), Key, jiffy:encode([list_to_binary(CommitSHA)]));
 	SHAsJSON ->
 	    SHAs = jiffy:decode(SHAsJSON),
-	    DB:put(bucket(User, Design), Key, jiffy:encode([list_to_binary(CommitSHA)|SHAs]))
+            case lists:member(list_to_binary(CommitSHA), SHAs) of
+                true ->
+                    ok;
+                false ->
+                    DB:put(bucket(User, Design), Key, jiffy:encode([list_to_binary(CommitSHA)|SHAs]))
+            end
     end.
 
 is_published_stl(User, Design, CommitSHA) ->
@@ -171,12 +176,12 @@ get_brep(SHA) when is_list(SHA) ->
 	undefined ->
 	    undefined;
 	BRep ->
-	    BRep
+	    jiffy:decode(BRep)
     end.
 
-put_brep(SHA, BRep) when is_list(SHA) andalso is_binary(BRep) ->
+put_brep(SHA, BRep) when is_list(SHA) ->
     {ok, DB} = application:get_env(node, db_module),
-    DB:put(<<"_brep">>, list_to_binary(SHA), BRep).
+    DB:put(<<"_brep">>, list_to_binary(SHA), jiffy:encode(BRep)).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

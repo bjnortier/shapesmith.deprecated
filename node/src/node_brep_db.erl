@@ -74,6 +74,9 @@ purge(WorkerPid, SHA) ->
     case node_worker_pool:call(WorkerPid, jiffy:encode(Msg)) of
 	"true" ->
 	    ok;
+        "false" ->
+            lager:error("Purge for SHA ~p failed: not_found", [SHA]),
+            {error, not_found};
 	{error, Reason} ->
 	    {error, Reason};
 	Error -> 
