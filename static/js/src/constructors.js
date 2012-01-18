@@ -448,7 +448,122 @@ SS.constructors.cylinder = function(spec) {
     return that;
 }
 
-SS.constructors.cone = function(spec) {
+SS.constructors.cylinder = function(spec) {
+
+    var my = {};
+    var that = SS.constructors.primitive(my);
+
+    var superUpdatePreview = that.updatePreview;
+    var updatePreview = function() {
+
+	superUpdatePreview();
+
+	var x = parseFloat($('#x').val()) || 0.0;
+	var y = parseFloat($('#y').val()) || 0.0;
+	var z = parseFloat($('#z').val()) || 0.0;
+
+	var r = parseFloat($('#r').val());
+	var h = parseFloat($('#h').val());
+
+	if (r) {
+	    var circleGeom1 = new THREE.Geometry(), circleGeom2 = new THREE.Geometry();
+	    for(var i = 0; i <= 50; ++i) {
+		var theta = Math.PI*2*i/50;
+		var dx = r*Math.cos(theta);
+		var dy = r*Math.sin(theta);
+		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+	    }
+	    var circle1 = new THREE.Line(circleGeom1, SS.constructors.lineMaterial);
+	    my.previewGeometry.addChild(circle1);
+	}
+
+	if (r && h) {
+	    var circle2 = new THREE.Line(circleGeom2, SS.constructors.lineMaterial);
+	    circle2.position.z = h;
+	    my.previewGeometry.addChild(circle2);
+
+	    var geometry = new THREE.CylinderGeometry(50, r, r, h);
+	    var cylinder = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
+	    cylinder.position.z = h/2;
+	    my.previewGeometry.addChild(cylinder);
+	}
+
+	my.previewGeometry.position.x = x;
+	my.previewGeometry.position.y = y;
+	my.previewGeometry.position.z = z;
+
+	sceneView.scene.addObject(my.previewGeometry);
+	
+    }
+    my.updatePreview = updatePreview;
+
+    var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
+    that.onWorkplaneCursorUpdated = function(event) {
+	
+	if (superOnWorkplaneCursorUpdated(event)) {
+	    updatePreview();
+	    return;
+	}
+	
+	var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
+
+	if (my.focussed === 'r') {
+	    var x = event.x, y = event.y;
+	    
+	    var dx = Math.abs(x - originX), dy = Math.abs(y - originY);
+	    var r  = Math.sqrt(dx*dx + dy*dy);
+	    
+	    $('#r').val(r.toFixed(2));
+	    updatePreview();
+	} else if (my.focussed === 'h') {
+
+	    var origin = new THREE.Vector3(originX, originY, 0);
+	    var direction = new THREE.Vector3(0, 0, 1);
+	    var ray = new THREE.Ray(origin, direction);
+	    var positionOnVertical = sceneView.determinePositionOnRay(event.originalEvent, ray);
+
+	    $('#h').val(positionOnVertical.z.toFixed(0));
+
+	    updatePreview();
+	}
+
+    }
+
+    var superOnWorkplaneClicked = that.onWorkplaneClicked;
+    that.onWorkplaneClicked = function(event) {
+	superOnWorkplaneClicked({origin: 'r', r:'h'});
+    }
+
+    var superSetupValueHandlers = that.setupValueHandlers;
+    that.setupValueHandlers = function() {
+	superSetupValueHandlers(updatePreview);
+	$('#r').keyup(updatePreview);
+	$('#h').keyup(updatePreview);
+    }
+
+    var superSetupFocusHandlers = that.setupFocusHandlers;
+    that.setupFocusHandlers = function() {
+	superSetupFocusHandlers();
+
+	$('#r').focus(function() { my.focussed = 'r'; });
+	$('#r').blur(function()  { my.focussed = undefined; });
+
+	$('#h').focus(function() { my.focussed = 'h'; });
+	$('#h').blur(function()  { my.focussed = undefined; });
+    }
+
+    var superCreate = that.create;
+    that.create = function() {
+	superCreate();
+	$('#r').focus();
+	updatePreview();
+    }
+
+    return that;
+}
+
+SS.constructors.ellipse1d = function(spec) {
 
     var my = {};
     var that = SS.constructors.primitive(my);
@@ -463,37 +578,19 @@ SS.constructors.cone = function(spec) {
 	var z = parseFloat($('#z').val()) || 0.0;
 
 	var r1 = parseFloat($('#r1').val());
-	var h = parseFloat($('#h').val());
 	var r2 = parseFloat($('#r2').val());
 
-	if (r1 && h) {
+	if (r1 && r2) {
 
-	    var geometry = new THREE.CylinderGeometry(50, r1, r2 || 0.000001, h);
-	    var cone = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
-	    cone.position.z = h/2;
-	    my.previewGeometry.addChild(cone);
-	    
-	    var circleGeom2 = new THREE.Geometry();
-	    for(var i = 0; i <= 50; ++i) {
-		var theta = Math.PI*2*i/50;
-		var dx = r2*Math.cos(theta);
-		var dy = r2*Math.sin(theta);
-		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
-	    }
-	    var circle2 = new THREE.Line(circleGeom2, SS.constructors.lineMaterial);
-	    circle2.position.z = h;
-	    my.previewGeometry.addChild(circle2);
-
-	} else if (r1) {
-	    var circleGeom1 = new THREE.Geometry();
+	    var ellipseGeom = new THREE.Geometry();
 	    for(var i = 0; i <= 50; ++i) {
 		var theta = Math.PI*2*i/50;
 		var dx = r1*Math.cos(theta);
-		var dy = r1*Math.sin(theta);
-		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+		var dy = r2*Math.sin(theta);
+		ellipseGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	    }
-	    var circle1 = new THREE.Line(circleGeom1, SS.constructors.lineMaterial);
-	    my.previewGeometry.addChild(circle1);
+	    var ellipse = new THREE.Line(ellipseGeom, SS.constructors.lineMaterial);
+	    my.previewGeometry.addChild(ellipse);
 	}
 
 	my.previewGeometry.position.x = x;
@@ -516,42 +613,11 @@ SS.constructors.cone = function(spec) {
 	var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
 	var x = event.x, y = event.y;
 
-	if (my.focussed === 'r1') {
-	    
-	    var dx = Math.abs(x - originX), dy = Math.abs(y - originY);
-	    var r1  = Math.sqrt(dx*dx + dy*dy);
-	    
-	    $('#r1').val(r1.toFixed(2));
-	    updatePreview();
-
-	} else if (my.focussed === 'h') {
-
-	    var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
-
-	    var origin = new THREE.Vector3(originX, originY, 0);
-	    var direction = new THREE.Vector3(0, 0, 1);
-	    var ray = new THREE.Ray(origin, direction);
-	    var positionOnVertical = sceneView.determinePositionOnRay(event.originalEvent, ray);
-
-	    $('#h').val(positionOnVertical.z.toFixed(0));
-
-	    updatePreview();
-	} else if (my.focussed === 'r2') {
-
-	    
-	    var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
-	    var planeMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 0 }));
-	    planeMesh.position.z = parseFloat($('#h').val()) || 0;
-
-	    var position = sceneView.determinePositionPlane(event.originalEvent, planeMesh);
-
-	    var dx = Math.abs(position.x - originX), dy = Math.abs(position.y - originY);
-	    var r2  = Math.sqrt(dx*dx + dy*dy);
-	    
-	    $('#r2').val(r2.toFixed(2));
-	    updatePreview();
-
-	}
+	var r1 = Math.abs(x - originX);
+        var r2 = Math.abs(y - originY);
+	$('#r2').val(r2.toFixed(2));
+	$('#r1').val(r1.toFixed(2));
+	updatePreview();
 
     }
 

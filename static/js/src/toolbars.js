@@ -157,9 +157,10 @@ $(document).ready(function() {
 		   SS.constructors.torus().create();
 	       }).render($("#3Dprimitives"));
 
-    new Action("Ellipse", "/static/images/cuboid.png", 
+    new Action("Ellipse 1D", "/static/images/cuboid.png", 
                function() { 
-		   create_primitive("ellipse",  ["r1", "r2"]); 
+		   create_primitive("ellipse1d",  ["r1", "r2"]); 
+                   SS.constructors.ellipse1d().create();
 	       }).render($("#1Dprimitives"));
     
     /*

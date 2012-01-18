@@ -92,7 +92,7 @@ string create_geometry(string id, map< string, mValue > json) {
         return create_primitive<TorusBuilder>(id, json);
     
     // 1D Primitives
-    } else if (geomType == "ellipse") {
+    } else if (geomType == "ellipse1d") {
         return create_primitive<Ellipse1DBuilder>(id, json);
     
     // Booleans

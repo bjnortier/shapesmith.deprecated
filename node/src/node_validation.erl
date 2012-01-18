@@ -126,10 +126,11 @@ validate_geom_type(<<"torus">>, Props) ->
 			       {<<"r1">>, fun positive/1},
 			       {<<"r2">>, fun positive/1}
 			      ]);
-validate_geom_type(<<"ellipse">>, Props) ->
+validate_geom_type(<<"ellipse1d">>, Props) ->
     validate_primitive(Props, [
 			       {<<"r1">>, fun positive/1},
-			       {<<"r2">>, fun positive/1}
+			       {<<"r2">>, fun positive/1},
+			       {[<<"r1">>, <<"r2">>], fun first_greater_than_second/1}
 			      ]);
 validate_geom_type(<<"union">>, Props) ->
     validate_boolean(Props);
@@ -398,6 +399,11 @@ one_zero_one_positive([A, B]) when B > 0 andalso A >= 0 ->
     ok;
 one_zero_one_positive(_) ->
     {error, <<"one must be positive">>}.
+
+first_greater_than_second([A, B]) when A > B ->
+    ok;
+first_greater_than_second(_) ->
+    {error, <<"the second must be greater than the first">>}.
 
 not_equal([A, B]) when A =:= B ->
     {error, <<"can't be equal">>};
