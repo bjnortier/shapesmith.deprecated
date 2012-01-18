@@ -20,7 +20,7 @@ include_directories("/usr/local/include")
 include_directories("/usr/local/inc")
 include_directories("/opt/local/include")
 
-set(ALL_CLASSES src/worker.cxx  src/CompositeShape.cxx src/Geometry.cxx src/Transform.cxx src/Util.cxx src/Tesselate.cxx src/base64.cpp)
+set(ALL_CLASSES src/worker.cxx  src/CompositeShape.cxx src/Builder.cxx src/Transform.cxx src/Util.cxx src/Tesselate.cxx src/base64.cpp)
 
 add_executable(worker  src/worker.cxx ${ALL_CLASSES})
 
@@ -30,14 +30,13 @@ enable_testing()
 # http://www.cmake.org/cmake/help/cmake-2-8-docs.html
 find_package(GTest REQUIRED)
 
-add_executable(run-tests 
-    test/line.cc)
-GTEST_ADD_TESTS(run-tests "" test/line.cc)
+add_executable(run-tests test/buildertest.cc src/Builder.cxx src/Transform.cxx src/CompositeShape.cxx  src/Tesselate.cxx src/Util.cxx)
+GTEST_ADD_TESTS(run-tests "" test/buildertest.cc)
 target_link_libraries(run-tests ${GTEST_BOTH_LIBRARIES})
 
 set(CMAKE_CXX_FLAGS "-DHAVE_CONFIG_H")
 
-set(ALL_LIBS "-L/opt/local/lib -ljson_spirit -lpthread -lPTKernel -lTKAdvTools -lTKBin -lTKBinL -lTKBinTObj -lTKBinXCAF -lTKBO -lTKBool -lTKBRep -lTKCAF -lTKCDF -lTKernel -lTKFeat -lTKFillet -lTKG2d -lTKG3d -lTKGeomAlgo -lTKGeomBase -lTKHLR -lTKIGES -lTKLCAF -lTKMath -lTKMesh -lTKMeshVS -lTKNIS -lTKOffset -lTKOpenGl -lTKPCAF -lTKPLCAF -lTKPrim -lTKPShape -lTKService -lTKShapeSchema -lTKShHealing -lTKStdLSchema  -lTKStdSchema -lTKSTEP -lTKSTEP209 -lTKSTEPAttr -lTKSTEPBase -lTKSTL -lTKTopAlgo -lTKV2d -lTKV3d -lTKXMesh -lTKXml -lTKXmlL -lTKXmlTObj -lTKXmlXCAF -lTKXSBase")
+set(ALL_LIBS -L/opt/local/lib -ljson_spirit -lpthread -lPTKernel -lTKAdvTools -lTKBin -lTKBinL -lTKBinTObj -lTKBinXCAF -lTKBO -lTKBool -lTKBRep -lTKCAF -lTKCDF -lTKernel -lTKFeat -lTKFillet -lTKG2d -lTKG3d -lTKGeomAlgo -lTKGeomBase -lTKHLR -lTKIGES -lTKLCAF -lTKMath -lTKMesh -lTKMeshVS -lTKNIS -lTKOffset -lTKOpenGl -lTKPCAF -lTKPLCAF -lTKPrim -lTKPShape -lTKService -lTKShapeSchema -lTKShHealing -lTKStdLSchema  -lTKStdSchema -lTKSTEP -lTKSTEP209 -lTKSTEPAttr -lTKSTEPBase -lTKSTL -lTKTopAlgo -lTKV2d -lTKV3d -lTKXMesh -lTKXml -lTKXmlL -lTKXmlTObj -lTKXmlXCAF -lTKXSBase)
 
 target_link_libraries(worker ${ALL_LIBS})
 target_link_libraries(run-tests ${ALL_LIBS})

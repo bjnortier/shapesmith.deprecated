@@ -1,8 +1,10 @@
-#ifndef SS_GEOMETRY
-#define SS_GEOMETRY
+#ifndef SS_BUILDER
+#define SS_BUILDER
 
 #include <json_spirit.h>
 #include "OCC.h"
+
+#include "CompositeShape.h"
 
 using namespace std;
 using namespace json_spirit;
@@ -80,7 +82,7 @@ protected:
 class Ellipse1DBuilder : public Builder1D {
 public:
     Ellipse1DBuilder(map< string, mValue > json);
-    ~Ellipse1DBuilder();
+    ~Ellipse1DBuilder() {};
 };
 
 #pragma mark Booleans

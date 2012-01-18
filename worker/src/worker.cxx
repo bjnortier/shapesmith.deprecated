@@ -26,8 +26,8 @@
 #include "WorkerConfig.h"
 #include "base64.h"
 
+#include "Builder.h"
 #include "CompositeShape.h"
-#include "Geometry.h"
 #include "Tesselate.h"
 #include "Transform.h"
 

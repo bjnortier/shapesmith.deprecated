@@ -383,7 +383,7 @@ SS.SceneView = function(container) {
 
     var add = function(geomNode) {
         if (geom_doc.isRoot(geomNode) && geomNode.mesh) {
-	    var geometry = createGeometry(geomNode.mesh);
+
 	    var color = unselectedColor, opacity = 1.0;
 	    var isEditing = geomNode.editing;
 	    for (index in geomNode.transforms) {
@@ -396,8 +396,18 @@ SS.SceneView = function(container) {
 		opacity = 0.2;
 	    }
 
-	    var material = new THREE.MeshPhongMaterial( { ambient: 0x030303, color: color, opacity: opacity,  specular: 0xccffcc, shininess: 50, shading: THREE.SmoothShading } );
-	    var mesh = new THREE.Mesh(geometry, material);
+	    var mesh = new THREE.Object3D();
+
+	    var geometry3D = create3DGeometry(geomNode.mesh['3d']);
+	    var material3D = new THREE.MeshPhongMaterial( { ambient: 0x030303, color: color, opacity: opacity,  specular: 0xccffcc, shininess: 50, shading: THREE.SmoothShading } );
+            var mesh3d = new THREE.Mesh(geometry3D, material3D);
+            mesh.addChild(mesh3d);
+            
+            var geometry1D = create1DGeometry(geomNode.mesh['1d']);
+            var material1D = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 1.0 });
+            var mesh1d = new THREE.Line(geometry1D, material1D);
+            mesh.addChild(mesh1d);
+
 	    mesh.doubleSided = true;
 	    mesh.name = geomNode.id;
 	    scene.addObject(mesh);
@@ -429,8 +439,17 @@ SS.SceneView = function(container) {
         }
     }
 
-    var createGeometry = function(mesh) {
-        return create3DGeometry(mesh['3d']);
+    var create1DGeometry = function(mesh) {
+        var geometry = new THREE.Geometry();
+
+        for (var i = 0; i < mesh.positions.length/3; ++i) {
+            var position = new THREE.Vector3(mesh.positions[i * 3], 
+					     mesh.positions[i * 3 + 1], 
+					     mesh.positions[i * 3 + 2]);
+	    var vertex = new THREE.Vertex(position);
+            geometry.vertices.push(vertex);
+        }
+        return geometry;
     }
 
     var create3DGeometry = function(mesh) {
@@ -473,7 +492,7 @@ SS.SceneView = function(container) {
     this.determinePositionPlane = determinePositionPlane;
     this.popupMenu = popupMenu;
     this.onMouseUp = onMouseUp;
-    this.createGeometry = createGeometry;
+    this.createGeometry = create3DGeometry;
 
     return this;
 }

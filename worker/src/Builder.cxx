@@ -1,5 +1,5 @@
+#include "Builder.h"
 #include "CompositeShape.h"   
-#include "Geometry.h"
 #include "Tesselate.h"
 #include "Transform.h"
 #include "Util.h"
@@ -184,8 +184,13 @@ void Builder1D::PostProcess(map< string, mValue > json) {
 }
 
 Ellipse1DBuilder::Ellipse1DBuilder(map< string, mValue > json) {
-    gp_Elips ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), 50.0, 20.0);
-	composite_shape_.set_two_d_shape(BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI*2).Edge());
+    map< string, mValue > parameters = json["parameters"].get_obj();
+    double r1 = Util::to_d(parameters["r1"]);
+    double r2 = Util::to_d(parameters["r2"]);
+    
+    gp_Elips ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), r1, r2);
+	composite_shape_.set_one_d_shape(BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI*2).Edge());
+    PostProcess(json);
 }
 
 
