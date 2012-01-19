@@ -30,8 +30,10 @@ SS.modifier.Origin = function(spec) {
 SS.preview.Ellipse1d = function(spec) {
     var that = this, scene = spec.scene, geomNode = spec.geomNode, updater = spec.updater;
     var cursoid = spec.cursoid;
+    var anchorGeometry = new THREE.CubeGeometry(1.0, 1.0, 1.0);
+    var anchorMaterial = new THREE.MeshBasicMaterial( { color: 0x66a1d1, opacity: 0.8, wireframe: false } );
     var sceneObject;
-
+    
     var updatePreview = function() {
         if(sceneObject) {
             scene.removeObject(sceneObject);
@@ -53,6 +55,16 @@ SS.preview.Ellipse1d = function(spec) {
 	    var ellipse = new THREE.Line(ellipseGeom, SS.constructors.lineMaterial);
             sceneObject.addChild(ellipse);
         }
+
+        var originAnchor = new THREE.Mesh(anchorGeometry, anchorMaterial);
+        originAnchor.name = {anchor: 'origin'};
+        sceneObject.addChild(originAnchor);
+
+        var radiiAnchor = new THREE.Mesh(anchorGeometry, anchorMaterial);
+        radiiAnchor.position.x = r1;
+        radiiAnchor.position.y = r2;
+        radiiAnchor.name = {anchor: 'radii'};
+        sceneObject.addChild(radiiAnchor);
     
         sceneObject.position.x = geomNode.origin.x;
         sceneObject.position.y = geomNode.origin.y;
