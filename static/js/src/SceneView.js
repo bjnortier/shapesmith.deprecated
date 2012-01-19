@@ -89,24 +89,36 @@ SS.SceneView = function(container) {
         state = undefined;
 	container.addEventListener('mouseup', onMouseUp, false);
 
+	var cursoidName;
+	var activeConstructor = SS.constructor.active;
+	if (activeConstructor) {
+	    var anchorName = activeConstructor.getAnchor(scene, camera, event);
+	    if (anchorName) {
+		activeConstructor.activateAnchor(anchorName);
+		cursoidName = 'xy';
+	    }
+	}
+	
+	if (!cursoidName) {
+	    cursoidName = cursoid.getCursoid(scene, camera, event)
+	}
+        if (cursoidName) {
+            state = {cursoid: cursoidName};
+            cursoid.activate(cursoidName);
+	    popupMenu.cancel();
+        } 
     }
     
     function onMouseMove(event) {
 
 	if (mouseOnDown) {
-
+	    
 	    if (!state && !popupMenu.isShowing()) {
-                var activeCursoid = cursoid.getCursoid(scene, camera, event)
-                if (activeCursoid) {
-                    state = {cursoid: activeCursoid};
-                    cursoid.setCursoidModifier(state.cursoid);
-                }
-                
 		if (event.button === 0 && !event.shiftKey) {
 		    if ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
 			||
 			(Math.abs(event.clientY - mouseOnDown.y) > threshhold)) {
-
+			
                         state = 'rotating';
 		    }
 		} 
@@ -119,25 +131,12 @@ SS.SceneView = function(container) {
 		    }
 		}
 	    }
-
+	    
 	    if (state) {
 		popupMenu.cancel()
 	    } 
             
-            if (state && state.cursoid) {
-
-                var positionOnWorkplane = determinePositionOnWorkplane(event);
-	        workplane.updateXYLocation(positionOnWorkplane, event);
-
-	        var origin = new THREE.Vector3(0, 0, 0);
-	        var direction = new THREE.Vector3(0, 0, 1);
-	        var ray = new THREE.Ray(origin, direction);
-	        var positionOnVertical = sceneView.determinePositionOnRay(event, ray);
-                if (positionOnVertical) {
-                    workplane.updateZLocation(positionOnVertical, event);
-                }
-                
-	    } else if (state === 'rotating') {
+            if (state === 'rotating') {
 		var mouse = {};
 		mouse.x = event.clientX;
 		mouse.y = event.clientY;
@@ -149,26 +148,27 @@ SS.SceneView = function(container) {
 		target.elevation = target.elevation > Math.PI ? Math.PI : target.elevation;
 		target.elevation = target.elevation < 0 ? 0 : target.elevation;
 	    }
-	} else {
-            if (cursoid.getCursoid(scene, camera, event)) {
-                document.body.style.cursor = 'pointer';
-            } else {
-                document.body.style.cursor = 'default';
-            }
+	} 
 
-	    var positionOnWorkplane = determinePositionOnWorkplane(event);
-	    workplane.updateXYLocation(positionOnWorkplane, event);
 
-	    var origin = new THREE.Vector3(0, 0, 0);
-	    var direction = new THREE.Vector3(0, 0, 1);
-	    var ray = new THREE.Ray(origin, direction);
-	    var positionOnVertical = sceneView.determinePositionOnRay(event, ray);
-            // TODO: MErge with above
-            if (positionOnVertical) {
-                workplane.updateZLocation(positionOnVertical, event);
-            }
+        if (cursoid.getCursoid(scene, camera, event) ||
+	    (SS.constructor.active &&  
+	     SS.constructor.active.getAnchor(scene, camera, event))) {
+            document.body.style.cursor = 'pointer';
+        } else {
+            document.body.style.cursor = 'default';
+        }
 
-	}
+	var positionOnWorkplane = determinePositionOnWorkplane(event);
+	workplane.updateXYLocation(positionOnWorkplane, event);
+
+	var origin = new THREE.Vector3(0, 0, 0);
+	var direction = new THREE.Vector3(0, 0, 1);
+	var ray = new THREE.Ray(origin, direction);
+	var positionOnVertical = sceneView.determinePositionOnRay(event, ray);
+        if (positionOnVertical) {
+            workplane.updateZLocation(positionOnVertical, event);
+        }
     }
 
     function determinePositionOnWorkplane(event) {
@@ -271,7 +271,8 @@ SS.SceneView = function(container) {
 	}
 
 	state = undefined;
-        cursoid.resetModifier();
+        cursoid.deactivate();
+	//SS.constructors.active && SS.constructors.active.deactivateAnchor();
 	popupMenu.onMouseUp(event);
 
 	mouseOnDown = null;

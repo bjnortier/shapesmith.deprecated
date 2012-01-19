@@ -122,7 +122,7 @@ SS.cursoid.zPositionIndicator = function(z) {
 SS.Cursoid = function(spec) {
 
     var that = this, scene = spec.scene, position, cursoidSceneObject;
-    var cursoidMaterial = new THREE.MeshBasicMaterial( { color: 0x66a1d1, opacity: 0.8, wireframe: false } );
+    var cursoidMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.8, wireframe: false } );
     var cursoidXMaterial = new THREE.MeshBasicMaterial( { color: 0x000066, opacity: 0.8, wireframe: false } );
     var cursoidYMaterial = new THREE.MeshBasicMaterial( { color: 0x006600, opacity: 0.8, wireframe: false } );
     var cursoidXYMaterial = new THREE.MeshBasicMaterial( { color: 0x004444, opacity: 0.8, wireframe: false } );
@@ -132,7 +132,7 @@ SS.Cursoid = function(spec) {
     var toZMaterial = new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.5, linewidth: 1 })
     var zToZMaterial = new THREE.LineBasicMaterial({ color: 0x666666, opacity: 0.5, linewidth: 1 })
     var cursoidGeometry = new THREE.CubeGeometry(1.0, 1.0, 1.0);
-    var modifier;
+    var active;
 
     evented(this);
 
@@ -233,14 +233,14 @@ SS.Cursoid = function(spec) {
     };
 
     spec.workplane.on('workplaneXYCursorUpdated', function(event) {
-        if (modifier && modifier.cursoid) {
-            
-            if (modifier.cursoid === 'xy') {
+        if (active) {
+
+            if (active === 'xy') {
                 position.x = event.x;
                 position.y = event.y;
-            } else if (modifier.cursoid === 'x') {
+            } else if (active === 'x') {
                 position.x = event.x;
-            } else if (modifier.cursoid === 'y') {
+            } else if (active === 'y') {
                 position.y = event.y;
             } 
             updatePosition();
@@ -248,7 +248,7 @@ SS.Cursoid = function(spec) {
     });
 
     spec.workplane.on('workplaneZCursorUpdated', function(event) {
-        if (modifier && modifier.cursoid && (modifier.cursoid === 'z')) {
+        if (active && (active === 'z')) {
             position.z = event.z;
             updatePosition();
         }
@@ -264,12 +264,15 @@ SS.Cursoid = function(spec) {
         return filtered.length > 0 ? filtered[0].object.name.cursoid : undefined;
     };
 
-    this.setCursoidModifier = function(cursoid) {
-        modifier = {cursoid : cursoid};
+    this.activate = function(cursoid) {
+        active = cursoid;
     }
 
-    this.resetModifier = function() {
-        modifier = undefined;
+    this.deactivate = function() {
+        active = undefined;
+	if (cursoidSceneObject) {
+	    //scene.removeObject(cursoidSceneObject);
+	}
     }
 
     this.setPosition = function(newPosition) {
