@@ -250,7 +250,7 @@ SS.preview.Ellipse1d = function(spec) {
 
     this.dispose = function() {
 	updater = null;
-	cursoid.deactivate;
+	cursoid.clear();
 	Object.keys(sceneObjects).map(function(key) {
              scene.removeObject(sceneObjects[key]);
         });

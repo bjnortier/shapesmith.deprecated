@@ -270,8 +270,12 @@ SS.Cursoid = function(spec) {
 
     this.deactivate = function() {
         active = undefined;
+    }
+
+    this.clear = function() {
+	this.deactivate();
 	if (cursoidSceneObject) {
-	    //scene.removeObject(cursoidSceneObject);
+	    scene.removeObject(cursoidSceneObject);
 	}
     }
 
