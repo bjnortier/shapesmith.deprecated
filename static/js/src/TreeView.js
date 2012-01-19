@@ -333,7 +333,7 @@ function TreeView() {
 
         if (event.remove) {
 	    // Preview model is removed on cancel
-	    SS.constructors.active && SS.constructors.active.dispose();
+	    SS.constructors.active && SS.constructors.disposeActive();
 
             var geomNode = event.remove;
             $('#' + geomNode.id).remove();

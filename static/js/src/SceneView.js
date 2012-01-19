@@ -16,7 +16,7 @@ SS.SceneView = function(container) {
     var unselectedColor = 0x00dd00, selectedColor = 0xdddd00;
     var state, threshhold = 10; // inside this threshold is a single click
 
-    var workplane;
+    var workplane, cursoid;
     var popupMenu = SS.popupMenu();
     
     function init() {
@@ -133,7 +133,9 @@ SS.SceneView = function(container) {
 	        var direction = new THREE.Vector3(0, 0, 1);
 	        var ray = new THREE.Ray(origin, direction);
 	        var positionOnVertical = sceneView.determinePositionOnRay(event, ray);
-                workplane.updateZLocation(positionOnVertical, event);
+                if (positionOnVertical) {
+                    workplane.updateZLocation(positionOnVertical, event);
+                }
                 
 	    } else if (state === 'rotating') {
 		var mouse = {};
@@ -161,7 +163,11 @@ SS.SceneView = function(container) {
 	    var direction = new THREE.Vector3(0, 0, 1);
 	    var ray = new THREE.Ray(origin, direction);
 	    var positionOnVertical = sceneView.determinePositionOnRay(event, ray);
-            workplane.updateZLocation(positionOnVertical, event);
+            // TODO: MErge with above
+            if (positionOnVertical) {
+                workplane.updateZLocation(positionOnVertical, event);
+            }
+
 	}
     }
 
@@ -507,6 +513,7 @@ SS.SceneView = function(container) {
     this.renderer = renderer;
     this.scene = scene;
     this.workplane = workplane;
+    this.cursoid = cursoid;
     this.determinePositionOnRay = determinePositionOnRay;
     this.determinePositionPlane = determinePositionPlane;
     this.popupMenu = popupMenu;

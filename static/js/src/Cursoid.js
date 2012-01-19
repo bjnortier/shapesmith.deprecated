@@ -227,6 +227,9 @@ SS.Cursoid = function(spec) {
         }
         
         scene.addObject(cursoidSceneObject);
+
+        that.fire({type: 'cursoidUpdated', 
+		   position: {x: position.x, y: position.y, z: position.z}});
     };
 
     spec.workplane.on('workplaneXYCursorUpdated', function(event) {
@@ -247,8 +250,8 @@ SS.Cursoid = function(spec) {
     spec.workplane.on('workplaneZCursorUpdated', function(event) {
         if (modifier && modifier.cursoid && (modifier.cursoid === 'z')) {
             position.z = event.z;
+            updatePosition();
         }
-        updatePosition();
     });
    
 

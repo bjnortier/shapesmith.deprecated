@@ -69,15 +69,17 @@ function delete_geom(selected) {
 
 function create_primitive(type, keys) {
 
-    var geometryParams = {};
+    var geometryParams = {}, geomNode;
     for (var i in keys) {
         geometryParams[keys[i]] = null;
     }
-    geom_doc.add(new GeomNode({
+    geomNode = new GeomNode({
         type: type,
         editing: true,
 	origin: {x: 0, y: 0, z: 0},
-        parameters: geometryParams}));
+        parameters: geometryParams});
+    geom_doc.add(geomNode);
+    return geomNode;
 }
 
 function create_transform(selected, type, keys) {
@@ -159,8 +161,10 @@ $(document).ready(function() {
 
     new Action("Ellipse 1D", "/static/images/cuboid.png", 
                function() { 
-		   create_primitive("ellipse1d",  ["r1", "r2"]); 
-                   SS.constructors.ellipse1d().create();
+		   var geomNode = create_primitive("ellipse1d",  ["r1", "r2"]); 
+                   geomNode.parameters.r1 = 30;
+                   geomNode.parameters.r2 = 10;
+                   SS.preview.createEllipse1d({geomNode: geomNode});
 	       }).render($("#1Dprimitives"));
     
     /*
