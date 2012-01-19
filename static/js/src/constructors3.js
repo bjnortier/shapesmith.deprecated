@@ -1,6 +1,7 @@
 var SS = SS || {};
 SS.constructors = {};
 SS.preview = {};
+SS.modifier = {};
 
 SS.GeomNodeUpdater = function(geomNode) {
     var geomNode = geomNode, that = this;
@@ -15,13 +16,15 @@ SS.GeomNodeUpdater = function(geomNode) {
 }
 
 SS.modifier.Origin = function(spec) {
-    var update = spec.updater, cursoid = spec.cursoid;
+    var geomNode = spec.geomNode, updater = spec.updater, cursoid = spec.cursoid;
     
     cursoid.on('cursoidUpdated', function(event) {
         updater.setOrigin({x: event.position.x,
                            y: event.position.y,
                            z: event.position.z});
     });
+
+    cursoid.setPosition(geomNode.origin);
 }
 
 SS.preview.Ellipse1d = function(spec) {
@@ -61,6 +64,8 @@ SS.preview.Ellipse1d = function(spec) {
     spec.updater.on('updated', function(event) {
         updatePreview();
     });
+
+    updatePreview();
 }
 
 SS.preview.createEllipse1d = function(spec) {
@@ -70,6 +75,9 @@ SS.preview.createEllipse1d = function(spec) {
                                                        scene    : sceneView.scene,
                                                        cursoid  : sceneView.cursoid,
                                                        updater  : updater});
+    SS.modifier.active = new SS.modifier.Origin({geomNode : spec.geomNode,
+                                                 cursoid  : sceneView.cursoid,
+                                                 updater  : updater});
     
 }
 

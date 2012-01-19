@@ -121,7 +121,7 @@ SS.cursoid.zPositionIndicator = function(z) {
 
 SS.Cursoid = function(spec) {
 
-    var that = this, scene = spec.scene, position = {x:30, y:30, z:20}, cursoidSceneObject;
+    var that = this, scene = spec.scene, position, cursoidSceneObject;
     var cursoidMaterial = new THREE.MeshBasicMaterial( { color: 0x66a1d1, opacity: 0.8, wireframe: false } );
     var cursoidXMaterial = new THREE.MeshBasicMaterial( { color: 0x000066, opacity: 0.8, wireframe: false } );
     var cursoidYMaterial = new THREE.MeshBasicMaterial( { color: 0x006600, opacity: 0.8, wireframe: false } );
@@ -272,7 +272,13 @@ SS.Cursoid = function(spec) {
         modifier = undefined;
     }
 
-    updatePosition();
+    this.setPosition = function(newPosition) {
+        position = {x: newPosition.x,
+                    y: newPosition.y,
+                    z: newPosition.z};
+        updatePosition();
+    }
+
     return this;
     
 };
