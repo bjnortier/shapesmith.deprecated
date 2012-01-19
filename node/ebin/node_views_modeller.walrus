@@ -99,8 +99,11 @@
   
   <script type="text/javascript" src="/static/js/src/TreeView.js"></script>
   <script type="text/javascript" src="/static/js/src/workplane.js"></script>
+  <script type="text/javascript" src="/static/js/src/Cursoid.js"></script>
   <script type="text/javascript" src="/static/js/src/popupmenu.js"></script>
+  <script type="text/javascript" src="/static/js/src/SceneSelector.js"></script>
   <script type="text/javascript" src="/static/js/src/SceneView.js"></script>
+
   <script type="text/javascript">
 
     if(!Detector.webgl){

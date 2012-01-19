@@ -10,11 +10,11 @@ SS.SceneView = function(container) {
     var elevation = 0, azimuth = Math.PI/4;
     var target = { azimuth: Math.PI/4, elevation: Math.PI*3/8 };
     var targetOnDown = { azimuth: target.azimuth, elevation: target.elevation };
-    var distance = 1000, distanceTarget = 400;
+    var distance = 1000, distanceTarget = 300;
 
     var idToModel = {};
     var unselectedColor = 0x00dd00, selectedColor = 0xdddd00;
-    var panning = false, rotating = false, threshhold = 10; // inside this threshold is a single click
+    var state, threshhold = 10; // inside this threshold is a single click
 
     var workplane;
     var popupMenu = SS.popupMenu();
@@ -38,6 +38,7 @@ SS.SceneView = function(container) {
 
 	addLights();
 	workplane = new SS.Workplane({scene: scene});
+        cursoid = new SS.Cursoid({scene: scene, workplane: workplane});
 	popupMenu = SS.popupMenu();
 
 	renderer = new THREE.WebGLRenderer({antialias: true});
@@ -85,42 +86,56 @@ SS.SceneView = function(container) {
 	mouseOnDown.x = event.clientX;
 	mouseOnDown.y = event.clientY;
 
-	rotating = false;
-	panning = false;
-
-
-
+        state = undefined;
 	container.addEventListener('mouseup', onMouseUp, false);
-
 
     }
     
     function onMouseMove(event) {
 
 	if (mouseOnDown) {
-	    if (!(rotating || panning) && !popupMenu.isShowing()) {
-		if (event.button == 0 && !event.shiftKey) {
+
+	    if (!state && !popupMenu.isShowing()) {
+                var activeCursoid = cursoid.getCursoid(scene, camera, event)
+                if (activeCursoid) {
+                    state = {cursoid: activeCursoid};
+                    cursoid.setCursoidModifier(state.cursoid);
+                }
+                
+		if (event.button === 0 && !event.shiftKey) {
 		    if ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
 			||
 			(Math.abs(event.clientY - mouseOnDown.y) > threshhold)) {
 
-			rotating = true;
+                        state = 'rotating';
 		    }
 		} 
-		if (event.button == 1 || event.shiftKey) {
+		if (event.button === 1 || event.shiftKey) {
 		    if ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
 			||
 			(Math.abs(event.clientY - mouseOnDown.y) > threshhold)) {
-			panning = true;
+                        
+                        state = 'panning';
 		    }
 		}
 	    }
 
-	    if (panning || rotating) {
+	    if (state) {
 		popupMenu.cancel()
 	    } 
+            
+            if (state && state.cursoid) {
 
-	    if (rotating) {
+                var positionOnWorkplane = determinePositionOnWorkplane(event);
+	        workplane.updateXYLocation(positionOnWorkplane, event);
+
+	        var origin = new THREE.Vector3(0, 0, 0);
+	        var direction = new THREE.Vector3(0, 0, 1);
+	        var ray = new THREE.Ray(origin, direction);
+	        var positionOnVertical = sceneView.determinePositionOnRay(event, ray);
+                workplane.updateZLocation(positionOnVertical, event);
+                
+	    } else if (state === 'rotating') {
 		var mouse = {};
 		mouse.x = event.clientX;
 		mouse.y = event.clientY;
@@ -133,8 +148,20 @@ SS.SceneView = function(container) {
 		target.elevation = target.elevation < 0 ? 0 : target.elevation;
 	    }
 	} else {
+            if (cursoid.getCursoid(scene, camera, event)) {
+                document.body.style.cursor = 'pointer';
+            } else {
+                document.body.style.cursor = 'default';
+            }
+
 	    var positionOnWorkplane = determinePositionOnWorkplane(event);
 	    workplane.updateXYLocation(positionOnWorkplane, event);
+
+	    var origin = new THREE.Vector3(0, 0, 0);
+	    var direction = new THREE.Vector3(0, 0, 1);
+	    var ray = new THREE.Ray(origin, direction);
+	    var positionOnVertical = sceneView.determinePositionOnRay(event, ray);
+            workplane.updateZLocation(positionOnVertical, event);
 	}
     }
 
@@ -203,32 +230,17 @@ SS.SceneView = function(container) {
     }
 
     function selectObject(event) {
-	var mouse = {};
-	mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-	mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+	
+        var found = SS.selectInScene(scene, camera, event);
+        var foundGeomNodes = found.filter(function(obj) {
+            return obj.object.name.geomNodeId;
+        });
 
-	var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-	var projector = new THREE.Projector();
-	var mouse3D = projector.unprojectVector(vector, camera);
-	var ray = new THREE.Ray(camera.position, null);
-	ray.direction = mouse3D.subSelf(camera.position).normalize();
-	var intersects = ray.intersectScene(scene);
-
-	var foundObjectId = null;
-	if (intersects.length > 0) {
-	    for (var i in intersects) {
-		if (intersects[i].object.name) {
-		    foundObjectId = intersects[i].object.name;
-		    break;
-		}
-	    }
-	}
-
-	if (foundObjectId) {
+	if (foundGeomNodes.length > 0) {
 	    if (event.shiftKey) {
-		selectionManager.shiftPick(foundObjectId);
+		selectionManager.shiftPick(foundGeomNodes[0].object.name.geomNodeId);
 	    } else {
-		selectionManager.pick(foundObjectId);
+		selectionManager.pick(foundGeomNodes[0].object.name.geomNodeId);
 	    }
 	} else {
 	    selectionManager.deselectAll();
@@ -240,7 +252,7 @@ SS.SceneView = function(container) {
 	targetOnDown.azimuth = target.azimuth;
 	targetOnDown.elevation = target.elevation;
 
-	if (!panning && !rotating) {
+	if (!state) {
 
 	    var positionOnWorkplane = determinePositionOnWorkplane(event);
 	    if (positionOnWorkplane) {
@@ -252,9 +264,8 @@ SS.SceneView = function(container) {
 	    }
 	}
 
-	rotating = false;
-	panning = false;
-	
+	state = undefined;
+        cursoid.resetModifier();
 	popupMenu.onMouseUp(event);
 
 	mouseOnDown = null;
@@ -397,19 +408,22 @@ SS.SceneView = function(container) {
 	    }
 
 	    var mesh = new THREE.Object3D();
+            var objectName = {geomNodeId: geomNode.id};
 
 	    var geometry3D = create3DGeometry(geomNode.mesh['3d']);
 	    var material3D = new THREE.MeshPhongMaterial( { ambient: 0x030303, color: color, opacity: opacity,  specular: 0xccffcc, shininess: 50, shading: THREE.SmoothShading } );
             var mesh3d = new THREE.Mesh(geometry3D, material3D);
+            mesh3d.name = objectName
             mesh.addChild(mesh3d);
             
             var geometry1D = create1DGeometry(geomNode.mesh['1d']);
-            var material1D = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 1.0 });
+            var material1D = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 1.0, linewidth: 2 });
             var mesh1d = new THREE.Line(geometry1D, material1D);
+            mesh1d.name =objectName
             mesh.addChild(mesh1d);
 
 	    mesh.doubleSided = true;
-	    mesh.name = geomNode.id;
+            mesh.name = objectName
 	    scene.addObject(mesh);
 	    idToModel[geomNode.id] = mesh;
         }
@@ -427,13 +441,18 @@ SS.SceneView = function(container) {
         if (event.deselected) {
             for (var i in event.deselected) {
                 var id = event.deselected[i];
-		idToModel[id].materials[0].color.setHex(unselectedColor);
+                
+		idToModel[id].children.map(function(child) {
+                    child.materials[0].color.setHex(unselectedColor);
+                });
             }
         }
         if (event.selected) {
             for (var i in event.selected) {
                 var id = event.selected[i];
-		idToModel[id].materials[0].color.setHex(selectedColor);
+		idToModel[id].children.map(function(child) {
+                    child.materials[0].color.setHex(selectedColor);
+                });
 		
             }
         }

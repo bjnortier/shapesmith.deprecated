@@ -45,133 +45,6 @@ SS.workplane.pointer = function(spec) {
     return that;
 }
 
-SS.workplane.positionIndicator = function(spec) {
-    var that = {};
-    
-    var scene = spec.scene, gridExtents = spec.gridExtents;
-
-    var labelMesh = function(x) {
-	var height = 0.01,
-	size = 2,
-	curveSegments = 6,
-	font = "helvetiker", 		
-	weight = "bold",		
-	style = "normal";
-	var labelMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00, opacity: 0.7, wireframe: false } );
-	var labelGeometry = new THREE.TextGeometry('' + Math.round(x), {
-	    size: size, 
-	    height: height,
-	    curveSegments: curveSegments,
-	    font: font,
-	    weight: weight,
-	    style: style,
-	    bezelEnabled: false
-	});
-	var label = new THREE.Mesh(labelGeometry, labelMaterial);
-
-
-	label.position.z = 0.1;
-	label.rotation.z = Math.PI;
-	return label;
-    }
-
-    var indicatorBase = new THREE.Object3D();
-    var background = new THREE.Mesh(new THREE.PlaneGeometry(5, 3),
-				    new THREE.MeshBasicMaterial({ color: 0x101010, opacity: 1.0 }));
-    background.position.x = 0;
-    background.position.y = 2;
-    background.position.z = 0.1;
-    
-    var borderGeom = [new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry()];
-    borderGeom[0].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 0, 0)));
-    borderGeom[0].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 0, 0)));
-    borderGeom[1].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 0, 0)));
-    borderGeom[1].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 3, 0)));
-    borderGeom[2].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 3, 0)));
-    borderGeom[2].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 3, 0)));
-    borderGeom[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 3, 0)));
-    borderGeom[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 0, 0)));
-    for (var i = 0; i < 4; ++i) {
-	var border = new THREE.Line(borderGeom[i], new THREE.LineBasicMaterial({ color: 0xe9fb00, opacity: 0.5 }));
-	border.position.x = 0;
-	border.position.y = 0.5;
-	border.position.z = 0.15;
-	indicatorBase.addChild(border);
-    }
-
-    var arrowGeometry = new THREE.Geometry();
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(-0.5, 0.5, 0)));
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0.5, 0.5, 0)));
-    var arrowFace = new THREE.Face3(0,1,2);
-    arrowGeometry.faces.push(arrowFace);
-    arrowGeometry.computeCentroids();
-    arrowGeometry.computeFaceNormals();
-
-    var arrowMaterial = new THREE.MeshBasicMaterial({ color: 0xe9fb00, opacity: 1.0 });
-    var arrow = new THREE.Mesh(arrowGeometry, arrowMaterial);
-    arrow.doubleSided = true;
-    arrow.position.z = 0.15;
-
-    indicatorBase.addChild(arrow);
-    indicatorBase.addChild(background);
-
-    scene.addObject(indicatorBase);
-    
-    var label = labelMesh(0);
-    scene.addObject(label);
-
-    that.update = function(value) {
-	scene.removeObject(label);
-	label = labelMesh(value);
-	scene.addObject(label);
-
-	return {backdrop: indicatorBase, label: label};
-    }
-
-    return that;
-}
-
-SS.workplane.xPositionIndicator = function(spec) {
-    var that = this.positionIndicator(spec);
-    var superUpdate = that.update;
-    
-    var gridExtents = spec.gridExtents;
-
-    that.update = function(x) {
-	if (gridExtents.isInsideX(x)) {
-	    var indicator = superUpdate(x);
-	    indicator.backdrop.position.x = x;
-	    indicator.backdrop.position.y = gridExtents.maxY;
-	    indicator.label.position.x = x;
-	    indicator.label.position.y = gridExtents.maxY + 3;
-	}
-    }
-
-    return that;
-}
-
-SS.workplane.yPositionIndicator = function(spec) {
-    var that = this.positionIndicator(spec);
-    var superUpdate = that.update;
-
-    var gridExtents = spec.gridExtents;
-
-    that.update = function(y) {
-	if (gridExtents.isInsideY(y)) {
-	    var indicator = superUpdate(y);
-	    indicator.backdrop.position.x = gridExtents.maxX;
-	    indicator.backdrop.position.y = y;
-	    indicator.backdrop.rotation.z = 3*Math.PI/2;
-	    indicator.label.rotation.z = Math.PI/2;
-	    indicator.label.position.y = y;
-	    indicator.label.position.x = gridExtents.maxX + 3;
-	}
-    }
-
-    return that;
-}
-
 SS.workplane.grid = function(spec) {
     var that = {};
     var gridExtents = spec.gridExtents;
@@ -179,8 +52,8 @@ SS.workplane.grid = function(spec) {
     var fadingGridLineGeometry = new THREE.Geometry();
     var majorGridLineGeometry = new THREE.Geometry();
     var minorGridLineGeometry = new THREE.Geometry();
-    var majorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 });
-    var minorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.05 });
+    var majorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.2 });
+    var minorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.01 });
 
     var height = 0.01,
     majorTick = 10;
@@ -202,7 +75,7 @@ SS.workplane.grid = function(spec) {
     var addAxes = function() {
 
 	axes = [new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry(), 
-		new THREE.Geometry(), new THREE.Geometry()];
+		new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry()];
 	axes[0].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
 	axes[0].vertices.push(new THREE.Vertex(new THREE.Vector3(gridExtents.maxX + gridExtents.fadingWidth, 0, 0)));
 
@@ -218,11 +91,16 @@ SS.workplane.grid = function(spec) {
 	axes[4].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
 	axes[4].vertices.push(new THREE.Vertex(new THREE.Vector3(0, gridExtents.minY - gridExtents.fadingWidth, 0)));
 
+	axes[5].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	axes[5].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, -500)));
+
 	scene.addObject(new THREE.Line(axes[0], new THREE.LineBasicMaterial({ color: 0x0000ff, opacity: 0.5 }))); 
 	scene.addObject(new THREE.Line(axes[1], new THREE.LineBasicMaterial({ color: 0x00ff00, opacity: 0.5 })));
 	scene.addObject(new THREE.Line(axes[2], new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.5 })));
 	scene.addObject(new THREE.Line(axes[3], new THREE.LineBasicMaterial({ color: 0x0000ff, opacity: 0.2 })));
 	scene.addObject(new THREE.Line(axes[4], new THREE.LineBasicMaterial({ color: 0x00ff00, opacity: 0.2 })));
+	scene.addObject(new THREE.Line(axes[5], new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.2 })));
+
     }
 
     var addMainGrid = function() {
@@ -358,8 +236,6 @@ SS.Workplane = function(spec) {
 
     var gridExtents        = SS.workplane.gridExtents({minX: -60, minY: -60, maxX: 60, maxY: 60, fadingWidth: 50});
     var workplanePointer   = SS.workplane.pointer({scene: scene, gridExtents: gridExtents});
-    var xPositionIndicator = SS.workplane.xPositionIndicator({scene: scene, gridExtents: gridExtents});
-    var yPositionIndicator = SS.workplane.yPositionIndicator({scene: scene, gridExtents: gridExtents});
     var grid = SS.workplane.grid({scene: scene, gridExtents: gridExtents});
 
     // Make the workplane evented
@@ -383,16 +259,22 @@ SS.Workplane = function(spec) {
 	    mouseOnWorkplane.x = gridX;
 	    mouseOnWorkplane.y = gridY;
 	    
-	    xPositionIndicator.update(gridX);
-	    yPositionIndicator.update(gridY);
 	    workplanePointer.update({x: gridX, y: gridY});
 
-	    that.fire({type: 'workplaneCursorUpdated', 
+	    that.fire({type: 'workplaneXYCursorUpdated', 
 		       x: gridX, 
 		       y: gridY,
 		       originalEvent: originalEvent
 		      });
 	}
+    }
+
+    that.updateZLocation = function(position, originalEvent) {
+        var gridZ = Math.round(position.z);
+	that.fire({type: 'workplaneZCursorUpdated', 
+		       z: gridZ, 
+		       originalEvent: originalEvent
+		      });
     }
 
     that.getPlaneMesh = function() {

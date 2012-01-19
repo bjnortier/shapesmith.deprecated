@@ -75,7 +75,7 @@ SS.constructors.origin = function(my) {
     that.edit = function() {
 	that.setupValueHandlers();
 	that.setupFocusHandlers();
-	sceneView.workplane.on('workplaneCursorUpdated', function(event) {
+	sceneView.workplane.on('workplaneXYCursorUpdated', function(event) {
 	    if (event.originalEvent.shiftKey) {
 		that.onWorkplaneCursorUpdated(event);
 	    }
@@ -90,7 +90,7 @@ SS.constructors.origin = function(my) {
     }
     
     that.dispose = function() {
-	sceneView.workplane.off('workplaneCursorUpdated', that.onWorkplaneCursorUpdated);
+	sceneView.workplane.off('workplaneXYCursorUpdated', that.onWorkplaneCursorUpdated);
 	sceneView.workplane.off('workplaneClicked', that.onWorkplaneClicked);
 	
 	if (my.previewGeometry) {
@@ -610,14 +610,16 @@ SS.constructors.ellipse1d = function(spec) {
 	    return;
 	}
 
-	var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
-	var x = event.x, y = event.y;
-
-	var r1 = Math.abs(x - originX);
-        var r2 = Math.abs(y - originY);
-	$('#r2').val(r2.toFixed(2));
-	$('#r1').val(r1.toFixed(2));
-	updatePreview();
+        else if ((my.focussed === 'r1') || (my.foxussed === 'r1')) {
+	    var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
+	    var x = event.x, y = event.y;
+            
+	    var r1 = Math.abs(x - originX);
+            var r2 = Math.abs(y - originY);
+	    $('#r2').val(r2.toFixed(2));
+	    $('#r1').val(r1.toFixed(2));
+	    updatePreview();
+        }
 
     }
 
