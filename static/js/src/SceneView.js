@@ -90,7 +90,7 @@ SS.SceneView = function(container) {
 	container.addEventListener('mouseup', onMouseUp, false);
 
 	var cursoidName;
-	var activeConstructor = SS.constructor.active;
+	var activeConstructor = SS.constructors.active;
 	if (activeConstructor) {
 	    var anchorName = activeConstructor.getAnchor(scene, camera, event);
 	    if (anchorName) {
@@ -152,8 +152,8 @@ SS.SceneView = function(container) {
 
 
         if (cursoid.getCursoid(scene, camera, event) ||
-	    (SS.constructor.active &&  
-	     SS.constructor.active.getAnchor(scene, camera, event))) {
+	    (SS.constructors.active &&  
+	     SS.constructors.active.getAnchor(scene, camera, event))) {
             document.body.style.cursor = 'pointer';
         } else {
             document.body.style.cursor = 'default';

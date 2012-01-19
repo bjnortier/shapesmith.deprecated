@@ -162,7 +162,7 @@ $(document).ready(function() {
     new Action("Ellipse 1D", "/static/images/cuboid.png", 
                function() { 
 		   var geomNode = create_primitive("ellipse1d",  ["r1", "r2"]); 
-                   geomNode.parameters.r1 = 30;
+                   geomNode.parameters.r1 = 20;
                    geomNode.parameters.r2 = 10;
                    SS.preview.createEllipse1d({geomNode: geomNode});
 	       }).render($("#1Dprimitives"));

@@ -342,7 +342,7 @@ function TreeView() {
 
         if (event.replace) {
 	    // Preview model is replaced with real model on success
-	    SS.constructors.active && SS.constructors.active.dispose();
+	    SS.constructors.active && SS.constructors.disposeActive();
 
             var original = event.replace.original;
             var replacement = event.replace.replacement;

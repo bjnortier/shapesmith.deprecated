@@ -13,6 +13,7 @@
     <script type="text/javascript" src="/static/js/lib/Detector.js"></script>
     <script type="text/javascript" src="/static/js/lib/Three.js"></script>
     <script type="text/javascript" src="/static/js/lib/helvetiker_bold.typeface.js"></script>
+    <script type="text/javascript" src="/static/js/lib/helvetiker_regular.typeface.js"></script>
 
    <script type="text/javascript">
       var SS = SS || {};
