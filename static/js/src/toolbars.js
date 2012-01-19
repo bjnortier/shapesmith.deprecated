@@ -162,6 +162,9 @@ $(document).ready(function() {
     new Action("Ellipse 1D", "/static/images/cuboid.png", 
                function() { 
 		   var geomNode = create_primitive("ellipse1d",  ["r1", "r2"]); 
+		   var lastMousePosition = sceneView.workplane.getLastMousePosition();
+		   geomNode.origin.x = lastMousePosition.x;
+		   geomNode.origin.y = lastMousePosition.y;
                    geomNode.parameters.r1 = 20;
                    geomNode.parameters.r2 = 10;
                    SS.preview.createEllipse1d({geomNode: geomNode});
