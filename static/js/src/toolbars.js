@@ -139,8 +139,7 @@ $(document).ready(function() {
 	       }).render($('#3Dprimitives'));
     new Action('Cylinder', '/static/images/cylinder.png', 
                function() { 
-		   create_primitive('cylinder', ['r', 'h']); 
-		   SS.constructors.cylinder().create();
+		   SS.constructors.createCylinder(create_primitive('cylinder', ['r', 'h'])); 
 	       }).render($('#3Dprimitives'));
     new Action('Cone', '/static/images/cone.png', 
                function() { 

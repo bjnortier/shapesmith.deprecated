@@ -91,7 +91,7 @@ SS.modifier.Origin = function(spec) {
 SS.modifier.Radius = function(spec) {
     var geomNode = spec.geomNode, updater = spec.updater, cursoid = spec.cursoid;
     
-    var setR = function(event) {
+    var setRadius = function(event) {
         var dx = event.position.x - geomNode.origin.x;
         var dy = event.position.y - geomNode.origin.y;
         var angle = Math.atan2(dy, dx);
@@ -108,12 +108,40 @@ SS.modifier.Radius = function(spec) {
     }
 
     this.dispose = function() {
-	cursoid.off('cursoidUpdated', setR);
+	cursoid.off('cursoidUpdated', setRadius);
         updater.off('updatedFromTree', setCursoid);
     }
 
     var init = function() {
-        cursoid.on('cursoidUpdated', setR);
+        cursoid.on('cursoidUpdated', setRadius);
+        updater.on('updatedFromTree', setCursoid);
+        setCursoid();
+    }
+    init();
+}
+
+SS.modifier.Height = function(spec) {
+    var geomNode = spec.geomNode, updater = spec.updater, cursoid = spec.cursoid;
+    
+    var setHeight = function(event) {
+        var h = event.position.z - geomNode.origin.z;
+	updater.setParams({h: h});
+    }
+
+    var setCursoid = function() {
+        var position = {x: geomNode.origin.x,
+		        y: geomNode.origin.y,
+		        z: geomNode.origin.z + geomNode.parameters.h};
+        cursoid.setPosition(position, 'no_xy');
+    }
+
+    this.dispose = function() {
+	cursoid.off('cursoidUpdated', setHeight);
+        updater.off('updatedFromTree', setCursoid);
+    }
+
+    var init = function() {
+        cursoid.on('cursoidUpdated', setHeight);
         updater.on('updatedFromTree', setCursoid);
         setCursoid();
     }
@@ -160,7 +188,7 @@ SS.preview.arrowMaterial
 SS.preview.createDimArrow = function(value, angle) {
     var r1DimensionGeom = new THREE.Geometry();
     r1DimensionGeom.vertices.push(
-	new THREE.Vertex(new THREE.Vector3(0,0,0)));
+	new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
     r1DimensionGeom.vertices.push(
 	new THREE.Vertex(new THREE.Vector3(value, 0, 0)));
     var line = new THREE.Line(r1DimensionGeom, SS.constructors.lineMaterial);
@@ -318,13 +346,17 @@ SS.constructors.Constructor = function(spec) {
     init();
 }
 
-SS.constructors.editEllipse1d = function(geomNode) {
+SS.constructors.edit = function(geomNode, specialisation) {
     var updater = new SS.GeomNodeUpdater(geomNode);
     SS.constructors.active = new SS.constructors.Constructor({geomNode : geomNode,
                                                               scene    : sceneView.scene,
                                                               cursoid  : sceneView.cursoid,
-                                                              specialisation : new SS.constructors.Ellipse1d,
+                                                              specialisation : new specialisation(),
                                                               updater  : updater});
+}
+
+SS.constructors.editEllipse1d = function(geomNode) {
+    SS.constructors.edit(geomNode, SS.constructors.Ellipse1d);
 }
 
 SS.constructors.createEllipse1d = function(geomNode) {
@@ -337,12 +369,7 @@ SS.constructors.createEllipse1d = function(geomNode) {
 }
 
 SS.constructors.editSphere = function(geomNode) {
-    var updater = new SS.GeomNodeUpdater(geomNode);
-    SS.constructors.active = new SS.constructors.Constructor({geomNode : geomNode,
-                                                              scene    : sceneView.scene,
-                                                              cursoid  : sceneView.cursoid,
-                                                              specialisation : new SS.constructors.Sphere,
-                                                              updater  : updater});
+    SS.constructors.edit(geomNode, SS.constructors.Sphere);
 }
 
 SS.constructors.createSphere = function(geomNode) {
@@ -351,6 +378,19 @@ SS.constructors.createSphere = function(geomNode) {
     geomNode.origin.y = lastMousePosition.y;
     geomNode.parameters.r = 10;
     SS.constructors.editSphere(geomNode);
+}
+
+SS.constructors.editCylinder = function(geomNode) {
+    SS.constructors.edit(geomNode, SS.constructors.Cylinder);
+}
+
+SS.constructors.createCylinder = function(geomNode) {
+    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    geomNode.origin.x = lastMousePosition.x;
+    geomNode.origin.y = lastMousePosition.y;
+    geomNode.parameters.r = 10;
+    geomNode.parameters.h = 20;
+    SS.constructors.editCylinder(geomNode);
 }
 
 SS.constructors.disposeActive = function() {
@@ -464,3 +504,77 @@ SS.constructors.Sphere = function() {
 
 }
 
+SS.constructors.Cylinder = function() {
+
+    this.createSceneObject = function(geomNode, activeAnchor) {
+        
+        var sceneObjects = {};
+        
+        var r = geomNode.parameters.r;
+        var h = geomNode.parameters.h;
+        if (r) {
+	    sceneObjects.rDim = SS.preview.createDimArrow(r, (geomNode.extra && geomNode.extra.angle) || 0);
+	}
+        if (h) {
+	    sceneObjects.hDim = SS.preview.createDimArrow(h, Math.PI);
+            sceneObjects.hDim.rotation.y = Math.PI/2;
+	}
+
+	var cylinderObj = new THREE.Object3D();
+        if (r) {
+            var circleGeom1 = new THREE.Geometry(), circleGeom2 = new THREE.Geometry();
+	    for(var i = 0; i <= 50; ++i) {
+		var theta = Math.PI*2*i/50;
+		var dx = r*Math.cos(theta);
+		var dy = r*Math.sin(theta);
+		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+	    }
+	    var circle1 = new THREE.Line(circleGeom1, SS.constructors.lineMaterial);
+	    cylinderObj.addChild(circle1);
+        }
+
+        if (r && h) {
+            var circle2 = new THREE.Line(circleGeom2, SS.constructors.lineMaterial);
+	    circle2.position.z = h;
+	    cylinderObj.addChild(circle2);
+
+	    var geometry = new THREE.CylinderGeometry(50, r, r, h);
+	    var cylinder = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
+	    cylinder.position.z = h/2;
+	    //cylinderObj.addChild(cylinder);
+        }
+
+        if (activeAnchor !== 'radius') {
+            var radiusAnchor = new THREE.Mesh(SS.constructors.anchorGeometry, SS.constructors.anchorMaterial);
+            var angle = (geomNode.extra && geomNode.extra.angle) || 0;
+            radiusAnchor.position.x = r*Math.cos(angle);
+            radiusAnchor.position.y = r*Math.sin(angle);
+            radiusAnchor.name = {anchor: 'radius'};
+            cylinderObj.addChild(radiusAnchor);
+	}
+
+        if (activeAnchor !== 'height') {
+            var heightAnchor = new THREE.Mesh(SS.constructors.anchorGeometry, SS.constructors.anchorMaterial);
+            heightAnchor.position.z = h;
+            heightAnchor.name = {anchor: 'height'};
+            cylinderObj.addChild(heightAnchor);
+	}
+
+        sceneObjects.cylinder = cylinderObj;
+        return sceneObjects;
+    }
+
+    this.anchorPriorities = ['height', 'radius', 'origin'];
+
+    this.getModifierForAnchor = function(anchorName) {
+        if (anchorName === 'radius') {
+	    return SS.modifier.Radius;
+	}
+        if (anchorName === 'height') {
+	    return SS.modifier.Height;
+	}
+        return null;
+    }
+
+}

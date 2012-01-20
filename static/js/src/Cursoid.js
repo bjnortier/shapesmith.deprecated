@@ -165,17 +165,21 @@ SS.Cursoid = function(spec) {
         cursoidSceneObject.addChild(cursoidPointer);
 
         if (position.y !== 0) {
-            var cursoidXPointer = new THREE.Mesh(cursoidGeometry, cursoidXMaterial);
-            cursoidXPointer.position.x = position.x;
-            cursoidXPointer.name = {cursoid: 'x'};
-            cursoidSceneObject.addChild(cursoidXPointer)
+            if (modifier !== 'no_xy') {
+                var cursoidXPointer = new THREE.Mesh(cursoidGeometry, cursoidXMaterial);
+                cursoidXPointer.position.x = position.x;
+                cursoidXPointer.name = {cursoid: 'x'};
+                cursoidSceneObject.addChild(cursoidXPointer)
+            }
         }
 
         if (position.x !== 0) {
-            var cursoidYPointer = new THREE.Mesh(cursoidGeometry, cursoidYMaterial);
-            cursoidYPointer.position.y = position.y;
-            cursoidYPointer.name = {cursoid: 'y'};
-            cursoidSceneObject.addChild(cursoidYPointer);
+            if (modifier !== 'no_xy') {
+                var cursoidYPointer = new THREE.Mesh(cursoidGeometry, cursoidYMaterial);
+                cursoidYPointer.position.y = position.y;
+                cursoidYPointer.name = {cursoid: 'y'};
+                cursoidSceneObject.addChild(cursoidYPointer);
+            }
         }
 
         if ((position.x !== 0) && (position.y !== 0)) {
@@ -188,11 +192,13 @@ SS.Cursoid = function(spec) {
         }
 
         if (position.z !== 0) {
-            var cursoidXYPointer = new THREE.Mesh(cursoidGeometry, cursoidXYMaterial);
-            cursoidXYPointer.position.x = position.x;
-            cursoidXYPointer.position.y = position.y;
-            cursoidXYPointer.name = {cursoid: 'xy'};
-            cursoidSceneObject.addChild(cursoidXYPointer);
+            if (modifier !== 'no_xy') {
+                var cursoidXYPointer = new THREE.Mesh(cursoidGeometry, cursoidXYMaterial);
+                cursoidXYPointer.position.x = position.x;
+                cursoidXYPointer.position.y = position.y;
+                cursoidXYPointer.name = {cursoid: 'xy'};
+                cursoidSceneObject.addChild(cursoidXYPointer);
+            }
         }
         
         scene.addObject(cursoidSceneObject);
