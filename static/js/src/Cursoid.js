@@ -2,7 +2,7 @@ var SS = SS || {};
 
 SS.cursoid = {};
 
-SS.cursoid.positionIndicator = function(value) {
+SS.cursoid.positionIndicator = function(value, color) {
     var that = {};
     
     var labelMesh = function(x) {
@@ -12,7 +12,7 @@ SS.cursoid.positionIndicator = function(value) {
 	font = "helvetiker", 		
 	weight = "bold",		
 	style = "normal";
-	var labelMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00, opacity: 0.7, wireframe: false } );
+	var labelMaterial = new THREE.MeshBasicMaterial( { color: color, opacity: 1.0, wireframe: false } );
 	var labelGeometry = new THREE.TextGeometry('' + Math.round(x), {
 	    size: size, 
 	    height: height,
@@ -47,7 +47,7 @@ SS.cursoid.positionIndicator = function(value) {
     borderGeom[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 3, 0)));
     borderGeom[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 0, 0)));
     for (var i = 0; i < 4; ++i) {
-	var border = new THREE.Line(borderGeom[i], new THREE.LineBasicMaterial({ color: 0xe9fb00, opacity: 0.5 }));
+	var border = new THREE.Line(borderGeom[i], new THREE.LineBasicMaterial({ color: color, opacity: 0.5 }));
 	border.position.x = 0;
 	border.position.y = 0.5;
 	border.position.z = 0.15;
@@ -63,7 +63,7 @@ SS.cursoid.positionIndicator = function(value) {
     arrowGeometry.computeCentroids();
     arrowGeometry.computeFaceNormals();
 
-    var arrowMaterial = new THREE.MeshBasicMaterial({ color: 0xe9fb00, opacity: 1.0 });
+    var arrowMaterial = new THREE.MeshBasicMaterial({ color: color, opacity: 1.0 });
     var arrow = new THREE.Mesh(arrowGeometry, arrowMaterial);
     arrow.doubleSided = true;
     arrow.position.z = 0.15;
@@ -78,7 +78,7 @@ SS.cursoid.positionIndicator = function(value) {
 
 SS.cursoid.xPositionIndicator = function(x) {
     
-    var baseAndLabel = SS.cursoid.positionIndicator(x);
+    var baseAndLabel = SS.cursoid.positionIndicator(x, 0x6666ff);
     
     baseAndLabel.base.position.x = x;
     baseAndLabel.base.position.y = 0;
@@ -93,12 +93,13 @@ SS.cursoid.xPositionIndicator = function(x) {
 
 SS.cursoid.yPositionIndicator = function(y) {
     
-    var baseAndLabel = SS.cursoid.positionIndicator(y);
+    var baseAndLabel = SS.cursoid.positionIndicator(y, 0x66ff66);
     
     baseAndLabel.base.position.x = 0;
     baseAndLabel.base.position.y = y;
     baseAndLabel.base.rotation.z = Math.PI/2;
-    baseAndLabel.label.position.y = 3;
+    baseAndLabel.label.position.y = 1;
+    baseAndLabel.label.rotation.z = 0;
 
     baseAndLabel.base.addChild(baseAndLabel.label);
     return baseAndLabel.base;
@@ -106,7 +107,7 @@ SS.cursoid.yPositionIndicator = function(y) {
 
 SS.cursoid.zPositionIndicator = function(z) {
     
-    var baseAndLabel = SS.cursoid.positionIndicator(z);
+    var baseAndLabel = SS.cursoid.positionIndicator(z, 0xff6666);
     
     baseAndLabel.base.position.x = 0;
     baseAndLabel.base.position.y = 0;
@@ -123,10 +124,10 @@ SS.Cursoid = function(spec) {
 
     var that = this, scene = spec.scene, position, cursoidSceneObject;
     var cursoidMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.8, wireframe: false } );
-    var cursoidXMaterial = new THREE.MeshBasicMaterial( { color: 0x000066, opacity: 0.8, wireframe: false } );
-    var cursoidYMaterial = new THREE.MeshBasicMaterial( { color: 0x006600, opacity: 0.8, wireframe: false } );
-    var cursoidXYMaterial = new THREE.MeshBasicMaterial( { color: 0x004444, opacity: 0.8, wireframe: false } );
-    var cursoidZMaterial = new THREE.MeshBasicMaterial( { color: 0x660000, opacity: 0.8, wireframe: false } );
+    var cursoidXMaterial = new THREE.MeshBasicMaterial( { color: 0x6666ff, opacity: 0.8, wireframe: false } );
+    var cursoidYMaterial = new THREE.MeshBasicMaterial( { color: 0x66ff66, opacity: 0.8, wireframe: false } );
+    var cursoidXYMaterial = new THREE.MeshBasicMaterial( { color: 0x66dddd, opacity: 0.8, wireframe: false } );
+    var cursoidZMaterial = new THREE.MeshBasicMaterial( { color: 0xff6666, opacity: 0.8, wireframe: false } );
     var toXMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff, opacity: 0.5, linewidth: 1 });
     var toYMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00, opacity: 0.5, linewidth: 1 });
     var toZMaterial = new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.5, linewidth: 1 })
