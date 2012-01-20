@@ -31,7 +31,7 @@ SS.workplane.pointer = function(spec) {
 
     pointer.position.x = 0;
     pointer.position.y = 0;
-    scene.addObject(pointer);
+    scene.add(pointer);
     
     that.update = function(position) {	
 	if (gridExtents.isInsideX(position.x)) {
@@ -94,12 +94,12 @@ SS.workplane.grid = function(spec) {
 	axes[5].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
 	axes[5].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, -500)));
 
-	scene.addObject(new THREE.Line(axes[0], new THREE.LineBasicMaterial({ color: 0x0000ff, opacity: 0.5 }))); 
-	scene.addObject(new THREE.Line(axes[1], new THREE.LineBasicMaterial({ color: 0x00ff00, opacity: 0.5 })));
-	scene.addObject(new THREE.Line(axes[2], new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.5 })));
-	scene.addObject(new THREE.Line(axes[3], new THREE.LineBasicMaterial({ color: 0x0000ff, opacity: 0.2 })));
-	scene.addObject(new THREE.Line(axes[4], new THREE.LineBasicMaterial({ color: 0x00ff00, opacity: 0.2 })));
-	scene.addObject(new THREE.Line(axes[5], new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.2 })));
+	scene.add(new THREE.Line(axes[0], new THREE.LineBasicMaterial({ color: 0x0000ff, opacity: 0.5 }))); 
+	scene.add(new THREE.Line(axes[1], new THREE.LineBasicMaterial({ color: 0x00ff00, opacity: 0.5 })));
+	scene.add(new THREE.Line(axes[2], new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.5 })));
+	scene.add(new THREE.Line(axes[3], new THREE.LineBasicMaterial({ color: 0x0000ff, opacity: 0.2 })));
+	scene.add(new THREE.Line(axes[4], new THREE.LineBasicMaterial({ color: 0x00ff00, opacity: 0.2 })));
+	scene.add(new THREE.Line(axes[5], new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.2 })));
 
     }
 
@@ -112,7 +112,7 @@ SS.workplane.grid = function(spec) {
 		var line = new THREE.Line(geometry, material);
 		line.position.x = x;
 		line.rotation.z = 90 * Math.PI / 180;
-		scene.addObject(line);
+		scene.add(line);
 
 	    }
 	}
@@ -123,7 +123,7 @@ SS.workplane.grid = function(spec) {
 		var geometry = (y % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
 		var line = new THREE.Line(geometry, material);
 		line.position.y = y;
-		scene.addObject(line);
+		scene.add(line);
 	    }
 	}
     }
@@ -151,13 +151,13 @@ SS.workplane.grid = function(spec) {
 	var line = new THREE.Line(fadingGridLineGeometry, material);
 	line.position.x = x > 0 ? (x-majorTick) : x;
 	line.position.y = y;
-	scene.addObject(line);
+	scene.add(line);
 	
 	var line = new THREE.Line(fadingGridLineGeometry, material);
 	line.position.x = x;
 	line.position.y = y > 0 ? (y-majorTick) : y;
 	line.rotation.z = 90 * Math.PI / 180;
-	scene.addObject(line);
+	scene.add(line);
 
     }
 
@@ -175,11 +175,11 @@ SS.workplane.grid = function(spec) {
 		style: style,
 		bezelEnabled: false
 	    });
-	    var textMesh1 = new THREE.Mesh( textGeo, textMaterial );
-	    textMesh1.position.y = gridExtents.maxY + 3;
-	    textMesh1.position.x = x*10 + (x > 0 ? -2 : (x < 0 ? 2.5 : 0));
-	    textMesh1.rotation.z = Math.PI;
-	    scene.addObject(textMesh1);
+	    var text = new THREE.Mesh( textGeo, textMaterial );
+	    text.position.y = gridExtents.maxY + 3;
+	    text.position.x = x*10 + text.boundRadius/2;
+	    text.rotation.z = Math.PI;
+	    scene.add(text);
 	}
 
 	for (var y = (gridExtents.minY/majorTick); y <= (gridExtents.maxY/majorTick); ++y) {
@@ -192,11 +192,12 @@ SS.workplane.grid = function(spec) {
 		style: style,
 		bezelEnabled: false
 	    });
-	    var textMesh1 = new THREE.Mesh( textGeo, textMaterial );
-	    textMesh1.position.y = y*10 + (y > 0 ? -2 : (y < 0 ? 2.5 : 0));
-	    textMesh1.position.x = gridExtents.maxX + 3;
-	    textMesh1.rotation.z = Math.PI/2;
-	    scene.addObject(textMesh1);
+	    var text = new THREE.Mesh( textGeo, textMaterial );
+            
+	    text.position.y = y*10 - text.boundRadius/2;
+	    text.position.x = gridExtents.maxX + 3;
+	    text.rotation.z = Math.PI/2;
+	    scene.add(text);
 	}
     }
 

@@ -14,43 +14,44 @@ SS.SceneView = function(container) {
 
     var idToModel = {};
     var unselectedColor = 0x00dd00, selectedColor = 0xdddd00;
-    var state, threshhold = 10; // inside this threshold is a single click
+    var state, threshhold = 10;
 
     var workplane, cursoid;
     var popupMenu = SS.popupMenu();
     
     function init() {
 
-	container.style.color = '#fff';
-	container.style.font = '13px/20px Arial, sans-serif';
-
-	var shader, uniforms, material;
 	w = container.offsetWidth || window.innerWidth;
 	h = container.offsetHeight || window.innerHeight;
 
-	camera = new THREE.Camera(30, w / h, 1, 10000);
+        scene = new THREE.Scene();
+
+        camera = new THREE.PerspectiveCamera(30, w / h, 1, 10000);
 	camera.up.x = 0;
 	camera.up.y = 0;
 	camera.up.z = 1;
-	
-	vector = new THREE.Vector3();
-	scene = new THREE.Scene();
-
-	addLights();
-	workplane = new SS.Workplane({scene: scene});
-        cursoid = new SS.Cursoid({scene: scene, workplane: workplane});
-	popupMenu = SS.popupMenu();
+        scene.add( camera );
 
 	renderer = new THREE.WebGLRenderer({antialias: true});
 	renderer.autoClear = false;
 	renderer.setClearColorHex(0x080808, 0.0);
 	renderer.setSize(w, h);
 
+	container.appendChild( renderer.domElement );
+        
+	container.style.color = '#fff';
+	container.style.font = '13px/20px Arial, sans-serif';
+        
+        scene.add( new THREE.AmbientLight( 0x404040 ) );
+        
+        addLights();
+	workplane = new SS.Workplane({scene: scene});
+        cursoid = new SS.Cursoid({scene: scene, workplane: workplane});
+	popupMenu = SS.popupMenu();
+
 	renderer.domElement.style.position = 'absolute';
 
-	container.appendChild(renderer.domElement);
-
-	container.addEventListener('mousedown', onMouseDown, false);
+        container.addEventListener('mousedown', onMouseDown, false);
 	container.addEventListener('mousewheel', onMouseWheel, false);
 	container.addEventListener('DOMMouseScroll', onMouseWheel, false);
 	container.addEventListener('mousemove', onMouseMove, false);
@@ -331,6 +332,7 @@ SS.SceneView = function(container) {
     }
 
     function render() {
+
 	zoom(0);
 
 	azimuth += (target.azimuth - azimuth) * 0.2;
@@ -352,33 +354,21 @@ SS.SceneView = function(container) {
 	camera.position.y = distance * Math.sin(elevation) * Math.sin(azimuth);
 	camera.position.z = distance * Math.cos(elevation);
 
-	renderer.clear();
+        camera.lookAt( scene.position );
 	renderer.render(scene, camera);
     }
     
     function addLights() {
-	ambientLight = new THREE.AmbientLight( 0x101010 );
-	scene.addLight( ambientLight );
 
-	pointLight = new THREE.PointLight( 0xa0a050 );
-	pointLight.position.z = 100;
-	scene.addLight(pointLight);
+	pointLight = new THREE.PointLight( 0x999999 );
+	pointLight.position.set(0, 0, 100);
+        scene.add(pointLight);
 
-	pointLight = new THREE.PointLight( 0x333333 );
-	pointLight.position.z = -100;
-	scene.addLight(pointLight);
+        pointLight = new THREE.PointLight( 0x999999 );
+	pointLight.position.set(0, 0, -100);
+        scene.add(pointLight);
 
-	pointLight = new THREE.PointLight( 0x333333 );
-	pointLight.position.x = -100;
-	pointLight.position.y = -100;
-	scene.addLight(pointLight);
 
-	directionalLight = new THREE.DirectionalLight( 0xaaaa88 );
-	directionalLight.position.x = 100;
-	directionalLight.position.y = 50;
-	directionalLight.position.z = 50;
-	directionalLight.position.normalize();
-	scene.addLight( directionalLight );
     }
 
 
@@ -418,20 +408,20 @@ SS.SceneView = function(container) {
             var objectName = {geomNodeId: geomNode.id};
 
 	    var geometry3D = create3DGeometry(geomNode.mesh['3d']);
-	    var material3D = new THREE.MeshPhongMaterial( { ambient: 0x030303, color: color, opacity: opacity,  specular: 0xccffcc, shininess: 50, shading: THREE.SmoothShading } );
+	    var material3D = new THREE.MeshPhongMaterial( { ambient: color, color: color, opacity: opacity,  specular: color, shininess: 50, shading: THREE.SmoothShading } );
             var mesh3d = new THREE.Mesh(geometry3D, material3D);
+            mesh3d.doubleSided = true;
             mesh3d.name = objectName
-            mesh.addChild(mesh3d);
+            mesh.add(mesh3d);
             
             var geometry1D = create1DGeometry(geomNode.mesh['1d']);
             var material1D = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 1.0, linewidth: 2 });
             var mesh1d = new THREE.Line(geometry1D, material1D);
-            mesh1d.name =objectName
-            mesh.addChild(mesh1d);
+            mesh1d.name = objectName
+            mesh.add(mesh1d);
 
-	    mesh.doubleSided = true;
             mesh.name = objectName
-	    scene.addObject(mesh);
+	    scene.add(mesh);
 	    idToModel[geomNode.id] = mesh;
         }
     }
@@ -450,7 +440,10 @@ SS.SceneView = function(container) {
                 var id = event.deselected[i];
                 
 		idToModel[id].children.map(function(child) {
-                    child.materials[0].color.setHex(unselectedColor);
+                    child.material.color.setHex(unselectedColor);
+                    child.material.ambient && child.material.ambient.setHex(unselectedColor);
+                    child.material.specular && child.material.specular.setHex(unselectedColor);
+
                 });
             }
         }
@@ -458,7 +451,9 @@ SS.SceneView = function(container) {
             for (var i in event.selected) {
                 var id = event.selected[i];
 		idToModel[id].children.map(function(child) {
-                    child.materials[0].color.setHex(selectedColor);
+                    child.material.color.setHex(selectedColor);
+                    child.material.ambient && child.material.ambient.setHex(selectedColor);
+                    child.material.specular && child.material.specular.setHex(selectedColor);
                 });
 		
             }

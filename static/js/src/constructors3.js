@@ -3,6 +3,13 @@ SS.constructors = {};
 SS.preview = {};
 SS.modifier = {};
 
+SS.constructors.lineColor = 0x66A1D2;
+SS.constructors.faceColor = 0x3F8FD2;
+SS.constructors.faceMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.faceColor, transparent: true, opacity: 0.2 } );
+SS.constructors.solidFaceMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.faceColor } );
+SS.constructors.lineMaterial = new THREE.LineBasicMaterial({ color: SS.constructors.lineColor, wireframe : true });
+SS.constructors.wireframeMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.lineColor, wireframe: true } )
+
 SS.GeomNodeUpdater = function(geomNode) {
     var geomNode = geomNode, that = this;
 
@@ -227,9 +234,9 @@ SS.preview.createDimArrow = function(value, angle) {
     }
 
     var dimObject = new THREE.Object3D();
-    dimObject.addChild(line);
-    dimObject.addChild(arrow);
-    dimObject.addChild(text);
+    dimObject.add(line);
+    dimObject.add(arrow);
+    dimObject.add(text);
 
     dimObject.rotation.z = angle;
 
@@ -272,7 +279,13 @@ SS.constructors.Constructor = function(spec) {
 	    sceneObjects[key].position.x = geomNode.origin.x;
 	    sceneObjects[key].position.y = geomNode.origin.y;
 	    sceneObjects[key].position.z = geomNode.origin.z;
-	    scene.addObject(sceneObjects[key]);
+            // Perfornamce boost as per
+            // https://github.com/mrdoob/three.js/issues/167
+            sceneObjects[key].children.map(function(child) {
+                child.matrixAutoUpdate = false;
+                child.updateMatrix();
+            });
+	    scene.add(sceneObjects[key]);
 	});
 
     }
@@ -426,7 +439,7 @@ SS.constructors.Ellipse1d = function() {
 	        ellipseGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	    }
 	    var ellipse = new THREE.Line(ellipseGeom, SS.constructors.lineMaterial);
-            ellipseObj.addChild(ellipse);
+            ellipseObj.add(ellipse);
         }
         
         if (activeAnchor !== 'radii') {
@@ -434,7 +447,7 @@ SS.constructors.Ellipse1d = function() {
             radiiAnchor.position.x = r1;
             radiiAnchor.position.y = r2;
             radiiAnchor.name = {anchor: 'radii'};
-            ellipseObj.addChild(radiiAnchor);
+            ellipseObj.add(radiiAnchor);
 	}
 
         sceneObjects.ellipse = ellipseObj;
@@ -467,7 +480,7 @@ SS.constructors.Sphere = function() {
         if (r) {
             var geometry = new THREE.SphereGeometry(r, 50, 10);
 	    var sphere = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
-	    //sphereObj.addChild(sphere);
+	    sphereObj.add(sphere);
 
 	    var circleGeom = new THREE.Geometry();
 	    for(var i = 0; i <= 50; ++i) {
@@ -477,7 +490,7 @@ SS.constructors.Sphere = function() {
 	        circleGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	    }
 	    var circle = new THREE.Line(circleGeom, SS.constructors.lineMaterial);
-	    sphereObj.addChild(circle);
+	    sphereObj.add(circle);
         }
 
         if (activeAnchor !== 'radius') {
@@ -486,7 +499,7 @@ SS.constructors.Sphere = function() {
             radiusAnchor.position.x = r*Math.cos(angle);
             radiusAnchor.position.y = r*Math.sin(angle);
             radiusAnchor.name = {anchor: 'radius'};
-            sphereObj.addChild(radiusAnchor);
+            sphereObj.add(radiusAnchor);
 	}
 
         sceneObjects.sphere = sphereObj;
@@ -531,18 +544,19 @@ SS.constructors.Cylinder = function() {
 		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	    }
 	    var circle1 = new THREE.Line(circleGeom1, SS.constructors.lineMaterial);
-	    cylinderObj.addChild(circle1);
+	    cylinderObj.add(circle1);
         }
 
         if (r && h) {
             var circle2 = new THREE.Line(circleGeom2, SS.constructors.lineMaterial);
 	    circle2.position.z = h;
-	    cylinderObj.addChild(circle2);
+	    cylinderObj.add(circle2);
 
-	    var geometry = new THREE.CylinderGeometry(50, r, r, h);
+	    var geometry = new THREE.CylinderGeometry(r, r, h, 20);
 	    var cylinder = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
 	    cylinder.position.z = h/2;
-	    //cylinderObj.addChild(cylinder);
+            cylinder.rotation.x = -Math.PI/2;
+	    cylinderObj.add(cylinder);
         }
 
         if (activeAnchor !== 'radius') {
@@ -551,14 +565,14 @@ SS.constructors.Cylinder = function() {
             radiusAnchor.position.x = r*Math.cos(angle);
             radiusAnchor.position.y = r*Math.sin(angle);
             radiusAnchor.name = {anchor: 'radius'};
-            cylinderObj.addChild(radiusAnchor);
+            cylinderObj.add(radiusAnchor);
 	}
 
         if (activeAnchor !== 'height') {
             var heightAnchor = new THREE.Mesh(SS.constructors.anchorGeometry, SS.constructors.anchorMaterial);
             heightAnchor.position.z = h;
             heightAnchor.name = {anchor: 'height'};
-            cylinderObj.addChild(heightAnchor);
+            cylinderObj.add(heightAnchor);
 	}
 
         sceneObjects.cylinder = cylinderObj;

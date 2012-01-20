@@ -51,10 +51,10 @@ SS.cursoid.positionIndicator = function(value, color) {
 	border.position.x = 0;
 	border.position.y = 0;
 	border.position.z = 0.15;
-	indicatorBase.addChild(border);
+	indicatorBase.add(border);
     }
 
-    indicatorBase.addChild(background);
+    indicatorBase.add(background);
 
     var label = labelMesh(value);
     label = labelMesh(value);
@@ -70,9 +70,10 @@ SS.cursoid.xPositionIndicator = function(x) {
     baseAndLabel.base.rotation.z = Math.PI;
 
     baseAndLabel.label.position.y = -1;
+    baseAndLabel.label.position.x = -baseAndLabel.label.boundRadius/2;
     baseAndLabel.label.rotation.z = 0;
 
-    baseAndLabel.base.addChild(baseAndLabel.label);
+    baseAndLabel.base.add(baseAndLabel.label);
     return baseAndLabel.base;
 }
 
@@ -84,9 +85,10 @@ SS.cursoid.yPositionIndicator = function(y) {
     baseAndLabel.base.position.y = y;
     baseAndLabel.base.rotation.z = Math.PI/2;
     baseAndLabel.label.position.y = -1;
+    baseAndLabel.label.position.x = -baseAndLabel.label.boundRadius/2;
     baseAndLabel.label.rotation.z = 0;
 
-    baseAndLabel.base.addChild(baseAndLabel.label);
+    baseAndLabel.base.add(baseAndLabel.label);
     return baseAndLabel.base;
 }
 
@@ -99,8 +101,9 @@ SS.cursoid.zPositionIndicator = function(z) {
     baseAndLabel.base.position.z = z;
     baseAndLabel.base.rotation.x = -Math.PI/2;
     baseAndLabel.label.position.y = 1.0;
+    baseAndLabel.label.position.x = baseAndLabel.label.boundRadius/2;
 
-    baseAndLabel.base.addChild(baseAndLabel.label);
+    baseAndLabel.base.add(baseAndLabel.label);
     return baseAndLabel.base;
 }
 
@@ -134,27 +137,27 @@ SS.Cursoid = function(spec) {
 
 	toXLine1.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, 0, 0)));
 	toXLine1.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, position.y, 0)));
-        cursoidSceneObject.addChild(new THREE.Line(toXLine1, toXMaterial));
+        cursoidSceneObject.add(new THREE.Line(toXLine1, toXMaterial));
 
 	toYLine1.vertices.push(new THREE.Vertex(new THREE.Vector3(0, position.y, 0)));
 	toYLine1.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, position.y, 0)));
-        cursoidSceneObject.addChild(new THREE.Line(toYLine1, toYMaterial));
+        cursoidSceneObject.add(new THREE.Line(toYLine1, toYMaterial));
 
         if (position.z !== 0) {
             toZLine1.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, position.z)));
 	    toZLine1.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, position.y, position.z)));
-            cursoidSceneObject.addChild(new THREE.Line(toZLine1, toZMaterial));
+            cursoidSceneObject.add(new THREE.Line(toZLine1, toZMaterial));
 
             toZLine2.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, position.y, 0)));
 	    toZLine2.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, position.y, position.z)));
-            cursoidSceneObject.addChild(new THREE.Line(toZLine2, zToZMaterial));
+            cursoidSceneObject.add(new THREE.Line(toZLine2, zToZMaterial));
         }
 
 
-        cursoidSceneObject.addChild(SS.cursoid.xPositionIndicator(position.x));
-        cursoidSceneObject.addChild(SS.cursoid.yPositionIndicator(position.y));
+        cursoidSceneObject.add(SS.cursoid.xPositionIndicator(position.x));
+        cursoidSceneObject.add(SS.cursoid.yPositionIndicator(position.y));
         if (position.z !== 0) {
-            cursoidSceneObject.addChild(SS.cursoid.zPositionIndicator(position.z));
+            cursoidSceneObject.add(SS.cursoid.zPositionIndicator(position.z));
         }
 
         var cursoidPointer = new THREE.Mesh(cursoidGeometry, cursoidMaterial);
@@ -162,14 +165,14 @@ SS.Cursoid = function(spec) {
         if (position.z === 0) {
             cursoidPointer.name = {cursoid: 'xy'};
         }
-        cursoidSceneObject.addChild(cursoidPointer);
+        cursoidSceneObject.add(cursoidPointer);
 
         if (position.y !== 0) {
             if (modifier !== 'no_xy') {
                 var cursoidXPointer = new THREE.Mesh(cursoidGeometry, cursoidXMaterial);
                 cursoidXPointer.position.x = position.x;
                 cursoidXPointer.name = {cursoid: 'x'};
-                cursoidSceneObject.addChild(cursoidXPointer)
+                cursoidSceneObject.add(cursoidXPointer)
             }
         }
 
@@ -178,17 +181,15 @@ SS.Cursoid = function(spec) {
                 var cursoidYPointer = new THREE.Mesh(cursoidGeometry, cursoidYMaterial);
                 cursoidYPointer.position.y = position.y;
                 cursoidYPointer.name = {cursoid: 'y'};
-                cursoidSceneObject.addChild(cursoidYPointer);
+                cursoidSceneObject.add(cursoidYPointer);
             }
         }
 
-        if ((position.x !== 0) && (position.y !== 0)) {
-            if (modifier !== 'no_z') {
-                var cursoidZPointer = new THREE.Mesh(cursoidGeometry, cursoidZMaterial);
-                cursoidZPointer.position.z = position.z;
-                cursoidZPointer.name = {cursoid: 'z'};
-                cursoidSceneObject.addChild(cursoidZPointer);
-            }
+        if (modifier !== 'no_z') {
+            var cursoidZPointer = new THREE.Mesh(cursoidGeometry, cursoidZMaterial);
+            cursoidZPointer.position.z = position.z;
+            cursoidZPointer.name = {cursoid: 'z'};
+            cursoidSceneObject.add(cursoidZPointer);
         }
 
         if (position.z !== 0) {
@@ -197,11 +198,11 @@ SS.Cursoid = function(spec) {
                 cursoidXYPointer.position.x = position.x;
                 cursoidXYPointer.position.y = position.y;
                 cursoidXYPointer.name = {cursoid: 'xy'};
-                cursoidSceneObject.addChild(cursoidXYPointer);
+                cursoidSceneObject.add(cursoidXYPointer);
             }
         }
         
-        scene.addObject(cursoidSceneObject);
+        scene.add(cursoidSceneObject);
 
     };
 

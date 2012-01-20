@@ -1,11 +1,5 @@
 var SS = SS || {};
 
-SS.constructors.lineColor = 0x66A1D2;
-SS.constructors.faceColor = 0x3F8FD2;
-SS.constructors.faceMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.faceColor, opacity: 0. } );
-SS.constructors.solidFaceMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.faceColor } );
-SS.constructors.lineMaterial = new THREE.LineBasicMaterial({ color: SS.constructors.lineColor, wireframe : true });
-SS.constructors.wireframeMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.lineColor, wireframe: true } )
 
 SS.constructors.origin = function(my) {
     var that = {};
