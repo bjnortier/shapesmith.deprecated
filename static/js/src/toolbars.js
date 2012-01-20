@@ -84,7 +84,7 @@ function create_primitive(type, keys) {
 
 function create_transform(selected, type, keys) {
     if (selected.length != 1)  {
-        alert("no object selected!");
+        alert('no object selected!');
         return;
     }
     var transformParams = {};
@@ -116,93 +116,86 @@ function create_transform(selected, type, keys) {
 $(document).ready(function() {
 
     // Edit
-    new Action("Delete", "/static/images/trash.png", 
+    new Action('Delete', '/static/images/trash.png', 
                function(selected) { 
 		   delete_geom(selected); 
-	       }).render($("#edit"));
-    new Action("Copy", "/static/images/copy.png", 
+	       }).render($('#edit'));
+    new Action('Copy', '/static/images/copy.png', 
                function(selected) { 
 		   copy(selected)
-	       }).render($("#edit"));
+	       }).render($('#edit'));
 
     /*
      * Primitives
      */
-    new Action("Cuboid", "/static/images/cuboid.png", 
+    new Action('Cuboid', '/static/images/cuboid.png', 
                function() { 
-		   create_primitive("cuboid",  ["u", "v", "w"]); 
+		   create_primitive('cuboid',  ['u', 'v', 'w']); 
 		   SS.constructors.cuboid().create();
-	       }).render($("#3Dprimitives"));
-    new Action("Sphere", "/static/images/sphere.png", 
+	       }).render($('#3Dprimitives'));
+    new Action('Sphere', '/static/images/sphere.png', 
                function() { 
-		   create_primitive("sphere", ["r"]); 
-		   SS.constructors.sphere().create();
-	       }).render($("#3Dprimitives"));
-    new Action("Cylinder", "/static/images/cylinder.png", 
+                   SS.constructors.createSphere(create_primitive('sphere',  ['r']));
+	       }).render($('#3Dprimitives'));
+    new Action('Cylinder', '/static/images/cylinder.png', 
                function() { 
-		   create_primitive("cylinder", ["r", "h"]); 
+		   create_primitive('cylinder', ['r', 'h']); 
 		   SS.constructors.cylinder().create();
-	       }).render($("#3Dprimitives"));
-    new Action("Cone", "/static/images/cone.png", 
+	       }).render($('#3Dprimitives'));
+    new Action('Cone', '/static/images/cone.png', 
                function() { 
-		   create_primitive("cone", ["r1", "h", "r2"]); 
+		   create_primitive('cone', ['r1', 'h', 'r2']); 
 		   SS.constructors.cone().create();
-	       }).render($("#3Dprimitives"));
-    new Action("Wedge", "/static/images/wedge.png", 
+	       }).render($('#3Dprimitives'));
+    new Action('Wedge', '/static/images/wedge.png', 
                function() { 
-		   create_primitive("wedge", ["u1", "v", "u2", "w"]); 
+		   create_primitive('wedge', ['u1', 'v', 'u2', 'w']); 
 		   SS.constructors.wedge().create();
-	       }).render($("#3Dprimitives"));
-    new Action("Torus", "/static/images/torus.png", 
+	       }).render($('#3Dprimitives'));
+    new Action('Torus', '/static/images/torus.png', 
                function() { 
-		   create_primitive("torus", ["r1", "r2"]); 
+		   create_primitive('torus', ['r1', 'r2']); 
 		   SS.constructors.torus().create();
-	       }).render($("#3Dprimitives"));
+	       }).render($('#3Dprimitives'));
 
-    new Action("Ellipse 1D", "/static/images/cuboid.png", 
+    new Action('Ellipse 1D', '/static/images/cuboid.png', 
                function() { 
-		   var geomNode = create_primitive("ellipse1d",  ["r1", "r2"]); 
-		   var lastMousePosition = sceneView.workplane.getLastMousePosition();
-		   geomNode.origin.x = lastMousePosition.x;
-		   geomNode.origin.y = lastMousePosition.y;
-                   geomNode.parameters.r1 = 20;
-                   geomNode.parameters.r2 = 10;
-                   SS.constructors.createEllipse1d({geomNode: geomNode});
-	       }).render($("#1Dprimitives"));
+                   SS.constructors.createEllipse1d(create_primitive('ellipse1d',  ['r1', 'r2']));
+	       }).render($('#1Dprimitives'));
     
     /*
      * Booleans
      */
-    new Action("Union", "/static/images/union.png", 
-               function(selected) { boolean(selected, "union"); }).render($("#boolean"));
-    new Action("Subtract", "/static/images/diff.png", 
-               function(selected) { boolean(selected, "subtract"); }).render($("#boolean"));
-    new Action("Intersect", "/static/images/intersect.png", 
-               function(selected) { boolean(selected, "intersect"); }).render($("#boolean"));
+    new Action('Union', '/static/images/union.png', 
+               function(selected) { boolean(selected, 'union'); }).render($('#boolean'));
+    new Action('Subtract', '/static/images/diff.png', 
+               function(selected) { boolean(selected, 'subtract'); }).render($('#boolean'));
+    new Action('Intersect', '/static/images/intersect.png', 
+               function(selected) { boolean(selected, 'intersect'); }).render($('#boolean'));
     
     /*
      * Transformations
      */
-    new Action("Translate", "/static/images/translate.png", 
+    new Action('Translate', '/static/images/translate.png', 
                function(selected) { 
-		   var editingNode = create_transform(selected, "translate", ["u", "v", "w", "n"]); 
+		   var editingNode = create_transform(selected, 'translate', ['u', 'v', 'w', 'n']); 
 		   SS.constructors.translate({geomNode: editingNode}).create();
-	       }).render($("#transforms"));
-    new Action("Scale", "/static/images/scale.png", 
+	       }).render($('#transforms'));
+    new Action('Scale', '/static/images/scale.png', 
                function(selected) { 
-		   var editingNode = create_transform(selected, "scale", ["factor"]); 
+		   var editingNode = create_transform(selected, 'scale', ['factor']); 
 		   SS.constructors.scale({geomNode: editingNode}).create();
-	       }).render($("#transforms"));
-    new Action("Rotate", "/static/images/rotate.png", 
+	       }).render($('#transforms'));
+    new Action('Rotate', '/static/images/rotate.png', 
                function(selected) { 
-		   var editingNode = create_transform(selected, "rotate", ["u", "v", "w", "angle", "n"]);
+		   var editingNode = create_transform(selected, 'rotate', ['u', 'v', 'w', 'angle', 'n']);
 		   SS.constructors.rotate({geomNode: editingNode}).create();
-	       }).render($("#transforms"));
-    new Action("Mirror", "/static/images/mirror.png", 
+	       }).render($('#transforms'));
+    new Action('Mirror', '/static/images/mirror.png', 
                function(selected) { 
-		   var editingNode = create_transform(selected, "mirror", ["u", "v", "w", "n"]); 
+		   var editingNode = create_transform(selected, 'mirror', ['u', 'v', 'w', 'n']); 
 		   SS.constructors.mirror({geomNode: editingNode}).create();
-	       }).render($("#transforms"));
+	       }).render($('#transforms'));
 
 });
 
@@ -236,11 +229,11 @@ $('#thingiverse-export input.ok').click(function() {
 	    $('#thingiyverse-export-form').submit();
 	    $('#black-overlay').hide();
 	    $('#thingiverse-export').hide();
-	    $('#thingiverse-export input.ok').removeAttr("disabled");
+	    $('#thingiverse-export input.ok').removeAttr('disabled');
 	},
 	error: function(jqXHR, textStatus, errorThrown) {
 	    alert(jqXHR.responseText);
-	    $('#thingiverse-export input.ok').removeAttr("disabled");
+	    $('#thingiverse-export input.ok').removeAttr('disabled');
 	}
     });
     return false;

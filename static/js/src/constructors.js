@@ -2,7 +2,7 @@ var SS = SS || {};
 
 SS.constructors.lineColor = 0x66A1D2;
 SS.constructors.faceColor = 0x3F8FD2;
-SS.constructors.faceMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.faceColor, opacity: 0.5 } );
+SS.constructors.faceMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.faceColor, opacity: 0.2 } );
 SS.constructors.solidFaceMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.faceColor } );
 SS.constructors.lineMaterial = new THREE.LineBasicMaterial({ color: SS.constructors.lineColor, wireframe : true });
 SS.constructors.wireframeMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.lineColor, wireframe: true } )
@@ -243,91 +243,6 @@ SS.constructors.cuboid = function(spec) {
 	updatePreview();
     }
 
-    return that;
-}
-
-SS.constructors.sphere = function() {
-
-    var my = {};
-    var that = SS.constructors.primitive(my);
-
-    var superUpdatePreview = that.updatePreview;
-    var updatePreview = function() {
-
-	superUpdatePreview();
-	
-	var x = parseFloat($('#x').val()) || 0.0;
-	var y = parseFloat($('#y').val()) || 0.0;
-	var z = parseFloat($('#z').val()) || 0.0;
-	var r = parseFloat($('#r').val()) || 0.001;
-
-	var geometry = new THREE.SphereGeometry(r, 50, 10);
-	var sphere = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
-	my.previewGeometry.addChild(sphere);
-
-	var circleGeom = new THREE.Geometry();
-	for(var i = 0; i <= 50; ++i) {
-	    var theta = Math.PI*2*i/50;
-	    var dx = r*Math.cos(theta);
-	    var dy = r*Math.sin(theta);
-	    circleGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
-	}
-	var circle = new THREE.Line(circleGeom, SS.constructors.lineMaterial);
-	my.previewGeometry.addChild(circle);
-    
-	my.previewGeometry.position.x = x;
-	my.previewGeometry.position.y = y;
-	my.previewGeometry.position.z = z;
-	sceneView.scene.addObject(my.previewGeometry);
-    }
-    my.updatePreview = updatePreview;
-
-    var superOnWorkplaneCursorUpdated = that.onWorkplaneCursorUpdated;
-    that.onWorkplaneCursorUpdated = function(event) {
-
-	if (superOnWorkplaneCursorUpdated(event)) {
-	    updatePreview();
-	    return;
-	}
-	
-	var originX = parseFloat($('#x').val()), originY = parseFloat($('#y').val());
-	if (my.focussed === 'r') {
-	    
-	    var x = event.x, y = event.y;
-	    
-	    var dx = Math.abs(x - originX), dy = Math.abs(y - originY);
-	    var r  = Math.sqrt(dx*dx + dy*dy);
-	    
-	    $('#r').val(r.toFixed(2));
-	    updatePreview();
-	}
-    }
-
-    var superOnWorkplaneClicked = that.onWorkplaneClicked;
-    that.onWorkplaneClicked = function(event) {
-	superOnWorkplaneClicked({origin: 'r'});
-    }
-
-    var superSetupValueHandlers = that.setupValueHandlers;
-    that.setupValueHandlers = function() {
-	superSetupValueHandlers();
-	$('#r').keyup(updatePreview);
-    }
-
-    var superSetupFocusHandlers = that.setupFocusHandlers;
-    that.setupFocusHandlers = function() {
-	superSetupFocusHandlers();
-	$('#r').focus(function() { my.focussed = 'r'; });
-	$('#r').blur(function()  { my.focussed = undefined; });
-    }
-
-    var superCreate = that.create;
-    that.create = function() {
-	superCreate();
-	$('#r').focus();
-	updatePreview();
-    }
-   
     return that;
 }
 

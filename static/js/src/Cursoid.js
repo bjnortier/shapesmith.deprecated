@@ -130,7 +130,7 @@ SS.Cursoid = function(spec) {
 
         var toXLine1 = new THREE.Geometry(), toYLine1 = new THREE.Geometry();
         var toXLine2 = new THREE.Geometry(), toYLine2 = new THREE.Geometry();
-        var toZLine1 = new THREE.Geometry(), toZLine2 = new THREE.Geometry(), toZLine3 = new THREE.Geometry();
+        var toZLine1 = new THREE.Geometry(), toZLine2 = new THREE.Geometry();
 
 	toXLine1.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, 0, 0)));
 	toXLine1.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, position.y, 0)));
@@ -141,32 +141,13 @@ SS.Cursoid = function(spec) {
         cursoidSceneObject.addChild(new THREE.Line(toYLine1, toYMaterial));
 
         if (position.z !== 0) {
-	    toXLine2.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, position.z)));
-	    toXLine2.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, 0, position.z)));
-	    toXLine2.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, position.y, position.z)));
-            //cursoidSceneObject.addChild(new THREE.Line(toXLine2, toXMaterial));
-            
-            toYLine2.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, position.z)));
-	    toYLine2.vertices.push(new THREE.Vertex(new THREE.Vector3(0, position.y, position.z)));
-	    toYLine2.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, position.y, position.z)));
-            //cursoidSceneObject.addChild(new THREE.Line(toYLine2, toYMaterial));
-	 
-            //toZLine1.vertices.push(new THREE.Vertex(new THREE.Vector3(0, position.y, 0)));
-	    //toZLine1.vertices.push(new THREE.Vertex(new THREE.Vector3(0, position.y, position.z)));
-            //cursoidSceneObject.addChild(new THREE.Line(toZLine1, toZMaterial));
-
             toZLine1.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, position.z)));
 	    toZLine1.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, position.y, position.z)));
             cursoidSceneObject.addChild(new THREE.Line(toZLine1, toZMaterial));
 
-            
-            toZLine2.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, 0, 0)));
-	    toZLine2.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, 0, position.z)));
-            //cursoidSceneObject.addChild(new THREE.Line(toZLine2, toZMaterial));
-
-            toZLine3.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, position.y, 0)));
-	    toZLine3.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, position.y, position.z)));
-            cursoidSceneObject.addChild(new THREE.Line(toZLine3, zToZMaterial));
+            toZLine2.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, position.y, 0)));
+	    toZLine2.vertices.push(new THREE.Vertex(new THREE.Vector3(position.x, position.y, position.z)));
+            cursoidSceneObject.addChild(new THREE.Line(toZLine2, zToZMaterial));
         }
 
 

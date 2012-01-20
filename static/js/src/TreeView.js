@@ -313,9 +313,9 @@ function TreeView() {
 	    if (SS.constructors[geomNode.type]) {
 		SS.constructors[geomNode.type]().edit();
 	    } else {
-                var factoryFunction = 'create' + geomNode.type.charAt(0).toUpperCase() + geomNode.type.substring(1);
+                var factoryFunction = 'edit' + geomNode.type.charAt(0).toUpperCase() + geomNode.type.substring(1);
                 if (SS.constructors[factoryFunction]) {
-                    SS.constructors[factoryFunction]({geomNode: geomNode});
+                    SS.constructors[factoryFunction](geomNode);
                 }
             }
             
