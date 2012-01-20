@@ -34,41 +34,26 @@ SS.cursoid.positionIndicator = function(value, color) {
     var background = new THREE.Mesh(new THREE.PlaneGeometry(5, 3),
 				    new THREE.MeshBasicMaterial({ color: 0x101010, opacity: 1.0 }));
     background.position.x = 0;
-    background.position.y = 2;
+    background.position.y = 0;
     background.position.z = 0.1;
     
     var borderGeom = [new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry()];
-    borderGeom[0].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 0, 0)));
-    borderGeom[0].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 0, 0)));
-    borderGeom[1].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 0, 0)));
-    borderGeom[1].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 3, 0)));
-    borderGeom[2].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 3, 0)));
-    borderGeom[2].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 3, 0)));
-    borderGeom[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 3, 0)));
-    borderGeom[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 0, 0)));
+    borderGeom[0].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, -1.5, 0)));
+    borderGeom[0].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, -1.5, 0)));
+    borderGeom[1].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, -1.5, 0)));
+    borderGeom[1].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 1.5, 0)));
+    borderGeom[2].vertices.push(new THREE.Vertex(new THREE.Vector3(2.5, 1.5, 0)));
+    borderGeom[2].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 1.5, 0)));
+    borderGeom[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, 1.5, 0)));
+    borderGeom[3].vertices.push(new THREE.Vertex(new THREE.Vector3(-2.5, -1.5, 0)));
     for (var i = 0; i < 4; ++i) {
 	var border = new THREE.Line(borderGeom[i], new THREE.LineBasicMaterial({ color: color, opacity: 0.5 }));
 	border.position.x = 0;
-	border.position.y = 0.5;
+	border.position.y = 0;
 	border.position.z = 0.15;
 	indicatorBase.addChild(border);
     }
 
-    var arrowGeometry = new THREE.Geometry();
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(-0.5, 0.5, 0)));
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0.5, 0.5, 0)));
-    var arrowFace = new THREE.Face3(0,1,2);
-    arrowGeometry.faces.push(arrowFace);
-    arrowGeometry.computeCentroids();
-    arrowGeometry.computeFaceNormals();
-
-    var arrowMaterial = new THREE.MeshBasicMaterial({ color: color, opacity: 1.0 });
-    var arrow = new THREE.Mesh(arrowGeometry, arrowMaterial);
-    arrow.doubleSided = true;
-    arrow.position.z = 0.15;
-
-    indicatorBase.addChild(arrow);
     indicatorBase.addChild(background);
 
     var label = labelMesh(value);
@@ -81,10 +66,10 @@ SS.cursoid.xPositionIndicator = function(x) {
     var baseAndLabel = SS.cursoid.positionIndicator(x, 0x6666ff);
     
     baseAndLabel.base.position.x = x;
-    baseAndLabel.base.position.y = 0;
+    baseAndLabel.base.position.y = -2;
     baseAndLabel.base.rotation.z = Math.PI;
 
-    baseAndLabel.label.position.y = 1;
+    baseAndLabel.label.position.y = -1;
     baseAndLabel.label.rotation.z = 0;
 
     baseAndLabel.base.addChild(baseAndLabel.label);
@@ -95,10 +80,10 @@ SS.cursoid.yPositionIndicator = function(y) {
     
     var baseAndLabel = SS.cursoid.positionIndicator(y, 0x66ff66);
     
-    baseAndLabel.base.position.x = 0;
+    baseAndLabel.base.position.x = -2;
     baseAndLabel.base.position.y = y;
     baseAndLabel.base.rotation.z = Math.PI/2;
-    baseAndLabel.label.position.y = 1;
+    baseAndLabel.label.position.y = -1;
     baseAndLabel.label.rotation.z = 0;
 
     baseAndLabel.base.addChild(baseAndLabel.label);
@@ -109,11 +94,11 @@ SS.cursoid.zPositionIndicator = function(z) {
     
     var baseAndLabel = SS.cursoid.positionIndicator(z, 0xff6666);
     
-    baseAndLabel.base.position.x = 0;
+    baseAndLabel.base.position.x = -3;
     baseAndLabel.base.position.y = 0;
     baseAndLabel.base.position.z = z;
-    baseAndLabel.base.rotation.y = Math.PI/2;
-    baseAndLabel.label.position.y = 3;
+    baseAndLabel.base.rotation.x = -Math.PI/2;
+    baseAndLabel.label.position.y = 1.0;
 
     baseAndLabel.base.addChild(baseAndLabel.label);
     return baseAndLabel.base;

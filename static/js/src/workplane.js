@@ -53,7 +53,7 @@ SS.workplane.grid = function(spec) {
     var majorGridLineGeometry = new THREE.Geometry();
     var minorGridLineGeometry = new THREE.Geometry();
     var majorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.2 });
-    var minorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.01 });
+    var minorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.02 });
 
     var height = 0.01,
     majorTick = 10;
