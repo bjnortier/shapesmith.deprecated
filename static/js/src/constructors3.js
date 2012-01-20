@@ -30,14 +30,13 @@ SS.GeomNodeUpdater = function(geomNode) {
    
         
     this.setOrigin = function(origin) {
-        geomNode.origin = origin;
+        geomNode.origin = {x: origin.x, y:origin.y, z:origin.z};
 	updateTreeview();
         that.fire({type: 'updated'});
     }
 
     this.setR1R2 = function(r1r2) {
-	geomNode.parameters.r1 = r1r2.r1;
-	geomNode.parameters.r2 = r1r2.r2;
+	geomNode.parameters = {r1: r1r2.r1, r2: r1r2.r2};
 	updateTreeview();
         that.fire({type: 'updated'});
     }
@@ -86,8 +85,8 @@ SS.modifier.MajorMinorRadii = function(spec) {
     var geomNode = spec.geomNode, updater = spec.updater, cursoid = spec.cursoid;
     
     var setR1R2 = function(event) {
-	var r1 = Math.abs(event.position.x - geomNode.origin.x);
-	var r2 = Math.abs(event.position.y - geomNode.origin.y);
+	var r1 = event.position.x - geomNode.origin.x;
+	var r2 = event.position.y - geomNode.origin.y;
 	updater.setR1R2({r1: r1, r2:r2});
     }
 
