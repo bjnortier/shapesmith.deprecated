@@ -167,7 +167,7 @@ $(document).ready(function() {
 		   geomNode.origin.y = lastMousePosition.y;
                    geomNode.parameters.r1 = 20;
                    geomNode.parameters.r2 = 10;
-                   SS.preview.createEllipse1d({geomNode: geomNode});
+                   SS.constructors.createEllipse1d({geomNode: geomNode});
 	       }).render($("#1Dprimitives"));
     
     /*

@@ -16,17 +16,32 @@ SS.GeomNodeUpdater = function(geomNode) {
 	$('#r2').val(geomNode.parameters.r2);
     }
 
+    var updateFromTreeView = function() {
+        geomNode.origin.x = parseFloat($('#x').val());
+        geomNode.origin.y = parseFloat($('#y').val());
+        geomNode.origin.z = parseFloat($('#z').val());
+        geomNode.parameters.r1 = parseFloat($('#r1').val());
+        geomNode.parameters.r2 = parseFloat($('#r2').val());
+        that.fire({type: 'updated'});
+    }
+
+    $('#x').change(updateFromTreeView);
+    $('#y').change(updateFromTreeView);
+    $('#z').change(updateFromTreeView);
+    $('#r1').change(updateFromTreeView);
+    $('#r2').change(updateFromTreeView);
+        
     this.setOrigin = function(origin) {
         geomNode.origin = origin;
-        that.fire({type: 'updated'});
 	updateTreeview();
+        that.fire({type: 'updated'});
     }
 
     this.setR1R2 = function(r1r2) {
 	geomNode.parameters.r1 = r1r2.r1;
 	geomNode.parameters.r2 = r1r2.r2;
-        that.fire({type: 'updated'});
 	updateTreeview();
+        that.fire({type: 'updated'});
     }
 
     updateTreeview();
@@ -40,12 +55,23 @@ SS.modifier.Origin = function(spec) {
                            y: event.position.y,
                            z: event.position.z});
     }
-    
-    cursoid.on('cursoidUpdated', setOrigin);
+
+    var setCursoid = function() {
+        cursoid.setPosition(geomNode.origin);
+    }
 
     this.dispose = function() {
 	cursoid.off('cursoidUpdated', setOrigin);
+        updater.off('updated', setCursoid);
     }
+
+    var init = function() {
+        cursoid.on('cursoidUpdated', setOrigin);
+        updater.on('updated', setCursoid);
+        setCursoid();
+    }
+
+    init();
 }
 
 SS.modifier.MajorMinorRadii = function(spec) {
@@ -56,12 +82,25 @@ SS.modifier.MajorMinorRadii = function(spec) {
 	var r2 = Math.abs(event.position.y - geomNode.origin.y);
 	updater.setR1R2({r1: r1, r2:r2});
     }
-    
-    cursoid.on('cursoidUpdated', setR1R2);
+
+    var setCursoid = function() {
+        var position = {x: geomNode.origin.x + geomNode.parameters.r1,
+		        y: geomNode.origin.y + geomNode.parameters.r2,
+		        z: geomNode.origin.z};
+        cursoid.setPosition(position, 'no_z');
+    }
 
     this.dispose = function() {
 	cursoid.off('cursoidUpdated', setR1R2);
+        updater.off('updated', setCursoid);
     }
+
+    var init = function() {
+        cursoid.on('cursoidUpdated', setR1R2);
+        updater.on('updated', setCursoid);
+        setCursoid();
+    }
+    init();
 }
 
 
@@ -225,16 +264,13 @@ SS.preview.Ellipse1d = function(spec) {
 	    modifier = new SS.modifier.Origin({geomNode : geomNode,
                                                cursoid  : sceneView.cursoid,
 					       updater  : updater});
-	    cursoid.setPosition(geomNode.origin);
+	   
 	}
 	if (anchorName === 'radii') {
 	    modifier = new SS.modifier.MajorMinorRadii({geomNode : geomNode,
 							cursoid  : sceneView.cursoid,
 							updater  : updater});
-	    var position = {x: geomNode.origin.x + geomNode.parameters.r1,
-			    y: geomNode.origin.y + geomNode.parameters.r2,
-			    z: geomNode.origin.z};
-	    cursoid.setPosition(position);
+	    
 	}
 
 	if(modifier) {
@@ -249,7 +285,7 @@ SS.preview.Ellipse1d = function(spec) {
     }
 
     this.dispose = function() {
-	updater = null;
+        updater = null;
 	cursoid.clear();
 	Object.keys(sceneObjects).map(function(key) {
              scene.removeObject(sceneObjects[key]);
@@ -263,7 +299,7 @@ SS.preview.Ellipse1d = function(spec) {
     updatePreview();
 }
 
-SS.preview.createEllipse1d = function(spec) {
+SS.constructors.createEllipse1d = function(spec) {
     
     var updater = new SS.GeomNodeUpdater(spec.geomNode);
     SS.constructors.active = new SS.preview.Ellipse1d({geomNode : spec.geomNode,

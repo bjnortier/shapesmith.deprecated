@@ -133,7 +133,7 @@ SS.Cursoid = function(spec) {
     var toZMaterial = new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.5, linewidth: 1 })
     var zToZMaterial = new THREE.LineBasicMaterial({ color: 0x666666, opacity: 0.5, linewidth: 1 })
     var cursoidGeometry = new THREE.CubeGeometry(1.0, 1.0, 1.0);
-    var active;
+    var active, modifier;
 
     evented(this);
 
@@ -213,10 +213,12 @@ SS.Cursoid = function(spec) {
         }
 
         if ((position.x !== 0) && (position.y !== 0)) {
-            var cursoidZPointer = new THREE.Mesh(cursoidGeometry, cursoidZMaterial);
-            cursoidZPointer.position.z = position.z;
-            cursoidZPointer.name = {cursoid: 'z'};
-            cursoidSceneObject.addChild(cursoidZPointer);
+            if (modifier !== 'no_z') {
+                var cursoidZPointer = new THREE.Mesh(cursoidGeometry, cursoidZMaterial);
+                cursoidZPointer.position.z = position.z;
+                cursoidZPointer.name = {cursoid: 'z'};
+                cursoidSceneObject.addChild(cursoidZPointer);
+            }
         }
 
         if (position.z !== 0) {
@@ -229,8 +231,6 @@ SS.Cursoid = function(spec) {
         
         scene.addObject(cursoidSceneObject);
 
-        that.fire({type: 'cursoidUpdated', 
-		   position: {x: position.x, y: position.y, z: position.z}});
     };
 
     spec.workplane.on('workplaneXYCursorUpdated', function(event) {
@@ -245,6 +245,9 @@ SS.Cursoid = function(spec) {
                 position.y = event.y;
             } 
             updatePosition();
+            that.fire({type: 'cursoidUpdated', 
+		   position: {x: position.x, y: position.y, z: position.z}});
+
         }
     });
 
@@ -252,6 +255,9 @@ SS.Cursoid = function(spec) {
         if (active && (active === 'z')) {
             position.z = event.z;
             updatePosition();
+            that.fire({type: 'cursoidUpdated', 
+		       position: {x: position.x, y: position.y, z: position.z}});
+
         }
     });
    
@@ -280,10 +286,11 @@ SS.Cursoid = function(spec) {
 	}
     }
 
-    this.setPosition = function(newPosition) {
+    this.setPosition = function(newPosition, newModifier) {
         position = {x: newPosition.x,
                     y: newPosition.y,
                     z: newPosition.z};
+        modifier = newModifier;
         updatePosition();
     }
 
