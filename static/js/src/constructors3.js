@@ -9,27 +9,25 @@ SS.GeomNodeUpdater = function(geomNode) {
     evented(this);
 
     var updateTreeview = function() {
-	$('#x').val(geomNode.origin.x);
-	$('#y').val(geomNode.origin.y);
-	$('#z').val(geomNode.origin.z);
-	$('#r1').val(geomNode.parameters.r1);
-	$('#r2').val(geomNode.parameters.r2);
+        Object.keys(geomNode.origin).map(function(key) {
+            $('#' + key).val(geomNode.origin[key]);
+        });
+        Object.keys(geomNode.parameters).map(function(key) {
+            $('#' + key).val(geomNode.parameters[key]);
+        });
     }
 
     var updateFromTreeView = function() {
-        geomNode.origin.x = parseFloat($('#x').val());
-        geomNode.origin.y = parseFloat($('#y').val());
-        geomNode.origin.z = parseFloat($('#z').val());
-        geomNode.parameters.r1 = parseFloat($('#r1').val());
-        geomNode.parameters.r2 = parseFloat($('#r2').val());
+        Object.keys(geomNode.origin).map(function(key) {
+            geomNode.origin[key] = parseFloat($('#' + key).val());
+        });
+        Object.keys(geomNode.parameters).map(function(key) {
+            geomNode.parameters[key] = parseFloat($('#' + key).val());
+        });
         that.fire({type: 'updated'});
     }
 
-    $('#x').change(updateFromTreeView);
-    $('#y').change(updateFromTreeView);
-    $('#z').change(updateFromTreeView);
-    $('#r1').change(updateFromTreeView);
-    $('#r2').change(updateFromTreeView);
+   
         
     this.setOrigin = function(origin) {
         geomNode.origin = origin;
@@ -44,7 +42,17 @@ SS.GeomNodeUpdater = function(geomNode) {
         that.fire({type: 'updated'});
     }
 
-    updateTreeview();
+    var init = function() {
+        Object.keys(geomNode.origin).map(function(key) {
+            $('#' + key).change(updateFromTreeView);
+        });
+        Object.keys(geomNode.parameters).map(function(key) {
+            $('#' + key).change(updateFromTreeView);
+        });
+        updateTreeview();
+    }
+    
+    init();
 }
 
 SS.modifier.Origin = function(spec) {
