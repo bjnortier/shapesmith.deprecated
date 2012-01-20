@@ -95,8 +95,8 @@ SS.SceneView = function(container) {
 	if (activeConstructor) {
 	    var anchorName = activeConstructor.getAnchor(scene, camera, event);
 	    if (anchorName) {
-		activeConstructor.activateAnchor(anchorName);
-		cursoidName = 'xy';
+		var initialCursoid = activeConstructor.activateAnchor(anchorName);
+		cursoidName = initialCursoid;
 	    }
 	}
 	

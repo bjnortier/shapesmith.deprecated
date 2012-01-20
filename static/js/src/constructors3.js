@@ -86,6 +86,8 @@ SS.modifier.Origin = function(spec) {
         updater.off('updatedFromTree', setCursoid);
     }
 
+    this.initialCursoidName = 'xy';
+
     var init = function() {
         cursoid.on('cursoidUpdated', setOrigin);
         updater.on('updatedFromTree', setCursoid);
@@ -119,6 +121,8 @@ SS.modifier.Radius = function(spec) {
         updater.off('updatedFromTree', setCursoid);
     }
 
+    this.initialCursoidName = 'xy';
+
     var init = function() {
         cursoid.on('cursoidUpdated', setRadius);
         updater.on('updatedFromTree', setCursoid);
@@ -146,6 +150,8 @@ SS.modifier.Height = function(spec) {
 	cursoid.off('cursoidUpdated', setHeight);
         updater.off('updatedFromTree', setCursoid);
     }
+
+    this.initialCursoidName = 'xyz';
 
     var init = function() {
         cursoid.on('cursoidUpdated', setHeight);
@@ -175,6 +181,8 @@ SS.modifier.MajorMinorRadii = function(spec) {
 	cursoid.off('cursoidUpdated', setR1R2);
         updater.off('updatedFromTree', setCursoid);
     }
+
+    this.initialCursoidName = 'xy';
 
     var init = function() {
         cursoid.on('cursoidUpdated', setR1R2);
@@ -333,6 +341,7 @@ SS.constructors.Constructor = function(spec) {
 	    SS.modifier.active = modifier;
 	}
 	updatePreview();
+	return modifier.initialCursoidName;
     }
 
     this.deactivateAnchor = function() {
