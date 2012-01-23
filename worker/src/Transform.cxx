@@ -28,12 +28,15 @@ CompositeShape Rotate::apply(double multiplier,
     transformation.SetRotation(gp_Ax1(gp_Pnt(x,y,z), gp_Dir(u,v,w)),
                                multiplier*Util::to_d(angle)/180*M_PI);
     
-    composite_shape_.set_three_d_shape(                                          
-        BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
-    composite_shape_.set_two_d_shape(                                          
-        BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
-    composite_shape_.set_one_d_shape(
-        BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
+    if (!composite_shape_.three_d_shape().IsNull()) {
+        composite_shape_.set_three_d_shape(BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
+    }
+    if (!composite_shape_.two_d_shape().IsNull()) {
+        composite_shape_.set_two_d_shape(BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
+    }
+    if (!composite_shape_.one_d_shape().IsNull()) {
+        composite_shape_.set_one_d_shape(BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
+    }
     return composite_shape_;
 }
 
@@ -76,9 +79,15 @@ CompositeShape Mirror::apply(double multiplier,
     gp_Trsf transformation = gp_Trsf();
     transformation.SetMirror(gp_Ax1(gp_Pnt(x, y, z), gp_Dir(u, v, w)));
     
-    composite_shape_.set_three_d_shape(BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
-    composite_shape_.set_two_d_shape(BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
-    composite_shape_.set_one_d_shape(BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
+    if (!composite_shape_.three_d_shape().IsNull()) {
+        composite_shape_.set_three_d_shape(BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
+    }
+    if (!composite_shape_.two_d_shape().IsNull()) {
+        composite_shape_.set_two_d_shape(BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
+    }
+    if (!composite_shape_.one_d_shape().IsNull()) {
+        composite_shape_.set_one_d_shape(BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
+    }
     return composite_shape_;
 }
 
@@ -95,9 +104,15 @@ CompositeShape Translate::apply(double multiplier,
                                          multiplier*v, 
                                          multiplier*w));
     
-    composite_shape_.set_three_d_shape(BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
-    composite_shape_.set_two_d_shape(BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
-    composite_shape_.set_one_d_shape(BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
+    if (!composite_shape_.three_d_shape().IsNull()) {
+        composite_shape_.set_three_d_shape(BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
+    }
+    if (!composite_shape_.two_d_shape().IsNull()) {
+        composite_shape_.set_two_d_shape(BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
+    }
+    if (!composite_shape_.one_d_shape().IsNull()) {
+        composite_shape_.set_one_d_shape(BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
+    }
     return composite_shape_;
 
 }

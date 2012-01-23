@@ -53,12 +53,24 @@ private:
             auto_ptr<T> transform(new T(obj_to_copy));
             CompositeShape transformedShape = transform->apply(multiplier, origin, parameters);
             
-            copies[index].set_three_d_shape(BRepAlgoAPI_Fuse(transformedShape.three_d_shape(), 
-                                                             copies[index - 1].three_d_shape()).Shape());
-            copies[index].set_two_d_shape(BRepAlgoAPI_Fuse(transformedShape.two_d_shape(), 
-                                                           copies[index - 1].two_d_shape()).Shape());
-            copies[index].set_one_d_shape(BRepAlgoAPI_Fuse(transformedShape.one_d_shape(), 
-                                                           copies[index - 1].one_d_shape()).Shape());
+            if (!transformedShape.three_d_shape().IsNull()) {
+                copies[index].set_three_d_shape(BRepAlgoAPI_Fuse(transformedShape.three_d_shape(), 
+                                                                 copies[index - 1].three_d_shape()).Shape());
+            } else {
+                copies[index].set_three_d_shape(copies[index-1].three_d_shape());
+            }
+            if (!transformedShape.two_d_shape().IsNull()) {
+                copies[index].set_two_d_shape(BRepAlgoAPI_Fuse(transformedShape.two_d_shape(), 
+                                                               copies[index - 1].two_d_shape()).Shape());
+            } else {
+                copies[index].set_two_d_shape(copies[index-1].two_d_shape());
+            }
+            if (!transformedShape.one_d_shape().IsNull()) {
+                copies[index].set_one_d_shape(BRepAlgoAPI_Fuse(transformedShape.one_d_shape(), 
+                                                               copies[index - 1].one_d_shape()).Shape());
+            } else {
+                copies[index].set_one_d_shape(copies[index-1].one_d_shape());
+            }
             
             multiplier = multiplier + grouping;
             remaining = remaining - grouping;
