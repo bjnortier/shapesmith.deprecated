@@ -170,6 +170,45 @@ SS.modifier.Radius = function(spec) {
     init();
 }
 
+SS.modifier.Angle = function(spec) {
+    var node = spec.node, updater = spec.updater, cursoid = spec.cursoid;
+    var parameterName = spec.parameterName || 'angle';
+    
+    
+    var setAngle = function(event) {
+        var dx = event.position.x - node.origin.x;
+        var dy = event.position.y - node.origin.y;
+        var angle = parseFloat((Math.atan2(dy, dx)/Math.PI*180).toFixed(3));
+	var r  = parseFloat(Math.sqrt(dx*dx + dy*dy).toFixed(3));
+        
+        var params = {};
+        params[parameterName] = angle;
+	updater.setParams(params);
+    }
+
+    var setCursoid = function() {
+        var r = 20, angle = node.parameters[parameterName];
+        var position = {x: node.origin.x + r*Math.cos(angle/180*Math.PI),
+		        y: node.origin.y + r*Math.sin(angle/180*Math.PI),
+		        z: node.origin.z};
+        cursoid.setPositionAndExclusions(position, ['z']);
+    }
+
+    this.dispose = function() {
+	cursoid.off('cursoidUpdated', setAngle);
+        updater.off('updatedFromTree', setCursoid);
+    }
+
+    this.initialCursoidName = 'xy';
+
+    var init = function() {
+        cursoid.on('cursoidUpdated', setAngle);
+        updater.on('updatedFromTree', setCursoid);
+        setCursoid();
+    }
+    init();
+}
+
 SS.modifier.RadiusMinR1 = function(spec) {
     var node = spec.node, updater = spec.updater, cursoid = spec.cursoid;
     

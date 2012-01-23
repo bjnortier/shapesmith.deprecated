@@ -184,7 +184,7 @@ $(document).ready(function() {
 	       }).render($('#transforms'));
     new Action('Rotate', '/static/images/rotate.png', 
                function(selected) { 
-		   SS.constructors,createRotate(create_transform(selected, 'rotate', ['u', 'v', 'w', 'angle', 'n']));
+		   SS.constructors.createRotate(create_transform(selected, 'rotate', ['u', 'v', 'w', 'angle', 'n']));
 	       }).render($('#transforms'));
     new Action('Mirror', '/static/images/mirror.png', 
                function(selected) { 
