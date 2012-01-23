@@ -429,7 +429,7 @@ SS.SceneView = function(container) {
     var remove = function(geomNode) {
 	var mesh = idToModel[geomNode.id];
 	if (mesh) {
-	    scene.removeObject(mesh);
+	    scene.remove(mesh);
 	    delete idToModel[geomNode.id];
 	}
     }

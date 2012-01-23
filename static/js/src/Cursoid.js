@@ -127,7 +127,7 @@ SS.Cursoid = function(spec) {
 
     var updatePosition = function() {
         if (cursoidSceneObject) {
-            scene.removeObject(cursoidSceneObject);
+            scene.remove(cursoidSceneObject);
         }
         cursoidSceneObject = new THREE.Object3D();
 
@@ -255,7 +255,7 @@ SS.Cursoid = function(spec) {
     this.clear = function() {
 	this.deactivate();
 	if (cursoidSceneObject) {
-	    scene.removeObject(cursoidSceneObject);
+	    scene.remove(cursoidSceneObject);
 	}
     }
 

@@ -130,8 +130,7 @@ $(document).ready(function() {
      */
     new Action('Cuboid', '/static/images/cuboid.png', 
                function() { 
-		   create_primitive('cuboid',  ['u', 'v', 'w']); 
-		   SS.constructors.cuboid().create();
+		   SS.constructors.createCuboid(create_primitive('cuboid',  ['u', 'v', 'w']));
 	       }).render($('#3Dprimitives'));
     new Action('Sphere', '/static/images/sphere.png', 
                function() { 

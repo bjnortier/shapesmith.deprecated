@@ -97,6 +97,37 @@ SS.modifier.Origin = function(spec) {
     init();
 }
 
+SS.modifier.UV = function(spec) {
+    var geomNode = spec.geomNode, updater = spec.updater, cursoid = spec.cursoid;
+    
+    var setUV = function(event) {
+	updater.setParams({u: event.position.x - geomNode.origin.x,
+                           v: event.position.y - geomNode.origin.y});
+    }
+
+    var setCursoid = function() {
+        cursoid.setPosition({x: geomNode.origin.x + geomNode.parameters.u,
+		             y: geomNode.origin.y + geomNode.parameters.v,
+		             z: geomNode.origin.z});
+        cursoid.setPosition(geomNode.origin);
+    }
+
+    this.dispose = function() {
+	cursoid.off('cursoidUpdated', setUV);
+        updater.off('updatedFromTree', setCursoid);
+    }
+
+    this.initialCursoidName = 'xy';
+
+    var init = function() {
+        cursoid.on('cursoidUpdated', setUV);
+        updater.on('updatedFromTree', setCursoid);
+        setCursoid();
+    }
+
+    init();
+}
+
 SS.modifier.Radius = function(spec) {
     var geomNode = spec.geomNode, updater = spec.updater, cursoid = spec.cursoid;
     
@@ -125,6 +156,36 @@ SS.modifier.Radius = function(spec) {
 
     var init = function() {
         cursoid.on('cursoidUpdated', setRadius);
+        updater.on('updatedFromTree', setCursoid);
+        setCursoid();
+    }
+    init();
+}
+
+SS.modifier.W = function(spec) {
+    var geomNode = spec.geomNode, updater = spec.updater, cursoid = spec.cursoid;
+    
+    var setW = function(event) {
+        var w = event.position.z - geomNode.origin.z;
+	updater.setParams({w: w});
+    }
+
+    var setCursoid = function() {
+        var position = {x: geomNode.origin.x,
+		        y: geomNode.origin.y,
+		        z: geomNode.origin.z + geomNode.parameters.w};
+        cursoid.setPosition(position, 'no_xy');
+    }
+
+    this.dispose = function() {
+	cursoid.off('cursoidUpdated', setW);
+        updater.off('updatedFromTree', setCursoid);
+    }
+
+    this.initialCursoidName = 'xyz';
+
+    var init = function() {
+        cursoid.on('cursoidUpdated', setW);
         updater.on('updatedFromTree', setCursoid);
         setCursoid();
     }
@@ -273,7 +334,7 @@ SS.constructors.Constructor = function(spec) {
     
     var updatePreview = function() {
         Object.keys(sceneObjects).map(function(key) {
-            scene.removeObject(sceneObjects[key]);
+            scene.remove(sceneObjects[key]);
         });
         sceneObjects = specialisation.createSceneObject(geomNode, activeAnchor);
 
@@ -352,7 +413,7 @@ SS.constructors.Constructor = function(spec) {
     this.dispose = function() {
 	cursoid.clear();
 	Object.keys(sceneObjects).map(function(key) {
-             scene.removeObject(sceneObjects[key]);
+             scene.remove(sceneObjects[key]);
         });
         updater.off('updatedFromTree', updatePreview);
         updater.off('updatedFromCursoid', updatePreview);
@@ -388,6 +449,20 @@ SS.constructors.createEllipse1d = function(geomNode) {
     geomNode.parameters.r1 = 20;
     geomNode.parameters.r2 = 10;
     SS.constructors.editEllipse1d(geomNode);
+}
+
+SS.constructors.editCuboid = function(geomNode) {
+    SS.constructors.edit(geomNode, SS.constructors.Cuboid);
+}
+
+SS.constructors.createCuboid = function(geomNode) {
+    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    geomNode.origin.x = lastMousePosition.x;
+    geomNode.origin.y = lastMousePosition.y;
+    geomNode.parameters.u = 10;
+    geomNode.parameters.v = 10;
+    geomNode.parameters.w = 10;
+    SS.constructors.editCuboid(geomNode);
 }
 
 SS.constructors.editSphere = function(geomNode) {
@@ -468,6 +543,80 @@ SS.constructors.Ellipse1d = function() {
     this.getModifierForAnchor = function(anchorName) {
         if (anchorName === 'radii') {
 	    return SS.modifier.MajorMinorRadii;
+	}
+        return null;
+    }
+
+}
+
+SS.constructors.Cuboid = function() {
+
+    this.createSceneObject = function(geomNode, activeAnchor) {
+        
+        var sceneObjects = {};
+        
+        var u = geomNode.parameters.u;
+        var v = geomNode.parameters.v;
+        var w = geomNode.parameters.w;
+        if (u) {
+	    sceneObjects.uDim = SS.preview.createDimArrow(u, 0);
+	}
+        if (v) {
+	    sceneObjects.vDim = SS.preview.createDimArrow(v, Math.PI/2);
+	}
+        if (w) {
+	    sceneObjects.wDim = SS.preview.createDimArrow(w, Math.PI);
+            sceneObjects.wDim.rotation.y = Math.PI/2;
+	}
+
+	var cuboidObj = new THREE.Object3D();
+        if(u &&v && w) {
+            var geometry = new THREE.CubeGeometry(u,v,w);
+	    var materials = [ SS.constructors.faceMaterial, SS.constructors.wireframeMaterial ];
+	    var cube = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
+	    cube.position.x = u/2;
+	    cube.position.y = v/2;
+	    cube.position.z = w/2;
+	    cuboidObj.add(cube);
+        } else if (u && v) {
+            var uvLineGeom = new THREE.Geometry();
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u, 0, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u, v, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, v, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	    var uvLine = new THREE.Line(uvLineGeom, SS.constructors.lineMaterial);
+	    cuboidObj.add(uvLine);
+        }
+        
+
+        if (activeAnchor !== 'uv') {
+            var uvAnchor = new THREE.Mesh(SS.constructors.anchorGeometry, SS.constructors.anchorMaterial);
+            uvAnchor.position.x = u;
+            uvAnchor.position.y = v;
+            uvAnchor.name = {anchor: 'uv'};
+            cuboidObj.add(uvAnchor);
+	}
+
+        if (activeAnchor !== 'w') {
+            var wAnchor = new THREE.Mesh(SS.constructors.anchorGeometry, SS.constructors.anchorMaterial);
+            wAnchor.position.z = w;
+            wAnchor.name = {anchor: 'w'};
+            cuboidObj.add(wAnchor);
+	}
+
+        sceneObjects.cuboid = cuboidObj;
+        return sceneObjects;
+    }
+
+    this.anchorPriorities = ['uv', 'w', 'origin'];
+
+    this.getModifierForAnchor = function(anchorName) {
+        if (anchorName === 'uv') {
+	    return SS.modifier.UV;
+	}
+        if (anchorName === 'w') {
+	    return SS.modifier.W;
 	}
         return null;
     }

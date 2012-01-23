@@ -310,14 +310,12 @@ function TreeView() {
             editingNode.editing = true;
             geom_doc.replace(geomNode, editingNode);
 	    
-	    if (SS.constructors[geomNode.type]) {
+            var factoryFunction = 'edit' + geomNode.type.charAt(0).toUpperCase() + geomNode.type.substring(1);
+            if (SS.constructors[factoryFunction]) {
+                SS.constructors[factoryFunction](geomNode);
+            } else if (SS.constructors[geomNode.type]) {
 		SS.constructors[geomNode.type]().edit();
-	    } else {
-                var factoryFunction = 'edit' + geomNode.type.charAt(0).toUpperCase() + geomNode.type.substring(1);
-                if (SS.constructors[factoryFunction]) {
-                    SS.constructors[factoryFunction](geomNode);
-                }
-            }
+	    } 
             
 	}
     }
