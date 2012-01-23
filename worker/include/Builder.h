@@ -39,37 +39,37 @@ class CuboidBuilder : public Builder3D {
 
 public:
     CuboidBuilder(map< string, mValue > json);
-    ~CuboidBuilder();
+    ~CuboidBuilder() {};
 };
 
 class SphereBuilder : public Builder3D {
 public:
     SphereBuilder(map< string, mValue > json);
-    ~SphereBuilder();
+    ~SphereBuilder() {};
 };
 
 class CylinderBuilder : public Builder3D {
 public:
     CylinderBuilder(map< string, mValue > json);
-    ~CylinderBuilder();
+    ~CylinderBuilder() {};
 };
 
 class ConeBuilder : public Builder3D {
 public:
     ConeBuilder(map< string, mValue > json);
-    ~ConeBuilder();
+    ~ConeBuilder() {};
 };
 
 class WedgeBuilder : public Builder3D {
 public:
     WedgeBuilder(map< string, mValue > json);
-    ~WedgeBuilder();
+    ~WedgeBuilder() {};
 };
 
 class TorusBuilder : public Builder3D {
 public:
     TorusBuilder(map< string, mValue > json);
-    ~TorusBuilder();
+    ~TorusBuilder() {};
 };
 
 #pragma mark 1D Primitives

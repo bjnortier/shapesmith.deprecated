@@ -135,7 +135,10 @@ CylinderBuilder::CylinderBuilder(map< string, mValue > json) {
 ConeBuilder::ConeBuilder(map< string, mValue > json) {
     map< string, mValue > parameters = json["parameters"].get_obj();
     double r1 = Util::to_d(parameters["r1"]);
-    double r2 = Util::to_d(parameters["r2"]);
+    double r2 = 0.0;
+    if (!parameters["r2"].is_null()) {
+        r2 = Util::to_d(parameters["r2"]);
+    }
     double h = Util::to_d(parameters["h"]);
 
     map< string, mValue > origin = json["origin"].get_obj();

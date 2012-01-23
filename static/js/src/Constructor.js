@@ -73,6 +73,20 @@ SS.constructors.createCylinder = function(geomNode) {
     SS.constructors.editCylinder(geomNode);
 }
 
+SS.constructors.editCone = function(geomNode) {
+    SS.constructors.edit(geomNode, SS.constructors.Cone);
+}
+
+SS.constructors.createCone = function(geomNode) {
+    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    geomNode.origin.x = lastMousePosition.x;
+    geomNode.origin.y = lastMousePosition.y;
+    geomNode.parameters.r1 = 10;
+    geomNode.parameters.r2 = 0;
+    geomNode.parameters.h = 20;
+    SS.constructors.editCone(geomNode);
+}
+
 SS.constructors.editWedge = function(geomNode) {
     SS.constructors.edit(geomNode, SS.constructors.Wedge);
 }
@@ -551,6 +565,93 @@ SS.constructors.Cylinder = function() {
 
     this.getModifierForAnchor = function(spec) {
         if (spec.anchorName === 'radius') {
+	    return new SS.modifier.Radius(spec);
+	}
+        if (spec.anchorName === 'height') {
+            spec.parameterName = 'h';
+	    return new SS.modifier.W(spec);
+	}
+        return null;
+    }
+
+}
+
+
+SS.constructors.Cone = function() {
+
+    this.createSceneObject = function(geomNode, activeAnchor) {
+        
+        var sceneObjects = {};
+        
+        var r1 = geomNode.parameters.r1;
+        var r2 = geomNode.parameters.r2;
+        var h = geomNode.parameters.h;
+        if (r1) {
+	    sceneObjects.r1Dim = SS.preview.createDimArrow(r1, (geomNode.extra && geomNode.extra.angle) || 0);
+	}
+        if (h) {
+	    sceneObjects.hDim = SS.preview.createDimArrow(h, Math.PI);
+            sceneObjects.hDim.rotation.y = Math.PI/2;
+	}
+
+	var coneObj = new THREE.Object3D();
+
+	if (r1 && h) {
+            var geometry = new THREE.CylinderGeometry(r1, r2 || 0.000001, h, 50);
+	    var cone = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
+	    cone.position.z = h/2;
+            cone.rotation.x = -Math.PI/2;
+	    coneObj.add(cone);
+	    
+	    var circleGeom2 = new THREE.Geometry();
+	    for(var i = 0; i <= 50; ++i) {
+		var theta = Math.PI*2*i/50;
+		var dx = r2*Math.cos(theta);
+		var dy = r2*Math.sin(theta);
+		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+	    }
+	    var circle2 = new THREE.Line(circleGeom2, SS.constructors.lineMaterial);
+            circle2.position.z = h;
+	    coneObj.add(circle2);
+
+	}
+        if (r1) {
+	    var circleGeom1 = new THREE.Geometry();
+	    for(var i = 0; i <= 50; ++i) {
+		var theta = Math.PI*2*i/50;
+		var dx = r1*Math.cos(theta);
+		var dy = r1*Math.sin(theta);
+		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+	    }
+	    var circle1 = new THREE.Line(circleGeom1, SS.constructors.lineMaterial);
+	    coneObj.add(circle1);
+        }
+
+        if (activeAnchor !== 'r1') {
+            var radiusAnchor = new THREE.Mesh(SS.constructors.anchorGeometry, SS.constructors.anchorMaterial);
+            var angle = (geomNode.extra && geomNode.extra.angle) || 0;
+            radiusAnchor.position.x = r1*Math.cos(angle);
+            radiusAnchor.position.y = r1*Math.sin(angle);
+            radiusAnchor.name = {anchor: 'r1'};
+            coneObj.add(radiusAnchor);
+	}
+
+        if (activeAnchor !== 'height') {
+            var heightAnchor = new THREE.Mesh(SS.constructors.anchorGeometry, SS.constructors.anchorMaterial);
+            heightAnchor.position.z = h;
+            heightAnchor.name = {anchor: 'height'};
+            coneObj.add(heightAnchor);
+	}
+
+        sceneObjects.cylinder = coneObj;
+        return sceneObjects;
+    }
+
+    this.anchorPriorities = ['height', 'r1', 'origin'];
+
+    this.getModifierForAnchor = function(spec) {
+        if (spec.anchorName === 'r1') {
+            spec.parameterName = 'r1';
 	    return new SS.modifier.Radius(spec);
 	}
         if (spec.anchorName === 'height') {

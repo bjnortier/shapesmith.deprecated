@@ -142,8 +142,7 @@ $(document).ready(function() {
 	       }).render($('#3Dprimitives'));
     new Action('Cone', '/static/images/cone.png', 
                function() { 
-		   create_primitive('cone', ['r1', 'h', 'r2']); 
-		   SS.constructors.cone().create();
+		   SS.constructors.createCone(create_primitive('cone', ['r1', 'h', 'r2'])); 
 	       }).render($('#3Dprimitives'));
     new Action('Wedge', '/static/images/wedge.png', 
                function() { 
