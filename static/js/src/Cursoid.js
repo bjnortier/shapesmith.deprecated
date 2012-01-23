@@ -254,15 +254,15 @@ SS.Cursoid = function(spec) {
     }
 
     this.setPosition = function(newPosition) {
+        this.setPositionAndExclusions(newPosition, []);
+    }
+
+    this.setPositionAndExclusions = function(newPosition, newExclusions) {
+        exclusions = newExclusions || [];
         position = {x: newPosition.x,
                     y: newPosition.y,
                     z: newPosition.z};
         updatePosition();
-    }
-
-    this.setPositionAndExclusions = function(newPosition, newExclusions) {
-        exclusions = newExclusions;
-        this.setPosition(newPosition);
     }
 
     return this;
