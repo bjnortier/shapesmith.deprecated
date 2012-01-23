@@ -32,15 +32,20 @@ SS.modifier.Origin = function(spec) {
 
 SS.modifier.UV = function(spec) {
     var geomNode = spec.geomNode, updater = spec.updater, cursoid = spec.cursoid;
+    var uParameterName = spec.uParameterName || 'u', vParameterName = spec.vParameterName || 'v';
+
     
     var setUV = function(event) {
-	updater.setParams({u: event.position.x - geomNode.origin.x,
-                           v: event.position.y - geomNode.origin.y});
+        var params = {};
+        params[uParameterName] = event.position.x - geomNode.origin.x;
+        params[vParameterName] = event.position.y - geomNode.origin.y;
+	updater.setParams(params); 
     }
 
     var setCursoid = function() {
-        cursoid.setPosition({x: geomNode.origin.x + geomNode.parameters.u,
-		             y: geomNode.origin.y + geomNode.parameters.v,
+        
+        cursoid.setPosition({x: geomNode.origin.x + geomNode.parameters[uParameterName],
+		             y: geomNode.origin.y + geomNode.parameters[vParameterName],
 		             z: geomNode.origin.z});
         cursoid.setPosition(geomNode.origin);
     }
@@ -54,6 +59,39 @@ SS.modifier.UV = function(spec) {
 
     var init = function() {
         cursoid.on('cursoidUpdated', setUV);
+        updater.on('updatedFromTree', setCursoid);
+        setCursoid();
+    }
+
+    init();
+}
+
+SS.modifier.U2 = function(spec) {
+    var geomNode = spec.geomNode, updater = spec.updater, cursoid = spec.cursoid;
+    var u2ParameterName = spec.u2ParameterName || 'u2';
+
+    var setU2 = function(event) {
+        var params = {};
+        params[u2ParameterName] = event.position.x - geomNode.origin.x;
+	updater.setParams(params); 
+    }
+
+    var setCursoid = function() {
+        cursoid.setPosition({x: geomNode.origin.x + geomNode.parameters[u2ParameterName],
+		             y: geomNode.origin.y,
+		             z: geomNode.origin.z});
+        cursoid.setPositionAndExclusions(geomNode.origin, ['y', 'z']);
+    }
+
+    this.dispose = function() {
+	cursoid.off('cursoidUpdated', setU2);
+        updater.off('updatedFromTree', setCursoid);
+    }
+
+    this.initialCursoidName = 'xy';
+
+    var init = function() {
+        cursoid.on('cursoidUpdated', setU2);
         updater.on('updatedFromTree', setCursoid);
         setCursoid();
     }
@@ -82,7 +120,7 @@ SS.modifier.Radius = function(spec) {
         var position = {x: geomNode.origin.x + geomNode.parameters[parameterName]*Math.cos(angle),
 		        y: geomNode.origin.y + geomNode.parameters[parameterName]*Math.sin(angle),
 		        z: geomNode.origin.z};
-        cursoid.setPosition(position, 'no_z');
+        cursoid.setPositionAndExclusions(position, ['z']);
     }
 
     this.dispose = function() {
@@ -120,7 +158,7 @@ SS.modifier.RadiusMinR1 = function(spec) {
         var position = {x: geomNode.origin.x + r*Math.cos(angle),
 		        y: geomNode.origin.y + r*Math.sin(angle),
 		        z: geomNode.origin.z};
-        cursoid.setPosition(position, 'no_z');
+        cursoid.setPositionAndExclusions(position, ['y', 'z']);
     }
 
     this.dispose = function() {
@@ -153,7 +191,7 @@ SS.modifier.W = function(spec) {
         var position = {x: geomNode.origin.x,
 		        y: geomNode.origin.y,
 		        z: geomNode.origin.z + geomNode.parameters[parameterName]};
-        cursoid.setPosition(position, 'no_xy');
+        cursoid.setPositionAndExclusions(position, ['xy']);
     }
 
     this.dispose = function() {
@@ -184,7 +222,7 @@ SS.modifier.MajorMinorRadii = function(spec) {
         var position = {x: geomNode.origin.x + geomNode.parameters.r1,
 		        y: geomNode.origin.y + geomNode.parameters.r2,
 		        z: geomNode.origin.z};
-        cursoid.setPosition(position, 'no_z');
+        cursoid.setPositionAndExclusions(position, ['z']);
     }
 
     this.dispose = function() {

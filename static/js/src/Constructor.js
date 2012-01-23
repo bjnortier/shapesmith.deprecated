@@ -73,6 +73,21 @@ SS.constructors.createCylinder = function(geomNode) {
     SS.constructors.editCylinder(geomNode);
 }
 
+SS.constructors.editWedge = function(geomNode) {
+    SS.constructors.edit(geomNode, SS.constructors.Wedge);
+}
+
+SS.constructors.createWedge = function(geomNode) {
+    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    geomNode.origin.x = lastMousePosition.x;
+    geomNode.origin.y = lastMousePosition.y;
+    geomNode.parameters.u1 = 20;
+    geomNode.parameters.u2 = 10;
+    geomNode.parameters.v = 10;
+    geomNode.parameters.w = 10;
+    SS.constructors.editWedge(geomNode);
+}
+
 SS.constructors.editTorus = function(geomNode) {
     SS.constructors.edit(geomNode, SS.constructors.Torus);
 }
@@ -316,6 +331,99 @@ SS.constructors.Cuboid = function() {
     this.getModifierForAnchor = function(spec) {
         if (spec.anchorName === 'uv') {
 	    return new SS.modifier.UV(spec);
+	}
+        if (spec.anchorName === 'w') {
+	    return new SS.modifier.W(spec);
+	}
+        return null;
+    }
+
+}
+
+
+SS.constructors.Wedge = function() {
+
+    this.createSceneObject = function(geomNode, activeAnchor) {
+        
+        var sceneObjects = {};
+        
+        var u1 = geomNode.parameters.u1;
+        var u2 = geomNode.parameters.u2;
+        var v = geomNode.parameters.v;
+        var w = geomNode.parameters.w;
+        if (u1) {
+	    sceneObjects.u1Dim = SS.preview.createDimArrow(u1, 0);
+	}
+        if (u2) {
+	    sceneObjects.u2Dim = SS.preview.createDimArrow(u2, 0);
+            sceneObjects.u2Dim.position.y = v;
+	}
+        if (v) {
+	    sceneObjects.vDim = SS.preview.createDimArrow(v, Math.PI/2);
+	}
+        if (w) {
+	    sceneObjects.wDim = SS.preview.createDimArrow(w, Math.PI);
+            sceneObjects.wDim.rotation.y = Math.PI/2;
+	}
+
+	var wedgeObj = new THREE.Object3D();
+        if (u1 && v && w) {
+	    var geometry = new THREE.WedgeGeometry(u1,v,w,u2 - u1);
+	    var materials = [ SS.constructors.faceMaterial, SS.constructors.wireframeMaterial ];
+	    var wedge =  THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
+	    wedge.position.x = u1/2;
+	    wedge.position.y = v/2;
+	    wedge.position.z = w/2;
+            wedgeObj.add(wedge);
+        } else if (u1 && v && u2) {
+
+	    var uvLineGeom = new THREE.Geometry();
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u1, 0, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u2, v, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, v, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	    var uvLine = new THREE.Line(uvLineGeom, SS.constructors.lineMaterial);
+	    wedgeObj(uvLine);
+        }
+        
+
+        if (activeAnchor !== 'uv') {
+            var uvAnchor = new THREE.Mesh(SS.constructors.anchorGeometry, SS.constructors.anchorMaterial);
+            uvAnchor.position.x = u1;
+            uvAnchor.position.y = v;
+            uvAnchor.name = {anchor: 'uv'};
+            wedgeObj.add(uvAnchor);
+	}
+
+        if (activeAnchor !== 'u2') {
+            var wAnchor = new THREE.Mesh(SS.constructors.anchorGeometry, SS.constructors.anchorMaterial);
+            wAnchor.position.x = u2;
+            wAnchor.position.y = v;
+            wAnchor.name = {anchor: 'u2'};
+            wedgeObj.add(wAnchor);
+	}
+
+        if (activeAnchor !== 'w') {
+            var wAnchor = new THREE.Mesh(SS.constructors.anchorGeometry, SS.constructors.anchorMaterial);
+            wAnchor.position.z = w;
+            wAnchor.name = {anchor: 'w'};
+            wedgeObj.add(wAnchor);
+	}
+
+        sceneObjects.wedge = wedgeObj;
+        return sceneObjects;
+    }
+
+    this.anchorPriorities = ['uv', 'w', 'u2', 'origin'];
+
+    this.getModifierForAnchor = function(spec) {
+        if (spec.anchorName === 'uv') {
+            spec.uParameterName = 'u1';
+	    return new SS.modifier.UV(spec);
+	}
+        if (spec.anchorName === 'u2') {
+	    return new SS.modifier.U2(spec);
 	}
         if (spec.anchorName === 'w') {
 	    return new SS.modifier.W(spec);

@@ -121,7 +121,7 @@ SS.Cursoid = function(spec) {
     var toZMaterial = new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.5, linewidth: 1 })
     var zToZMaterial = new THREE.LineBasicMaterial({ color: 0x666666, opacity: 0.5, linewidth: 1 })
     var cursoidGeometry = new THREE.CubeGeometry(1.0, 1.0, 1.0);
-    var active, modifier;
+    var active, exclusions = [];
 
     evented(this);
 
@@ -167,39 +167,33 @@ SS.Cursoid = function(spec) {
         }
         cursoidSceneObject.add(cursoidPointer);
 
-        if (position.y !== 0) {
-            if (modifier !== 'no_xy') {
-                var cursoidXPointer = new THREE.Mesh(cursoidGeometry, cursoidXMaterial);
-                cursoidXPointer.position.x = position.x;
-                cursoidXPointer.name = {cursoid: 'x'};
-                cursoidSceneObject.add(cursoidXPointer)
-            }
+        if ((position.y !== 0) && (exclusions.indexOf('x') === -1)) {
+            var cursoidXPointer = new THREE.Mesh(cursoidGeometry, cursoidXMaterial);
+            cursoidXPointer.position.x = position.x;
+            cursoidXPointer.name = {cursoid: 'x'};
+            cursoidSceneObject.add(cursoidXPointer)
         }
 
-        if (position.x !== 0) {
-            if (modifier !== 'no_xy') {
-                var cursoidYPointer = new THREE.Mesh(cursoidGeometry, cursoidYMaterial);
-                cursoidYPointer.position.y = position.y;
-                cursoidYPointer.name = {cursoid: 'y'};
-                cursoidSceneObject.add(cursoidYPointer);
-            }
+        if ((position.x !== 0) && (exclusions.indexOf('y') === -1)) {
+            var cursoidYPointer = new THREE.Mesh(cursoidGeometry, cursoidYMaterial);
+            cursoidYPointer.position.y = position.y;
+            cursoidYPointer.name = {cursoid: 'y'};
+            cursoidSceneObject.add(cursoidYPointer);
         }
 
-        if (modifier !== 'no_z') {
+        if (exclusions.indexOf('z') === -1) {
             var cursoidZPointer = new THREE.Mesh(cursoidGeometry, cursoidZMaterial);
             cursoidZPointer.position.z = position.z;
             cursoidZPointer.name = {cursoid: 'z'};
             cursoidSceneObject.add(cursoidZPointer);
         }
 
-        if (position.z !== 0) {
-            if (modifier !== 'no_xy') {
-                var cursoidXYPointer = new THREE.Mesh(cursoidGeometry, cursoidXYMaterial);
-                cursoidXYPointer.position.x = position.x;
-                cursoidXYPointer.position.y = position.y;
-                cursoidXYPointer.name = {cursoid: 'xy'};
-                cursoidSceneObject.add(cursoidXYPointer);
-            }
+        if ((position.z !== 0)  && (exclusions.indexOf('xy') === -1)) {
+            var cursoidXYPointer = new THREE.Mesh(cursoidGeometry, cursoidXYMaterial);
+            cursoidXYPointer.position.x = position.x;
+            cursoidXYPointer.position.y = position.y;
+            cursoidXYPointer.name = {cursoid: 'xy'};
+            cursoidSceneObject.add(cursoidXYPointer);
         }
         
         scene.add(cursoidSceneObject);
@@ -259,12 +253,16 @@ SS.Cursoid = function(spec) {
 	}
     }
 
-    this.setPosition = function(newPosition, newModifier) {
+    this.setPosition = function(newPosition) {
         position = {x: newPosition.x,
                     y: newPosition.y,
                     z: newPosition.z};
-        modifier = newModifier;
         updatePosition();
+    }
+
+    this.setPositionAndExclusions = function(newPosition, newExclusions) {
+        exclusions = newExclusions;
+        this.setPosition(newPosition);
     }
 
     return this;
