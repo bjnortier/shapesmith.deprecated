@@ -79,6 +79,7 @@ function create_primitive(type, keys) {
 	origin: {x: 0, y: 0, z: 0},
         parameters: geometryParams});
     geom_doc.add(geomNode);
+    sceneView.setOthersTransparent(geomNode);
     return geomNode;
 }
 
@@ -112,6 +113,7 @@ function create_transform(selected, type, keys) {
     replacement.transforms.push(transform);
     selectionManager.deselectAll();
     geom_doc.replace(original, replacement);
+    sceneView.setOthersTransparent(replacement);
     return {geomNode: replacement, transform: transform};
 }
 

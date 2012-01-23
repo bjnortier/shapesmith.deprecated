@@ -400,8 +400,8 @@ SS.SceneView = function(container) {
 		}
 	    }
 	    if (isEditing) {
-		color = 0x3F8FD2;
-		opacity = 0.2;
+		color = 0xdddd00;
+		opacity = 0.5;
 	    }
 
 	    var mesh = new THREE.Object3D();
@@ -506,6 +506,24 @@ SS.SceneView = function(container) {
 	geometry.computeCentroids();
 	geometry.computeFaceNormals();
 	return geometry;
+    }
+
+    this.setOthersTransparent = function(geomNode) {
+        geom_doc.rootNodes.map(function(rootNode) {
+            if (geomNode.id !== rootNode.id) {
+                idToModel[rootNode.id].children.map(function(child) {
+                    child.material.opacity = 0.2;
+                });
+            }
+         });
+    }
+
+    this.restoreOpacity = function() {
+        geom_doc.rootNodes.map(function(rootNode) {
+            idToModel[rootNode.id].children.map(function(child) {
+                child.material.opacity = 1.0;
+            });
+        });
     }
     
     init();
