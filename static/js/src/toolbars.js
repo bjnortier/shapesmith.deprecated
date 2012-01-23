@@ -188,7 +188,7 @@ $(document).ready(function() {
 	       }).render($('#transforms'));
     new Action('Mirror', '/static/images/mirror.png', 
                function(selected) { 
-		   SS.constructors.createAxisMirror(create_transform(selected, 'mirror', ['u', 'v', 'w', 'n']));
+		   SS.constructors.createMirror(create_transform(selected, 'mirror', ['u', 'v', 'w', 'n']));
 	       }).render($('#transforms'));
     
 });

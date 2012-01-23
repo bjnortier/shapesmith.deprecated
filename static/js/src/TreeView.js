@@ -272,6 +272,12 @@ function TreeView() {
             var editingNode = geomNode.editableCopy();
             editingNode.transforms[transformIndex].editing = true;
             geom_doc.replace(geomNode, editingNode);
+
+            var transformNode = editingNode.transforms[transformIndex];
+            var factoryFunction = 'edit' + transformNode.type.charAt(0).toUpperCase() + transformNode.type.substring(1);
+            if (SS.constructors[factoryFunction]) {
+                SS.constructors[factoryFunction](geomNode, transformNode);
+            }
         });
 
         $('.delete-transform').click(function() {

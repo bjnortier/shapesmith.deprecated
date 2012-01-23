@@ -56,11 +56,11 @@ SS.constructors.createScale = function(spec) {
     SS.constructors.editScale(spec.geomNode, spec.transform);
 }
 
-SS.constructors.editAxisMirror = function(geomNode, transform) {
+SS.constructors.editMirror = function(geomNode, transform) {
     SS.constructors.editTransform(geomNode, transform, SS.constructors.AxisMirror);
 }
 
-SS.constructors.createAxisMirror = function(spec) {
+SS.constructors.createMirror = function(spec) {
     spec.transform.origin.x = 0;
     spec.transform.origin.y = 0;
     spec.transform.origin.z = 0;
@@ -69,7 +69,7 @@ SS.constructors.createAxisMirror = function(spec) {
     spec.transform.parameters.w = 10;
     spec.transform.parameters.n = 0;
 
-    SS.constructors.editAxisMirror(spec.geomNode, spec.transform);
+    SS.constructors.editMirror(spec.geomNode, spec.transform);
 }
 
 SS.constructors.Translate = function() {
