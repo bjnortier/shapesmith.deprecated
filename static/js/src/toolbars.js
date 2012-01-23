@@ -176,8 +176,7 @@ $(document).ready(function() {
      */
     new Action('Translate', '/static/images/translate.png', 
                function(selected) { 
-		   var editingNode = create_transform(selected, 'translate', ['u', 'v', 'w', 'n']); 
-		   SS.constructors.translate({geomNode: editingNode}).create();
+		   SS.constructors.createTranslate(create_transform(selected, 'translate', ['u', 'v', 'w', 'n']));
 	       }).render($('#transforms'));
     new Action('Scale', '/static/images/scale.png', 
                function(selected) { 
@@ -185,15 +184,13 @@ $(document).ready(function() {
 	       }).render($('#transforms'));
     new Action('Rotate', '/static/images/rotate.png', 
                function(selected) { 
-		   var editingNode = create_transform(selected, 'rotate', ['u', 'v', 'w', 'angle', 'n']);
-		   SS.constructors.rotate({geomNode: editingNode}).create();
+		   SS.constructors,createRotate(create_transform(selected, 'rotate', ['u', 'v', 'w', 'angle', 'n']));
 	       }).render($('#transforms'));
     new Action('Mirror', '/static/images/mirror.png', 
                function(selected) { 
-		   var editingNode = create_transform(selected, 'mirror', ['u', 'v', 'w', 'n']); 
-		   SS.constructors.mirror({geomNode: editingNode}).create();
+		   SS.constructors.createMirror(create_transform(selected, 'mirror', ['u', 'v', 'w', 'n']));
 	       }).render($('#transforms'));
-
+    
 });
 
 

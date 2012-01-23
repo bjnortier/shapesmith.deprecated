@@ -30,6 +30,37 @@ SS.modifier.Origin = function(spec) {
     init();
 }
 
+SS.modifier.UVW = function(spec) {
+    var node = spec.node, updater = spec.updater, cursoid = spec.cursoid;
+    
+    var setUVW = function(event) {
+	updater.setParams({u: event.position.x - node.origin.x,
+                           v: event.position.y - node.origin.y,
+                           w: event.position.z - node.origin.z});
+    }
+
+    var setCursoid = function() {
+        cursoid.setPosition({x: node.origin.x + node.parameters.u,
+                             y: node.origin.y + node.parameters.v,
+                             z: node.origin.z + node.parameters.w});
+    }
+
+    this.dispose = function() {
+	cursoid.off('cursoidUpdated', setUVW);
+        updater.off('updatedFromTree', setCursoid);
+    }
+
+    this.initialCursoidName = 'xy';
+
+    var init = function() {
+        cursoid.on('cursoidUpdated', setUVW);
+        updater.on('updatedFromTree', setCursoid);
+        setCursoid();
+    }
+
+    init();
+}
+
 SS.modifier.UV = function(spec) {
     var node = spec.node, updater = spec.updater, cursoid = spec.cursoid;
     var uParameterName = spec.uParameterName || 'u', vParameterName = spec.vParameterName || 'v';
@@ -65,6 +96,7 @@ SS.modifier.UV = function(spec) {
 
     init();
 }
+
 
 SS.modifier.U2 = function(spec) {
     var node = spec.node, updater = spec.updater, cursoid = spec.cursoid;
