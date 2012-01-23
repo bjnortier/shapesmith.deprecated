@@ -152,8 +152,7 @@ $(document).ready(function() {
 	       }).render($('#3Dprimitives'));
     new Action('Torus', '/static/images/torus.png', 
                function() { 
-		   create_primitive('torus', ['r1', 'r2']); 
-		   SS.constructors.torus().create();
+		   SS.constructors.createTorus(create_primitive('torus', ['r1', 'r2']));
 	       }).render($('#3Dprimitives'));
 
     new Action('Ellipse 1D', '/static/images/cuboid.png', 

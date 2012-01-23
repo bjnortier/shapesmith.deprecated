@@ -96,8 +96,10 @@
   <script type="text/javascript" src="/static/js/src/Command.js"></script>
   <script type="text/javascript" src="/static/js/src/GeomNode.js"></script>
   <script type="text/javascript" src="/static/js/src/GeomDocument.js"></script>
-  <script type="text/javascript" src="/static/js/src/constructors3.js"></script>
-  <script type="text/javascript" src="/static/js/src/constructors.js"></script>
+  <script type="text/javascript" src="/static/js/src/Preview.js"></script>
+  <script type="text/javascript" src="/static/js/src/GeomNodeUpdater.js"></script>
+  <script type="text/javascript" src="/static/js/src/Modifier.js"></script>
+  <script type="text/javascript" src="/static/js/src/Constructor.js"></script>
   
   <script type="text/javascript" src="/static/js/src/TreeView.js"></script>
   <script type="text/javascript" src="/static/js/src/workplane.js"></script>
