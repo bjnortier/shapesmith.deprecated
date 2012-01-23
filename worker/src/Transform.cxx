@@ -49,9 +49,15 @@ CompositeShape Scale::apply(double multiplier,
     gp_Trsf transformation = gp_Trsf();
     transformation.SetScale(gp_Pnt(x, y, z), factor);
     
-    composite_shape_.set_three_d_shape(BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
-    composite_shape_.set_two_d_shape(BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
-    composite_shape_.set_one_d_shape(BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
+    if (!composite_shape_.three_d_shape().IsNull()) {
+        composite_shape_.set_three_d_shape(BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
+    }
+    if (!composite_shape_.two_d_shape().IsNull()) {
+        composite_shape_.set_two_d_shape(BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
+    }
+    if (!composite_shape_.one_d_shape().IsNull()) {
+        composite_shape_.set_one_d_shape(BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
+    }
     return composite_shape_;
 
 }

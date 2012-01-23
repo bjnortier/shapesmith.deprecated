@@ -98,18 +98,21 @@ function create_transform(selected, type, keys) {
     var replacement = original.editableCopy();
     var origin = {x: 0, y: 0, z: 0};
     if (((type === 'translate') || (type === 'scale')) && (original.origin)) {
-	origin = original.origin;
+	origin = {x: original.origin.x,
+                  y: original.origin.y,
+                  z: original.origin.z};
     }
     
-    replacement.transforms.push(new Transform({
+    var transform = new Transform({
         type: type,
         editing: true,
 	origin: origin,
         parameters: transformParams
-    }));
+    });
+    replacement.transforms.push(transform);
     selectionManager.deselectAll();
     geom_doc.replace(original, replacement);
-    return replacement;
+    return {geomNode: replacement, transform: transform};
 }
 
 
@@ -178,8 +181,7 @@ $(document).ready(function() {
 	       }).render($('#transforms'));
     new Action('Scale', '/static/images/scale.png', 
                function(selected) { 
-		   var editingNode = create_transform(selected, 'scale', ['factor']); 
-		   SS.constructors.scale({geomNode: editingNode}).create();
+		   SS.constructors.createScale(create_transform(selected, 'scale', ['factor']));
 	       }).render($('#transforms'));
     new Action('Rotate', '/static/images/rotate.png', 
                function(selected) { 

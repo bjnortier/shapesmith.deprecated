@@ -12,17 +12,18 @@ SS.constructors.anchorGeometry = new THREE.CubeGeometry(1.0, 1.0, 1.0);
 SS.constructors.anchorMaterial = new THREE.MeshBasicMaterial( { color: 0x66a1d1, opacity: 0.8, wireframe: false } );
 
 
-SS.constructors.edit = function(geomNode, specialisation) {
-    var updater = new SS.GeomNodeUpdater(geomNode);
+SS.constructors.editPrimitive = function(geomNode, specialisationClazz) {
+    var updater = new SS.NodeUpdater(geomNode);
     SS.constructors.active = new SS.constructors.Constructor({geomNode : geomNode,
                                                               scene    : sceneView.scene,
                                                               cursoid  : sceneView.cursoid,
-                                                              specialisation : new specialisation(),
+                                                              specialisation : new specialisationClazz(),
                                                               updater  : updater});
 }
 
+
 SS.constructors.editEllipse1d = function(geomNode) {
-    SS.constructors.edit(geomNode, SS.constructors.Ellipse1d);
+    SS.constructors.editPrimitive(geomNode, SS.constructors.Ellipse1d);
 }
 
 SS.constructors.createEllipse1d = function(geomNode) {
@@ -35,7 +36,7 @@ SS.constructors.createEllipse1d = function(geomNode) {
 }
 
 SS.constructors.editCuboid = function(geomNode) {
-    SS.constructors.edit(geomNode, SS.constructors.Cuboid);
+    SS.constructors.editPrimitive(geomNode, SS.constructors.Cuboid);
 }
 
 SS.constructors.createCuboid = function(geomNode) {
@@ -49,7 +50,7 @@ SS.constructors.createCuboid = function(geomNode) {
 }
 
 SS.constructors.editSphere = function(geomNode) {
-    SS.constructors.edit(geomNode, SS.constructors.Sphere);
+    SS.constructors.editPrimitive(geomNode, SS.constructors.Sphere);
 }
 
 SS.constructors.createSphere = function(geomNode) {
@@ -61,7 +62,7 @@ SS.constructors.createSphere = function(geomNode) {
 }
 
 SS.constructors.editCylinder = function(geomNode) {
-    SS.constructors.edit(geomNode, SS.constructors.Cylinder);
+    SS.constructors.editPrimitive(geomNode, SS.constructors.Cylinder);
 }
 
 SS.constructors.createCylinder = function(geomNode) {
@@ -74,7 +75,7 @@ SS.constructors.createCylinder = function(geomNode) {
 }
 
 SS.constructors.editCone = function(geomNode) {
-    SS.constructors.edit(geomNode, SS.constructors.Cone);
+    SS.constructors.editPrimitive(geomNode, SS.constructors.Cone);
 }
 
 SS.constructors.createCone = function(geomNode) {
@@ -88,7 +89,7 @@ SS.constructors.createCone = function(geomNode) {
 }
 
 SS.constructors.editWedge = function(geomNode) {
-    SS.constructors.edit(geomNode, SS.constructors.Wedge);
+    SS.constructors.editPrimitive(geomNode, SS.constructors.Wedge);
 }
 
 SS.constructors.createWedge = function(geomNode) {
@@ -103,7 +104,7 @@ SS.constructors.createWedge = function(geomNode) {
 }
 
 SS.constructors.editTorus = function(geomNode) {
-    SS.constructors.edit(geomNode, SS.constructors.Torus);
+    SS.constructors.editPrimitive(geomNode, SS.constructors.Torus);
 }
 
 SS.constructors.createTorus = function(geomNode) {
@@ -115,9 +116,10 @@ SS.constructors.createTorus = function(geomNode) {
     SS.constructors.editTorus(geomNode);
 }
 
+
 SS.constructors.Constructor = function(spec) {
-    var that = this, scene = spec.scene, geomNode = spec.geomNode, updater = spec.updater;
-    var cursoid = spec.cursoid;
+    var that = this, scene = spec.scene, node = spec.transform || spec.geomNode;
+    var updater = spec.updater, cursoid = spec.cursoid;
 
     var sceneObjects = {};
     var activeAnchor;
@@ -127,7 +129,11 @@ SS.constructors.Constructor = function(spec) {
         Object.keys(sceneObjects).map(function(key) {
             scene.remove(sceneObjects[key]);
         });
-        sceneObjects = specialisation.createSceneObject(geomNode, activeAnchor);
+        if (spec.transform) {
+            sceneObjects = specialisation.createSceneObject(spec.geomNode, spec.transform, activeAnchor);
+        } else {
+            sceneObjects = specialisation.createSceneObject(spec.geomNode, activeAnchor);
+        }
 
 	if (activeAnchor !== 'origin') {
             var originAnchor = new THREE.Mesh(SS.constructors.anchorGeometry, SS.constructors.anchorMaterial);
@@ -136,9 +142,9 @@ SS.constructors.Constructor = function(spec) {
 	}
     
 	Object.keys(sceneObjects).map(function(key) {
-	    sceneObjects[key].position.x = geomNode.origin.x + sceneObjects[key].position.x;
-	    sceneObjects[key].position.y = geomNode.origin.y + sceneObjects[key].position.y;
-	    sceneObjects[key].position.z = geomNode.origin.z + sceneObjects[key].position.z;
+	    sceneObjects[key].position.x = node.origin.x + sceneObjects[key].position.x;
+	    sceneObjects[key].position.y = node.origin.y + sceneObjects[key].position.y;
+	    sceneObjects[key].position.z = node.origin.z + sceneObjects[key].position.z;
             // Perfornamce boost as per
             // https://github.com/mrdoob/three.js/issues/167
             sceneObjects[key].children.map(function(child) {
@@ -178,13 +184,13 @@ SS.constructors.Constructor = function(spec) {
 	    SS.modifier.active.dispose();
 	}
 
-        var spec = {geomNode  : geomNode,
+        var spec = {node      : node,
                     cursoid   : sceneView.cursoid,
 		    updater   : updater,
                     anchorName: anchorName};
         var modifier = specialisation.getModifierForAnchor(spec);
         if (!modifier && anchorName === 'origin') {
-	    modifier = new SS.modifier.Origin({geomNode : geomNode,
+	    modifier = new SS.modifier.Origin({node     : node,
                                                cursoid  : sceneView.cursoid,
 					       updater  : updater});
 	}

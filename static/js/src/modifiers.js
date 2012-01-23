@@ -2,7 +2,7 @@ var SS = SS || {};
 SS.modifier = {};
 
 SS.modifier.Origin = function(spec) {
-    var geomNode = spec.geomNode, updater = spec.updater, cursoid = spec.cursoid;
+    var node = spec.node, updater = spec.updater, cursoid = spec.cursoid;
     
     var setOrigin = function(event) {
 	updater.setOrigin({x: event.position.x,
@@ -11,7 +11,7 @@ SS.modifier.Origin = function(spec) {
     }
 
     var setCursoid = function() {
-        cursoid.setPosition(geomNode.origin);
+        cursoid.setPosition(node.origin);
     }
 
     this.dispose = function() {
@@ -31,23 +31,23 @@ SS.modifier.Origin = function(spec) {
 }
 
 SS.modifier.UV = function(spec) {
-    var geomNode = spec.geomNode, updater = spec.updater, cursoid = spec.cursoid;
+    var node = spec.node, updater = spec.updater, cursoid = spec.cursoid;
     var uParameterName = spec.uParameterName || 'u', vParameterName = spec.vParameterName || 'v';
 
     
     var setUV = function(event) {
         var params = {};
-        params[uParameterName] = event.position.x - geomNode.origin.x;
-        params[vParameterName] = event.position.y - geomNode.origin.y;
+        params[uParameterName] = event.position.x - node.origin.x;
+        params[vParameterName] = event.position.y - node.origin.y;
 	updater.setParams(params); 
     }
 
     var setCursoid = function() {
         
-        cursoid.setPosition({x: geomNode.origin.x + geomNode.parameters[uParameterName],
-		             y: geomNode.origin.y + geomNode.parameters[vParameterName],
-		             z: geomNode.origin.z});
-        cursoid.setPosition(geomNode.origin);
+        cursoid.setPosition({x: node.origin.x + node.parameters[uParameterName],
+		             y: node.origin.y + node.parameters[vParameterName],
+		             z: node.origin.z});
+        cursoid.setPosition(node.origin);
     }
 
     this.dispose = function() {
@@ -67,20 +67,20 @@ SS.modifier.UV = function(spec) {
 }
 
 SS.modifier.U2 = function(spec) {
-    var geomNode = spec.geomNode, updater = spec.updater, cursoid = spec.cursoid;
+    var node = spec.node, updater = spec.updater, cursoid = spec.cursoid;
     var u2ParameterName = spec.u2ParameterName || 'u2';
 
     var setU2 = function(event) {
         var params = {};
-        params[u2ParameterName] = event.position.x - geomNode.origin.x;
+        params[u2ParameterName] = event.position.x - node.origin.x;
 	updater.setParams(params); 
     }
 
     var setCursoid = function() {
-        cursoid.setPosition({x: geomNode.origin.x + geomNode.parameters[u2ParameterName],
-		             y: geomNode.origin.y,
-		             z: geomNode.origin.z});
-        cursoid.setPositionAndExclusions(geomNode.origin, ['y', 'z']);
+        cursoid.setPosition({x: node.origin.x + node.parameters[u2ParameterName],
+		             y: node.origin.y,
+		             z: node.origin.z});
+        cursoid.setPositionAndExclusions(node.origin, ['y', 'z']);
     }
 
     this.dispose = function() {
@@ -100,13 +100,13 @@ SS.modifier.U2 = function(spec) {
 }
 
 SS.modifier.Radius = function(spec) {
-    var geomNode = spec.geomNode, updater = spec.updater, cursoid = spec.cursoid;
+    var node = spec.node, updater = spec.updater, cursoid = spec.cursoid;
     var parameterName = spec.parameterName || 'r';
     
     
     var setRadius = function(event) {
-        var dx = event.position.x - geomNode.origin.x;
-        var dy = event.position.y - geomNode.origin.y;
+        var dx = event.position.x - node.origin.x;
+        var dy = event.position.y - node.origin.y;
         var angle = Math.atan2(dy, dx);
 	var r  = parseFloat(Math.sqrt(dx*dx + dy*dy).toFixed(3));
         
@@ -116,10 +116,10 @@ SS.modifier.Radius = function(spec) {
     }
 
     var setCursoid = function() {
-        var angle = (geomNode.extra && geomNode.extra.angle) || 0;
-        var position = {x: geomNode.origin.x + geomNode.parameters[parameterName]*Math.cos(angle),
-		        y: geomNode.origin.y + geomNode.parameters[parameterName]*Math.sin(angle),
-		        z: geomNode.origin.z};
+        var angle = (node.extra && node.extra.angle) || 0;
+        var position = {x: node.origin.x + node.parameters[parameterName]*Math.cos(angle),
+		        y: node.origin.y + node.parameters[parameterName]*Math.sin(angle),
+		        z: node.origin.z};
         cursoid.setPositionAndExclusions(position, ['z']);
     }
 
@@ -139,25 +139,25 @@ SS.modifier.Radius = function(spec) {
 }
 
 SS.modifier.RadiusMinR1 = function(spec) {
-    var geomNode = spec.geomNode, updater = spec.updater, cursoid = spec.cursoid;
+    var node = spec.node, updater = spec.updater, cursoid = spec.cursoid;
     
     var setR2 = function(event) {
-        var dx = event.position.x - geomNode.origin.x;
-        var dy = event.position.y - geomNode.origin.y;
+        var dx = event.position.x - node.origin.x;
+        var dy = event.position.y - node.origin.y;
         var angle = Math.atan2(dy, dx);
 	var r  = parseFloat(Math.sqrt(dx*dx + dy*dy).toFixed(3));
 
-        var r2 = parseFloat((r - geomNode.parameters.r1).toFixed(3));
+        var r2 = parseFloat((r - node.parameters.r1).toFixed(3));
         
 	updater.setParams({r2: r2}, {angle: angle});
     }
 
     var setCursoid = function() {
-        var angle = (geomNode.extra && geomNode.extra.angle) || 0;
-        var r = geomNode.parameters.r1 + geomNode.parameters.r2;
-        var position = {x: geomNode.origin.x + r*Math.cos(angle),
-		        y: geomNode.origin.y + r*Math.sin(angle),
-		        z: geomNode.origin.z};
+        var angle = (node.extra && node.extra.angle) || 0;
+        var r = node.parameters.r1 + node.parameters.r2;
+        var position = {x: node.origin.x + r*Math.cos(angle),
+		        y: node.origin.y + r*Math.sin(angle),
+		        z: node.origin.z};
         cursoid.setPositionAndExclusions(position, ['y', 'z']);
     }
 
@@ -177,20 +177,20 @@ SS.modifier.RadiusMinR1 = function(spec) {
 }
 
 SS.modifier.W = function(spec) {
-    var geomNode = spec.geomNode, updater = spec.updater, cursoid = spec.cursoid;
+    var node = spec.node, updater = spec.updater, cursoid = spec.cursoid;
     var parameterName = spec.parameterName || 'w';
     
     var setW = function(event) {
-        var w = event.position.z - geomNode.origin.z;
+        var w = event.position.z - node.origin.z;
         var params = {};
         params[parameterName] = w;
 	updater.setParams(params);
     }
 
     var setCursoid = function() {
-        var position = {x: geomNode.origin.x,
-		        y: geomNode.origin.y,
-		        z: geomNode.origin.z + geomNode.parameters[parameterName]};
+        var position = {x: node.origin.x,
+		        y: node.origin.y,
+		        z: node.origin.z + node.parameters[parameterName]};
         cursoid.setPositionAndExclusions(position, ['xy']);
     }
 
@@ -210,18 +210,18 @@ SS.modifier.W = function(spec) {
 }
 
 SS.modifier.MajorMinorRadii = function(spec) {
-    var geomNode = spec.geomNode, updater = spec.updater, cursoid = spec.cursoid;
+    var node = spec.node, updater = spec.updater, cursoid = spec.cursoid;
     
     var setR1R2 = function(event) {
-	var r1 = event.position.x - geomNode.origin.x;
-	var r2 = event.position.y - geomNode.origin.y;
+	var r1 = event.position.x - node.origin.x;
+	var r2 = event.position.y - node.origin.y;
 	updater.setParams({r1: r1, r2:r2});
     }
 
     var setCursoid = function() {
-        var position = {x: geomNode.origin.x + geomNode.parameters.r1,
-		        y: geomNode.origin.y + geomNode.parameters.r2,
-		        z: geomNode.origin.z};
+        var position = {x: node.origin.x + node.parameters.r1,
+		        y: node.origin.y + node.parameters.r2,
+		        z: node.origin.z};
         cursoid.setPositionAndExclusions(position, ['z']);
     }
 
