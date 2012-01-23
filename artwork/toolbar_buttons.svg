@@ -14,7 +14,7 @@
    height="1052.3622047"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.0 r9654"
+   inkscape:version="0.48.1 r9760"
    sodipodi:docname="toolbar_buttons.svg"
    inkscape:export-filename="/Users/bjnortier/development/isambard/web/images/save.png"
    inkscape:export-xdpi="10.838273"
@@ -24,11 +24,11 @@
      pagecolor="#000000"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="0"
+     inkscape:pageopacity="1"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.24748737"
-     inkscape:cx="129.79146"
-     inkscape:cy="2552.4341"
+     inkscape:zoom="0.35"
+     inkscape:cx="508.18895"
+     inkscape:cy="821.90429"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -369,6 +369,39 @@
          stdDeviation="4"
          id="feGaussianBlur4284" />
     </filter>
+    <radialGradient
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.3794861,0.00308336,-0.00210277,0.94077315,-106.06278,4.5818265)"
+       r="137.73245"
+       fy="91.9375"
+       fx="280"
+       cy="91.9375"
+       cx="280"
+       id="radialGradient4475-4"
+       xlink:href="#linearGradient4469-7"
+       inkscape:collect="always" />
+    <linearGradient
+       id="linearGradient4469-7">
+      <stop
+         id="stop4471-1"
+         offset="0"
+         style="stop-color:#00ff38;stop-opacity:1;" />
+      <stop
+         id="stop4473-3"
+         offset="1"
+         style="stop-color:#00ff38;stop-opacity:0;" />
+    </linearGradient>
+    <radialGradient
+       r="137.73245"
+       fy="91.9375"
+       fx="280"
+       cy="91.9375"
+       cx="280"
+       gradientTransform="matrix(1.3794861,0.00308336,-0.00210277,0.94077315,928.22295,-17.850648)"
+       gradientUnits="userSpaceOnUse"
+       id="radialGradient5100"
+       xlink:href="#linearGradient4469-7"
+       inkscape:collect="always" />
   </defs>
   <metadata
      id="metadata7">
@@ -1275,5 +1308,18 @@
        inkscape:export-filename="/Users/bjnortier/development/isambard/web/images/save.png"
        inkscape:export-xdpi="10.84"
        inkscape:export-ydpi="10.84" />
+    <path
+       sodipodi:type="arc"
+       style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="path5119"
+       sodipodi:cx="1177.1428"
+       sodipodi:cy="-27.637833"
+       sodipodi:rx="131.42857"
+       sodipodi:ry="85.714287"
+       d="m 1308.5714,-27.637833 a 131.42857,85.714287 0 1 1 -262.8572,0 131.42857,85.714287 0 1 1 262.8572,0 z"
+       transform="translate(125.71429,331.42857)"
+       inkscape:export-xdpi="12.1"
+       inkscape:export-ydpi="12.1"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/ellipse1d.png" />
   </g>
 </svg>
