@@ -141,7 +141,7 @@ SS.preview.createDimArrow2 = function(text, u, v, w) {
         } else {
             text.lookAt(new THREE.Vector3(0, -1, 0).normalize());
         }
-        text.position.z = r/2 + text && text.boundRadius/2;
+        text.position.z = r/2 + text.boundRadius/2;
         dimObject.add(text);
     }
 
