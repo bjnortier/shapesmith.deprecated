@@ -56,6 +56,22 @@ SS.constructors.createScale = function(spec) {
     SS.constructors.editScale(spec.geomNode, spec.transform);
 }
 
+SS.constructors.editAxisMirror = function(geomNode, transform) {
+    SS.constructors.editTransform(geomNode, transform, SS.constructors.AxisMirror);
+}
+
+SS.constructors.createAxisMirror = function(spec) {
+    spec.transform.origin.x = 0;
+    spec.transform.origin.y = 0;
+    spec.transform.origin.z = 0;
+    spec.transform.parameters.u = 0;
+    spec.transform.parameters.v = 0;
+    spec.transform.parameters.w = 10;
+    spec.transform.parameters.n = 0;
+
+    SS.constructors.editAxisMirror(spec.geomNode, spec.transform);
+}
+
 SS.constructors.Translate = function() {
 
     this.createSceneObject = function(geomNode, transform, activeAnchor) {
@@ -259,3 +275,88 @@ SS.constructors.Scale = function() {
     }
 
 }
+
+
+SS.constructors.AxisMirror = function() {
+
+    this.createSceneObject = function(geomNode, transform, activeAnchor) {
+        
+        var sceneObjects = {};
+        
+        var x = transform.origin.x, y = transform.origin.y, z = transform.origin.z;
+        var u = transform.parameters.u, v = transform.parameters.v, w = transform.parameters.w;
+        var angle = transform.parameters.angle;
+
+	var mirrorObj = new THREE.Object3D();
+        var r = parseFloat((Math.sqrt(u*u + v*v + w*w)).toFixed(3));
+
+        if (r > 0) {
+            var rDim = SS.preview.createDimArrow2('', u, v, w);
+            sceneObjects.rDim = rDim;
+        }
+
+        if (r > 0) {
+
+            var geometry = sceneView.createGeometry(geomNode.mesh);
+            var originalPositions = geometry.vertices.map(function(vertex) {
+	        return vertex.position;
+            });
+
+            var un, vn, wn;
+            var normUVW = new THREE.Vector3(u, v, w).normalize();
+            un = normUVW.x;
+            vn = normUVW.y;
+            wn = normUVW.z;
+
+            var mirrorGeometry = sceneView.createGeometry(geomNode.mesh);
+	    mirrorGeometry.vertices = originalPositions.map(function(position) {
+	        var position = position.clone();
+                position.x = position.x - x;
+                position.y = position.y - y;
+                position.z = position.z - z;
+                
+                var a = (un*position.x + vn*position.y + wn*position.z);
+                var x2 = 2*a*un - position.x;
+                var y2 = 2*a*vn - position.y;
+                var z2 = 2*a*wn - position.z;
+                
+	        var newPosition = new THREE.Vector3(x2, y2, z2);
+	        return new THREE.Vertex(newPosition);
+	    });
+	    mirrorGeometry.computeCentroids();
+	    mirrorGeometry.computeFaceNormals();
+
+	    var materials = [SS.constructors.faceMaterial];
+	    var mesh = THREE.SceneUtils.createMultiMaterialObject(mirrorGeometry, materials);
+
+	    mesh.doubleSided = true;
+            
+            var mirrorMeshObj = new THREE.Object3D();
+            mirrorMeshObj.add(mesh);
+            sceneObjects.rotatedMeshObj = mirrorMeshObj;
+        }
+
+        if (activeAnchor !== 'uvw') {
+            var uvwAnchor = new THREE.Mesh(SS.constructors.anchorGeometry, SS.constructors.anchorMaterial);
+            uvwAnchor.position.x = u;
+            uvwAnchor.position.y = v;
+            uvwAnchor.position.z = w;
+            uvwAnchor.name = {anchor: 'uvw'};
+            mirrorObj.add(uvwAnchor);
+	}
+
+        sceneObjects.rotate = mirrorObj;
+        return sceneObjects;
+    }
+
+    this.anchorPriorities = ['angle', 'uvw', 'origin'];
+
+    this.getModifierForAnchor = function(spec) {
+        if (spec.anchorName === 'uvw') {
+	    return new SS.modifier.UVW(spec);
+	}
+        return null;
+    }
+
+}
+
