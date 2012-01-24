@@ -406,7 +406,7 @@ SS.SceneView = function(container) {
 
             var objectName = {geomNodeId: geomNode.id};
 
-	    var geometry3D = createGeometry(geomNode.mesh);
+	    var geometry3D = create3DGeometry(geomNode.mesh['3d']);
 	    var material3D = new THREE.MeshPhongMaterial( { ambient: color, color: color, opacity: opacity,  specular: color, shininess: 50, shading: THREE.SmoothShading } );
             var mesh3d = new THREE.Mesh(geometry3D, material3D);
             mesh3d.doubleSided = true;
@@ -487,7 +487,8 @@ SS.SceneView = function(container) {
     }
 
     var createGeometry = function(meshes) {
-        return create3DGeometry(meshes['3d']);
+        return {'3d' : create3DGeometry(meshes['3d']),
+                '1d' : create1DGeometry(meshes['1d'])};
     }
 
     var create3DGeometry = function(mesh) {
