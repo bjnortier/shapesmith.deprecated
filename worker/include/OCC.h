@@ -15,6 +15,7 @@
 
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 
 #include <StlAPI_Writer.hxx>
@@ -29,6 +30,7 @@
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
+#include <TopoDS_Wire.hxx>
 #include <TopoDS_Face.hxx>
 #include <Poly_Triangulation.hxx>
 #include <TColgp_Array1OfDir.hxx>

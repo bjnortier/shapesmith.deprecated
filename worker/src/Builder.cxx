@@ -179,6 +179,41 @@ TorusBuilder::TorusBuilder(map< string, mValue > json) {
     PostProcess(json);
 }
 
+#pragma mark 2D Builders
+
+void Builder2D::Mesh() {
+    TopExp_Explorer Ex; 
+    int numFaces = 0;
+    for (Ex.Init(composite_shape_.two_d_shape(), TopAbs_FACE); Ex.More(); Ex.Next()) { 
+        ++numFaces;
+    }
+    
+    if (numFaces > 0) {
+        BRepMesh().Mesh(composite_shape_.two_d_shape(), 1.0);
+    }
+}
+
+void Builder2D::PostProcess(map< string, mValue > json) {
+    this->ApplyOrigin(json);
+
+    this->ApplyTransforms(json);
+    this->Mesh();
+}
+
+Ellipse2DBuilder::Ellipse2DBuilder(map< string, mValue > json) {
+    map< string, mValue > parameters = json["parameters"].get_obj();
+    double r1 = Util::to_d(parameters["r1"]);
+    double r2 = Util::to_d(parameters["r2"]);
+    
+    gp_Elips ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), r1, r2);
+    TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI*2).Edge();
+    TopoDS_Wire wire = BRepBuilderAPI_MakeWire(edge);
+    TopoDS_Face face = BRepBuilderAPI_MakeFace(wire);
+    composite_shape_.set_two_d_shape(face);
+    PostProcess(json);
+}
+
+
 #pragma mark 1D Builders
 
 void Builder1D::PostProcess(map< string, mValue > json) {
@@ -195,6 +230,8 @@ Ellipse1DBuilder::Ellipse1DBuilder(map< string, mValue > json) {
 	composite_shape_.set_one_d_shape(BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI*2).Edge());
     PostProcess(json);
 }
+
+
 
 
 #pragma mark Boolean builders

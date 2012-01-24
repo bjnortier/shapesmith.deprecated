@@ -72,6 +72,21 @@ public:
     ~TorusBuilder() {};
 };
 
+#pragma mark 2D Primitives
+
+class Builder2D : public Builder {
+private:
+    void Mesh();
+protected:
+    virtual void PostProcess(map< string, mValue > json);
+};
+
+class Ellipse2DBuilder : public Builder2D {
+public:
+    Ellipse2DBuilder(map< string, mValue > json);
+    ~Ellipse2DBuilder() {};
+};
+
 #pragma mark 1D Primitives
 
 class Builder1D : public Builder {

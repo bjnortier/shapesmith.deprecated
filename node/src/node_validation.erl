@@ -126,6 +126,12 @@ validate_geom_type(<<"torus">>, Props) ->
 			       {<<"r1">>, fun positive/1},
 			       {<<"r2">>, fun positive/1}
 			      ]);
+validate_geom_type(<<"ellipse2d">>, Props) ->
+    validate_primitive(Props, [
+			       {<<"r1">>, fun positive/1},
+			       {<<"r2">>, fun positive/1},
+			       {[<<"r1">>, <<"r2">>], fun first_greater_or_equal_to_second/1}
+			      ]);
 validate_geom_type(<<"ellipse1d">>, Props) ->
     validate_primitive(Props, [
 			       {<<"r1">>, fun positive/1},

@@ -35,6 +35,19 @@ SS.constructors.createEllipse1d = function(geomNode) {
     SS.constructors.editEllipse1d(geomNode);
 }
 
+SS.constructors.editEllipse2d = function(geomNode) {
+    SS.constructors.editPrimitive(geomNode, SS.constructors.Ellipse1d);
+}
+
+SS.constructors.createEllipse2d = function(geomNode) {
+    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    geomNode.origin.x = lastMousePosition.x;
+    geomNode.origin.y = lastMousePosition.y;
+    geomNode.parameters.r1 = 20;
+    geomNode.parameters.r2 = 10;
+    SS.constructors.editEllipse2d(geomNode);
+}
+
 SS.constructors.editCuboid = function(geomNode) {
     SS.constructors.editPrimitive(geomNode, SS.constructors.Cuboid);
 }

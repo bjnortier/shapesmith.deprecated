@@ -416,6 +416,17 @@ SS.SceneView = function(container) {
                 mesh3D.add(mesh);
             });
             mesh3D.name = objectName;
+
+            var geometries2D = create3DGeometries(geomNode.mesh['2d']);
+	    var material2D = new THREE.MeshPhongMaterial( { ambient: color, color: color, opacity: opacity,  specular: color, shininess: 50, shading: THREE.SmoothShading } );
+            var mesh2D = new THREE.Object3D();
+            geometries2D.map(function(geometry2D) {
+                var mesh = new THREE.Mesh(geometry2D, material2D);
+                mesh.doubleSided = true;
+                mesh.name = objectName
+                mesh2D.add(mesh);
+            });
+            mesh2D.name = objectName;
             
             var geometries1D = create1DGeometries(geomNode.mesh['1d']);
             var material1D = new THREE.LineBasicMaterial({ color: color, opacity: 1.0, linewidth: 2 });
@@ -438,9 +449,13 @@ SS.SceneView = function(container) {
             selectionMesh1D.name = objectName;                       
             
 	    scene.add(mesh3D);
+	    scene.add(mesh2D);
 	    scene.add(mesh1D);
 	    scene.add(selectionMesh1D);
-	    idToModel[geomNode.id] = {'1d': mesh1D, '3d': mesh3D, 'selection1d' : selectionMesh1D};
+	    idToModel[geomNode.id] = {'1d': mesh1D, 
+                                      '2d': mesh2D,
+                                      '3d': mesh3D, 
+                                      'selection1d' : selectionMesh1D};
         }
     }
 
@@ -464,6 +479,11 @@ SS.SceneView = function(container) {
 		    child.material.ambient.setHex(unselectedColor);
 		    child.material.specular.setHex(unselectedColor);
                 });
+                idToModel[id]['2d'].children.map(function(child) {
+                    child.material.color.setHex(unselectedColor);
+		    child.material.ambient.setHex(unselectedColor);
+		    child.material.specular.setHex(unselectedColor);
+                });
 		idToModel[id]['1d'].children.map(function(child) {
                     child.material.color.setHex(unselectedColor);
                 });
@@ -474,6 +494,11 @@ SS.SceneView = function(container) {
                 var id = event.selected[i];
 
 	        idToModel[id]['3d'].children.map(function(child) {
+                    child.material.color.setHex(selectedColor);
+		    child.material.ambient.setHex(selectedColor);
+		    child.material.specular.setHex(selectedColor);
+                });
+                idToModel[id]['2d'].children.map(function(child) {
                     child.material.color.setHex(selectedColor);
 		    child.material.ambient.setHex(selectedColor);
 		    child.material.specular.setHex(selectedColor);

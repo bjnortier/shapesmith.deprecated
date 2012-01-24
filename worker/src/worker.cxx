@@ -90,6 +90,10 @@ string create_geometry(string id, map< string, mValue > json) {
         return create_primitive<WedgeBuilder>(id, json);
     } else if (geomType == "torus") {
         return create_primitive<TorusBuilder>(id, json);
+        
+    // 2D Primitives
+    } else if (geomType == "ellipse2d") {
+        return create_primitive<Ellipse2DBuilder>(id, json);
     
     // 1D Primitives
     } else if (geomType == "ellipse1d") {
