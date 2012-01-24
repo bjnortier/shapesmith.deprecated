@@ -73,11 +73,15 @@ provide_content(ReqData, Context = #context{ user = User,
     {_, Geoms} = lists:keyfind(<<"geoms">>, 1, CommitProps),
     Facets = lists:map(fun(GeomSHABin) ->
 			       GeomSHA = binary_to_list(GeomSHABin),
-			       {ok, STL} = node_master:stl(User, Design, GeomSHA),
-			       Lines = string:tokens(binary_to_list(STL), "\n"),
-			       [_|FacetsPlusFooter] = Lines,
-			       [_|ReverseFacets] = lists:reverse(FacetsPlusFooter),
-			       string:join(lists:reverse(ReverseFacets), "\n")
+                               case node_master:stl(User, Design, GeomSHA) of
+                                   {ok, STL} ->
+                                       Lines = string:tokens(binary_to_list(STL), "\n"),
+                                       [_|FacetsPlusFooter] = Lines,
+                                       [_|ReverseFacets] = lists:reverse(FacetsPlusFooter),
+                                       string:join(lists:reverse(ReverseFacets), "\n");
+                                   empty ->
+                                       ""
+                               end
 		       end,
 		       Geoms),
     ReqData1 =  wrq:set_resp_header("Content-disposition",

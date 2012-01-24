@@ -211,6 +211,8 @@ TopoDS_Shape deserialize_shape(string s11n, string sha, int dim) {
     Handle(PTopoDS_HShape) aPShape  = Handle(PTopoDS_HShape)::DownCast(p);
     f.Close();
     
+    // Delete file
+    remove(fileName);
     
     // Create the shape
     PTColStd_PersistentTransientMap aMap;
@@ -300,12 +302,17 @@ int main (int argc, char *argv[]) {
                     !filename.is_null() && (filename.type() == str_type)) {
                     
                     CompositeShape composite_shape = find_shape(id.get_str());
-                    string filenameStr = filename.get_str();
-                    
-                    StlAPI_Writer writer;
-                    writer.Write(composite_shape.three_d_shape(), filenameStr.c_str());
-                    
-                    mValue response = mValue("ok");
+                    mValue response;
+                    if (composite_shape.three_d_shape().IsNull()) {
+                        response = mValue("empty");
+                    } else {
+                        string filenameStr = filename.get_str();
+                        
+                        StlAPI_Writer writer;
+                        writer.Write(composite_shape.three_d_shape(), filenameStr.c_str());
+                        
+                        response = mValue("ok");
+                    }
                     string output = write(response);
                     write_cmd(output.c_str(), output.size());
                     continue;

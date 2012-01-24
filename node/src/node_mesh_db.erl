@@ -48,7 +48,11 @@ stl(WorkerPid, Hash) ->
 	   ]},
     case node_worker_pool:call(WorkerPid, jiffy:encode(Msg)) of
 	<<"\"ok\"">> ->
-	    file:read_file(Filename);
+	    Result = file:read_file(Filename),
+            file:delete(Filename),
+            Result;
+        <<"\"empty\"">> ->
+            empty;
 	{error, Reason} ->
 	    {error, Reason}
     end.
