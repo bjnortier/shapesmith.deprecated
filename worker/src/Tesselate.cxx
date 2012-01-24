@@ -13,8 +13,12 @@ Tesselator1D::Tesselator1D(TopoDS_Shape shape)  {
 mValue Tesselator1D::Tesselate() {
     
     mArray positions;
+    mArray segments;
     TopExp_Explorer Ex;
+    
+    int index = 0;
     for (Ex.Init(shape_,TopAbs_EDGE); Ex.More(); Ex.Next()) { 
+        
         TopoDS_Edge edge = TopoDS::Edge(Ex.Current());
         
         BRepAdaptor_Curve curve_adaptor(edge);
@@ -27,11 +31,20 @@ mValue Tesselator1D::Tesselate() {
             positions.push_back(pt.Y());
             positions.push_back(pt.Z());
         }
+        int newIndex = index + discretizer.NbPoints()*3;
+        
+        mObject segment;
+        segment["start"] = index;
+        segment["end"]   = newIndex - 1;
+        segments.push_back(segment);
+        
+        index = newIndex;
     }
     
     mObject result;
     result["primitive"] = "polyline";
     result["positions"] = positions;
+    result["segments"]  = segments;
     return result;
 }
 

@@ -406,26 +406,41 @@ SS.SceneView = function(container) {
 
             var objectName = {geomNodeId: geomNode.id};
 
-	    var geometry3D = create3DGeometry(geomNode.mesh['3d']);
+	    var geometries3D = create3DGeometries(geomNode.mesh['3d']);
 	    var material3D = new THREE.MeshPhongMaterial( { ambient: color, color: color, opacity: opacity,  specular: color, shininess: 50, shading: THREE.SmoothShading } );
-            var mesh3d = new THREE.Mesh(geometry3D, material3D);
-            mesh3d.doubleSided = true;
-            mesh3d.name = objectName
+            var mesh3D = new THREE.Object3D();
+            geometries3D.map(function(geometry3D) {
+                var mesh = new THREE.Mesh(geometry3D, material3D);
+                mesh.doubleSided = true;
+                mesh.name = objectName
+                mesh3D.add(mesh);
+            });
+            mesh3D.name = objectName;
             
-            var geometry1D = create1DGeometry(geomNode.mesh['1d']);
+            var geometries1D = create1DGeometries(geomNode.mesh['1d']);
             var material1D = new THREE.LineBasicMaterial({ color: color, opacity: 1.0, linewidth: 2 });
-            var mesh1d = new THREE.Line(geometry1D, material1D);
-            mesh1d.name = objectName
+            var mesh1D = new THREE.Object3D();
+            geometries1D.map(function(geometry1D) {
+                var line = new THREE.Line(geometry1D, material1D);
+                line.name = objectName;
+                mesh1D.add(line);
+            });
+            mesh1D.name = objectName;
 
-            var selectionGeometry1D = create1DSelectionGeometry(geomNode.mesh['1d']);
-            var selectionMesh1d = new THREE.Mesh(selectionGeometry1D, new THREE.MeshBasicMaterial({ color: 0x666666, opacity: 0.0 })); 
-            selectionMesh1d.name = objectName
-            selectionMesh1d.doubleSided = true;
+            var selectionGeometries1D = create1DSelectionGeometries(geomNode.mesh['1d']);
+            var selectionMesh1D = new THREE.Object3D();
+            selectionGeometries1D.map(function(selectionGeometry1D) {
+                var mesh = new THREE.Mesh(selectionGeometry1D, new THREE.MeshBasicMaterial({ color: 0x666666, opacity: 0 })); 
+                mesh.name = objectName
+                mesh.doubleSided = true;
+                selectionMesh1D.add(mesh);
+            });
+            selectionMesh1D.name = objectName;                       
             
-	    scene.add(mesh3d);
-	    scene.add(mesh1d);
-	    scene.add(selectionMesh1d);
-	    idToModel[geomNode.id] = {'1d': mesh1d, '3d': mesh3d, 'selection1d' : selectionMesh1d};
+	    scene.add(mesh3D);
+	    scene.add(mesh1D);
+	    scene.add(selectionMesh1D);
+	    idToModel[geomNode.id] = {'1d': mesh1D, '3d': mesh3D, 'selection1d' : selectionMesh1D};
         }
     }
 
@@ -444,54 +459,67 @@ SS.SceneView = function(container) {
             for (var i in event.deselected) {
                 var id = event.deselected[i];
                 
-		idToModel[id]['3d'].material.color.setHex(unselectedColor);
-		idToModel[id]['3d'].material.ambient.setHex(unselectedColor);
-		idToModel[id]['3d'].material.specular.setHex(unselectedColor);
-		idToModel[id]['1d'].material.color.setHex(unselectedColor);
+		idToModel[id]['3d'].children.map(function(child) {
+                    child.material.color.setHex(unselectedColor);
+		    child.material.ambient.setHex(unselectedColor);
+		    child.material.specular.setHex(unselectedColor);
+                });
+		idToModel[id]['1d'].children.map(function(child) {
+                    child.material.color.setHex(unselectedColor);
+                });
             }
         }
         if (event.selected) {
             for (var i in event.selected) {
                 var id = event.selected[i];
 
-	        idToModel[id]['3d'].material.color.setHex(selectedColor);
-		idToModel[id]['3d'].material.ambient.setHex(selectedColor);
-		idToModel[id]['3d'].material.specular.setHex(selectedColor);
-		idToModel[id]['1d'].material.color.setHex(selectedColor);
+	        idToModel[id]['3d'].children.map(function(child) {
+                    child.material.color.setHex(selectedColor);
+		    child.material.ambient.setHex(selectedColor);
+		    child.material.specular.setHex(selectedColor);
+                });
+		idToModel[id]['1d'].children.map(function(child) {
+                    child.material.color.setHex(selectedColor);
+                });
 		
             }
         }
     }
 
-   var create1DGeometry = function(mesh) {
-        var geometry = new THREE.Geometry();
+   var create1DGeometries = function(mesh) {
+       return mesh.segments.map(function(segment) {
 
-        for (var i = 0; i < mesh.positions.length/3; ++i) {
-            var position = new THREE.Vector3(mesh.positions[i * 3], 
-					     mesh.positions[i * 3 + 1], 
-					     mesh.positions[i * 3 + 2]);
-	    var vertex = new THREE.Vertex(position);
-            geometry.vertices.push(vertex);
-        }
-        return geometry;
+           var geometry = new THREE.Geometry();
+           for (var i = segment.start; i < segment.end; i += 3) {
+               var position = new THREE.Vector3(mesh.positions[i], 
+					        mesh.positions[i + 1], 
+					        mesh.positions[i + 2]);
+	       var vertex = new THREE.Vertex(position);
+               geometry.vertices.push(vertex);
+           }
+           return geometry;
+           
+       });
     }
 
-   var create1DSelectionGeometry = function(mesh) {
-        var positions = [];
-        for (var i = 0; i < mesh.positions.length/3; ++i) {
-            positions.push(new THREE.Vector3(mesh.positions[i * 3], 
-					     mesh.positions[i * 3 + 1], 
-					     mesh.positions[i * 3 + 2]));
-        }
-       return new THREE.PipeGeometry(3, positions);
+   var create1DSelectionGeometries = function(mesh) {
+       return mesh.segments.map(function(segment) {
+           var positions = [];
+           for (var i = segment.start; i < segment.end; i+=3) {
+            positions.push(new THREE.Vector3(mesh.positions[i], 
+					     mesh.positions[i + 1], 
+					     mesh.positions[i + 2]));
+           }
+           return new THREE.PipeGeometry(3, positions);
+       });
     }
 
     var createGeometry = function(meshes) {
-        return {'3d' : create3DGeometry(meshes['3d']),
-                '1d' : create1DGeometry(meshes['1d'])};
+        return {'3d' : create3DGeometries(meshes['3d']),
+                '1d' : create1DGeometries(meshes['1d'])};
     }
 
-    var create3DGeometry = function(mesh) {
+    var create3DGeometries = function(mesh) {
 	var geometry = new THREE.Geometry();
 
 	for (var i = 0; i  < mesh.positions.length/3; ++i) {
@@ -519,13 +547,15 @@ SS.SceneView = function(container) {
 	}
 	geometry.computeCentroids();
 	geometry.computeFaceNormals();
-	return geometry;
+	return [geometry];
     }
 
     this.setOthersTransparent = function(geomNode) {
         geom_doc.rootNodes.map(function(rootNode) {
             if (geomNode.id !== rootNode.id) {
-                idToModel[rootNode.id]['3d'].material.opacity = 0.2;
+                idToModel[rootNode.id]['3d'].children.map(function(child) {
+                    child.material.opacity = 0.2;
+                });
             }
          });
     }
@@ -533,7 +563,9 @@ SS.SceneView = function(container) {
     this.restoreOpacity = function() {
         geom_doc.rootNodes.map(function(rootNode) {
             if (idToModel[rootNode.id]) {
-                idToModel[rootNode.id]['3d'].material.opacity = 1.0;
+                idToModel[rootNode.id]['3d'].children.map(function(child) {
+                    child.material.opacity = 1.0;
+                });
             }
         });
     }

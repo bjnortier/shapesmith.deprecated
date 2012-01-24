@@ -94,11 +94,15 @@ SS.constructors.Translate = function() {
 
             var geometries = sceneView.createGeometry(geomNode.mesh);
 	    var meshes = [];
-            if (geometries['3d'].vertices.length > 0) {
-                meshes.push(new THREE.Mesh(geometries['3d'], SS.constructors.faceMaterial));
+            if (geometries['3d'].length > 0) {
+                geometries['3d'].map(function(geometry) {
+                    meshes.push(new THREE.Mesh(geometry, SS.constructors.faceMaterial));
+                });
             }
-            if (geometries['1d'].vertices.length > 0) {
-                meshes.push(new THREE.Line(geometries['1d'], SS.constructors.lineMaterial));
+            if (geometries['1d'].length > 0) {
+                geometries['1d'].map(function(geometry) {
+                    meshes.push(new THREE.Line(geometry, SS.constructors.lineMaterial));
+                });
             }
 
             meshes.map(function(mesh) {
@@ -155,48 +159,52 @@ SS.constructors.Rotate = function() {
         if (r > 0) {
 
             var geometries = sceneView.createGeometry(geomNode.mesh);
-
             for (key in geometries) {
-                var geometry = geometries[key];
-                if (geometry.vertices.length > 0) {
+                if (geometries[key].length > 0) {
+                    geometries[key].map(function(geometry) {
 
-                    var un, vn, wn;
-                    var normUVW = new THREE.Vector3(u, v, w).normalize();
-                    un = normUVW.x;
-                    vn = normUVW.y;
-                    wn = normUVW.z;
+                        var un, vn, wn;
+                        var normUVW = new THREE.Vector3(u, v, w).normalize();
+                        un = normUVW.x;
+                        vn = normUVW.y;
+                        wn = normUVW.z;
 
-	            geometry.vertices = geometry.vertices.map(function(vertex) {
-	                var position = vertex.position.clone();
-                        position.x = position.x - x;
-                        position.y = position.y - y;
-                        position.z = position.z - z;
-                        
-                        // http://blog.client9.com/2007/09/rotating-point-around-vector.html
-                        var a = (un*position.x + vn*position.y + wn*position.z);
-                        var x2 = a*un + (position.x - a*un)*Math.cos(angle/180*Math.PI) 
-                            + (vn*position.z - wn*position.y)*Math.sin(angle/180*Math.PI);
-                        var y2 = a*vn + (position.y - a*vn)*Math.cos(angle/180*Math.PI) 
-                            + (wn*position.x - un*position.z)*Math.sin(angle/180*Math.PI);
-                        var z2 = a*wn + (position.z - a*wn)*Math.cos(angle/180*Math.PI) 
-                            + (un*position.y - vn*position.x)*Math.sin(angle/180*Math.PI);
-                        
-	                var newPosition = new THREE.Vector3(x2, y2, z2);
-	                return new THREE.Vertex(newPosition);
-	            });
-	            geometry.computeCentroids();
-	            geometry.computeFaceNormals();
+	                geometry.vertices = geometry.vertices.map(function(vertex) {
+	                    var position = vertex.position.clone();
+                            position.x = position.x - x;
+                            position.y = position.y - y;
+                            position.z = position.z - z;
+                            
+                            // http://blog.client9.com/2007/09/rotating-point-around-vector.html
+                            var a = (un*position.x + vn*position.y + wn*position.z);
+                            var x2 = a*un + (position.x - a*un)*Math.cos(angle/180*Math.PI) 
+                                + (vn*position.z - wn*position.y)*Math.sin(angle/180*Math.PI);
+                            var y2 = a*vn + (position.y - a*vn)*Math.cos(angle/180*Math.PI) 
+                                + (wn*position.x - un*position.z)*Math.sin(angle/180*Math.PI);
+                            var z2 = a*wn + (position.z - a*wn)*Math.cos(angle/180*Math.PI) 
+                                + (un*position.y - vn*position.x)*Math.sin(angle/180*Math.PI);
+                            
+	                    var newPosition = new THREE.Vector3(x2, y2, z2);
+	                    return new THREE.Vertex(newPosition);
+	                });
+	                geometry.computeCentroids();
+	                geometry.computeFaceNormals();
+                    });
                 }
             }
 
             var rotatedMeshObj = new THREE.Object3D();
-            if (geometries['3d'].vertices.length > 0) {
-                var mesh3d = new THREE.Mesh(geometries['3d'], SS.constructors.faceMaterial)
-                mesh3d.doubleSided = true;
-                rotatedMeshObj.add(mesh3d);
+            if (geometries['3d'].length > 0) {
+                geometries['3d'].map(function(geometry) {
+                    var mesh3d = new THREE.Mesh(geometry, SS.constructors.faceMaterial)
+                    mesh3d.doubleSided = true;
+                    rotatedMeshObj.add(mesh3d);
+                });
             }
-            if (geometries['1d'].vertices.length > 0) {
-                rotatedMeshObj.add(new THREE.Line(geometries['1d'], SS.constructors.lineMaterial));
+            if (geometries['1d'].length > 0) {
+                geometries['1d'].map(function(geometry) {
+                    rotatedMeshObj.add(new THREE.Line(geometry, SS.constructors.lineMaterial));
+                });
             }
             sceneObjects.rotatedMeshObj = rotatedMeshObj;
         }
@@ -256,27 +264,33 @@ SS.constructors.Scale = function() {
             var geometries = sceneView.createGeometry(geomNode.mesh);
             for (key in geometries) {
                 var geometry = geometries[key];
-                if (geometry.vertices.length > 0) {
+                if (geometries[key].length > 0) {
 
-	            geometry.vertices = geometry.vertices.map(function(vertex) {
-	                var position = vertex.position.clone();
-	                position.x = (position.x - x)*factor;
-	                position.y = (position.y - y)*factor;
-	                position.z = (position.z - z)*factor;
-	                return new THREE.Vertex(position);
-	            });
-	            geometry.computeCentroids();
-	            geometry.computeFaceNormals();
+                    geometries[key].map(function(geometry) {
+	                geometry.vertices = geometry.vertices.map(function(vertex) {
+	                    var position = vertex.position.clone();
+	                    position.x = (position.x - x)*factor;
+	                    position.y = (position.y - y)*factor;
+	                    position.z = (position.z - z)*factor;
+	                    return new THREE.Vertex(position);
+	                });
+	                geometry.computeCentroids();
+	                geometry.computeFaceNormals();
+                    });
                 }
             }
 
-            if (geometries['3d'].vertices.length > 0) {
-                var mesh3d = new THREE.Mesh(geometries['3d'], SS.constructors.faceMaterial)
-                mesh3d.doubleSided = true;
-                scaledObj.add(mesh3d);
+            if (geometries['3d'].length > 0) {
+                geometries['3d'].map(function(geometry) {
+                    var mesh3d = new THREE.Mesh(geometry, SS.constructors.faceMaterial)
+                    mesh3d.doubleSided = true;
+                    scaledObj.add(mesh3d);
+                });
             }
-            if (geometries['1d'].vertices.length > 0) {
-                scaledObj.add(new THREE.Line(geometries['1d'], SS.constructors.lineMaterial));
+            if (geometries['1d'].length > 0) {
+                geometries['1d'].map(function(geometry) {
+                    scaledObj.add(new THREE.Line(geometry, SS.constructors.lineMaterial));
+                });
             }
         }
 
@@ -313,45 +327,49 @@ SS.constructors.AxisMirror = function() {
 
         if (r > 0) {
 
-            var geometries = sceneView.createGeometry(geomNode.mesh);
+             var geometries = sceneView.createGeometry(geomNode.mesh);
             for (key in geometries) {
-                var geometry = geometries[key];
-                if (geometry.vertices.length > 0) {
+                if (geometries[key].length > 0) {
+                    geometries[key].map(function(geometry) {
 
-                    var un, vn, wn;
-                    var normUVW = new THREE.Vector3(u, v, w).normalize();
-                    un = normUVW.x;
-                    vn = normUVW.y;
-                    wn = normUVW.z;
+                        var un, vn, wn;
+                        var normUVW = new THREE.Vector3(u, v, w).normalize();
+                        un = normUVW.x;
+                        vn = normUVW.y;
+                        wn = normUVW.z;
 
-	            geometry.vertices = geometry.vertices.map(function(vertex) {
-	                var position = vertex.position.clone();
-                        position.x = position.x - x;
-                        position.y = position.y - y;
-                        position.z = position.z - z;
-                        
-                        var a = (un*position.x + vn*position.y + wn*position.z);
-                        var x2 = 2*a*un - position.x;
-                        var y2 = 2*a*vn - position.y;
-                        var z2 = 2*a*wn - position.z;
-                        
-	                var newPosition = new THREE.Vector3(x2, y2, z2);
-	                return new THREE.Vertex(newPosition);
-	            });
-	            geometry.computeCentroids();
-	            geometry.computeFaceNormals();                    
+	                geometry.vertices = geometry.vertices.map(function(vertex) {
+	                    var position = vertex.position.clone();
+                            position.x = position.x - x;
+                            position.y = position.y - y;
+                            position.z = position.z - z;
+                            
+                            var a = (un*position.x + vn*position.y + wn*position.z);
+                            var x2 = 2*a*un - position.x;
+                            var y2 = 2*a*vn - position.y;
+                            var z2 = 2*a*wn - position.z;
+                            
+	                    var newPosition = new THREE.Vector3(x2, y2, z2);
+	                    return new THREE.Vertex(newPosition);
+	                });
+	                geometry.computeCentroids();
+	                geometry.computeFaceNormals();                    
+                    });
                 }
-                
             }
 
             var mirrorMeshObj = new THREE.Object3D();
-            if (geometries['3d'].vertices.length > 0) {
-                var mesh3d = new THREE.Mesh(geometries['3d'], SS.constructors.faceMaterial)
-                mesh3d.doubleSided = true;
-                mirrorMeshObj.add(mesh3d);
+             if (geometries['3d'].length > 0) {
+                geometries['3d'].map(function(geometry) {
+                    var mesh3d = new THREE.Mesh(geometry, SS.constructors.faceMaterial)
+                    mesh3d.doubleSided = true;
+                    mirrorMeshObj.add(mesh3d);
+                });
             }
-            if (geometries['1d'].vertices.length > 0) {
-                mirrorMeshObj.add(new THREE.Line(geometries['1d'], SS.constructors.lineMaterial));
+            if (geometries['1d'].length > 0) {
+                geometries['1d'].map(function(geometry) {
+                    mirrorMeshObj.add(new THREE.Line(geometry, SS.constructors.lineMaterial));
+                });
             }
             sceneObjects.mirrorMeshObj = mirrorMeshObj;
         }
