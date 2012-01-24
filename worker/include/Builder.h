@@ -102,9 +102,19 @@ public:
 
 #pragma mark Booleans
 
+class BuilderND : public Builder {
+private:
+    void Mesh();
+protected:
+    virtual void PostProcess(map< string, mValue > json);
+public:
+    BuilderND() {};
+    
+};
+
 typedef TopoDS_Shape (*boolean_op)(const TopoDS_Shape&, const TopoDS_Shape&);
 
-class BooleanBuilder : public Builder3D {
+class BooleanBuilder : public BuilderND {
 public:
     BooleanBuilder(map< string, mValue > json, vector<CompositeShape>& shapes, boolean_op fn);
 };

@@ -236,13 +236,50 @@ Ellipse1DBuilder::Ellipse1DBuilder(map< string, mValue > json) {
 
 #pragma mark Boolean builders
 
+void BuilderND::Mesh() {
+    TopExp_Explorer ex3D, ex2D;
+    ex3D.Init(composite_shape_.three_d_shape(), TopAbs_FACE);
+    ex2D.Init(composite_shape_.two_d_shape(), TopAbs_FACE);
+    
+    if (ex3D.More()) {
+        BRepMesh().Mesh(composite_shape_.three_d_shape(), 1.0);
+    }
+    if (ex2D.More()) {
+        BRepMesh().Mesh(composite_shape_.two_d_shape(), 1.0);
+    }
+
+}
+
+void BuilderND::PostProcess(map< string, mValue > json) {
+    this->ApplyOrigin(json);
+    this->ApplyTransforms(json);
+    this->Mesh();
+}
+
+TopoDS_Shape robustBoolean(TopoDS_Shape a, TopoDS_Shape b, boolean_op function) {
+    if (!a.IsNull() && !b.IsNull()) {
+        return function(a,b);
+    } else if (a.IsNull()) {
+        return b;
+    } else {
+        return a;
+    }
+}
+
 BooleanBuilder::BooleanBuilder(map< string, mValue > json, vector<CompositeShape>& shapes, boolean_op function) {
     vector<CompositeShape>::iterator it = shapes.begin();
+
     composite_shape_.set_three_d_shape((*it).three_d_shape());
+    composite_shape_.set_two_d_shape((*it).two_d_shape());
+    composite_shape_.set_one_d_shape((*it).one_d_shape());
     ++it;
+    
     for ( ; it < shapes.end(); ++it ) {
-        composite_shape_.set_three_d_shape(function((*it).three_d_shape(), 
-                                                    composite_shape_.three_d_shape()));
+        composite_shape_.set_three_d_shape(robustBoolean((*it).three_d_shape(), composite_shape_.three_d_shape(), function));
+        composite_shape_.set_two_d_shape(robustBoolean((*it).two_d_shape(), composite_shape_.two_d_shape(), function));
+
+        composite_shape_.set_one_d_shape(robustBoolean((*it).one_d_shape(), composite_shape_.one_d_shape(), function));
+
     }
     PostProcess(json);
 }
