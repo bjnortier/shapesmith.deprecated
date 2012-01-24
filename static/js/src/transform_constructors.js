@@ -72,6 +72,27 @@ SS.constructors.createMirror = function(spec) {
     SS.constructors.editMirror(spec.geomNode, spec.transform);
 }
 
+SS.constructors.addGeometries = function(meshObject, geometries) {
+    if (geometries['3d'].length > 0) {
+        geometries['3d'].map(function(geometry) {
+            var mesh3d = new THREE.Mesh(geometry, SS.constructors.faceMaterial)
+            mesh3d.doubleSided = true;
+            meshObject.add(mesh3d);
+        });
+    }
+    if (geometries['2d'].length > 0) {
+        geometries['2d'].map(function(geometry) {
+            var mesh3d = new THREE.Mesh(geometry, SS.constructors.faceMaterial)
+            mesh3d.doubleSided = true;
+            meshObject.add(mesh3d);
+        });
+    }
+    if (geometries['1d'].length > 0) {
+        geometries['1d'].map(function(geometry) {
+            meshObject.add(new THREE.Line(geometry, SS.constructors.lineMaterial));
+        });
+    }
+}
 
 SS.constructors.Translate = function() {
 
@@ -194,18 +215,7 @@ SS.constructors.Rotate = function() {
             }
 
             var rotatedMeshObj = new THREE.Object3D();
-            if (geometries['3d'].length > 0) {
-                geometries['3d'].map(function(geometry) {
-                    var mesh3d = new THREE.Mesh(geometry, SS.constructors.faceMaterial)
-                    mesh3d.doubleSided = true;
-                    rotatedMeshObj.add(mesh3d);
-                });
-            }
-            if (geometries['1d'].length > 0) {
-                geometries['1d'].map(function(geometry) {
-                    rotatedMeshObj.add(new THREE.Line(geometry, SS.constructors.lineMaterial));
-                });
-            }
+            SS.constructors.addGeometries(rotatedMeshObj, geometries);
             sceneObjects.rotatedMeshObj = rotatedMeshObj;
         }
 
@@ -258,7 +268,6 @@ SS.constructors.Scale = function() {
         var x = transform.origin.x, y = transform.origin.y, z = transform.origin.z;
         var factor = transform.parameters.factor;
 
-	var scaledObj = new THREE.Object3D();
         if (factor) {
 
             var geometries = sceneView.createGeometry(geomNode.mesh);
@@ -280,21 +289,11 @@ SS.constructors.Scale = function() {
                 }
             }
 
-            if (geometries['3d'].length > 0) {
-                geometries['3d'].map(function(geometry) {
-                    var mesh3d = new THREE.Mesh(geometry, SS.constructors.faceMaterial)
-                    mesh3d.doubleSided = true;
-                    scaledObj.add(mesh3d);
-                });
-            }
-            if (geometries['1d'].length > 0) {
-                geometries['1d'].map(function(geometry) {
-                    scaledObj.add(new THREE.Line(geometry, SS.constructors.lineMaterial));
-                });
-            }
+            var scaledMeshObj = new THREE.Object3D();
+            SS.constructors.addGeometries(scaledMeshObj, geometries);
+            sceneObjects.scaledMeshObj = scaledMeshObj;
         }
 
-        sceneObjects.scaled = scaledObj;
         return sceneObjects;
     }
 
@@ -303,9 +302,7 @@ SS.constructors.Scale = function() {
     this.getModifierForAnchor = function(spec) {
         return null;
     }
-
 }
-
 
 SS.constructors.AxisMirror = function() {
 
@@ -358,19 +355,9 @@ SS.constructors.AxisMirror = function() {
                 }
             }
 
+
             var mirrorMeshObj = new THREE.Object3D();
-             if (geometries['3d'].length > 0) {
-                geometries['3d'].map(function(geometry) {
-                    var mesh3d = new THREE.Mesh(geometry, SS.constructors.faceMaterial)
-                    mesh3d.doubleSided = true;
-                    mirrorMeshObj.add(mesh3d);
-                });
-            }
-            if (geometries['1d'].length > 0) {
-                geometries['1d'].map(function(geometry) {
-                    mirrorMeshObj.add(new THREE.Line(geometry, SS.constructors.lineMaterial));
-                });
-            }
+            SS.constructors.addGeometries(mirrorMeshObj, geometries);
             sceneObjects.mirrorMeshObj = mirrorMeshObj;
         }
 

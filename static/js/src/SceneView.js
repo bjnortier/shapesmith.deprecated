@@ -541,6 +541,7 @@ SS.SceneView = function(container) {
 
     var createGeometry = function(meshes) {
         return {'3d' : create3DGeometries(meshes['3d']),
+                '2d' : create3DGeometries(meshes['2d']),
                 '1d' : create1DGeometries(meshes['1d'])};
     }
 
@@ -578,9 +579,13 @@ SS.SceneView = function(container) {
     this.setOthersTransparent = function(geomNode) {
         geom_doc.rootNodes.map(function(rootNode) {
             if (geomNode.id !== rootNode.id) {
-                idToModel[rootNode.id]['3d'].children.map(function(child) {
-                    child.material.opacity = 0.2;
-                });
+                for (key in idToModel[rootNode.id]) {
+                    idToModel[rootNode.id][key].children.map(function(child) {
+                        if (child.material.opacity === 1.0) {
+                            child.material.opacity = 0.2;
+                        }
+                    });
+                }
             }
          });
     }
@@ -588,9 +593,13 @@ SS.SceneView = function(container) {
     this.restoreOpacity = function() {
         geom_doc.rootNodes.map(function(rootNode) {
             if (idToModel[rootNode.id]) {
-                idToModel[rootNode.id]['3d'].children.map(function(child) {
-                    child.material.opacity = 1.0;
-                });
+                for (key in idToModel[rootNode.id]) {
+                    idToModel[rootNode.id][key].children.map(function(child) {
+                        if (child.material.opacity === 0.2) {
+                            child.material.opacity = 1.0;
+                        }
+                    });
+                }
             }
         });
     }
