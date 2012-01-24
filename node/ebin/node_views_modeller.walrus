@@ -87,6 +87,7 @@
     
   
   <script type="text/javascript" src="/static/js/src/WedgeGeometry.js"></script>
+  <script type="text/javascript" src="/static/js/src/PipeGeometry.js"></script>
   <script type="text/javascript" src="/static/js/src/Observable.js"></script>
   <script type="text/javascript" src="/static/js/src/Spinner.js"></script>
  

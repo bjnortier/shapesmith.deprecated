@@ -404,7 +404,6 @@ SS.SceneView = function(container) {
 		opacity = 0.5;
 	    }
 
-	    var mesh = new THREE.Object3D();
             var objectName = {geomNodeId: geomNode.id};
 
 	    var geometry3D = createGeometry(geomNode.mesh);
@@ -412,24 +411,30 @@ SS.SceneView = function(container) {
             var mesh3d = new THREE.Mesh(geometry3D, material3D);
             mesh3d.doubleSided = true;
             mesh3d.name = objectName
-            mesh.add(mesh3d);
             
             var geometry1D = create1DGeometry(geomNode.mesh['1d']);
-            var material1D = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 1.0, linewidth: 2 });
+            var material1D = new THREE.LineBasicMaterial({ color: color, opacity: 1.0, linewidth: 2 });
             var mesh1d = new THREE.Line(geometry1D, material1D);
             mesh1d.name = objectName
-            mesh.add(mesh1d);
 
-            mesh.name = objectName
-	    scene.add(mesh);
-	    idToModel[geomNode.id] = mesh;
+            var selectionGeometry1D = create1DSelectionGeometry(geomNode.mesh['1d']);
+            var selectionMesh1d = new THREE.Mesh(selectionGeometry1D, new THREE.MeshBasicMaterial({ color: 0x666666, opacity: 0.0 })); 
+            selectionMesh1d.name = objectName
+            selectionMesh1d.doubleSided = true;
+            
+	    scene.add(mesh3d);
+	    scene.add(mesh1d);
+	    scene.add(selectionMesh1d);
+	    idToModel[geomNode.id] = {'1d': mesh1d, '3d': mesh3d, 'selection1d' : selectionMesh1d};
         }
     }
 
     var remove = function(geomNode) {
-	var mesh = idToModel[geomNode.id];
-	if (mesh) {
-	    scene.remove(mesh);
+	var meshes = idToModel[geomNode.id];
+	if (meshes) {
+            for (key in meshes) {
+	        scene.remove(meshes[key]);
+            }
 	    delete idToModel[geomNode.id];
 	}
     }
@@ -439,28 +444,26 @@ SS.SceneView = function(container) {
             for (var i in event.deselected) {
                 var id = event.deselected[i];
                 
-		idToModel[id].children.map(function(child) {
-                    child.material.color.setHex(unselectedColor);
-                    child.material.ambient && child.material.ambient.setHex(unselectedColor);
-                    child.material.specular && child.material.specular.setHex(unselectedColor);
-
-                });
+		idToModel[id]['3d'].material.color.setHex(unselectedColor);
+		idToModel[id]['3d'].material.ambient.setHex(unselectedColor);
+		idToModel[id]['3d'].material.specular.setHex(unselectedColor);
+		idToModel[id]['1d'].material.color.setHex(unselectedColor);
             }
         }
         if (event.selected) {
             for (var i in event.selected) {
                 var id = event.selected[i];
-		idToModel[id].children.map(function(child) {
-                    child.material.color.setHex(selectedColor);
-                    child.material.ambient && child.material.ambient.setHex(selectedColor);
-                    child.material.specular && child.material.specular.setHex(selectedColor);
-                });
+
+	        idToModel[id]['3d'].material.color.setHex(selectedColor);
+		idToModel[id]['3d'].material.ambient.setHex(selectedColor);
+		idToModel[id]['3d'].material.specular.setHex(selectedColor);
+		idToModel[id]['1d'].material.color.setHex(selectedColor);
 		
             }
         }
     }
 
-    var create1DGeometry = function(mesh) {
+   var create1DGeometry = function(mesh) {
         var geometry = new THREE.Geometry();
 
         for (var i = 0; i < mesh.positions.length/3; ++i) {
@@ -471,6 +474,16 @@ SS.SceneView = function(container) {
             geometry.vertices.push(vertex);
         }
         return geometry;
+    }
+
+   var create1DSelectionGeometry = function(mesh) {
+        var positions = [];
+        for (var i = 0; i < mesh.positions.length/3; ++i) {
+            positions.push(new THREE.Vector3(mesh.positions[i * 3], 
+					     mesh.positions[i * 3 + 1], 
+					     mesh.positions[i * 3 + 2]));
+        }
+       return new THREE.PipeGeometry(3, positions);
     }
 
     var createGeometry = function(meshes) {
@@ -511,18 +524,16 @@ SS.SceneView = function(container) {
     this.setOthersTransparent = function(geomNode) {
         geom_doc.rootNodes.map(function(rootNode) {
             if (geomNode.id !== rootNode.id) {
-                idToModel[rootNode.id].children.map(function(child) {
-                    child.material.opacity = 0.2;
-                });
+                idToModel[rootNode.id]['3d'].material.opacity = 0.2;
             }
          });
     }
 
     this.restoreOpacity = function() {
         geom_doc.rootNodes.map(function(rootNode) {
-            idToModel[rootNode.id].children.map(function(child) {
-                child.material.opacity = 1.0;
-            });
+            if (idToModel[rootNode.id]) {
+                idToModel[rootNode.id]['3d'].material.opacity = 1.0;
+            }
         });
     }
     
