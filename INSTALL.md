@@ -23,7 +23,7 @@ Install OCE v 0.4
  
  * git clone https://github.com/tpaviot/oce.git
  * cd oce
- * git checkout -b 0. 4.0 OCE-0.4.0
+ * git checkout -b 0.4.0 OCE-0.4.0
  * mkdir build
  * cd build
  * cmake ..
