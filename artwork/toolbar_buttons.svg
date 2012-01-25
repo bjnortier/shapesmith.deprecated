@@ -27,15 +27,15 @@
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
      inkscape:zoom="0.35"
-     inkscape:cx="508.18895"
-     inkscape:cy="821.90429"
+     inkscape:cx="198.18896"
+     inkscape:cy="1164.7614"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
-     inkscape:window-width="1309"
-     inkscape:window-height="816"
-     inkscape:window-x="15"
-     inkscape:window-y="0"
+     inkscape:window-width="1526"
+     inkscape:window-height="856"
+     inkscape:window-x="75"
+     inkscape:window-y="114"
      inkscape:window-maximized="0">
     <inkscape:grid
        snapvisiblegridlinesonly="true"
@@ -47,6 +47,18 @@
   </sodipodi:namedview>
   <defs
      id="defs4">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient3986">
+      <stop
+         style="stop-color:#00ff00;stop-opacity:1;"
+         offset="0"
+         id="stop3988" />
+      <stop
+         style="stop-color:#00ff00;stop-opacity:0;"
+         offset="1"
+         id="stop3990" />
+    </linearGradient>
     <marker
        style="overflow:visible;"
        id="Arrow2Lend"
@@ -402,6 +414,15 @@
        id="radialGradient5100"
        xlink:href="#linearGradient4469-7"
        inkscape:collect="always" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3986"
+       id="linearGradient3992"
+       x1="1126.0714"
+       y1="-53.352119"
+       x2="1211.0714"
+       y2="132.36217"
+       gradientUnits="userSpaceOnUse" />
   </defs>
   <metadata
      id="metadata7">
@@ -1310,7 +1331,7 @@
        inkscape:export-ydpi="10.84" />
     <path
        sodipodi:type="arc"
-       style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:url(#linearGradient3992);fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="path5119"
        sodipodi:cx="1177.1428"
        sodipodi:cy="-27.637833"
@@ -1320,6 +1341,6 @@
        transform="translate(125.71429,331.42857)"
        inkscape:export-xdpi="12.1"
        inkscape:export-ydpi="12.1"
-       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/ellipse1d.png" />
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/ellipse2d.png" />
   </g>
 </svg>
