@@ -72,6 +72,16 @@ template < typename T > string create_boolean(string id, map< string, mValue > j
     std::auto_ptr<Builder> builder(new T(json, childShapes));
     shapes[id] = builder->composite_shape();
     return "ok";
+    
+}
+
+template < typename T > string create_modifier(string id, map< string, mValue > json) {
+    mArray children = json["children"].get_array();
+    CompositeShape childShape = find_shape(children[0].get_str());
+    
+    std::auto_ptr<Builder> builder(new T(json, childShape));
+    shapes[id] = builder->composite_shape();
+    return "ok";
 }
 
 string create_geometry(string id, map< string, mValue > json) {
@@ -98,6 +108,11 @@ string create_geometry(string id, map< string, mValue > json) {
     // 1D Primitives
     } else if (geomType == "ellipse1d") {
         return create_primitive<Ellipse1DBuilder>(id, json);
+        
+    // Modifiers
+    } else if (geomType == "prism") {
+        return create_modifier<PrismBuilder>(id, json);
+
     
     // Booleans
     } else if (geomType == "union") {

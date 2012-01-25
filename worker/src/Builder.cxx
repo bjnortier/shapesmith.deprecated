@@ -232,8 +232,6 @@ Ellipse1DBuilder::Ellipse1DBuilder(map< string, mValue > json) {
 }
 
 
-
-
 #pragma mark Boolean builders
 
 void BuilderND::Mesh() {
@@ -307,3 +305,25 @@ IntersectBuilder::IntersectBuilder(map< string, mValue > json, vector<CompositeS
 SubtractBuilder::SubtractBuilder(map< string, mValue > json, vector<CompositeShape>& shapes) 
     : BooleanBuilder(json, shapes, &cut) {
 }
+
+#pragma mark Modifier builders
+
+PrismBuilder::PrismBuilder(map< string, mValue > json, CompositeShape shape) {
+
+    map< string, mValue > parameters = json["parameters"].get_obj();
+    double u = Util::to_d(parameters["u"]);
+    double v = Util::to_d(parameters["v"]);
+    double w = Util::to_d(parameters["w"]);
+    gp_Vec prismVec(u,v,w);
+
+    TopoDS_Shape empty;
+    if (!shape.two_d_shape().IsNull()) {
+        composite_shape_.set_three_d_shape(BRepPrimAPI_MakePrism(shape.two_d_shape(), prismVec));
+    }
+    if (!shape.one_d_shape().IsNull()) {
+        composite_shape_.set_two_d_shape(BRepPrimAPI_MakePrism(shape.two_d_shape(), prismVec));
+    }
+    
+    PostProcess(json);
+}
+

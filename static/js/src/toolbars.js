@@ -83,6 +83,32 @@ function create_primitive(type, keys) {
     return geomNode;
 }
 
+function create_modifier(selected, type, keys) {
+    if (selected.length != 1)  {
+        alert('Only a single object is supported!');
+        return;
+    }
+    var id = selected[0];
+    var original = geom_doc.findById(id);
+
+    var geometryParams = {};
+    for (var i in keys) {
+        geometryParams[keys[i]] = null;
+    }
+    modifierNode = new GeomNode({
+        type: type,
+        editing: true,
+	origin: {x: 0, y: 0, z: 0},
+        parameters: geometryParams
+    }, [original]);
+                                
+    selectionManager.deselectAll();
+    geom_doc.replace(original, modifierNode);
+    sceneView.setOthersTransparent(modifierNode);
+
+    return modifierNode;
+}
+
 function create_transform(selected, type, keys) {
     if (selected.length != 1)  {
         alert('no object selected!');
@@ -176,6 +202,14 @@ $(document).ready(function() {
                function(selected) { boolean(selected, 'subtract'); }).render($('#boolean'));
     new Action('Intersect', '/static/images/intersect.png', 
                function(selected) { boolean(selected, 'intersect'); }).render($('#boolean'));
+
+    /*
+     * Modifiers
+     */
+    new Action('Prism', '/static/images/union.png', 
+               function(selected) { 
+                   create_modifier(selected, 'prism', ['u', 'v', 'w']);
+               }).render($('#transforms'));
     
     /*
      * Transformations

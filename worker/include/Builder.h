@@ -137,4 +137,12 @@ public:
     ~IntersectBuilder();
 };
 
+#pragma mark Modifiers
+
+class PrismBuilder : public BuilderND {
+public:
+    PrismBuilder(map< string, mValue > json, CompositeShape shape);
+    ~PrismBuilder() {};
+};
+
 #endif

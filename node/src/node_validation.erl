@@ -138,6 +138,13 @@ validate_geom_type(<<"ellipse1d">>, Props) ->
 			       {<<"r2">>, fun positive/1},
 			       {[<<"r1">>, <<"r2">>], fun first_greater_or_equal_to_second/1}
 			      ]);
+
+validate_geom_type(<<"prism">>, Props) ->
+    validate_primitive(Props, [{<<"u">>, fun number/1},
+			       {<<"v">>, fun number/1},
+			       {<<"w">>, fun number/1}
+			      ]);
+
 validate_geom_type(<<"union">>, Props) ->
     validate_boolean(Props);
 validate_geom_type(<<"subtract">>, Props) ->
@@ -217,6 +224,7 @@ validate_geom_type_test_() ->
 					    ]}}]))
     ].
 -endif.
+
 
 validate_transform_type(<<"translate">>, Props) ->
     validate_primitive(Props, [{<<"u">>, fun number/1},
