@@ -278,7 +278,7 @@ function TreeView() {
             var transformNode = editingNode.transforms[transformIndex];
             var factoryFunction = 'edit' + transformNode.type.charAt(0).toUpperCase() + transformNode.type.substring(1);
             if (SS.constructors[factoryFunction]) {
-                SS.constructors[factoryFunction](geomNode, transformNode);
+                SS.constructors[factoryFunction](editingNode, transformNode);
             }
         });
 
@@ -321,11 +321,11 @@ function TreeView() {
 
             sceneView.setOthersTransparent(editingNode);
 	    
-            var factoryFunction = 'edit' + geomNode.type.charAt(0).toUpperCase() + geomNode.type.substring(1);
+            var factoryFunction = 'edit' + editingNode.type.charAt(0).toUpperCase() + editingNode.type.substring(1);
             if (SS.constructors[factoryFunction]) {
-                SS.constructors[factoryFunction](geomNode);
-            } else if (SS.constructors[geomNode.type]) {
-		SS.constructors[geomNode.type]().edit();
+                SS.constructors[factoryFunction](editingNode);
+            } else if (SS.constructors[editingNode.type]) {
+		SS.constructors[editingNode.type]().edit();
 	    } 
             
 	}
