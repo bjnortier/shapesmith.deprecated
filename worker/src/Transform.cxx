@@ -23,6 +23,12 @@ TopoDS_Shape Rotate::apply(double multiplier,
     double v = Util::to_d(parameters["v"]);
     double w = Util::to_d(parameters["w"]);
     double angle = Util::to_d(parameters["angle"]);
+    while (angle > 360) {
+        angle -= 360;
+    }
+    while (angle < 0) {
+        angle += 360;
+    }
     
     gp_Trsf transformation = gp_Trsf();
     transformation.SetRotation(gp_Ax1(gp_Pnt(x,y,z), gp_Dir(u,v,w)),

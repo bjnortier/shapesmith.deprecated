@@ -250,7 +250,7 @@ validate_transform_type(<<"rotate">>, Props) ->
 			       {<<"u">>, fun number/1},
 			       {<<"v">>, fun number/1},
 			       {<<"w">>, fun number/1},
-			       {<<"angle">>, fun positive/1},
+			       {<<"angle">>, fun number/1},
 			       {<<"n">>, fun positive_or_zero/1}
 			      ]);
 validate_transform_type(<<"mirror">>, Props) ->

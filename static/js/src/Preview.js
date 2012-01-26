@@ -62,15 +62,21 @@ SS.preview.createDimArrow = function(value, angle) {
 
 SS.preview.createAngleArrow = function(text, x, y, z, u, v, w, angle) {
     var angleObject = new THREE.Object3D();
+    var angleGeometry = new THREE.Geometry();
+    var r = 20;
 
-    var angleGeometry = new THREE.Geometry(), r = 20;
-    angleGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(1, 0, 0)));
-    for (var i = 0; i < Math.floor(angle/360*72); ++i) {
-        angleGeometry.vertices.push(
-	    new THREE.Vertex(new THREE.Vector3(r*Math.cos(i*5/180*Math.PI),r* Math.sin(i*5/180*Math.PI), 0)));
+    angleGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+    if (angle > 0) {
+        for (var i = 0; i < Math.floor(angle/360*72); ++i) {
+            angleGeometry.vertices.push(
+	        new THREE.Vertex(new THREE.Vector3(r*Math.cos(i*5/180*Math.PI),r* Math.sin(i*5/180*Math.PI), 0)));
+        }
+    } else {
+        for (var i = 0; i > Math.floor(angle/360*72); --i) {
+            angleGeometry.vertices.push(
+	        new THREE.Vertex(new THREE.Vector3(r*Math.cos(i*5/180*Math.PI),r* Math.sin(i*5/180*Math.PI), 0)));
+        }
     }
-    angleGeometry.vertices.push(
-        new THREE.Vertex(new THREE.Vector3(r*Math.cos(angle/180*Math.PI), r*Math.sin(angle/180*Math.PI), 0)));
     var angleLine = new THREE.Line(angleGeometry, SS.constructors.lineMaterial);
     angleObject.add(angleLine);
 
@@ -79,9 +85,9 @@ SS.preview.createAngleArrow = function(text, x, y, z, u, v, w, angle) {
     arrowGeometry.vertices.push(
 	new THREE.Vertex(new THREE.Vector3(r, 0, 0)));
     arrowGeometry.vertices.push(
-	new THREE.Vertex(new THREE.Vector3(r+1, -3, 0)));
+	new THREE.Vertex(new THREE.Vector3(r+1, angle > 0 ? -3 : 3, 0)));
     arrowGeometry.vertices.push(
-	new THREE.Vertex(new THREE.Vector3(r-1, -3, 0)));
+	new THREE.Vertex(new THREE.Vector3(r-1, angle > 0 ? -3 : 3, 0)));
     
     var arrowFace = new THREE.Face3(0,1,2);
     arrowGeometry.faces.push(arrowFace);
@@ -89,6 +95,7 @@ SS.preview.createAngleArrow = function(text, x, y, z, u, v, w, angle) {
     arrowGeometry.computeFaceNormals();
     var arrow =  new THREE.Mesh(arrowGeometry, SS.preview.arrowMaterial);
     arrow.rotation.z = angle/180*Math.PI;
+
     arrow.doubleSided = true;
     angleObject.add(arrow);
 
