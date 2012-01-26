@@ -24,11 +24,11 @@
      pagecolor="#000000"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="0"
+     inkscape:pageopacity="1"
      inkscape:pageshadow="2"
      inkscape:zoom="0.7"
-     inkscape:cx="1301.6964"
-     inkscape:cy="61.708421"
+     inkscape:cx="967.97977"
+     inkscape:cy="518.85128"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -465,6 +465,15 @@
          offset="1"
          style="stop-color:#005d17;stop-opacity:0.64406782;" />
     </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3895"
+       id="linearGradient4120"
+       x1="1546.0715"
+       y1="673.07654"
+       x2="1716.7858"
+       y2="817.36224"
+       gradientUnits="userSpaceOnUse" />
   </defs>
   <metadata
      id="metadata7">
@@ -1398,5 +1407,15 @@
        inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/prism.png"
        inkscape:export-xdpi="15.8"
        inkscape:export-ydpi="15.8" />
+    <rect
+       style="fill:url(#linearGradient4120);stroke:#ffffff;stroke-width:5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;fill-opacity:1"
+       id="rect4112"
+       width="241.42857"
+       height="164.28572"
+       x="1474.2858"
+       y="629.50507"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/rectangle2d.png"
+       inkscape:export-xdpi="10.838273"
+       inkscape:export-ydpi="10.838273" />
   </g>
 </svg>
