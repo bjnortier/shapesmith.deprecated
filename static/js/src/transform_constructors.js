@@ -73,22 +73,15 @@ SS.constructors.createMirror = function(spec) {
 }
 
 SS.constructors.addGeometries = function(meshObject, geometries) {
-    if (geometries['3d'].length > 0) {
-        geometries['3d'].map(function(geometry) {
+    if (geometries['faces'].length > 0) {
+        geometries['faces'].map(function(geometry) {
             var mesh3d = new THREE.Mesh(geometry, SS.constructors.faceMaterial)
             mesh3d.doubleSided = true;
             meshObject.add(mesh3d);
         });
     }
-    if (geometries['2d'].length > 0) {
-        geometries['2d'].map(function(geometry) {
-            var mesh3d = new THREE.Mesh(geometry, SS.constructors.faceMaterial)
-            mesh3d.doubleSided = true;
-            meshObject.add(mesh3d);
-        });
-    }
-    if (geometries['1d'].length > 0) {
-        geometries['1d'].map(function(geometry) {
+    if (geometries['edges'].length > 0) {
+        geometries['edges'].map(function(geometry) {
             meshObject.add(new THREE.Line(geometry, SS.constructors.lineMaterial));
         });
     }

@@ -406,56 +406,43 @@ SS.SceneView = function(container) {
 
             var objectName = {geomNodeId: geomNode.id};
 
-	    var geometries3D = create3DGeometries(geomNode.mesh['3d']);
-	    var material3D = new THREE.MeshPhongMaterial( { ambient: color, color: color, opacity: opacity,  specular: color, shininess: 50, shading: THREE.SmoothShading } );
-            var mesh3D = new THREE.Object3D();
-            geometries3D.map(function(geometry3D) {
-                var mesh = new THREE.Mesh(geometry3D, material3D);
+	    var triangleGeometries = create3DGeometries(geomNode.mesh['faces']);
+	    var triangleMaterial = new THREE.MeshPhongMaterial( { ambient: color, color: color, opacity: opacity,  specular: color, shininess: 50, shading: THREE.SmoothShading } );
+            var triangles = new THREE.Object3D();
+            triangleGeometries.map(function(triangleGeometry) {
+                var mesh = new THREE.Mesh(triangleGeometry, triangleMaterial);
                 mesh.doubleSided = true;
                 mesh.name = objectName
-                mesh3D.add(mesh);
+                triangles.add(mesh);
             });
-            mesh3D.name = objectName;
+            triangles.name = objectName;
 
-            var geometries2D = create3DGeometries(geomNode.mesh['2d']);
-	    var material2D = new THREE.MeshPhongMaterial( { ambient: color, color: color, opacity: opacity,  specular: color, shininess: 50, shading: THREE.SmoothShading } );
-            var mesh2D = new THREE.Object3D();
-            geometries2D.map(function(geometry2D) {
-                var mesh = new THREE.Mesh(geometry2D, material2D);
-                mesh.doubleSided = true;
-                mesh.name = objectName
-                mesh2D.add(mesh);
-            });
-            mesh2D.name = objectName;
-            
-            var geometries1D = create1DGeometries(geomNode.mesh['1d']);
-            var material1D = new THREE.LineBasicMaterial({ color: color, opacity: 1.0, linewidth: 2 });
-            var mesh1D = new THREE.Object3D();
-            geometries1D.map(function(geometry1D) {
-                var line = new THREE.Line(geometry1D, material1D);
+            var lineGeometries = create1DGeometries(geomNode.mesh['edges']);
+            var lineMaterial = new THREE.LineBasicMaterial({ color: color, opacity: 1.0, linewidth: 2 });
+            var lines = new THREE.Object3D();
+            lineGeometries.map(function(lineGeometry) {
+                var line = new THREE.Line(lineGeometry, lineMaterial);
                 line.name = objectName;
-                mesh1D.add(line);
+                lines.add(line);
             });
-            mesh1D.name = objectName;
+            lines.name = objectName;
 
-            var selectionGeometries1D = create1DSelectionGeometries(geomNode.mesh['1d']);
-            var selectionMesh1D = new THREE.Object3D();
-            selectionGeometries1D.map(function(selectionGeometry1D) {
-                var mesh = new THREE.Mesh(selectionGeometry1D, new THREE.MeshBasicMaterial({ color: 0x666666, opacity: 0 })); 
+            var selectionGeometriesForLines = create1DSelectionGeometries(geomNode.mesh['edges']);
+            var selectionMeshes = new THREE.Object3D();
+            selectionGeometriesForLines.map(function(selectionGeometriesForLine) {
+                var mesh = new THREE.Mesh(selectionGeometriesForLine, new THREE.MeshBasicMaterial({ color: 0x666666, opacity: 0 })); 
                 mesh.name = objectName
                 mesh.doubleSided = true;
-                selectionMesh1D.add(mesh);
+                selectionMeshes.add(mesh);
             });
-            selectionMesh1D.name = objectName;                       
+            selectionMeshes.name = objectName;                       
             
-	    scene.add(mesh3D);
-	    scene.add(mesh2D);
-	    scene.add(mesh1D);
-	    scene.add(selectionMesh1D);
-	    idToModel[geomNode.id] = {'1d': mesh1D, 
-                                      '2d': mesh2D,
-                                      '3d': mesh3D, 
-                                      'selection1d' : selectionMesh1D};
+	    scene.add(triangles);
+	    scene.add(lines);
+	    scene.add(selectionMeshes);
+	    idToModel[geomNode.id] = {'faces': triangles, 
+                                      'edges': lines,
+                                      'selectionForEdges' : selectionMeshes};
         }
     }
 
@@ -474,17 +461,12 @@ SS.SceneView = function(container) {
             for (var i in event.deselected) {
                 var id = event.deselected[i];
                 
-		idToModel[id]['3d'].children.map(function(child) {
+		idToModel[id]['faces'].children.map(function(child) {
                     child.material.color.setHex(unselectedColor);
 		    child.material.ambient.setHex(unselectedColor);
 		    child.material.specular.setHex(unselectedColor);
                 });
-                idToModel[id]['2d'].children.map(function(child) {
-                    child.material.color.setHex(unselectedColor);
-		    child.material.ambient.setHex(unselectedColor);
-		    child.material.specular.setHex(unselectedColor);
-                });
-		idToModel[id]['1d'].children.map(function(child) {
+		idToModel[id]['edges'].children.map(function(child) {
                     child.material.color.setHex(unselectedColor);
                 });
             }
@@ -493,17 +475,12 @@ SS.SceneView = function(container) {
             for (var i in event.selected) {
                 var id = event.selected[i];
 
-	        idToModel[id]['3d'].children.map(function(child) {
+	        idToModel[id]['faces'].children.map(function(child) {
                     child.material.color.setHex(selectedColor);
 		    child.material.ambient.setHex(selectedColor);
 		    child.material.specular.setHex(selectedColor);
                 });
-                idToModel[id]['2d'].children.map(function(child) {
-                    child.material.color.setHex(selectedColor);
-		    child.material.ambient.setHex(selectedColor);
-		    child.material.specular.setHex(selectedColor);
-                });
-		idToModel[id]['1d'].children.map(function(child) {
+		idToModel[id]['edges'].children.map(function(child) {
                     child.material.color.setHex(selectedColor);
                 });
 		
@@ -540,9 +517,8 @@ SS.SceneView = function(container) {
     }
 
     var createGeometry = function(meshes) {
-        return {'3d' : create3DGeometries(meshes['3d']),
-                '2d' : create3DGeometries(meshes['2d']),
-                '1d' : create1DGeometries(meshes['1d'])};
+        return {'faces' : create3DGeometries(meshes['faces']),
+                'edges' : create1DGeometries(meshes['edges'])};
     }
 
     var create3DGeometries = function(mesh) {

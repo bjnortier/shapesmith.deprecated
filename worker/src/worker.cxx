@@ -27,7 +27,6 @@
 #include "base64.h"
 
 #include "Builder.h"
-#include "CompositeShape.h"
 #include "Tesselate.h"
 #include "Transform.h"
 
@@ -37,7 +36,7 @@ using namespace json_spirit;
 // TODO: Tesselate in parallel
 // TODO: compress 1.00000000 into 1.0 etc. Also reduce precision
 
-map< string, CompositeShape > shapes = map< string, CompositeShape >();
+map< string, TopoDS_Shape > shapes = map< string, TopoDS_Shape >();
 
 struct not_found : std::exception { 
     char const* what() const throw() {
@@ -45,8 +44,8 @@ struct not_found : std::exception {
     }
 };
 
-CompositeShape find_shape(string id) {
-    map< string, CompositeShape >::iterator it = shapes.find(id);
+TopoDS_Shape find_shape(string id) {
+    map< string, TopoDS_Shape >::iterator it = shapes.find(id);
     if (it != shapes.end()) {
         return (*it).second;
     }
@@ -57,30 +56,30 @@ CompositeShape find_shape(string id) {
 
 template < typename T > string create_primitive(string id, map< string, mValue > json) {
     std::auto_ptr<Builder> builder(new T(json));
-    shapes[id] = builder->composite_shape();
+    shapes[id] = builder->shape();
     return "ok";
 }
 
 template < typename T > string create_boolean(string id, map< string, mValue > json) {
     mArray children = json["children"].get_array();
-    vector<CompositeShape> childShapes;
+    vector<TopoDS_Shape> childShapes;
     for (unsigned int k = 0; k < children.size(); ++k) {
-        CompositeShape childShape = find_shape(children[k].get_str());
+        TopoDS_Shape childShape = find_shape(children[k].get_str());
         childShapes.push_back(childShape);
     }
     
     std::auto_ptr<Builder> builder(new T(json, childShapes));
-    shapes[id] = builder->composite_shape();
+    shapes[id] = builder->shape();
     return "ok";
     
 }
 
 template < typename T > string create_modifier(string id, map< string, mValue > json) {
     mArray children = json["children"].get_array();
-    CompositeShape childShape = find_shape(children[0].get_str());
+    TopoDS_Shape childShape = find_shape(children[0].get_str());
     
     std::auto_ptr<Builder> builder(new T(json, childShape));
-    shapes[id] = builder->composite_shape();
+    shapes[id] = builder->shape();
     return "ok";
 }
 
@@ -167,9 +166,9 @@ int write_cmd(const char *buf, int len) {
 
 #pragma mark export/import
 
-mValue serialize_shape(string sha, TopoDS_Shape shape, int dim) {
+mValue serialize_shape(string sha, TopoDS_Shape shape) {
     char fileName[100];
-    sprintf(fileName, "/tmp/%s.%i.bin", sha.c_str(), dim);
+    sprintf(fileName, "/tmp/%s.bin", sha.c_str());
     
     // Write to temporary file
     FSD_BinaryFile f;
@@ -202,11 +201,11 @@ mValue serialize_shape(string sha, TopoDS_Shape shape, int dim) {
     return encoded;
 }
 
-TopoDS_Shape deserialize_shape(string s11n, string sha, int dim) {
+TopoDS_Shape deserialize_shape(string s11n, string sha) {
     
     // Temp filename
     char fileName[100];
-    sprintf(fileName, "/tmp/%s.%i.bin", sha.c_str(), dim);
+    sprintf(fileName, "/tmp/%s.bin", sha.c_str());
     
     // Decode base64
     std::string decoded = base64_decode(s11n);
@@ -280,8 +279,8 @@ int main (int argc, char *argv[]) {
                 mValue tesselateId = objMap["tesselate"];
                 if (!tesselateId.is_null() && (tesselateId.type() == str_type)) {
                     
-                    CompositeShape composite_shape = find_shape(tesselateId.get_str());
-                    mValue response = composite_shape.Tesselate();
+                    TopoDS_Shape shape = find_shape(tesselateId.get_str());
+                    mValue response = Tesselator(shape).Tesselate();
                         
                     string output = write(response);
                     write_cmd(output.c_str(), output.size());
@@ -301,7 +300,7 @@ int main (int argc, char *argv[]) {
                 if (!purgeId.is_null() && (purgeId.type() == str_type)) {
                     
                     mValue response = false;
-                    map< string, CompositeShape >::iterator it = shapes.find(purgeId.get_str());
+                    map< string, TopoDS_Shape >::iterator it = shapes.find(purgeId.get_str());
                     if (it != shapes.end()) {
                         shapes.erase(it);
                         response = true;
@@ -320,15 +319,17 @@ int main (int argc, char *argv[]) {
                     && 
                     !filename.is_null() && (filename.type() == str_type)) {
                     
-                    CompositeShape composite_shape = find_shape(id.get_str());
+                    TopoDS_Shape shape = find_shape(id.get_str());
                     mValue response;
-                    if (composite_shape.three_d_shape().IsNull()) {
+                    
+                    
+                    if (!TopExp_Explorer(shape, TopAbs_SOLID).More()) {
                         response = mValue("empty");
                     } else {
                         string filenameStr = filename.get_str();
                         
                         StlAPI_Writer writer;
-                        writer.Write(composite_shape.three_d_shape(), filenameStr.c_str());
+                        writer.Write(shape, filenameStr.c_str());
                         
                         response = mValue("ok");
                     }
@@ -341,18 +342,10 @@ int main (int argc, char *argv[]) {
                     &&
                     !id.is_null() && (id.type() == str_type)) {
                     
-                    CompositeShape composite_shape = find_shape(id.get_str());
-                    mValue three_d_s11n = serialize_shape(id.get_str(), composite_shape.three_d_shape(), 3);
-                    mValue two_d_s11n = serialize_shape(id.get_str(), composite_shape.two_d_shape(), 2);
-                    mValue one_d_s11n = serialize_shape(id.get_str(), composite_shape.one_d_shape(), 1);
-                    
-                    mObject encodings;
-                        encodings["3d"] = three_d_s11n;
-                        encodings["2d"] = two_d_s11n;
-                        encodings["1d"] = one_d_s11n;
-                    
+                    TopoDS_Shape shape = find_shape(id.get_str());
                     mObject result;
-                    result["s11n"] = encodings;
+                    result["s11n"] = serialize_shape(id.get_str(), shape);
+                    
                     string output = write(result);
                     write_cmd(output.c_str(), output.size());
                     continue;
@@ -364,25 +357,10 @@ int main (int argc, char *argv[]) {
                     &&
                     !id.is_null() && (id.type() == str_type)
                     &&
-                    !s11n.is_null() && ((s11n.type() == obj_type) || (s11n.type() == str_type))) {
+                    !s11n.is_null() && (s11n.type() == str_type)) {
 
-                    CompositeShape composite_shape;
-                    
-                    if (s11n.type() == obj_type) {
-
-                        string s11n3d = s11n.get_obj()["3d"].get_str();
-                        string s11n2d = s11n.get_obj()["2d"].get_str();
-                        string s11n1d = s11n.get_obj()["1d"].get_str();
-
-                        composite_shape.set_three_d_shape(deserialize_shape(s11n3d, id.get_str(), 3));
-                        composite_shape.set_two_d_shape(deserialize_shape(s11n2d, id.get_str(), 2));
-                        composite_shape.set_one_d_shape(deserialize_shape(s11n1d, id.get_str(), 1));
-                    } else if (s11n.type() == str_type) {
-                        string s11n3d = s11n.get_str();
-                        composite_shape.set_three_d_shape(deserialize_shape(s11n3d, id.get_str(), 3));
-                    }
-                                                          
-                    shapes[id.get_str()] = composite_shape;
+                    TopoDS_Shape shape = deserialize_shape(s11n.get_str(), id.get_str());
+                    shapes[id.get_str()] = shape;
                     
                     mValue response = mValue("ok");
                     string output = write(response);
@@ -398,7 +376,7 @@ int main (int argc, char *argv[]) {
                 
                 if (message == "purge_all") {
                     
-                    shapes = map< string, CompositeShape >();
+                    shapes = map< string, TopoDS_Shape >();
                     
                     mValue response = mValue("ok");
                     string output = write(response);

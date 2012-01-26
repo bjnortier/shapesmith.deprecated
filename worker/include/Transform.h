@@ -3,7 +3,6 @@
 
 #include <json_spirit.h>
 #include "OCC.h"
-#include "CompositeShape.h"
 
 using namespace std;
 using namespace json_spirit;
@@ -12,33 +11,33 @@ template <class T>
 class Transformer {
     
 public:
-    Transformer(CompositeShape composite_shape, 
+    Transformer(TopoDS_Shape shape, 
                 map< string, mValue > origin,
                 map< string, mValue > parameters) {
-        transformed_shape_ = apply<T>(composite_shape, origin, parameters);
+        transformed_shape_ = apply<T>(shape, origin, parameters);
     }
     
-    CompositeShape transformed_shape() { 
+    TopoDS_Shape transformed_shape() { 
         return transformed_shape_;
     }
 
     
 private: 
-    CompositeShape transformed_shape_;
+    TopoDS_Shape transformed_shape_;
     
     template<typename U>
-    static CompositeShape apply(CompositeShape composite_shape, 
-                                map< string, mValue > origin,
-                                map< string, mValue > parameters) {
+    static TopoDS_Shape apply(TopoDS_Shape shape, 
+                              map< string, mValue > origin,
+                              map< string, mValue > parameters) {
         int n = parameters["n"].is_null() ? 0 : parameters["n"].get_int();
         
         if(n == 0) {
-            auto_ptr<U> transform(new T(composite_shape));
+            auto_ptr<U> transform(new T(shape));
             return transform->apply(1.0, origin, parameters);
         }
         
-        vector<CompositeShape> copies(n+1); 
-        copies[0] = composite_shape;
+        vector<TopoDS_Shape> copies(n+1); 
+        copies[0] = shape;
         
         int remaining = n;
         int grouping = 1;
@@ -48,29 +47,12 @@ private:
         while (remaining > 0) {
             
             int group_index = (int)(log(grouping)/log(2));
-            CompositeShape obj_to_copy = copies[group_index];
+            TopoDS_Shape shape_to_copy = copies[group_index];
             
-            auto_ptr<T> transform(new T(obj_to_copy));
-            CompositeShape transformedShape = transform->apply(multiplier, origin, parameters);
+            auto_ptr<T> transform(new T(shape_to_copy));
+            TopoDS_Shape transformedShape = transform->apply(multiplier, origin, parameters);
             
-            if (!transformedShape.three_d_shape().IsNull()) {
-                copies[index].set_three_d_shape(BRepAlgoAPI_Fuse(transformedShape.three_d_shape(), 
-                                                                 copies[index - 1].three_d_shape()).Shape());
-            } else {
-                copies[index].set_three_d_shape(copies[index-1].three_d_shape());
-            }
-            if (!transformedShape.two_d_shape().IsNull()) {
-                copies[index].set_two_d_shape(BRepAlgoAPI_Fuse(transformedShape.two_d_shape(), 
-                                                               copies[index - 1].two_d_shape()).Shape());
-            } else {
-                copies[index].set_two_d_shape(copies[index-1].two_d_shape());
-            }
-            if (!transformedShape.one_d_shape().IsNull()) {
-                copies[index].set_one_d_shape(BRepAlgoAPI_Fuse(transformedShape.one_d_shape(), 
-                                                               copies[index - 1].one_d_shape()).Shape());
-            } else {
-                copies[index].set_one_d_shape(copies[index-1].one_d_shape());
-            }
+            copies[index] = BRepAlgoAPI_Fuse(transformedShape, copies[index - 1]).Shape();
             
             multiplier = multiplier + grouping;
             remaining = remaining - grouping;
@@ -91,12 +73,12 @@ private:
 
 class Transform {
 protected:
-    CompositeShape composite_shape_;
+    TopoDS_Shape shape_;
 public:
-    Transform(CompositeShape composite_shape);
+    Transform(TopoDS_Shape shape);
     virtual ~Transform() {};
 
-    virtual CompositeShape apply(double multiplier, 
+    virtual TopoDS_Shape apply(double multiplier, 
                                  map< string, mValue > origin, 
                                  map< string, mValue > parameters) = 0;
 };
@@ -104,10 +86,10 @@ public:
 class Rotate : public Transform {
     
 public:
-    Rotate(CompositeShape composite_shape) : Transform(composite_shape) {}
+    Rotate(TopoDS_Shape shape) : Transform(shape) {}
     virtual ~Rotate() {};
     
-    virtual CompositeShape apply(double multiplier, 
+    virtual TopoDS_Shape apply(double multiplier, 
                                  map< string, mValue > origin, 
                                  map< string, mValue > parameters);
 };
@@ -116,10 +98,10 @@ public:
 class Scale : public Transform {
     
 public:
-    Scale(CompositeShape composite_shape) : Transform(composite_shape) {}
+    Scale(TopoDS_Shape shape) : Transform(shape) {}
     virtual ~Scale() {};
     
-    virtual CompositeShape apply(double multiplier, 
+    virtual TopoDS_Shape apply(double multiplier, 
                                  map< string, mValue > origin, 
                                  map< string, mValue > parameters);
 };
@@ -127,10 +109,10 @@ public:
 class Mirror : public Transform {
     
 public:
-    Mirror(CompositeShape composite_shape) : Transform(composite_shape) {}
+    Mirror(TopoDS_Shape shape) : Transform(shape) {}
     virtual ~Mirror() {};
     
-    virtual CompositeShape apply(double multiplier, 
+    virtual TopoDS_Shape apply(double multiplier, 
                                  map< string, mValue > origin, 
                                  map< string, mValue > parameters);
 };
@@ -138,10 +120,10 @@ public:
 class Translate : public Transform {
     
 public:
-    Translate(CompositeShape composite_shape) : Transform(composite_shape) {}
+    Translate(TopoDS_Shape shape) : Transform(shape) {}
     virtual ~Translate() {};
     
-    virtual CompositeShape apply(double multiplier, 
+    virtual TopoDS_Shape apply(double multiplier, 
                                  map< string, mValue > origin, 
                                  map< string, mValue > parameters);
 };

@@ -20,7 +20,7 @@ include_directories("/usr/local/include")
 include_directories("/usr/local/inc")
 include_directories("/opt/local/include")
 
-set(ALL_CLASSES src/worker.cxx  src/CompositeShape.cxx src/Builder.cxx src/Transform.cxx src/Util.cxx src/Tesselate.cxx src/base64.cpp)
+set(ALL_CLASSES src/worker.cxx src/Builder.cxx src/Transform.cxx src/Util.cxx src/Tesselate.cxx src/base64.cpp)
 
 add_executable(worker  src/worker.cxx ${ALL_CLASSES})
 
@@ -30,7 +30,7 @@ enable_testing()
 # http://www.cmake.org/cmake/help/cmake-2-8-docs.html
 find_package(GTest REQUIRED)
 
-add_executable(run-tests test/buildertest.cc src/Builder.cxx src/Transform.cxx src/CompositeShape.cxx  src/Tesselate.cxx src/Util.cxx)
+add_executable(run-tests test/buildertest.cc  ${ALL_CLASSES})
 GTEST_ADD_TESTS(run-tests "" test/buildertest.cc)
 target_link_libraries(run-tests ${GTEST_BOTH_LIBRARIES})
 

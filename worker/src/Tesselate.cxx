@@ -6,6 +6,22 @@
 using namespace json_spirit;
 using namespace std;
 
+Tesselator::Tesselator(TopoDS_Shape shape)  {
+    shape_ = shape;
+}
+
+mValue Tesselator::Tesselate() {
+    std::auto_ptr<Tesselator3D> tesselator3D(new Tesselator3D(shape_));
+    std::auto_ptr<Tesselator3D> tesselator2D(new Tesselator3D(shape_));
+    std::auto_ptr<Tesselator1D> tesselator1D(new Tesselator1D(shape_));
+    
+    mObject result;
+    result["faces"] = tesselator3D->Tesselate();
+    result["edges"] = tesselator1D->Tesselate();
+    return result;
+}
+
+
 Tesselator1D::Tesselator1D(TopoDS_Shape shape)  {
     shape_ = shape;
 }

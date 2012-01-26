@@ -8,11 +8,11 @@ using namespace std;
 using namespace json_spirit;
 
 
-Transform::Transform(CompositeShape composite_shape) {
-    composite_shape_ = composite_shape;
+Transform::Transform(TopoDS_Shape shape) {
+    shape_ = shape;
 }
     
-CompositeShape Rotate::apply(double multiplier, 
+TopoDS_Shape Rotate::apply(double multiplier, 
                              map< string, mValue > origin, 
                             map< string, mValue > parameters) {
     
@@ -28,19 +28,10 @@ CompositeShape Rotate::apply(double multiplier,
     transformation.SetRotation(gp_Ax1(gp_Pnt(x,y,z), gp_Dir(u,v,w)),
                                multiplier*Util::to_d(angle)/180*M_PI);
     
-    if (!composite_shape_.three_d_shape().IsNull()) {
-        composite_shape_.set_three_d_shape(BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
-    }
-    if (!composite_shape_.two_d_shape().IsNull()) {
-        composite_shape_.set_two_d_shape(BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
-    }
-    if (!composite_shape_.one_d_shape().IsNull()) {
-        composite_shape_.set_one_d_shape(BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
-    }
-    return composite_shape_;
+    return BRepBuilderAPI_Transform(shape_, transformation).Shape();
 }
 
-CompositeShape Scale::apply(double multiplier, 
+TopoDS_Shape Scale::apply(double multiplier, 
                           map< string, mValue > origin, 
                           map< string, mValue > parameters) {
     
@@ -52,20 +43,11 @@ CompositeShape Scale::apply(double multiplier,
     gp_Trsf transformation = gp_Trsf();
     transformation.SetScale(gp_Pnt(x, y, z), factor);
     
-    if (!composite_shape_.three_d_shape().IsNull()) {
-        composite_shape_.set_three_d_shape(BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
-    }
-    if (!composite_shape_.two_d_shape().IsNull()) {
-        composite_shape_.set_two_d_shape(BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
-    }
-    if (!composite_shape_.one_d_shape().IsNull()) {
-        composite_shape_.set_one_d_shape(BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
-    }
-    return composite_shape_;
+    return BRepBuilderAPI_Transform(shape_, transformation).Shape();
 
 }
 
-CompositeShape Mirror::apply(double multiplier, 
+TopoDS_Shape Mirror::apply(double multiplier, 
                            map< string, mValue > origin, 
                            map< string, mValue > parameters) {
     
@@ -79,19 +61,11 @@ CompositeShape Mirror::apply(double multiplier,
     gp_Trsf transformation = gp_Trsf();
     transformation.SetMirror(gp_Ax1(gp_Pnt(x, y, z), gp_Dir(u, v, w)));
     
-    if (!composite_shape_.three_d_shape().IsNull()) {
-        composite_shape_.set_three_d_shape(BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
-    }
-    if (!composite_shape_.two_d_shape().IsNull()) {
-        composite_shape_.set_two_d_shape(BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
-    }
-    if (!composite_shape_.one_d_shape().IsNull()) {
-        composite_shape_.set_one_d_shape(BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
-    }
-    return composite_shape_;
+    return BRepBuilderAPI_Transform(shape_, transformation).Shape();
+
 }
 
-CompositeShape Translate::apply(double multiplier, 
+TopoDS_Shape Translate::apply(double multiplier, 
                               map< string, mValue > origin, 
                               map< string, mValue > parameters) {
     
@@ -104,16 +78,7 @@ CompositeShape Translate::apply(double multiplier,
                                          multiplier*v, 
                                          multiplier*w));
     
-    if (!composite_shape_.three_d_shape().IsNull()) {
-        composite_shape_.set_three_d_shape(BRepBuilderAPI_Transform(composite_shape_.three_d_shape(), transformation).Shape());
-    }
-    if (!composite_shape_.two_d_shape().IsNull()) {
-        composite_shape_.set_two_d_shape(BRepBuilderAPI_Transform(composite_shape_.two_d_shape(), transformation).Shape());
-    }
-    if (!composite_shape_.one_d_shape().IsNull()) {
-        composite_shape_.set_one_d_shape(BRepBuilderAPI_Transform(composite_shape_.one_d_shape(), transformation).Shape());
-    }
-    return composite_shape_;
+    return BRepBuilderAPI_Transform(shape_, transformation).Shape();
 
 }
 

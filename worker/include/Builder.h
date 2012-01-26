@@ -4,18 +4,16 @@
 #include <json_spirit.h>
 #include "OCC.h"
 
-#include "CompositeShape.h"
-
 using namespace std;
 using namespace json_spirit;
 
 class Builder {
 public:
-    Builder();
+    Builder() {};
     virtual ~Builder() {};
     
 protected:
-    CompositeShape composite_shape_;
+    TopoDS_Shape shape_;
     
     void ApplyOrigin(map< string, mValue > json);
     void ApplyTransform(map< string, mValue > json);
@@ -25,7 +23,7 @@ protected:
     
     
 public:
-    CompositeShape composite_shape();
+    TopoDS_Shape shape();
     
 };
 
@@ -125,24 +123,24 @@ typedef TopoDS_Shape (*boolean_op)(const TopoDS_Shape&, const TopoDS_Shape&);
 
 class BooleanBuilder : public BuilderND {
 public:
-    BooleanBuilder(map< string, mValue > json, vector<CompositeShape>& shapes, boolean_op fn);
+    BooleanBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boolean_op fn);
 };
 
 class UnionBuilder : public BooleanBuilder {
 public:
-    UnionBuilder(map< string, mValue > json, vector<CompositeShape>& shapes);
+    UnionBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
     virtual ~UnionBuilder() {};
 };
 
 class SubtractBuilder : public BooleanBuilder {
 public:
-    SubtractBuilder(map< string, mValue > json, vector<CompositeShape>& shapes);
+    SubtractBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
     virtual ~SubtractBuilder() {};
 };
 
 class IntersectBuilder : public BooleanBuilder {
 public:
-    IntersectBuilder(map< string, mValue > json, vector<CompositeShape>& shapes);
+    IntersectBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
     virtual ~IntersectBuilder() {};
 };
 
@@ -150,7 +148,7 @@ public:
 
 class PrismBuilder : public BuilderND {
 public:
-    PrismBuilder(map< string, mValue > json, CompositeShape shape);
+    PrismBuilder(map< string, mValue > json, TopoDS_Shape shape);
     ~PrismBuilder() {};
 };
 
