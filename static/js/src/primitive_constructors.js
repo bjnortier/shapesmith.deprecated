@@ -129,6 +129,18 @@ SS.constructors.createTorus = function(geomNode) {
     SS.constructors.editTorus(geomNode);
 }
 
+SS.constructors.editPrism = function(geomNode) {
+    SS.constructors.editPrimitive(geomNode, SS.constructors.Prism);
+}
+
+SS.constructors.createPrism = function(geomNode) {
+    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    geomNode.parameters.u = 0;
+    geomNode.parameters.v = 0;
+    geomNode.parameters.w = 20;
+
+    SS.constructors.editPrism(geomNode);
+}
 
 SS.constructors.Constructor = function(spec) {
     var that = this, scene = spec.scene, node = spec.transform || spec.geomNode;
@@ -767,6 +779,64 @@ SS.constructors.Torus = function() {
         if (spec.anchorName === 'r2') {
             spec.parameterName = 'r2';
 	    return new SS.modifier.RadiusMinR1(spec);
+	}
+        return null;
+    }
+
+}
+
+SS.constructors.Prism = function() {
+
+    this.createSceneObject = function(geomNode, activeAnchor) {
+        
+        var sceneObjects = {};
+        
+        var x = geomNode.origin.x, y = geomNode.origin.y, z = geomNode.origin.z;
+        var u = geomNode.parameters.u, v = geomNode.parameters.v, w = geomNode.parameters.w;
+
+        var r = parseFloat((Math.sqrt(u*u + v*v + w*w)).toFixed(3));
+        var childNode = geomNode.children[0];
+
+        if (r > 0) {
+            var rDim = SS.preview.createDimArrow2(r, u, v, w);
+            sceneObjects.rDim = rDim;
+        }
+
+         if (r > 0) {
+
+            var geometries = sceneView.createGeometry(childNode.mesh);
+
+	    var originalMeshObj = new THREE.Object3D();
+            SS.constructors.addGeometries(originalMeshObj, geometries);
+            sceneObjects.originalMeshObj = originalMeshObj;
+
+	    var translatedMeshObj = new THREE.Object3D();
+            SS.constructors.addGeometries(translatedMeshObj, geometries);
+
+            translatedMeshObj.position.x = u;
+	    translatedMeshObj.position.y = v;
+	    translatedMeshObj.position.z = w;
+
+            sceneObjects.translatedMeshObj = translatedMeshObj;
+        }
+
+        if (activeAnchor !== 'uvw') {
+            var uvwAnchor = new THREE.Mesh(SS.constructors.anchorGeometry, SS.constructors.anchorMaterial);
+            uvwAnchor.position.x = u;
+            uvwAnchor.position.y = v;
+            uvwAnchor.position.z = w;
+            uvwAnchor.name = {anchor: 'uvw'};
+            sceneObjects.uvwAnchor = uvwAnchor ;
+	}
+
+        return sceneObjects;
+    }
+
+    this.anchorPriorities = ['uvw', 'origin'];
+
+    this.getModifierForAnchor = function(spec) {
+        if (spec.anchorName === 'uvw') {
+	    return new SS.modifier.UVW(spec);
 	}
         return null;
     }

@@ -22,7 +22,7 @@ SS.popupMenu = function() {
 	} else if (selectionManager.getSelected().length == 1) {
 	    $('#toolWheel').append($('#edit'));
 	    $('#toolWheel').append($('#transforms'));
-	    $('#toolWheel').append($('#copyTransforms'));
+	    $('#toolWheel').append($('#modifiers'));
 	} else if (selectionManager.getSelected().length >= 2) {
 	    $('#toolWheel').append($('#boolean'));
 	}

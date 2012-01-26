@@ -188,10 +188,10 @@ $(document).ready(function() {
                function() { 
                    SS.constructors.createEllipse1d(create_primitive('ellipse2d',  ['r1', 'r2']));
 	       }).render($('#1Dprimitives'));
-    new Action('Ellipse 1D', '/static/images/ellipse1d.png', 
+    /*new Action('Ellipse 1D', '/static/images/ellipse1d.png', 
                function() { 
                    SS.constructors.createEllipse1d(create_primitive('ellipse1d',  ['r1', 'r2']));
-	       }).render($('#1Dprimitives'));
+	       }).render($('#1Dprimitives'));*/
     
     /*
      * Booleans
@@ -206,10 +206,10 @@ $(document).ready(function() {
     /*
      * Modifiers
      */
-    new Action('Prism', '/static/images/union.png', 
+    new Action('Prism', '/static/images/prism.png', 
                function(selected) { 
-                   create_modifier(selected, 'prism', ['u', 'v', 'w']);
-               }).render($('#transforms'));
+                   SS.constructors.createPrism(create_modifier(selected, 'prism', ['u', 'v', 'w']));
+               }).render($('#modifiers'));
     
     /*
      * Transformations

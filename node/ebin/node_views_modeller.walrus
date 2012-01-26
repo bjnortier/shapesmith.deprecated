@@ -82,6 +82,7 @@
     <div class="toolbar" id="1Dprimitives"></div>
     <div class="toolbar" id="boolean"></div>
     <div class="toolbar" id="transforms"></div>
+    <div class="toolbar" id="modifiers"></div>
   </div>
   <div id="geom-model-doc"></div>
     

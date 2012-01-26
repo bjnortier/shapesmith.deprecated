@@ -72,6 +72,8 @@ SS.constructors.createMirror = function(spec) {
     SS.constructors.editMirror(spec.geomNode, spec.transform);
 }
 
+
+
 SS.constructors.addGeometries = function(meshObject, geometries) {
     if (geometries['faces'].length > 0) {
         geometries['faces'].map(function(geometry) {
@@ -119,7 +121,7 @@ SS.constructors.Translate = function() {
             var uvwAnchor = new THREE.Mesh(SS.constructors.anchorGeometry, SS.constructors.anchorMaterial);
             uvwAnchor.position.x = u;
             uvwAnchor.position.y = v;
-            uvwAnchor.position.w = w;
+            uvwAnchor.position.z = w;
             uvwAnchor.name = {anchor: 'uvw'};
             sceneObjects.uvwAnchor = uvwAnchor ;
 	}
