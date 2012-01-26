@@ -4,13 +4,13 @@ SS.SceneView = function(container) {
     var camera, scene, renderer, w, h;
     var overRenderer;
 
-    var mouseOnDown = null;
-    var lastMouseDownTime = null;
+    var mouseOnDown, lastMouseMpos;
 
     var elevation = 0, azimuth = Math.PI/4;
     var target = { azimuth: Math.PI/4, elevation: Math.PI*3/8 };
     var targetOnDown = { azimuth: target.azimuth, elevation: target.elevation };
     var distance = 1000, distanceTarget = 300;
+    var targetScenePosition = new THREE.Vector3(0,0,0);
 
     var idToModel = {};
     var unselectedColor = 0x00dd00, selectedColor = 0xdddd00;
@@ -86,6 +86,7 @@ SS.SceneView = function(container) {
 	mouseOnDown = {};
 	mouseOnDown.x = event.clientX;
 	mouseOnDown.y = event.clientY;
+        lastMousePos = mouseOnDown;
 
         state = undefined;
 	container.addEventListener('mouseup', onMouseUp, false);
@@ -112,24 +113,21 @@ SS.SceneView = function(container) {
     
     function onMouseMove(event) {
 
+        var mouse = {};
+	mouse.x = event.clientX;
+	mouse.y = event.clientY;
+
 	if (mouseOnDown) {
 	    
 	    if (!state && !popupMenu.isShowing()) {
-		if (event.button === 0 && !event.shiftKey) {
-		    if ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
-			||
-			(Math.abs(event.clientY - mouseOnDown.y) > threshhold)) {
-			
-                        state = 'rotating';
-		    }
+                var overThreshold = ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
+			             ||
+			             (Math.abs(event.clientY - mouseOnDown.y) > threshhold));
+		if ((event.button === 0 && !event.shiftKey) && overThreshold) {
+                    state = 'rotating';
 		} 
-		if (event.button === 1 || event.shiftKey) {
-		    if ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
-			||
-			(Math.abs(event.clientY - mouseOnDown.y) > threshhold)) {
-                        
-                        state = 'panning';
-		    }
+		if ((event.button === 1 || event.shiftKey) && overThreshold)  {
+                    state = 'panning';
 		}
 	    }
 	    
@@ -138,9 +136,7 @@ SS.SceneView = function(container) {
 	    } 
             
             if (state === 'rotating') {
-		var mouse = {};
-		mouse.x = event.clientX;
-		mouse.y = event.clientY;
+		
 		var zoomDamp = Math.sqrt(distance)/10;
 
 		target.azimuth = targetOnDown.azimuth - (mouse.x - mouseOnDown.x) * 0.005 * zoomDamp;
@@ -148,7 +144,23 @@ SS.SceneView = function(container) {
 
 		target.elevation = target.elevation > Math.PI ? Math.PI : target.elevation;
 		target.elevation = target.elevation < 0 ? 0 : target.elevation;
-	    }
+	    } else if (state === 'panning') {
+                
+                var dMouse = {x: mouse.x - lastMousePos.x,
+                              y: mouse.y - lastMousePos.y};
+                
+                var camVec = camera.position.clone().negate().normalize();
+                var upVec = new THREE.Vector3(0,0,1);
+                var mouseLeftVec = new THREE.Vector3().cross(upVec, camVec);
+                var mouseUpVec = new THREE.Vector3().cross(camVec, mouseLeftVec);
+                
+                var dPos = mouseLeftVec.clone().multiplyScalar(dMouse.x).addSelf(mouseUpVec.clone().multiplyScalar(dMouse.y));
+                var factor = Math.sqrt(distance)/50;
+                dPos.multiplyScalar(factor);
+
+                targetScenePosition.addSelf(dPos);
+            }
+            
 	} 
 
 
@@ -170,6 +182,8 @@ SS.SceneView = function(container) {
         if (positionOnVertical) {
             workplane.updateZLocation(positionOnVertical, event);
         }
+
+        lastMousePos = mouse;
     }
 
     function determinePositionOnWorkplane(event) {
@@ -286,29 +300,31 @@ SS.SceneView = function(container) {
     }
 
     function onMouseWheel(event) {
+        var factor = 0.01;
 	event.preventDefault();
 	if (overRenderer) {
 	    if (event.wheelDeltaY) {
-		zoom(event.wheelDeltaY * 0.05);
+		zoom(event.wheelDeltaY * Math.sqrt(distance)*factor);
 	    }
 	    if (event.detail) {
-		zoom(-event.detail*60 * 0.05);
+		zoom(-event.detail*60 * Math.sqrt(distance)*factor);
 	    }
 	}
 	return false;
     }
 
     function onDocumentKeyDown(event) {
+        var factor = 10;
 	if (overRenderer) {
 	    switch (event.keyCode) {
 	    case 187:
 	    case 107:
-		zoom(100);
+		zoom(Math.sqrt(distance)*factor);
 		event.preventDefault();
 		break;
 	    case 189:
 	    case 109:
-		zoom(-100);
+		zoom(-Math.sqrt(distance)*factor);
 		event.preventDefault();
 		break;
 	    }
@@ -350,11 +366,14 @@ SS.SceneView = function(container) {
 	    distance += dDistance;
 	}
 
+        scene.position.addSelf(new THREE.Vector3().sub(targetScenePosition, scene.position).multiplyScalar(0.2));
+
 	camera.position.x = distance * Math.sin(elevation) * Math.cos(azimuth);
 	camera.position.y = distance * Math.sin(elevation) * Math.sin(azimuth);
 	camera.position.z = distance * Math.cos(elevation);
+        camera.position.addSelf(scene.position);
 
-        camera.lookAt( scene.position );
+        camera.lookAt(scene.position);
 	renderer.render(scene, camera);
     }
     
