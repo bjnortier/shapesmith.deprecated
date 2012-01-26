@@ -10,6 +10,10 @@ using namespace std;
 using namespace json_spirit;
 
 class Builder {
+public:
+    Builder();
+    virtual ~Builder() {};
+    
 protected:
     CompositeShape composite_shape_;
     
@@ -17,6 +21,8 @@ protected:
     void ApplyTransform(map< string, mValue > json);
     void ApplyTransforms(map< string, mValue > json);
     virtual void PostProcess(map< string, mValue > json) = 0;
+    
+    
     
 public:
     CompositeShape composite_shape();
@@ -30,6 +36,7 @@ private:
     void Mesh();
 protected:
     virtual void PostProcess(map< string, mValue > json);
+    virtual ~Builder3D() {};
 public:
     Builder3D() {};
     
@@ -39,37 +46,37 @@ class CuboidBuilder : public Builder3D {
 
 public:
     CuboidBuilder(map< string, mValue > json);
-    ~CuboidBuilder() {};
+    virtual ~CuboidBuilder() {};
 };
 
 class SphereBuilder : public Builder3D {
 public:
     SphereBuilder(map< string, mValue > json);
-    ~SphereBuilder() {};
+    virtual ~SphereBuilder() {};
 };
 
 class CylinderBuilder : public Builder3D {
 public:
     CylinderBuilder(map< string, mValue > json);
-    ~CylinderBuilder() {};
+    virtual ~CylinderBuilder() {};
 };
 
 class ConeBuilder : public Builder3D {
 public:
     ConeBuilder(map< string, mValue > json);
-    ~ConeBuilder() {};
+    virtual ~ConeBuilder() {};
 };
 
 class WedgeBuilder : public Builder3D {
 public:
     WedgeBuilder(map< string, mValue > json);
-    ~WedgeBuilder() {};
+    virtual ~WedgeBuilder() {};
 };
 
 class TorusBuilder : public Builder3D {
 public:
     TorusBuilder(map< string, mValue > json);
-    ~TorusBuilder() {};
+    virtual ~TorusBuilder() {};
 };
 
 #pragma mark 2D Primitives
@@ -79,12 +86,13 @@ private:
     void Mesh();
 protected:
     virtual void PostProcess(map< string, mValue > json);
+    virtual ~Builder2D() {};
 };
 
 class Ellipse2DBuilder : public Builder2D {
 public:
     Ellipse2DBuilder(map< string, mValue > json);
-    ~Ellipse2DBuilder() {};
+    virtual ~Ellipse2DBuilder() {};
 };
 
 #pragma mark 1D Primitives
@@ -92,12 +100,13 @@ public:
 class Builder1D : public Builder {
 protected:
     virtual void PostProcess(map< string, mValue > json);
+    virtual ~Builder1D() {};
 };
 
 class Ellipse1DBuilder : public Builder1D {
 public:
     Ellipse1DBuilder(map< string, mValue > json);
-    ~Ellipse1DBuilder() {};
+    virtual ~Ellipse1DBuilder() {};
 };
 
 #pragma mark Booleans
@@ -109,7 +118,7 @@ protected:
     virtual void PostProcess(map< string, mValue > json);
 public:
     BuilderND() {};
-    
+    virtual ~BuilderND() {};
 };
 
 typedef TopoDS_Shape (*boolean_op)(const TopoDS_Shape&, const TopoDS_Shape&);
@@ -122,19 +131,19 @@ public:
 class UnionBuilder : public BooleanBuilder {
 public:
     UnionBuilder(map< string, mValue > json, vector<CompositeShape>& shapes);
-    ~UnionBuilder();
+    virtual ~UnionBuilder() {};
 };
 
 class SubtractBuilder : public BooleanBuilder {
 public:
     SubtractBuilder(map< string, mValue > json, vector<CompositeShape>& shapes);
-    ~SubtractBuilder();
+    virtual ~SubtractBuilder() {};
 };
 
 class IntersectBuilder : public BooleanBuilder {
 public:
     IntersectBuilder(map< string, mValue > json, vector<CompositeShape>& shapes);
-    ~IntersectBuilder();
+    virtual ~IntersectBuilder() {};
 };
 
 #pragma mark Modifiers

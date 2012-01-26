@@ -4,6 +4,9 @@
 #include "Transform.h"
 #include "Util.h"
 
+Builder::Builder() {
+    composite_shape_ = CompositeShape();
+}
 
 CompositeShape Builder::composite_shape() {
     return composite_shape_;

@@ -16,25 +16,13 @@ public:
         one_d_shape_ = other.one_d_shape_;
     }
     
-    void set_three_d_shape(TopoDS_Shape shape) {
-        three_d_shape_ = shape;
-    }
-    void set_two_d_shape(TopoDS_Shape shape) {
-        two_d_shape_ = shape;
-    }
-    void set_one_d_shape(TopoDS_Shape shape) {
-        one_d_shape_ = shape;
-    }
+    void set_three_d_shape(TopoDS_Shape shape);
+    void set_two_d_shape(TopoDS_Shape shape);   
+    void set_one_d_shape(TopoDS_Shape shape);
     
-    TopoDS_Shape three_d_shape() {
-        return three_d_shape_;
-    }
-    TopoDS_Shape two_d_shape() {
-        return two_d_shape_;
-    }
-    TopoDS_Shape one_d_shape() {
-        return one_d_shape_;
-    }
+    TopoDS_Shape three_d_shape();
+    TopoDS_Shape two_d_shape();
+    TopoDS_Shape one_d_shape();
     
     mValue Tesselate();
 
