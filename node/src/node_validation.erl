@@ -87,7 +87,12 @@ validate_geom_test_() ->
 			      {<<"parameters">>, {[{<<"x">>, 0.0},
 						   {<<"y">>, 3},
 						   {<<"z">>, 0.0},
-						   {<<"factor">>, <<"a">>}]}}]}]}]}))
+						   {<<"factor">>, <<"a">>}]}}]}]}]})),
+     ?_assertEqual({error, {[{<<"children">>, <<"only one child allowed">>}]}},
+		   geom({[{<<"type">>, <<"prism">>},
+			  {<<"origin">>, Origin},
+                          {<<"parameters">>, {[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]}},
+                          {<<"children">>, [<<"abc">>, <<"123">>]}]}))
 
     ].
 -endif.
@@ -138,11 +143,17 @@ validate_geom_type(<<"ellipse1d">>, Props) ->
 			      ]);
 
 validate_geom_type(<<"prism">>, Props) ->
-    validate_primitive(Props, [{<<"u">>, fun number/1},
-			       {<<"v">>, fun number/1},
-			       {<<"w">>, fun number/1}
-			      ]);
-
+    case lists:keyfind(<<"children">>, 1, Props) of
+	false ->
+	    {error, {[{<<"missing">>, <<"children">>}]}};
+	{_, [_Child]} ->
+            validate_primitive(Props, [{<<"u">>, fun number/1},
+                                       {<<"v">>, fun number/1},
+                                       {<<"w">>, fun number/1}
+                                      ]);
+	_ ->
+	    {error, {[{<<"children">>, <<"only one child allowed">>}]}}
+    end;
 validate_geom_type(<<"union">>, Props) ->
     validate_boolean(Props);
 validate_geom_type(<<"subtract">>, Props) ->
