@@ -111,11 +111,11 @@ SS.cursoid.zPositionIndicator = function(z) {
 SS.Cursoid = function(spec) {
 
     var that = this, scene = spec.scene, position, cursoidSceneObject;
-    var cursoidMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 0.8, wireframe: false } );
-    var cursoidXMaterial = new THREE.MeshBasicMaterial( { color: 0x6666ff, opacity: 0.8, wireframe: false } );
-    var cursoidYMaterial = new THREE.MeshBasicMaterial( { color: 0x66ff66, opacity: 0.8, wireframe: false } );
-    var cursoidXYMaterial = new THREE.MeshBasicMaterial( { color: 0x66dddd, opacity: 0.8, wireframe: false } );
-    var cursoidZMaterial = new THREE.MeshBasicMaterial( { color: 0xff6666, opacity: 0.8, wireframe: false } );
+    var cursoidMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff, opacity: 1.0, wireframe: false } );
+    var cursoidXMaterial = new THREE.MeshBasicMaterial( { color: 0x6666ff, opacity: 1.0, wireframe: false } );
+    var cursoidYMaterial = new THREE.MeshBasicMaterial( { color: 0x66ff66, opacity: 1.0, wireframe: false } );
+    var cursoidXYMaterial = new THREE.MeshBasicMaterial( { color: 0x66dddd, opacity: 1.0, wireframe: false } );
+    var cursoidZMaterial = new THREE.MeshBasicMaterial( { color: 0xff6666, opacity: 1.0, wireframe: false } );
     var toXMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff, opacity: 0.5, linewidth: 1 });
     var toYMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00, opacity: 0.5, linewidth: 1 });
     var toZMaterial = new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.5, linewidth: 1 })
