@@ -2,7 +2,7 @@
 #include "Builder.h"
 #include "Tesselate.h"
 
-TEST(BuilderTest, Ellipse) {
+TEST(BuilderTest, Ellipse1) {
  
     mObject origin;
     origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
@@ -34,14 +34,45 @@ TEST(BuilderTest, Ellipse) {
     
 }
 
-
-TEST(BuilderTest, Ellipse2) {
+TEST(BuilderTest, Ellipse) {
     
     mObject origin;
     origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
     mObject parameters;
     parameters["r1"] = 10.0;
     parameters["r2"] = 5.0;
+    
+    
+    mObject json;
+    json["origin"] = origin;
+    json["parameters"] = parameters;
+    
+    Ellipse1DBuilder builder(json);
+    
+    TopoDS_Shape shape = builder.shape();
+    
+    ASSERT_FALSE(shape.IsNull());
+    
+    auto_ptr<Tesselator> tesselator(new Tesselator(shape));
+    mValue tesselation = tesselator->Tesselate();
+    
+    mArray facesTesselation = tesselation.get_obj()["faces"].get_obj()["positions"].get_array();
+    mArray edgeTesselation = tesselation.get_obj()["edges"].get_obj()["positions"].get_array();
+    
+    
+    ASSERT_EQ(facesTesselation.size(), 0);
+    ASSERT_NE(edgeTesselation.size(), 0);
+
+}
+
+
+TEST(BuilderTest, EllipseWithMajorSmallerThanMinor) {
+    
+    mObject origin;
+    origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
+    mObject parameters;
+    parameters["r1"] = 5.0;
+    parameters["r2"] = 10.0;
     
     
     mObject json;

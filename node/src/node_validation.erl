@@ -129,14 +129,12 @@ validate_geom_type(<<"torus">>, Props) ->
 validate_geom_type(<<"ellipse2d">>, Props) ->
     validate_primitive(Props, [
 			       {<<"r1">>, fun positive/1},
-			       {<<"r2">>, fun positive/1},
-			       {[<<"r1">>, <<"r2">>], fun first_greater_or_equal_to_second/1}
+			       {<<"r2">>, fun positive/1}
 			      ]);
 validate_geom_type(<<"ellipse1d">>, Props) ->
     validate_primitive(Props, [
 			       {<<"r1">>, fun positive/1},
-			       {<<"r2">>, fun positive/1},
-			       {[<<"r1">>, <<"r2">>], fun first_greater_or_equal_to_second/1}
+			       {<<"r2">>, fun positive/1}
 			      ]);
 
 validate_geom_type(<<"prism">>, Props) ->
@@ -413,11 +411,6 @@ one_zero_one_positive([A, B]) when B > 0 andalso A >= 0 ->
     ok;
 one_zero_one_positive(_) ->
     {error, <<"one must be positive">>}.
-
-first_greater_or_equal_to_second([A, B]) when A >= B ->
-    ok;
-first_greater_or_equal_to_second(_) ->
-    {error, <<"the second must be greater or equal to the first">>}.
 
 not_equal([A, B]) when A =:= B ->
     {error, <<"can't be equal">>};

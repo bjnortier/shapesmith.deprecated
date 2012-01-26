@@ -195,16 +195,30 @@ void Builder2D::PostProcess(map< string, mValue > json) {
     this->Mesh();
 }
 
+TopoDS_Shape rotate90DegreesAroundZ(TopoDS_Shape shape);
+
 Ellipse2DBuilder::Ellipse2DBuilder(map< string, mValue > json) {
     map< string, mValue > parameters = json["parameters"].get_obj();
     double r1 = Util::to_d(parameters["r1"]);
     double r2 = Util::to_d(parameters["r2"]);
     
-    gp_Elips ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), r1, r2);
+    gp_Elips ellipse;
+    if (r1 > r2) {
+        ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), r1, r2);
+    } else {
+        ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), r2, r1);
+    }
+     
     TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI*2).Edge();
     TopoDS_Wire wire = BRepBuilderAPI_MakeWire(edge);
-    TopoDS_Face face = BRepBuilderAPI_MakeFace(wire);
-    shape_ = face;
+    TopoDS_Shape shape = BRepBuilderAPI_MakeFace(wire);
+    
+    if (r1 > r2) {
+        shape_ = shape;
+    } else {
+        shape_ = rotate90DegreesAroundZ(shape);
+    }
+    
     PostProcess(json);
 }
 
@@ -221,11 +235,30 @@ Ellipse1DBuilder::Ellipse1DBuilder(map< string, mValue > json) {
     double r1 = Util::to_d(parameters["r1"]);
     double r2 = Util::to_d(parameters["r2"]);
     
-    gp_Elips ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), r1, r2);
-	shape_ = BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI*2).Edge();
+    gp_Elips ellipse;
+    if (r1 < r2) {
+        ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), r2, r1);
+    } else {
+        ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), r1, r2);
+    }
+    
+	TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI*2).Edge();
+    
+    if (r1 < r2) {
+        shape_ = rotate90DegreesAroundZ(edge);
+    } else {
+        shape_ = edge;
+    }
+    
     PostProcess(json);
 }
 
+TopoDS_Shape rotate90DegreesAroundZ(TopoDS_Shape shape) {
+    gp_Trsf transformation = gp_Trsf();
+    transformation.SetRotation(gp_Ax1(gp_Pnt(0.0,0.0,0.0), gp_Dir(0.0,0.0,1.0)), M_PI/2);
+    
+    return BRepBuilderAPI_Transform(shape, transformation).Shape();
+}
 
 #pragma mark Boolean builders
 
@@ -265,20 +298,18 @@ TopoDS_Shape create_compound(TopoDS_Shape shape, TopAbs_ShapeEnum keepType) {
 }
 
 
-TopoDS_Shape robustBoolean(TopoDS_Shape a, TopoDS_Shape b, boolean_op function) {
+TopoDS_Shape performCompoundBoolean(TopoDS_Shape a, TopoDS_Shape b, boolean_op function) {
     
     
     TopoDS_Shape solidA = create_compound(a, TopAbs_SOLID);
     TopoDS_Shape solidB = create_compound(b, TopAbs_SOLID);
-
     TopoDS_Shape solids = function(solidA, solidB);
     
     
     TopoDS_Shape facesA = create_compound(a, TopAbs_FACE);
     TopoDS_Shape facesB = create_compound(b, TopAbs_FACE);
-    
     TopoDS_Shape faces = function(facesA, facesB);
-
+    
     TopoDS_Builder builder;
     TopoDS_Compound compound;
     builder.MakeCompound(compound);
@@ -295,7 +326,7 @@ BooleanBuilder::BooleanBuilder(map< string, mValue > json, vector<TopoDS_Shape>&
     ++it;
     
     for ( ; it < shapes.end(); ++it ) {
-        shape_ = robustBoolean((*it), shape_, function);
+        shape_ = performCompoundBoolean((*it), shape_, function);
     }
     PostProcess(json);
 }
