@@ -34,18 +34,27 @@
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Wire.hxx>
 #include <TopoDS_Face.hxx>
+
 #include <Poly_Triangulation.hxx>
-#include <TColgp_Array1OfDir.hxx>
 #include <Poly_Connect.hxx>
+
+#include <TColgp_Array1OfDir.hxx>
 #include <StdPrs_ToolShadedShape.hxx>
 
 #include <FSD_BinaryFile.hxx>
+
+#include <GC_MakeSegment.hxx>
+
 #include <Storage_Data.hxx>
 #include <ShapeSchema.hxx>
-#include <PTColStd_TransientPersistentMap.hxx>
+
 #include <MgtBRep.hxx>
+
 #include <Storage_HSeqOfRoot.hxx>
 #include <Storage_HSeqOfRoot.hxx>
 #include <Storage_Root.hxx>
+
 #include <PTColStd_PersistentTransientMap.hxx>
+#include <PTColStd_TransientPersistentMap.hxx>
+
 

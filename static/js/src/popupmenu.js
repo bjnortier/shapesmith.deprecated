@@ -18,7 +18,7 @@ SS.popupMenu = function() {
     var addActions = function() {
 	if (selectionManager.getSelected().length == 0) {
 	    $('#toolWheel').append($('#3Dprimitives'));
-	    $('#toolWheel').append($('#1Dprimitives'));
+	    $('#toolWheel').append($('#2Dprimitives'));
 	} else if (selectionManager.getSelected().length == 1) {
 	    $('#toolWheel').append($('#edit'));
 	    $('#toolWheel').append($('#transforms'));

@@ -103,6 +103,9 @@ string create_geometry(string id, map< string, mValue > json) {
     // 2D Primitives
     } else if (geomType == "ellipse2d") {
         return create_primitive<Ellipse2DBuilder>(id, json);
+    } else if (geomType == "rectangle2d") {
+        return create_primitive<Rectangle2DBuilder>(id, json);
+
     
     // 1D Primitives
     } else if (geomType == "ellipse1d") {

@@ -186,8 +186,13 @@ $(document).ready(function() {
 
     new Action('Ellipse 2D', '/static/images/ellipse2d.png', 
                function() { 
-                   SS.constructors.createEllipse1d(create_primitive('ellipse2d',  ['r1', 'r2']));
-	       }).render($('#1Dprimitives'));
+                   SS.constructors.createEllipse2d(create_primitive('ellipse2d',  ['r1', 'r2']));
+	       }).render($('#2Dprimitives'));
+    new Action('Rectangle 2D', '/static/images/rectangle2d.png', 
+               function() { 
+                   SS.constructors.createRectangle2d(create_primitive('rectangle2d',  ['u', 'v']));
+	       }).render($('#2Dprimitives'));
+
     /*new Action('Ellipse 1D', '/static/images/ellipse1d.png', 
                function() { 
                    SS.constructors.createEllipse1d(create_primitive('ellipse1d',  ['r1', 'r2']));

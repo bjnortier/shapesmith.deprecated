@@ -222,6 +222,23 @@ Ellipse2DBuilder::Ellipse2DBuilder(map< string, mValue > json) {
     PostProcess(json);
 }
 
+Rectangle2DBuilder::Rectangle2DBuilder(map< string, mValue > json) {
+    map< string, mValue > parameters = json["parameters"].get_obj();
+    double u = Util::to_d(parameters["u"]);
+    double v = Util::to_d(parameters["v"]);
+    
+    gp_Pnt points[4] = {gp_Pnt(0 , 0 , 0), gp_Pnt(u , 0 , 0), gp_Pnt(u , v , 0), gp_Pnt(0 , v , 0)};
+    
+    TopoDS_Edge edges[4];
+    for (int i = 0; i < 4; ++i) {
+        edges[i] = BRepBuilderAPI_MakeEdge(GC_MakeSegment(points[i] , points[(i + 1) % 4]));
+    }
+    TopoDS_Wire wire = BRepBuilderAPI_MakeWire(edges[0], edges[1], edges[2], edges[3]);
+    
+    shape_ = BRepBuilderAPI_MakeFace(wire);
+    PostProcess(json);  
+}
+
 
 #pragma mark 1D Builders
 

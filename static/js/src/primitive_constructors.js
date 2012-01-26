@@ -23,7 +23,7 @@ SS.constructors.editPrimitive = function(geomNode, specialisationClazz) {
 
 
 SS.constructors.editEllipse1d = function(geomNode) {
-    SS.constructors.editPrimitive(geomNode, SS.constructors.Ellipse1d);
+    SS.constructors.editPrimitive(geomNode, SS.constructors.Ellipse);
 }
 
 SS.constructors.createEllipse1d = function(geomNode) {
@@ -36,7 +36,7 @@ SS.constructors.createEllipse1d = function(geomNode) {
 }
 
 SS.constructors.editEllipse2d = function(geomNode) {
-    SS.constructors.editPrimitive(geomNode, SS.constructors.Ellipse1d);
+    SS.constructors.editPrimitive(geomNode, SS.constructors.Ellipse);
 }
 
 SS.constructors.createEllipse2d = function(geomNode) {
@@ -46,6 +46,20 @@ SS.constructors.createEllipse2d = function(geomNode) {
     geomNode.parameters.r1 = 20;
     geomNode.parameters.r2 = 10;
     SS.constructors.editEllipse2d(geomNode);
+}
+
+
+SS.constructors.editRectangle2d = function(geomNode) {
+    SS.constructors.editPrimitive(geomNode, SS.constructors.Rectangle);
+}
+
+SS.constructors.createRectangle2d = function(geomNode) {
+    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    geomNode.origin.x = lastMousePosition.x;
+    geomNode.origin.y = lastMousePosition.y;
+    geomNode.parameters.u = 10;
+    geomNode.parameters.v = 10;
+    SS.constructors.editRectangle2d(geomNode);
 }
 
 SS.constructors.editCuboid = function(geomNode) {
@@ -259,7 +273,7 @@ SS.constructors.disposeActive = function() {
     }
 }
 
-SS.constructors.Ellipse1d = function() {
+SS.constructors.Ellipse = function() {
 
     this.createSceneObject = function(geomNode, activeAnchor) {
         
@@ -305,6 +319,56 @@ SS.constructors.Ellipse1d = function() {
     this.getModifierForAnchor = function(spec) {
         if (spec.anchorName === 'radii') {
 	    return new SS.modifier.MajorMinorRadii(spec);
+	}
+        return null;
+    }
+
+}
+
+SS.constructors.Rectangle = function() {
+
+    this.createSceneObject = function(geomNode, activeAnchor) {
+        
+        var sceneObjects = {};
+        
+        var u = geomNode.parameters.u;
+        var v = geomNode.parameters.v;
+        if (u) {
+	    sceneObjects.uDim = SS.preview.createDimArrow(u, 0);
+	}
+        if (v) {
+	    sceneObjects.vDim = SS.preview.createDimArrow(v, Math.PI/2);
+	}
+
+	var rectangleObj = new THREE.Object3D();
+        if (u && v) {
+            var uvLineGeom = new THREE.Geometry();
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u, 0, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u, v, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, v, 0)));
+	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
+	    var uvLine = new THREE.Line(uvLineGeom, SS.constructors.lineMaterial);
+	    rectangleObj.add(uvLine);
+        }
+
+        if (activeAnchor !== 'uv') {
+            var uvAnchor = new THREE.Mesh(SS.constructors.anchorGeometry, SS.constructors.anchorMaterial);
+            uvAnchor.position.x = u;
+            uvAnchor.position.y = v;
+            uvAnchor.name = {anchor: 'uv'};
+            rectangleObj.add(uvAnchor);
+	}
+
+        sceneObjects.rectangleObj = rectangleObj;
+        return sceneObjects;
+    }
+
+    this.anchorPriorities = ['uv', 'origin'];
+
+    this.getModifierForAnchor = function(spec) {
+        if (spec.anchorName === 'uv') {
+	    return new SS.modifier.UV(spec);
 	}
         return null;
     }

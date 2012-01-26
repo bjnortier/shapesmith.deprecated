@@ -93,6 +93,12 @@ public:
     virtual ~Ellipse2DBuilder() {};
 };
 
+class Rectangle2DBuilder : public Builder2D {
+public:
+    Rectangle2DBuilder(map< string, mValue > json);
+    virtual ~Rectangle2DBuilder() {};
+};
+
 #pragma mark 1D Primitives
 
 class Builder1D : public Builder {
