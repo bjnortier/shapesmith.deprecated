@@ -96,7 +96,6 @@ SS.constructors.Translate = function() {
         var x = transform.origin.x, y = transform.origin.y, z = transform.origin.z;
         var u = transform.parameters.u, v = transform.parameters.v, w = transform.parameters.w;
 
-	var translatedObj = new THREE.Object3D();
         var r = parseFloat((Math.sqrt(u*u + v*v + w*w)).toFixed(3));
 
         if (r > 0) {
@@ -107,25 +106,13 @@ SS.constructors.Translate = function() {
         if (r > 0) {
 
             var geometries = sceneView.createGeometry(geomNode.mesh);
-	    var meshes = [];
-            if (geometries['3d'].length > 0) {
-                geometries['3d'].map(function(geometry) {
-                    meshes.push(new THREE.Mesh(geometry, SS.constructors.faceMaterial));
-                });
-            }
-            if (geometries['1d'].length > 0) {
-                geometries['1d'].map(function(geometry) {
-                    meshes.push(new THREE.Line(geometry, SS.constructors.lineMaterial));
-                });
-            }
+	    var translatedMeshObj = new THREE.Object3D();
+            SS.constructors.addGeometries(translatedMeshObj, geometries);
 
-            meshes.map(function(mesh) {
-                mesh.position.x = u - x;
-	        mesh.position.y = v - y;
-	        mesh.position.z = w - z;
-	        mesh.doubleSided = true;
-	        translatedObj.add(mesh);
-            });
+            translatedMeshObj.position.x = u - x;
+	    translatedMeshObj.position.y = v - y;
+	    translatedMeshObj.position.z = w - z;
+            sceneObjects.translatedMeshObj = translatedMeshObj;
         }
 
         if (activeAnchor !== 'uvw') {
@@ -134,10 +121,9 @@ SS.constructors.Translate = function() {
             uvwAnchor.position.y = v;
             uvwAnchor.position.w = w;
             uvwAnchor.name = {anchor: 'uvw'};
-            translatedObj.add(uvwAnchor);
+            sceneObjects.uvwAnchor = uvwAnchor ;
 	}
 
-        sceneObjects.translated = translatedObj;
         return sceneObjects;
     }
 
