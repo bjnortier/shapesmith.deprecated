@@ -49,8 +49,9 @@ From within the cloned shapesmith repo:
  * cd build
  * cmake ..
  * make
+ * make test
 
-You should now have a usable worker process
+If all the tests pass you should now have a usable worker process
 
 Build the Erlang application
 ----------------------------
