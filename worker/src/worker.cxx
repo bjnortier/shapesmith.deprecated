@@ -197,6 +197,9 @@ mValue serialize_shape(string sha, TopoDS_Shape shape) {
         ++index;
     }
     tmpFile.close();
+
+    // Delete file
+    remove(fileName);
     
     // Base64
     std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(s11nBuf), index - 1);
