@@ -163,7 +163,12 @@ validate_username({Props}) ->
     Pattern = "^[A-Z0-9._-]+$",
     case re:run(String, Pattern, [caseless]) of
 	{match,[_]} ->
-	    ok;
+            case lists:nth(1, String) of
+                $_ ->
+                    {error, {[{<<"username">>, <<"may not start with an underscore">>}]}};
+                _ ->
+                    ok
+                end;
 	nomatch ->
 	    {error, {[{<<"username">>, <<"can only contain letters, numbers, dots, dashes and underscores">>}]}}
     end.
@@ -217,6 +222,9 @@ validate_username_test_() ->
     [
      ?_assertEqual({error, {[{<<"username">>, Reason}]}},
 		   validate_username({[{<<"username">>, <<"&^%">>}]})),
+     ?_assertEqual({error, {[{<<"username">>, <<"may not start with an underscore">>}]}},
+		   validate_username({[{<<"username">>, <<"_brep">>}]})),
+
      ?_assertEqual({error, {[{<<"username">>, Reason}]}},
 		   validate_username({[{<<"username">>, <<"user name">>}]})),
      ?_assertEqual(ok,
