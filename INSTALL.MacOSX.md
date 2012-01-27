@@ -3,7 +3,7 @@
 ## Install MacPorts + dependencies
 
  * Install MacPorts from http://www.macports.org/
- * sudo port install cmake ftgl json_spirit
+ * sudo port install cmake ftgl json_spirit google-test
 
 ## Install Erlang
 
