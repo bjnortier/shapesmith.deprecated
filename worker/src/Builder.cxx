@@ -323,8 +323,8 @@ TopoDS_Shape performCompoundBoolean(TopoDS_Shape a, TopoDS_Shape b, boolean_op f
     TopoDS_Shape solids = function(solidA, solidB);
     
     
-    TopoDS_Shape facesA = create_compound(a, TopAbs_FACE);
-    TopoDS_Shape facesB = create_compound(b, TopAbs_FACE);
+    TopoDS_Shape facesA = create_compound(a, TopAbs_FACE, TopAbs_SOLID);
+    TopoDS_Shape facesB = create_compound(b, TopAbs_FACE, TopAbs_SOLID);
     TopoDS_Shape faces = function(facesA, facesB);
     
     TopoDS_Builder builder;
