@@ -372,7 +372,7 @@ TEST(BuilderTest, Text) {
     json["origin"] = origin;
     json["parameters"] = parameters;
     
-    Text1DBuilder builder(json);
+    Text2DBuilder builder(json);
     
     TopoDS_Shape shape = builder.shape();
     

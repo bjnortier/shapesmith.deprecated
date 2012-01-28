@@ -39,7 +39,7 @@ mValue Tesselator1D::Tesselate() {
         
         BRepAdaptor_Curve curve_adaptor(edge);
         GCPnts_UniformDeflection discretizer;
-        discretizer.Initialize(curve_adaptor, 0.001);
+        discretizer.Initialize(curve_adaptor, 0.05);
         
         for (int i = 0; i < discretizer.NbPoints(); i++) {
             gp_Pnt pt = curve_adaptor.Value(discretizer.Parameter(i + 1));

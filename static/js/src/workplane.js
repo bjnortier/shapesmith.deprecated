@@ -112,7 +112,9 @@ SS.workplane.grid = function(spec) {
 		var line = new THREE.Line(geometry, material);
 		line.position.x = x;
 		line.rotation.z = 90 * Math.PI / 180;
-		scene.add(line);
+                if (x % 10 == 0) {
+		    scene.add(line);
+                }
 
 	    }
 	}
@@ -123,7 +125,9 @@ SS.workplane.grid = function(spec) {
 		var geometry = (y % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
 		var line = new THREE.Line(geometry, material);
 		line.position.y = y;
-		scene.add(line);
+                if (y % 10 == 0) {
+		    scene.add(line);
+                }
 	    }
 	}
     }

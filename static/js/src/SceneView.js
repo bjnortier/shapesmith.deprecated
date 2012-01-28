@@ -442,7 +442,7 @@ SS.SceneView = function(container) {
             lineGeometries.map(function(lineGeometry) {
                 var line = new THREE.Line(lineGeometry, lineMaterial);
                 line.name = objectName;
-                lines.add(line);
+                //lines.add(line);
             });
             lines.name = objectName;
 

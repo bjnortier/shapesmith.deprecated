@@ -309,15 +309,7 @@ public:
         }
         return wires_;
     }
-    
-    int addEdge(FT_Vector* to) {
-        gp_Pnt new_position = ToPoint(to);
-        TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(GC_MakeSegment(last_position_, new_position));
-        wire_maker_.Add(edge);
-        last_position_ = new_position;
-        return 0;
-    }
-    
+
     int moveTo(FT_Vector* to) {
         if (wire_maker_.IsDone()) {
             wires_.push_back(wire_maker_.Wire());
@@ -328,14 +320,34 @@ public:
         last_position_ = ToPoint(to);
         return 0;
     };
+    
     int lineTo(FT_Vector* to) {
-        return addEdge(to);
+        gp_Pnt new_position = ToPoint(to);
+        TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(GC_MakeSegment(last_position_, new_position));
+        wire_maker_.Add(edge);
+        last_position_ = new_position;
+        return 0;
     };
+    
     int conicTo(FT_Vector* control, FT_Vector* to) {
-        return addEdge(to);
+        gp_Pnt control_pt = ToPoint(control);
+        gp_Pnt to_pt = ToPoint(to);
+        
+        TColgp_Array1OfPnt poles(1, 3);
+        poles.SetValue(1, last_position_);
+        poles.SetValue(2, control_pt);
+        poles.SetValue(3, to_pt);
+
+        Handle(Geom_BezierCurve) curve = new Geom_BezierCurve(poles); 
+        TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(curve);
+        wire_maker_.Add(edge);
+
+        last_position_ = to_pt;
+        return 0;
     };
+    
     int cubicTo(FT_Vector* control1, FT_Vector* control2, FT_Vector* to) {
-        return addEdge(to);
+        return 0;
     };
 
     
@@ -358,6 +370,14 @@ Text2DBuilder::Text2DBuilder(map< string, mValue > json) {
     map< string, mValue > parameters = json["parameters"].get_obj();
     string text = parameters["text"].get_str();
     const char* textChars = text.c_str();
+    
+//  Andale Mono
+//	Arial
+//	Courier
+//	Georgia 
+//	Impact
+//	Times New Roman 
+//	Verdana 
     
     FT_Library freetype_library;
     FT_Init_FreeType(&freetype_library);

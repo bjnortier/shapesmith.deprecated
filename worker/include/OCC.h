@@ -26,6 +26,7 @@
 #include <gp_Pnt.hxx>
 #include <gp_Elips.hxx>
 #include <gp_Sphere.hxx>
+#include <Geom_BezierCurve.hxx>
 
 #include <GCPnts_UniformDeflection.hxx>
 
@@ -39,6 +40,7 @@
 #include <Poly_Connect.hxx>
 
 #include <TColgp_Array1OfDir.hxx>
+#include <TColgp_Array1OfPnt2d.hxx>
 #include <StdPrs_ToolShadedShape.hxx>
 
 #include <FSD_BinaryFile.hxx>
