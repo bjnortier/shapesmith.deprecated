@@ -359,6 +359,25 @@ TEST(BuilderTest, Boolean3) {
     
     ASSERT_FALSE(final.shape().IsNull());
     
+}
+
+TEST(BuilderTest, Text) {
+    
+    mObject origin;
+    origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
+    mObject parameters;
+    parameters["text"] = "123";
+    
+    mObject json;
+    json["origin"] = origin;
+    json["parameters"] = parameters;
+    
+    Text1DBuilder builder(json);
+    
+    TopoDS_Shape shape = builder.shape();
+    
+    ASSERT_FALSE(shape.IsNull());
+
     
 }
 

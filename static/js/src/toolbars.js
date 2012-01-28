@@ -197,6 +197,11 @@ $(document).ready(function() {
                function() { 
                    SS.constructors.createEllipse1d(create_primitive('ellipse1d',  ['r1', 'r2']));
 	       }).render($('#1Dprimitives'));*/
+    new Action('Text 1D', '/static/images/ellipse1d.png', 
+               function() { 
+                   create_primitive('text1d',  ['text']);
+	       }).render($('#2Dprimitives'));
+
     
     /*
      * Booleans

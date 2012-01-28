@@ -110,6 +110,8 @@ string create_geometry(string id, map< string, mValue > json) {
     // 1D Primitives
     } else if (geomType == "ellipse1d") {
         return create_primitive<Ellipse1DBuilder>(id, json);
+    } else if (geomType == "text1d") {
+        return create_primitive<Text1DBuilder>(id, json);
         
     // Modifiers
     } else if (geomType == "prism") {
@@ -253,6 +255,8 @@ int main (int argc, char *argv[]) {
     
     unsigned char buf[1024*1024];
     int msg_size;
+    
+    
     
     while ((msg_size = read_cmd(buf)) > 0) {
         
@@ -414,6 +418,6 @@ int main (int argc, char *argv[]) {
         }
         
     }
-    
+
     return 0;
 }

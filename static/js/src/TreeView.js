@@ -142,7 +142,11 @@ function TreeView() {
                     geomNode.origin[key] = parseFloat($('#' + key).val());
 		}
 		for (key in geomNode.parameters) {
-                    geomNode.parameters[key] = parseFloat($('#' + key).val());
+                    if (key === 'text') {
+                        geomNode.parameters[key] = $('#' + key).val();
+                    } else {
+                        geomNode.parameters[key] = parseFloat($('#' + key).val());
+                    }
 		}
 		return update_geom_command(precursor, geomNode, geomNode);
             } else {
@@ -152,7 +156,11 @@ function TreeView() {
 		}
 		var parameters = {};
 		for (key in geomNode.parameters) {
-                    parameters[key] = parseFloat($('#' + key).val());
+                    if (key === 'text') {
+                        parameters[key] = $('#' + key).val();
+                    } else {
+                        parameters[key] = parseFloat($('#' + key).val());
+                    }
 		}
 		return create_geom_command(geomNode, {type: geomNode.type,
 						      origin: origin,

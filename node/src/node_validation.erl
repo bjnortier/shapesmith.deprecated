@@ -146,6 +146,11 @@ validate_geom_type(<<"ellipse1d">>, Props) ->
 			       {<<"r1">>, fun positive/1},
 			       {<<"r2">>, fun positive/1}
 			      ]);
+validate_geom_type(<<"text1d">>, Props) ->
+    validate_primitive(Props, [
+			       {<<"text">>, fun non_empty_string/1}
+			      ]);
+
 
 validate_geom_type(<<"prism">>, Props) ->
     case lists:keyfind(<<"children">>, 1, Props) of
@@ -235,7 +240,23 @@ validate_geom_type_test_() ->
 					   {[{<<"u">>, 0},
 					     {<<"v">>, 3.1},
 					     {<<"w">>, 0}
-					    ]}}]))
+					    ]}}])),
+     ?_assertEqual(
+        {error, {[{<<"text">>, <<"must be a non-empty string">>}]}}, 
+        validate_geom_type(<<"text1d">>, [{<<"origin">>, Origin},
+					  {<<"parameters">>, 
+					   {[{<<"text">>, 0.1}]}}])),
+     ?_assertEqual(
+        {error, {[{<<"text">>, <<"must be a non-empty string">>}]}}, 
+        validate_geom_type(<<"text1d">>, [{<<"origin">>, Origin},
+					  {<<"parameters">>, 
+					   {[{<<"text">>, <<>>}]}}])),
+     ?_assertEqual(
+        ok, 
+        validate_geom_type(<<"text1d">>, [{<<"origin">>, Origin},
+					  {<<"parameters">>, 
+					   {[{<<"text">>, <<"some text">>}]}}]))
+
     ].
 -endif.
 
@@ -399,6 +420,13 @@ validate_spec({ParameterProps}, {Field, CheckFn}) ->
         _ ->
             ok
     end.
+
+non_empty_string(<<>>) ->
+    {error, <<"must be a non-empty string">>};
+non_empty_string(Value) when is_binary(Value) ->
+    ok;
+non_empty_string(_) ->
+    {error, <<"must be a non-empty string">>}.
 
 positive(Value) when is_integer(Value) andalso Value > 0 ->
     ok;

@@ -1,3 +1,4 @@
+
 #include "Builder.h"
 #include "Tesselate.h"
 #include "Transform.h"
@@ -266,6 +267,133 @@ Ellipse1DBuilder::Ellipse1DBuilder(map< string, mValue > json) {
     } else {
         shape_ = edge;
     }
+    
+    PostProcess(json);
+}
+
+
+
+class TextComposer {
+    
+    gp_Pnt last_position_;
+    gp_Pnt offset_;
+    BRepBuilderAPI_MakeWire wire_maker_;
+    FT_Vector character_pos_;
+    TopoDS_Shape compound_;
+
+    
+private:
+    
+    double factor;
+    
+    gp_Pnt ToPoint(FT_Vector* vec) {
+        return gp_Pnt(offset_.X() + factor*vec->x, 
+                      offset_.Y() + factor*vec->y, 
+                      0);
+    }
+    
+public:
+
+    TextComposer(FT_Vector* character_pos, TopoDS_Shape compound) {
+        factor = 0.001;
+        offset_ = gp_Pnt(factor*character_pos->x, 
+                         factor*character_pos->y, 
+                         0);
+        
+        compound_ = compound;
+    }
+    
+    void compose(FT_Outline* outline, FT_Outline_Funcs interface) {
+        FT_Outline_Decompose(outline, &interface, this);
+        if (wire_maker_.IsDone()) {
+            TopoDS_Builder().Add(compound_, wire_maker_.Wire());
+        }
+    }
+    
+    int addEdge(FT_Vector* to) {
+        gp_Pnt new_position = ToPoint(to);
+        TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(GC_MakeSegment(last_position_, new_position));
+        wire_maker_.Add(edge);
+        last_position_ = new_position;
+        return 0;
+    }
+    
+    int moveTo(FT_Vector* to) {
+        if (wire_maker_.IsDone()) {
+            TopoDS_Builder().Add(compound_, wire_maker_.Wire());
+        }
+        BRepBuilderAPI_MakeWire tmp;
+        wire_maker_ = tmp;
+        
+        last_position_ = ToPoint(to);
+        return 0;
+    };
+    int lineTo(FT_Vector* to) {
+        return addEdge(to);
+    };
+    int conicTo(FT_Vector* control, FT_Vector* to) {
+        return addEdge(to);
+    };
+    int cubicTo(FT_Vector* control1, FT_Vector* control2, FT_Vector* to) {
+        return addEdge(to);
+    };
+
+    
+};
+
+int moveToCallback(FT_Vector* to, TextComposer* composer) {
+    return composer->moveTo(to);
+};
+int lineToCallback(FT_Vector* to, TextComposer* composer) {
+    return composer->lineTo(to);
+};
+int conicToCallback(FT_Vector* control, FT_Vector* to, TextComposer* composer) {
+    return composer->conicTo(control, to);
+};
+int cubicToCallback(FT_Vector* control1, FT_Vector* control2, FT_Vector* to, TextComposer* composer) {
+    return composer->cubicTo(control1, control2, to);
+};
+
+Text1DBuilder::Text1DBuilder(map< string, mValue > json) {
+    map< string, mValue > parameters = json["parameters"].get_obj();
+    string text = parameters["text"].get_str();
+    const char* textChars = text.c_str();
+    
+    FT_Library freetype_library;
+    FT_Init_FreeType(&freetype_library);
+    FT_Face     face; 
+    FT_New_Face(freetype_library,
+                "/Library/Fonts/Times New Roman.ttf",
+                0,
+                &face);
+    
+    FT_Set_Char_Size(face, 50*64, 0, 100, 100);
+    
+    FT_Outline_Funcs interface;
+    interface.move_to = (FT_Outline_LineTo_Func)moveToCallback;
+    interface.line_to = (FT_Outline_LineTo_Func)lineToCallback;
+    interface.conic_to = (FT_Outline_ConicTo_Func)conicToCallback;
+    interface.cubic_to = (FT_Outline_CubicTo_Func)cubicToCallback;
+    interface.shift = 0;
+    interface.delta = 0;
+    
+    TopoDS_Builder builder;
+    TopoDS_Compound compound;
+    builder.MakeCompound(compound);
+    
+    FT_Vector character_pos = {0,0};
+    for (unsigned int i = 0; i < text.length(); ++i) {
+        FT_Load_Char(face, textChars[i], FT_LOAD_NO_BITMAP);
+        auto_ptr<TextComposer> composer(new TextComposer(&character_pos, compound));
+        composer->compose(&face->glyph->outline, interface);
+        character_pos.x += face->glyph->advance.x;
+        character_pos.y += face->glyph->advance.y;
+    }
+    
+    shape_ = compound;
+    
+    FT_Done_Face(face);
+    FT_Done_FreeType(freetype_library);
     
     PostProcess(json);
 }

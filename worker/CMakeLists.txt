@@ -19,6 +19,7 @@ include_directories("include")
 include_directories("/usr/local/include")
 include_directories("/usr/local/inc")
 include_directories("/opt/local/include")
+include_directories("/opt/local/include/freetype2/")
 
 set(ALL_CLASSES src/worker.cxx src/Builder.cxx src/Transform.cxx src/Util.cxx src/Tesselate.cxx src/base64.cpp)
 
@@ -30,13 +31,13 @@ enable_testing()
 # http://www.cmake.org/cmake/help/cmake-2-8-docs.html
 find_package(GTest REQUIRED)
 
-add_executable(run-tests test/BuilderTest.cc src/Builder.cxx src/Transform.cxx src/Tesselate.cxx src/Util.cxx)
-GTEST_ADD_TESTS(run-tests "" test/BuilderTest.cc)
+add_executable(run-tests test/BuilderTest.cc test/FontTest.cc src/Builder.cxx src/Transform.cxx src/Tesselate.cxx src/Util.cxx)
+GTEST_ADD_TESTS(run-tests "" test/BuilderTest.cc test/FontTest.cc)
 target_link_libraries(run-tests ${GTEST_BOTH_LIBRARIES})
 
 set(CMAKE_CXX_FLAGS "-DHAVE_CONFIG_H")
 
-set(ALL_LIBS -L/opt/local/lib -ljson_spirit -lpthread -lPTKernel -lTKAdvTools -lTKBin -lTKBinL -lTKBinTObj -lTKBinXCAF -lTKBO -lTKBool -lTKBRep -lTKCAF -lTKCDF -lTKernel -lTKFeat -lTKFillet -lTKG2d -lTKG3d -lTKGeomAlgo -lTKGeomBase -lTKHLR -lTKIGES -lTKLCAF -lTKMath -lTKMesh -lTKMeshVS -lTKNIS -lTKOffset -lTKOpenGl -lTKPCAF -lTKPLCAF -lTKPrim -lTKPShape -lTKService -lTKShapeSchema -lTKShHealing -lTKStdLSchema  -lTKStdSchema -lTKSTEP -lTKSTEP209 -lTKSTEPAttr -lTKSTEPBase -lTKSTL -lTKTopAlgo -lTKV2d -lTKV3d -lTKXMesh -lTKXml -lTKXmlL -lTKXmlTObj -lTKXmlXCAF -lTKXSBase)
+set(ALL_LIBS -L/opt/local/lib -ljson_spirit -lpthread -lfreetype -lPTKernel -lTKAdvTools -lTKBin -lTKBinL -lTKBinTObj -lTKBinXCAF -lTKBO -lTKBool -lTKBRep -lTKCAF -lTKCDF -lTKernel -lTKFeat -lTKFillet -lTKG2d -lTKG3d -lTKGeomAlgo -lTKGeomBase -lTKHLR -lTKIGES -lTKLCAF -lTKMath -lTKMesh -lTKMeshVS -lTKNIS -lTKOffset -lTKOpenGl -lTKPCAF -lTKPLCAF -lTKPrim -lTKPShape -lTKService -lTKShapeSchema -lTKShHealing -lTKStdLSchema  -lTKStdSchema -lTKSTEP -lTKSTEP209 -lTKSTEPAttr -lTKSTEPBase -lTKSTL -lTKTopAlgo -lTKV2d -lTKV3d -lTKXMesh -lTKXml -lTKXmlL -lTKXmlTObj -lTKXmlXCAF -lTKXSBase)
 
 target_link_libraries(worker ${ALL_LIBS})
 target_link_libraries(run-tests ${ALL_LIBS})

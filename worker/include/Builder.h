@@ -1,6 +1,11 @@
 #ifndef SS_BUILDER
 #define SS_BUILDER
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_STROKER_H
+
+
 #include <json_spirit.h>
 #include "OCC.h"
 
@@ -113,6 +118,12 @@ public:
     virtual ~Ellipse1DBuilder() {};
 };
 
+class Text1DBuilder : public Builder1D {
+public:
+    Text1DBuilder(map< string, mValue > json);
+    virtual ~Text1DBuilder() {};
+};
+
 #pragma mark Booleans
 
 class BuilderND : public Builder {
@@ -157,5 +168,8 @@ public:
     PrismBuilder(map< string, mValue > json, TopoDS_Shape shape);
     ~PrismBuilder() {};
 };
+
+    
+
 
 #endif
