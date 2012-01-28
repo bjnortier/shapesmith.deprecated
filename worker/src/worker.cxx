@@ -105,13 +105,13 @@ string create_geometry(string id, map< string, mValue > json) {
         return create_primitive<Ellipse2DBuilder>(id, json);
     } else if (geomType == "rectangle2d") {
         return create_primitive<Rectangle2DBuilder>(id, json);
+    } else if (geomType == "text2d") {
+        return create_primitive<Text2DBuilder>(id, json);
 
     
     // 1D Primitives
     } else if (geomType == "ellipse1d") {
         return create_primitive<Ellipse1DBuilder>(id, json);
-    } else if (geomType == "text1d") {
-        return create_primitive<Text1DBuilder>(id, json);
         
     // Modifiers
     } else if (geomType == "prism") {

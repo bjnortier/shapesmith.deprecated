@@ -192,15 +192,16 @@ $(document).ready(function() {
                function() { 
                    SS.constructors.createRectangle2d(create_primitive('rectangle2d',  ['u', 'v']));
 	       }).render($('#2Dprimitives'));
+    new Action('Text 2D', '/static/images/text2d.png', 
+               function() { 
+                   create_primitive('text2d',  ['text']);
+	       }).render($('#2Dprimitives'));
 
     /*new Action('Ellipse 1D', '/static/images/ellipse1d.png', 
                function() { 
                    SS.constructors.createEllipse1d(create_primitive('ellipse1d',  ['r1', 'r2']));
 	       }).render($('#1Dprimitives'));*/
-    new Action('Text 1D', '/static/images/ellipse1d.png', 
-               function() { 
-                   create_primitive('text1d',  ['text']);
-	       }).render($('#2Dprimitives'));
+    
 
     
     /*

@@ -104,6 +104,12 @@ public:
     virtual ~Rectangle2DBuilder() {};
 };
 
+class Text2DBuilder : public Builder2D {
+public:
+    Text2DBuilder(map< string, mValue > json);
+    virtual ~Text2DBuilder() {};
+};
+
 #pragma mark 1D Primitives
 
 class Builder1D : public Builder {
@@ -118,11 +124,7 @@ public:
     virtual ~Ellipse1DBuilder() {};
 };
 
-class Text1DBuilder : public Builder1D {
-public:
-    Text1DBuilder(map< string, mValue > json);
-    virtual ~Text1DBuilder() {};
-};
+
 
 #pragma mark Booleans
 

@@ -279,35 +279,35 @@ class TextComposer {
     gp_Pnt offset_;
     BRepBuilderAPI_MakeWire wire_maker_;
     FT_Vector character_pos_;
-    TopoDS_Shape compound_;
+    vector<TopoDS_Wire> wires_;
 
-    
+   
 private:
     
-    double factor;
+    double factor_;
     
     gp_Pnt ToPoint(FT_Vector* vec) {
-        return gp_Pnt(offset_.X() + factor*vec->x, 
-                      offset_.Y() + factor*vec->y, 
+        return gp_Pnt(offset_.X() + factor_*vec->x, 
+                      offset_.Y() + factor_*vec->y, 
                       0);
     }
     
 public:
 
-    TextComposer(FT_Vector* character_pos, TopoDS_Shape compound) {
-        factor = 0.001;
-        offset_ = gp_Pnt(factor*character_pos->x, 
-                         factor*character_pos->y, 
+    TextComposer(FT_Vector* character_pos) {
+        factor_ = 0.002;
+        offset_ = gp_Pnt(factor_*character_pos->x, 
+                         factor_*character_pos->y, 
                          0);
         
-        compound_ = compound;
     }
     
-    void compose(FT_Outline* outline, FT_Outline_Funcs interface) {
+    vector<TopoDS_Wire> compose(FT_Outline* outline, FT_Outline_Funcs interface) {
         FT_Outline_Decompose(outline, &interface, this);
         if (wire_maker_.IsDone()) {
-            TopoDS_Builder().Add(compound_, wire_maker_.Wire());
+            wires_.push_back(wire_maker_.Wire());
         }
+        return wires_;
     }
     
     int addEdge(FT_Vector* to) {
@@ -320,7 +320,7 @@ public:
     
     int moveTo(FT_Vector* to) {
         if (wire_maker_.IsDone()) {
-            TopoDS_Builder().Add(compound_, wire_maker_.Wire());
+            wires_.push_back(wire_maker_.Wire());
         }
         BRepBuilderAPI_MakeWire tmp;
         wire_maker_ = tmp;
@@ -354,7 +354,7 @@ int cubicToCallback(FT_Vector* control1, FT_Vector* control2, FT_Vector* to, Tex
     return composer->cubicTo(control1, control2, to);
 };
 
-Text1DBuilder::Text1DBuilder(map< string, mValue > json) {
+Text2DBuilder::Text2DBuilder(map< string, mValue > json) {
     map< string, mValue > parameters = json["parameters"].get_obj();
     string text = parameters["text"].get_str();
     const char* textChars = text.c_str();
@@ -363,7 +363,7 @@ Text1DBuilder::Text1DBuilder(map< string, mValue > json) {
     FT_Init_FreeType(&freetype_library);
     FT_Face     face; 
     FT_New_Face(freetype_library,
-                "/Library/Fonts/Times New Roman.ttf",
+                "/Library/Fonts/Arial.ttf",
                 0,
                 &face);
     
@@ -384,8 +384,29 @@ Text1DBuilder::Text1DBuilder(map< string, mValue > json) {
     FT_Vector character_pos = {0,0};
     for (unsigned int i = 0; i < text.length(); ++i) {
         FT_Load_Char(face, textChars[i], FT_LOAD_NO_BITMAP);
-        auto_ptr<TextComposer> composer(new TextComposer(&character_pos, compound));
-        composer->compose(&face->glyph->outline, interface);
+        auto_ptr<TextComposer> composer(new TextComposer(&character_pos));
+        vector<TopoDS_Wire> wires = composer->compose(&face->glyph->outline, interface);
+        
+        vector<TopoDS_Wire>::iterator it = wires.begin();
+        TopoDS_Shape character_shape = BRepBuilderAPI_MakeFace(*it);
+        ++it;
+        
+        for (; it < wires.end(); ++it ) {
+            TopoDS_Shape cuttingFace = BRepBuilderAPI_MakeFace(*it);
+            
+            // If the new face is inside the original - subtract it.
+            TopoDS_Shape intersect = BRepAlgoAPI_Common(character_shape, cuttingFace);
+            bool inside = TopExp_Explorer(intersect, TopAbs_FACE).More();
+            
+            if (inside) {
+                character_shape = BRepAlgoAPI_Cut(character_shape, cuttingFace);
+            } else {
+                character_shape = BRepAlgoAPI_Fuse(character_shape, cuttingFace);
+            }
+        }
+        
+        builder.Add(compound, character_shape);
+        
         character_pos.x += face->glyph->advance.x;
         character_pos.y += face->glyph->advance.y;
     }
