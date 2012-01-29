@@ -12,6 +12,8 @@
 using namespace std;
 using namespace json_spirit;
 
+#define TRIANGLE_SIZE 1.0
+
 class Builder {
 public:
     Builder() {};

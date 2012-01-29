@@ -455,7 +455,7 @@ void BuilderND::Mesh() {
     TopExp_Explorer ex(shape_, TopAbs_FACE);
     
     if (ex.More()) {
-        BRepMesh().Mesh(shape_, 1.0);
+        BRepMesh().Mesh(shape_, TRIANGLE_SIZE);
     }
 
 }
