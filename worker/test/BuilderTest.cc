@@ -366,7 +366,7 @@ TEST(BuilderTest, Text) {
     mObject origin;
     origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
     mObject parameters;
-    parameters["text"] = "123";
+    parameters["text"] = "12 3";
     
     mObject json;
     json["origin"] = origin;

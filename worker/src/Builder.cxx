@@ -407,25 +407,28 @@ Text2DBuilder::Text2DBuilder(map< string, mValue > json) {
         auto_ptr<TextComposer> composer(new TextComposer(&character_pos));
         vector<TopoDS_Wire> wires = composer->compose(&face->glyph->outline, interface);
         
-        vector<TopoDS_Wire>::iterator it = wires.begin();
-        TopoDS_Shape character_shape = BRepBuilderAPI_MakeFace(*it);
-        ++it;
+        // spaces have no wires
+        if (wires.size() > 0) {
+            vector<TopoDS_Wire>::iterator it = wires.begin();
+            TopoDS_Shape character_shape = BRepBuilderAPI_MakeFace(*it);
+            ++it;
         
-        for (; it < wires.end(); ++it ) {
-            TopoDS_Shape cuttingFace = BRepBuilderAPI_MakeFace(*it);
-            
-            // If the new face is inside the original - subtract it.
-            TopoDS_Shape intersect = BRepAlgoAPI_Common(character_shape, cuttingFace);
-            bool inside = TopExp_Explorer(intersect, TopAbs_FACE).More();
-            
-            if (inside) {
-                character_shape = BRepAlgoAPI_Cut(character_shape, cuttingFace);
-            } else {
-                character_shape = BRepAlgoAPI_Fuse(character_shape, cuttingFace);
+            for (; it < wires.end(); ++it ) {
+                TopoDS_Shape cuttingFace = BRepBuilderAPI_MakeFace(*it);
+                
+                // If the new face is inside the original - subtract it.
+                TopoDS_Shape intersect = BRepAlgoAPI_Common(character_shape, cuttingFace);
+                bool inside = TopExp_Explorer(intersect, TopAbs_FACE).More();
+                
+                if (inside) {
+                    character_shape = BRepAlgoAPI_Cut(character_shape, cuttingFace);
+                } else {
+                    character_shape = BRepAlgoAPI_Fuse(character_shape, cuttingFace);
+                }
             }
+            
+            builder.Add(compound, character_shape);
         }
-        
-        builder.Add(compound, character_shape);
         
         character_pos.x += face->glyph->advance.x;
         character_pos.y += face->glyph->advance.y;

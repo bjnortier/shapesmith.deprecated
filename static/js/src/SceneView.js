@@ -442,7 +442,7 @@ SS.SceneView = function(container) {
             lineGeometries.map(function(lineGeometry) {
                 var line = new THREE.Line(lineGeometry, lineMaterial);
                 line.name = objectName;
-                //lines.add(line);
+                lines.add(line);
             });
             lines.name = objectName;
 
@@ -508,19 +508,102 @@ SS.SceneView = function(container) {
     }
 
    var create1DGeometries = function(mesh) {
-       return mesh.segments.map(function(segment) {
 
-           var geometry = new THREE.Geometry();
+       var precisionPoints = 4; 
+       var precision = Math.pow( 10, precisionPoints );
+       var keyForVertex = function(vertex) {
+           var position = vertex.position;
+           return [ Math.round( position.x * precision ), Math.round( position.y * precision ), Math.round( position.z * precision ) ].join( '_' );
+       }
+
+       var segmentsByStartPosition = {};
+       var segmentsByEndPosition = {};
+       var allSegments = [];
+
+       mesh.segments.map(function(segment) {
+
+           var vertices = [];
            for (var i = segment.start; i < segment.end; i += 3) {
                var position = new THREE.Vector3(mesh.positions[i], 
 					        mesh.positions[i + 1], 
 					        mesh.positions[i + 2]);
 	       var vertex = new THREE.Vertex(position);
-               geometry.vertices.push(vertex);
+               vertices.push(vertex);
            }
-           return geometry;
            
+           var startVertex = vertices[0];
+           var endVertex = vertices[vertices.length-1];
+           var startVertexKey = keyForVertex(startVertex);
+           var endVertexKey = keyForVertex(endVertex);
+           
+           allSegments.push(vertices);
+           segmentsByStartPosition[startVertexKey] = segmentsByStartPosition[startVertexKey] || [];
+           segmentsByStartPosition[startVertexKey].push(vertices);
+
+           segmentsByEndPosition[endVertexKey] = segmentsByEndPosition[endVertexKey] || [];
+           segmentsByEndPosition[endVertexKey].push(vertices);
        });
+
+       // Compression
+       do {
+
+           var didACompression = false;
+           for (vertexKey in segmentsByStartPosition)  {
+
+               if (!didACompression) {
+                   // If the is a segment with the same end position key as this 
+                   // start position, compress the segments
+
+                   if ((segmentsByStartPosition[vertexKey].length > 0) &&
+                       segmentsByEndPosition[vertexKey] &&
+                       (segmentsByEndPosition[vertexKey].length > 0)) {
+
+                       var firstSegment = segmentsByEndPosition[vertexKey][0];
+                       var secondSegment = segmentsByStartPosition[vertexKey][0];
+
+                       // Circular segments
+                       if (!(firstSegment === secondSegment)) {
+
+                           var newSegment = [].concat(firstSegment).concat(secondSegment);
+
+                           newSegmentStartKey = keyForVertex(newSegment[0]);
+                           newSegmentEndKey   = keyForVertex(newSegment[newSegment.length - 1]);
+                           
+                           allSegments.splice(allSegments.indexOf(firstSegment), 1);
+                           allSegments.splice(allSegments.indexOf(secondSegment), 1);
+                           allSegments.push(newSegment);
+
+                           segmentsByStartPosition[vertexKey].splice(
+                               segmentsByStartPosition[vertexKey].indexOf(secondSegment), 1);
+                           segmentsByStartPosition[newSegmentStartKey].splice(
+                               segmentsByStartPosition[newSegmentStartKey].indexOf(firstSegment), 1);
+                           
+                           segmentsByEndPosition[vertexKey].splice(
+                               segmentsByEndPosition[vertexKey].indexOf(firstSegment), 1);
+                           segmentsByEndPosition[newSegmentEndKey].splice(
+                               segmentsByEndPosition[newSegmentEndKey].indexOf(secondSegment), 1);
+                           
+
+                           segmentsByStartPosition[newSegmentStartKey].push(newSegment);
+                           segmentsByEndPosition[newSegmentEndKey].push(newSegment);
+
+                           didACompression = true;
+                       }
+                   }
+               }
+               
+           }
+               
+           
+       } while(didACompression);
+       
+
+       return allSegments.map(function(segment) {
+           var geometry =  new THREE.Geometry();
+           geometry.vertices = segment;
+           return geometry;
+       });
+
     }
 
    var create1DSelectionGeometries = function(mesh) {
