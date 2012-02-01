@@ -33,7 +33,7 @@ SS.SceneView = function(container) {
         scene.add( camera );
 
 	renderer = new THREE.WebGLRenderer({antialias: true});
-	renderer.autoClear = false;
+	renderer.autoClear = true;
 	renderer.setClearColorHex(0x080808, 0.0);
 	renderer.setSize(w, h);
 
