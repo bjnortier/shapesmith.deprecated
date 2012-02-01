@@ -367,6 +367,8 @@ TEST(BuilderTest, Text) {
     origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
     mObject parameters;
     parameters["text"] = "12 3";
+    parameters["font"] = "OpenSans";
+
     
     mObject json;
     json["origin"] = origin;

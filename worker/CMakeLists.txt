@@ -31,8 +31,8 @@ enable_testing()
 # http://www.cmake.org/cmake/help/cmake-2-8-docs.html
 find_package(GTest REQUIRED)
 
-add_executable(run-tests test/BuilderTest.cc test/FontTest.cc src/Builder.cxx src/Transform.cxx src/Tesselate.cxx src/Util.cxx)
-GTEST_ADD_TESTS(run-tests "" test/BuilderTest.cc test/FontTest.cc)
+add_executable(run-tests test/BuilderTest.cc src/Builder.cxx src/Transform.cxx src/Tesselate.cxx src/Util.cxx)
+GTEST_ADD_TESTS(run-tests "" test/BuilderTest.cc)
 target_link_libraries(run-tests ${GTEST_BOTH_LIBRARIES})
 
 set(CMAKE_CXX_FLAGS "-DHAVE_CONFIG_H")

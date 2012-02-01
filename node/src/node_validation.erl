@@ -148,7 +148,8 @@ validate_geom_type(<<"ellipse1d">>, Props) ->
 			      ]);
 validate_geom_type(<<"text2d">>, Props) ->
     validate_primitive(Props, [
-			       {<<"text">>, fun non_empty_string/1}
+			       {<<"text">>, fun non_empty_string/1},
+                               {<<"font">>, fun supported_fonts/1}
 			      ]);
 
 
@@ -245,17 +246,23 @@ validate_geom_type_test_() ->
         {error, {[{<<"text">>, <<"must be a non-empty string">>}]}}, 
         validate_geom_type(<<"text2d">>, [{<<"origin">>, Origin},
 					  {<<"parameters">>, 
-					   {[{<<"text">>, 0.1}]}}])),
+					   {[{<<"text">>, 0.1}, {<<"font">>, <<"DroidSerif">>}]}}])),
      ?_assertEqual(
         {error, {[{<<"text">>, <<"must be a non-empty string">>}]}}, 
         validate_geom_type(<<"text2d">>, [{<<"origin">>, Origin},
 					  {<<"parameters">>, 
-					   {[{<<"text">>, <<>>}]}}])),
+					   {[{<<"text">>, <<>>}, {<<"font">>, <<"Inconsolata">>}]}}])),
+     ?_assertEqual(
+        {error, {[{<<"font">>, <<"must be one of 'DroidSerif', 'Inconsolata', 'Lobster' or 'OpenSans'">>}]}}, 
+        validate_geom_type(<<"text2d">>, [{<<"origin">>, Origin},
+					  {<<"parameters">>, 
+					   {[{<<"text">>, <<"some text">>},
+                                             {<<"font">>, <<"Arial">>}]}}])),
      ?_assertEqual(
         ok, 
         validate_geom_type(<<"text2d">>, [{<<"origin">>, Origin},
 					  {<<"parameters">>, 
-					   {[{<<"text">>, <<"some text">>}]}}]))
+					   {[{<<"text">>, <<"some text">>}, {<<"font">>, <<"Lobster">>}]}}]))
 
     ].
 -endif.
@@ -427,6 +434,18 @@ non_empty_string(Value) when is_binary(Value) ->
     ok;
 non_empty_string(_) ->
     {error, <<"must be a non-empty string">>}.
+
+supported_fonts(<<"DroidSerif">>) ->
+    ok;
+supported_fonts(<<"Inconsolata">>) ->
+    ok;
+supported_fonts(<<"Lobster">>) ->    
+    ok;
+supported_fonts(<<"OpenSans">>) ->
+    ok;
+supported_fonts(_) ->
+    {error, <<"must be one of 'DroidSerif', 'Inconsolata', 'Lobster' or 'OpenSans'">>}.
+    
 
 positive(Value) when is_integer(Value) andalso Value > 0 ->
     ok;

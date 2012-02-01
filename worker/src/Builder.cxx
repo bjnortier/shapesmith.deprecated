@@ -371,19 +371,15 @@ Text2DBuilder::Text2DBuilder(map< string, mValue > json) {
     string text = parameters["text"].get_str();
     const char* textChars = text.c_str();
     
-//  Andale Mono
-//	Arial
-//	Courier
-//	Georgia 
-//	Impact
-//	Times New Roman 
-//	Verdana 
-    
+    string font = parameters["font"].get_str();
+    char font_path[256];
+    sprintf(font_path, "../%s/%s.ttf", font.c_str(), font.c_str()   );
+        
     FT_Library freetype_library;
     FT_Init_FreeType(&freetype_library);
     FT_Face     face; 
     FT_New_Face(freetype_library,
-                "/Library/Fonts/Arial.ttf",
+                "../fonts/Lobster/Lobster.ttf",
                 0,
                 &face);
     

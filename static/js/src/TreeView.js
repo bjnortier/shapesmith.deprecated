@@ -142,7 +142,7 @@ function TreeView() {
                     geomNode.origin[key] = parseFloat($('#' + key).val());
 		}
 		for (key in geomNode.parameters) {
-                    if (key === 'text') {
+                    if ((key === 'text') || (key === 'font')) {
                         geomNode.parameters[key] = $('#' + key).val();
                     } else {
                         geomNode.parameters[key] = parseFloat($('#' + key).val());
@@ -156,7 +156,7 @@ function TreeView() {
 		}
 		var parameters = {};
 		for (key in geomNode.parameters) {
-                    if (key === 'text') {
+                    if ((key === 'text') || (key === 'font')) {
                         parameters[key] = $('#' + key).val();
                     } else {
                         parameters[key] = parseFloat($('#' + key).val());

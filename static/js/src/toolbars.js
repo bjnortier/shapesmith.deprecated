@@ -194,7 +194,7 @@ $(document).ready(function() {
 	       }).render($('#2Dprimitives'));
     new Action('Text 2D', '/static/images/text2d.png', 
                function() { 
-                   create_primitive('text2d',  ['text']);
+                   create_primitive('text2d',  ['font', 'text']);
 	       }).render($('#2Dprimitives'));
 
     /*new Action('Ellipse 1D', '/static/images/ellipse1d.png', 
