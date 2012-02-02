@@ -127,6 +127,80 @@ function create_geom_command(prototype, geometry) {
     return new Command(doFn, undoFn, redoFn);
 }
 
+function explode(selected, type) {
+    if (selected.length !== 1)  {
+        alert("must have 1 object selected");
+        return;
+    }
+
+    var boolNode = geom_doc.findById(selected[0]);
+    var childNodes = boolNode.children;
+
+
+    if (childNodes.length === 0) {
+        alert("You can only explode an item with children (e.g. booleans)");
+        return;
+    }
+
+    var doFn = function() {
+        var childrenToFetchMeshesFor = childNodes.filter(function(childNode) {
+            return !childNode.mesh;
+        });
+
+        var replaceInGeomDoc = function() {
+            selectionManager.deselectAll();
+            geom_doc.remove(boolNode);
+            childNodes.map(function(childNode) {
+                geom_doc.add(childNode);
+            });
+            command_stack.commit();
+        };
+
+        if (childrenToFetchMeshesFor.length == 0) {
+            replaceInGeomDoc();
+        } else {
+            var copies = childrenToFetchMeshesFor.slice(0);
+            copies.map(function(childNode) {
+                $.ajax({
+	            type: 'GET',
+	            url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + childNode.sha,
+	            success: function(mesh) {
+		        childNode.mesh = mesh;
+                        childrenToFetchMeshesFor.splice(childrenToFetchMeshesFor.indexOf(childNode), 1);
+                        if (childrenToFetchMeshesFor.length == 0) {
+                            replaceInGeomDoc();
+                        }
+                    },
+	            error: function(jqXHR, textStatus, errorThrown) {
+		        command_stack.error(jqXHR.responseText);
+	            }
+	        });
+            });
+        }
+
+    }
+
+    var undoFn = function() {
+        childNodes.map(function(child) {
+            geom_doc.remove(child);
+        });
+        geom_doc.add(boolNode);
+	command_stack.success();
+    }
+
+    var redoFn = function() {
+        geom_doc.remove(boolNode);
+        childNodes.reverse().map(function(child) {
+            geom_doc.add(child);
+        });
+	command_stack.success();
+    }
+
+    var cmd = new Command(doFn, undoFn, redoFn);
+    command_stack.execute(cmd);
+}
+
+
 
 function boolean(selected, type) {
     var sha;

@@ -218,6 +218,8 @@ $(document).ready(function() {
                function(selected) { boolean(selected, 'subtract'); }).render($('#boolean'));
     new Action('Intersect', '/static/images/intersect.png', 
                function(selected) { boolean(selected, 'intersect'); }).render($('#boolean'));
+    new Action('Explode', '/static/images/explode.png', 
+           function(selected) { explode(selected, 'intersect'); }).render($('#edit'));
 
     //
     // Modifiers
