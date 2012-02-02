@@ -12,13 +12,14 @@
     <script type="text/javascript" src="/static/js/lib/RequestAnimationFrame.js"></script>
     <script type="text/javascript" src="/static/js/lib/Detector.js"></script>
     <script type="text/javascript" src="/static/js/lib/Three.js"></script>
+    <script type="text/javascript" src="/static/js/lib/TextGeometry.js"></script>
 
     <script type="text/javascript" src="/static/js/lib/fonts/helvetiker_bold.typeface.js"></script>
     <script type="text/javascript" src="/static/js/lib/fonts/helvetiker_regular.typeface.js"></script>
-    <script type="text/javascript" src="/static/js/lib/fonts/Lobster.typeface.js"></script>
-    <script type="text/javascript" src="/static/js/lib/fonts/DroidSerif.typeface.js"></script>
-    <script type="text/javascript" src="/static/js/lib/fonts/Inconsolata.typeface.js"></script>
-    <script type="text/javascript" src="/static/js/lib/fonts/OpenSans.typeface.js"></script>
+    <script type="text/javascript" src="/static/js/lib/fonts/lobster_1.4_regular.typeface.js"></script>
+    <script type="text/javascript" src="/static/js/lib/fonts/droid_serif_regular.typeface.js"></script>
+    <script type="text/javascript" src="/static/js/lib/fonts/inconsolata_medium.typeface.js"></script>
+    <script type="text/javascript" src="/static/js/lib/fonts/open_sans_regular.typeface.js"></script>
 
    <script type="text/javascript">
       var SS = SS || {};

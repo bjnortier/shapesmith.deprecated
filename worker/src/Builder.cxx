@@ -295,7 +295,9 @@ private:
 public:
 
     TextComposer(FT_Vector* character_pos) {
-        factor_ = 0.002;
+        // The spacing is slightly different in Three.js and Freetype, this is very close
+        // to making the font render as height=10 in Three.js
+        factor_ = 0.00312;
         offset_ = gp_Pnt(factor_*character_pos->x, 
                          factor_*character_pos->y, 
                          0);

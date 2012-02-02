@@ -62,6 +62,17 @@ SS.constructors.createRectangle2d = function(geomNode) {
     SS.constructors.editRectangle2d(geomNode);
 }
 
+SS.constructors.editText2d = function(geomNode) {
+    SS.constructors.editPrimitive(geomNode, SS.constructors.Text2D);
+}
+
+SS.constructors.createText2d = function(geomNode) {
+    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    geomNode.origin.x = lastMousePosition.x;
+    geomNode.origin.y = lastMousePosition.y;
+    SS.constructors.editText2d(geomNode);
+}
+
 SS.constructors.editCuboid = function(geomNode) {
     SS.constructors.editPrimitive(geomNode, SS.constructors.Cuboid);
 }
@@ -227,7 +238,7 @@ SS.constructors.Constructor = function(spec) {
                     cursoid   : sceneView.cursoid,
 		    updater   : updater,
                     anchorName: anchorName};
-        var modifier = specialisation.getModifierForAnchor(spec);
+        var modifier = specialisation.getModifierForAnchor && specialisation.getModifierForAnchor(spec);
         if (!modifier && anchorName === 'origin') {
 	    modifier = new SS.modifier.Origin({node     : node,
                                                cursoid  : sceneView.cursoid,
@@ -374,6 +385,49 @@ SS.constructors.Rectangle = function() {
     }
 
 }
+
+
+SS.constructors.Text2D = function() {
+
+    this.createSceneObject = function(geomNode, activeAnchor) {
+        
+        var sceneObjects = {};
+        
+        var text = geomNode.parameters.text;
+        var font = geomNode.parameters.font;
+
+        var properFont;
+        if (font === 'DroidSerif') {
+            properFont = 'droid serif';
+        } else if (font === 'OpenSans') {
+            properFont = 'open sans';
+        } else  if (font === 'Lobster') {
+            properFont = 'lobster 1.4';
+        } else  if (font === 'Inconsolata') {
+            properFont = 'inconsolata';
+        }
+        if (text && font) {
+
+            var textGeo = new THREE.TextGeometry(text, {
+		size: 10, 
+		height: 0.01,
+		curveSegments: curveSegments,
+		font: properFont,
+		weight: 'normal',
+		style: 'normal',
+		bezelEnabled: false
+	    });
+	    var text = new THREE.Mesh( textGeo, SS.constructors.faceMaterial );
+            sceneObjects.textObj = text;
+        }
+
+        return sceneObjects;
+    }
+
+    this.anchorPriorities = ['origin'];
+
+}
+
 
 SS.constructors.Cuboid = function() {
 

@@ -15,11 +15,20 @@ SS.NodeUpdater = function(node) {
     }
 
     var updateFromTreeView = function() {
+        var schema = SS.schemas[node.type];
+        
         Object.keys(node.origin).map(function(key) {
             node.origin[key] = parseFloat($('#' + key).val());
         });
+
         Object.keys(node.parameters).map(function(key) {
-            node.parameters[key] = parseFloat($('#' + key).val());
+
+            var itemSchema = schema.properties.parameters.properties[key];
+            if (itemSchema.type === 'string') {
+                node.parameters[key] = $('#' + key).val();
+            } else {
+                node.parameters[key] = parseFloat($('#' + key).val());
+            }
         });
         that.fire({type: 'updatedFromTree'});
     }
