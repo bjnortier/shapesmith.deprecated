@@ -412,16 +412,23 @@ Text2DBuilder::Text2DBuilder(map< string, mValue > json) {
             ++it;
         
             for (; it < wires.end(); ++it ) {
-                TopoDS_Shape cuttingFace = BRepBuilderAPI_MakeFace(*it);
-                
-                // If the new face is inside the original - subtract it.
-                TopoDS_Shape intersect = BRepAlgoAPI_Common(character_shape, cuttingFace);
-                bool inside = TopExp_Explorer(intersect, TopAbs_FACE).More();
-                
-                if (inside) {
-                    character_shape = BRepAlgoAPI_Cut(character_shape, cuttingFace);
+                TopoDS_Shape newFace = BRepBuilderAPI_MakeFace(*it);
+
+                // If there is an intersection, cut the way that leaves faces
+                TopoDS_Shape intersect = BRepAlgoAPI_Common(character_shape, newFace);
+                if (TopExp_Explorer(intersect, TopAbs_FACE).More()) {
+                    
+                    TopoDS_Shape a = BRepAlgoAPI_Cut(character_shape, newFace);
+                    TopoDS_Shape b = BRepAlgoAPI_Cut(newFace, character_shape);
+                    
+                    if (TopExp_Explorer(a, TopAbs_FACE).More()) {
+                        character_shape = a;
+                    } else {
+                        character_shape = b;
+                    }
+                        
                 } else {
-                    character_shape = BRepAlgoAPI_Fuse(character_shape, cuttingFace);
+                    character_shape = BRepAlgoAPI_Fuse(character_shape, newFace);
                 }
             }
             
