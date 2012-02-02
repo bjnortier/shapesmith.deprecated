@@ -272,7 +272,7 @@ validate_transform_type(<<"translate">>, Props) ->
     validate_primitive(Props, [{<<"u">>, fun number/1},
 			       {<<"v">>, fun number/1},
 			       {<<"w">>, fun number/1},
-			       {<<"n">>, fun positive_or_zero/1}
+			       {<<"n">>, fun positive_or_zero_integer/1}
 			      ]);
 validate_transform_type(<<"scale">>, Props) ->
     validate_primitive(Props, [
@@ -284,14 +284,14 @@ validate_transform_type(<<"rotate">>, Props) ->
 			       {<<"v">>, fun number/1},
 			       {<<"w">>, fun number/1},
 			       {<<"angle">>, fun number/1},
-			       {<<"n">>, fun positive_or_zero/1}
+			       {<<"n">>, fun positive_or_zero_integer/1}
 			      ]);
 validate_transform_type(<<"mirror">>, Props) ->
     validate_primitive(Props, [
 			       {<<"u">>, fun number/1},
 			       {<<"v">>, fun number/1},
 			       {<<"w">>, fun number/1},
-			       {<<"n">>, fun zero_or_one/1}
+			       {<<"n">>, fun zero_or_one_integer/1}
 			      ]);
 validate_transform_type(_, _) ->
     {error, {[{<<"invalid">>, <<"transform">>}]}}.
@@ -459,9 +459,12 @@ positive_or_zero(Value) when is_integer(Value) andalso Value >= 0 ->
 positive_or_zero(Value) when is_float(Value) andalso Value >= 0 ->
     ok;
 positive_or_zero(_) ->
-    {error, <<"must be positive">>}.
+    {error, <<"must be >= 0">>}.
 
-
+positive_or_zero_integer(Value) when is_integer(Value) andalso Value >= 0 ->
+    ok;
+positive_or_zero_integer(_) ->
+    {error, <<"must be and integer and >= 0">>}.
 
 number(Value) when is_integer(Value) orelse is_float(Value) ->
     ok;
@@ -487,12 +490,13 @@ not_zero(Value) when is_float(Value) andalso Value =/= 0 ->
 not_zero(_) ->
     {error, <<"cannot be zero">>}.
 
-zero_or_one(Value) when is_integer(Value) andalso Value =:= 0 ->
+zero_or_one_integer(Value) when is_integer(Value) andalso Value =:= 0 ->
     ok;
-zero_or_one(Value) when is_integer(Value) andalso Value =:= 1 ->
+zero_or_one_integer(Value) when is_integer(Value) andalso Value =:= 1 ->
     ok;
-zero_or_one(_) ->
+zero_or_one_integer(_) ->
     {error, <<"must be 0 or one">>}.
+
 
 
 -ifdef(TEST).

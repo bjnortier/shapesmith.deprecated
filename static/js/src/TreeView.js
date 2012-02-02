@@ -1,5 +1,35 @@
+function renderInputElement(key, jsonSchema) {
+    
+    var item = jsonSchema.properties[key];
+    if ((item.type === 'number') || (item.type === 'integer')) {
+        var element = '<input id="{{key}}" type="number" value="{{value}}"';
+        if (item.minimum !== null) {
+            element += ' min="' + item.minimum + '"';
+        }
+        if (item.maximum) {
+            element += ' max="' + item.maximum + '"';
+        }
+        element += '/>';
+        return element;
+
+    } else if (item.type === 'string') {
+        if (item['enum']) {
+            var data = {
+                key: key,
+                options: item['enum']
+            };
+            var template = '<select id={{key}} name={{key}}>{{#options}}<option value="{{.}}">{{.}}</option>{{/options}}</select>';
+            return $.mustache(template, data);
+        } else {
+            return '<input id="{{key}}" type="text" value="{{value}}"/>';
+        }
+    }
+        
+}
+
 function renderTransform(geomNode, transformIndex) {
     var transform = geomNode.transforms[transformIndex];
+    var schema = SS.schemas[transform.type];
     
     // Origin & Orientation
     var originTable = null;
@@ -8,9 +38,11 @@ function renderTransform(geomNode, transformIndex) {
 	    return {key: key, 
 		    value: transform.origin[key], 
 		    'edit-class': 'edit-transform target-' + geomNode.id + '-' + transformIndex,
-		    editing: transform.editing}
+		    editing: transform.editing,
+                    inputElement: renderInputElement(key, schema.properties.origin)
+                   }
 	});
-	var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}<input id="{{key}}" type="text" value="{{value}}"/>{{/editing}}</td></tr>{{/originArr}}</table>';
+	var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}{{{inputElement}}}{{/editing}}</td></tr>{{/originArr}}</table>';
 	var originTable = $.mustache(originTemplate, {originArr : originArr});
     }
 
@@ -20,10 +52,11 @@ function renderTransform(geomNode, transformIndex) {
         paramsArr.push({key: key,
                         value: transform.parameters[key],
                         'edit-class': 'edit-transform target-' + geomNode.id + '-' + transformIndex,
-                        editing: transform.editing
+                        editing: transform.editing,
+                        inputElement: renderInputElement(key, schema.properties.parameters)
                        });
     }
-    var parametersTemplate = '<table>{{#paramsArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}<input id="{{key}}" type="text" value="{{value}}"/>{{/editing}}</td></tr>{{/paramsArr}}</table>';
+    var parametersTemplate = '<table>{{#paramsArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}{{{inputElement}}}{{/editing}}</td></tr>{{/paramsArr}}</table>';
     var paramsTable = $.mustache(parametersTemplate, {paramsArr : paramsArr});
 
 
@@ -42,33 +75,36 @@ function renderTransform(geomNode, transformIndex) {
 
 function renderNode(geomNode) {
 
+    var schema = SS.schemas[geomNode.type];
+
     // Origin & Orientation
     var originTable = null;
-    if (geomNode.origin) {
+    if (schema.properties.origin) {
 	var originArr = ['x', 'y', 'z'].map(function(key) {
 	    return {key: key, 
 		    value: geomNode.origin[key], 
 		    clazz: 'edit-geom target-' + geomNode.id,
-		    editing: geomNode.editing}
+		    editing: geomNode.editing,
+                    inputElement: renderInputElement(key, schema.properties.origin)
+                   }
 	});
-	var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{clazz}}">{{value}}</span>{{/editing}}{{#editing}}<input id="{{key}}" type="text" value="{{value}}"/>{{/editing}}</td></tr>{{/originArr}}</table>';
+	var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{clazz}}">{{value}}</span>{{/editing}}{{#editing}}{{{inputElement}}}{{/editing}}</td></tr>{{/originArr}}</table>';
 	var originTable = $.mustache(originTemplate, {originArr : originArr});
     }
 
     // Params
     var paramsArr = [];
-    if (!geomNode.isBoolean()) {
-
+    if (schema.properties.parameters) {
         for (key in geomNode.parameters) {
-
             paramsArr.push({key: key,
                             value: geomNode.parameters[key],
                             clazz: 'edit-geom target-' + geomNode.id,
-                            editing: geomNode.editing
+                            editing: geomNode.editing,
+                            inputElement: renderInputElement(key, schema.properties.parameters)
                            });
         }
     }
-    var parametersTemplate = '<table>{{#paramsArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{clazz}}">{{value}}</span>{{/editing}}{{#editing}}<input id="{{key}}" type="text" value="{{value}}"/>{{/editing}}</td></tr>{{/paramsArr}}</table>';
+    var parametersTemplate = '<table>{{#paramsArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{clazz}}">{{value}}</span>{{/editing}}{{#editing}}{{{inputElement}}}{{/editing}}</td></tr>{{/paramsArr}}</table>';
     var paramsTable = $.mustache(parametersTemplate, {paramsArr : paramsArr});
 
     // Transforms
@@ -137,16 +173,24 @@ function TreeView() {
 	}
 	
 	var okGeomFunction = function() {
+            var updateParameters = function(key, parameters) {
+                var schema = SS.schemas[geomNode.type];
+                var itemSchema = schema.properties.parameters.properties[key];
+                
+                if (itemSchema.type === 'string') {
+                    parameters[key] = $('#' + key).val();
+                } else {
+                    parameters[key] = parseFloat($('#' + key).val());
+                }
+
+            };
+            
 	    if (precursor) {
 		for (key in geomNode.origin) {
                     geomNode.origin[key] = parseFloat($('#' + key).val());
 		}
 		for (key in geomNode.parameters) {
-                    if ((key === 'text') || (key === 'font')) {
-                        geomNode.parameters[key] = $('#' + key).val();
-                    } else {
-                        geomNode.parameters[key] = parseFloat($('#' + key).val());
-                    }
+                    updateParameters(key, geomNode.parameters);
 		}
 		return update_geom_command(precursor, geomNode, geomNode);
             } else {
@@ -156,11 +200,7 @@ function TreeView() {
 		}
 		var parameters = {};
 		for (key in geomNode.parameters) {
-                    if ((key === 'text') || (key === 'font')) {
-                        parameters[key] = $('#' + key).val();
-                    } else {
-                        parameters[key] = parseFloat($('#' + key).val());
-                    }
+                    updateParameters(key, parameters);
 		}
 		return create_geom_command(geomNode, {type: geomNode.type,
 						      origin: origin,

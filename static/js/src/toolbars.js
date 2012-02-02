@@ -67,11 +67,13 @@ function delete_geom(selected) {
 }
 
 
-function create_primitive(type, keys) {
+function create_primitive(type) {
 
     var geometryParams = {}, geomNode;
-    for (var i in keys) {
-        geometryParams[keys[i]] = null;
+    var jsonSchema = SS.schemas[type];
+
+    for (var key in jsonSchema.properties.parameters.properties) {
+        geometryParams[key] = null;
     }
     geomNode = new GeomNode({
         type: type,
@@ -83,7 +85,7 @@ function create_primitive(type, keys) {
     return geomNode;
 }
 
-function create_modifier(selected, type, keys) {
+function create_modifier(selected, type) {
     if (selected.length != 1)  {
         alert('Only a single object is supported!');
         return;
@@ -91,9 +93,11 @@ function create_modifier(selected, type, keys) {
     var id = selected[0];
     var original = geom_doc.findById(id);
 
+    var jsonSchema = SS.schemas[type];
+
     var geometryParams = {};
-    for (var i in keys) {
-        geometryParams[keys[i]] = null;
+    for (var key in jsonSchema.properties.parameters.properties) {
+        geometryParams[key] = null;
     }
     modifierNode = new GeomNode({
         type: type,
@@ -109,14 +113,16 @@ function create_modifier(selected, type, keys) {
     return modifierNode;
 }
 
-function create_transform(selected, type, keys) {
+function create_transform(selected, type) {
     if (selected.length != 1)  {
         alert('no object selected!');
         return;
     }
+
+    var jsonSchema = SS.schemas[type];
     var transformParams = {};
-    for (var i in keys) {
-        transformParams[keys[i]] = null;
+    for (var key in jsonSchema.properties.parameters.properties) {
+        transformParams[key] = null;
     }
     
     var id = selected[0];
@@ -156,45 +162,46 @@ $(document).ready(function() {
 		   copy(selected)
 	       }).render($('#edit'));
 
-    /*
-     * Primitives
-     */
+
+    //
+    // Primitives
+    //
     new Action('Cuboid', '/static/images/cuboid.png', 
                function() { 
-		   SS.constructors.createCuboid(create_primitive('cuboid',  ['u', 'v', 'w']));
+		   SS.constructors.createCuboid(create_primitive('cuboid'));
 	       }).render($('#3Dprimitives'));
     new Action('Sphere', '/static/images/sphere.png', 
                function() { 
-                   SS.constructors.createSphere(create_primitive('sphere',  ['r']));
+                   SS.constructors.createSphere(create_primitive('sphere'));
 	       }).render($('#3Dprimitives'));
     new Action('Cylinder', '/static/images/cylinder.png', 
                function() { 
-		   SS.constructors.createCylinder(create_primitive('cylinder', ['r', 'h'])); 
+		   SS.constructors.createCylinder(create_primitive('cylinder')); 
 	       }).render($('#3Dprimitives'));
     new Action('Cone', '/static/images/cone.png', 
                function() { 
-		   SS.constructors.createCone(create_primitive('cone', ['r1', 'h', 'r2'])); 
+		   SS.constructors.createCone(create_primitive('cone')); 
 	       }).render($('#3Dprimitives'));
     new Action('Wedge', '/static/images/wedge.png', 
                function() { 
-		   SS.constructors.createWedge(create_primitive('wedge', ['u1', 'v', 'u2', 'w']));
+		   SS.constructors.createWedge(create_primitive('wedge'));
 	       }).render($('#3Dprimitives'));
     new Action('Torus', '/static/images/torus.png', 
                function() { 
-		   SS.constructors.createTorus(create_primitive('torus', ['r1', 'r2']));
+		   SS.constructors.createTorus(create_primitive('torus'));
 	       }).render($('#3Dprimitives'));
 
     new Action('Ellipse 2D', '/static/images/ellipse2d.png', 
                function() { 
-                   SS.constructors.createEllipse2d(create_primitive('ellipse2d',  ['r1', 'r2']));
+                   SS.constructors.createEllipse2d(create_primitive('ellipse2d'));
 	       }).render($('#2Dprimitives'));
     new Action('Rectangle 2D', '/static/images/rectangle2d.png', 
                function() { 
-                   SS.constructors.createRectangle2d(create_primitive('rectangle2d',  ['u', 'v']));
+                   SS.constructors.createRectangle2d(create_primitive('rectangle2d'));
 	       }).render($('#2Dprimitives'));
     new Action('Text 2D', '/static/images/text2d.png', 
                function() { 
-                   create_primitive('text2d',  ['font', 'text']);
+                   SS.constructors.createText2d(create_primitive('text2d'));
 	       }).render($('#2Dprimitives'));
 
     /*new Action('Ellipse 1D', '/static/images/ellipse1d.png', 
@@ -202,11 +209,9 @@ $(document).ready(function() {
                    SS.constructors.createEllipse1d(create_primitive('ellipse1d',  ['r1', 'r2']));
 	       }).render($('#1Dprimitives'));*/
     
-
-    
-    /*
-     * Booleans
-     */
+    //
+    // Booleans
+    //
     new Action('Union', '/static/images/union.png', 
                function(selected) { boolean(selected, 'union'); }).render($('#boolean'));
     new Action('Subtract', '/static/images/diff.png', 
@@ -214,12 +219,12 @@ $(document).ready(function() {
     new Action('Intersect', '/static/images/intersect.png', 
                function(selected) { boolean(selected, 'intersect'); }).render($('#boolean'));
 
-    /*
-     * Modifiers
-     */
+    //
+    // Modifiers
+    //
     new Action('Prism', '/static/images/prism.png', 
                function(selected) { 
-                   SS.constructors.createPrism(create_modifier(selected, 'prism', ['u', 'v', 'w']));
+                   SS.constructors.createPrism(create_modifier(selected, 'prism'));
                }).render($('#modifiers'));
     
     /*
@@ -227,7 +232,7 @@ $(document).ready(function() {
      */
     new Action('Translate', '/static/images/translate.png', 
                function(selected) { 
-		   SS.constructors.createTranslate(create_transform(selected, 'translate', ['u', 'v', 'w', 'n']));
+		   SS.constructors.createTranslate(create_transform(selected, 'translate'));
 	       }).render($('#transforms'));
     new Action('Scale', '/static/images/scale.png', 
                function(selected) { 

@@ -373,13 +373,13 @@ Text2DBuilder::Text2DBuilder(map< string, mValue > json) {
     
     string font = parameters["font"].get_str();
     char font_path[256];
-    sprintf(font_path, "../%s/%s.ttf", font.c_str(), font.c_str()   );
+    sprintf(font_path, "worker/fonts/%s/%s.ttf", font.c_str(), font.c_str()   );
         
     FT_Library freetype_library;
     FT_Init_FreeType(&freetype_library);
     FT_Face     face; 
     FT_New_Face(freetype_library,
-                "../fonts/Lobster/Lobster.ttf",
+                font_path,
                 0,
                 &face);
     

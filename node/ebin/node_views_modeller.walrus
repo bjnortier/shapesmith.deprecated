@@ -12,8 +12,13 @@
     <script type="text/javascript" src="/static/js/lib/RequestAnimationFrame.js"></script>
     <script type="text/javascript" src="/static/js/lib/Detector.js"></script>
     <script type="text/javascript" src="/static/js/lib/Three.js"></script>
-    <script type="text/javascript" src="/static/js/lib/helvetiker_bold.typeface.js"></script>
-    <script type="text/javascript" src="/static/js/lib/helvetiker_regular.typeface.js"></script>
+
+    <script type="text/javascript" src="/static/js/lib/fonts/helvetiker_bold.typeface.js"></script>
+    <script type="text/javascript" src="/static/js/lib/fonts/helvetiker_regular.typeface.js"></script>
+    <script type="text/javascript" src="/static/js/lib/fonts/Lobster.typeface.js"></script>
+    <script type="text/javascript" src="/static/js/lib/fonts/DroidSerif.typeface.js"></script>
+    <script type="text/javascript" src="/static/js/lib/fonts/Inconsolata.typeface.js"></script>
+    <script type="text/javascript" src="/static/js/lib/fonts/OpenSans.typeface.js"></script>
 
    <script type="text/javascript">
       var SS = SS || {};
@@ -100,6 +105,7 @@
   <script type="text/javascript" src="/static/js/src/GeomNode.js"></script>
   <script type="text/javascript" src="/static/js/src/GeomDocument.js"></script>
   <script type="text/javascript" src="/static/js/src/Preview.js"></script>
+  <script type="text/javascript" src="/static/js/src/schemas.js"></script>
   <script type="text/javascript" src="/static/js/src/updaters.js"></script>
   <script type="text/javascript" src="/static/js/src/modifiers.js"></script>
   <script type="text/javascript" src="/static/js/src/primitive_constructors.js"></script>

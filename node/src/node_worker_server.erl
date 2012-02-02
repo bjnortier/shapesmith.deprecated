@@ -52,11 +52,12 @@ call(_, _Msg) ->
 -record(state, {port, worker_max_time}).
 
 init([WorkerPath, WorkerMaxTime]) ->
-    WorkerBin = filename:join(
-                  [filename:dirname(code:which(?MODULE))|WorkerPath]),
-
+    WorkingDirectory = filename:absname(filename:join([filename:dirname(code:which(?MODULE)), "..", ".."])),
+    WorkerBin = filename:join([WorkingDirectory] ++ WorkerPath),
+    lager:info("Worker working dir: ~p binary: ~p", [WorkingDirectory, WorkerBin]),
     process_flag(trap_exit, true),
-    Port = open_port({spawn_executable, WorkerBin}, [{packet, 4}]),
+    Port = open_port({spawn_executable, WorkerBin}, [{packet, 4}, 
+                                                     {cd, WorkingDirectory}]),
     {ok, #state{port = Port, worker_max_time = WorkerMaxTime}}.
 
 handle_call(stop, _From, State) ->
