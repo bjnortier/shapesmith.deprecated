@@ -12,7 +12,6 @@
     <script type="text/javascript" src="/static/js/lib/RequestAnimationFrame.js"></script>
     <script type="text/javascript" src="/static/js/lib/Detector.js"></script>
     <script type="text/javascript" src="/static/js/lib/Three.js"></script>
-    <script type="text/javascript" src="/static/js/lib/TextGeometry.js"></script>
 
     <script type="text/javascript" src="/static/js/lib/fonts/helvetiker_bold.typeface.js"></script>
     <script type="text/javascript" src="/static/js/lib/fonts/helvetiker_regular.typeface.js"></script>
