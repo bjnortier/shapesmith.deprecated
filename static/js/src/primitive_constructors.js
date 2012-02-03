@@ -2,8 +2,8 @@ var SS = SS || {};
 SS.constructors = {};
 
 SS.constructors.lineColor = 0x66A1D2;
-SS.constructors.faceColor = 0x3F8FD2;
-SS.constructors.faceMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.faceColor, transparent: true, opacity: 0.5 } );
+SS.constructors.faceColor = 0x0b5fa5;
+SS.constructors.faceMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.faceColor, transparent: true, opacity: 0.2 } );
 SS.constructors.solidFaceMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.faceColor } );
 SS.constructors.lineMaterial = new THREE.LineBasicMaterial({ color: SS.constructors.lineColor, wireframe : true, linewidth: 2.0 });
 SS.constructors.wireframeMaterial = new THREE.MeshBasicMaterial( { color: SS.constructors.lineColor, wireframe: true } )

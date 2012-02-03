@@ -29,9 +29,9 @@ SS.transformers.Manager = function() {
         var height = boundingBox.max.z - boundingBox.min.z;
 
         var geometry = new THREE.CubeGeometry(width, depth, height);
-	var materials = [SS.constructors.wireframeMaterial];
-	var cube = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
-
+	var cube = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: SS.constructors.lineColor, 
+                                                                     wireframe: true}));
+        
 	cube.position.x = boundingBox.min.x + width/2;
 	cube.position.y = boundingBox.min.y + depth/2;
 	cube.position.z = boundingBox.min.z + height/2;
@@ -39,10 +39,14 @@ SS.transformers.Manager = function() {
 	transformerUI.add(cube);
 
         var planeGeometry = new THREE.PlaneGeometry(width, depth); 
-	var planeMesh = new THREE.Mesh(planeGeometry, SS.constructors.faceMaterial);
+	var planeMesh = new THREE.Mesh(planeGeometry, 
+                                       new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, 
+                                                                    transparent: true, 
+                                                                    opacity: 0.2}));
         planeMesh.doubleSided = true;
         planeMesh.position.x = boundingBox.min.x + width/2;
         planeMesh.position.y = boundingBox.min.y + depth/2;
+        planeMesh.position.z = -0.05;
         planeMesh.name = {transformerElement: 'translate-plane'};
 
         transformerUI.add(planeMesh);
@@ -129,10 +133,11 @@ SS.transformers.Manager = function() {
 
             for (var i in uiElements) {
                 if (elementToHighlight === uiElements[i]) {
-                    elementToHighlight.material.color.setHex(0xffffff);
+                    elementToHighlight.material.color.setHex(0x66a1d2);
                     elementToHighlight.material.opacity = 1.0;
                 } else {
                     uiElements[i].material.color.setHex(SS.constructors.faceColor);
+                    uiElements[i].material.opacity = 0.2;
                 }
             }
             
