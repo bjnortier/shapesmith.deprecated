@@ -229,7 +229,7 @@ function TreeView() {
 		    cmd = okTransformFn();
 		}
                 command_stack.execute(cmd);
-                sceneView.restoreOpacity();
+                SS.sceneView.restoreOpacity();
                 
             });
 
@@ -239,7 +239,7 @@ function TreeView() {
                 } else {
                     geom_doc.remove(geomNode);
                 }
-                sceneView.restoreOpacity();
+                SS.sceneView.restoreOpacity();
 	    }
 
 	    $(document).bind('keyup.editing', function(e) {
@@ -347,7 +347,7 @@ function TreeView() {
             editingNode.transforms.splice(transformIndex, 1);
             var cmd = update_geom_command(geomNode, geomNode, editingNode);
             command_stack.execute(cmd);
-            sceneView.restoreOpacity();
+            SS.sceneView.restoreOpacity();
         });
 
         // Show/Hide
@@ -367,7 +367,7 @@ function TreeView() {
             editingNode.editing = true;
             geom_doc.replace(geomNode, editingNode);
 
-            sceneView.setOthersTransparent(editingNode);
+            SS.sceneView.setOthersTransparent(editingNode);
 	    
             var factoryFunction = 'edit' + editingNode.type.charAt(0).toUpperCase() + editingNode.type.substring(1);
             if (SS.constructors[factoryFunction]) {

@@ -18,6 +18,8 @@ SS.SceneView = function(container) {
 
     var workplane, cursoid;
     var popupMenu = SS.popupMenu();
+
+    var that = this;
     
     function init() {
 
@@ -178,7 +180,7 @@ SS.SceneView = function(container) {
 	var origin = new THREE.Vector3(0, 0, 0);
 	var direction = new THREE.Vector3(0, 0, 1);
 	var ray = new THREE.Ray(origin, direction);
-	var positionOnVertical = sceneView.determinePositionOnRay(event, ray);
+	var positionOnVertical = that.determinePositionOnRay(event, ray);
         if (positionOnVertical) {
             workplane.updateZLocation(positionOnVertical, event);
         }
@@ -389,8 +391,6 @@ SS.SceneView = function(container) {
 
 
     }
-
-
 
     this.geomDocUpdated = function(event) {
 

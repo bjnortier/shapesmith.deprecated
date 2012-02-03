@@ -124,8 +124,8 @@
       Detector.addGetWebGLMessage({id: 'webgl-detector'});
     } else {
       var container = document.getElementById('scene');
-      var sceneView = new SS.SceneView(container);
-      sceneView.animate();
+      SS.sceneView = new SS.SceneView(container);
+      SS.sceneView.animate();
     }
 
   </script>

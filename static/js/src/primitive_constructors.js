@@ -15,8 +15,8 @@ SS.constructors.anchorMaterial = new THREE.MeshBasicMaterial( { color: 0x66a1d1,
 SS.constructors.editPrimitive = function(geomNode, specialisationClazz) {
     var updater = new SS.NodeUpdater(geomNode);
     SS.constructors.active = new SS.constructors.Constructor({geomNode : geomNode,
-                                                              scene    : sceneView.scene,
-                                                              cursoid  : sceneView.cursoid,
+                                                              scene    : SS.sceneView.scene,
+                                                              cursoid  : SS.sceneView.cursoid,
                                                               specialisation : new specialisationClazz(),
                                                               updater  : updater});
 }
@@ -27,7 +27,7 @@ SS.constructors.editEllipse1d = function(geomNode) {
 }
 
 SS.constructors.createEllipse1d = function(geomNode) {
-    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    var lastMousePosition = SS.sceneView.workplane.getLastMousePosition();
     geomNode.origin.x = lastMousePosition.x;
     geomNode.origin.y = lastMousePosition.y;
     geomNode.parameters.r1 = 20;
@@ -40,7 +40,7 @@ SS.constructors.editEllipse2d = function(geomNode) {
 }
 
 SS.constructors.createEllipse2d = function(geomNode) {
-    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    var lastMousePosition = SS.sceneView.workplane.getLastMousePosition();
     geomNode.origin.x = lastMousePosition.x;
     geomNode.origin.y = lastMousePosition.y;
     geomNode.parameters.r1 = 20;
@@ -54,7 +54,7 @@ SS.constructors.editRectangle2d = function(geomNode) {
 }
 
 SS.constructors.createRectangle2d = function(geomNode) {
-    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    var lastMousePosition = SS.sceneView.workplane.getLastMousePosition();
     geomNode.origin.x = lastMousePosition.x;
     geomNode.origin.y = lastMousePosition.y;
     geomNode.parameters.u = 10;
@@ -67,7 +67,7 @@ SS.constructors.editText2d = function(geomNode) {
 }
 
 SS.constructors.createText2d = function(geomNode) {
-    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    var lastMousePosition = SS.sceneView.workplane.getLastMousePosition();
     geomNode.origin.x = lastMousePosition.x;
     geomNode.origin.y = lastMousePosition.y;
     SS.constructors.editText2d(geomNode);
@@ -78,7 +78,7 @@ SS.constructors.editCuboid = function(geomNode) {
 }
 
 SS.constructors.createCuboid = function(geomNode) {
-    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    var lastMousePosition = SS.sceneView.workplane.getLastMousePosition();
     geomNode.origin.x = lastMousePosition.x;
     geomNode.origin.y = lastMousePosition.y;
     geomNode.parameters.u = 10;
@@ -92,7 +92,7 @@ SS.constructors.editSphere = function(geomNode) {
 }
 
 SS.constructors.createSphere = function(geomNode) {
-    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    var lastMousePosition = SS.sceneView.workplane.getLastMousePosition();
     geomNode.origin.x = lastMousePosition.x;
     geomNode.origin.y = lastMousePosition.y;
     geomNode.parameters.r = 10;
@@ -104,7 +104,7 @@ SS.constructors.editCylinder = function(geomNode) {
 }
 
 SS.constructors.createCylinder = function(geomNode) {
-    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    var lastMousePosition = SS.sceneView.workplane.getLastMousePosition();
     geomNode.origin.x = lastMousePosition.x;
     geomNode.origin.y = lastMousePosition.y;
     geomNode.parameters.r = 10;
@@ -117,7 +117,7 @@ SS.constructors.editCone = function(geomNode) {
 }
 
 SS.constructors.createCone = function(geomNode) {
-    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    var lastMousePosition = SS.sceneView.workplane.getLastMousePosition();
     geomNode.origin.x = lastMousePosition.x;
     geomNode.origin.y = lastMousePosition.y;
     geomNode.parameters.r1 = 10;
@@ -131,7 +131,7 @@ SS.constructors.editWedge = function(geomNode) {
 }
 
 SS.constructors.createWedge = function(geomNode) {
-    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    var lastMousePosition = SS.sceneView.workplane.getLastMousePosition();
     geomNode.origin.x = lastMousePosition.x;
     geomNode.origin.y = lastMousePosition.y;
     geomNode.parameters.u1 = 20;
@@ -146,7 +146,7 @@ SS.constructors.editTorus = function(geomNode) {
 }
 
 SS.constructors.createTorus = function(geomNode) {
-    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    var lastMousePosition = SS.sceneView.workplane.getLastMousePosition();
     geomNode.origin.x = lastMousePosition.x;
     geomNode.origin.y = lastMousePosition.y;
     geomNode.parameters.r1 = 20;
@@ -159,7 +159,7 @@ SS.constructors.editPrism = function(geomNode) {
 }
 
 SS.constructors.createPrism = function(geomNode) {
-    var lastMousePosition = sceneView.workplane.getLastMousePosition();
+    var lastMousePosition = SS.sceneView.workplane.getLastMousePosition();
     geomNode.parameters.u = 0;
     geomNode.parameters.v = 0;
     geomNode.parameters.w = 20;
@@ -235,13 +235,13 @@ SS.constructors.Constructor = function(spec) {
 	}
 
         var spec = {node      : node,
-                    cursoid   : sceneView.cursoid,
+                    cursoid   : SS.sceneView.cursoid,
 		    updater   : updater,
                     anchorName: anchorName};
         var modifier = specialisation.getModifierForAnchor && specialisation.getModifierForAnchor(spec);
         if (!modifier && anchorName === 'origin') {
 	    modifier = new SS.modifier.Origin({node     : node,
-                                               cursoid  : sceneView.cursoid,
+                                               cursoid  : SS.sceneView.cursoid,
 					       updater  : updater});
 	}
 
@@ -922,7 +922,7 @@ SS.constructors.Prism = function() {
 
          if (r > 0) {
 
-            var geometries = sceneView.createGeometry(childNode.mesh);
+            var geometries = SS.sceneView.createGeometry(childNode.mesh);
 
 	    var originalMeshObj = new THREE.Object3D();
             SS.constructors.addGeometries(originalMeshObj, geometries);

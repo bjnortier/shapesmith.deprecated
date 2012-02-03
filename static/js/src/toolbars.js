@@ -21,8 +21,8 @@ function Action(label, iconPath, fn) {
         jQuery("#" + imgId).mouseup(function(event) {
 	    // TODO: Move this to the popupmenu
 	    var selected = selectionManager.getSelected();
-	    sceneView.popupMenu.disposeIfShowing();
-	    sceneView.onMouseUp(event);
+	    SS.sceneView.popupMenu.disposeIfShowing();
+	    SS.sceneView.onMouseUp(event);
 	    fn(selected);
             
         });
@@ -81,7 +81,7 @@ function create_primitive(type) {
 	origin: {x: 0, y: 0, z: 0},
         parameters: geometryParams});
     geom_doc.add(geomNode);
-    sceneView.setOthersTransparent(geomNode);
+    SS.sceneView.setOthersTransparent(geomNode);
     return geomNode;
 }
 
@@ -108,7 +108,7 @@ function create_modifier(selected, type) {
                                 
     selectionManager.deselectAll();
     geom_doc.replace(original, modifierNode);
-    sceneView.setOthersTransparent(modifierNode);
+    SS.sceneView.setOthersTransparent(modifierNode);
 
     return modifierNode;
 }
@@ -145,7 +145,7 @@ function create_transform(selected, type) {
     replacement.transforms.push(transform);
     selectionManager.deselectAll();
     geom_doc.replace(original, replacement);
-    sceneView.setOthersTransparent(replacement);
+    SS.sceneView.setOthersTransparent(replacement);
     return {geomNode: replacement, transform: transform};
 }
 

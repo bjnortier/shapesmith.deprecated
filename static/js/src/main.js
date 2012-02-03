@@ -16,10 +16,10 @@ selectionManager.addListener(function(event) {
 });
 
 geom_doc.addListener(function(event) {
-    sceneView.geomDocUpdated(event);
+    SS.sceneView.geomDocUpdated(event);
 });
 selectionManager.addListener(function(event) {
-    sceneView.selectionUpdated(event);
+    SS.sceneView.selectionUpdated(event);
 });
 
 

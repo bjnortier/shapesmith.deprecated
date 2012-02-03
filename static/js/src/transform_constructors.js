@@ -5,8 +5,8 @@ SS.constructors.editTransform = function(geomNode, transform, specialisationClaz
     var updater = new SS.NodeUpdater(transform);
     SS.constructors.active = new SS.constructors.Constructor({geomNode : geomNode,
                                                               transform: transform,
-                                                              scene    : sceneView.scene,
-                                                              cursoid  : sceneView.cursoid,
+                                                              scene    : SS.sceneView.scene,
+                                                              cursoid  : SS.sceneView.cursoid,
                                                               specialisation : new specialisationClazz(),
                                                               updater  : updater});
 }
@@ -107,7 +107,7 @@ SS.constructors.Translate = function() {
 
         if (r > 0) {
 
-            var geometries = sceneView.createGeometry(geomNode.mesh);
+            var geometries = SS.sceneView.createGeometry(geomNode.mesh);
 	    var translatedMeshObj = new THREE.Object3D();
             SS.constructors.addGeometries(translatedMeshObj, geometries);
 
@@ -160,7 +160,7 @@ SS.constructors.Rotate = function() {
 
         if (r > 0) {
 
-            var geometries = sceneView.createGeometry(geomNode.mesh);
+            var geometries = SS.sceneView.createGeometry(geomNode.mesh);
             for (key in geometries) {
                 if (geometries[key].length > 0) {
                     geometries[key].map(function(geometry) {
@@ -251,7 +251,7 @@ SS.constructors.Scale = function() {
 
         if (factor) {
 
-            var geometries = sceneView.createGeometry(geomNode.mesh);
+            var geometries = SS.sceneView.createGeometry(geomNode.mesh);
             for (key in geometries) {
                 var geometry = geometries[key];
                 if (geometries[key].length > 0) {
@@ -305,7 +305,7 @@ SS.constructors.AxisMirror = function() {
 
         if (r > 0) {
 
-             var geometries = sceneView.createGeometry(geomNode.mesh);
+             var geometries = SS.sceneView.createGeometry(geomNode.mesh);
             for (key in geometries) {
                 if (geometries[key].length > 0) {
                     geometries[key].map(function(geometry) {
