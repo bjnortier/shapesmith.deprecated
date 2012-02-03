@@ -12,8 +12,7 @@ SS.SceneView = function(container) {
     var distance = 1000, distanceTarget = 300;
     var targetScenePosition = new THREE.Vector3(0,0,0);
 
-    var idToModel = {};
-    var unselectedColor = 0x00dd00, selectedColor = 0xdddd00;
+    
     var state, threshhold = 10;
 
     var workplane, cursoid;
@@ -38,6 +37,7 @@ SS.SceneView = function(container) {
 	renderer.autoClear = true;
 	renderer.setClearColorHex(0x080808, 0.0);
 	renderer.setSize(w, h);
+        renderer.sortObjects = false;
 
 	container.appendChild( renderer.domElement );
         
@@ -111,6 +111,12 @@ SS.SceneView = function(container) {
             cursoid.activate(cursoidName);
 	    popupMenu.cancel();
         } 
+
+        if (SS.transformerManager.isMouseOverTransformerElement(scene, camera, event)) {
+            state = 'transforming';
+            popupMenu.cancel()
+        }
+        
     }
     
     function onMouseMove(event) {
@@ -136,7 +142,7 @@ SS.SceneView = function(container) {
 	    if (state) {
 		popupMenu.cancel()
 	    } 
-            
+
             if (state === 'rotating') {
 		
 		var zoomDamp = Math.sqrt(distance)/10;
@@ -146,6 +152,7 @@ SS.SceneView = function(container) {
 
 		target.elevation = target.elevation > Math.PI ? Math.PI : target.elevation;
 		target.elevation = target.elevation < 0 ? 0 : target.elevation;
+
 	    } else if (state === 'panning') {
                 
                 var dMouse = {x: mouse.x - lastMousePos.x,
@@ -170,6 +177,8 @@ SS.SceneView = function(container) {
 	    (SS.constructors.active &&  
 	     SS.constructors.active.getAnchor(scene, camera, event))) {
             document.body.style.cursor = 'pointer';
+        } else if (SS.transformerManager.cursor) {
+            document.body.style.cursor = SS.transformerManager.cursor;
         } else {
             document.body.style.cursor = 'default';
         }
@@ -275,13 +284,12 @@ SS.SceneView = function(container) {
 	targetOnDown.azimuth = target.azimuth;
 	targetOnDown.elevation = target.elevation;
 
+	var positionOnWorkplane = determinePositionOnWorkplane(event);
+	if (positionOnWorkplane) {
+	    workplane.clicked(positionOnWorkplane);
+	}
+
 	if (!state) {
-
-	    var positionOnWorkplane = determinePositionOnWorkplane(event);
-	    if (positionOnWorkplane) {
-		workplane.clicked(positionOnWorkplane);
-	    }
-
 	    if (!SS.constructors.active && (event.button == 0)) {
 		selectObject(event);
 	    }
@@ -409,290 +417,41 @@ SS.SceneView = function(container) {
     }
 
     var add = function(geomNode) {
-        if (geom_doc.isRoot(geomNode) && geomNode.mesh) {
-
-	    var color = unselectedColor, opacity = 1.0;
-	    var isEditing = geomNode.editing;
-	    for (index in geomNode.transforms) {
-		if (geomNode.transforms[index].editing) {
-		    isEditing = true;
-		}
-	    }
-	    if (isEditing) {
-		color = 0xdddd00;
-		opacity = 0.5;
-	    }
-
-            var objectName = {geomNodeId: geomNode.id};
-
-	    var triangleGeometries = create3DGeometries(geomNode.mesh['faces']);
-	    var triangleMaterial = new THREE.MeshPhongMaterial( { ambient: color, color: color, opacity: opacity,  specular: color, shininess: 50, shading: THREE.SmoothShading } );
-            var triangles = new THREE.Object3D();
-            triangleGeometries.map(function(triangleGeometry) {
-                var mesh = new THREE.Mesh(triangleGeometry, triangleMaterial);
-                mesh.doubleSided = true;
-                mesh.name = objectName
-                triangles.add(mesh);
-            });
-            triangles.name = objectName;
-
-            var lineGeometries = create1DGeometries(geomNode.mesh['edges']);
-            var lineMaterial = new THREE.LineBasicMaterial({ color: color, opacity: 1.0, linewidth: 2 });
-            var lines = new THREE.Object3D();
-            lineGeometries.map(function(lineGeometry) {
-                var line = new THREE.Line(lineGeometry, lineMaterial);
-                line.name = objectName;
-                lines.add(line);
-            });
-            lines.name = objectName;
-
-            var selectionGeometriesForLines = create1DSelectionGeometries(geomNode.mesh['edges']);
-            var selectionMeshes = new THREE.Object3D();
-            selectionGeometriesForLines.map(function(selectionGeometriesForLine) {
-                var mesh = new THREE.Mesh(selectionGeometriesForLine, new THREE.MeshBasicMaterial({ color: 0x666666, opacity: 0 })); 
-                mesh.name = objectName
-                mesh.doubleSided = true;
-                selectionMeshes.add(mesh);
-            });
-            selectionMeshes.name = objectName;                       
-            
-	    scene.add(triangles);
-	    scene.add(lines);
-	    scene.add(selectionMeshes);
-	    idToModel[geomNode.id] = {'faces': triangles, 
-                                      'edges': lines,
-                                      'selectionForEdges' : selectionMeshes};
-        }
+        SS.renderGeometry(geomNode);
     }
 
     var remove = function(geomNode) {
-	var meshes = idToModel[geomNode.id];
-	if (meshes) {
-            for (key in meshes) {
-	        scene.remove(meshes[key]);
-            }
-	    delete idToModel[geomNode.id];
-	}
+        SS.hideGeometry(geomNode);
     }
 
     this.selectionUpdated = function(event) {
         if (event.deselected) {
             for (var i in event.deselected) {
                 var id = event.deselected[i];
-                
-		idToModel[id]['faces'].children.map(function(child) {
-                    child.material.color.setHex(unselectedColor);
-		    child.material.ambient.setHex(unselectedColor);
-		    child.material.specular.setHex(unselectedColor);
-                });
-		idToModel[id]['edges'].children.map(function(child) {
-                    child.material.color.setHex(unselectedColor);
-                });
+                SS.unhighlightGeometry(geom_doc.findById(id))
             }
         }
         if (event.selected) {
             for (var i in event.selected) {
                 var id = event.selected[i];
-
-	        idToModel[id]['faces'].children.map(function(child) {
-                    child.material.color.setHex(selectedColor);
-		    child.material.ambient.setHex(selectedColor);
-		    child.material.specular.setHex(selectedColor);
-                });
-		idToModel[id]['edges'].children.map(function(child) {
-                    child.material.color.setHex(selectedColor);
-                });
-		
+                SS.highlightGeometry(geom_doc.findById(id));
             }
         }
     }
 
-   var create1DGeometries = function(mesh) {
-
-       var precisionPoints = 4; 
-       var precision = Math.pow( 10, precisionPoints );
-       var keyForVertex = function(vertex) {
-           var position = vertex.position;
-           return [ Math.round( position.x * precision ), Math.round( position.y * precision ), Math.round( position.z * precision ) ].join( '_' );
-       }
-
-       var segmentsByStartPosition = {};
-       var segmentsByEndPosition = {};
-       var allSegments = [];
-
-       mesh.segments.map(function(segment) {
-
-           var vertices = [];
-           for (var i = segment.start; i < segment.end; i += 3) {
-               var position = new THREE.Vector3(mesh.positions[i], 
-					        mesh.positions[i + 1], 
-					        mesh.positions[i + 2]);
-	       var vertex = new THREE.Vertex(position);
-               vertices.push(vertex);
-           }
-           
-           var startVertex = vertices[0];
-           var endVertex = vertices[vertices.length-1];
-           var startVertexKey = keyForVertex(startVertex);
-           var endVertexKey = keyForVertex(endVertex);
-           
-           allSegments.push(vertices);
-           segmentsByStartPosition[startVertexKey] = segmentsByStartPosition[startVertexKey] || [];
-           segmentsByStartPosition[startVertexKey].push(vertices);
-
-           segmentsByEndPosition[endVertexKey] = segmentsByEndPosition[endVertexKey] || [];
-           segmentsByEndPosition[endVertexKey].push(vertices);
-       });
-
-       // Compression
-       do {
-
-           var didACompression = false;
-           for (vertexKey in segmentsByStartPosition)  {
-
-               if (!didACompression) {
-                   // If the is a segment with the same end position key as this 
-                   // start position, compress the segments
-
-                   if ((segmentsByStartPosition[vertexKey].length > 0) &&
-                       segmentsByEndPosition[vertexKey] &&
-                       (segmentsByEndPosition[vertexKey].length > 0)) {
-
-                       var firstSegment = segmentsByEndPosition[vertexKey][0];
-                       var secondSegment = segmentsByStartPosition[vertexKey][0];
-
-                       // Circular segments
-                       if (!(firstSegment === secondSegment)) {
-
-                           var newSegment = [].concat(firstSegment).concat(secondSegment);
-
-                           newSegmentStartKey = keyForVertex(newSegment[0]);
-                           newSegmentEndKey   = keyForVertex(newSegment[newSegment.length - 1]);
-                           
-                           allSegments.splice(allSegments.indexOf(firstSegment), 1);
-                           allSegments.splice(allSegments.indexOf(secondSegment), 1);
-                           allSegments.push(newSegment);
-
-                           segmentsByStartPosition[vertexKey].splice(
-                               segmentsByStartPosition[vertexKey].indexOf(secondSegment), 1);
-                           segmentsByStartPosition[newSegmentStartKey].splice(
-                               segmentsByStartPosition[newSegmentStartKey].indexOf(firstSegment), 1);
-                           
-                           segmentsByEndPosition[vertexKey].splice(
-                               segmentsByEndPosition[vertexKey].indexOf(firstSegment), 1);
-                           segmentsByEndPosition[newSegmentEndKey].splice(
-                               segmentsByEndPosition[newSegmentEndKey].indexOf(secondSegment), 1);
-                           
-
-                           segmentsByStartPosition[newSegmentStartKey].push(newSegment);
-                           segmentsByEndPosition[newSegmentEndKey].push(newSegment);
-
-                           didACompression = true;
-                       }
-                   }
-               }
-               
-           }
-               
-           
-       } while(didACompression);
-       
-
-       return allSegments.map(function(segment) {
-           var geometry =  new THREE.Geometry();
-           geometry.vertices = segment;
-           return geometry;
-       });
-
-    }
-
-   var create1DSelectionGeometries = function(mesh) {
-       return mesh.segments.map(function(segment) {
-           var positions = [];
-           for (var i = segment.start; i < segment.end; i+=3) {
-            positions.push(new THREE.Vector3(mesh.positions[i], 
-					     mesh.positions[i + 1], 
-					     mesh.positions[i + 2]));
-           }
-           return new THREE.PipeGeometry(3, positions);
-       });
-    }
-
-    var createGeometry = function(meshes) {
-        return {'faces' : create3DGeometries(meshes['faces']),
-                'edges' : create1DGeometries(meshes['edges'])};
-    }
-
-    var create3DGeometries = function(mesh) {
-	var geometry = new THREE.Geometry();
-
-	for (var i = 0; i  < mesh.positions.length/3; ++i) {
-	    var position = new THREE.Vector3(mesh.positions[i * 3], 
-					     mesh.positions[i * 3 + 1], 
-					     mesh.positions[i * 3 + 2]);
-	    var vertex = new THREE.Vertex(position);
-	    geometry.vertices.push(vertex);
-	}
-	
-	for (var i = 0; i < mesh.indices.length/3; ++i) {
-	    var a = mesh.indices[i * 3],
-	    b = mesh.indices[i * 3 + 1],
-	    c = mesh.indices[i * 3 + 2];
-
-	    var face = new THREE.Face3(a,b,c);
-	    face.vertexNormals = [new THREE.Vector3(mesh.normals[a*3], 
-						    mesh.normals[a*3+1], 
-						    mesh.normals[a*3+2]),
-				  new THREE.Vector3(mesh.normals[b*3], 
-						    mesh.normals[b*3+1], mesh.normals[b*3+2]),
-				  new THREE.Vector3(mesh.normals[c*3], 
-						    mesh.normals[c*3+1], mesh.normals[c*3+2])];
-	    geometry.faces.push(face);
-	}
-	geometry.computeCentroids();
-	geometry.computeFaceNormals();
-	return [geometry];
-    }
-
-    this.setOthersTransparent = function(geomNode) {
-        geom_doc.rootNodes.map(function(rootNode) {
-            if (geomNode.id !== rootNode.id) {
-                for (key in idToModel[rootNode.id]) {
-                    idToModel[rootNode.id][key].children.map(function(child) {
-                        if (child.material.opacity === 1.0) {
-                            child.material.opacity = 0.2;
-                        }
-                    });
-                }
-            }
-         });
-    }
-
-    this.restoreOpacity = function() {
-        geom_doc.rootNodes.map(function(rootNode) {
-            if (idToModel[rootNode.id]) {
-                for (key in idToModel[rootNode.id]) {
-                    idToModel[rootNode.id][key].children.map(function(child) {
-                        if (child.material.opacity === 0.2) {
-                            child.material.opacity = 1.0;
-                        }
-                    });
-                }
-            }
-        });
-    }
+ 
     
     init();
     this.animate = animate;
     this.renderer = renderer;
     this.scene = scene;
+    this.camera = camera;
     this.workplane = workplane;
     this.cursoid = cursoid;
     this.determinePositionOnRay = determinePositionOnRay;
     this.determinePositionPlane = determinePositionPlane;
     this.popupMenu = popupMenu;
     this.onMouseUp = onMouseUp;
-    this.createGeometry = createGeometry;
 
     return this;
 }

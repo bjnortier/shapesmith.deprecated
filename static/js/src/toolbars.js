@@ -81,7 +81,7 @@ function create_primitive(type) {
 	origin: {x: 0, y: 0, z: 0},
         parameters: geometryParams});
     geom_doc.add(geomNode);
-    SS.sceneView.setOthersTransparent(geomNode);
+    SS.setOthersTransparent(geomNode);
     return geomNode;
 }
 
@@ -108,7 +108,7 @@ function create_modifier(selected, type) {
                                 
     selectionManager.deselectAll();
     geom_doc.replace(original, modifierNode);
-    SS.sceneView.setOthersTransparent(modifierNode);
+    SS.setOthersTransparent(modifierNode);
 
     return modifierNode;
 }
@@ -145,7 +145,7 @@ function create_transform(selected, type) {
     replacement.transforms.push(transform);
     selectionManager.deselectAll();
     geom_doc.replace(original, replacement);
-    SS.sceneView.setOthersTransparent(replacement);
+    SS.setOthersTransparent(replacement);
     return {geomNode: replacement, transform: transform};
 }
 
@@ -238,15 +238,15 @@ $(document).ready(function() {
 	       }).render($('#transforms'));
     new Action('Scale', '/static/images/scale.png', 
                function(selected) { 
-		   SS.constructors.createScale(create_transform(selected, 'scale', ['factor']));
+		   SS.constructors.createScale(create_transform(selected, 'scale'));
 	       }).render($('#transforms'));
     new Action('Rotate', '/static/images/rotate.png', 
                function(selected) { 
-		   SS.constructors.createRotate(create_transform(selected, 'rotate', ['u', 'v', 'w', 'angle', 'n']));
+		   SS.constructors.createRotate(create_transform(selected, 'rotate'));
 	       }).render($('#transforms'));
     new Action('Mirror', '/static/images/mirror.png', 
                function(selected) { 
-		   SS.constructors.createMirror(create_transform(selected, 'mirror', ['u', 'v', 'w', 'n']));
+		   SS.constructors.createMirror(create_transform(selected, 'mirror'));
 	       }).render($('#transforms'));
     
 });

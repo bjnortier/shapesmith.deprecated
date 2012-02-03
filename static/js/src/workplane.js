@@ -52,8 +52,8 @@ SS.workplane.grid = function(spec) {
     var fadingGridLineGeometry = new THREE.Geometry();
     var majorGridLineGeometry = new THREE.Geometry();
     var minorGridLineGeometry = new THREE.Geometry();
-    var majorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.2 });
-    var minorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.02 });
+    var majorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.2, transparent: true });
+    var minorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.02, transparent: true });
 
     var height = 0.01,
     majorTick = 10;
@@ -108,9 +108,10 @@ SS.workplane.grid = function(spec) {
 	for (var x = gridExtents.minX; x <= gridExtents.maxX; ++x) {
 	    if (x != 0) {
 		var material = (x % 10 == 0) ? majorMaterialInside : minorMaterialInside;
-		var geometry = (y % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
+		var geometry = (x % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
 		var line = new THREE.Line(geometry, material);
 		line.position.x = x;
+	        line.position.z = (x % 10 == 0) ? line.position.z : line.position.z - 0.1;
 		line.rotation.z = 90 * Math.PI / 180;
 		scene.add(line);
 	    }
@@ -122,6 +123,7 @@ SS.workplane.grid = function(spec) {
 		var geometry = (y % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
 		var line = new THREE.Line(geometry, material);
 		line.position.y = y;
+                line.position.z = (y % 10 == 0) ? line.position.z : line.position.z - 0.1;
 		scene.add(line);
 	    }
 	}

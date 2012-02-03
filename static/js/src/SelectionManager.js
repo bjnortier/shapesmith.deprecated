@@ -58,9 +58,7 @@ function SelectionManager() {
 	if (deselected.length > 0) {
             this.notify({deselected : deselected});
 	}
-        if (!found) {
-            this.notify({selected : [sha]});
-        }
+        this.notify({selected : [sha]});
     }
     
     this.deselectAll = function() {

@@ -108,8 +108,11 @@
   <script type="text/javascript" src="/static/js/src/schemas.js"></script>
   <script type="text/javascript" src="/static/js/src/updaters.js"></script>
   <script type="text/javascript" src="/static/js/src/modifiers.js"></script>
+  <script type="text/javascript" src="/static/js/src/transformers.js"></script>
+
   <script type="text/javascript" src="/static/js/src/primitive_constructors.js"></script>
   <script type="text/javascript" src="/static/js/src/transform_constructors.js"></script>
+  <script type="text/javascript" src="/static/js/src/geomnode_rendering.js"></script>
   
   <script type="text/javascript" src="/static/js/src/TreeView.js"></script>
   <script type="text/javascript" src="/static/js/src/workplane.js"></script>
