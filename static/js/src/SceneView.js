@@ -113,7 +113,6 @@ SS.SceneView = function(container) {
         } 
 
         if (SS.transformerManager.isMouseOverTransformerElement(scene, camera, event)) {
-            state = 'transforming';
             popupMenu.cancel()
         }
         
@@ -128,13 +127,20 @@ SS.SceneView = function(container) {
 	if (mouseOnDown) {
 	    
 	    if (!state && !popupMenu.isShowing()) {
-                var overThreshold = ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
-			             ||
-			             (Math.abs(event.clientY - mouseOnDown.y) > threshhold));
-		if ((event.button === 0 && !event.shiftKey) && overThreshold) {
+                var overPanRotateThreshold = ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
+			                      ||
+			                      (Math.abs(event.clientY - mouseOnDown.y) > threshhold));
+
+                if (!state && (event.button === 0) && overPanRotateThreshold) {
+                    if (SS.transformerManager.initiateTransformer(scene, camera, event)) {
+                        state = 'transforming';
+                    }
+                }
+                
+		if (!state && (event.button === 0 && !event.shiftKey) && overPanRotateThreshold) {
                     state = 'rotating';
 		} 
-		if ((event.button === 1 || event.shiftKey) && overThreshold)  {
+		if (!state && (event.button === 1 || event.shiftKey) && overPanRotateThreshold)  {
                     state = 'panning';
 		}
 	    }

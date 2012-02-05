@@ -30,10 +30,6 @@ SS.preview.createDimArrow = function(value, angle) {
     arrowGeometry.computeCentroids();
     arrowGeometry.computeFaceNormals();
     
-    var arrowFace = new THREE.Face3(0,1,2);
-    arrowGeometry.faces.push(arrowFace);
-    arrowGeometry.computeCentroids();
-    arrowGeometry.computeFaceNormals();
     var arrow =  new THREE.Mesh(arrowGeometry, SS.preview.arrowMaterial);
     arrow.position.x = value;
     arrow.doubleSided = true;
@@ -79,7 +75,6 @@ SS.preview.createAngleArrow = function(text, x, y, z, u, v, w, angle) {
     }
     var angleLine = new THREE.Line(angleGeometry, SS.constructors.lineMaterial);
     angleObject.add(angleLine);
-
 
     var arrowGeometry = new THREE.Geometry();
     arrowGeometry.vertices.push(

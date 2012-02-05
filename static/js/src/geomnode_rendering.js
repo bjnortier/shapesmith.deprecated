@@ -93,11 +93,11 @@ var SS = SS || {};
                
            
        } while(didACompression);
-       
 
        return allSegments.map(function(segment) {
            var geometry =  new THREE.Geometry();
            geometry.vertices = segment;
+           geometry.dynamic = true;
            return geometry;
        });
 
@@ -148,6 +148,7 @@ var SS = SS || {};
 	}
 	geometry.computeCentroids();
 	geometry.computeFaceNormals();
+        geometry.dynamic = true;
 	return [geometry];
     }
 
@@ -293,12 +294,47 @@ var SS = SS || {};
         }
     }
 
+    SS.snapshotGeometry = function(geomNode) {
+        var snapshot = {};
+        if (geomNode.sceneObjects) {
+            for (key in geomNode.sceneObjects) {
+                geomNode.sceneObjects[key].children.map(function(child) {
+                    var geometry = child.geometry;
+                    snapshot[key] = snapshot[key] || {};
+                    snapshot[key][child] = geometry.vertices;
+                });
+            }
+        }
+        return snapshot;
+    }
+
+    SS.scaleGeomNodeRendering = function(geomNode, scalePoint, factor, snapshot) {
+        if (geomNode.sceneObjects) {
+            for (key in geomNode.sceneObjects) {
+                geomNode.sceneObjects[key].children.map(function(child) {
+
+                    var geometry = child.geometry;
+                    var snapshotVertices = snapshot[key][child];
+                    geometry.vertices = snapshotVertices.map(function(vertex) {
+	                var position = vertex.position.clone();
+	                position.x = scalePoint.x + (position.x - scalePoint.x)*factor;
+	                position.y = scalePoint.y + (position.y - scalePoint.y)*factor;
+	                position.z = scalePoint.z + (position.z - scalePoint.z)*factor;
+	                return new THREE.Vertex(position);
+	            });
+
+                    geometry.__dirtyVertices = true;
+                });
+            }
+        }
+    }
+
     SS.boundingBoxForGeomNode = function(geomNode) {
         var boundingBoxes = [];
         var addFunction = function(child) {
-            if (!child.geometry.boundingBox) {
+            //if (!child.geometry.boundingBox) {
                 child.geometry.computeBoundingBox();
-            }
+            //}
             boundingBoxes.push(child.geometry.boundingBox);
         };
             
@@ -317,7 +353,7 @@ var SS = SS || {};
             max.z = Math.max(max.z, box.max.z);
         }
         
-        for (key in min) {
+        /*for (key in min) {
             if (typeof(min[key]) === 'number') {
                 if (min[key] < 0) {
                     min[key] = -Math.ceil(-min[key]);
@@ -335,7 +371,7 @@ var SS = SS || {};
                     max[key] = Math.ceil(max[key]);
                 }
             }
-        }
+        }*/
         
         return {min: min, max: max};
     }
