@@ -153,9 +153,9 @@ var SS = SS || {};
     }
 
 
-    SS.renderGeometry = function(geomNode) {
+    SS.createGeometry = function(geomNode) {
 
-        if (!(geom_doc.isRoot(geomNode) && geomNode.mesh)) {
+        if (!geomNode.mesh) {
             return;
         }
         
@@ -203,13 +203,19 @@ var SS = SS || {};
         });
         selectionMeshes.name = objectName;                       
         
-        SS.sceneView.scene.add(triangles);
-        SS.sceneView.scene.add(lines);
-        SS.sceneView.scene.add(selectionMeshes);
-
-        geomNode.sceneObjects = {'faces': triangles, 
-                                 'edges': lines,
-                                 'selectionForEdges' : selectionMeshes};
+        return {'faces': triangles, 
+                'edges': lines,
+                'selectionForEdges' : selectionMeshes};
+    }
+    
+    SS.renderGeometry = function(geomNode) {
+        var geometries = SS.createGeometry(geomNode);
+        if (geometries) {
+            SS.sceneView.scene.add(geometries.faces);
+            SS.sceneView.scene.add(geometries.edges);
+            SS.sceneView.scene.add(geometries.selectionForEdges);
+            geomNode.sceneObjects = geometries;
+        }
     }
 
     SS.hideGeometry = function(geomNode) {
@@ -301,11 +307,24 @@ var SS = SS || {};
                 geomNode.sceneObjects[key].children.map(function(child) {
                     var geometry = child.geometry;
                     snapshot[key] = snapshot[key] || {};
-                    snapshot[key][child] = geometry.vertices;
+                    snapshot[key][child.id] = geometry.vertices;
                 });
             }
         }
         return snapshot;
+    }
+
+    SS.restoreGeomNodeRendering = function(geomNode, snapshot) {
+        if (geomNode.sceneObjects) {
+            for (key in geomNode.sceneObjects) {
+                geomNode.sceneObjects[key].children.map(function(child) {
+                    var geometry = child.geometry;
+                    var snapshotVertices = snapshot[key][child.id];
+                    geometry.vertices = snapshotVertices;
+                    geometry.__dirtyVertices = true;
+                });
+            }
+        }
     }
 
     SS.scaleGeomNodeRendering = function(geomNode, scalePoint, factor, snapshot) {
@@ -314,7 +333,7 @@ var SS = SS || {};
                 geomNode.sceneObjects[key].children.map(function(child) {
 
                     var geometry = child.geometry;
-                    var snapshotVertices = snapshot[key][child];
+                    var snapshotVertices = snapshot[key][child.id];
                     geometry.vertices = snapshotVertices.map(function(vertex) {
 	                var position = vertex.position.clone();
 	                position.x = scalePoint.x + (position.x - scalePoint.x)*factor;
@@ -323,6 +342,47 @@ var SS = SS || {};
 	                return new THREE.Vertex(position);
 	            });
 
+                    geometry.computeCentroids();
+	            geometry.computeFaceNormals();
+                    geometry.__dirtyVertices = true;
+                });
+            }
+        }
+    }
+
+    SS.rotateGeomNodeRendering = function(geomNode, center, u, v, w, angle, snapshot) {
+        if (geomNode.sceneObjects) {
+            var normUVW = new THREE.Vector3(u, v, w).normalize();
+            var un = normUVW.x, vn = normUVW.y, wn = normUVW.z;
+
+            for (key in geomNode.sceneObjects) {
+                geomNode.sceneObjects[key].children.map(function(child) {
+
+                    var geometry = child.geometry;
+                    var snapshotVertices = snapshot[key][child.id];
+
+	            geometry.vertices = snapshotVertices.map(function(vertex) {
+	                var position = vertex.position.clone();
+                        position.x = position.x - center.x;
+                        position.y = position.y - center.y;
+                        position.z = position.z - center.z;
+                        
+                        // http://blog.client9.com/2007/09/rotating-point-around-vector.html
+                        var a = (un*position.x + vn*position.y + wn*position.z);
+                        var x2 = a*un + (position.x - a*un)*Math.cos(angle/180*Math.PI) 
+                            + (vn*position.z - wn*position.y)*Math.sin(angle/180*Math.PI);
+                        var y2 = a*vn + (position.y - a*vn)*Math.cos(angle/180*Math.PI) 
+                            + (wn*position.x - un*position.z)*Math.sin(angle/180*Math.PI);
+                        var z2 = a*wn + (position.z - a*wn)*Math.cos(angle/180*Math.PI) 
+                            + (un*position.y - vn*position.x)*Math.sin(angle/180*Math.PI);
+                        
+	                var newPosition = new THREE.Vector3(center.x + x2, 
+                                                            center.y + y2, 
+                                                            center.z + z2);
+	                return new THREE.Vertex(newPosition);
+	            });
+                    geometry.computeCentroids();
+	            geometry.computeFaceNormals();
                     geometry.__dirtyVertices = true;
                 });
             }
@@ -352,26 +412,6 @@ var SS = SS || {};
             max.y = Math.max(max.y, box.max.y);
             max.z = Math.max(max.z, box.max.z);
         }
-        
-        /*for (key in min) {
-            if (typeof(min[key]) === 'number') {
-                if (min[key] < 0) {
-                    min[key] = -Math.ceil(-min[key]);
-                } else {
-                    min[key] = Math.floor(min[key]);
-                }
-            }
-        }
-        
-        for (key in max) {
-            if (typeof(max[key]) === 'number') {
-                if (max[key] < 0) {
-                    max[key] = -Math.floor(-max[key]);
-                } else {
-                    max[key] = Math.ceil(max[key]);
-                }
-            }
-        }*/
         
         return {min: min, max: max};
     }

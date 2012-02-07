@@ -37,7 +37,7 @@ SS.constructors.createRotate = function(spec) {
     spec.transform.origin.z = 0;
     spec.transform.parameters.u = 0;
     spec.transform.parameters.v = 0;
-    spec.transform.parameters.w = 10;
+    spec.transform.parameters.w = 1;
     spec.transform.parameters.angle = 45;
     spec.transform.parameters.n = 0;
 
@@ -75,18 +75,8 @@ SS.constructors.createMirror = function(spec) {
 
 
 SS.constructors.addGeometries = function(meshObject, geometries) {
-    if (geometries['faces'].length > 0) {
-        geometries['faces'].map(function(geometry) {
-            var mesh3d = new THREE.Mesh(geometry, SS.constructors.faceMaterial)
-            mesh3d.doubleSided = true;
-            meshObject.add(mesh3d);
-        });
-    }
-    if (geometries['edges'].length > 0) {
-        geometries['edges'].map(function(geometry) {
-            meshObject.add(new THREE.Line(geometry, SS.constructors.lineMaterial));
-        });
-    }
+    meshObject.add(geometries['faces']);
+    meshObject.add(geometries['edges']);
 }
 
 SS.constructors.Translate = function() {
@@ -107,7 +97,7 @@ SS.constructors.Translate = function() {
 
         if (r > 0) {
 
-            var geometries = SS.sceneView.createGeometry(geomNode.mesh);
+            var geometries = SS.renderGeometry(geomNode);
 	    var translatedMeshObj = new THREE.Object3D();
             SS.constructors.addGeometries(translatedMeshObj, geometries);
 
@@ -160,7 +150,7 @@ SS.constructors.Rotate = function() {
 
         if (r > 0) {
 
-            var geometries = SS.sceneView.createGeometry(geomNode.mesh);
+            var geometries = SS.create(geomNode);
             for (key in geometries) {
                 if (geometries[key].length > 0) {
                     geometries[key].map(function(geometry) {
@@ -251,7 +241,7 @@ SS.constructors.Scale = function() {
 
         if (factor) {
 
-            var geometries = SS.sceneView.createGeometry(geomNode.mesh);
+            var geometries = SS.renderGeometry(geomNode);
             for (key in geometries) {
                 var geometry = geometries[key];
                 if (geometries[key].length > 0) {
@@ -305,7 +295,7 @@ SS.constructors.AxisMirror = function() {
 
         if (r > 0) {
 
-             var geometries = SS.sceneView.createGeometry(geomNode.mesh);
+             var geometries = SS.renderGeometry(geomNode);
             for (key in geometries) {
                 if (geometries[key].length > 0) {
                     geometries[key].map(function(geometry) {

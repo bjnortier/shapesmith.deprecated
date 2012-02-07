@@ -105,8 +105,13 @@ mValue Tesselator3D::Tesselate() {
             for (int i = 1; i <= facing->NbTriangles(); ++i) {
                 Poly_Triangle triangle = facing->Triangles().Value(i);
                 Standard_Integer index1, index2, index3;
-                triangle.Get(index1, index2, index3);
                 
+                if (Face.Orientation() == TopAbs_REVERSED) {
+                    triangle.Get(index1, index3, index2);
+                } else {
+                    triangle.Get(index1, index2, index3);
+                }
+                 
                 // Step 1 - caluclate the normals of the triangles
                 gp_Pnt vertex1 = facing->Nodes().Value(index1);
                 gp_Pnt vertex2 = facing->Nodes().Value(index2);

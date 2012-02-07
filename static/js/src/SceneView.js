@@ -13,7 +13,7 @@ SS.SceneView = function(container) {
     var targetScenePosition = new THREE.Vector3(0,0,0);
 
     
-    var state, threshhold = 10;
+    var state;
 
     var workplane, cursoid;
     var popupMenu = SS.popupMenu();
@@ -125,17 +125,21 @@ SS.SceneView = function(container) {
 	mouse.y = event.clientY;
 
 	if (mouseOnDown) {
+
+            var panRotateThreshold = 10;
+            var transformerThreshold = 5;
 	    
 	    if (!state && !popupMenu.isShowing()) {
-                var overPanRotateThreshold = ((Math.abs(event.clientX - mouseOnDown.x) > threshhold)
-			                      ||
-			                      (Math.abs(event.clientY - mouseOnDown.y) > threshhold));
-
-                if (!state && (event.button === 0) && overPanRotateThreshold) {
+                
+                if (!state && (event.button === 0)) {
                     if (SS.transformerManager.initiateTransformer(scene, camera, event)) {
                         state = 'transforming';
                     }
                 }
+
+                var overPanRotateThreshold = ((Math.abs(event.clientX - mouseOnDown.x) > panRotateThreshold)
+			                      ||
+			                      (Math.abs(event.clientY - mouseOnDown.y) > panRotateThreshold));
                 
 		if (!state && (event.button === 0 && !event.shiftKey) && overPanRotateThreshold) {
                     state = 'rotating';
@@ -183,7 +187,7 @@ SS.SceneView = function(container) {
 	    (SS.constructors.active &&  
 	     SS.constructors.active.getAnchor(scene, camera, event))) {
             document.body.style.cursor = 'pointer';
-        } else if (SS.transformerManager.cursor) {
+        } else if (SS.transformerManager && SS.transformerManager.cursor) {
             document.body.style.cursor = SS.transformerManager.cursor;
         } else {
             document.body.style.cursor = 'default';
@@ -207,10 +211,10 @@ SS.SceneView = function(container) {
 	var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
 	var planeMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 0 }));
 	planeMesh.doubleSided = true;
-	return determinePositionPlane(event, planeMesh);
+	return determinePositionOnPlane(event, planeMesh);
     }
 
-    function determinePositionPlane(event, planeMesh) {
+    function determinePositionOnPlane(event, planeMesh) {
 	
 	var mouse = {};
 	mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -222,10 +226,11 @@ SS.SceneView = function(container) {
 	var ray = new THREE.Ray(camera.position, null);
 	ray.direction = mouse3D.subSelf(camera.position).normalize();
 
-
 	var intersects = ray.intersectObject(planeMesh);
 	if (intersects.length == 1) {
-	    return {x: Math.round(intersects[0].point.x), y: Math.round(intersects[0].point.y)};
+	    return {x: Math.round(intersects[0].point.x), 
+                    y: Math.round(intersects[0].point.y),
+                    z: Math.round(intersects[0].point.z)};
 	} else {
 	    return null;
 	}
@@ -455,7 +460,7 @@ SS.SceneView = function(container) {
     this.workplane = workplane;
     this.cursoid = cursoid;
     this.determinePositionOnRay = determinePositionOnRay;
-    this.determinePositionPlane = determinePositionPlane;
+    this.determinePositionOnPlane = determinePositionOnPlane;
     this.popupMenu = popupMenu;
     this.onMouseUp = onMouseUp;
 

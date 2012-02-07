@@ -920,21 +920,21 @@ SS.constructors.Prism = function() {
             sceneObjects.rDim = rDim;
         }
 
-         if (r > 0) {
-
-            var geometries = SS.sceneView.createGeometry(childNode.mesh);
-
+        if (r > 0) {
+            
+            var geometries = SS.createGeometry(childNode);
+            
 	    var originalMeshObj = new THREE.Object3D();
             SS.constructors.addGeometries(originalMeshObj, geometries);
             sceneObjects.originalMeshObj = originalMeshObj;
-
+            
 	    var translatedMeshObj = new THREE.Object3D();
             SS.constructors.addGeometries(translatedMeshObj, geometries);
-
+            
             translatedMeshObj.position.x = u;
 	    translatedMeshObj.position.y = v;
 	    translatedMeshObj.position.z = w;
-
+            
             sceneObjects.translatedMeshObj = translatedMeshObj;
         }
 

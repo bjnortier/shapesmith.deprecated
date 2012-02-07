@@ -18,6 +18,8 @@ SS.transformers.TranslateElement = function(geomNode) {
                                    new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, 
                                                                 transparent: true, 
                                                                 opacity: 0.5}));
+    var rotationPlane;
+    var rotationIndicator;
 
     planeMesh.doubleSided = true;
     planeMesh.position.x = boundingBox.min.x + width/2;
@@ -81,8 +83,6 @@ SS.transformers.ScaleElement = function(geomNode, elementName) {
     this.sceneObject.add(arrowMesh);
     this.sceneObject.add(line);
     
-    
-
     this.highlight = function() {
         this.sceneObject.children.map(function(child) {
             child.material.opacity = 1.0;
@@ -97,6 +97,165 @@ SS.transformers.ScaleElement = function(geomNode, elementName) {
 
     this.cursor = 'move';
 }
+
+SS.transformers.RotateElement = function(geomNode, elementName) {
+    
+    var boundingBox = SS.boundingBoxForGeomNode(geomNode);
+    var center = SS.transformers.centerOfGeom(boundingBox);
+
+    var width = 3;
+    var r = 30;
+    var dr = 0.5;
+    var maxAngle = 7;
+
+    var outerCurveGeometry = new THREE.Geometry();
+    for (var i = -maxAngle; i <= 0; ++i) {
+        var angle = i/180*Math.PI;
+        var z = (r+dr)*Math.cos(angle);
+        var x = (r+dr)*Math.sin(angle);
+        outerCurveGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(x,0,z)));
+    }
+
+    var innerCurveGeometry = new THREE.Geometry();
+    for (var i = 0; i >= -maxAngle; --i) {
+        var angle = i/180*Math.PI;
+        var z = (r-dr)*Math.cos(angle);
+        var x = (r-dr)*Math.sin(angle);
+        innerCurveGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(x,0,z)));
+    }
+
+    var arrowHeadGeometry = new THREE.Geometry();
+    arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r+dr)));
+    arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r+dr+1)));
+    arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(3,0,r)));
+    arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r-dr-1)));
+    arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r-dr)));
+
+    var arrowLineGeometry = new THREE.Geometry();
+    arrowLineGeometry.vertices.push(innerCurveGeometry.vertices[maxAngle]);
+    arrowLineGeometry.vertices.push(outerCurveGeometry.vertices[0]);
+    arrowLineGeometry.vertices = arrowLineGeometry.vertices.concat(outerCurveGeometry.vertices);
+    arrowLineGeometry.vertices = arrowLineGeometry.vertices.concat(arrowHeadGeometry.vertices);
+    arrowLineGeometry.vertices = arrowLineGeometry.vertices.concat(innerCurveGeometry.vertices);
+
+    var lineMaterial = new THREE.LineBasicMaterial({color: SS.constructors.lineColor, 
+                                                    linewidth: 2.0, 
+                                                    transparent: true, 
+                                                    opacity: 0.5 });
+    
+    var arrowLine = new THREE.Line(arrowLineGeometry, lineMaterial);
+    arrowLine.name = {transformerElement: elementName};
+    
+    var arrowFaceGeometry = new THREE.Geometry();
+    arrowFaceGeometry.vertices = outerCurveGeometry.vertices;
+    arrowFaceGeometry.vertices = arrowFaceGeometry.vertices.concat(innerCurveGeometry.vertices.reverse());
+    for (var i = 0; i < maxAngle; ++i) {
+        arrowFaceGeometry.faces.push(new THREE.Face4(i, i+1, 
+                                                     outerCurveGeometry.vertices.length + i + 1,
+                                                     outerCurveGeometry.vertices.length + i));
+    }
+    arrowFaceGeometry.vertices.push(arrowHeadGeometry.vertices[1]);
+    arrowFaceGeometry.vertices.push(arrowHeadGeometry.vertices[2]);
+    arrowFaceGeometry.vertices.push(arrowHeadGeometry.vertices[3]);
+    arrowFaceGeometry.faces.push(new THREE.Face3(arrowFaceGeometry.vertices.length-3,
+                                                 arrowFaceGeometry.vertices.length-2,
+                                                 arrowFaceGeometry.vertices.length-1));
+    arrowFaceGeometry.computeCentroids();
+    arrowFaceGeometry.computeFaceNormals();
+
+    var arrowFace = new THREE.Mesh(arrowFaceGeometry,
+                                   new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, 
+                                                                transparent: true, 
+                                                                opacity: 0.5}));
+    arrowFace.doubleSided = true;
+    arrowFace.name = {transformerElement: elementName};
+
+    this.sceneObject = new THREE.Object3D();
+    this.sceneObject.add(arrowFace);
+    this.sceneObject.add(arrowLine);
+    arrowFace.position.z = -r;
+    arrowLine.position.z = -r;
+    arrowFace.rotation.y = maxAngle/180*Math.PI;
+    arrowLine.rotation.y = maxAngle/180*Math.PI;
+
+
+    this.highlight = function() {
+        this.sceneObject.children.map(function(child) {
+            if (child.material) {
+                child.material.opacity = 1.0;
+            }
+        });
+    }
+
+    this.unHighlight = function() {
+        this.sceneObject.children.map(function(child) {
+            if (child.material) {
+                child.material.opacity = 0.5;
+            }
+        });
+    }
+
+    var rotationAngle = new THREE.Object3D();
+
+    var positionForAngle;
+    this.setPositionForAngle = function(position) {
+        positionForAngle = position;
+    }
+
+    this.drawAngle = function(angle, params) {
+        this.sceneObject.remove(rotationAngle);
+        rotationAngle = new THREE.Object3D();
+
+        var angleGeometry = new THREE.Geometry();
+        angleGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,0)));
+
+        var r = new THREE.Vector3().sub(positionForAngle, center).length()
+        for (var i = 0; 
+             angle > 0 ? i <= Math.round(angle) : i > Math.round(angle); 
+             angle > 0 ? ++i : --i) {
+            var theta = i/180*Math.PI;
+            var z = r*Math.cos(theta);
+            var x = r*Math.sin(theta);
+            angleGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(x,0,z)));
+        }
+        angleGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,0)));
+        
+        var lineMaterial = new THREE.LineBasicMaterial({color: 0xeeeeee, 
+                                                        linewidth: 2.0, 
+                                                        transparent: true, 
+                                                        opacity: 1.0 });
+    
+        var line = new THREE.Line(angleGeometry, lineMaterial);
+        line.position.z = -r;
+        rotationAngle.add(line);
+
+        var textGeo = new THREE.TextGeometry('' + angle, {
+	    size: 2, height: 0.01, curveSegments: 6,
+	    font: 'helvetiker', weight: 'normal', style: 'normal',
+	    bezelEnabled: false});
+        var text = new THREE.Mesh(textGeo, 
+                                  new THREE.MeshBasicMaterial({color: 0xffffff, 
+                                                               opacity: 0.8}));
+
+        text.position.z = (r+3)*Math.cos(angle/180*Math.PI) - r;
+        text.position.x = (r+3)*Math.sin(angle/180*Math.PI);
+        if (params.v > 0) {
+            text.rotation.z = Math.PI;
+        }
+        if (params.u > 0) {
+            text.rotation.z = -Math.PI/2;
+        }
+        text.rotation.x = -Math.PI/2;
+        rotationAngle.add(text);
+
+        this.sceneObject.add(rotationAngle);
+
+    }
+
+    this.cursor = 'move';
+}
+
+
 
 SS.transformers.Manager = function() {
 
@@ -194,6 +353,46 @@ SS.transformers.Manager = function() {
 	    transformerUI.add(line);
         });
 
+        var rotateElementSpec = {
+            'rotateY' : {
+                x: center.x,
+                y: center.y,
+                z: boundingBox.max.z + jutOut
+            },
+            'rotateZ' : {
+                x : boundingBox.max.x + jutOut,
+                y: center.y,
+                z: center.z,
+                rotationZ: Math.PI/2,
+                rotationY: Math.PI/2
+            },
+            'rotateX' : {
+                x : center.x,
+                y: boundingBox.max.y + jutOut,
+                z: center.z,
+                rotationZ: -Math.PI/2,
+                rotationX: -Math.PI/2
+            }
+        };
+        
+        for (name in rotateElementSpec) {
+            var element = new SS.transformers.RotateElement(geomNode, name);
+
+            uiElements.push(element);
+
+            element.sceneObject.position.x = rotateElementSpec[name].x || 0;
+            element.sceneObject.position.y = rotateElementSpec[name].y || 0;
+            element.sceneObject.position.z = rotateElementSpec[name].z || 0;
+
+            element.setPositionForAngle(element.sceneObject.position);
+            
+            element.sceneObject.rotation.z = rotateElementSpec[name].rotationZ || 0;
+            element.sceneObject.rotation.y = rotateElementSpec[name].rotationY || 0;
+            element.sceneObject.rotation.x = rotateElementSpec[name].rotationX || 0;
+
+            transformerUI.add(element.sceneObject);
+        }
+
 
         SS.sceneView.scene.add(transformerUI);
     }
@@ -263,12 +462,10 @@ SS.transformers.Manager = function() {
                 var dyTo = event.y - transformingState.center.y;
                 var r2 = Math.sqrt(dxTo*dxTo + dyTo*dyTo);
 
-                console.log('from:' + JSON.stringify(transformingState.from));
-                console.log('center:' + JSON.stringify(transformingState.center));
-                console.log('event:' + JSON.stringify({x: event.x, y:event.y}));
-
-
-                var factor = r2/r1;
+                var factor = parseFloat((r2/r1).toFixed(3));
+                if (event.originalEvent.shiftKey) {
+                    factor = Math.round(factor*10)/10;
+                }
                 
                 var scalePoint = transformingState.center.clone();
                 scalePoint.z = 0;
@@ -280,6 +477,72 @@ SS.transformers.Manager = function() {
 
                 transformingState.transform.parameters.factor = factor;
                 activateScale(transformingState.originalNode);
+
+                var textGeo = new THREE.TextGeometry('' + factor, {
+	            size: 2, height: 0.01, curveSegments: 6,
+	            font: 'helvetiker', weight: 'normal', style: 'normal',
+	            bezelEnabled: false});
+                var text = new THREE.Mesh(textGeo, 
+                                          new THREE.MeshBasicMaterial({color: 0xffffff, 
+                                                                       opacity: 0.8}));
+
+                var boundingBox = SS.boundingBoxForGeomNode(transformingState.originalNode);
+                var center = SS.transformers.centerOfGeom(boundingBox);
+                text.position.y = center.y - text.boundRadius/2;
+                text.position.x = boundingBox.max.x + 5;
+                text.rotation.z = Math.PI/2; 
+
+                transformerUI.add(text);
+
+            } else if (transformingState.transform.type === 'rotate') {
+                
+                var positionOnRotationPlane = SS.sceneView.determinePositionOnPlane(event.originalEvent, rotationPlane);
+                if (!positionOnRotationPlane) {
+                    return;
+                }
+
+                var initial = transformingState.initialPositionOnPlane;
+                var v1 = new THREE.Vector3().sub(
+                    new THREE.Vector3(
+                        positionOnRotationPlane.x, 
+                        positionOnRotationPlane.y, 
+                        positionOnRotationPlane.z),
+                    transformingState.center).normalize();
+                var v2;
+                if (transformingState.transform.parameters.u > 0) {
+                    v2 = new THREE.Vector3(0,1,0);
+                } else if (transformingState.transform.parameters.v > 0) {
+                    v2 = new THREE.Vector3(0,0,1);
+                } else if (transformingState.transform.parameters.w > 0) {
+                    v2 = new THREE.Vector3(1,0,0);
+                } 
+
+                
+                var v2CrossV1 = new THREE.Vector3().cross(v2, v1);
+                var rotationVector = new THREE.Vector3(
+                    transformingState.transform.parameters.u, 
+                    transformingState.transform.parameters.v, 
+                    transformingState.transform.parameters.w);
+
+                var angle = parseFloat((Math.acos(v1.dot(v2))/Math.PI*180).toFixed(0));
+                if (rotationVector.dot(v2CrossV1) < 0) {
+                    angle = -angle;
+                }
+                if (event.originalEvent.shiftKey) {
+                    angle = Math.round(angle/15)*15;
+                }
+                transformingState.transform.parameters.angle = angle;
+
+                SS.rotateGeomNodeRendering(transformingState.originalNode, 
+                                           transformingState.center, 
+                                           transformingState.transform.parameters.u, 
+                                           transformingState.transform.parameters.v, 
+                                           transformingState.transform.parameters.w, 
+                                           angle, 
+                                           transformingState.originalGeometrySnapshot);
+
+                transformingState.element.drawAngle(angle, transformingState.transform.parameters);
+
 
             }
         }
@@ -299,15 +562,22 @@ SS.transformers.Manager = function() {
                   (transformingState.transform.parameters.w !== 0)));
             var doScale = ((transformingState.transform.type === 'scale') &&
                            (transformingState.transform.parameters.factor !== 1.0));
+            var doRotate = ((transformingState.transform.type === 'rotate') &&
+                            (transformingState.transform.parameters.angle !== 0.0));
 
-            if (doTranslate || doScale) {
+            if (doTranslate || doScale || doRotate) {
                 var cmd = update_geom_command(transformingState.originalNode, 
                                               transformingState.originalNode, 
                                               transformingState.editingNode);
                 command_stack.execute(cmd);
+            } else {
+                SS.restoreGeomNodeRendering(transformingState.originalNode, 
+                                            transformingState.originalGeometrySnapshot);
             }
+            transformingState = undefined;
+            SS.sceneView.scene.remove(transformerUI);
         }
-        transformingState = undefined;
+        
     });
 
     this.selectionUpdated = function(event) {
@@ -338,6 +608,7 @@ SS.transformers.Manager = function() {
         transformingState = {from: {x: lastWorkplanePosition.x, y: lastWorkplanePosition.y},
                              center: center,
                              originalNode: geomNode,
+                             originalGeometrySnapshot: SS.snapshotGeometry(geomNode),
                              editingNode:  editingNode,
                              transform: transform};
     }
@@ -348,7 +619,48 @@ SS.transformers.Manager = function() {
 
     this.initiateScale = function(event, geomNode) {
         initiateTransform(event, geomNode, 'scale', {factor: 1.0});
-        transformingState.originalGeometrySnapshot = SS.snapshotGeometry(geomNode);
+    }
+
+    this.initiateRotate = function(event, geomNode, axis) {
+        var boundingBox = SS.boundingBoxForGeomNode(geomNode);
+        var center = SS.transformers.centerOfGeom(boundingBox);
+
+        var parameters = {u:0, 
+                          v:0, 
+                          w:0, 
+                          angle:0.0, 
+                          n:0};
+        if (axis === 'X') {
+            parameters.u = 1.0;
+        } else if (axis === 'Y') {
+            parameters.v = 1.0;
+        } else if (axis === 'Z') {
+            parameters.w = 1.0;
+        }
+
+
+        rotationPlane = new THREE.Mesh(
+            new THREE.PlaneGeometry(1000, 1000),
+            new THREE.MeshBasicMaterial({ color: 0x333366, opacity: 0.1, transparent: true }));
+        rotationPlane.position = center;
+        if (parameters.u > 0) {
+            rotationPlane.rotation.y = Math.PI/2;
+        }
+        if (parameters.v > 0) {
+            rotationPlane.rotation.x = Math.PI/2;
+        }
+        rotationPlane.doubleSided = true;
+        transformerUI.add(rotationPlane);
+
+        initiateTransform(event, geomNode, 'rotate', parameters);
+        transformingState.transform.origin.x = center.x;
+        transformingState.transform.origin.y = center.y;
+        transformingState.transform.origin.z = center.z;
+        
+        // Animate() is required for the ray casting below to work correctly
+        SS.sceneView.animate();
+        transformingState.initialPositionOnPlane =
+            SS.sceneView.determinePositionOnPlane(event, rotationPlane);
     }
 
     this.isMouseOverTransformerElement = function(scene, camera, event) {
@@ -376,6 +688,21 @@ SS.transformers.Manager = function() {
             }
             if (element.match(/scale.*/)) {
                 SS.transformerManager.initiateScale(event, geomNode);
+            }
+            if (element.match(/rotate.*/)) {
+                var axis = element.match("^rotate(X|Y|Z)$")[1];
+                SS.transformerManager.initiateRotate(event, geomNode, axis);
+                transformingState.elemnt = element;
+ 
+                for (var j = 0; (j < uiElements.length); ++j) {
+                    if ((foundTransformerUIElements[0].object === uiElements[j].sceneObject) || 
+                        (foundTransformerUIElements[0].object.parent && 
+                         (foundTransformerUIElements[0].object.parent === uiElements[j].sceneObject))) {
+                        
+                        transformingState.element = uiElements[j];
+                    }
+                }
+                    
             }
         }
         
