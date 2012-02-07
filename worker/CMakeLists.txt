@@ -20,6 +20,7 @@ include_directories("/usr/local/include")
 include_directories("/usr/local/inc")
 include_directories("/opt/local/include")
 include_directories("/opt/local/include/freetype2/")
+include_directories("/usr/include/freetype2/")
 
 set(ALL_CLASSES src/worker.cxx src/Builder.cxx src/Transform.cxx src/Util.cxx src/Tesselate.cxx src/base64.cpp)
 
