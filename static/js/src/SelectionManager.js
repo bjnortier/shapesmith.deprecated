@@ -14,51 +14,51 @@ function SelectionManager() {
         return selected.length;
     }
 
-    this.shiftPick = function(sha) {
+    this.shiftPick = function(id) {
 	var alreadySelected = false;
         for (var i in selected) {
-            if (selected[i] == sha) {
+            if (selected[i] == id) {
                 alreadySelected = true;
             } 
         }
 
         if (alreadySelected) {
-            this.deselectSHA(sha);
+            this.deselectID(id);
         } else  {
-            this.selectSHA(sha);
+            this.selectID(id);
         }
     }
     
-    this.pick = function(sha) {
-        this.selectOnly(sha);
+    this.pick = function(id) {
+        this.selectOnly(id);
     }
 
-    this.selectSHA = function(sha) {
-        selected.push(sha);
-        this.notify({selected : [sha]});
+    this.selectID = function(id) {
+        selected.push(id);
+        this.notify({selected : [id]});
     }
     
-    this.deselectSHA = function(sha) {
-        selected.splice(selected.indexOf(sha), 1);
-        this.notify({deselected : [sha]});
+    this.deselectID = function(id) {
+        selected.splice(selected.indexOf(id), 1);
+        this.notify({deselected : [id]});
     }
 
-    this.selectOnly = function(sha) {
+    this.selectOnly = function(id) {
         var deselected = [];
         var found = false;
         for (var i in selected) {
-            if (selected[i] == sha) {
+            if (selected[i] == id) {
                 found = true;
             } else {
                 deselected.push(selected[i]);
             }
         }
-        selected = [sha];
+        selected = [id];
         
 	if (deselected.length > 0) {
             this.notify({deselected : deselected});
 	}
-        this.notify({selected : [sha]});
+        this.notify({selected : [id]});
     }
     
     this.deselectAll = function() {

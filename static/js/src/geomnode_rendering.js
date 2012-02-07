@@ -327,64 +327,62 @@ var SS = SS || {};
         }
     }
 
-    SS.scaleGeomNodeRendering = function(geomNode, scalePoint, factor, snapshot) {
-        if (geomNode.sceneObjects) {
-            for (key in geomNode.sceneObjects) {
-                geomNode.sceneObjects[key].children.map(function(child) {
+    SS.scaleGeomNodeRendering = function(originalNode, editingNode, scalePoint, factor) {
+        for (key in editingNode.sceneObjects) {
+            for (var i = 0; i < editingNode.sceneObjects[key].children.length; ++i) {
 
-                    var geometry = child.geometry;
-                    var snapshotVertices = snapshot[key][child.id];
-                    geometry.vertices = snapshotVertices.map(function(vertex) {
-	                var position = vertex.position.clone();
-	                position.x = scalePoint.x + (position.x - scalePoint.x)*factor;
-	                position.y = scalePoint.y + (position.y - scalePoint.y)*factor;
-	                position.z = scalePoint.z + (position.z - scalePoint.z)*factor;
-	                return new THREE.Vertex(position);
-	            });
+                var originalGeometry = originalNode.originalSceneObjects[key].children[i].geometry;
+                var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
 
-                    geometry.computeCentroids();
-	            geometry.computeFaceNormals();
-                    geometry.__dirtyVertices = true;
-                });
+                editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
+	            var position = vertex.position.clone();
+	            position.x = scalePoint.x + (position.x - scalePoint.x)*factor;
+	            position.y = scalePoint.y + (position.y - scalePoint.y)*factor;
+	            position.z = scalePoint.z + (position.z - scalePoint.z)*factor;
+	            return new THREE.Vertex(position);
+	        });
+
+                editingGeometry.computeCentroids();
+	        editingGeometry.computeFaceNormals();
+                editingGeometry.__dirtyVertices = true;
             }
         }
     }
 
-    SS.rotateGeomNodeRendering = function(geomNode, center, u, v, w, angle, snapshot) {
-        if (geomNode.sceneObjects) {
-            var normUVW = new THREE.Vector3(u, v, w).normalize();
-            var un = normUVW.x, vn = normUVW.y, wn = normUVW.z;
+    SS.rotateGeomNodeRendering = function(originalNode, editingNode, center, u, v, w, angle) {
+        var normUVW = new THREE.Vector3(u, v, w).normalize();
+        var un = normUVW.x, vn = normUVW.y, wn = normUVW.z;
 
-            for (key in geomNode.sceneObjects) {
-                geomNode.sceneObjects[key].children.map(function(child) {
+        for (key in editingNode.sceneObjects) {
 
-                    var geometry = child.geometry;
-                    var snapshotVertices = snapshot[key][child.id];
+            for (var i = 0; i < editingNode.sceneObjects[key].children.length; ++i) {
+                
+                var originalGeometry = originalNode.originalSceneObjects[key].children[i].geometry;
+                var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
 
-	            geometry.vertices = snapshotVertices.map(function(vertex) {
-	                var position = vertex.position.clone();
-                        position.x = position.x - center.x;
-                        position.y = position.y - center.y;
-                        position.z = position.z - center.z;
-                        
-                        // http://blog.client9.com/2007/09/rotating-point-around-vector.html
-                        var a = (un*position.x + vn*position.y + wn*position.z);
-                        var x2 = a*un + (position.x - a*un)*Math.cos(angle/180*Math.PI) 
-                            + (vn*position.z - wn*position.y)*Math.sin(angle/180*Math.PI);
-                        var y2 = a*vn + (position.y - a*vn)*Math.cos(angle/180*Math.PI) 
-                            + (wn*position.x - un*position.z)*Math.sin(angle/180*Math.PI);
-                        var z2 = a*wn + (position.z - a*wn)*Math.cos(angle/180*Math.PI) 
-                            + (un*position.y - vn*position.x)*Math.sin(angle/180*Math.PI);
-                        
-	                var newPosition = new THREE.Vector3(center.x + x2, 
-                                                            center.y + y2, 
-                                                            center.z + z2);
-	                return new THREE.Vertex(newPosition);
-	            });
-                    geometry.computeCentroids();
-	            geometry.computeFaceNormals();
-                    geometry.__dirtyVertices = true;
-                });
+	        editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
+	            var position = vertex.position.clone();
+                    position.x = position.x - center.x;
+                    position.y = position.y - center.y;
+                    position.z = position.z - center.z;
+                    
+                    // http://blog.client9.com/2007/09/rotating-point-around-vector.html
+                    var a = (un*position.x + vn*position.y + wn*position.z);
+                    var x2 = a*un + (position.x - a*un)*Math.cos(angle/180*Math.PI) 
+                        + (vn*position.z - wn*position.y)*Math.sin(angle/180*Math.PI);
+                    var y2 = a*vn + (position.y - a*vn)*Math.cos(angle/180*Math.PI) 
+                        + (wn*position.x - un*position.z)*Math.sin(angle/180*Math.PI);
+                    var z2 = a*wn + (position.z - a*wn)*Math.cos(angle/180*Math.PI) 
+                        + (un*position.y - vn*position.x)*Math.sin(angle/180*Math.PI);
+                    
+	            var newPosition = new THREE.Vector3(center.x + x2, 
+                                                        center.y + y2, 
+                                                        center.z + z2);
+	            return new THREE.Vertex(newPosition);
+	        });
+                editingGeometry.computeCentroids();
+	        editingGeometry.computeFaceNormals();
+                editingGeometry.__dirtyVertices = true;
             }
         }
     }

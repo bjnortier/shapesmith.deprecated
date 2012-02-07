@@ -444,6 +444,7 @@ SS.transformers.Manager = function() {
         if (transformingState) {
 
             if (transformingState.transform.type === 'translate') {
+                
                 transformingState.transform.parameters.u = event.x - transformingState.from.x
                 transformingState.transform.parameters.v = event.y - transformingState.from.y
 
@@ -451,7 +452,8 @@ SS.transformers.Manager = function() {
                 transformerUI.position.y = transformingState.transform.parameters.v;
                 transformerUI.position.z = transformingState.transform.parameters.w;
                 
-                SS.moveGeomNodeRendering(transformingState.originalNode, transformerUI.position);
+                SS.moveGeomNodeRendering(transformingState.editingNode, transformerUI.position);
+
             } else if (transformingState.transform.type === 'scale') {
                 var dxFrom =  transformingState.from.x - transformingState.center.x;
                 var dyFrom =  transformingState.from.y - transformingState.center.y;
@@ -471,12 +473,12 @@ SS.transformers.Manager = function() {
                 scalePoint.z = 0;
 
                 SS.scaleGeomNodeRendering(transformingState.originalNode, 
+                                          transformingState.editingNode, 
                                           scalePoint, 
-                                          factor, 
-                                          transformingState.originalGeometrySnapshot);
+                                          factor);
 
                 transformingState.transform.parameters.factor = factor;
-                activateScale(transformingState.originalNode);
+                activateScale(transformingState.editingNode);
 
                 var textGeo = new THREE.TextGeometry('' + factor, {
 	            size: 2, height: 0.01, curveSegments: 6,
@@ -486,7 +488,7 @@ SS.transformers.Manager = function() {
                                           new THREE.MeshBasicMaterial({color: 0xffffff, 
                                                                        opacity: 0.8}));
 
-                var boundingBox = SS.boundingBoxForGeomNode(transformingState.originalNode);
+                var boundingBox = SS.boundingBoxForGeomNode(transformingState.editingNode);
                 var center = SS.transformers.centerOfGeom(boundingBox);
                 text.position.y = center.y - text.boundRadius/2;
                 text.position.x = boundingBox.max.x + 5;
@@ -534,12 +536,12 @@ SS.transformers.Manager = function() {
                 transformingState.transform.parameters.angle = angle;
 
                 SS.rotateGeomNodeRendering(transformingState.originalNode, 
-                                           transformingState.center, 
+                                           transformingState.editingNode, 
+                                           transformingState.center,
                                            transformingState.transform.parameters.u, 
                                            transformingState.transform.parameters.v, 
                                            transformingState.transform.parameters.w, 
-                                           angle, 
-                                           transformingState.originalGeometrySnapshot);
+                                           angle);
 
                 transformingState.element.drawAngle(angle, transformingState.transform.parameters);
 
@@ -567,7 +569,7 @@ SS.transformers.Manager = function() {
 
             if (doTranslate || doScale || doRotate) {
                 var cmd = update_geom_command(transformingState.originalNode, 
-                                              transformingState.originalNode, 
+                                              transformingState.editingNode, 
                                               transformingState.editingNode);
                 command_stack.execute(cmd);
             } else {
@@ -582,10 +584,20 @@ SS.transformers.Manager = function() {
 
     this.selectionUpdated = function(event) {
         if (event.deselected) {
-            deactivate();
+            if (event.deselected.length === 1) {
+                var node =  geom_doc.findById(event.deselected[0]);
+                if (!transformingState || (node !== transformingState.originalNode)) {
+                    deactivate();
+                }
+            } else {
+                deactivate();
+            }
         } else if (event.selected) {
             if (selectionManager.size() === 1) {
-                activate(geom_doc.findById(selectionManager.getSelected()[0]));
+                var node = geom_doc.findById(selectionManager.getSelected()[0]);
+                if (!transformingState || (node !== transformingState.editingNode)) {
+                    activate(node);
+                }
             } else {
                 deactivate();
             }
@@ -600,17 +612,23 @@ SS.transformers.Manager = function() {
         var transform = new Transform({
             type: type,
             editing: true,
-	    origin: {x: center.x, y: center.y, z: 0},
+	    origin: {x: parseFloat((center.x).toFixed(3)), 
+                     y: parseFloat((center.y).toFixed(3)), 
+                     z: 0},
             parameters: parameters
         });
-
         editingNode.transforms.push(transform);
+
         transformingState = {from: {x: lastWorkplanePosition.x, y: lastWorkplanePosition.y},
                              center: center,
                              originalNode: geomNode,
-                             originalGeometrySnapshot: SS.snapshotGeometry(geomNode),
                              editingNode:  editingNode,
                              transform: transform};
+
+        selectionManager.deselectID(geomNode.id);
+        geomNode.originalSceneObjects = geomNode.sceneObjects;
+        geom_doc.replace(geomNode, editingNode);
+        selectionManager.selectID(editingNode.id);
     }
 
     this.initiateTranslate = function(event, geomNode) {
@@ -641,7 +659,7 @@ SS.transformers.Manager = function() {
 
         rotationPlane = new THREE.Mesh(
             new THREE.PlaneGeometry(1000, 1000),
-            new THREE.MeshBasicMaterial({ color: 0x333366, opacity: 0.1, transparent: true }));
+            new THREE.MeshBasicMaterial({ color: 0x333366, opacity: 0.0, transparent: true }));
         rotationPlane.position = center;
         if (parameters.u > 0) {
             rotationPlane.rotation.y = Math.PI/2;
@@ -653,9 +671,9 @@ SS.transformers.Manager = function() {
         transformerUI.add(rotationPlane);
 
         initiateTransform(event, geomNode, 'rotate', parameters);
-        transformingState.transform.origin.x = center.x;
-        transformingState.transform.origin.y = center.y;
-        transformingState.transform.origin.z = center.z;
+        transformingState.transform.origin.x = parseFloat((center.x).toFixed(3));
+        transformingState.transform.origin.y = parseFloat((center.y).toFixed(3));
+        transformingState.transform.origin.z = parseFloat((center.z).toFixed(3));
         
         // Animate() is required for the ray casting below to work correctly
         SS.sceneView.animate();
@@ -692,7 +710,6 @@ SS.transformers.Manager = function() {
             if (element.match(/rotate.*/)) {
                 var axis = element.match("^rotate(X|Y|Z)$")[1];
                 SS.transformerManager.initiateRotate(event, geomNode, axis);
-                transformingState.elemnt = element;
  
                 for (var j = 0; (j < uiElements.length); ++j) {
                     if ((foundTransformerUIElements[0].object === uiElements[j].sceneObject) || 

@@ -97,7 +97,7 @@ SS.constructors.Translate = function() {
 
         if (r > 0) {
 
-            var geometries = SS.renderGeometry(geomNode);
+            var geometries = SS.createGeometry(geomNode);
 	    var translatedMeshObj = new THREE.Object3D();
             SS.constructors.addGeometries(translatedMeshObj, geometries);
 
