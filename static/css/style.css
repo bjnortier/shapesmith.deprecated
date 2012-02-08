@@ -418,7 +418,7 @@ div#export-options {
     color: black;
 }
 
-.show-hide-siblings {
+.show-hide-siblings, .show-hide-contents {
     padding-right: 3px;
 }
 

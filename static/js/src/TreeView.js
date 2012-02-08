@@ -60,7 +60,7 @@ function renderTransform(geomNode, transformIndex) {
     var paramsTable = $.mustache(parametersTemplate, {paramsArr : paramsArr});
 
 
-    var template = '<table><tr><td>{{type}}{{^editing}}<img class="{{delete-class}}" src="/static/images/delete_button.png" alt="delete"/>{{/editing}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>       {{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input id="modal-ok" type="submit" value="Ok"/><input id="modal-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}</table>';
+    var template = '<table><tr><td><img class="show-hide-contents" src="/static/images/arrow_hidden.png"></img>{{type}}{{^editing}}<img class="{{delete-class}}" src="/static/images/delete_button.png" alt="delete"/>{{/editing}}</td></tr><tr style="display:none;"><td>{{{originTable}}}</td></tr><tr style="display: none;"><td>       {{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input id="modal-ok" type="submit" value="Ok"/><input id="modal-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}</table>';
 
     var view = {
         type: transform.type,
@@ -264,7 +264,7 @@ function TreeView() {
         if (!(geomNode.editing || anyTransformsEditing)) {
             hideNode($('#' + geomNode.id + ' .show-hide-siblings'));
         }
-
+        
         $("#geom-model-doc tr:nth-child(even)").addClass("even");
         $("#geom-model-doc tr:nth-child(odd)").addClass("odd");
 
@@ -351,10 +351,31 @@ function TreeView() {
         });
 
         // Show/Hide
+        $('.show-hide-contents').click(function() {
+            var tbody = $(this).parent().parent().parent();
+            if ($(this).hasClass('contents-showing')) {
+                $(this).attr('src', '/static/images/arrow_hidden.png');
+                $(this).removeClass('contents-showing');
+                for (var i = 1; i < tbody.children().length; ++i) {
+                    $(tbody.children()[i]).hide();
+                }
+            } else {
+                $(this).attr('src', '/static/images/arrow_showing.png');
+                $(this).addClass('contents-showing');
+                for (var i = 1; i < tbody.children().length; ++i) {
+                    $(tbody.children()[i]).show();
+                }
+            }
+            return false;
+        });
+
+        // Show/Hide
         $('#' + geomNode.id + ' .show-hide-siblings').click(function() {
             toggleShowHide(this);
             return false;
         });
+
+
         
     }
 
