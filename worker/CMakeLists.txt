@@ -43,5 +43,7 @@ set(ALL_LIBS -L/opt/local/lib -ljson_spirit -lpthread -lfreetype -lPTKernel -lTK
 target_link_libraries(worker ${ALL_LIBS})
 target_link_libraries(run-tests ${ALL_LIBS})
 
+file(COPY "${PROJECT_SOURCE_DIR}/fonts" DESTINATION "${PROJECT_BINARY_DIR}")
+
 
 
