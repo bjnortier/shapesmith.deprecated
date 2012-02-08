@@ -60,11 +60,12 @@ function renderTransform(geomNode, transformIndex) {
     var paramsTable = $.mustache(parametersTemplate, {paramsArr : paramsArr});
 
 
-    var template = '<table><tr><td><img class="show-hide-contents" src="/static/images/arrow_hidden.png"></img>{{type}}{{^editing}}<img class="{{delete-class}}" src="/static/images/delete_button.png" alt="delete"/>{{/editing}}</td></tr><tr style="display:none;"><td>{{{originTable}}}</td></tr><tr style="display: none;"><td>       {{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input id="modal-ok" type="submit" value="Ok"/><input id="modal-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}</table>';
+    var template = '<table><tr><td><img class="show-hide-contents" src="/static/images/arrow_hidden.png"></img>{{type}}{{^editing}}<img class="{{delete-class}}" src="/static/images/delete_button.png" alt="delete"/>{{/editing}}</td></tr><tr style="{{contentsStyle}}"><td>{{{originTable}}}</td></tr><tr style="display: none;{{contentsStyle}}"><td>       {{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input id="modal-ok" type="submit" value="Ok"/><input id="modal-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}</table>';
 
     var view = {
         type: transform.type,
 	editing: transform.editing,
+        contentsStyle: (transform.editing ? '' : 'display:none;'),
         'delete-class': 'delete-transform target-' + geomNode.id + '-' + transformIndex,
 	originTable: originTable,
 	paramsTable: paramsTable};
