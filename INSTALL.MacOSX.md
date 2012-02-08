@@ -13,4 +13,8 @@
 
  * Install it from source as described in INSTALL.MacOSXErlangFromSource.md
 
+## Or install Erlang and the other dependencies using the [homebrew](http://mxcl.github.com/homebrew/) package manager
+
+ * Install homebrew from http://mxcl.github.com/homebrew/
+ * `brew install erlang cmake ftgl json_spirit gtest`
 
