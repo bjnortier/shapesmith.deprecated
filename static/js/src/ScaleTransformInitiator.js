@@ -5,19 +5,68 @@ SS.ScaleTransformInitiator = Backbone.Model.extend({
     initialize: function() { 
         this.boundingBox = SS.boundingBoxForGeomNode(this.attributes.geomNode);
         this.position = new THREE.Vector3(0,0,0);
-        new SS.ScaleTransformInitiatorViewMaxXMaxY({model: this}).render();
-        new SS.ScaleTransformInitiatorViewMaxXMinY({model: this}).render();
-        new SS.ScaleTransformInitiatorViewMinXMinY({model: this}).render();
-        new SS.ScaleTransformInitiatorViewMinXMaxY({model: this}).render();
+        var views = [
+	    new SS.ScaleTransformInitiatorViewMaxXMaxY({model: this}).render(),
+            new SS.ScaleTransformInitiatorViewMaxXMinY({model: this}).render(),
+            new SS.ScaleTransformInitiatorViewMinXMinY({model: this}).render(),
+            new SS.ScaleTransformInitiatorViewMinXMaxY({model: this}).render(),
+	];
     },
+
+    initiate: function() {
+	var geomNode = this.attributes.geomNode;
+	var boundingBox = SS.boundingBoxForGeomNode(geomNode);
+        var center = SS.transformers.centerOfGeom(boundingBox);
+        
+        var editingNode = geomNode.editableCopy();
+        var transform = new Transform({
+            type: type,
+            editing: true,
+	    origin: {x: parseFloat((center.x).toFixed(3)), 
+                     y: parseFloat((center.y).toFixed(3)), 
+                     z: 0},
+            parameters: parameters
+        });
+        editingNode.transforms.push(transform);
+
+        selectionManager.deselectID(geomNode.id);
+        geom_doc.replace(geomNode, editingNode);
+        selectionManager.selectID(editingNode.id);
+    }
 
 });
 
-SS.ScaleTransformInitiatorView = Backbone.View.extend({
+SS.SceneObjectView = Backbone.View.extend({
     
     initialize: function() {
         this.sceneObject = new THREE.Object3D(); 
-        this.model.bind('change', this.render, this);
+	SS.sceneView.registerSceneObjectView(this);
+    },
+
+    remove: function() {
+	SS.sceneView.deregisterSceneObjectView(this);
+    }
+
+});
+
+SS.recursiveHighlightFn =  function(object, opacity) {
+    var functor = function(object) {
+	if (object.material) {
+	    object.material.opacity = opacity;
+	}
+	if (object.children) {
+	    object.children.map(functor);
+	}
+    }
+    functor(object);
+};
+
+SS.ScaleTransformInitiatorView = SS.SceneObjectView.extend({
+    
+    initialize: function() {
+	SS.SceneObjectView.prototype.initialize.call(this);
+	this.on('mouseEnter', this.highlight);
+	this.on('mouseLeave', this.unhighlight);
     },
 
     render: function() {
@@ -61,7 +110,16 @@ SS.ScaleTransformInitiatorView = Backbone.View.extend({
 
         SS.sceneView.scene.add(this.sceneObject);
         return this;
+    },
+
+    highlight: function() {
+	SS.recursiveHighlightFn(this.sceneObject, 1.0);
+    },
+
+    unhighlight: function() {
+	SS.recursiveHighlightFn(this.sceneObject, 0.5);
     }
+    
 });
 
 SS.ScaleTransformInitiatorViewMaxXMaxY = SS.ScaleTransformInitiatorView.extend({

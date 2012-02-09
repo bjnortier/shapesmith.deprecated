@@ -83,6 +83,8 @@ SS.SceneView = function(container) {
     function onMouseDown(event) {
 	event.preventDefault();
 
+	that.triggerMouseDownOnSceneObjectViews(event);
+
 	popupMenu.onMouseDown(event);
 
 	mouseOnDown = {};
@@ -119,6 +121,8 @@ SS.SceneView = function(container) {
     }
     
     function onMouseMove(event) {
+
+	that.triggerMouseOverSceneObjectViews(event);
 
         var mouse = {};
 	mouse.x = event.clientX;
@@ -450,8 +454,66 @@ SS.SceneView = function(container) {
         }
     }
 
- 
-    
+    var sceneObjectViews = [];
+    var mouseOverSceneObjectViews = [];
+    this.registerSceneObjectView = function(sceneObjectView) {
+	sceneObjectViews.push(sceneObjectView);
+    }
+
+    this.deregisterSceneObjectView = function(sceneObjectView) {
+	sceneObjectViews.splice(sceneObjectViews.indexOf(sceneObjectView), 1);
+	mouseOverSceneObjectViews.splice(sceneObjectViews.indexOf(sceneObjectView), 1);
+    }
+
+    var findSceneObjectViewsForEvent = function(event) {
+	
+	var found = SS.selectInScene(scene, camera, event);
+	var objects = _.pluck(found, 'object');
+	// Select the hightest-level THREE.Object3D objects in the scene
+	var getRoot = function(object) {
+	    return object.parent.constructor === THREE.Scene ? 
+		object : 
+		getRoot(object.parent);
+	}
+
+	var foundSceneObjectViews = [];
+	objects.map(getRoot).map(function(object) {
+	    sceneObjectViews.map(function(sceneObjectView) {
+		if (getRoot(object) === sceneObjectView.sceneObject) {
+		    foundSceneObjectViews.push(sceneObjectView);
+		}
+	    });
+	});
+	return foundSceneObjectViews;
+	    
+    }
+
+    this.triggerMouseOverSceneObjectViews = function(event) {
+	
+	var potentialLeaveObjects = mouseOverSceneObjectViews.map(function(x) { return x; });
+	console.log('potentialLeaveObjects' + JSON.stringify(potentialLeaveObjects.length));
+	findSceneObjectViewsForEvent(event).map(function(sceneObjectView) {
+	    // If the mouse was already over the object, do nothing
+	    // If it's new, trigger and event.
+	    if (mouseOverSceneObjectViews.indexOf(sceneObjectView) === -1) {
+		sceneObjectView.trigger('mouseEnter');
+		mouseOverSceneObjectViews.push(sceneObjectView);
+	    }
+	    potentialLeaveObjects.splice(
+		potentialLeaveObjects.indexOf(sceneObjectView), 1);
+	});
+	console.log('potentialLeaveObjects' + JSON.stringify(potentialLeaveObjects.length));
+
+	potentialLeaveObjects.map(function(sceneObjectView) {
+	    sceneObjectView.trigger('mouseLeave');
+	});
+
+    }
+
+    this.triggerMouseDownOnSceneObjectViews = function(event) {
+	
+    }
+
     init();
     this.animate = animate;
     this.renderer = renderer;
