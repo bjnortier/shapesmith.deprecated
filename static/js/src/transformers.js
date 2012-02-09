@@ -292,6 +292,8 @@ SS.transformers.Manager = function() {
     }
 
     var activateScale = function(geomNode) {
+        new SS.ScaleTransformInitiator({geomNode: geomNode});
+
         uiElements = [];
         SS.sceneView.scene.remove(transformerUI);
 
@@ -303,19 +305,7 @@ SS.transformers.Manager = function() {
         uiElements.push(translateElement);
         transformerUI.add(translateElement.sceneObject);
 
-        var scaleElementSpec = {'scale1' : {x: boundingBox.max.x + 1,
-                                           y: boundingBox.max.y + 1,
-                                           zRotation: 1/4*Math.PI},
-                                'scale2' : {x: boundingBox.min.x - 1,
-                                           y: boundingBox.max.y + 1,
-                                           zRotation: 3/4*Math.PI},
-                                'scale3' : {x: boundingBox.min.x - 1,
-                                           y: boundingBox.min.y - 1,
-                                           zRotation: 5/4*Math.PI},
-                                'scale4' : {x: boundingBox.max.x + 1,
-                                           y: boundingBox.min.y - 1,
-                                           zRotation: 7/4*Math.PI}};
-                                
+        var scaleElementSpec = {};
         for (name in scaleElementSpec) {
             var element = new SS.transformers.ScaleElement(geomNode, name);
             uiElements.push(element);

@@ -12,6 +12,8 @@
     <script type="text/javascript" src="/static/js/lib/RequestAnimationFrame.js"></script>
     <script type="text/javascript" src="/static/js/lib/Detector.js"></script>
     <script type="text/javascript" src="/static/js/lib/Three.js"></script>
+    <script type="text/javascript" src="/static/js/lib/underscore-min.js"></script>
+    <script type="text/javascript" src="/static/js/lib/backbone-min.js"></script>
 
     <script type="text/javascript" src="/static/js/lib/fonts/helvetiker_bold.typeface.js"></script>
     <script type="text/javascript" src="/static/js/lib/fonts/helvetiker_regular.typeface.js"></script>
@@ -120,6 +122,8 @@
   <script type="text/javascript" src="/static/js/src/popupmenu.js"></script>
   <script type="text/javascript" src="/static/js/src/SceneSelector.js"></script>
   <script type="text/javascript" src="/static/js/src/SceneView.js"></script>
+  <script type="text/javascript" src="/static/js/src/ScaleTransformInitiator.js"></script>
+
 
   <script type="text/javascript">
 
