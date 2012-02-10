@@ -42,7 +42,7 @@ function renderTransform(geomNode, transformIndex) {
                     inputElement: renderInputElement(key, schema.properties.origin)
                    }
 	});
-	var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}{{{inputElement}}}{{/editing}}</td></tr>{{/originArr}}</table>';
+	var originTemplate = '<table>{{#originArr}}<tr><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}</td></tr>{{/originArr}}</table>';
 	var originTable = $.mustache(originTemplate, {originArr : originArr});
     }
 
@@ -56,11 +56,11 @@ function renderTransform(geomNode, transformIndex) {
                         inputElement: renderInputElement(key, schema.properties.parameters)
                        });
     }
-    var parametersTemplate = '<table>{{#paramsArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}{{{inputElement}}}{{/editing}}</td></tr>{{/paramsArr}}</table>';
+    var parametersTemplate = '<table>{{#paramsArr}}<tr ><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}</td></tr>{{/paramsArr}}</table>';
     var paramsTable = $.mustache(parametersTemplate, {paramsArr : paramsArr});
 
 
-    var template = '<table><tr><td><img class="show-hide-contents" src="/static/images/arrow_hidden.png"></img>{{type}}{{^editing}}<img class="{{delete-class}}" src="/static/images/delete_button.png" alt="delete"/>{{/editing}}</td></tr><tr style="{{contentsStyle}}"><td>{{{originTable}}}</td></tr><tr style="{{contentsStyle}}"><td>       {{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input id="modal-ok" type="submit" value="Ok"/><input id="modal-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}</table>';
+    var template = '<table><tr><td><img class="show-hide-contents" src="/static/images/arrow_hidden.png"></img>{{type}}{{^editing}}<img class="{{delete-class}}" src="/static/images/delete_button.png" alt="delete"/>{{/editing}}</td></tr><tr style="{{contentsStyle}}"><td>{{{originTable}}}</td></tr><tr style="{{contentsStyle}}"><td>       {{{paramsTable}}}</td></tr></table>';
 
     var view = {
         type: transform.type,

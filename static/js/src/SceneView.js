@@ -145,7 +145,7 @@ SS.SceneView = function(container) {
 			                      ||
 			                      (Math.abs(event.clientY - mouseOnDown.y) > panRotateThreshold));
                 
-		if (!state && (event.button === 0 && !event.shiftKey) && overPanRotateThreshold) {
+		if (!state && (event.button === 0 && event.shiftKey) && overPanRotateThreshold) {
                     state = 'rotating';
 		} 
 		if (!state && (event.button === 1 || event.shiftKey) && overPanRotateThreshold)  {
@@ -295,6 +295,8 @@ SS.SceneView = function(container) {
     }
 
     function onMouseUp(event) {
+
+        that.triggerMouseUpOnSceneObjectViews(event);
 
 	targetOnDown.azimuth = target.azimuth;
 	targetOnDown.elevation = target.elevation;
@@ -456,6 +458,8 @@ SS.SceneView = function(container) {
 
     var sceneObjectViews = [];
     var mouseOverSceneObjectViews = [];
+    var mouseDownSceneObjectViews = [];
+
     this.registerSceneObjectView = function(sceneObjectView) {
 	sceneObjectViews.push(sceneObjectView);
     }
@@ -489,29 +493,38 @@ SS.SceneView = function(container) {
     }
 
     this.triggerMouseOverSceneObjectViews = function(event) {
-	
-	var potentialLeaveObjects = mouseOverSceneObjectViews.map(function(x) { return x; });
-	console.log('potentialLeaveObjects' + JSON.stringify(potentialLeaveObjects.length));
+	var previousOverObjects = mouseOverSceneObjectViews.map(function(x) { return x; });
+        var leaveObjects = mouseOverSceneObjectViews.map(function(x) { return x; });
+        mouseOverSceneObjectViews = [];
 	findSceneObjectViewsForEvent(event).map(function(sceneObjectView) {
-	    // If the mouse was already over the object, do nothing
-	    // If it's new, trigger and event.
-	    if (mouseOverSceneObjectViews.indexOf(sceneObjectView) === -1) {
-		sceneObjectView.trigger('mouseEnter');
-		mouseOverSceneObjectViews.push(sceneObjectView);
+            if (previousOverObjects.indexOf(sceneObjectView) === -1) {
+		sceneObjectView.trigger('mouseEnter', event);
 	    }
-	    potentialLeaveObjects.splice(
-		potentialLeaveObjects.indexOf(sceneObjectView), 1);
+	    mouseOverSceneObjectViews.push(sceneObjectView);
+	    leaveObjects.splice(leaveObjects.indexOf(sceneObjectView), 1);
 	});
-	console.log('potentialLeaveObjects' + JSON.stringify(potentialLeaveObjects.length));
+	leaveObjects.map(function(sceneObjectView) {
+	    sceneObjectView.trigger('mouseLeave', event);
+	});
 
-	potentialLeaveObjects.map(function(sceneObjectView) {
-	    sceneObjectView.trigger('mouseLeave');
+        mouseDownSceneObjectViews.map(function(sceneObjectView) {
+            sceneObjectView.trigger('mouseDrag', event);
 	});
 
     }
 
     this.triggerMouseDownOnSceneObjectViews = function(event) {
-	
+        mouseDownSceneObjectViews = findSceneObjectViewsForEvent(event);
+        mouseDownSceneObjectViews.map(function(sceneObjectView) {
+            sceneObjectView.trigger('mouseDown', event);
+        });
+    }
+
+    this.triggerMouseUpOnSceneObjectViews = function(event) {
+        findSceneObjectViewsForEvent(event).map(function(sceneObjectView) {
+            sceneObjectView.trigger('mouseUp', event);
+        });
+        mouseDownSceneObjectViews = [];
     }
 
     init();
@@ -523,6 +536,7 @@ SS.SceneView = function(container) {
     this.cursoid = cursoid;
     this.determinePositionOnRay = determinePositionOnRay;
     this.determinePositionOnPlane = determinePositionOnPlane;
+    this.determinePositionOnWorkplane = determinePositionOnWorkplane;
     this.popupMenu = popupMenu;
     this.onMouseUp = onMouseUp;
 

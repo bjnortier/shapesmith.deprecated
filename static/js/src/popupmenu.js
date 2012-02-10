@@ -64,11 +64,11 @@ SS.popupMenu = function() {
 	if (event.button == 2) {
 	    showIfNotCancelled(event);
 	} else {
-	    setTimeout(function() {
+	    /*setTimeout(function() {
 		if (holding && (reference == referenceCounter)) {
 		    showIfNotCancelled(event);
 		}
-	    }, holdDelayTime);
+	    }, holdDelayTime);*/
 	}
 	
     }

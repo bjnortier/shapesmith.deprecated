@@ -40,64 +40,6 @@ SS.transformers.TranslateElement = function(geomNode) {
     this.cursor = 'move';
 }
 
-SS.transformers.ScaleElement = function(geomNode, elementName) {
-    
-    var boundingBox = SS.boundingBoxForGeomNode(geomNode);
-
-    var arrowGeometry = new THREE.Geometry();
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(2, -1.5, 0)));
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(2, -0.5, 0)));
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(3, -0.5, 0)));
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(3, -1.5, 0)));
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(5, 0, 0)));
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(3, 1.5, 0)));
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(3, 0.5, 0)));
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(2, 0.5, 0)));
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(2, 1.5, 0)));
-    arrowGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-    
-    arrowGeometry.faces.push(new THREE.Face4(2,3,7,8));
-    arrowGeometry.faces.push(new THREE.Face3(0,1,9));
-    arrowGeometry.faces.push(new THREE.Face3(4,5,6));
-    arrowGeometry.computeCentroids();
-    arrowGeometry.computeFaceNormals();
-
-    var arrowMesh = new THREE.Mesh(arrowGeometry, 
-                                   new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, 
-                                                                transparent: true, 
-                                                                opacity: 0.5}));
-    arrowMesh.name = {transformerElement: elementName};
-    
-    var lineGeom = new THREE.Geometry();
-    lineGeom.vertices = arrowGeometry.vertices;
-    var line = new THREE.Line(lineGeom, 
-                              new THREE.LineBasicMaterial({color: SS.constructors.lineColor, 
-                                                           wireframe : true, 
-                                                           linewidth: 2.0, 
-                                                           transparent: true, 
-                                                           opacity: 0.5 }));
-    line.name = {transformerElement: elementName};
-    
-    this.sceneObject = new THREE.Object3D();
-    this.sceneObject.add(arrowMesh);
-    this.sceneObject.add(line);
-    
-    this.highlight = function() {
-        this.sceneObject.children.map(function(child) {
-            child.material.opacity = 1.0;
-        });
-    }
-
-    this.unHighlight = function() {
-        this.sceneObject.children.map(function(child) {
-            child.material.opacity = 0.5;
-        });
-    }
-
-    this.cursor = 'move';
-}
-
 SS.transformers.RotateElement = function(geomNode, elementName) {
     
     var boundingBox = SS.boundingBoxForGeomNode(geomNode);
@@ -269,6 +211,8 @@ SS.transformers.Manager = function() {
     var cube;
     var uiElements = [];
 
+    var initiators = [];
+
     var addBoundingBox = function(geomNode) {
         if (cube) {
             transformerUI.remove(cube);
@@ -292,30 +236,19 @@ SS.transformers.Manager = function() {
     }
 
     var activateScale = function(geomNode) {
-        new SS.ScaleTransformInitiator({geomNode: geomNode});
+        initiators.push(new SS.ScaleTransformInitiatorModel({geomNode: geomNode}));
 
-        uiElements = [];
-        SS.sceneView.scene.remove(transformerUI);
-
-        transformerUI = new THREE.Object3D();
+        /*transformerUI = new THREE.Object3D();
         addBoundingBox(geomNode);
         var boundingBox = SS.boundingBoxForGeomNode(geomNode);
 
         var translateElement = new SS.transformers.TranslateElement(geomNode);
         uiElements.push(translateElement);
-        transformerUI.add(translateElement.sceneObject);
+        transformerUI.add(translateElement.sceneObject);*/
 
-        var scaleElementSpec = {};
-        for (name in scaleElementSpec) {
-            var element = new SS.transformers.ScaleElement(geomNode, name);
-            uiElements.push(element);
-            element.sceneObject.position.x = scaleElementSpec[name].x;
-            element.sceneObject.position.y = scaleElementSpec[name].y;
-            element.sceneObject.rotation.z = scaleElementSpec[name].zRotation;
-            transformerUI.add(element.sceneObject);
-        }
+        //var element = new SS.transformers.ScaleElement(geomNode, name);
 
-        SS.sceneView.scene.add(transformerUI);
+        //SS.sceneView.scene.add(transformerUI);
     }
 
     var activateRotate = function(geomNode) {
@@ -401,6 +334,10 @@ SS.transformers.Manager = function() {
         uiElements = [];
         SS.sceneView.scene.remove(transformerUI);
         uiState = UISTATE.DEACTIVATED;
+        initiators.map(function(initiator) {
+            initiator.destroy();
+        });
+        initiators = [];
     }
 
     var highlightElement = function(event) {
@@ -445,7 +382,7 @@ SS.transformers.Manager = function() {
                 SS.moveGeomNodeRendering(transformingState.editingNode, transformerUI.position);
 
             } else if (transformingState.transform.type === 'scale') {
-                var dxFrom =  transformingState.from.x - transformingState.center.x;
+                /*var dxFrom =  transformingState.from.x - transformingState.center.x;
                 var dyFrom =  transformingState.from.y - transformingState.center.y;
                 var r1 = Math.sqrt(dxFrom*dxFrom + dyFrom*dyFrom);
 
@@ -484,7 +421,7 @@ SS.transformers.Manager = function() {
                 text.position.x = boundingBox.max.x + 5;
                 text.rotation.z = Math.PI/2; 
 
-                transformerUI.add(text);
+                transformerUI.add(text);*/
 
             } else if (transformingState.transform.type === 'rotate') {
                 
@@ -546,7 +483,7 @@ SS.transformers.Manager = function() {
     });
 
     SS.sceneView.workplane.on('workplaneClicked', function(event) {
-        if (transformingState) {
+        /*if (transformingState) {
             var doTranslate = 
                 ((transformingState.transform.type === 'translate') &&
                  ((transformingState.transform.parameters.u !== 0) ||
@@ -568,34 +505,30 @@ SS.transformers.Manager = function() {
             }
             transformingState = undefined;
             SS.sceneView.scene.remove(transformerUI);
-        }
+        }*/
         
     });
 
     this.selectionUpdated = function(event) {
-        if (event.deselected) {
-            if (event.deselected.length === 1) {
-                var node =  geom_doc.findById(event.deselected[0]);
-                if (!transformingState || (node !== transformingState.originalNode)) {
-                    deactivate();
-                }
-            } else {
-                deactivate();
-            }
+
+        if (event.selected && event.deselected) {
+            // do nothing
+        } else if (event.deselected) {
+            deactivate();
         } else if (event.selected) {
             if (selectionManager.size() === 1) {
-                var node = geom_doc.findById(selectionManager.getSelected()[0]);
-                if (!transformingState || (node !== transformingState.editingNode)) {
+                node = geom_doc.findById(selectionManager.getSelected()[0]);
+                var editingTransform = _.pluck(node.transforms, "editing").indexOf(true) >= 0;
+                var editing = node.editing || editingTransform;
+                if (!editing) {
                     activate(node);
                 }
-            } else {
-                deactivate();
             }
         }
     }
 
     var initiateTransform = function(event, geomNode, type, parameters) {
-        var boundingBox = SS.boundingBoxForGeomNode(geomNode);
+       /* var boundingBox = SS.boundingBoxForGeomNode(geomNode);
         var center = SS.transformers.centerOfGeom(boundingBox);
         
         var editingNode = geomNode.editableCopy();
@@ -618,7 +551,7 @@ SS.transformers.Manager = function() {
         selectionManager.deselectID(geomNode.id);
         geomNode.originalSceneObjects = geomNode.sceneObjects;
         geom_doc.replace(geomNode, editingNode);
-        selectionManager.selectID(editingNode.id);
+        selectionManager.selectID(editingNode.id);*/
     }
 
     this.initiateTranslate = function(event, geomNode) {

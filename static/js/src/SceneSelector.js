@@ -13,7 +13,5 @@ SS.selectInScene = function(scene, camera, event) {
     ray.direction = mouse3D.subSelf(camera.position).normalize();
     var intersects = ray.intersectScene(scene);
 
-    return intersects.filter(function(x) {
-        return x.object.name;
-    });
+    return intersects;
 }

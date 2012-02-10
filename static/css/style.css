@@ -57,7 +57,6 @@ body {
     text-align: center;
 }
 
-
 #messages-container li {
     border-left: solid thin #777777;
     border-right: solid thin #777777;
@@ -120,6 +119,14 @@ body {
     display: inline;
     background: no-repeat url("/static/images/delete_button_red.png");
 
+}
+
+#editing-area {
+    width:200px;
+    margin: 0 auto;
+    position: absolute;
+    bottom: 10px;
+    left: 40%;
 }
 
 
