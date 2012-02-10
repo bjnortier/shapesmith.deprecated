@@ -17,9 +17,16 @@ SS.ScaleTransformerModel = Backbone.Model.extend({
             arrowView.render();
         });
 
-        new SS.ScaleGeomNodeView({model: this});
-        new SS.ScaleFactorView({model: this});
-        new SS.ScaleDOMView({model: this, el: $('#editing-area')});
+        geom_doc.addListener(function(event) {
+            that.geomDocUpdated(event);
+        });
+
+        var newViews = [
+            new SS.ScaleGeomNodeView({model: this}),
+            new SS.ScaleFactorView({model: this}),
+            new SS.ScaleDOMView({model: this}),
+        ];
+        this.views = newViews.concat(this.attributes.arrowViews);
     },
 
     mouseDown: function(arrowView, event) {
@@ -75,7 +82,32 @@ SS.ScaleTransformerModel = Backbone.Model.extend({
         this.trigger('change');
     },
 
+    tryCommit: function() {
+        var cmd =  update_geom_command(this.attributes.originalNode, 
+                                       this.attributes.editingNode, 
+                                       this.attributes.editingNode); 
+        command_stack.execute(cmd);
+        console.log('Try Commit');
+    },
 
+    cancel: function() {
+        geom_doc.replace(this.attributes.editingNode, 
+                         this.attributes.originalNode);
+    },
+
+    destroy: function() {
+        this.views.map(function(view) {
+            view.remove();
+        });
+        geom_doc.removeListener(this.geomDocUpdated);
+    },
+    
+    geomDocUpdated: function(event) {
+        if (event.replace && (event.replace.original === this.attributes.editingNode)) {
+            this.destroy();
+        }
+    }
+        
 });
 
 SS.ScaleGeomNodeView = Backbone.View.extend({
@@ -102,13 +134,9 @@ SS.ScaleGeomNodeView = Backbone.View.extend({
 
 SS.ScaleDOMView = Backbone.View.extend({
 
-    classname: "edit-scale",
-
-    tagName: "div",
-
     initialize: function() {
         this.render();
-        this.model.on("change", this.update, this);
+        this.model.on('change', this.update, this);
     },
 
     render: function() {
@@ -152,14 +180,16 @@ SS.ScaleDOMView = Backbone.View.extend({
         var transformTable = $.mustache(template, view);
 
         this.$el.html(transformTable);
+        $('#editing-area').append(this.$el);
         return this;
     },
 
     events: {
-        "click .ok" : "ok",
-        "change input": "fieldChanged",
-        "keyup input": "fieldChanged",
-        "click input": "fieldChanged",
+        'click .ok' : 'ok',
+        'click .cancel' : 'cancel',
+        'change .field': 'fieldChanged',
+        'keyup .field': 'fieldChanged',
+        'click .field': 'fieldChanged',
     },
 
     preventUpdate: false,
@@ -182,7 +212,11 @@ SS.ScaleDOMView = Backbone.View.extend({
     },
 
     ok: function() {
-        console.log('OK');
+        this.model.tryCommit();
+    },
+
+    cancel: function() {
+        this.model.cancel();
     },
 
     fieldChanged: function() {
@@ -197,7 +231,7 @@ SS.ScaleFactorView = SS.SceneObjectView.extend({
     
     initialize: function() {
 	SS.SceneObjectView.prototype.initialize.call(this);
-        this.model.on("change", this.render, this);
+        this.model.on('change', this.render, this);
     },
 
     render: function() {

@@ -2,7 +2,7 @@ function renderInputElement(key, jsonSchema) {
     
     var item = jsonSchema.properties[key];
     if ((item.type === 'number') || (item.type === 'integer')) {
-        var element = '<input id="{{key}}" type="number" value="{{value}}"';
+        var element = '<input class="field" id="{{key}}" type="number" value="{{value}}"';
         if (item.minimum !== null) {
             element += ' min="' + item.minimum + '"';
         }
