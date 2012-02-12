@@ -12,7 +12,9 @@ SS.ScaleTransformInitiatorModel = Backbone.Model.extend({
 	];
 
         var that = this;
-        selectionManager.addListener(this.selectionUpdated);
+        selectionManager.on('deselected', this.deselected, this);
+        selectionManager.on('selected', this.selected, this);
+
     },
 
     mouseDownOnArrow: function(arrowView, event) {
@@ -41,19 +43,26 @@ SS.ScaleTransformInitiatorModel = Backbone.Model.extend({
                                       transform: transform,
                                       anchorFunction: arrowView.anchorFunction,
                                       arrowViews: this.views});
+
+        this.destroy();
     },
 
-    selectionUpdated: function(event) {
-        if ((event.deselected) && 
-            (event.deselected.length === 1) &&
-            (event.deselected[0] === this.attributes.geomNode.id)) {
+    selected: function(selected) {
+        if (selectionManager.size() !== 1) {
+            this.destroy();
+        }
+    },
 
+    deselected: function(deselected) {
+        if ((deselected.length === 1) &&
+            (deselected[0] === this.attributes.geomNode.id)) {
+            
             this.destroy();
         }
     },
 
     destroy: function(event) {
-        selectionManager.removeListener(this.selectionUpdated);
+        selectionManager.off('deselected', this.deselected);
         this.views.map(function(view) {
             view.remove();
         });
@@ -66,8 +75,6 @@ SS.SceneObjectView = Backbone.View.extend({
     initialize: function() {
         this.sceneObject = new THREE.Object3D(); 
 	SS.sceneView.registerSceneObjectView(this);
-
-
         
         this.render();
         this.postRender();
@@ -114,10 +121,6 @@ SS.ScaleTransformArrowView = SS.SceneObjectView.extend({
         this.on('mouseDown', function(event) {
             this.model.mouseDownOnArrow && this.model.mouseDownOnArrow(this, event);
         }, this);
-    },
-
-    attach: function(model) {
-        this.model = model;
         this.model.on("change", this.render, this);
     },
 

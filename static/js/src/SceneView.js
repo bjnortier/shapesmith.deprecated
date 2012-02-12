@@ -460,6 +460,15 @@ SS.SceneView = function(container) {
     var mouseOverSceneObjectViews = [];
     var mouseDownSceneObjectViews = [];
 
+    this.replaceSceneObjectViewInMouseState = function(oldView, newView) {
+        [mouseOverSceneObjectViews, mouseDownSceneObjectViews].map(function(array) {
+            if (array.indexOf(oldView) !== -1) {
+                array.splice(mouseOverSceneObjectViews.indexOf(oldView), 1);
+                array.push(newView);
+            }
+        });
+    }
+
     this.registerSceneObjectView = function(sceneObjectView) {
 	sceneObjectViews.push(sceneObjectView);
     }

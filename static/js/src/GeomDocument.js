@@ -1,6 +1,8 @@
 
 function GeomDocument() {
 
+    _.extend(this, Backbone.Events);
+
     this.rootNodes = [];
 
     this.isRoot = function(node) {
@@ -10,11 +12,13 @@ function GeomDocument() {
     this.add = function(node) {
         this.rootNodes = [node].concat(this.rootNodes);
         this.notify({add: node});
+        this.trigger('add', node);
     }
 
     this.removeAll = function() {
 	for (index in this.rootNodes) {
 	    this.notify({remove: this.rootNodes[index]});
+            this.trigger('remove', this.rootNodes[index]);
 	}
 	this.rootNodes = [];
     }
@@ -22,6 +26,7 @@ function GeomDocument() {
     this.remove = function(node) {
         this.rootNodes.splice(this.rootNodes.indexOf(node),1);
         this.notify({remove: node});
+        this.trigger('remove', node);
     }
 
     this.replace = function(original, replacement) {
@@ -38,6 +43,7 @@ function GeomDocument() {
         recurFn(this.rootNodes);
         this.notify({replace: {original : original,
                                replacement : replacement}});
+        this.trigger('replace', original, replacement);
     }
 
     this.removeById = function(id) {

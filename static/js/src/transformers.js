@@ -335,7 +335,7 @@ SS.transformers.Manager = function() {
         SS.sceneView.scene.remove(transformerUI);
         uiState = UISTATE.DEACTIVATED;
         initiators.map(function(initiator) {
-            initiator.destroy();
+            //initiator.destroy();
         });
         initiators = [];
     }

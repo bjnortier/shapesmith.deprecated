@@ -9,28 +9,33 @@ SS.ScaleTransformerModel = Backbone.Model.extend({
         this.center = SS.transformers.centerOfGeom(this.boundingBox);
         this.anchorPosition = attributes.anchorFunction(this.boundingBox);
 
-        this.attributes.arrowViews.map(function(arrowView) {
-            arrowView.attach(that);
+
+        geom_doc.on('replace', this.geomDocReplace, this);
+
+        var arrowViews = [
+	    new SS.ScaleTransformArrowViewMaxXMaxY({model: this}),
+            new SS.ScaleTransformArrowViewMaxXMinY({model: this}),
+            new SS.ScaleTransformArrowViewMinXMinY({model: this}),
+            new SS.ScaleTransformArrowViewMinXMaxY({model: this}),
+	];
+
+        for (var i = 0; i < 4; ++i) {
+            SS.sceneView.replaceSceneObjectViewInMouseState(this.attributes.arrowViews[i], arrowViews[i]);
+        }
+
+        arrowViews.map(function(arrowView) {
             arrowView.on('mouseDrag', function(event) {
                 that.drag(event);
             });
-            arrowView.render();
         });
 
-        geom_doc.addListener(function(event) {
-            that.geomDocUpdated(event);
-        });
-
-        selectionManager.addListener(function(event) {
-           that.selectionUpdated(event);
-        });
 
         var newViews = [
             new SS.ScaleGeomNodeView({model: this}),
             new SS.ScaleFactorView({model: this}),
             new SS.ScaleDOMView({model: this}),
         ];
-        this.views = newViews.concat(this.attributes.arrowViews);
+        this.views = newViews.concat(arrowViews);
     },
 
     mouseDown: function(arrowView, event) {
@@ -103,11 +108,11 @@ SS.ScaleTransformerModel = Backbone.Model.extend({
         this.views.map(function(view) {
             view.remove();
         });
-        geom_doc.removeListener(this.geomDocUpdated);
+        geom_doc.off('replace', this.geomDocReplace, this);
     },
     
-    geomDocUpdated: function(event) {
-        if (event.replace && (event.replace.original === this.attributes.editingNode)) {
+    geomDocReplace: function(original, replacement) {
+        if (original === this.attributes.editingNode) {
             this.destroy();
         }
     },
