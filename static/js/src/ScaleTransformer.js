@@ -21,6 +21,10 @@ SS.ScaleTransformerModel = Backbone.Model.extend({
             that.geomDocUpdated(event);
         });
 
+        selectionManager.addListener(function(event) {
+           that.selectionUpdated(event);
+        });
+
         var newViews = [
             new SS.ScaleGeomNodeView({model: this}),
             new SS.ScaleFactorView({model: this}),
@@ -106,7 +110,8 @@ SS.ScaleTransformerModel = Backbone.Model.extend({
         if (event.replace && (event.replace.original === this.attributes.editingNode)) {
             this.destroy();
         }
-    }
+    },
+
         
 });
 

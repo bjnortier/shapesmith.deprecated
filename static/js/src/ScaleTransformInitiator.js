@@ -11,9 +11,11 @@ SS.ScaleTransformInitiatorModel = Backbone.Model.extend({
             new SS.ScaleTransformArrowViewMinXMaxY({model: this}),
 	];
 
+        var that = this;
+        selectionManager.addListener(this.selectionUpdated);
     },
 
-    mouseDown: function(arrowView, event) {
+    mouseDownOnArrow: function(arrowView, event) {
         
 	var geomNode = this.attributes.geomNode;
 	var boundingBox = SS.boundingBoxForGeomNode(geomNode);
@@ -41,6 +43,21 @@ SS.ScaleTransformInitiatorModel = Backbone.Model.extend({
                                       arrowViews: this.views});
     },
 
+    selectionUpdated: function(event) {
+        if ((event.deselected) && 
+            (event.deselected.length === 1) &&
+            (event.deselected[0] === this.attributes.geomNode.id)) {
+
+            this.destroy();
+        }
+    },
+
+    destroy: function(event) {
+        selectionManager.removeListener(this.selectionUpdated);
+        this.views.map(function(view) {
+            view.remove();
+        });
+    },
 
 });
 
@@ -95,7 +112,7 @@ SS.ScaleTransformArrowView = SS.SceneObjectView.extend({
 	this.on('mouseLeave', this.unhighlight);
 
         this.on('mouseDown', function(event) {
-            this.model.mouseDown && this.model.mouseDown(this, event);
+            this.model.mouseDownOnArrow && this.model.mouseDownOnArrow(this, event);
         }, this);
     },
 
