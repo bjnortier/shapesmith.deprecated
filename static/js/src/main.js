@@ -28,6 +28,5 @@ selectionManager.addListener(function(event) {
     SS.transformerManager.selectionUpdated(event);
 });
 
-
-
+SS.UI_STATE = new SS.UIState();
 

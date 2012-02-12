@@ -306,10 +306,9 @@ SS.SceneView = function(container) {
 	    workplane.clicked(positionOnWorkplane);
 	}
 
-	if (!state) {
-	    if (!SS.constructors.active && (event.button == 0)) {
-		selectObject(event);
-	    }
+	if ((SS.UI_STATE.state === SS.UIStates.UNDEFINED) &&
+            (event.button == 0)) {
+	    selectObject(event);
 	}
 
 	state = undefined;
