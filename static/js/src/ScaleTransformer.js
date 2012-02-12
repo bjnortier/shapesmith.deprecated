@@ -29,7 +29,6 @@ SS.ScaleTransformerModel = Backbone.Model.extend({
             });
         });
 
-
         var newViews = [
             new SS.ScaleGeomNodeView({model: this}),
             new SS.ScaleFactorView({model: this}),

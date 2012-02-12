@@ -58,6 +58,8 @@ SS.SceneView = function(container) {
 	container.addEventListener('DOMMouseScroll', onMouseWheel, false);
 	container.addEventListener('mousemove', onMouseMove, false);
 	window.addEventListener('keydown', onDocumentKeyDown, false);
+	window.addEventListener('keyup', onDocumentKeyUp, false);
+
 	container.addEventListener('mouseover', function() {
 	    overRenderer = true;
 	}, false);
@@ -358,6 +360,15 @@ SS.SceneView = function(container) {
 	return false;
     }
 
+    function onDocumentKeyUp(event) {
+        if ((event.keyIdentifier === 'Shift') &&
+            (state === 'rotating')) {
+            state = undefined;
+            
+        }
+        return false;
+    }
+
     function onWindowResize(event) {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
@@ -515,9 +526,12 @@ SS.SceneView = function(container) {
 	    sceneObjectView.trigger('mouseLeave', event);
 	});
 
-        mouseDownSceneObjectViews.map(function(sceneObjectView) {
-            sceneObjectView.trigger('mouseDrag', event);
-	});
+        if ((event.button === 0) &&
+            (event.ctrlKey || !event.shiftKey)) {
+            mouseDownSceneObjectViews.map(function(sceneObjectView) {
+                sceneObjectView.trigger('mouseDrag', event);
+	    });
+        }
 
     }
 
