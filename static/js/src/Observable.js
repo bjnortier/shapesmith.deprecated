@@ -5,7 +5,10 @@ Observable.addListener = function(listener) {
 };
 
 Observable.removeListener = function(listener) {
-    this.listeners.splice(this.listeners.indexOf(listener),1);
+    var index = this.listeners.indexOf(listener);
+    if (index !== -1) {
+        this.listeners.splice(index, 1);
+    }
 };
 
 Observable.notify = function(event) {

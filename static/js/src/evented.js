@@ -49,7 +49,9 @@ var evented = function(that) {
 	if (registry.hasOwnProperty(type)) {
 	    for (var key in registry[type]) {
 		var index = registry[type].indexOf(func);
-		registry[type].splice(index, 1);
+                if (index !== -1) {
+		    registry[type].splice(index, 1);
+                }
 	    }
 	}
 	return this;

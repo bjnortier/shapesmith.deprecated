@@ -33,6 +33,8 @@ SS.ScaleTransformerModel = Backbone.Model.extend({
             new SS.ScaleGeomNodeView({model: this}),
             new SS.ScaleFactorView({model: this}),
             new SS.ScaleDOMView({model: this}),
+            new SS.ScaleBoxView({model: this}),
+            new SS.ScaleFootprintView({model: this}),
         ];
         this.views = newViews.concat(arrowViews);
     },

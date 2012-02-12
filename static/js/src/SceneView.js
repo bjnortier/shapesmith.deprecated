@@ -484,8 +484,14 @@ SS.SceneView = function(container) {
     }
 
     this.deregisterSceneObjectView = function(sceneObjectView) {
-	sceneObjectViews.splice(sceneObjectViews.indexOf(sceneObjectView), 1);
-	mouseOverSceneObjectViews.splice(sceneObjectViews.indexOf(sceneObjectView), 1);
+        var index1 = sceneObjectViews.indexOf(sceneObjectView);
+        if (index1 !== -1) {
+	    sceneObjectViews.splice(index1, 1);
+        }
+        var index2 = mouseOverSceneObjectViews.indexOf(sceneObjectView);
+        if (index2 !== -1) {
+	    mouseOverSceneObjectViews.splice(index2, 1);
+        }
     }
 
     var findSceneObjectViewsForEvent = function(event) {
@@ -520,7 +526,10 @@ SS.SceneView = function(container) {
 		sceneObjectView.trigger('mouseEnter', event);
 	    }
 	    mouseOverSceneObjectViews.push(sceneObjectView);
-	    leaveObjects.splice(leaveObjects.indexOf(sceneObjectView), 1);
+            var index = leaveObjects.indexOf(sceneObjectView);
+            if (index !== -1) {
+	        leaveObjects.splice(index, 1);
+            }
 	});
 	leaveObjects.map(function(sceneObjectView) {
 	    sceneObjectView.trigger('mouseLeave', event);

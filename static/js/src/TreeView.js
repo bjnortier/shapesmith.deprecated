@@ -345,7 +345,7 @@ function TreeView() {
             }
             var geomNode = geom_doc.findById(id);
             var editingNode = geomNode.editableCopy();
-            editingNode.transforms.splice(transformIndex, 1);
+            editingNode.transforms.spliceGe(transformIndex, 1);
             var cmd = update_geom_command(geomNode, geomNode, editingNode);
             command_stack.execute(cmd);
             SS.restoreOpacity();

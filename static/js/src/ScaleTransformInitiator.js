@@ -4,12 +4,17 @@ SS.ScaleTransformInitiatorModel = Backbone.Model.extend({
 
     initialize: function() { 
         this.boundingBox = SS.boundingBoxForGeomNode(this.attributes.geomNode);
-        this.views = [
+        this.center = SS.transformers.centerOfGeom(this.boundingBox);
+        this.arrowViews = [
 	    new SS.ScaleTransformArrowViewMaxXMaxY({model: this}),
             new SS.ScaleTransformArrowViewMaxXMinY({model: this}),
             new SS.ScaleTransformArrowViewMinXMinY({model: this}),
             new SS.ScaleTransformArrowViewMinXMaxY({model: this}),
 	];
+        this.views = this.arrowViews.concat([
+            new SS.ScaleBoxView({model: this}),
+            new SS.ScaleFootprintView({model: this}),
+        ]);
 
         var that = this;
         selectionManager.on('deselected', this.deselected, this);
@@ -20,15 +25,12 @@ SS.ScaleTransformInitiatorModel = Backbone.Model.extend({
     mouseDownOnArrow: function(arrowView, event) {
         
 	var geomNode = this.attributes.geomNode;
-	var boundingBox = SS.boundingBoxForGeomNode(geomNode);
-        var center = SS.transformers.centerOfGeom(boundingBox);
-        
         var editingNode = geomNode.editableCopy();
         var transform = new Transform({
             type: 'scale',
             editing: true,
-	    origin: {x: parseFloat((center.x).toFixed(3)), 
-                     y: parseFloat((center.y).toFixed(3)), 
+	    origin: {x: parseFloat((this.center.x).toFixed(3)), 
+                     y: parseFloat((this.center.y).toFixed(3)), 
                      z: 0},
             parameters: {factor: 1.0}
         });
@@ -42,8 +44,7 @@ SS.ScaleTransformInitiatorModel = Backbone.Model.extend({
                                       editingNode: editingNode, 
                                       transform: transform,
                                       anchorFunction: arrowView.anchorFunction,
-                                      arrowViews: this.views});
-
+                                      arrowViews: this.arrowViews});
         this.destroy();
     },
 
@@ -258,3 +259,68 @@ SS.ScaleTransformArrowViewMaxXMinY = SS.ScaleTransformArrowView.extend({
 });
 
 
+SS.ScaleBoxView = SS.SceneObjectView.extend({
+
+    initialize: function() {
+	SS.SceneObjectView.prototype.initialize.call(this);
+        this.model.on('change', this.render, this);
+    },
+    
+    render: function() {
+        this.clear();
+        
+        var width  = this.model.boundingBox.max.x - this.model.boundingBox.min.x;
+        var depth  = this.model.boundingBox.max.y - this.model.boundingBox.min.y;
+        var height = this.model.boundingBox.max.z - this.model.boundingBox.min.z;
+
+        var geometry = new THREE.CubeGeometry(width, depth, height);
+	cube = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: SS.constructors.lineColor, 
+                                                                     wireframe: true}));
+        
+	cube.position.x = this.model.boundingBox.min.x + width/2;
+	cube.position.y = this.model.boundingBox.min.y + depth/2;
+	cube.position.z = this.model.boundingBox.min.z + height/2;
+	this.sceneObject.add(cube);
+
+        this.postRender();
+        return this;
+    },
+
+});
+
+SS.ScaleFootprintView = SS.SceneObjectView.extend({
+
+    initialize: function() {
+	SS.SceneObjectView.prototype.initialize.call(this);
+        this.model.on('change', this.render, this);
+    },
+    
+    render: function() {
+        this.clear();
+        
+        var width  = this.model.boundingBox.max.x - this.model.boundingBox.min.x;
+        var depth  = this.model.boundingBox.max.y - this.model.boundingBox.min.y;
+        var height = this.model.boundingBox.max.z - this.model.boundingBox.min.z;
+
+        var planeGeometry = new THREE.PlaneGeometry(width, depth); 
+        var planeMesh = THREE.SceneUtils.createMultiMaterialObject(
+            planeGeometry, 
+            [
+                new THREE.MeshBasicMaterial({color: SS.constructors.lineColor, 
+                                             wireframe: true}),
+                new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, 
+                                             transparent: true, 
+                                             opacity: 0.5})
+            ]);
+
+        planeMesh.doubleSided = true;
+        planeMesh.position.x = this.model.boundingBox.min.x + width/2;
+        planeMesh.position.y = this.model.boundingBox.min.y + depth/2;
+        planeMesh.position.z = -0.05;
+	this.sceneObject.add(planeMesh);
+
+        this.postRender();
+        return this;
+    },
+
+});

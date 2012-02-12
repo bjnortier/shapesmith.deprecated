@@ -24,15 +24,18 @@ function GeomDocument() {
     }
 
     this.remove = function(node) {
-        this.rootNodes.splice(this.rootNodes.indexOf(node),1);
-        this.notify({remove: node});
-        this.trigger('remove', node);
+        var index = this.rootNodes.indexOf(node);
+        if (index !== -1) {
+            this.rootNodes.splice(index, 1);
+            this.notify({remove: node});
+            this.trigger('remove', node);
+        }
     }
 
     this.replace = function(original, replacement) {
         var recurFn = function(children) {
             var index = children.indexOf(original);
-            if (index > -1 ) {
+            if (index !== -1 ) {
                 children.splice(index,1,replacement);
             } else {
                 for (i in children) {
