@@ -48,8 +48,12 @@ SS.TranslateTransformer = SS.Transformer.extend({
         this.views.push(this.translateView);
         SS.sceneView.replaceSceneObjectViewInMouseState(this.attributes.translateView,  this.translateView);
 
-        this.views.push(new SS.TransformDOMView({model: this}));
-        this.views.push(new SS.TranslateGeomNodeView({model: this}));
+        this.views = this.views.concat([
+            new SS.TransformDOMView({model: this}),
+            new SS.TranslateGeomNodeView({model: this}),
+            new SS.ScaleBoxView({model: this}),
+            new SS.ScaleFootprintView({model: this}),
+        ]);
 
         this.translateView.on('mouseDrag', this.drag, this);
     },

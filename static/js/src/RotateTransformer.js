@@ -32,7 +32,7 @@ SS.RotateTransformerInitiator = SS.TransformerInitiator.extend({
             editing: true,
 	    origin: {x: Math.round(this.center.x), 
                      y: Math.round(this.center.y), 
-                     z: 0},
+                     z: Math.round(this.center.z)},
             parameters: parameters
         });
         editingNode.transforms.push(transform);
@@ -103,15 +103,19 @@ SS.RotateGeomNodeView = Backbone.View.extend({
 
     render: function() {
         var transform = this.model.attributes.transform;
+        var center = new THREE.Vector3(transform.origin.x,
+                                       transform.origin.y,
+                                       transform.origin.z);
+        
         var axis = new THREE.Vector3(transform.parameters.u,
                                      transform.parameters.v,
                                      transform.parameters.w);
 
         SS.rotateGeomNodeRendering(this.model.attributes.originalNode, 
-                                  this.model.attributes.editingNode, 
-                                  this.model.center,
-                                  axis,
-                                  this.model.attributes.transform.parameters.angle);
+                                   this.model.attributes.editingNode, 
+                                   center,
+                                   axis,
+                                   this.model.attributes.transform.parameters.angle);
     },
 
 });
