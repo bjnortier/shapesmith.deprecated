@@ -123,9 +123,10 @@
   <script type="text/javascript" src="/static/js/src/SceneSelector.js"></script>
   <script type="text/javascript" src="/static/js/src/SceneView.js"></script>
   <script type="text/javascript" src="/static/js/src/UIState.js"></script>
-  <script type="text/javascript" src="/static/js/src/ScaleTransformInitiator.js"></script>
+  <script type="text/javascript" src="/static/js/src/Transformer.js"></script>
+  <script type="text/javascript" src="/static/js/src/TranslateTransformer.js"></script>
   <script type="text/javascript" src="/static/js/src/ScaleTransformer.js"></script>
-
+  <script type="text/javascript" src="/static/js/src/ScaleTransformInitiator.js"></script>
 
   <script type="text/javascript">
 

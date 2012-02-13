@@ -167,19 +167,19 @@ SS.Cursoid = function(spec) {
         }
         cursoidSceneObject.add(cursoidPointer);
 
-        if ((position.x !== 0) && (position.y !== 0) && (exclusions.indexOf('x') === -1)) {
+        /*if ((position.x !== 0) && (position.y !== 0) && (exclusions.indexOf('x') === -1)) {
             var cursoidXPointer = new THREE.Mesh(cursoidGeometry, cursoidXMaterial);
             cursoidXPointer.position.x = position.x;
             cursoidXPointer.name = {cursoid: 'x'};
             cursoidSceneObject.add(cursoidXPointer)
-        }
+        }*/
 
-        if ((position.x !== 0) && (position.y !== 0) && (exclusions.indexOf('y') === -1)) {
+        /*if ((position.x !== 0) && (position.y !== 0) && (exclusions.indexOf('y') === -1)) {
             var cursoidYPointer = new THREE.Mesh(cursoidGeometry, cursoidYMaterial);
             cursoidYPointer.position.y = position.y;
             cursoidYPointer.name = {cursoid: 'y'};
             cursoidSceneObject.add(cursoidYPointer);
-        }
+        }*/
 
         if (exclusions.indexOf('z') === -1) {
             var cursoidZPointer = new THREE.Mesh(cursoidGeometry, cursoidZMaterial);

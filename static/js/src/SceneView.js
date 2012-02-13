@@ -498,6 +498,7 @@ SS.SceneView = function(container) {
 	
 	var found = SS.selectInScene(scene, camera, event);
 	var objects = _.pluck(found, 'object');
+
 	// Select the hightest-level THREE.Object3D objects in the scene
 	var getRoot = function(object) {
 	    return object.parent.constructor === THREE.Scene ? 
@@ -509,7 +510,9 @@ SS.SceneView = function(container) {
 	objects.map(getRoot).map(function(object) {
 	    sceneObjectViews.map(function(sceneObjectView) {
 		if (getRoot(object) === sceneObjectView.sceneObject) {
-		    foundSceneObjectViews.push(sceneObjectView);
+                    if (foundSceneObjectViews.indexOf(sceneObjectView) === -1) {
+		        foundSceneObjectViews.push(sceneObjectView);
+                    }
 		}
 	    });
 	});

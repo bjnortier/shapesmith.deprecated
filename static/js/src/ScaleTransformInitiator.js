@@ -1,28 +1,25 @@
 var SS = SS || {};
 
-SS.ScaleTransformInitiatorModel = Backbone.Model.extend({
+SS.ScaleTransformerInitiator = SS.TransformerInitiator.extend({
 
     initialize: function() { 
-        this.boundingBox = SS.boundingBoxForGeomNode(this.attributes.geomNode);
-        this.center = SS.transformers.centerOfGeom(this.boundingBox);
+        SS.TransformerInitiator.prototype.initialize.call(this);
+
         this.arrowViews = [
-	    new SS.ScaleTransformArrowViewMaxXMaxY({model: this}),
-            new SS.ScaleTransformArrowViewMaxXMinY({model: this}),
-            new SS.ScaleTransformArrowViewMinXMinY({model: this}),
-            new SS.ScaleTransformArrowViewMinXMaxY({model: this}),
+	    new SS.ScaleArrowViewMaxXMaxY({model: this}),
+            new SS.ScaleArrowViewMaxXMinY({model: this}),
+            new SS.ScaleArrowViewMinXMinY({model: this}),
+            new SS.ScaleArrowViewMinXMaxY({model: this}),
 	];
-        this.views = this.arrowViews.concat([
+        
+        this.views = this.views.concat(this.arrowViews);
+        this.views = this.views.concat([
             new SS.ScaleBoxView({model: this}),
             new SS.ScaleFootprintView({model: this}),
         ]);
-
-        var that = this;
-        selectionManager.on('deselected', this.deselected, this);
-        selectionManager.on('selected', this.selected, this);
-
     },
 
-    mouseDownOnArrow: function(arrowView, event) {
+    mouseDownOnArrow: function(arrowView) {
         
 	var geomNode = this.attributes.geomNode;
         var editingNode = geomNode.editableCopy();
@@ -40,62 +37,12 @@ SS.ScaleTransformInitiatorModel = Backbone.Model.extend({
         selectionManager.deselectID(geomNode.id);
         geom_doc.replace(geomNode, editingNode);
 
-        new SS.ScaleTransformerModel({originalNode: geomNode,
-                                      editingNode: editingNode, 
-                                      transform: transform,
-                                      anchorFunction: arrowView.anchorFunction,
-                                      arrowViews: this.arrowViews});
+        new SS.ScaleTransformer({originalNode: geomNode,
+                                 editingNode: editingNode, 
+                                 transform: transform,
+                                 anchorFunction: arrowView.anchorFunction,
+                                 arrowViews: this.arrowViews});
         this.destroy();
-    },
-
-    selected: function(selected) {
-        if (selectionManager.size() !== 1) {
-            this.destroy();
-        }
-    },
-
-    deselected: function(deselected) {
-        if ((deselected.length === 1) &&
-            (deselected[0] === this.attributes.geomNode.id)) {
-            
-            this.destroy();
-        }
-    },
-
-    destroy: function(event) {
-        selectionManager.off('deselected', this.deselected);
-        this.views.map(function(view) {
-            view.remove();
-        });
-    },
-
-});
-
-SS.SceneObjectView = Backbone.View.extend({
-    
-    initialize: function() {
-        this.sceneObject = new THREE.Object3D(); 
-	SS.sceneView.registerSceneObjectView(this);
-        
-        this.render();
-        this.postRender();
-    },
-
-    clear: function() {
-        var children = this.sceneObject.children;
-        var that = this
-        children.map(function(child) {
-            that.sceneObject.remove(child);
-        });
-    },
-
-    postRender: function() {
-        SS.sceneView.scene.add(this.sceneObject);
-    },
-
-    remove: function() {
-	SS.sceneView.deregisterSceneObjectView(this);
-        SS.sceneView.scene.remove(this.sceneObject);
     },
 
 });
@@ -112,17 +59,20 @@ SS.recursiveHighlightFn =  function(object, opacity) {
     functor(object);
 };
 
-SS.ScaleTransformArrowView = SS.SceneObjectView.extend({
+SS.ScaleArrowView = SS.ActiveTransformerView.extend({
     
     initialize: function() {
-	SS.SceneObjectView.prototype.initialize.call(this);
-	this.on('mouseEnter', this.highlight);
-	this.on('mouseLeave', this.unhighlight);
+	SS.ActiveTransformerView.prototype.initialize.call(this);
+        this.on('mouseDown', this.mouseDown, this);
+    },
 
-        this.on('mouseDown', function(event) {
-            this.model.mouseDownOnArrow && this.model.mouseDownOnArrow(this, event);
-        }, this);
-        this.model.on("change", this.render, this);
+    mouseDown: function() {
+        this.model.mouseDownOnArrow && this.model.mouseDownOnArrow(this);
+    },
+
+    remove: function() {
+        SS.ActiveTransformerView.prototype.remove.call(this);
+        this.model.off('mouseDown', this.mouseDownOnArrow);
     },
 
     render: function() {
@@ -150,6 +100,8 @@ SS.ScaleTransformArrowView = SS.SceneObjectView.extend({
                                        new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, 
                                                                     transparent: true, 
                                                                     opacity: 0.5}));
+        arrowMesh.doubleSides = true;
+        
         var lineGeom = new THREE.Geometry();
         lineGeom.vertices = arrowGeometry.vertices;
         var line = new THREE.Line(lineGeom, 
@@ -168,20 +120,13 @@ SS.ScaleTransformArrowView = SS.SceneObjectView.extend({
         return this;
     },
 
-    highlight: function() {
-	SS.recursiveHighlightFn(this.sceneObject, 1.0);
-    },
-
-    unhighlight: function() {
-	SS.recursiveHighlightFn(this.sceneObject, 0.5);
-    }
     
 });
 
-SS.ScaleTransformArrowViewMaxXMaxY = SS.ScaleTransformArrowView.extend({
+SS.ScaleArrowViewMaxXMaxY = SS.ScaleArrowView.extend({
     
     initialize: function() {
-	SS.ScaleTransformArrowView.prototype.initialize.call(this);
+	SS.ScaleArrowView.prototype.initialize.call(this);
         this.anchorFunction = function(boundingBox) {
             return {x: boundingBox.max.x, 
                     y: boundingBox.max.y};
@@ -189,7 +134,7 @@ SS.ScaleTransformArrowViewMaxXMaxY = SS.ScaleTransformArrowView.extend({
     },
 
     render: function() {
-        SS.ScaleTransformArrowView.prototype.render.call(this);
+        SS.ScaleArrowView.prototype.render.call(this);
         this.sceneObject.position.x = this.model.boundingBox.max.x + 1;
         this.sceneObject.position.y = this.model.boundingBox.max.y + 1;
         this.sceneObject.rotation.z = 1/4*Math.PI;
@@ -198,10 +143,10 @@ SS.ScaleTransformArrowViewMaxXMaxY = SS.ScaleTransformArrowView.extend({
     }
 });
 
-SS.ScaleTransformArrowViewMinXMaxY = SS.ScaleTransformArrowView.extend({
+SS.ScaleArrowViewMinXMaxY = SS.ScaleArrowView.extend({
 
     initialize: function() {
-	SS.ScaleTransformArrowView.prototype.initialize.call(this);
+	SS.ScaleArrowView.prototype.initialize.call(this);
         this.anchorFunction = function(boundingBox) {
             return {x: boundingBox.min.x, 
                     y: boundingBox.max.y};
@@ -209,7 +154,7 @@ SS.ScaleTransformArrowViewMinXMaxY = SS.ScaleTransformArrowView.extend({
     },
 
     render: function() {
-        SS.ScaleTransformArrowView.prototype.render.call(this);
+        SS.ScaleArrowView.prototype.render.call(this);
         this.sceneObject.position.x = this.model.boundingBox.min.x - 1;
         this.sceneObject.position.y = this.model.boundingBox.max.y + 1;
         this.sceneObject.rotation.z = 3/4*Math.PI;
@@ -218,10 +163,10 @@ SS.ScaleTransformArrowViewMinXMaxY = SS.ScaleTransformArrowView.extend({
     }
 });
 
-SS.ScaleTransformArrowViewMinXMinY = SS.ScaleTransformArrowView.extend({
+SS.ScaleArrowViewMinXMinY = SS.ScaleArrowView.extend({
 
     initialize: function() {
-	SS.ScaleTransformArrowView.prototype.initialize.call(this);
+	SS.ScaleArrowView.prototype.initialize.call(this);
         this.anchorFunction = function(boundingBox) {
             return {x: boundingBox.min.x, 
                     y: boundingBox.min.y};
@@ -229,7 +174,7 @@ SS.ScaleTransformArrowViewMinXMinY = SS.ScaleTransformArrowView.extend({
     },
 
     render: function() {
-        SS.ScaleTransformArrowView.prototype.render.call(this);
+        SS.ScaleArrowView.prototype.render.call(this);
         this.sceneObject.position.x = this.model.boundingBox.min.x - 1;
         this.sceneObject.position.y = this.model.boundingBox.min.y - 1;
         this.sceneObject.rotation.z = 5/4*Math.PI;
@@ -238,10 +183,10 @@ SS.ScaleTransformArrowViewMinXMinY = SS.ScaleTransformArrowView.extend({
     }
 });
 
-SS.ScaleTransformArrowViewMaxXMinY = SS.ScaleTransformArrowView.extend({
+SS.ScaleArrowViewMaxXMinY = SS.ScaleArrowView.extend({
 
     initialize: function() {
-	SS.ScaleTransformArrowView.prototype.initialize.call(this);
+	SS.ScaleArrowView.prototype.initialize.call(this);
         this.anchorFunction = function(boundingBox) {
             return {x: boundingBox.max.x, 
                     y: boundingBox.min.y};
@@ -249,7 +194,7 @@ SS.ScaleTransformArrowViewMaxXMinY = SS.ScaleTransformArrowView.extend({
     },
 
     render: function() {
-        SS.ScaleTransformArrowView.prototype.render.call(this);
+        SS.ScaleArrowView.prototype.render.call(this);
         this.sceneObject.position.x = this.model.boundingBox.max.x + 1;
         this.sceneObject.position.y = this.model.boundingBox.min.y - 1;
         this.sceneObject.rotation.z = 7/4*Math.PI;
@@ -263,7 +208,7 @@ SS.ScaleBoxView = SS.SceneObjectView.extend({
 
     initialize: function() {
 	SS.SceneObjectView.prototype.initialize.call(this);
-        this.model.on('change', this.render, this);
+       
     },
     
     render: function() {
@@ -292,7 +237,6 @@ SS.ScaleFootprintView = SS.SceneObjectView.extend({
 
     initialize: function() {
 	SS.SceneObjectView.prototype.initialize.call(this);
-        this.model.on('change', this.render, this);
     },
     
     render: function() {

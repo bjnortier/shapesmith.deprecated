@@ -235,8 +235,10 @@ SS.transformers.Manager = function() {
 	transformerUI.add(cube);
     }
 
-    var activateScale = function(geomNode) {
-        initiators.push(new SS.ScaleTransformInitiatorModel({geomNode: geomNode}));
+    var activateScaleAndTranslate = function(geomNode) {
+        initiators.push(new SS.ScaleTransformerInitiator({geomNode: geomNode}));
+        initiators.push(new SS.TranslateTransformerInitiator({geomNode: geomNode}));
+
 
         /*transformerUI = new THREE.Object3D();
         addBoundingBox(geomNode);
@@ -251,7 +253,7 @@ SS.transformers.Manager = function() {
         //SS.sceneView.scene.add(transformerUI);
     }
 
-    var activateRotate = function(geomNode) {
+    var activateRotateAndTranslate = function(geomNode) {
         uiElements = [];
         SS.sceneView.scene.remove(transformerUI);
         
@@ -322,10 +324,10 @@ SS.transformers.Manager = function() {
     
     var activate = function(geomNode) {
         if (uiState === UISTATE.SCALE) {
-            activateRotate(geomNode);
+            activateRotateAndTranslate(geomNode);
             uiState = UISTATE.ROTATE;
         } else {
-            activateScale(geomNode);
+            activateScaleAndTranslate(geomNode);
             uiState = UISTATE.SCALE;
         }
     }
