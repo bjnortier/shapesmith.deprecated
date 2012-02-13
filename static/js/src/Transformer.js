@@ -49,12 +49,16 @@ SS.Transformer = Backbone.Model.extend({
         this.transform = attributes.transform;
         this.originalNode = attributes.originalNode;
         this.editingNode = attributes.editingNode;
-        this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
-        this.center = SS.transformers.centerOfGeom(this.boundingBox);
+
+        if (!attributes.editingExisting) {
+            this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
+            this.center = SS.transformers.centerOfGeom(this.boundingBox);
+        }
 
         this.views = [];
 
         geom_doc.on('replace', this.geomDocReplace, this);
+        //SS.setOthersTransparent(this.editingNode);
     },
 
     updateFromDOMView: function() {
@@ -74,8 +78,10 @@ SS.Transformer = Backbone.Model.extend({
         updateValues(transform.origin, schema.properties.origin);
         updateValues(transform.parameters, schema.properties.parameters);
 
-        this.trigger('change:model');
-        this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
+        if (!this.attributes.editingExisting) {
+            this.trigger('change:model');
+            this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
+        }
 
         this.trigger('change');
     },
@@ -96,7 +102,8 @@ SS.Transformer = Backbone.Model.extend({
     geomDocReplace: function(original, replacement) {
         if (original === this.editingNode) {
             this.destroy();
-        }
+        } 
+        
     },
 
     destroy: function() {

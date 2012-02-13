@@ -435,7 +435,9 @@ SS.SceneView = function(container) {
     }
 
     var add = function(geomNode) {
-        SS.renderGeometry(geomNode);
+        if (geom_doc.isRoot(geomNode)) {
+            SS.renderGeometry(geomNode);
+        }
     }
 
     var remove = function(geomNode) {

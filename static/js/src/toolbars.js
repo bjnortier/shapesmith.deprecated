@@ -232,18 +232,6 @@ $(document).ready(function() {
     /*
      * Transformations
      */
-    new Action('Translate', '/static/images/translate.png', 
-               function(selected) { 
-		   SS.constructors.createTranslate(create_transform(selected, 'translate'));
-	       }).render($('#transforms'));
-    new Action('Scale', '/static/images/scale.png', 
-               function(selected) { 
-		   SS.constructors.createScale(create_transform(selected, 'scale'));
-	       }).render($('#transforms'));
-    new Action('Rotate', '/static/images/rotate.png', 
-               function(selected) { 
-		   SS.constructors.createRotate(create_transform(selected, 'rotate'));
-	       }).render($('#transforms'));
     new Action('Mirror', '/static/images/mirror.png', 
                function(selected) { 
 		   SS.constructors.createMirror(create_transform(selected, 'mirror'));
