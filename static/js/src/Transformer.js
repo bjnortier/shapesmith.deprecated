@@ -8,8 +8,9 @@ SS.transformers.centerOfGeom = function(boundingBox) {
 
 SS.TransformerInitiator = Backbone.Model.extend({
     
-    initialize: function() {
-        this.boundingBox = SS.boundingBoxForGeomNode(this.attributes.geomNode);
+    initialize: function(attributes) {
+        this.geomNode = attributes.geomNode;
+        this.boundingBox = SS.boundingBoxForGeomNode(this.geomNode);
         this.center = SS.transformers.centerOfGeom(this.boundingBox);
 
         this.views = [];
@@ -26,7 +27,7 @@ SS.TransformerInitiator = Backbone.Model.extend({
 
     deselected: function(deselected) {
         if ((deselected.length === 1) &&
-            (deselected[0] === this.attributes.geomNode.id)) {
+            (deselected[0] === this.geomNode.id)) {
             
             this.destroy();
         }
@@ -44,8 +45,11 @@ SS.TransformerInitiator = Backbone.Model.extend({
 
 SS.Transformer = Backbone.Model.extend({
 
-    initialize: function() {
-        this.boundingBox = SS.boundingBoxForGeomNode(this.attributes.editingNode);
+    initialize: function(attributes) {
+        this.transform = attributes.transform;
+        this.originalNode = attributes.originalNode;
+        this.editingNode = attributes.editingNode;
+        this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
         this.center = SS.transformers.centerOfGeom(this.boundingBox);
 
         this.views = [];
@@ -65,32 +69,32 @@ SS.Transformer = Backbone.Model.extend({
             }
         };
 
-        var transform = this.attributes.transform;
+        var transform = this.transform;
         var schema = SS.schemas[transform.type];
         updateValues(transform.origin, schema.properties.origin);
         updateValues(transform.parameters, schema.properties.parameters);
 
         this.trigger('change:model');
-        this.boundingBox = SS.boundingBoxForGeomNode(this.attributes.editingNode);
+        this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
 
         this.trigger('change');
     },
 
     tryCommit: function() {
-        var cmd =  update_geom_command(this.attributes.originalNode, 
-                                       this.attributes.editingNode, 
-                                       this.attributes.editingNode); 
+        var cmd =  update_geom_command(this.originalNode, 
+                                       this.editingNode, 
+                                       this.editingNode); 
         command_stack.execute(cmd);
         console.log('Try Commit');
     },
 
     cancel: function() {
-        geom_doc.replace(this.attributes.editingNode, 
-                         this.attributes.originalNode);
+        geom_doc.replace(this.editingNode, 
+                         this.originalNode);
     },
 
     geomDocReplace: function(original, replacement) {
-        if (original === this.attributes.editingNode) {
+        if (original === this.editingNode) {
             this.destroy();
         }
     },
@@ -183,8 +187,8 @@ SS.TransformDOMView = Backbone.View.extend({
     },
 
     render: function() {
-        var geomNode = this.model.attributes.editingNode;
-        var transform = this.model.attributes.transform;
+        var geomNode = this.model.editingNode;
+        var transform = this.model.transform;
         var schema = SS.schemas[transform.type];
     
         // Origin & Orientation
@@ -248,7 +252,7 @@ SS.TransformDOMView = Backbone.View.extend({
             }
         };
 
-        var transform = this.model.attributes.transform;
+        var transform = this.model.transform;
         var schema = SS.schemas[transform.type];
         updateValues(transform.origin, schema.properties.origin);
         updateValues(transform.parameters, schema.properties.parameters);

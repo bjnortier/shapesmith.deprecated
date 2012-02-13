@@ -2,9 +2,9 @@ var SS = SS || {};
 
 SS.RotateTransformerInitiator = SS.TransformerInitiator.extend({
 
-    initialize: function() { 
-        SS.TransformerInitiator.prototype.initialize.call(this);
-
+    initialize: function(attributes) { 
+        SS.TransformerInitiator.prototype.initialize.call(this, attributes);
+        
         this.arrowViews = [
 	    new SS.RotateArrowViewX({model: this}),
             new SS.RotateArrowViewY({model: this}),
@@ -19,7 +19,7 @@ SS.RotateTransformerInitiator = SS.TransformerInitiator.extend({
 
     mouseDownOnArrow: function(arrowView) {
         
-	var geomNode = this.attributes.geomNode;
+	var geomNode = this.geomNode;
         var editingNode = geomNode.editableCopy();
         var parameters = {u: arrowView.axis.x,
                           v: arrowView.axis.y,
@@ -55,37 +55,44 @@ SS.RotateTransformerInitiator = SS.TransformerInitiator.extend({
 
 SS.RotateTransformer = SS.Transformer.extend({
 
-    initialize: function() { 
-        SS.Transformer.prototype.initialize.call(this);
+    initialize: function(attributes) { 
+        SS.Transformer.prototype.initialize.call(this, attributes);
 
-        var arrowViews = [
-	    new SS.RotateArrowViewX({model: this}),
-            new SS.RotateArrowViewY({model: this}),
-            new SS.RotateArrowViewZ({model: this}),
-	];
-        for (var i = 0; i < 3; ++i) {
-            SS.sceneView.replaceSceneObjectViewInMouseState(this.attributes.arrowViews[i], arrowViews[i]);
+        if (attributes.editingExisting) {
+            this.views = this.views.concat([
+                new SS.TransformDOMView({model: this}),
+            ]);
+        } else {
+            this.anchorPosition = attributes.anchorPosition;
+            var arrowViews = [
+	        new SS.RotateArrowViewX({model: this}),
+                new SS.RotateArrowViewY({model: this}),
+                new SS.RotateArrowViewZ({model: this}),
+	    ];
+            for (var i = 0; i < 3; ++i) {
+                SS.sceneView.replaceSceneObjectViewInMouseState(attributes.arrowViews[i], arrowViews[i]);
+            }
+
+            var newViews = [
+                new SS.RotateGeomNodeView({model: this}),
+                new SS.TransformDOMView({model: this}),
+                new SS.RotateAxesView({model: this}),
+                new SS.RotateAngleView({model: this}),
+            ];
+
+            this.views = this.views.concat(newViews);
+            this.views = this.views.concat(arrowViews);
         }
-
-        var newViews = [
-            new SS.RotateGeomNodeView({model: this}),
-            new SS.TransformDOMView({model: this}),
-            new SS.RotateAxesView({model: this}),
-            new SS.RotateAngleView({model: this}),
-        ];
-
-        this.views = this.views.concat(newViews);
-        this.views = this.views.concat(arrowViews);
     },
 
     mouseDownOnArrow: function(arrowView) {
-        this.attributes.anchorPosition = arrowView.anchorFunction();
-        this.attributes.rotationPlane  = arrowView.rotationPlane;
+        this.anchorPosition = arrowView.anchorFunction();
+        this.rotationPlane  = arrowView.rotationPlane;
     },
 
     setParameters: function(parameters) {
         for (var key in parameters) {
-            this.attributes.transform.parameters[key] = parameters[key];
+            this.transform.parameters[key] = parameters[key];
         }
 
         this.trigger('change:model');
@@ -102,7 +109,7 @@ SS.RotateGeomNodeView = Backbone.View.extend({
     },
 
     render: function() {
-        var transform = this.model.attributes.transform;
+        var transform = this.model.transform;
         var center = new THREE.Vector3(transform.origin.x,
                                        transform.origin.y,
                                        transform.origin.z);
@@ -111,11 +118,11 @@ SS.RotateGeomNodeView = Backbone.View.extend({
                                      transform.parameters.v,
                                      transform.parameters.w);
 
-        SS.rotateGeomNodeRendering(this.model.attributes.originalNode, 
-                                   this.model.attributes.editingNode, 
+        SS.rotateGeomNodeRendering(this.model.originalNode, 
+                                   this.model.editingNode, 
                                    center,
                                    axis,
-                                   this.model.attributes.transform.parameters.angle);
+                                   this.model.transform.parameters.angle);
     },
 
 });
@@ -190,7 +197,7 @@ SS.RotateArrowView = SS.ActiveTransformerView.extend({
                 positionOnRotationPlane.y, 
                 positionOnRotationPlane.z),
             this.model.center).normalize();
-        var v2 = new THREE.Vector3().sub(this.model.attributes.anchorPosition,
+        var v2 = new THREE.Vector3().sub(this.model.anchorPosition,
                                          this.model.center).normalize();
         var v2CrossV1 = new THREE.Vector3().cross(v2, v1);
         var rotationVector = this.axis;
@@ -387,7 +394,7 @@ SS.RotateAngleView = SS.SceneObjectView.extend({
     render: function() {
         this.clear();
 
-        var params = this.model.attributes.transform.parameters;
+        var params = this.model.transform.parameters;
         if (!(((params.u !== 0) && (params.v === 0) && (params.w === 0)) ||
               ((params.u === 0) && (params.v !== 0) && (params.w === 0)) ||
               ((params.u === 0) && (params.v === 0) && (params.w !== 0)))) {
@@ -399,10 +406,10 @@ SS.RotateAngleView = SS.SceneObjectView.extend({
         var angleGeometry = new THREE.Geometry();
         angleGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,0)));
 
-        var r = new THREE.Vector3().sub(this.model.attributes.anchorPosition, 
+        var r = new THREE.Vector3().sub(this.model.anchorPosition, 
                                         this.model.center).length()
 
-        var angle = this.model.attributes.transform.parameters.angle || 0;
+        var angle = this.model.transform.parameters.angle || 0;
         for (var i = 0; 
              angle > 0 ? i <= Math.round(angle) : i > Math.round(angle); 
              angle > 0 ? ++i : --i) {
@@ -432,10 +439,10 @@ SS.RotateAngleView = SS.SceneObjectView.extend({
 
         text.position.z = (r+3)*Math.cos(angle/180*Math.PI) - r;
         text.position.x = (r+3)*Math.sin(angle/180*Math.PI);
-        if (this.model.attributes.transform.parameters.v > 0) {
+        if (this.model.transform.parameters.v > 0) {
             text.rotation.z = Math.PI;
         }
-        if (this.model.attributes.transform.parameters.u > 0) {
+        if (this.model.transform.parameters.u > 0) {
             text.rotation.z = -Math.PI/2;
         }
         text.rotation.x = -Math.PI/2;
@@ -443,7 +450,7 @@ SS.RotateAngleView = SS.SceneObjectView.extend({
 
         this.sceneObject.add(rotationAngle);
 
-        this.sceneObject.position = this.model.attributes.anchorPosition;
+        this.sceneObject.position = this.model.anchorPosition;
         this.sceneObject.rotation.x = 0;
         this.sceneObject.rotation.y = 0;
         this.sceneObject.rotation.z = 0;

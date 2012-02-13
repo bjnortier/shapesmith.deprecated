@@ -59,8 +59,7 @@ function renderTransform(geomNode, transformIndex) {
     var parametersTemplate = '<table>{{#paramsArr}}<tr ><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}</td></tr>{{/paramsArr}}</table>';
     var paramsTable = $.mustache(parametersTemplate, {paramsArr : paramsArr});
 
-
-    var template = '<table><tr><td><img class="show-hide-contents" src="/static/images/arrow_hidden.png"></img>{{type}}{{^editing}}<img class="{{delete-class}}" src="/static/images/delete_button.png" alt="delete"/>{{/editing}}</td></tr><tr style="{{contentsStyle}}"><td>{{{originTable}}}</td></tr><tr style="{{contentsStyle}}"><td>       {{{paramsTable}}}</td></tr></table>';
+    var template = '{{#editing}}<div id="editing-area"></div>{{/editing}}{{^editing}}<table><tr><td><img class="show-hide-contents" src="/static/images/arrow_hidden.png"></img>{{type}}<img class="{{delete-class}}" src="/static/images/delete_button.png" alt="delete"/></td></tr><tr style="{{contentsStyle}}"><td>{{{originTable}}}</td></tr><tr style="{{contentsStyle}}"><td>       {{{paramsTable}}}</td></tr></table>{{/editing}}';
 
     var view = {
         type: transform.type,
@@ -269,6 +268,7 @@ function TreeView() {
         $("#geom-model-doc tr:nth-child(even)").addClass("even");
         $("#geom-model-doc tr:nth-child(odd)").addClass("odd");
 
+        $('.select-geom').unbind('click');
         $('.select-geom').click(function(event) {
             var id;
             var pattern = /^target-(.*)$/;
@@ -286,6 +286,7 @@ function TreeView() {
         });
 
         // Edit geom
+        $('.edit-geom').unbind('dblclick');
         $('.edit-geom').dblclick(function() { 
 	    selectionManager.deselectAll();
 
@@ -306,6 +307,7 @@ function TreeView() {
 	
 
         // Edit transform
+        $('.edit-transform').unbind('dblclick');
         $('.edit-transform').dblclick(function() { 
 	    selectionManager.deselectAll();
             var id;
@@ -324,13 +326,23 @@ function TreeView() {
             editingNode.transforms[transformIndex].editing = true;
             geom_doc.replace(geomNode, editingNode);
 
-            var transformNode = editingNode.transforms[transformIndex];
-            var factoryFunction = 'edit' + transformNode.type.charAt(0).toUpperCase() + transformNode.type.substring(1);
-            if (SS.constructors[factoryFunction]) {
-                SS.constructors[factoryFunction](editingNode, transformNode);
+            var transform = editingNode.transforms[transformIndex];
+
+            var constructor;
+            if (transform.type === 'translate') {
+                constructor = SS.TranslateTransformer;
+            } else if (transform.type === 'scale') {
+                constructor = SS.ScaleTransformer;
+            } else if (transform.type === 'rotate') {
+                constructor = SS.RotateTransformer;
             }
+            new constructor({originalNode: geomNode,
+                             editingNode: editingNode, 
+                             editingExisting: true,
+                             transform: transform});
         });
 
+        $('.delete-transform').unbind('click');
         $('.delete-transform').click(function() {
             var id;
             var transformIndex;
@@ -352,6 +364,7 @@ function TreeView() {
         });
 
         // Show/Hide
+        $('.show-hide-contents').unbind('click');
         $('.show-hide-contents').click(function() {
             var tbody = $(this).parent().parent().parent();
             if ($(this).hasClass('contents-showing')) {

@@ -3,15 +3,16 @@ var SS = SS || {};
 
 SS.TranslateTransformerInitiator = SS.TransformerInitiator.extend({
 
-    initialize: function() { 
-        SS.TransformerInitiator.prototype.initialize.call(this);
+    initialize: function(attributes) { 
+        SS.TransformerInitiator.prototype.initialize.call(this, attributes);
+        this.geomNode = attributes.geomNode;
         this.translateView = new SS.TranslateTransformerView({model: this});
         this.views.push(this.translateView);
     },
 
     mouseDownOnTranslate: function(translateView) {
         
-	var geomNode = this.attributes.geomNode;
+        var geomNode = this.geomNode;
         var editingNode = geomNode.editableCopy();
         var transform = new Transform({
             type: 'translate',
@@ -41,44 +42,51 @@ SS.TranslateTransformerInitiator = SS.TransformerInitiator.extend({
 
 SS.TranslateTransformer = SS.Transformer.extend({
 
-    initialize: function() { 
-        SS.Transformer.prototype.initialize.call(this);
+    initialize: function(attributes) { 
+        SS.Transformer.prototype.initialize.call(this, attributes);
 
-        this.translateView = new SS.TranslateTransformerView({model: this});
-        this.views.push(this.translateView);
-        SS.sceneView.replaceSceneObjectViewInMouseState(this.attributes.translateView,  this.translateView);
-
-        this.views = this.views.concat([
-            new SS.TransformDOMView({model: this}),
-            new SS.TranslateGeomNodeView({model: this}),
-            new SS.ScaleBoxView({model: this}),
-            new SS.ScaleFootprintView({model: this}),
-        ]);
-
-        this.translateView.on('mouseDrag', this.drag, this);
+        if (attributes.editingExisting) {
+            this.views = this.views.concat([
+                new SS.TransformDOMView({model: this}),
+            ]);
+        } else {
+            this.translateView = new SS.TranslateTransformerView({model: this});
+            this.views.push(this.translateView);
+            if (attributes.translateView) {
+                SS.sceneView.replaceSceneObjectViewInMouseState(attributes.translateView,  this.translateView);
+            }
+            
+            this.views = this.views.concat([
+                new SS.TranslateGeomNodeView({model: this}),
+                new SS.TransformDOMView({model: this}),
+                new SS.ScaleBoxView({model: this}),
+                new SS.ScaleFootprintView({model: this}),
+            ]);
+            
+            this.translateView.on('mouseDrag', this.drag, this);
+        }
     },
 
     drag: function(event) {
         
         var workplanePosition = SS.sceneView.determinePositionOnWorkplane(event);
-        var u = workplanePosition.x - this.attributes.transform.origin.x;
-        var v = workplanePosition.y - this.attributes.transform.origin.y;
+        var u = workplanePosition.x - this.transform.origin.x;
+        var v = workplanePosition.y - this.transform.origin.y;
 
-        this.attributes.transform.parameters.u = parseFloat(u.toFixed(3));        
-        this.attributes.transform.parameters.v = parseFloat(v.toFixed(3));
+        this.transform.parameters.u = parseFloat(u.toFixed(3));        
+        this.transform.parameters.v = parseFloat(v.toFixed(3));
         if (!event.ctrlKey) {
-            this.attributes.transform.parameters.u = 
-                Math.round(this.attributes.transform.parameters.u*10)/10;    
-            this.attributes.transform.parameters.v = 
-                Math.round(this.attributes.transform.parameters.v*10)/10;
+            this.transform.parameters.u = 
+                Math.round(this.transform.parameters.u*10)/10;    
+            this.transform.parameters.v = 
+                Math.round(this.transform.parameters.v*10)/10;
         }
 
         this.trigger('change:model');
-        this.boundingBox = SS.boundingBoxForGeomNode(this.attributes.editingNode);
+        this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
         this.center = SS.transformers.centerOfGeom(this.boundingBox);
 
         this.trigger('change');
-
     },
 
 });
@@ -129,15 +137,17 @@ SS.TranslateGeomNodeView = Backbone.View.extend({
     },
 
     render: function() {
-        var transform = this.model.attributes.transform;
-        var position = new THREE.Vector3(transform.parameters.u,
-                                         transform.parameters.v,
-                                         transform.parameters.w);
-
-        // TODO: Replace with model for geom node
-        SS.translateGeomNodeRendering(this.model.attributes.originalNode, 
-                                      this.model.attributes.editingNode, 
-                                      position);
+        if (this.model.originalNode.originalSceneObjects) {
+            var transform = this.model.transform;
+            var position = new THREE.Vector3(transform.parameters.u,
+                                             transform.parameters.v,
+                                             transform.parameters.w);
+            
+            // TODO: Replace with model for geom node
+            SS.translateGeomNodeRendering(this.model.originalNode, 
+                                          this.model.editingNode, 
+                                          position);
+        }
     },
 
 });
