@@ -334,8 +334,8 @@ var SS = SS || {};
         }
     }
 
-    SS.rotateGeomNodeRendering = function(originalNode, editingNode, center, u, v, w, angle) {
-        var normUVW = new THREE.Vector3(u, v, w).normalize();
+    SS.rotateGeomNodeRendering = function(originalNode, editingNode, center, axis, angle) {
+        var normUVW = axis.clone().normalize();
         var un = normUVW.x, vn = normUVW.y, wn = normUVW.z;
 
         for (key in editingNode.sceneObjects) {

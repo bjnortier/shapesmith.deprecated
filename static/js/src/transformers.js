@@ -146,6 +146,7 @@ SS.transformers.RotateElement = function(geomNode, elementName) {
 
     this.drawAngle = function(angle, params) {
         this.sceneObject.remove(rotationAngle);
+        
         rotationAngle = new THREE.Object3D();
 
         var angleGeometry = new THREE.Geometry();
@@ -237,10 +238,10 @@ SS.transformers.Manager = function() {
 
     var activateScaleAndTranslate = function(geomNode) {
         initiators.map(function(initiator) {
-            initiator.detroy();
+            initiator.destroy();
         });
         initiators = [];
-        initiators.push(new SS.ScaleTransformerInitiator({geomNode: geomNode}));
+        initiators.push(new SS.RotateTransformerInitiator({geomNode: geomNode}));
         initiators.push(new SS.TranslateTransformerInitiator({geomNode: geomNode}));
 
 
@@ -262,6 +263,8 @@ SS.transformers.Manager = function() {
             initiator.destroy();
         });
         initiators = [];
+        initiators.push(new SS.ScaleTransformerInitiator({geomNode: geomNode}));
+        initiators.push(new SS.TranslateTransformerInitiator({geomNode: geomNode}));
 
         /*uiElements = [];
         SS.sceneView.scene.remove(transformerUI);

@@ -105,9 +105,6 @@ SS.SceneObjectView = Backbone.View.extend({
 	SS.sceneView.registerSceneObjectView(this);
 
         this.model.on('change', this.render, this);
-        
-        this.render();
-        this.postRender();
     },
 
     clear: function() {
@@ -140,12 +137,25 @@ SS.ActiveTransformerView = SS.SceneObjectView.extend({
         this.model.on("change", this.render, this);
     },
 
+
+    recursiveHighlightFn:  function(object, opacity) {
+        var functor = function(object) {
+	    if (object.material) {
+	        object.material.opacity = opacity;
+	    }
+	    if (object.children) {
+	        object.children.map(functor);
+	    }
+        }
+        functor(object);
+    },
+
     highlight: function() {
-	SS.recursiveHighlightFn(this.sceneObject, 1.0);
+	this.recursiveHighlightFn(this.sceneObject, 1.0);
     },
 
     unhighlight: function() {
-	SS.recursiveHighlightFn(this.sceneObject, 0.5);
+	this.recursiveHighlightFn(this.sceneObject, 0.5);
     },
 
     remove: function() {

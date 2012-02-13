@@ -126,7 +126,7 @@
   <script type="text/javascript" src="/static/js/src/Transformer.js"></script>
   <script type="text/javascript" src="/static/js/src/TranslateTransformer.js"></script>
   <script type="text/javascript" src="/static/js/src/ScaleTransformer.js"></script>
-  <script type="text/javascript" src="/static/js/src/ScaleTransformInitiator.js"></script>
+  <script type="text/javascript" src="/static/js/src/RotateTransformer.js"></script>
 
   <script type="text/javascript">
 
