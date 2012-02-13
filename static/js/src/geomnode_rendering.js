@@ -103,21 +103,55 @@ var SS = SS || {};
 
     }
 
-   var create1DSelectionGeometries = function(mesh) {
-       return mesh.segments.map(function(segment) {
-           var positions = [];
-           for (var i = segment.start; i < segment.end; i+=3) {
-            positions.push(new THREE.Vector3(mesh.positions[i], 
-					     mesh.positions[i + 1], 
-					     mesh.positions[i + 2]));
-           }
-           return new THREE.PipeGeometry(3, positions);
-       });
-   }
+  
 
     var createGeometry = function(meshes) {
         return {'faces' : create3DGeometries(meshes['faces']),
                 'edges' : create1DGeometries(meshes['edges'])};
+    }
+
+    var create1DSelectionGeometries = function(mesh) {
+        return mesh.segments.map(function(segment) {
+           var positions = [];
+            for (var i = segment.start; i < segment.end; i+=3) {
+                positions.push(new THREE.Vector3(mesh.positions[i], 
+					         mesh.positions[i + 1], 
+					         mesh.positions[i + 2]));
+            }
+            return new THREE.PipeGeometry(3, positions);
+        });
+    }
+
+    var createVertexGeometries = function(mesh) {
+        var precisionPoints = 4; 
+        var precision = Math.pow( 10, precisionPoints );
+        var keyForPosition = function(position) {
+            return [ Math.round( position.x * precision ), Math.round( position.y * precision ), Math.round( position.z * precision ) ].join( '_' );
+        }
+
+        var positions = {};
+        var vertexMaterial = new THREE.MeshBasicMaterial({color: 0xffffff, opacity: 0.8});
+        mesh.segments.map(function(segment) {
+            var startPosition = new THREE.Vector3(mesh.positions[segment.start], 
+					          mesh.positions[segment.start + 1], 
+					          mesh.positions[segment.start + 2]);
+            var endPosition = new THREE.Vector3(mesh.positions[segment.end - 2], 
+					      mesh.positions[segment.end - 1], 
+					      mesh.positions[segment.end]);
+            [startPosition, endPosition].map(function(position) {
+                var key = keyForPosition(position);
+                if (!positions[key]) {
+                    positions[key] = new THREE.Mesh(new THREE.CubeGeometry(0.5, 0.5, 0.5), vertexMaterial);
+                    positions[key].position = position;
+                }
+            });
+        });
+
+        var cubes = [];
+        for (var key in positions) {
+            cubes.push(positions[key]);
+        }
+        return cubes;
     }
 
     var create3DGeometries = function(mesh) {
@@ -152,7 +186,6 @@ var SS = SS || {};
 	return [geometry];
     }
 
-
     SS.createGeometry = function(geomNode) {
 
         if (!geomNode.mesh) {
@@ -177,11 +210,18 @@ var SS = SS || {};
         var triangles = new THREE.Object3D();
         triangleGeometries.map(function(triangleGeometry) {
             var mesh = new THREE.Mesh(triangleGeometry, triangleMaterial);
-            mesh.doubleSided = true;
+            mesh.doubleSided = true; 
             mesh.name = objectName
             triangles.add(mesh);
         });
         triangles.name = objectName;
+
+        var vertexGeometries = createVertexGeometries(geomNode.mesh['edges']);
+        var vertices = new THREE.Object3D();
+        vertexGeometries.map(function(vertex) {
+            vertices.add(vertex);
+        });
+        vertices.names = objectName;
 
         var lineGeometries = create1DGeometries(geomNode.mesh['edges']);
         var lineMaterial = new THREE.LineBasicMaterial({ color: color, opacity: 1.0, linewidth: 2, transparent:true });
@@ -204,6 +244,7 @@ var SS = SS || {};
         selectionMeshes.name = objectName;                       
         
         return {'faces': triangles, 
+                'vertices' : vertices,
                 'edges': lines,
                 'selectionForEdges' : selectionMeshes};
     }
@@ -213,6 +254,7 @@ var SS = SS || {};
         if (geometries) {
             SS.sceneView.scene.add(geometries.faces);
             SS.sceneView.scene.add(geometries.edges);
+            SS.sceneView.scene.add(geometries.vertices);
             SS.sceneView.scene.add(geometries.selectionForEdges);
             geomNode.sceneObjects = geometries;
         }

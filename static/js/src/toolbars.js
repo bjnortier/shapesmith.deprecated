@@ -199,6 +199,10 @@ $(document).ready(function() {
                function() { 
                    SS.constructors.createRectangle2d(create_primitive('rectangle2d'));
 	       }).render($('#2Dprimitives'));
+    new Action('Triangle 2D', '/static/images/triangle2d.png', 
+               function() { 
+                   create_primitive('triangle2d');
+	       }).render($('#2Dprimitives'));
     new Action('Text 2D', '/static/images/text2d.png', 
                function() { 
                    SS.constructors.createText2d(create_primitive('text2d'));

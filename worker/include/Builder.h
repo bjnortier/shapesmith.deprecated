@@ -106,6 +106,12 @@ public:
     virtual ~Rectangle2DBuilder() {};
 };
 
+class Triangle2DBuilder : public Builder2D {
+public:
+    Triangle2DBuilder(map< string, mValue > json);
+    virtual ~Triangle2DBuilder() {};
+};
+
 class Text2DBuilder : public Builder2D {
 public:
     Text2DBuilder(map< string, mValue > json);

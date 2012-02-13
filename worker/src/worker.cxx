@@ -105,6 +105,8 @@ string create_geometry(string id, map< string, mValue > json) {
         return create_primitive<Ellipse2DBuilder>(id, json);
     } else if (geomType == "rectangle2d") {
         return create_primitive<Rectangle2DBuilder>(id, json);
+    } else if (geomType == "triangle2d") {
+        return create_primitive<Triangle2DBuilder>(id, json);
     } else if (geomType == "text2d") {
         return create_primitive<Text2DBuilder>(id, json);
 

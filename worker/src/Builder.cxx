@@ -240,6 +240,31 @@ Rectangle2DBuilder::Rectangle2DBuilder(map< string, mValue > json) {
     PostProcess(json);  
 }
 
+Triangle2DBuilder::Triangle2DBuilder(map< string, mValue > json) {
+    map< string, mValue > parameters = json["parameters"].get_obj();
+    double u1 = Util::to_d(parameters["u1"]);
+    double v1 = Util::to_d(parameters["v1"]);
+    double w1 = Util::to_d(parameters["w1"]);
+    double u2 = Util::to_d(parameters["u2"]);
+    double v2 = Util::to_d(parameters["v2"]);
+    double w2 = Util::to_d(parameters["w2"]);
+    double u3 = Util::to_d(parameters["u3"]);
+    double v3 = Util::to_d(parameters["v3"]);
+    double w3 = Util::to_d(parameters["w3"]);
+
+    
+    gp_Pnt points[3] = {gp_Pnt(u1, v1, w1), gp_Pnt(u2, v2, w2), gp_Pnt(u3, v3, w3)};
+    
+    TopoDS_Edge edges[3];
+    for (int i = 0; i < 3; ++i) {
+        edges[i] = BRepBuilderAPI_MakeEdge(GC_MakeSegment(points[i] , points[(i + 1) % 3]));
+    }
+    TopoDS_Wire wire = BRepBuilderAPI_MakeWire(edges[0], edges[1], edges[2]);
+    
+    shape_ = BRepBuilderAPI_MakeFace(wire);
+    PostProcess(json);  
+}
+
 
 #pragma mark 1D Builders
 

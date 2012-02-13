@@ -131,6 +131,28 @@ SS.schemas.rectangle2d = {
     }
 };
 
+SS.schemas.triangle2d = {
+    description: "Triangle2D",
+    type: 'object',
+    properties: {
+        origin: SS.schemas.originSchema,
+        parameters: {
+            type: 'object',
+            properties: {
+                'u1' : {type: 'number'},
+                'v1' : {type: 'number'},
+                'w1' : {type: 'number'},
+                'u2' : {type: 'number'},
+                'v2' : {type: 'number'},
+                'w2' : {type: 'number'},
+                'u3' : {type: 'number'},
+                'v3' : {type: 'number'},
+                'w3' : {type: 'number'},
+                }
+        }
+    }
+};
+
 SS.schemas.text2d = {
     description: "Text2D",
     type: 'object',

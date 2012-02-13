@@ -141,6 +141,9 @@ validate_geom_type(<<"rectangle2d">>, Props) ->
 			       {<<"u">>, fun not_zero/1},
 			       {<<"v">>, fun not_zero/1}
 			      ]);
+validate_geom_type(<<"triangle2d">>, Props) ->
+    validate_primitive(Props, [
+			      ]);
 validate_geom_type(<<"ellipse1d">>, Props) ->
     validate_primitive(Props, [
 			       {<<"r1">>, fun positive/1},
