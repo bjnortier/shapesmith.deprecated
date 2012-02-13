@@ -84,6 +84,7 @@ SS.TranslateTransformerView = SS.ActiveTransformerView.extend({
     initialize: function() {
 	SS.ActiveTransformerView.prototype.initialize.call(this);
         this.on('mouseDown', this.mouseDown, this);
+        this.render();
     },
 
     mouseDown: function() {

@@ -1,5 +1,11 @@
 var SS = SS || {};
 
+SS.transformers = {};
+SS.transformers.centerOfGeom = function(boundingBox) {
+    return new THREE.Vector3().add(boundingBox.min, 
+                                   new THREE.Vector3().sub(boundingBox.max, boundingBox.min).divideScalar(2));
+}
+
 SS.TransformerInitiator = Backbone.Model.extend({
     
     initialize: function() {
@@ -261,5 +267,5 @@ SS.TransformDOMView = Backbone.View.extend({
         this.model.updateFromDOMView();
         this.preventUpdate = false;
     },
-
+    
 });

@@ -9,7 +9,7 @@ var command_stack = new CommandStack(SS);
 var geom_doc = new GeomDocument();
 var treeView = new TreeView();
 
-SS.transformerManager = new SS.transformers.Manager();
+SS.transformerManager = new SS.TransformerManager();
 
 geom_doc.addListener(function(event) {
     treeView.geomDocUpdated(event);

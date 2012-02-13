@@ -136,6 +136,11 @@ SS.ScaleGeomNodeView = Backbone.View.extend({
 });
 
 SS.ScaleFactorView = SS.SceneObjectView.extend({
+
+    initialize: function() {
+        SS.SceneObjectView.prototype.initialize.call(this);
+        this.render();
+    },
     
     render: function() {
         this.clear();
@@ -228,6 +233,11 @@ SS.ScaleArrowView = SS.ActiveTransformerView.extend({
 });
 
 SS.ScaleArrowViewMaxXMaxY = SS.ScaleArrowView.extend({
+
+    initialize: function() {
+	SS.ScaleArrowView.prototype.initialize.call(this);
+        this.render();
+    },
     
     anchorFunction: function(boundingBox) {
         return {x: boundingBox.max.x, 
@@ -246,6 +256,11 @@ SS.ScaleArrowViewMaxXMaxY = SS.ScaleArrowView.extend({
 
 SS.ScaleArrowViewMinXMaxY = SS.ScaleArrowView.extend({
 
+    initialize: function() {
+	SS.ScaleArrowView.prototype.initialize.call(this);
+        this.render();
+    },
+
     anchorFunction: function(boundingBox) {
         return {x: boundingBox.min.x, 
                 y: boundingBox.max.y};
@@ -263,6 +278,11 @@ SS.ScaleArrowViewMinXMaxY = SS.ScaleArrowView.extend({
 
 SS.ScaleArrowViewMinXMinY = SS.ScaleArrowView.extend({
 
+    initialize: function() {
+	SS.ScaleArrowView.prototype.initialize.call(this);
+        this.render();
+    },
+
     anchorFunction: function(boundingBox) {
         return {x: boundingBox.min.x, 
                 y: boundingBox.min.y};
@@ -279,6 +299,11 @@ SS.ScaleArrowViewMinXMinY = SS.ScaleArrowView.extend({
 });
 
 SS.ScaleArrowViewMaxXMinY = SS.ScaleArrowView.extend({
+
+    initialize: function() {
+	SS.ScaleArrowView.prototype.initialize.call(this);
+        this.render();
+    },
 
     anchorFunction: function(boundingBox) {
         return {x: boundingBox.max.x, 
@@ -300,7 +325,7 @@ SS.ScaleBoxView = SS.SceneObjectView.extend({
 
     initialize: function() {
 	SS.SceneObjectView.prototype.initialize.call(this);
-       
+        this.render();
     },
     
     render: function() {
@@ -326,6 +351,11 @@ SS.ScaleBoxView = SS.SceneObjectView.extend({
 });
 
 SS.ScaleFootprintView = SS.SceneObjectView.extend({
+
+    initialize: function() {
+	SS.SceneObjectView.prototype.initialize.call(this);
+        this.render();
+    },
 
    
     render: function() {
