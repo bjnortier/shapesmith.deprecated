@@ -60,13 +60,18 @@ SS.TranslateTransformer = SS.Transformer.extend({
         var u = workplanePosition.x - this.attributes.transform.origin.x;
         var v = workplanePosition.y - this.attributes.transform.origin.y;
 
-        this.attributes.transform.parameters.u = u;        
-        this.attributes.transform.parameters.v = v;
+        this.attributes.transform.parameters.u = parseFloat(u.toFixed(3));        
+        this.attributes.transform.parameters.v = parseFloat(v.toFixed(3));
+        if (!event.ctrlKey) {
+            this.attributes.transform.parameters.u = 
+                Math.round(this.attributes.transform.parameters.u*10)/10;    
+            this.attributes.transform.parameters.v = 
+                Math.round(this.attributes.transform.parameters.v*10)/10;
+        }
 
         this.trigger('change:model');
         this.boundingBox = SS.boundingBoxForGeomNode(this.attributes.editingNode);
         this.center = SS.transformers.centerOfGeom(this.boundingBox);
-        console.log(JSON.stringify(this.boundingBox));
 
         this.trigger('change');
 

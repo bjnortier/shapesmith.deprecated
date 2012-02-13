@@ -236,6 +236,10 @@ SS.transformers.Manager = function() {
     }
 
     var activateScaleAndTranslate = function(geomNode) {
+        initiators.map(function(initiator) {
+            initiator.detroy();
+        });
+        initiators = [];
         initiators.push(new SS.ScaleTransformerInitiator({geomNode: geomNode}));
         initiators.push(new SS.TranslateTransformerInitiator({geomNode: geomNode}));
 
@@ -254,7 +258,12 @@ SS.transformers.Manager = function() {
     }
 
     var activateRotateAndTranslate = function(geomNode) {
-        uiElements = [];
+        initiators.map(function(initiator) {
+            initiator.destroy();
+        });
+        initiators = [];
+
+        /*uiElements = [];
         SS.sceneView.scene.remove(transformerUI);
         
         transformerUI = new THREE.Object3D();
@@ -319,7 +328,7 @@ SS.transformers.Manager = function() {
         }
 
 
-        SS.sceneView.scene.add(transformerUI);
+        SS.sceneView.scene.add(transformerUI);*/
     }
     
     var activate = function(geomNode) {

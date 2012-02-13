@@ -51,7 +51,7 @@ SS.ScaleTransformer = SS.Transformer.extend({
         var r2 = Math.sqrt(dxTo*dxTo + dyTo*dyTo);
 
         var factor = parseFloat((r2/r1).toFixed(3));
-        if (event.ctrlKey) {
+        if (!event.ctrlKey) {
             factor = Math.round(factor*10)/10;
         }
 
