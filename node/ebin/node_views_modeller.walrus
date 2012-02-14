@@ -120,12 +120,16 @@
   <script type="text/javascript" src="/static/js/src/SceneSelector.js"></script>
   <script type="text/javascript" src="/static/js/src/SceneView.js"></script>
   <script type="text/javascript" src="/static/js/src/UIState.js"></script>
+  <script type="text/javascript" src="/static/js/src/GeomNodeRenderingManager.js"></script>
+
+  <script type="text/javascript" src="/static/js/src/NodeModel.js"></script>
+  <script type="text/javascript" src="/static/js/src/Triangle2DCreator.js"></script>
+
   <script type="text/javascript" src="/static/js/src/TransformerManager.js"></script>
   <script type="text/javascript" src="/static/js/src/Transformer.js"></script>
   <script type="text/javascript" src="/static/js/src/TranslateTransformer.js"></script>
   <script type="text/javascript" src="/static/js/src/ScaleTransformer.js"></script>
   <script type="text/javascript" src="/static/js/src/RotateTransformer.js"></script>
-  <script type="text/javascript" src="/static/js/src/GeomNodeRenderingManager.js"></script>
 
 
   <script type="text/javascript">

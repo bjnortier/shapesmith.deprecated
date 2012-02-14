@@ -69,9 +69,30 @@ function create_primitive(type) {
     var geometryParams = {}, geomNode;
     var jsonSchema = SS.schemas[type];
 
-    for (var key in jsonSchema.properties.parameters.properties) {
-        geometryParams[key] = null;
+    var createParams = function(key, context, schema) {
+        if (schema.type !== 'array') {
+            context[key] = null;
+        } else {
+            
+            // Only support fixed length at the moment
+            if (schema.minItems !== schema.minItems) {
+                throw 'only fixed lenght arrays supported';
+            }
+            context[key] = [];
+            for (var i = 0; i < schema.maxItems; ++i) {
+                var params = {};
+                for (subKey in schema.items.properties) {
+                    createParams(subKey, params, schema.items.properties[subKey]);
+                }
+                context[key].push(params);
+            }
+        }
     }
+
+    for (var key in jsonSchema.properties.parameters.properties) {
+        createParams(key, geometryParams, jsonSchema.properties.parameters.properties[key]);
+    }
+    
     geomNode = new GeomNode({
         type: type,
         editing: true,
@@ -193,7 +214,7 @@ $(document).ready(function() {
 	       }).render($('#2Dprimitives'));
     new Action('Triangle 2D', '/static/images/triangle2d.png', 
                function() { 
-                   create_primitive('triangle2d');
+                   new SS.Triangle2DCreator({editingNode: create_primitive('triangle2d')});
 	       }).render($('#2Dprimitives'));
     new Action('Text 2D', '/static/images/text2d.png', 
                function() { 

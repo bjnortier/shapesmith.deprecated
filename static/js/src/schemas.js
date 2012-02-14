@@ -126,7 +126,7 @@ SS.schemas.rectangle2d = {
             properties: {
                 'u' : {type: 'number'},
                 'v' : {type: 'number'}
-                }
+            }
         }
     }
 };
@@ -139,16 +139,20 @@ SS.schemas.triangle2d = {
         parameters: {
             type: 'object',
             properties: {
-                'u1' : {type: 'number'},
-                'v1' : {type: 'number'},
-                'w1' : {type: 'number'},
-                'u2' : {type: 'number'},
-                'v2' : {type: 'number'},
-                'w2' : {type: 'number'},
-                'u3' : {type: 'number'},
-                'v3' : {type: 'number'},
-                'w3' : {type: 'number'},
+                'vertices' : {
+                    type: 'array',
+                    items: { 
+                        type: 'object',
+                        properties: {
+                            'u' : {type: 'number'},
+                            'v' : {type: 'number'},
+                            'w' : {type: 'number'}
+                        }
+                    },
+                    minItems: 3,
+                    maxItems: 3
                 }
+            }
         }
     }
 };

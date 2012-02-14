@@ -210,7 +210,7 @@ SS.ScaleArrowView = SS.ActiveTransformerView.extend({
                                        new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, 
                                                                     transparent: true, 
                                                                     opacity: 0.5}));
-        arrowMesh.doubleSides = true;
+        arrowMesh.doubleSided = true;
         
         var lineGeom = new THREE.Geometry();
         lineGeom.vertices = arrowGeometry.vertices;
@@ -221,9 +221,6 @@ SS.ScaleArrowView = SS.ActiveTransformerView.extend({
                                                                transparent: true, 
                                                                opacity: 0.5 }));
 
-        arrowMesh.name = {transformerElement: 'scale+X+Y'};
-        line.name = {transformerElement:  'scale+X+Y'};
-        
         this.sceneObject.add(arrowMesh);
         this.sceneObject.add(line);
        
@@ -367,21 +364,23 @@ SS.ScaleFootprintView = SS.SceneObjectView.extend({
         var height = this.model.boundingBox.max.z - this.model.boundingBox.min.z;
 
         var planeGeometry = new THREE.PlaneGeometry(width, depth); 
-        var planeMesh = THREE.SceneUtils.createMultiMaterialObject(
-            planeGeometry, 
-            [
-                new THREE.MeshBasicMaterial({color: SS.constructors.lineColor, 
-                                             wireframe: true}),
-                new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, 
-                                             transparent: true, 
-                                             opacity: 0.5})
-            ]);
+        var planeMesh = new THREE.Mesh(planeGeometry, 
+                                       new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, 
+                                                                    transparent: true, 
+                                                                    opacity: 0.5}));
+        var planeBorder = new THREE.Mesh(planeGeometry, 
+                                         new THREE.MeshBasicMaterial({color: SS.constructors.lineColor, 
+                                                                      wireframe: true}));
 
         planeMesh.doubleSided = true;
+
         planeMesh.position.x = this.model.boundingBox.min.x + width/2;
         planeMesh.position.y = this.model.boundingBox.min.y + depth/2;
         planeMesh.position.z = -0.05;
+        planeBorder.position = planeMesh.position;
+
 	this.sceneObject.add(planeMesh);
+	this.sceneObject.add(planeBorder);
 
         this.postRender();
         return this;

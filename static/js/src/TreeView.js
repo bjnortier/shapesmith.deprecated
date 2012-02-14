@@ -1,9 +1,9 @@
-function renderInputElement(key, jsonSchema) {
+function renderInputElement(key, context, jsonSchema) {
     
     var item = jsonSchema.properties[key];
     if ((item.type === 'number') || (item.type === 'integer')) {
         var element = '<input class="field" id="{{key}}" type="number" value="{{value}}"';
-        if (item.minimum !== null) {
+        if (item.minimum !== undefined) {
             element += ' min="' + item.minimum + '"';
         }
         if (item.maximum) {
@@ -23,6 +23,30 @@ function renderInputElement(key, jsonSchema) {
         } else {
             return '<input id="{{key}}" type="text" value="{{value}}"/>';
         }
+    } else if (item.type === 'array') {
+        
+        var elements = '';
+        for (var k = 0; k < context[key].length; ++k) {
+
+            var object = context[key][k];
+            var subSchema = jsonSchema.properties[key].items;
+            var items = [];
+            for (var subKey in object) {
+                var template = '<tr><td>{{label}}</td><td>' + renderInputElement(subKey, object[subKey], subSchema) + '</td></tr>';
+                items.push($.mustache(template, {label: subKey, 
+                                                 value: context[key][k][subKey],
+                                                 key: subKey + '_' + k}));
+            }
+
+            var template = '<table><tr><td>{{index}}</td><td><table>{{#items}}{{{.}}}{{/items}}</table></td></tr></table>';
+            var view = {
+                index: k,
+                items: items
+            };
+            var x = $.mustache(template, view);
+            elements += x;
+        }
+        return elements;
     }
         
 }
@@ -34,14 +58,15 @@ function renderTransform(geomNode, transformIndex) {
     // Origin & Orientation
     var originTable = null;
     if (transform.origin) {
-	var originArr = ['x', 'y', 'z'].map(function(key) {
-	    return {key: key, 
-		    value: transform.origin[key], 
-		    'edit-class': 'edit-transform target-' + geomNode.id + '-' + transformIndex,
-		    editing: transform.editing,
-                    inputElement: renderInputElement(key, schema.properties.origin)
-                   }
-	});
+	var originArr = [];
+        for (key in transform.origin) {
+	    originArr.push({key: key, 
+		            value: transform.origin[key], 
+		            'edit-class': 'edit-transform target-' + geomNode.id + '-' + transformIndex,
+		            editing: transform.editing,
+                            inputElement: renderInputElement(key, transform.origin, schema.properties.origin)
+                           });
+	}
 	var originTemplate = '<table>{{#originArr}}<tr><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}</td></tr>{{/originArr}}</table>';
 	var originTable = $.mustache(originTemplate, {originArr : originArr});
     }
@@ -53,7 +78,7 @@ function renderTransform(geomNode, transformIndex) {
                         value: transform.parameters[key],
                         'edit-class': 'edit-transform target-' + geomNode.id + '-' + transformIndex,
                         editing: transform.editing,
-                        inputElement: renderInputElement(key, schema.properties.parameters)
+                        inputElement: renderInputElement(key, transform.parameters, schema.properties.parameters)
                        });
     }
     var parametersTemplate = '<table>{{#paramsArr}}<tr ><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}</td></tr>{{/paramsArr}}</table>';
@@ -80,14 +105,15 @@ function renderNode(geomNode) {
     // Origin & Orientation
     var originTable = null;
     if (schema.properties.origin) {
-	var originArr = ['x', 'y', 'z'].map(function(key) {
-	    return {key: key, 
-		    value: geomNode.origin[key], 
-		    clazz: 'edit-geom target-' + geomNode.id,
-		    editing: geomNode.editing,
-                    inputElement: renderInputElement(key, schema.properties.origin)
-                   }
-	});
+        var originArr = [];
+        for (key in geomNode.origin) {
+	    originArr.push({key: key, 
+		            value: geomNode.origin[key], 
+		            clazz: 'edit-geom target-' + geomNode.id,
+		            editing: geomNode.editing,
+                            inputElement: renderInputElement(key, geomNode.origin, schema.properties.origin)
+                           });
+	}
 	var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{clazz}}">{{value}}</span>{{/editing}}{{#editing}}{{{inputElement}}}{{/editing}}</td></tr>{{/originArr}}</table>';
 	var originTable = $.mustache(originTemplate, {originArr : originArr});
     }
@@ -100,7 +126,7 @@ function renderNode(geomNode) {
                             value: geomNode.parameters[key],
                             clazz: 'edit-geom target-' + geomNode.id,
                             editing: geomNode.editing,
-                            inputElement: renderInputElement(key, schema.properties.parameters)
+                            inputElement: renderInputElement(key,  geomNode.parameters, schema.properties.parameters)
                            });
         }
     }
@@ -116,7 +142,7 @@ function renderNode(geomNode) {
     // Children
     var childTables = geomNode.children.map(renderNode);
     
-    var childTemplate = '<table id="{{id}}"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img>{{^editing}}<span class="{{clazz}}">{{type}}</span>{{/editing}}{{#editing}}{{type}}{{/editing}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input id="modal-ok" type="submit" value="Ok"/><input id="modal-cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>';
+    var childTemplate = '{{#editing}}<div id="editing-area"></div>{{/editing}}{{^editing}}<table id="{{id}}"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img><span class="{{clazz}}">{{type}}</span></td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>{{/editing}}';
 
     var clazz = geom_doc.isRoot(geomNode) ? 
 	'select-geom target-' + geomNode.id : 
