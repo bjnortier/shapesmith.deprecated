@@ -108,13 +108,5 @@ function GeomDocument() {
         throw Error("node not found");
     }
 
-    this.getPreviewNode = function() {
-	for(i in this.rootNodes) {
-	    if (this.rootNodes[i].editing) {
-		return this.rootNodes[i];
-	    }
-	}
-	return null;
-    }
 
 }

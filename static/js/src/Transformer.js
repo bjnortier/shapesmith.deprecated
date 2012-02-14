@@ -58,6 +58,15 @@ SS.Transformer = Backbone.Model.extend({
         this.views = [];
 
         geom_doc.on('replace', this.geomDocReplace, this);
+        command_stack.on('beforePop', this.cancel, this);
+    },
+
+    destroy: function() {
+        this.views.map(function(view) {
+            view.remove();
+        });
+        geom_doc.off('replace', this.geomDocReplace);
+        command_stack.off('beforePop', this.cancel, this);
     },
 
     updateFromDOMView: function() {
@@ -105,12 +114,6 @@ SS.Transformer = Backbone.Model.extend({
         
     },
 
-    destroy: function() {
-        this.views.map(function(view) {
-            view.remove();
-        });
-        geom_doc.off('replace', this.geomDocReplace);
-    },
 
 });
 

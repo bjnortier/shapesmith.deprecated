@@ -33,7 +33,7 @@ SS.popupMenu = function() {
     }
     
     var showIfNotCancelled = function(event) {
-	if (!cancelled && !SS.constructors.active) {
+	if (!cancelled && !(SS.UI_STATE.state === SS.UIStates.EDITING)) {
 	    updateToolWheelPosition(event);
 	    addActions();
 	    show();
