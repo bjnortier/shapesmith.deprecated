@@ -120,6 +120,8 @@ SS.SceneView = function(container) {
 
 	that.triggerMouseOverSceneObjectViews(event);
 
+
+
         var mouse = {};
 	mouse.x = event.clientX;
 	mouse.y = event.clientY;
@@ -181,7 +183,12 @@ SS.SceneView = function(container) {
 	} 
 
 
-        if (cursoid.getCursoid(scene, camera, event) ||
+        var mouseOverActiveObjects = mouseOverSceneObjectViews.filter(function(object) {
+            return object.active;
+        });
+        if (mouseOverActiveObjects.length > 0) {
+            document.body.style.cursor = 'pointer';
+        } else if (cursoid.getCursoid(scene, camera, event) ||
 	    (SS.constructors.active &&  
 	     SS.constructors.active.getAnchor(scene, camera, event))) {
             document.body.style.cursor = 'pointer';
@@ -412,8 +419,9 @@ SS.SceneView = function(container) {
 
     this.replaceSceneObjectViewInMouseState = function(oldView, newView) {
         [mouseOverSceneObjectViews, mouseDownSceneObjectViews].map(function(array) {
-            if (array.indexOf(oldView) !== -1) {
-                array.splice(mouseOverSceneObjectViews.indexOf(oldView), 1);
+            var index = array.indexOf(oldView);
+            if (index !== -1) {
+                array.splice(index, 1);
                 array.push(newView);
             }
         });

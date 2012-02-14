@@ -156,6 +156,7 @@ SS.ActiveTransformerView = SS.SceneObjectView.extend({
         this.model.on("change", this.render, this);
     },
 
+    active: true,
 
     recursiveHighlightFn:  function(object, opacity) {
         var functor = function(object) {
