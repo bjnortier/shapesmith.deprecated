@@ -16,7 +16,11 @@ SS.GeomNodeRenderingManager = function() {
         this.geomDocRemove(original);
         this.geomDocAdd(replacement);
 
-        
+        if (replacement.isEditingOrTransformEditing()) {
+            SS.setOthersTransparent(replacement);
+        } else {
+            SS.restoreOpacity(replacement);
+        }
     }
 
     this.deselected = function(deselected) {
