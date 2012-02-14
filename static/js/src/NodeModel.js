@@ -24,7 +24,21 @@ SS.NodeModel = Backbone.Model.extend({
         var schema = SS.schemas[node.type];
         updateValues(node.origin, schema.properties.origin);
         updateValues(node.parameters, schema.properties.parameters);
-    }
+    },
+
+    setParameters: function(parameters) {
+        for (var key in parameters) {
+            this.node.parameters[key] = parameters[key];
+        }
+
+        this.trigger('change:model');
+        if (this.editingNode.sceneObjects) {
+            this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
+            this.center = SS.transformers.centerOfGeom(this.boundingBox);
+        }
+
+        this.trigger('change');
+    },
 
 });
 
@@ -102,7 +116,16 @@ SS.NodeDOMView = Backbone.View.extend({
 
         var updateValues = function(object, schema) {
             for (key in schema.properties) {
-                $('#' + key).val(object[key]);
+                if (schema.properties[key].type === 'array') {
+                    for (var k = 0; k < object[key].length; ++k) {
+                        for (subKey in object[key][k]) {
+                            var id = '#' + subKey + '_' + k;
+                            $(id).val(object[key][k][subKey])
+                        }
+                    }
+                } else {
+                    $('#' + key).val(object[key]);
+                }
             }
         };
 
@@ -159,3 +182,43 @@ SS.SceneObjectView = Backbone.View.extend({
 
 });
 
+
+SS.ActiveTransformerView = SS.SceneObjectView.extend({
+
+    initialize: function() {
+	SS.SceneObjectView.prototype.initialize.call(this);
+	this.on('mouseEnter', this.highlight);
+	this.on('mouseLeave', this.unhighlight);
+        this.model.on("change", this.render, this);
+    },
+
+    active: true,
+
+    recursiveHighlightFn:  function(object, opacity) {
+        var functor = function(object) {
+	    if (object.material) {
+	        object.material.opacity = opacity;
+	    }
+	    if (object.children) {
+	        object.children.map(functor);
+	    }
+        }
+        functor(object);
+    },
+
+    highlight: function() {
+	this.recursiveHighlightFn(this.sceneObject, 1.0);
+    },
+
+    unhighlight: function() {
+	this.recursiveHighlightFn(this.sceneObject, 0.5);
+    },
+
+    remove: function() {
+        SS.SceneObjectView.prototype.remove.call(this);
+        this.off('mouseEnter', this.highlight);
+	this.off('mouseLeave', this.unhighlight);
+        this.model.off("change", this.render);
+    },
+    
+});

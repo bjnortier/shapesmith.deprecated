@@ -79,6 +79,7 @@ SS.Transformer = SS.NodeModel.extend({
         if (!this.attributes.editingExisting) {
             this.trigger('change:model');
             this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
+            this.center = SS.transformers.centerOfGeom(this.boundingBox);
         }
 
         this.trigger('change');
@@ -105,46 +106,6 @@ SS.Transformer = SS.NodeModel.extend({
     },
 
 
-});
-
-SS.ActiveTransformerView = SS.SceneObjectView.extend({
-
-    initialize: function() {
-	SS.SceneObjectView.prototype.initialize.call(this);
-	this.on('mouseEnter', this.highlight);
-	this.on('mouseLeave', this.unhighlight);
-        this.model.on("change", this.render, this);
-    },
-
-    active: true,
-
-    recursiveHighlightFn:  function(object, opacity) {
-        var functor = function(object) {
-	    if (object.material) {
-	        object.material.opacity = opacity;
-	    }
-	    if (object.children) {
-	        object.children.map(functor);
-	    }
-        }
-        functor(object);
-    },
-
-    highlight: function() {
-	this.recursiveHighlightFn(this.sceneObject, 1.0);
-    },
-
-    unhighlight: function() {
-	this.recursiveHighlightFn(this.sceneObject, 0.5);
-    },
-
-    remove: function() {
-        SS.SceneObjectView.prototype.remove.call(this);
-        this.off('mouseEnter', this.highlight);
-	this.off('mouseLeave', this.unhighlight);
-        this.model.off("change", this.render);
-    },
-    
 });
 
 SS.TransformOkCancelView = Backbone.View.extend({

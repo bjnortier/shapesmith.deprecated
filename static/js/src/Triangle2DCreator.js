@@ -18,14 +18,19 @@ SS.Triangle2DCreator = SS.NodeModel.extend({
         this.views = [
             new SS.NodeDOMView({model: this}),
             new SS.Triangle2DPreview({model: this}),
+            new SS.DraggableTriangleCorner({model: this, vertexIndex: 0}),
+            new SS.DraggableTriangleCorner({model: this, vertexIndex: 1}),
+            new SS.DraggableTriangleCorner({model: this, vertexIndex: 2}),
         ];
+
+        geom_doc.on('replace', this.geomDocReplace, this);
     },
-    
+
     destroy: function() {
         this.views.map(function(view) {
             view.remove();
         });
-        geom_doc.off('remove', this.geomDocRemove);
+        geom_doc.off('replace', this.geomDocReplace);
     },
 
     updateFromDOMView: function() {
@@ -45,8 +50,8 @@ SS.Triangle2DCreator = SS.NodeModel.extend({
         geom_doc.remove(this.editingNode); 
     },
 
-    geomDocRemove: function(node) {
-        if (node === this.editingNode) {
+    geomDocReplace: function(original, replacement) {
+        if (original === this.editingNode) {
             this.destroy();
         } 
     },
@@ -83,6 +88,65 @@ SS.Triangle2DPreview = SS.SceneObjectView.extend({
 	this.sceneObject.add(triangleWireframe);
 
         this.postRender();
+    },
+
+});
+
+SS.DraggableTriangleCorner = SS.ActiveTransformerView.extend({
+
+     initialize: function(options) {
+	 SS.ActiveTransformerView.prototype.initialize.call(this);
+         this.vertexIndex = options.vertexIndex;
+         this.on('mouseDown', this.mouseDown, this);
+         this.on('mouseDrag', this.drag);
+         this.render();
+    },
+
+    mouseDown: function() {
+        this.model.mouseDownOnCorner && this.model.mouseDownOnCorner(this);
+    },
+
+    remove: function() {
+        SS.ActiveTransformerView.prototype.remove.call(this);
+        this.model.off('mouseDown', this.mouseDown);
+        this.off('mouseDrag', this.drag);
+    },
+
+    render: function() {
+        this.clear();
+
+        var geometry = new THREE.CubeGeometry(1, 1, 1);
+        var materials = [
+            new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, opacity: 0.5, wireframe: false } ),
+            new THREE.MeshBasicMaterial({color: SS.constructors.lineColor, wireframe: true})
+        ];
+        var cube = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
+        
+        var vertex = this.model.node.parameters.vertices[this.vertexIndex];
+	cube.position.x = vertex.u;
+	cube.position.y = vertex.v;
+	cube.position.z = vertex.w;
+	this.sceneObject.add(cube);
+        this.postRender();
+        return this;
+    },
+
+    drag: function(event) {
+        var workplanePosition = SS.sceneView.determinePositionOnWorkplane(event);
+        var u = workplanePosition.x;
+        var v = workplanePosition.y;
+
+        var vertex = this.model.node.parameters.vertices[this.vertexIndex];
+
+        vertex.u = parseFloat(u.toFixed(3));
+        vertex.v = parseFloat(v.toFixed(3));
+
+        if (!event.ctrlKey) {
+            vertex.u = Math.round(vertex.u*10)/10;    
+            vertex.v = Math.round(vertex.v*10)/10;
+        }
+
+        this.model.setParameters({});
     },
 
 });

@@ -65,11 +65,6 @@ SS.ScaleTransformer = SS.Transformer.extend({
                 SS.sceneView.replaceSceneObjectViewInMouseState(attributes.arrowViews[i], arrowViews[i]);
             }
 
-            var that = this;
-            arrowViews.map(function(arrowView) {
-                arrowView.on('mouseDrag', that.drag, that);
-            });
-
             var newViews = [
                 new SS.ScaleGeomNodeView({model: this}),
                 new SS.ScaleFactorView({model: this}),
@@ -86,31 +81,7 @@ SS.ScaleTransformer = SS.Transformer.extend({
         this.anchorPosition = arrowView.anchorFunction(this.boundingBox);
     },
 
-    drag: function(event) {
-
-        var dxFrom = this.anchorPosition.x - this.transform.origin.x;
-        var dyFrom = this.anchorPosition.y - this.transform.origin.y;
-
-        var r1 = Math.sqrt(dxFrom*dxFrom + dyFrom*dyFrom);
-
-        var workplanePosition = SS.sceneView.determinePositionOnWorkplane(event);
-        var dxTo = workplanePosition.x - this.transform.origin.x;
-        var dyTo = workplanePosition.y - this.transform.origin.y;
-        var r2 = Math.sqrt(dxTo*dxTo + dyTo*dyTo);
-
-        var factor = parseFloat((r2/r1).toFixed(3));
-        if (!event.ctrlKey) {
-            factor = Math.round(factor*10)/10;
-        }
-
-        this.transform.parameters.factor = factor;
-
-        this.trigger('change:model');
-        this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
-        this.center = SS.transformers.centerOfGeom(this.boundingBox);
-
-        this.trigger('change');
-    },
+    
 
 });
 
@@ -174,11 +145,13 @@ SS.ScaleArrowView = SS.ActiveTransformerView.extend({
     initialize: function() {
 	SS.ActiveTransformerView.prototype.initialize.call(this);
         this.on('mouseDown', this.mouseDown, this);
+        this.on('mouseDrag', this.drag);
     },
 
     remove: function() {
         SS.ActiveTransformerView.prototype.remove.call(this);
         this.model.off('mouseDown', this.mouseDownOnArrow);
+        this.off('mouseDrag', this.drag);
     },
 
     mouseDown: function() {
@@ -225,6 +198,28 @@ SS.ScaleArrowView = SS.ActiveTransformerView.extend({
         this.sceneObject.add(line);
        
         return this;
+    },
+
+    drag: function(event) {
+
+        var dxFrom = this.model.anchorPosition.x - this.model.transform.origin.x;
+        var dyFrom = this.model.anchorPosition.y - this.model.transform.origin.y;
+
+        var r1 = Math.sqrt(dxFrom*dxFrom + dyFrom*dyFrom);
+
+        var workplanePosition = SS.sceneView.determinePositionOnWorkplane(event);
+        var dxTo = workplanePosition.x - this.model.transform.origin.x;
+        var dyTo = workplanePosition.y - this.model.transform.origin.y;
+        var r2 = Math.sqrt(dxTo*dxTo + dyTo*dyTo);
+
+        var factor = parseFloat((r2/r1).toFixed(3));
+        if (!event.ctrlKey) {
+            factor = Math.round(factor*10)/10;
+        }
+
+        this.model.setParameters({
+            factor: factor
+        });
     },
 
     

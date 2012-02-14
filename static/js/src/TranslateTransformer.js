@@ -58,30 +58,7 @@ SS.TranslateTransformer = SS.Transformer.extend({
                 new SS.ScaleFootprintView({model: this}),
             ]);
             
-            this.translateView.on('mouseDrag', this.drag, this);
         }
-    },
-
-    drag: function(event) {
-        
-        var workplanePosition = SS.sceneView.determinePositionOnWorkplane(event);
-        var u = workplanePosition.x - this.transform.origin.x;
-        var v = workplanePosition.y - this.transform.origin.y;
-
-        this.transform.parameters.u = parseFloat(u.toFixed(3));        
-        this.transform.parameters.v = parseFloat(v.toFixed(3));
-        if (!event.ctrlKey) {
-            this.transform.parameters.u = 
-                Math.round(this.transform.parameters.u*10)/10;    
-            this.transform.parameters.v = 
-                Math.round(this.transform.parameters.v*10)/10;
-        }
-
-        this.trigger('change:model');
-        this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
-        this.center = SS.transformers.centerOfGeom(this.boundingBox);
-
-        this.trigger('change');
     },
 
 });
@@ -91,6 +68,7 @@ SS.TranslateTransformerView = SS.ActiveTransformerView.extend({
     initialize: function() {
 	SS.ActiveTransformerView.prototype.initialize.call(this);
         this.on('mouseDown', this.mouseDown, this);
+        this.on('mouseDrag', this.drag);
         this.render();
     },
 
@@ -100,7 +78,8 @@ SS.TranslateTransformerView = SS.ActiveTransformerView.extend({
 
     remove: function() {
         SS.ActiveTransformerView.prototype.remove.call(this);
-        this.model.off('mouseDown', this.mouseDownOnArrow);
+        this.model.off('mouseDown', this.mouseDown);
+        this.off('mouseDrag', this.drag);
     },
 
     render: function() {
@@ -120,6 +99,25 @@ SS.TranslateTransformerView = SS.ActiveTransformerView.extend({
 
         this.postRender();
         return this;
+    },
+
+    drag: function() {
+        var workplanePosition = SS.sceneView.determinePositionOnWorkplane(event);
+        var u = workplanePosition.x - this.model.transform.origin.x;
+        var v = workplanePosition.y - this.model.transform.origin.y;
+
+        var parameters = {
+            u: parseFloat(u.toFixed(3)),
+            v: parseFloat(v.toFixed(3))
+        };
+        if (!event.ctrlKey) {
+            parameters.u = 
+                Math.round(parameters.u*10)/10;    
+            parameters.v =
+                Math.round(parameters.v*10)/10;
+        }
+
+        this.model.setParameters(parameters);
     },
 
 });

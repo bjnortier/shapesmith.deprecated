@@ -242,18 +242,15 @@ Rectangle2DBuilder::Rectangle2DBuilder(map< string, mValue > json) {
 
 Triangle2DBuilder::Triangle2DBuilder(map< string, mValue > json) {
     map< string, mValue > parameters = json["parameters"].get_obj();
-    double u1 = Util::to_d(parameters["u1"]);
-    double v1 = Util::to_d(parameters["v1"]);
-    double w1 = Util::to_d(parameters["w1"]);
-    double u2 = Util::to_d(parameters["u2"]);
-    double v2 = Util::to_d(parameters["v2"]);
-    double w2 = Util::to_d(parameters["w2"]);
-    double u3 = Util::to_d(parameters["u3"]);
-    double v3 = Util::to_d(parameters["v3"]);
-    double w3 = Util::to_d(parameters["w3"]);
-
     
-    gp_Pnt points[3] = {gp_Pnt(u1, v1, w1), gp_Pnt(u2, v2, w2), gp_Pnt(u3, v3, w3)};
+    mArray vertices = parameters["vertices"].get_array();
+    gp_Pnt points[3];
+    for (unsigned int k = 0; k < vertices.size(); ++k) {
+        map< string, mValue > vertex = vertices[k].get_obj();
+        points[k] = gp_Pnt(Util::to_d(vertex["u"]),
+                           Util::to_d(vertex["v"]),
+                           Util::to_d(vertex["w"]));
+    }
     
     TopoDS_Edge edges[3];
     for (int i = 0; i < 3; ++i) {

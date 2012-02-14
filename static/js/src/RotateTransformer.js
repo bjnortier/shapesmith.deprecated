@@ -85,14 +85,6 @@ SS.RotateTransformer = SS.Transformer.extend({
         this.rotationPlane  = arrowView.rotationPlane;
     },
 
-    setParameters: function(parameters) {
-        for (var key in parameters) {
-            this.transform.parameters[key] = parameters[key];
-        }
-
-        this.trigger('change:model');
-        this.trigger('change');
-    },
 
 });
 
