@@ -415,58 +415,56 @@ function TreeView() {
     }
 				 
 
-    this.geomDocUpdated = function(event) {
+    this.geomDocAdd = function(geomNode) {
+        var nodeTable = renderNode(geomNode);
+        
+        this.domNodeLookup[geomNode] = nodeTable;
+        $('#geom-model-doc').prepend(nodeTable);
+        this.addEvents(null, geomNode);
+    }
 
+    this.geomDocRemove = function(geomNode) {
 	$(document).unbind('keyup.editing');
 
-        if (event.add) {
-            var geomNode = event.add;
+	// Preview model is removed on cancel
+	SS.constructors.active && SS.constructors.disposeActive();
 
-            var nodeTable = renderNode(geomNode);
+        var geomNode = event.remove;
+        $('#' + geomNode.id).remove();
+        delete this.domNodeLookup[geomNode];
+    }
 
-            this.domNodeLookup[geomNode] = nodeTable;
-            $('#geom-model-doc').prepend(nodeTable);
-            this.addEvents(null, geomNode);
-        }
+    this.geomDocReplace = function(original, replacement) {
+	$(document).unbind('keyup.editing');
 
-        if (event.remove) {
-	    // Preview model is removed on cancel
-	    SS.constructors.active && SS.constructors.disposeActive();
+	// Preview model is replaced with real model on success
+	SS.constructors.active && SS.constructors.disposeActive();
+        
+        var nodeTable = renderNode(replacement);
+        $('#' + original.id).replaceWith(nodeTable);
+        this.addEvents(original, replacement);
+    }
 
-            var geomNode = event.remove;
-            $('#' + geomNode.id).remove();
-            delete this.domNodeLookup[geomNode];
-        }
-
-        if (event.replace) {
-	    // Preview model is replaced with real model on success
-	    SS.constructors.active && SS.constructors.disposeActive();
-
-            var original = event.replace.original;
-            var replacement = event.replace.replacement;
-            var nodeTable = renderNode(replacement);
-            $('#' + original.id).replaceWith(nodeTable);
-            this.addEvents(original, replacement);
+    this.deselected = function(deselected) {
+        for (var i in deselected) {
+            var id = deselected[i];
+            $('#' + id + ' > tbody > tr:nth-child(1)').removeClass('selected');
         }
     }
 
-    this.selectionUpdated = function(event) {
-        if (event.deselected) {
-            var deselected = event.deselected;
-            for (var i in deselected) {
-                var id = deselected[i];
-                $('#' + id + ' > tbody > tr:nth-child(1)').removeClass('selected');
-            }
+    this.selected = function(selected) {
+        for (var i in selected) {
+            var id = selected[i];
+            $('#' + id + ' > tbody > tr:nth-child(1)').addClass('selected');
         }
-        if (event.selected) {
-            var selected = event.selected;
-            for (var i in selected) {
-                var id = selected[i];
-                $('#' + id + ' > tbody > tr:nth-child(1)').addClass('selected');
-            }
-        }
-
     }
+
+    geom_doc.on('add', this.geomDocAdd, this);
+    geom_doc.on('remove', this.geomDocRemove, this);
+    geom_doc.on('replace', this.geomDocReplace, this);
+
+    selectionManager.on('selected', this.selected, this);
+    selectionManager.on('deselected', this.deselected, this);
 }
 
 

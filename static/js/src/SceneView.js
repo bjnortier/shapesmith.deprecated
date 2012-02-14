@@ -418,46 +418,6 @@ SS.SceneView = function(container) {
 
     }
 
-    this.geomDocUpdated = function(event) {
-
-        if (event.add) {
-            add(event.add);
-        }
-
-        if (event.remove) {
-            remove(event.remove);
-        }
-
-        if (event.replace) {
-            remove(event.replace.original);
-            add(event.replace.replacement);
-        }
-    }
-
-    var add = function(geomNode) {
-        if (geom_doc.isRoot(geomNode)) {
-            SS.renderGeometry(geomNode);
-        }
-    }
-
-    var remove = function(geomNode) {
-        SS.hideGeometry(geomNode);
-    }
-
-    this.selectionUpdated = function(event) {
-        if (event.deselected) {
-            for (var i in event.deselected) {
-                var id = event.deselected[i];
-                SS.unhighlightGeometry(geom_doc.findById(id))
-            }
-        }
-        if (event.selected) {
-            for (var i in event.selected) {
-                var id = event.selected[i];
-                SS.highlightGeometry(geom_doc.findById(id));
-            }
-        }
-    }
 
     var sceneObjectViews = [];
     var mouseOverSceneObjectViews = [];

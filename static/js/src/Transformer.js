@@ -58,7 +58,6 @@ SS.Transformer = Backbone.Model.extend({
         this.views = [];
 
         geom_doc.on('replace', this.geomDocReplace, this);
-        //SS.setOthersTransparent(this.editingNode);
     },
 
     updateFromDOMView: function() {

@@ -37,13 +37,11 @@ function SelectionManager() {
 
     this.selectID = function(id) {
         selected.push(id);
-        this.notify({selected : [id]});
         this.trigger('selected', [id]);
     }
     
     this.deselectID = function(id) {
         selected.splice(selected.indexOf(id), 1);
-        this.notify({deselected : [id]});
         this.trigger('deselected', [id]);
     }
 
@@ -60,10 +58,8 @@ function SelectionManager() {
         selected = [id];
         
 	if (deselected.length > 0) {
-            this.notify({deselected : deselected});
             this.trigger('deselected', deselected);
 	}
-        this.notify({selected : [id]});
         this.trigger('selected', [id]);
     }
     
@@ -71,7 +67,6 @@ function SelectionManager() {
         if (selected.length > 0) {
             var deselected = selected;
             selected = [];
-            this.notify({deselected : deselected});
             this.trigger('deselected', deselected);
         }
     }

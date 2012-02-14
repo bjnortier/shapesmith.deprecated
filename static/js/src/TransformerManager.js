@@ -38,18 +38,21 @@ SS.TransformerManager = function() {
         }
     }
 
-    this.selectionUpdated = function(event) {
-        if (event.selected) {
-            if (selectionManager.size() === 1) {
-                node = geom_doc.findById(selectionManager.getSelected()[0]);
-                var editingTransform = _.pluck(node.transforms, "editing").indexOf(true) >= 0;
-                var editing = node.editing || editingTransform;
-                if (!editing) {
-                    activate(node);
-                }
+    this.selected = function(selected) {
+        if (selectionManager.size() === 1) {
+            node = geom_doc.findById(selectionManager.getSelected()[0]);
+            var editingTransform = _.pluck(node.transforms, "editing").indexOf(true) >= 0;
+            var editing = node.editing || editingTransform;
+            if (!editing) {
+                activate(node);
             }
-        } else if (event.deselected) {
-            uiState = UISTATE.UNDEFINED;
         }
     }
+
+    this.deselected = function(deselected) {
+        uiState = UISTATE.UNDEFINED;
+    }
+
+    selectionManager.on('selected', this.selected, this);
+    selectionManager.on('deselected', this.deselected, this);    
 }
