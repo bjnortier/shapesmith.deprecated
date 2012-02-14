@@ -235,8 +235,12 @@ SS.TransformOkCancelView = Backbone.View.extend({
         }
         
         var pixelPosition = {};
-        pixelPosition.x = Math.min(window.innerWidth * ((screenPosition.x+1)/2), window.innerWidth - 100);
-        pixelPosition.y = Math.min(window.innerHeight * ((-screenPosition.y+1)/2), window.innerHeight - 100);
+        pixelPosition.x = window.innerWidth * ((screenPosition.x+1)/2);
+        pixelPosition.y = window.innerHeight * ((-screenPosition.y+1)/2);
+        pixelPosition.x = Math.min(pixelPosition.x, window.innerWidth - 100);
+        pixelPosition.y = Math.min(pixelPosition.y, window.innerHeight - 100);
+        pixelPosition.x = Math.max(pixelPosition.x, 100);
+        pixelPosition.y = Math.max(pixelPosition.y, 100);
        
         $('#floating-ok-cancel').css('left', pixelPosition.x);
 	$('#floating-ok-cancel').css('top', pixelPosition.y);
