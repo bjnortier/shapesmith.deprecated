@@ -29,8 +29,6 @@ function Action(label, iconPath, fn) {
 }
 
 function delete_geom(selected) {
-    selectionManager.deselectAll();
-
     if (selected.length == 0)  {
         alert("please select at least one object");
         return;
@@ -104,7 +102,6 @@ function create_modifier(selected, type) {
         parameters: geometryParams
     }, [original]);
                                 
-    selectionManager.deselectAll();
     geom_doc.replace(original, modifierNode);
 
     return modifierNode;
@@ -140,7 +137,6 @@ function create_transform(selected, type) {
         parameters: transformParams
     });
     replacement.transforms.push(transform);
-    selectionManager.deselectAll();
     geom_doc.replace(original, replacement);
     return {geomNode: replacement, transform: transform};
 }
@@ -228,10 +224,10 @@ $(document).ready(function() {
     /*
      * Transformations
      */
-    new Action('Mirror', '/static/images/mirror.png', 
+    /*new Action('Mirror', '/static/images/mirror.png', 
                function(selected) { 
 		   SS.constructors.createMirror(create_transform(selected, 'mirror'));
-	       }).render($('#transforms'));
+	       }).render($('#transforms'));*/
     
 });
 

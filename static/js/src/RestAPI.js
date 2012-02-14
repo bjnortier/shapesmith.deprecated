@@ -147,7 +147,6 @@ function explode(selected, type) {
         });
 
         var replaceInGeomDoc = function() {
-            selectionManager.deselectAll();
             geom_doc.remove(boolNode);
             childNodes.map(function(childNode) {
                 geom_doc.add(childNode);
@@ -279,7 +278,7 @@ function copy(selected) {
 	};
 	
 	newNode = copyWithChildren(node);
-	selectionManager.deselectAll();
+	selectionManager.deselectID(node.id);
 	geom_doc.add(newNode);
 	command_stack.commit();
     };

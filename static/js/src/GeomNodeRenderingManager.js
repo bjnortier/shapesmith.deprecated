@@ -4,6 +4,9 @@ SS.GeomNodeRenderingManager = function() {
 
     this.geomDocAdd = function(geomNode) {
         SS.renderGeometry(geomNode);
+        if (geomNode.isEditingOrTransformEditing()) {
+            SS.setOthersTransparent(geomNode);
+        }
     }
 
     this.geomDocBeforeRemove = function(geomNode) {
@@ -12,6 +15,9 @@ SS.GeomNodeRenderingManager = function() {
 
     this.geomDocRemove = function(geomNode) {
         SS.hideGeometry(geomNode);
+        if (geomNode.isEditingOrTransformEditing()) {
+            SS.restoreOpacity();
+        }
     }
 
     this.geomDocBeforeReplace = function(original, replacement) {
@@ -25,7 +31,7 @@ SS.GeomNodeRenderingManager = function() {
         if (replacement.isEditingOrTransformEditing()) {
             SS.setOthersTransparent(replacement);
         } else {
-            SS.restoreOpacity(replacement);
+            SS.restoreOpacity();
         }
     }
 
