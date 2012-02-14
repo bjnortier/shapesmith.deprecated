@@ -11,5 +11,6 @@ var treeView = new TreeView();
 SS.transformerManager = new SS.TransformerManager();
 SS.geomNodeRenderingManager = new SS.GeomNodeRenderingManager();
 
-SS.UI_STATE = new SS.UIState();
+SS.UI_MOUSE_STATE = new SS.UIMouseState();
+SS.UI_EDITING_STATE = new SS.UIEditingState();
 

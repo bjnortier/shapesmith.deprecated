@@ -4,16 +4,13 @@ SS.SceneView = function(container) {
     var camera, scene, renderer, w, h;
     var overRenderer;
 
-    var mouseOnDown, lastMouseMpos;
+    var mouseOnDown, lastMouseMpos, mouseDownOnSceneObject;
 
     var elevation = 0, azimuth = Math.PI/4;
     var target = { azimuth: Math.PI/4, elevation: Math.PI*3/8 };
     var targetOnDown = { azimuth: target.azimuth, elevation: target.elevation };
     var distance = 1000, distanceTarget = 300;
     var targetScenePosition = new THREE.Vector3(0,0,0);
-
-    
-    var state;
 
     var workplane, cursoid;
     var popupMenu = SS.popupMenu();
@@ -58,7 +55,6 @@ SS.SceneView = function(container) {
 	container.addEventListener('DOMMouseScroll', onMouseWheel, false);
 	container.addEventListener('mousemove', onMouseMove, false);
 	window.addEventListener('keydown', onDocumentKeyDown, false);
-	window.addEventListener('keyup', onDocumentKeyUp, false);
 
 	container.addEventListener('mouseover', function() {
 	    overRenderer = true;
@@ -85,17 +81,17 @@ SS.SceneView = function(container) {
     function onMouseDown(event) {
 	event.preventDefault();
 
-	that.triggerMouseDownOnSceneObjectViews(event);
-
 	popupMenu.onMouseDown(event);
 
+        mouseDownButton = event.button;
 	mouseOnDown = {};
 	mouseOnDown.x = event.clientX;
 	mouseOnDown.y = event.clientY;
         lastMousePos = mouseOnDown;
 
-        state = undefined;
 	container.addEventListener('mouseup', onMouseUp, false);
+
+        SS.UI_MOUSE_STATE.freeRotateAndPan();
 
 	var cursoidName;
 	var activeConstructor = SS.constructors.active;
@@ -111,11 +107,13 @@ SS.SceneView = function(container) {
 	    cursoidName = cursoid.getCursoid(scene, camera, event)
 	}
         if (cursoidName) {
-            state = {cursoid: cursoidName};
             cursoid.activate(cursoidName);
 	    popupMenu.cancel();
         } 
 
+        mouseDownOnSceneObject = mouseOverSceneObjectViews.length > 0;
+        
+	that.triggerMouseDownOnSceneObjectViews(event);
     }
     
     function onMouseMove(event) {
@@ -131,25 +129,29 @@ SS.SceneView = function(container) {
             var panRotateThreshold = 10;
             var transformerThreshold = 5;
 	    
-	    if (!state && !popupMenu.isShowing()) {
+	    if (SS.UI_MOUSE_STATE.isFree()) {
                 
                 var overPanRotateThreshold = ((Math.abs(event.clientX - mouseOnDown.x) > panRotateThreshold)
 			                      ||
 			                      (Math.abs(event.clientY - mouseOnDown.y) > panRotateThreshold));
-                
-		if (!state && (event.button === 0 && event.shiftKey) && overPanRotateThreshold) {
-                    state = 'rotating';
-		} 
-		if (!state && (event.button === 1 || event.shiftKey) && overPanRotateThreshold)  {
-                    state = 'panning';
-		}
-	    }
-	    
-	    if (state) {
-		popupMenu.cancel()
-	    } 
+                if (overPanRotateThreshold) {
 
-            if (state === 'rotating') {
+		    if (!event.shiftKey &&
+                        (event.button === 0) &&
+                        (mouseDownButton === 0) &&
+                        !mouseDownOnSceneObject) {
+                        
+                        SS.UI_MOUSE_STATE.rotating = true;
+		    } 
+		    if (((event.button === 1) && (mouseDownButton === 1)) 
+                        || 
+                        ((event.button === 0) && (mouseDownButton === 0) && (event.shiftKey)))  {
+                        SS.UI_MOUSE_STATE.panning = true;
+		    }
+                }
+	    }
+
+            if (SS.UI_MOUSE_STATE.rotating) {
 		
 		var zoomDamp = Math.sqrt(distance)/10;
 
@@ -159,7 +161,7 @@ SS.SceneView = function(container) {
 		target.elevation = target.elevation > Math.PI ? Math.PI : target.elevation;
 		target.elevation = target.elevation < 0 ? 0 : target.elevation;
 
-	    } else if (state === 'panning') {
+	    } else if (SS.UI_MOUSE_STATE.panning) {
                 
                 var dMouse = {x: mouse.x - lastMousePos.x,
                               y: mouse.y - lastMousePos.y};
@@ -293,15 +295,14 @@ SS.SceneView = function(container) {
 	targetOnDown.azimuth = target.azimuth;
 	targetOnDown.elevation = target.elevation;
 
-	if ((SS.UI_STATE.state === SS.UIStates.UNDEFINED) &&
-            (!state) &&
+	if (SS.UI_MOUSE_STATE.isFree() && 
+            !SS.UI_EDITING_STATE.isEditing() && 
             (event.button == 0)) {
 	    selectObject(event);
 	}
 
-	state = undefined;
         cursoid.deactivate();
-	//SS.constructors.active && SS.constructors.active.deactivateAnchor();
+
 	popupMenu.onMouseUp(event);
 
 	mouseOnDown = null;
@@ -344,15 +345,6 @@ SS.SceneView = function(container) {
 	    }
 	}
 	return false;
-    }
-
-    function onDocumentKeyUp(event) {
-        if ((event.keyIdentifier === 'Shift') &&
-            (state === 'rotating')) {
-            state = undefined;
-            
-        }
-        return false;
     }
 
     function onWindowResize(event) {

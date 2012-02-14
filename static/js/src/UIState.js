@@ -1,25 +1,44 @@
 var SS = SS || {};
 
-SS.UIStates = {UNDEFINED : 0, EDITING : 1};
+SS.UIMouseState = function() {
 
-SS.UIState = function() {
+    this.rotating = false;
+    this.panning = false;
+    this.popupShowing = false;
 
-    this.state = SS.UIStates.UNDEFINED;
-    
+    this.isFree = function() {
+        return (!(this.rotating || this.panning || this.popupShowing));
+    }
+
+    this.freeRotateAndPan = function() {
+        this.rotating = false;
+        this.panning = false;
+    }
+
+}
+
+SS.UIEditingState = function() {
+
+    this.editing = false;
+
+    this.isEditing = function() {
+        return this.editing;
+    }
+
     this.geomDocAdd = function(node) {
         if (node.isEditingOrTransformEditing()) {
-            this.state = SS.UIStates.EDITING;
+            this.editing = true;
         }
     }
 
     this.geomDocRemove = function(node) {
         if (node.isEditingOrTransformEditing()) {
-            this.state = SS.UIStates.UNDEFINED;
+            this.editing = false;
         }
     }
 
     this.geomDocReplace = function(original, replacement) {
-        this.state = replacement.isEditingOrTransformEditing() ? SS.UIStates.EDITING : SS.UIStates.UNDEFINED;
+        this.editing = replacement.isEditingOrTransformEditing();
     }
 
     geom_doc.on('add', this.geomDocAdd, this);
@@ -27,3 +46,4 @@ SS.UIState = function() {
     geom_doc.on('replace', this.geomDocReplace, this);
     
 }
+

@@ -3,8 +3,8 @@ var SS = SS || {};
 SS.TransformerManager = function() {
 
     var that = this;
-    var UISTATE = {DEACTIVATED: 0, SCALE: 1, ROTATE: 2};
-    var uiState = UISTATE.DEACTIVATED;
+    var STATES = {DEACTIVATED: 0, SCALE: 1, ROTATE: 2};
+    var state = STATES.DEACTIVATED;
     var transformingState = undefined;
     var lastWorkplanePosition = undefined;
     
@@ -29,12 +29,12 @@ SS.TransformerManager = function() {
     }
     
     var activate = function(geomNode) {
-        if (uiState === UISTATE.SCALE) {
+        if (state === STATES.SCALE) {
             activateRotateAndTranslate(geomNode);
-            uiState = UISTATE.ROTATE;
+            state = STATES.ROTATE;
         } else {
             activateScaleAndTranslate(geomNode);
-            uiState = UISTATE.SCALE;
+            state = STATES.SCALE;
         }
     }
 
@@ -48,14 +48,14 @@ SS.TransformerManager = function() {
     }
 
     this.deselected = function(deselected) {
-        uiState = UISTATE.UNDEFINED;
+        state = STATES.UNDEFINED;
     }
 
     this.clear = function() {
         initiators.map(function(initiator) {
             initiator.destroy();
         });
-        uiState = UISTATE.UNDEFINED;
+        state = STATES.UNDEFINED;
     }
 
     selectionManager.on('selected', this.selected, this);
