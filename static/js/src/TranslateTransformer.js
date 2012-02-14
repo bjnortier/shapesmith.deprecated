@@ -17,8 +17,8 @@ SS.TranslateTransformerInitiator = SS.TransformerInitiator.extend({
         var transform = new Transform({
             type: 'translate',
             editing: true,
-	    origin: {x: parseFloat((this.center.x).toFixed(3)), 
-                     y: parseFloat((this.center.y).toFixed(3)), 
+	    origin: {x: Math.round(this.center.x), 
+                     y: Math.round(this.center.y), 
                      z: 0},
             parameters: {u: 0.0,
                          v: 0.0,
