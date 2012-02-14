@@ -58,11 +58,7 @@ SS.RotateTransformer = SS.Transformer.extend({
     initialize: function(attributes) { 
         SS.Transformer.prototype.initialize.call(this, attributes);
 
-        if (attributes.editingExisting) {
-            this.views = this.views.concat([
-                new SS.TransformDOMView({model: this}),
-            ]);
-        } else {
+        if (!attributes.editingExisting) {
             this.anchorPosition = attributes.anchorPosition;
             var arrowViews = [
 	        new SS.RotateArrowViewX({model: this}),
@@ -75,7 +71,6 @@ SS.RotateTransformer = SS.Transformer.extend({
 
             var newViews = [
                 new SS.RotateGeomNodeView({model: this}),
-                new SS.TransformDOMView({model: this}),
                 new SS.RotateAxesView({model: this}),
                 new SS.RotateAngleView({model: this}),
             ];

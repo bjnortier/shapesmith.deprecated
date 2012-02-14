@@ -45,11 +45,7 @@ SS.TranslateTransformer = SS.Transformer.extend({
     initialize: function(attributes) { 
         SS.Transformer.prototype.initialize.call(this, attributes);
 
-        if (attributes.editingExisting) {
-            this.views = this.views.concat([
-                new SS.TransformDOMView({model: this}),
-            ]);
-        } else {
+        if (!attributes.editingExisting) {
             this.translateView = new SS.TranslateTransformerView({model: this});
             this.views.push(this.translateView);
             if (attributes.translateView) {
@@ -58,7 +54,6 @@ SS.TranslateTransformer = SS.Transformer.extend({
             
             this.views = this.views.concat([
                 new SS.TranslateGeomNodeView({model: this}),
-                new SS.TransformDOMView({model: this}),
                 new SS.ScaleBoxView({model: this}),
                 new SS.ScaleFootprintView({model: this}),
             ]);

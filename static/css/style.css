@@ -131,6 +131,10 @@ body {
     position: fixed;
 }
 
+#floating-ok-cancel {
+    position: fixed;
+}
+
 img#logo {
     position: absolute;
     left: 10px;

@@ -4,7 +4,7 @@ SS.SceneView = function(container) {
     var camera, scene, renderer, w, h;
     var overRenderer;
 
-    var mouseOnDown, lastMouseMpos, mouseDownOnSceneObject;
+    var mouseOnDown, lastMouseMpos, mouseDownOnActiveSceneObject;
 
     var elevation = 0, azimuth = Math.PI/4;
     var target = { azimuth: Math.PI/4, elevation: Math.PI*3/8 };
@@ -16,6 +16,8 @@ SS.SceneView = function(container) {
     var popupMenu = SS.popupMenu();
 
     var that = this;
+    
+    _.extend(that, Backbone.Events);
     
     function init() {
 
@@ -91,7 +93,7 @@ SS.SceneView = function(container) {
 
 	container.addEventListener('mouseup', onMouseUp, false);
 
-        SS.UI_MOUSE_STATE.freeRotateAndPan();
+        SS.UI_MOUSE_STATE.free();
 
 	var cursoidName;
 	var activeConstructor = SS.constructors.active;
@@ -107,11 +109,15 @@ SS.SceneView = function(container) {
 	    cursoidName = cursoid.getCursoid(scene, camera, event)
 	}
         if (cursoidName) {
+            SS.UI_MOUSE_STATE.overCursoid = true;
             cursoid.activate(cursoidName);
 	    popupMenu.cancel();
         } 
 
-        mouseDownOnSceneObject = mouseOverSceneObjectViews.length > 0;
+        var mouseOverActiveObjects = mouseOverSceneObjectViews.filter(function(object) {
+            return object.active;
+        });
+        mouseDownOnActiveSceneObject = mouseOverActiveObjects.length > 0;
         
 	that.triggerMouseDownOnSceneObjectViews(event);
     }
@@ -119,8 +125,6 @@ SS.SceneView = function(container) {
     function onMouseMove(event) {
 
 	that.triggerMouseOverSceneObjectViews(event);
-
-
 
         var mouse = {};
 	mouse.x = event.clientX;
@@ -141,7 +145,7 @@ SS.SceneView = function(container) {
 		    if (!event.shiftKey &&
                         (event.button === 0) &&
                         (mouseDownButton === 0) &&
-                        !mouseDownOnSceneObject) {
+                        !mouseDownOnActiveSceneObject) {
                         
                         SS.UI_MOUSE_STATE.rotating = true;
 		    } 
@@ -163,6 +167,8 @@ SS.SceneView = function(container) {
 		target.elevation = target.elevation > Math.PI ? Math.PI : target.elevation;
 		target.elevation = target.elevation < 0 ? 0 : target.elevation;
 
+                that.trigger('cameraChange');
+
 	    } else if (SS.UI_MOUSE_STATE.panning) {
                 
                 var dMouse = {x: mouse.x - lastMousePos.x,
@@ -178,6 +184,8 @@ SS.SceneView = function(container) {
                 dPos.multiplyScalar(factor);
 
                 targetScenePosition.addSelf(dPos);
+
+                that.trigger('cameraChange');
             }
             
 	} 
@@ -358,10 +366,12 @@ SS.SceneView = function(container) {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 	renderer.setSize(window.innerWidth, window.innerHeight);
+        that.trigger('cameraChange');
     }
 
     function zoom(delta) {
 	distanceTarget -= delta;
+        that.trigger('cameraChange');
     }
 
     function animate() {

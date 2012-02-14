@@ -52,11 +52,7 @@ SS.ScaleTransformer = SS.Transformer.extend({
     initialize: function(attributes) { 
         SS.Transformer.prototype.initialize.call(this, attributes);
 
-        if (attributes.editingExisting) {
-            this.views = this.views.concat([
-                new SS.TransformDOMView({model: this}),
-            ]);
-        } else {
+        if (!attributes.editingExisting) {
             this.anchorPosition = attributes.anchorFunction(this.boundingBox);
 
             var arrowViews = [
@@ -77,7 +73,6 @@ SS.ScaleTransformer = SS.Transformer.extend({
             var newViews = [
                 new SS.ScaleGeomNodeView({model: this}),
                 new SS.ScaleFactorView({model: this}),
-                new SS.TransformDOMView({model: this}),
                 new SS.ScaleBoxView({model: this}),
                 new SS.ScaleFootprintView({model: this}),
             ];

@@ -5,14 +5,16 @@ SS.UIMouseState = function() {
     this.rotating = false;
     this.panning = false;
     this.popupShowing = false;
+    this.overCursoid = false;
 
     this.isFree = function() {
-        return (!(this.rotating || this.panning || this.popupShowing));
+        return (!(this.rotating || this.panning || this.popupShowing || this.overCursoid));
     }
 
-    this.freeRotateAndPan = function() {
+    this.free = function() {
         this.rotating = false;
         this.panning = false;
+        this.overCursoid = false;
     }
 
 }

@@ -93,6 +93,7 @@
     <div class="toolbar" id="modifiers"></div>
   </div>
   <div id="geom-model-doc"></div>
+  <div id="floating-ok-cancel"></div>
   
   <script type="text/javascript" src="/static/js/src/WedgeGeometry.js"></script>
   <script type="text/javascript" src="/static/js/src/PipeGeometry.js"></script>
