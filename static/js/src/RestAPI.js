@@ -2,7 +2,6 @@ var SS = SS || {};
 
 function update_geom_command(originalNode, nodeInDoc, replacement) {
 
-    selectionManager.deselectAll();
     var chainedPostFn = function(index, fromChain, toChain) {
 
         var nextFrom = fromChain[index];
@@ -148,7 +147,6 @@ function explode(selected, type) {
         });
 
         var replaceInGeomDoc = function() {
-            selectionManager.deselectAll();
             geom_doc.remove(boolNode);
             childNodes.map(function(childNode) {
                 geom_doc.add(childNode);
@@ -220,8 +218,6 @@ function boolean(selected, type) {
             contentType: "application/json",
             data: JSON.stringify(geometry),
             success: function(result) {
-		selectionManager.deselectAll();
-
 		var sha = result.SHA;
 		geometry.sha = sha;
 		
@@ -282,7 +278,7 @@ function copy(selected) {
 	};
 	
 	newNode = copyWithChildren(node);
-	selectionManager.deselectAll();
+	selectionManager.deselectID(node.id);
 	geom_doc.add(newNode);
 	command_stack.commit();
     };

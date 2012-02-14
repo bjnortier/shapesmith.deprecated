@@ -160,4 +160,9 @@ GeomNode.prototype.isBoolean = function() {
             (this.type == 'subtract'));
 }
 
+GeomNode.prototype.isEditingOrTransformEditing = function() {
+    var editingTransform = _.pluck(this.transforms, "editing").indexOf(true) >= 0;
+    return this.editing || editingTransform;
+}
+
 

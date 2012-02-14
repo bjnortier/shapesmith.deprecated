@@ -4,7 +4,7 @@ SS.SceneView = function(container) {
     var camera, scene, renderer, w, h;
     var overRenderer;
 
-    var mouseOnDown, lastMouseMpos;
+    var mouseOnDown, lastMouseMpos, mouseDownOnActiveSceneObject;
 
     var elevation = 0, azimuth = Math.PI/4;
     var target = { azimuth: Math.PI/4, elevation: Math.PI*3/8 };
@@ -12,13 +12,12 @@ SS.SceneView = function(container) {
     var distance = 1000, distanceTarget = 300;
     var targetScenePosition = new THREE.Vector3(0,0,0);
 
-    
-    var state;
-
     var workplane, cursoid;
     var popupMenu = SS.popupMenu();
 
     var that = this;
+    
+    _.extend(that, Backbone.Events);
     
     function init() {
 
@@ -58,7 +57,6 @@ SS.SceneView = function(container) {
 	container.addEventListener('DOMMouseScroll', onMouseWheel, false);
 	container.addEventListener('mousemove', onMouseMove, false);
 	window.addEventListener('keydown', onDocumentKeyDown, false);
-	window.addEventListener('keyup', onDocumentKeyUp, false);
 
 	container.addEventListener('mouseover', function() {
 	    overRenderer = true;
@@ -85,17 +83,17 @@ SS.SceneView = function(container) {
     function onMouseDown(event) {
 	event.preventDefault();
 
-	that.triggerMouseDownOnSceneObjectViews(event);
-
 	popupMenu.onMouseDown(event);
 
+        mouseDownButton = event.button;
 	mouseOnDown = {};
 	mouseOnDown.x = event.clientX;
 	mouseOnDown.y = event.clientY;
         lastMousePos = mouseOnDown;
 
-        state = undefined;
 	container.addEventListener('mouseup', onMouseUp, false);
+
+        SS.UI_MOUSE_STATE.free();
 
 	var cursoidName;
 	var activeConstructor = SS.constructors.active;
@@ -111,15 +109,17 @@ SS.SceneView = function(container) {
 	    cursoidName = cursoid.getCursoid(scene, camera, event)
 	}
         if (cursoidName) {
-            state = {cursoid: cursoidName};
+            SS.UI_MOUSE_STATE.overCursoid = true;
             cursoid.activate(cursoidName);
 	    popupMenu.cancel();
         } 
 
-        if (SS.transformerManager.isMouseOverTransformerElement(scene, camera, event)) {
-            popupMenu.cancel()
-        }
+        var mouseOverActiveObjects = mouseOverSceneObjectViews.filter(function(object) {
+            return object.active;
+        });
+        mouseDownOnActiveSceneObject = mouseOverActiveObjects.length > 0;
         
+	that.triggerMouseDownOnSceneObjectViews(event);
     }
     
     function onMouseMove(event) {
@@ -135,31 +135,29 @@ SS.SceneView = function(container) {
             var panRotateThreshold = 10;
             var transformerThreshold = 5;
 	    
-	    if (!state && !popupMenu.isShowing()) {
+	    if (SS.UI_MOUSE_STATE.isFree()) {
                 
-                if (!state && (event.button === 0)) {
-                    if (SS.transformerManager.initiateTransformer(scene, camera, event)) {
-                        state = 'transforming';
-                    }
-                }
-
                 var overPanRotateThreshold = ((Math.abs(event.clientX - mouseOnDown.x) > panRotateThreshold)
 			                      ||
 			                      (Math.abs(event.clientY - mouseOnDown.y) > panRotateThreshold));
-                
-		if (!state && (event.button === 0 && event.shiftKey) && overPanRotateThreshold) {
-                    state = 'rotating';
-		} 
-		if (!state && (event.button === 1 || event.shiftKey) && overPanRotateThreshold)  {
-                    state = 'panning';
-		}
-	    }
-	    
-	    if (state) {
-		popupMenu.cancel()
-	    } 
+                if (overPanRotateThreshold) {
 
-            if (state === 'rotating') {
+		    if (!event.shiftKey &&
+                        (event.button === 0) &&
+                        (mouseDownButton === 0) &&
+                        !mouseDownOnActiveSceneObject) {
+                        
+                        SS.UI_MOUSE_STATE.rotating = true;
+		    } 
+		    if (((event.button === 1) && (mouseDownButton === 1)) 
+                        || 
+                        ((event.button === 0) && (mouseDownButton === 0) && (event.shiftKey)))  {
+                        SS.UI_MOUSE_STATE.panning = true;
+		    }
+                }
+	    }
+
+            if (SS.UI_MOUSE_STATE.rotating) {
 		
 		var zoomDamp = Math.sqrt(distance)/10;
 
@@ -169,7 +167,9 @@ SS.SceneView = function(container) {
 		target.elevation = target.elevation > Math.PI ? Math.PI : target.elevation;
 		target.elevation = target.elevation < 0 ? 0 : target.elevation;
 
-	    } else if (state === 'panning') {
+                that.trigger('cameraChange');
+
+	    } else if (SS.UI_MOUSE_STATE.panning) {
                 
                 var dMouse = {x: mouse.x - lastMousePos.x,
                               y: mouse.y - lastMousePos.y};
@@ -184,12 +184,19 @@ SS.SceneView = function(container) {
                 dPos.multiplyScalar(factor);
 
                 targetScenePosition.addSelf(dPos);
+
+                that.trigger('cameraChange');
             }
             
 	} 
 
 
-        if (cursoid.getCursoid(scene, camera, event) ||
+        var mouseOverActiveObjects = mouseOverSceneObjectViews.filter(function(object) {
+            return object.active;
+        });
+        if (mouseOverActiveObjects.length > 0) {
+            document.body.style.cursor = 'pointer';
+        } else if (cursoid.getCursoid(scene, camera, event) ||
 	    (SS.constructors.active &&  
 	     SS.constructors.active.getAnchor(scene, camera, event))) {
             document.body.style.cursor = 'pointer';
@@ -303,20 +310,16 @@ SS.SceneView = function(container) {
 	targetOnDown.azimuth = target.azimuth;
 	targetOnDown.elevation = target.elevation;
 
-	var positionOnWorkplane = determinePositionOnWorkplane(event);
-	if (positionOnWorkplane) {
-	    workplane.clicked(positionOnWorkplane);
-	}
-
-	if ((SS.UI_STATE.state === SS.UIStates.UNDEFINED) &&
+	if (SS.UI_MOUSE_STATE.isFree() && 
+            !SS.UI_EDITING_STATE.isEditing() && 
             (event.button == 0)) {
 	    selectObject(event);
 	}
 
-	state = undefined;
         cursoid.deactivate();
-	//SS.constructors.active && SS.constructors.active.deactivateAnchor();
 	popupMenu.onMouseUp(event);
+
+        SS.UI_MOUSE_STATE.free();
 
 	mouseOnDown = null;
 	container.removeEventListener('mouseup', onMouseUp, false);
@@ -360,23 +363,16 @@ SS.SceneView = function(container) {
 	return false;
     }
 
-    function onDocumentKeyUp(event) {
-        if ((event.keyIdentifier === 'Shift') &&
-            (state === 'rotating')) {
-            state = undefined;
-            
-        }
-        return false;
-    }
-
     function onWindowResize(event) {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 	renderer.setSize(window.innerWidth, window.innerHeight);
+        that.trigger('cameraChange');
     }
 
     function zoom(delta) {
 	distanceTarget -= delta;
+        that.trigger('cameraChange');
     }
 
     function animate() {
@@ -427,44 +423,6 @@ SS.SceneView = function(container) {
 
     }
 
-    this.geomDocUpdated = function(event) {
-
-        if (event.add) {
-            add(event.add);
-        }
-
-        if (event.remove) {
-            remove(event.remove);
-        }
-
-        if (event.replace) {
-            remove(event.replace.original);
-            add(event.replace.replacement);
-        }
-    }
-
-    var add = function(geomNode) {
-        SS.renderGeometry(geomNode);
-    }
-
-    var remove = function(geomNode) {
-        SS.hideGeometry(geomNode);
-    }
-
-    this.selectionUpdated = function(event) {
-        if (event.deselected) {
-            for (var i in event.deselected) {
-                var id = event.deselected[i];
-                SS.unhighlightGeometry(geom_doc.findById(id))
-            }
-        }
-        if (event.selected) {
-            for (var i in event.selected) {
-                var id = event.selected[i];
-                SS.highlightGeometry(geom_doc.findById(id));
-            }
-        }
-    }
 
     var sceneObjectViews = [];
     var mouseOverSceneObjectViews = [];
@@ -472,8 +430,9 @@ SS.SceneView = function(container) {
 
     this.replaceSceneObjectViewInMouseState = function(oldView, newView) {
         [mouseOverSceneObjectViews, mouseDownSceneObjectViews].map(function(array) {
-            if (array.indexOf(oldView) !== -1) {
-                array.splice(mouseOverSceneObjectViews.indexOf(oldView), 1);
+            var index = array.indexOf(oldView);
+            if (index !== -1) {
+                array.splice(index, 1);
                 array.push(newView);
             }
         });
@@ -498,6 +457,7 @@ SS.SceneView = function(container) {
 	
 	var found = SS.selectInScene(scene, camera, event);
 	var objects = _.pluck(found, 'object');
+
 	// Select the hightest-level THREE.Object3D objects in the scene
 	var getRoot = function(object) {
 	    return object.parent.constructor === THREE.Scene ? 
@@ -509,7 +469,9 @@ SS.SceneView = function(container) {
 	objects.map(getRoot).map(function(object) {
 	    sceneObjectViews.map(function(sceneObjectView) {
 		if (getRoot(object) === sceneObjectView.sceneObject) {
-		    foundSceneObjectViews.push(sceneObjectView);
+                    if (foundSceneObjectViews.indexOf(sceneObjectView) === -1) {
+		        foundSceneObjectViews.push(sceneObjectView);
+                    }
 		}
 	    });
 	});

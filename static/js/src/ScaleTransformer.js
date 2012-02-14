@@ -1,42 +1,85 @@
 var SS = SS || {};
 
-SS.ScaleTransformerModel = Backbone.Model.extend({
+SS.ScaleTransformerInitiator = SS.TransformerInitiator.extend({
 
     initialize: function(attributes) { 
-        var that = this;
+        SS.TransformerInitiator.prototype.initialize.call(this, attributes);
 
-        this.boundingBox = SS.boundingBoxForGeomNode(this.attributes.editingNode);
-        this.center = SS.transformers.centerOfGeom(this.boundingBox);
-        this.anchorPosition = attributes.anchorFunction(this.boundingBox);
-
-
-        geom_doc.on('replace', this.geomDocReplace, this);
-
-        var arrowViews = [
-	    new SS.ScaleTransformArrowViewMaxXMaxY({model: this}),
-            new SS.ScaleTransformArrowViewMaxXMinY({model: this}),
-            new SS.ScaleTransformArrowViewMinXMinY({model: this}),
-            new SS.ScaleTransformArrowViewMinXMaxY({model: this}),
+        this.arrowViews = [
+	    new SS.ScaleArrowViewMaxXMaxY({model: this}),
+            new SS.ScaleArrowViewMaxXMinY({model: this}),
+            new SS.ScaleArrowViewMinXMinY({model: this}),
+            new SS.ScaleArrowViewMinXMaxY({model: this}),
 	];
-
-        for (var i = 0; i < 4; ++i) {
-            SS.sceneView.replaceSceneObjectViewInMouseState(this.attributes.arrowViews[i], arrowViews[i]);
-        }
-
-        arrowViews.map(function(arrowView) {
-            arrowView.on('mouseDrag', function(event) {
-                that.drag(event);
-            });
-        });
-
-        var newViews = [
-            new SS.ScaleGeomNodeView({model: this}),
-            new SS.ScaleFactorView({model: this}),
-            new SS.ScaleDOMView({model: this}),
+        
+        this.views = this.views.concat(this.arrowViews);
+        this.views = this.views.concat([
             new SS.ScaleBoxView({model: this}),
             new SS.ScaleFootprintView({model: this}),
-        ];
-        this.views = newViews.concat(arrowViews);
+        ]);
+    },
+
+    mouseDownOnArrow: function(arrowView) {
+        
+	var geomNode = this.geomNode;
+        var editingNode = geomNode.editableCopy();
+        var transform = new Transform({
+            type: 'scale',
+            editing: true,
+	    origin: {x: Math.round(this.center.x), 
+                     y: Math.round(this.center.y), 
+                     z: 0},
+            parameters: {factor: 1.0}
+        });
+        editingNode.transforms.push(transform);
+        geomNode.originalSceneObjects = geomNode.sceneObjects;
+
+        selectionManager.deselectID(geomNode.id);
+        geom_doc.replace(geomNode, editingNode);
+
+        new SS.ScaleTransformer({originalNode: geomNode,
+                                 editingNode: editingNode, 
+                                 transform: transform,
+                                 anchorFunction: arrowView.anchorFunction,
+                                 arrowViews: this.arrowViews});
+        this.destroy();
+    },
+
+});
+
+SS.ScaleTransformer = SS.Transformer.extend({
+
+    initialize: function(attributes) { 
+        SS.Transformer.prototype.initialize.call(this, attributes);
+
+        if (!attributes.editingExisting) {
+            this.anchorPosition = attributes.anchorFunction(this.boundingBox);
+
+            var arrowViews = [
+	        new SS.ScaleArrowViewMaxXMaxY({model: this}),
+                new SS.ScaleArrowViewMaxXMinY({model: this}),
+                new SS.ScaleArrowViewMinXMinY({model: this}),
+                new SS.ScaleArrowViewMinXMaxY({model: this}),
+	    ];
+            for (var i = 0; i < 4; ++i) {
+                SS.sceneView.replaceSceneObjectViewInMouseState(attributes.arrowViews[i], arrowViews[i]);
+            }
+
+            var that = this;
+            arrowViews.map(function(arrowView) {
+                arrowView.on('mouseDrag', that.drag, that);
+            });
+
+            var newViews = [
+                new SS.ScaleGeomNodeView({model: this}),
+                new SS.ScaleFactorView({model: this}),
+                new SS.ScaleBoxView({model: this}),
+                new SS.ScaleFootprintView({model: this}),
+            ];
+
+            this.views = this.views.concat(newViews);
+            this.views = this.views.concat(arrowViews);
+        }
     },
 
     mouseDown: function(arrowView, event) {
@@ -45,80 +88,30 @@ SS.ScaleTransformerModel = Backbone.Model.extend({
 
     drag: function(event) {
 
-        var dxFrom = this.anchorPosition.x - this.attributes.transform.origin.x;
-        var dyFrom = this.anchorPosition.y - this.attributes.transform.origin.y;
+        var dxFrom = this.anchorPosition.x - this.transform.origin.x;
+        var dyFrom = this.anchorPosition.y - this.transform.origin.y;
 
         var r1 = Math.sqrt(dxFrom*dxFrom + dyFrom*dyFrom);
 
         var workplanePosition = SS.sceneView.determinePositionOnWorkplane(event);
-        var dxTo = workplanePosition.x - this.attributes.transform.origin.x;
-        var dyTo = workplanePosition.y - this.attributes.transform.origin.y;
+        var dxTo = workplanePosition.x - this.transform.origin.x;
+        var dyTo = workplanePosition.y - this.transform.origin.y;
         var r2 = Math.sqrt(dxTo*dxTo + dyTo*dyTo);
 
         var factor = parseFloat((r2/r1).toFixed(3));
-        if (event.ctrlKey) {
+        if (!event.ctrlKey) {
             factor = Math.round(factor*10)/10;
         }
 
-        this.attributes.transform.parameters.factor = factor;
+        this.transform.parameters.factor = factor;
 
         this.trigger('change:model');
-        this.boundingBox = SS.boundingBoxForGeomNode(this.attributes.editingNode);
-
-        this.trigger('change');
-
-    },
-
-    updateFromDOMView: function() {
-        var updateValues = function(object, schema) {
-            for (key in schema.properties) {
-                var itemSchema = schema.properties[key];
-                if (itemSchema.type === 'string') {
-                    object[key] = $('#' + key).val();
-                } else {
-                    object[key] = parseFloat($('#' + key).val());
-                }
-            }
-        };
-
-        var transform = this.attributes.transform;
-        var schema = SS.schemas[transform.type];
-        updateValues(transform.origin, schema.properties.origin);
-        updateValues(transform.parameters, schema.properties.parameters);
-
-        this.trigger('change:model');
-        this.boundingBox = SS.boundingBoxForGeomNode(this.attributes.editingNode);
+        this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
+        this.center = SS.transformers.centerOfGeom(this.boundingBox);
 
         this.trigger('change');
     },
 
-    tryCommit: function() {
-        var cmd =  update_geom_command(this.attributes.originalNode, 
-                                       this.attributes.editingNode, 
-                                       this.attributes.editingNode); 
-        command_stack.execute(cmd);
-        console.log('Try Commit');
-    },
-
-    cancel: function() {
-        geom_doc.replace(this.attributes.editingNode, 
-                         this.attributes.originalNode);
-    },
-
-    destroy: function() {
-        this.views.map(function(view) {
-            view.remove();
-        });
-        geom_doc.off('replace', this.geomDocReplace, this);
-    },
-    
-    geomDocReplace: function(original, replacement) {
-        if (original === this.attributes.editingNode) {
-            this.destroy();
-        }
-    },
-
-        
 });
 
 SS.ScaleGeomNodeView = Backbone.View.extend({
@@ -129,126 +122,31 @@ SS.ScaleGeomNodeView = Backbone.View.extend({
     },
 
     render: function() {
-        var transform = this.model.attributes.transform;
+        var transform = this.model.transform;
         var scalePoint = new THREE.Vector3(transform.origin.x,
                                            transform.origin.y,
                                            transform.origin.z);
 
         // TODO: Replace with model for geom node
-        SS.scaleGeomNodeRendering(this.model.attributes.originalNode, 
-                                  this.model.attributes.editingNode, 
+        SS.scaleGeomNodeRendering(this.model.originalNode, 
+                                  this.model.editingNode, 
                                   scalePoint, 
-                                  this.model.attributes.transform.parameters.factor);
-    },
-
-});
-
-SS.ScaleDOMView = Backbone.View.extend({
-
-    initialize: function() {
-        this.render();
-        this.model.on('change', this.update, this);
-    },
-
-    render: function() {
-        var geomNode = this.model.attributes.editingNode;
-        var transform = this.model.attributes.transform;
-        var schema = SS.schemas[transform.type];
-    
-        // Origin & Orientation
-        var originTable = null;
-        if (transform.origin) {
-	    var originArr = ['x', 'y', 'z'].map(function(key) {
-	        return {key: key, 
-		        value: transform.origin[key], 
-		        editing: transform.editing,
-                        inputElement: renderInputElement(key, schema.properties.origin)
-                       }
-	    });
-	    var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}{{{inputElement}}}{{/editing}}</td></tr>{{/originArr}}</table>';
-	    var originTable = $.mustache(originTemplate, {originArr : originArr});
-        }
-
-        // Params
-        var paramsArr = [];
-        for (key in transform.parameters) {
-            paramsArr.push({key: key,
-                            value: transform.parameters[key],
-                            editing: transform.editing,
-                            inputElement: renderInputElement(key, schema.properties.parameters)
-                           });
-        }
-        var parametersTemplate = '<table>{{#paramsArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}{{{inputElement}}}{{/editing}}</td></tr>{{/paramsArr}}</table>';
-        var paramsTable = $.mustache(parametersTemplate, {paramsArr : paramsArr});
-
-        var template = '<table><tr><td>{{type}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input class="ok" type="submit" value="Ok"/><input class="cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}</table>';
-
-        var view = {
-            type: transform.type,
-	    editing: transform.editing,
-	    originTable: originTable,
-	    paramsTable: paramsTable};
-        var transformTable = $.mustache(template, view);
-
-        this.$el.html(transformTable);
-        $('#editing-area').append(this.$el);
-        return this;
-    },
-
-    events: {
-        'click .ok' : 'ok',
-        'click .cancel' : 'cancel',
-        'change .field': 'fieldChanged',
-        'keyup .field': 'fieldChanged',
-        'click .field': 'fieldChanged',
-    },
-
-    preventUpdate: false,
-
-    update: function() {
-        if (this.preventUpdate) {
-            return;
-        }
-
-        var updateValues = function(object, schema) {
-            for (key in schema.properties) {
-                $('#' + key).val(object[key]);
-            }
-        };
-
-        var transform = this.model.attributes.transform;
-        var schema = SS.schemas[transform.type];
-        updateValues(transform.origin, schema.properties.origin);
-        updateValues(transform.parameters, schema.properties.parameters);
-    },
-
-    ok: function() {
-        this.model.tryCommit();
-    },
-
-    cancel: function() {
-        this.model.cancel();
-    },
-
-    fieldChanged: function() {
-        this.preventUpdate = true;
-        this.model.updateFromDOMView();
-        this.preventUpdate = false;
+                                  this.model.transform.parameters.factor);
     },
 
 });
 
 SS.ScaleFactorView = SS.SceneObjectView.extend({
-    
-    initialize: function() {
-	SS.SceneObjectView.prototype.initialize.call(this);
-        this.model.on('change', this.render, this);
-    },
 
+    initialize: function() {
+        SS.SceneObjectView.prototype.initialize.call(this);
+        this.render();
+    },
+    
     render: function() {
         this.clear();
         
-        var factor = this.model.attributes.transform.parameters.factor;
+        var factor = this.model.transform.parameters.factor;
         if (factor && (factor > 0)) {
             var textGeo = new THREE.TextGeometry('' + factor, {
 	        size: 2, height: 0.01, curveSegments: 6,
@@ -258,7 +156,7 @@ SS.ScaleFactorView = SS.SceneObjectView.extend({
                                       new THREE.MeshBasicMaterial({color: 0xffffff, 
                                                                    opacity: 0.8}));
             
-            var boundingBox = SS.boundingBoxForGeomNode(this.model.attributes.editingNode);
+            var boundingBox = SS.boundingBoxForGeomNode(this.model.editingNode);
             var center = SS.transformers.centerOfGeom(boundingBox);
             text.position.y = center.y - text.boundRadius/2;
             text.position.x = boundingBox.max.x + 5;
@@ -269,7 +167,224 @@ SS.ScaleFactorView = SS.SceneObjectView.extend({
         this.postRender();
     },
 
+});
+
+SS.ScaleArrowView = SS.ActiveTransformerView.extend({
     
+    initialize: function() {
+	SS.ActiveTransformerView.prototype.initialize.call(this);
+        this.on('mouseDown', this.mouseDown, this);
+    },
+
+    remove: function() {
+        SS.ActiveTransformerView.prototype.remove.call(this);
+        this.model.off('mouseDown', this.mouseDownOnArrow);
+    },
+
+    mouseDown: function() {
+        this.model.mouseDownOnArrow && this.model.mouseDownOnArrow(this);
+    },
+
+    render: function() {
+        this.clear();
+
+        var arrowGeometry = new THREE.Geometry();
+        var positions = [[0, 0, 0], 
+                         [2, -1.5, 0], [2, -0.5, 0], 
+                         [3, -0.5, 0], [3, -1.5, 0],
+                         [5, 0, 0], 
+                         [3, 1.5, 0], [3, 0.5, 0], 
+                         [2, 0.5, 0], [2, 1.5, 0], 
+                         [0, 0, 0]];
+
+        arrowGeometry.vertices = positions.map(function(coordinates) {
+            return new THREE.Vertex(new THREE.Vector3(coordinates[0], coordinates[1], coordinates[2]));
+        });
+        arrowGeometry.faces.push(new THREE.Face4(2,3,7,8));
+        arrowGeometry.faces.push(new THREE.Face3(0,1,9));
+        arrowGeometry.faces.push(new THREE.Face3(4,5,6));
+        arrowGeometry.computeCentroids();
+        arrowGeometry.computeFaceNormals();
+        
+        var arrowMesh = new THREE.Mesh(arrowGeometry, 
+                                       new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, 
+                                                                    transparent: true, 
+                                                                    opacity: 0.5}));
+        arrowMesh.doubleSides = true;
+        
+        var lineGeom = new THREE.Geometry();
+        lineGeom.vertices = arrowGeometry.vertices;
+        var line = new THREE.Line(lineGeom, 
+                                  new THREE.LineBasicMaterial({color: SS.constructors.lineColor, 
+                                                               wireframe : true, 
+                                                               linewidth: 2.0, 
+                                                               transparent: true, 
+                                                               opacity: 0.5 }));
+
+        arrowMesh.name = {transformerElement: 'scale+X+Y'};
+        line.name = {transformerElement:  'scale+X+Y'};
+        
+        this.sceneObject.add(arrowMesh);
+        this.sceneObject.add(line);
+       
+        return this;
+    },
+
+    
+});
+
+SS.ScaleArrowViewMaxXMaxY = SS.ScaleArrowView.extend({
+
+    initialize: function() {
+	SS.ScaleArrowView.prototype.initialize.call(this);
+        this.render();
+    },
+    
+    anchorFunction: function(boundingBox) {
+        return {x: boundingBox.max.x, 
+                y: boundingBox.max.y};
+    },
+
+    render: function() {
+        SS.ScaleArrowView.prototype.render.call(this);
+        this.sceneObject.position.x = this.model.boundingBox.max.x + 1;
+        this.sceneObject.position.y = this.model.boundingBox.max.y + 1;
+        this.sceneObject.rotation.z = 1/4*Math.PI;
+        this.postRender();
+        return this;
+    },
+});
+
+SS.ScaleArrowViewMinXMaxY = SS.ScaleArrowView.extend({
+
+    initialize: function() {
+	SS.ScaleArrowView.prototype.initialize.call(this);
+        this.render();
+    },
+
+    anchorFunction: function(boundingBox) {
+        return {x: boundingBox.min.x, 
+                y: boundingBox.max.y};
+    },
+
+    render: function() {
+        SS.ScaleArrowView.prototype.render.call(this);
+        this.sceneObject.position.x = this.model.boundingBox.min.x - 1;
+        this.sceneObject.position.y = this.model.boundingBox.max.y + 1;
+        this.sceneObject.rotation.z = 3/4*Math.PI;
+        this.postRender();
+        return this;
+    },
+});
+
+SS.ScaleArrowViewMinXMinY = SS.ScaleArrowView.extend({
+
+    initialize: function() {
+	SS.ScaleArrowView.prototype.initialize.call(this);
+        this.render();
+    },
+
+    anchorFunction: function(boundingBox) {
+        return {x: boundingBox.min.x, 
+                y: boundingBox.min.y};
+    },
+
+    render: function() {
+        SS.ScaleArrowView.prototype.render.call(this);
+        this.sceneObject.position.x = this.model.boundingBox.min.x - 1;
+        this.sceneObject.position.y = this.model.boundingBox.min.y - 1;
+        this.sceneObject.rotation.z = 5/4*Math.PI;
+        this.postRender();
+        return this;
+    },
+});
+
+SS.ScaleArrowViewMaxXMinY = SS.ScaleArrowView.extend({
+
+    initialize: function() {
+	SS.ScaleArrowView.prototype.initialize.call(this);
+        this.render();
+    },
+
+    anchorFunction: function(boundingBox) {
+        return {x: boundingBox.max.x, 
+                y: boundingBox.min.y};
+    },
+
+    render: function() {
+        SS.ScaleArrowView.prototype.render.call(this);
+        this.sceneObject.position.x = this.model.boundingBox.max.x + 1;
+        this.sceneObject.position.y = this.model.boundingBox.min.y - 1;
+        this.sceneObject.rotation.z = 7/4*Math.PI;
+        this.postRender();
+        return this;
+    },
+});
+
+
+SS.ScaleBoxView = SS.SceneObjectView.extend({
+
+    initialize: function() {
+	SS.SceneObjectView.prototype.initialize.call(this);
+        this.render();
+    },
+    
+    render: function() {
+        this.clear();
+        
+        var width  = this.model.boundingBox.max.x - this.model.boundingBox.min.x;
+        var depth  = this.model.boundingBox.max.y - this.model.boundingBox.min.y;
+        var height = this.model.boundingBox.max.z - this.model.boundingBox.min.z;
+
+        var geometry = new THREE.CubeGeometry(width, depth, height);
+	cube = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: SS.constructors.lineColor, 
+                                                                     wireframe: true}));
+        
+	cube.position.x = this.model.boundingBox.min.x + width/2;
+	cube.position.y = this.model.boundingBox.min.y + depth/2;
+	cube.position.z = this.model.boundingBox.min.z + height/2;
+	this.sceneObject.add(cube);
+
+        this.postRender();
+        return this;
+    },
 
 });
 
+SS.ScaleFootprintView = SS.SceneObjectView.extend({
+
+    initialize: function() {
+	SS.SceneObjectView.prototype.initialize.call(this);
+        this.render();
+    },
+
+   
+    render: function() {
+        this.clear();
+        
+        var width  = this.model.boundingBox.max.x - this.model.boundingBox.min.x;
+        var depth  = this.model.boundingBox.max.y - this.model.boundingBox.min.y;
+        var height = this.model.boundingBox.max.z - this.model.boundingBox.min.z;
+
+        var planeGeometry = new THREE.PlaneGeometry(width, depth); 
+        var planeMesh = THREE.SceneUtils.createMultiMaterialObject(
+            planeGeometry, 
+            [
+                new THREE.MeshBasicMaterial({color: SS.constructors.lineColor, 
+                                             wireframe: true}),
+                new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, 
+                                             transparent: true, 
+                                             opacity: 0.5})
+            ]);
+
+        planeMesh.doubleSided = true;
+        planeMesh.position.x = this.model.boundingBox.min.x + width/2;
+        planeMesh.position.y = this.model.boundingBox.min.y + depth/2;
+        planeMesh.position.z = -0.05;
+	this.sceneObject.add(planeMesh);
+
+        this.postRender();
+        return this;
+    },
+
+});

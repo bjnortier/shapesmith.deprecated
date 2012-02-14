@@ -240,14 +240,7 @@ SS.Workplane = function(spec) {
     var workplanePointer   = SS.workplane.pointer({scene: scene, gridExtents: gridExtents});
     var grid = SS.workplane.grid({scene: scene, gridExtents: gridExtents});
 
-    // Make the workplane evented
-    evented(that);
-
-    that.clicked = function(position) {
-	that.fire({type: 'workplaneClicked', 
-		   x: position.x, 
-		   y: position.y});
-    }
+    _.extend(that, Backbone.Events);
 
     that.updateXYLocation = function(position, originalEvent) {
 
@@ -263,20 +256,20 @@ SS.Workplane = function(spec) {
 	    
 	    workplanePointer.update({x: gridX, y: gridY});
 
-	    that.fire({type: 'workplaneXYCursorUpdated', 
-		       x: gridX, 
-		       y: gridY,
-		       originalEvent: originalEvent
-		      });
+	    that.trigger('workplaneXYCursorUpdated', {
+		x: gridX, 
+		y: gridY,
+		originalEvent: originalEvent
+	    });
 	}
     }
 
     that.updateZLocation = function(position, originalEvent) {
         var gridZ = Math.round(position.z);
-	that.fire({type: 'workplaneZCursorUpdated', 
-		       z: gridZ, 
-		       originalEvent: originalEvent
-		      });
+	that.trigger('workplaneZCursorUpdated', {
+	    z: gridZ, 
+	    originalEvent: originalEvent
+	});
     }
 
     that.getPlaneMesh = function() {

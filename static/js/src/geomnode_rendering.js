@@ -332,39 +332,24 @@ var SS = SS || {};
         });
     }
 
-    SS.moveGeomNodeRendering = function(geomNode, position) {
-        if (geomNode.sceneObjects) {
-            for (key in geomNode.sceneObjects) {
-                geomNode.sceneObjects[key].position.x = position.x;
-                geomNode.sceneObjects[key].position.y = position.y;
-                geomNode.sceneObjects[key].position.z = position.z;
-            }
-        }
-    }
+    SS.translateGeomNodeRendering = function(originalNode, editingNode,  translation) {
+        for (key in editingNode.sceneObjects) {
+            for (var i = 0; i < editingNode.sceneObjects[key].children.length; ++i) {
 
-    SS.snapshotGeometry = function(geomNode) {
-        var snapshot = {};
-        if (geomNode.sceneObjects) {
-            for (key in geomNode.sceneObjects) {
-                geomNode.sceneObjects[key].children.map(function(child) {
-                    var geometry = child.geometry;
-                    snapshot[key] = snapshot[key] || {};
-                    snapshot[key][child.id] = geometry.vertices;
-                });
-            }
-        }
-        return snapshot;
-    }
+                var originalGeometry = originalNode.originalSceneObjects[key].children[i].geometry;
+                var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
 
-    SS.restoreGeomNodeRendering = function(geomNode, snapshot) {
-        if (geomNode.sceneObjects) {
-            for (key in geomNode.sceneObjects) {
-                geomNode.sceneObjects[key].children.map(function(child) {
-                    var geometry = child.geometry;
-                    var snapshotVertices = snapshot[key][child.id];
-                    geometry.vertices = snapshotVertices;
-                    geometry.__dirtyVertices = true;
-                });
+                editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
+	            var position = vertex.position.clone();
+	            position.x = position.x + translation.x;
+	            position.y = position.y + translation.y;
+	            position.z = position.z + translation.z;
+	            return new THREE.Vertex(position);
+	        });
+
+                editingGeometry.computeCentroids();
+	        editingGeometry.computeFaceNormals();
+                editingGeometry.__dirtyVertices = true;
             }
         }
     }
@@ -391,8 +376,8 @@ var SS = SS || {};
         }
     }
 
-    SS.rotateGeomNodeRendering = function(originalNode, editingNode, center, u, v, w, angle) {
-        var normUVW = new THREE.Vector3(u, v, w).normalize();
+    SS.rotateGeomNodeRendering = function(originalNode, editingNode, center, axis, angle) {
+        var normUVW = axis.clone().normalize();
         var un = normUVW.x, vn = normUVW.y, wn = normUVW.z;
 
         for (key in editingNode.sceneObjects) {

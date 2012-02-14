@@ -121,15 +121,6 @@ body {
 
 }
 
-#editing-area {
-    width:200px;
-    margin: 0 auto;
-    position: absolute;
-    bottom: 10px;
-    left: 40%;
-}
-
-
 #toolWheel {
     position: fixed;
     display: none;
@@ -137,6 +128,10 @@ body {
 
 #toolbarStaging {
     display: none;
+    position: fixed;
+}
+
+#floating-ok-cancel {
     position: fixed;
 }
 

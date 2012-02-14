@@ -3,7 +3,7 @@ var SS = SS || {};
 SS.NodeUpdater = function(node) {
     var node = node, that = this;
 
-    evented(this);
+    _.extend(this, Backbone.Events);
 
     var updateTreeview = function() {
         Object.keys(node.origin).map(function(key) {
@@ -30,13 +30,13 @@ SS.NodeUpdater = function(node) {
                 node.parameters[key] = parseFloat($('#' + key).val());
             }
         });
-        that.fire({type: 'updatedFromTree'});
+        that.trigger('updatedFromTree');
     }
 
     this.setOrigin = function(origin) {
         node.origin = {x: origin.x, y:origin.y, z:origin.z};
 	updateTreeview();
-        that.fire({type: 'updatedFromCursoid'});
+        that.trigger('updatedFromCursoid');
     }
 
     this.setParams = function(params, extra) {
@@ -46,20 +46,24 @@ SS.NodeUpdater = function(node) {
         node.extra = extra;
 
 	updateTreeview();
-        that.fire({type: 'updatedFromCursoid'});
+        that.trigger('updatedFromCursoid');
     }
 
     this.setMeta = function(meta) {
         node.meta = meta;
-        that.fire({type: 'updatedFromCursoid'});
+        that.trigger('updatedFromCursoid');
     }
 
     var init = function() {
         Object.keys(node.origin).map(function(key) {
             $('#' + key).change(updateFromTreeView);
+            $('#' + key).keyup(updateFromTreeView);
+            $('#' + key).click(updateFromTreeView);
         });
         Object.keys(node.parameters).map(function(key) {
             $('#' + key).change(updateFromTreeView);
+            $('#' + key).keyup(updateFromTreeView);
+            $('#' + key).click(updateFromTreeView);
         });
         updateTreeview();
     }

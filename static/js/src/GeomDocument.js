@@ -11,28 +11,27 @@ function GeomDocument() {
     
     this.add = function(node) {
         this.rootNodes = [node].concat(this.rootNodes);
-        this.notify({add: node});
         this.trigger('add', node);
     }
 
     this.removeAll = function() {
 	for (index in this.rootNodes) {
-	    this.notify({remove: this.rootNodes[index]});
             this.trigger('remove', this.rootNodes[index]);
 	}
 	this.rootNodes = [];
     }
 
     this.remove = function(node) {
+        this.trigger('beforeRemove', node);
         var index = this.rootNodes.indexOf(node);
         if (index !== -1) {
             this.rootNodes.splice(index, 1);
-            this.notify({remove: node});
             this.trigger('remove', node);
         }
     }
 
     this.replace = function(original, replacement) {
+        this.trigger('beforeReplace', original, replacement);
         var recurFn = function(children) {
             var index = children.indexOf(original);
             if (index !== -1 ) {
@@ -44,8 +43,6 @@ function GeomDocument() {
             }
         }
         recurFn(this.rootNodes);
-        this.notify({replace: {original : original,
-                               replacement : replacement}});
         this.trigger('replace', original, replacement);
     }
 
@@ -111,14 +108,5 @@ function GeomDocument() {
         throw Error("node not found");
     }
 
-    this.getPreviewNode = function() {
-	for(i in this.rootNodes) {
-	    if (this.rootNodes[i].editing) {
-		return this.rootNodes[i];
-	    }
-	}
-	return null;
-    }
 
-    Observable.makeObservable(this);
 }

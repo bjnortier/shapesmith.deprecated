@@ -22,16 +22,13 @@ function Action(label, iconPath, fn) {
 	    // TODO: Move this to the popupmenu
 	    var selected = selectionManager.getSelected();
 	    SS.sceneView.popupMenu.disposeIfShowing();
-	    SS.sceneView.onMouseUp(event);
 	    fn(selected);
-            
+            event.stopPropagation();
         });
     }
 }
 
 function delete_geom(selected) {
-    selectionManager.deselectAll();
-
     if (selected.length == 0)  {
         alert("please select at least one object");
         return;
@@ -81,7 +78,6 @@ function create_primitive(type) {
 	origin: {x: 0, y: 0, z: 0},
         parameters: geometryParams});
     geom_doc.add(geomNode);
-    SS.setOthersTransparent(geomNode);
     return geomNode;
 }
 
@@ -106,9 +102,7 @@ function create_modifier(selected, type) {
         parameters: geometryParams
     }, [original]);
                                 
-    selectionManager.deselectAll();
     geom_doc.replace(original, modifierNode);
-    SS.setOthersTransparent(modifierNode);
 
     return modifierNode;
 }
@@ -143,9 +137,7 @@ function create_transform(selected, type) {
         parameters: transformParams
     });
     replacement.transforms.push(transform);
-    selectionManager.deselectAll();
     geom_doc.replace(original, replacement);
-    SS.setOthersTransparent(replacement);
     return {geomNode: replacement, transform: transform};
 }
 
@@ -236,22 +228,10 @@ $(document).ready(function() {
     /*
      * Transformations
      */
-    new Action('Translate', '/static/images/translate.png', 
-               function(selected) { 
-		   SS.constructors.createTranslate(create_transform(selected, 'translate'));
-	       }).render($('#transforms'));
-    new Action('Scale', '/static/images/scale.png', 
-               function(selected) { 
-		   SS.constructors.createScale(create_transform(selected, 'scale'));
-	       }).render($('#transforms'));
-    new Action('Rotate', '/static/images/rotate.png', 
-               function(selected) { 
-		   SS.constructors.createRotate(create_transform(selected, 'rotate'));
-	       }).render($('#transforms'));
-    new Action('Mirror', '/static/images/mirror.png', 
+    /*new Action('Mirror', '/static/images/mirror.png', 
                function(selected) { 
 		   SS.constructors.createMirror(create_transform(selected, 'mirror'));
-	       }).render($('#transforms'));
+	       }).render($('#transforms'));*/
     
 });
 

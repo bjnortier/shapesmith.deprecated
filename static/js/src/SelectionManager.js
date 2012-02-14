@@ -5,11 +5,7 @@ function SelectionManager() {
     var selected = [];
 
     this.getSelected = function() {
-        var toReturn = [];
-        for (var i in selected) {
-            toReturn.push(selected[i]);
-        }
-        return toReturn;
+        return selected.map(function(id) { return id});
     }
 
     this.size = function() {
@@ -37,14 +33,15 @@ function SelectionManager() {
 
     this.selectID = function(id) {
         selected.push(id);
-        this.notify({selected : [id]});
         this.trigger('selected', [id]);
     }
     
     this.deselectID = function(id) {
-        selected.splice(selected.indexOf(id), 1);
-        this.notify({deselected : [id]});
-        this.trigger('deselected', [id]);
+        var index = selected.indexOf(id);
+        if (index !== -1) {
+            selected.splice(selected.indexOf(id), 1);
+            this.trigger('deselected', [id]);
+        }
     }
 
     this.selectOnly = function(id) {
@@ -60,10 +57,8 @@ function SelectionManager() {
         selected = [id];
         
 	if (deselected.length > 0) {
-            this.notify({deselected : deselected});
             this.trigger('deselected', deselected);
 	}
-        this.notify({selected : [id]});
         this.trigger('selected', [id]);
     }
     
@@ -71,7 +66,6 @@ function SelectionManager() {
         if (selected.length > 0) {
             var deselected = selected;
             selected = [];
-            this.notify({deselected : deselected});
             this.trigger('deselected', deselected);
         }
     }

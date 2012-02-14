@@ -1,30 +1,46 @@
 var SS = SS || {};
 
-SS.UIStates = {UNDEFINED : 0, EDITING : 1};
+SS.UIMouseState = function() {
 
-SS.UIState = function() {
+    this.rotating = false;
+    this.panning = false;
+    this.popupShowing = false;
+    this.overCursoid = false;
 
-    this.state = SS.UIStates.UNDEFINED;
-    
-    var isEditing = function(node) {
-        var editingTransform = _.pluck(node.transforms, "editing").indexOf(true) >= 0;
-        return node.editing || editingTransform;
+    this.isFree = function() {
+        return (!(this.rotating || this.panning || this.popupShowing || this.overCursoid));
     }
-    
+
+    this.free = function() {
+        this.rotating = false;
+        this.panning = false;
+        this.overCursoid = false;
+    }
+
+}
+
+SS.UIEditingState = function() {
+
+    this.editing = false;
+
+    this.isEditing = function() {
+        return this.editing;
+    }
+
     this.geomDocAdd = function(node) {
-        if (isEditing(node)) {
-            this.state = SS.UIStates.EDITING;
+        if (node.isEditingOrTransformEditing()) {
+            this.editing = true;
         }
     }
 
     this.geomDocRemove = function(node) {
-        if (isEditing(node)) {
-            this.state = SS.UIStates.UNDEFINED;
+        if (node.isEditingOrTransformEditing()) {
+            this.editing = false;
         }
     }
 
     this.geomDocReplace = function(original, replacement) {
-        this.state = isEditing(replacement) ? SS.UIStates.EDITING : SS.UIStates.UNDEFINED;
+        this.editing = replacement.isEditingOrTransformEditing();
     }
 
     geom_doc.on('add', this.geomDocAdd, this);
@@ -32,3 +48,4 @@ SS.UIState = function() {
     geom_doc.on('replace', this.geomDocReplace, this);
     
 }
+
