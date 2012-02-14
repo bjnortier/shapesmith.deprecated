@@ -229,7 +229,6 @@ function TreeView() {
 		    cmd = okTransformFn();
 		}
                 command_stack.execute(cmd);
-                SS.restoreOpacity();
                 
             });
 
@@ -239,7 +238,6 @@ function TreeView() {
                 } else {
                     geom_doc.remove(geomNode);
                 }
-                SS.restoreOpacity();
 	    }
 
 	    $(document).bind('keyup.editing', function(e) {
@@ -360,7 +358,6 @@ function TreeView() {
             editingNode.transforms.splice(transformIndex, 1);
             var cmd = update_geom_command(geomNode, geomNode, editingNode);
             command_stack.execute(cmd);
-            SS.restoreOpacity();
         });
 
         // Show/Hide

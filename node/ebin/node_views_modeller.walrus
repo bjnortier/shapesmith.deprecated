@@ -105,7 +105,7 @@
   <script type="text/javascript" src="/static/js/src/GeomDocument.js"></script>
   <script type="text/javascript" src="/static/js/src/Preview.js"></script>
   <script type="text/javascript" src="/static/js/src/schemas.js"></script>
-  <script type="text/javascript" src="/static/js/src/updaters.js"></script>
+  <script type="text/javascript" src="/static/js/src/NodeUpdater.js"></script>
   <script type="text/javascript" src="/static/js/src/modifiers.js"></script>
 
   <script type="text/javascript" src="/static/js/src/primitive_constructors.js"></script>
