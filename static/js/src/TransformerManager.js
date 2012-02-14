@@ -51,6 +51,15 @@ SS.TransformerManager = function() {
         uiState = UISTATE.UNDEFINED;
     }
 
+    this.clear = function() {
+        initiators.map(function(initiator) {
+            initiator.destroy();
+        });
+        uiState = UISTATE.UNDEFINED;
+    }
+
     selectionManager.on('selected', this.selected, this);
-    selectionManager.on('deselected', this.deselected, this);    
+    selectionManager.on('deselected', this.deselected, this);  
+
+    command_stack.on('beforePop', this.clear, this);
 }

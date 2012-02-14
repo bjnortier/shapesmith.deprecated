@@ -2,7 +2,6 @@ var SS = SS || {};
 
 function update_geom_command(originalNode, nodeInDoc, replacement) {
 
-    selectionManager.deselectAll();
     var chainedPostFn = function(index, fromChain, toChain) {
 
         var nextFrom = fromChain[index];
@@ -220,8 +219,6 @@ function boolean(selected, type) {
             contentType: "application/json",
             data: JSON.stringify(geometry),
             success: function(result) {
-		selectionManager.deselectAll();
-
 		var sha = result.SHA;
 		geometry.sha = sha;
 		

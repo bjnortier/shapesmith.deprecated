@@ -22,6 +22,7 @@ function GeomDocument() {
     }
 
     this.remove = function(node) {
+        this.trigger('beforeRemove', node);
         var index = this.rootNodes.indexOf(node);
         if (index !== -1) {
             this.rootNodes.splice(index, 1);
@@ -30,6 +31,7 @@ function GeomDocument() {
     }
 
     this.replace = function(original, replacement) {
+        this.trigger('beforeReplace', original, replacement);
         var recurFn = function(children) {
             var index = children.indexOf(original);
             if (index !== -1 ) {

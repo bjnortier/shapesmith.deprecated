@@ -3,13 +3,19 @@ var SS = SS || {};
 SS.GeomNodeRenderingManager = function() {
 
     this.geomDocAdd = function(geomNode) {
-        if (geom_doc.isRoot(geomNode)) {
-            SS.renderGeometry(geomNode);
-        }
+        SS.renderGeometry(geomNode);
+    }
+
+    this.geomDocBeforeRemove = function(geomNode) {
+        selectionManager.deselectID(geomNode.id);
     }
 
     this.geomDocRemove = function(geomNode) {
         SS.hideGeometry(geomNode);
+    }
+
+    this.geomDocBeforeReplace = function(original, replacement) {
+        selectionManager.deselectID(original.id);
     }
 
     this.geomDocReplace = function(original, replacement) {
@@ -36,12 +42,20 @@ SS.GeomNodeRenderingManager = function() {
             SS.highlightGeometry(geom_doc.findById(id));
         }
     }
+
+    this.clear = function() {
+        selectionManager.deselectAll();
+    }
     
     geom_doc.on('add', this.geomDocAdd, this);
+    geom_doc.on('beforeRemove', this.geomDocBeforeRemove, this);
     geom_doc.on('remove', this.geomDocRemove, this);
+    geom_doc.on('beforeReplace', this.geomDocBeforeReplace, this);  
     geom_doc.on('replace', this.geomDocReplace, this);  
 
     selectionManager.on('selected', this.selected, this);
     selectionManager.on('deselected', this.deselected, this);
+
+    command_stack.on('beforePop', this.clear, this);
 
 }

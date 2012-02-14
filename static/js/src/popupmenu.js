@@ -3,7 +3,6 @@ SS.popupMenu = function() {
 
     var that = {};
 
-
     var showing = false, holding = false, cancelled = false, holdDelayTime = 500;
     // The reference counter is used to couple a mouse down and mouse up event, so
     // that the holding down of the button (delayed popup) is coupled correctly

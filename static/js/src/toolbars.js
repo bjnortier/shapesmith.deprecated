@@ -22,9 +22,8 @@ function Action(label, iconPath, fn) {
 	    // TODO: Move this to the popupmenu
 	    var selected = selectionManager.getSelected();
 	    SS.sceneView.popupMenu.disposeIfShowing();
-	    SS.sceneView.onMouseUp(event);
 	    fn(selected);
-            
+            event.stopPropagation();
         });
     }
 }

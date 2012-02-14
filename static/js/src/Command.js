@@ -18,12 +18,16 @@ function CommandStack(ss) {
     var ss = ss;
     var that = this;
 
+    _.extend(this, Backbone.Events);
+
     this.commit = function() {
 	commandInProgress.fromCommit = SS.session.commit;
 	ss.commit();
     }
 
     this.pop = function(commit) {
+        this.trigger('beforePop');
+
 	if (undoStack.peek() && undoStack.peek().fromCommit === commit) {
 	    console.info('UNDO: ' + undoStack.peek().fromCommit);
 	    this.undo();
@@ -49,8 +53,6 @@ function CommandStack(ss) {
     }
 
     this.undo = function() {
-	ss.selectionManager.deselectAll();
-
 	if (!this.canUndo()) {
 	    throw "Nothing to undo";
 	}
@@ -62,8 +64,6 @@ function CommandStack(ss) {
     }
 
     this.redo = function() {
-	ss.selectionManager.deselectAll();
-
 	if (!this.canRedo()) {
 	    throw "Nothing to redo";
 	}

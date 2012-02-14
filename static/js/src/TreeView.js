@@ -286,8 +286,6 @@ function TreeView() {
         // Edit geom
         $('.edit-geom').unbind('dblclick');
         $('.edit-geom').dblclick(function() { 
-	    selectionManager.deselectAll();
-
             var id;
             var pattern = /^target-(.*)$/;
             var classes = $(this).attr('class').split(' ');
@@ -307,7 +305,6 @@ function TreeView() {
         // Edit transform
         $('.edit-transform').unbind('dblclick');
         $('.edit-transform').dblclick(function() { 
-	    selectionManager.deselectAll();
             var id;
             var transformIndex;
             var pattern = /^target-(.*)-(.*)$/;
@@ -391,8 +388,6 @@ function TreeView() {
     }
 
     this.edit = function(id) {
-	selectionManager.deselectAll();
-
 	var geomNode = geom_doc.findById(id);
 	if (!geomNode.isBoolean()) {
             var editingNode = geomNode.editableCopy();
