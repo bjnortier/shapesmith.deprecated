@@ -317,8 +317,9 @@ SS.SceneView = function(container) {
 	}
 
         cursoid.deactivate();
-
 	popupMenu.onMouseUp(event);
+
+        SS.UI_MOUSE_STATE.free();
 
 	mouseOnDown = null;
 	container.removeEventListener('mouseup', onMouseUp, false);
