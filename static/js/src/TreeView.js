@@ -402,8 +402,6 @@ function TreeView() {
             editingNode.editing = true;
             geom_doc.replace(geomNode, editingNode);
 
-            SS.setOthersTransparent(editingNode);
-	    
             var factoryFunction = 'edit' + editingNode.type.charAt(0).toUpperCase() + editingNode.type.substring(1);
             if (SS.constructors[factoryFunction]) {
                 SS.constructors[factoryFunction](editingNode);
@@ -429,7 +427,6 @@ function TreeView() {
 	// Preview model is removed on cancel
 	SS.constructors.active && SS.constructors.disposeActive();
 
-        var geomNode = event.remove;
         $('#' + geomNode.id).remove();
         delete this.domNodeLookup[geomNode];
     }

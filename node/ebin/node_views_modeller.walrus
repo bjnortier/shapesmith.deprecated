@@ -98,7 +98,6 @@
   <script type="text/javascript" src="/static/js/src/PipeGeometry.js"></script>
   <script type="text/javascript" src="/static/js/src/Spinner.js"></script>
  
-  <script type="text/javascript" src="/static/js/src/evented.js"></script>
   <script type="text/javascript" src="/static/js/src/Messages.js"></script>
   <script type="text/javascript" src="/static/js/src/Stack.js"></script>
   <script type="text/javascript" src="/static/js/src/Command.js"></script>

@@ -15,6 +15,8 @@ SS.GeomNodeRenderingManager = function() {
     this.geomDocReplace = function(original, replacement) {
         this.geomDocRemove(original);
         this.geomDocAdd(replacement);
+
+        
     }
 
     this.deselected = function(deselected) {

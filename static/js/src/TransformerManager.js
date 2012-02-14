@@ -41,9 +41,7 @@ SS.TransformerManager = function() {
     this.selected = function(selected) {
         if (selectionManager.size() === 1) {
             node = geom_doc.findById(selectionManager.getSelected()[0]);
-            var editingTransform = _.pluck(node.transforms, "editing").indexOf(true) >= 0;
-            var editing = node.editing || editingTransform;
-            if (!editing) {
+            if (!node.isEditingOrTransformEditing()) {
                 activate(node);
             }
         }

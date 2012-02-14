@@ -123,7 +123,7 @@ SS.Cursoid = function(spec) {
     var cursoidGeometry = new THREE.CubeGeometry(1.0, 1.0, 1.0);
     var active, exclusions = [];
 
-    evented(this);
+    _.extend(this, Backbone.Events);
 
     var updatePosition = function() {
         if (cursoidSceneObject) {
@@ -212,8 +212,9 @@ SS.Cursoid = function(spec) {
                 position.y = event.y;
             } 
             updatePosition();
-            that.fire({type: 'cursoidUpdated', 
-		   position: {x: position.x, y: position.y, z: position.z}});
+            that.trigger('cursoidUpdated', {
+		position: {x: position.x, y: position.y, z: position.z}
+            });
 
         }
     });
@@ -222,8 +223,9 @@ SS.Cursoid = function(spec) {
         if (active && (active === 'z')) {
             position.z = event.z;
             updatePosition();
-            that.fire({type: 'cursoidUpdated', 
-		       position: {x: position.x, y: position.y, z: position.z}});
+            that.trigger('cursoidUpdated', {
+		position: {x: position.x, y: position.y, z: position.z}
+            });
 
         }
     });

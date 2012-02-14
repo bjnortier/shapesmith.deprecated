@@ -11,13 +11,11 @@ function GeomDocument() {
     
     this.add = function(node) {
         this.rootNodes = [node].concat(this.rootNodes);
-        this.notify({add: node});
         this.trigger('add', node);
     }
 
     this.removeAll = function() {
 	for (index in this.rootNodes) {
-	    this.notify({remove: this.rootNodes[index]});
             this.trigger('remove', this.rootNodes[index]);
 	}
 	this.rootNodes = [];
@@ -27,7 +25,6 @@ function GeomDocument() {
         var index = this.rootNodes.indexOf(node);
         if (index !== -1) {
             this.rootNodes.splice(index, 1);
-            this.notify({remove: node});
             this.trigger('remove', node);
         }
     }
@@ -44,8 +41,6 @@ function GeomDocument() {
             }
         }
         recurFn(this.rootNodes);
-        this.notify({replace: {original : original,
-                               replacement : replacement}});
         this.trigger('replace', original, replacement);
     }
 
@@ -120,5 +115,4 @@ function GeomDocument() {
 	return null;
     }
 
-    Observable.makeObservable(this);
 }

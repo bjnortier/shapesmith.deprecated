@@ -81,7 +81,6 @@ function create_primitive(type) {
 	origin: {x: 0, y: 0, z: 0},
         parameters: geometryParams});
     geom_doc.add(geomNode);
-    SS.setOthersTransparent(geomNode);
     return geomNode;
 }
 
@@ -108,7 +107,6 @@ function create_modifier(selected, type) {
                                 
     selectionManager.deselectAll();
     geom_doc.replace(original, modifierNode);
-    SS.setOthersTransparent(modifierNode);
 
     return modifierNode;
 }
@@ -145,7 +143,6 @@ function create_transform(selected, type) {
     replacement.transforms.push(transform);
     selectionManager.deselectAll();
     geom_doc.replace(original, replacement);
-    SS.setOthersTransparent(replacement);
     return {geomNode: replacement, transform: transform};
 }
 

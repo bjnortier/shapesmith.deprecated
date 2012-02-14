@@ -293,11 +293,6 @@ SS.SceneView = function(container) {
 	targetOnDown.azimuth = target.azimuth;
 	targetOnDown.elevation = target.elevation;
 
-	var positionOnWorkplane = determinePositionOnWorkplane(event);
-	if (positionOnWorkplane) {
-	    workplane.clicked(positionOnWorkplane);
-	}
-
 	if ((SS.UI_STATE.state === SS.UIStates.UNDEFINED) &&
             (!state) &&
             (event.button == 0)) {
