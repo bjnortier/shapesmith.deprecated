@@ -85,7 +85,7 @@ SS.TranslateTransformerView = SS.ActiveTransformerView.extend({
     render: function() {
         this.clear();
 
-        var geometry = new THREE.CubeGeometry(1, 1, 1);
+        var geometry = new THREE.CubeGeometry(0.5, 0.5, 0.5);
         var materials = [
             new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, opacity: 0.5, wireframe: false } ),
             new THREE.MeshBasicMaterial({color: SS.constructors.lineColor, wireframe: true})

@@ -189,7 +189,6 @@ SS.ActiveTransformerView = SS.SceneObjectView.extend({
 	SS.SceneObjectView.prototype.initialize.call(this);
 	this.on('mouseEnter', this.highlight);
 	this.on('mouseLeave', this.unhighlight);
-        this.model.on("change", this.render, this);
     },
 
     active: true,
@@ -218,7 +217,6 @@ SS.ActiveTransformerView = SS.SceneObjectView.extend({
         SS.SceneObjectView.prototype.remove.call(this);
         this.off('mouseEnter', this.highlight);
 	this.off('mouseLeave', this.unhighlight);
-        this.model.off("change", this.render);
     },
     
 });

@@ -27,16 +27,16 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.49497475"
-     inkscape:cx="865.0172"
-     inkscape:cy="1082.5062"
+     inkscape:cx="507.4232"
+     inkscape:cy="193.57197"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
-     inkscape:window-width="1705"
-     inkscape:window-height="860"
-     inkscape:window-x="66"
-     inkscape:window-y="52"
-     inkscape:window-maximized="0">
+     inkscape:window-width="1920"
+     inkscape:window-height="967"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1">
     <inkscape:grid
        snapvisiblegridlinesonly="true"
        enabled="false"
@@ -890,6 +890,15 @@
        y1="673.07654"
        x2="1716.7858"
        y2="817.36224" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3895-5"
+       id="linearGradient4727"
+       x1="1519.5"
+       y1="1002.3622"
+       x2="1720.5"
+       y2="1002.3622"
+       gradientUnits="userSpaceOnUse" />
   </defs>
   <metadata
      id="metadata7">
@@ -1894,5 +1903,13 @@
        inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/explode.png"
        inkscape:export-xdpi="7.1999998"
        inkscape:export-ydpi="7.1999998" />
+    <path
+       style="fill:url(#linearGradient4727);stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 1520,912.36218 100,180.00002 100,-160.00002 z"
+       id="path4103"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/triangle.png"
+       inkscape:export-xdpi="16.379999"
+       inkscape:export-ydpi="16.379999" />
   </g>
 </svg>
