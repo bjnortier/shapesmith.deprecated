@@ -16,7 +16,7 @@ SS.SphereCreator = SS.Creator.extend({
     },
 
     mouseDownOnRadius: function(corner) {
-        activateCorner(corner);
+        this.activateCorner(corner);
     },
 
     getBoundingBox: function() {
@@ -77,6 +77,7 @@ SS.DraggableRadiusCorner = SS.DraggableCorner.extend({
 
     initialize: function(options) {
         SS.DraggableCorner.prototype.initialize.call(this, options);
+        this.key = options.key || 'r';
         this.render();
     },
 
@@ -87,7 +88,7 @@ SS.DraggableRadiusCorner = SS.DraggableCorner.extend({
     },
 
     cornerPositionFromModel: function() {
-        var r = this.model.node.parameters.r;
+        var r = this.model.node.parameters[this.key];
         var angle = this.model.node.extra.angle;
         var dx = Math.cos(angle)*r;
         var dy = Math.sin(angle)*r;
@@ -102,7 +103,7 @@ SS.DraggableRadiusCorner = SS.DraggableCorner.extend({
         var angle = Math.atan2(dy, dx);
 
         var r = Math.sqrt(dx*dx + dy*dy);
-        this.model.node.parameters.r = Math.round(r);
+        this.model.node.parameters[this.key] = Math.round(r);
         this.model.node.extra = {angle: angle};
     },
 

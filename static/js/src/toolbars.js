@@ -194,7 +194,7 @@ $(document).ready(function() {
 	       }).render($('#3Dprimitives'));
     new Action('Cone', '/static/images/cone.png', 
                function() { 
-		   SS.constructors.createCone(create_primitive('cone')); 
+		   new SS.ConeCreator({editingNode: create_primitive('cone')});
 	       }).render($('#3Dprimitives'));
     new Action('Wedge', '/static/images/wedge.png', 
                function() { 

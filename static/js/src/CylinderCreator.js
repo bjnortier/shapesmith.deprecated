@@ -17,12 +17,7 @@ SS.CylinderCreator = SS.Creator.extend({
     },
 
     mouseDownOnRadius: function(corner) {
-        if (this.activeCorner === corner) {
-            return;
-        }
-        this.activeCornerView && this.activeCornerView.remove();
-        this.activeCorner = corner;
-        this.activeCornerView = new SS.RadiusHeightCursoid({model: this});
+        this.activateCorner(corner, SS.RadiusHeightCursoid);
     },
 
     getBoundingBox: function() {
@@ -87,13 +82,14 @@ SS.RadiusHeightCursoid = SS.HeightCursoid.extend({
 
      initialize: function(options) {
 	 SS.HeightCursoid.prototype.initialize.call(this);
+         this.key = options.key || 'r';
          this.render();
     },
 
     priority: 1,
 
     cornerPositionFromModel: function() {
-        var r = this.model.node.parameters.r;
+        var r = this.model.node.parameters[this.key];
         var h = this.model.node.parameters.h;
         var angle = this.model.node.extra.angle;
         var dx = Math.cos(angle)*r;
@@ -111,7 +107,7 @@ SS.RadiusHeightCursoid = SS.HeightCursoid.extend({
         var r = Math.sqrt(dx*dx + dy*dy);
         var h = position.z - this.model.node.origin.z;
 
-        this.model.node.parameters.r = Math.round(r);
+        this.model.node.parameters[this.key] = Math.round(r);
         this.model.node.parameters.h = Math.round(h);
         this.model.node.extra = {angle: angle};
     },
