@@ -216,12 +216,12 @@ var SS = SS || {};
         });
         triangles.name = objectName;
 
-        var vertexGeometries = createVertexGeometries(geomNode.mesh['edges']);
-        var vertices = new THREE.Object3D();
-        vertexGeometries.map(function(vertex) {
-            vertices.add(vertex);
-        });
-        vertices.names = objectName;
+        //var vertexGeometries = createVertexGeometries(geomNode.mesh['edges']);
+        // var vertices = new THREE.Object3D();
+        // vertexGeometries.map(function(vertex) {
+        //     vertices.add(vertex);
+        // });
+        //vertices.names = objectName;
 
         var lineGeometries = create1DGeometries(geomNode.mesh['edges']);
         var lineMaterial = new THREE.LineBasicMaterial({ color: color, opacity: 1.0, linewidth: 2, transparent:true });
@@ -244,7 +244,7 @@ var SS = SS || {};
         selectionMeshes.name = objectName;                       
         
         return {'faces': triangles, 
-                'vertices' : vertices,
+                //'vertices' : vertices,
                 'edges': lines,
                 'selectionForEdges' : selectionMeshes};
     }
@@ -254,7 +254,6 @@ var SS = SS || {};
         if (geometries) {
             SS.sceneView.scene.add(geometries.faces);
             SS.sceneView.scene.add(geometries.edges);
-            SS.sceneView.scene.add(geometries.vertices);
             SS.sceneView.scene.add(geometries.selectionForEdges);
             geomNode.sceneObjects = geometries;
         }

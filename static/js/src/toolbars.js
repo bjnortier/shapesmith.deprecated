@@ -92,11 +92,12 @@ function create_primitive(type) {
     for (var key in jsonSchema.properties.parameters.properties) {
         createParams(key, geometryParams, jsonSchema.properties.parameters.properties[key]);
     }
-    
+
+    var lastMousePosition = SS.sceneView.workplane.getLastMousePosition();
     geomNode = new GeomNode({
         type: type,
         editing: true,
-	origin: {x: 0, y: 0, z: 0},
+	origin: {x: lastMousePosition.x, y: lastMousePosition.y, z: 0},
         parameters: geometryParams});
     geom_doc.add(geomNode);
     return geomNode;
@@ -181,15 +182,15 @@ $(document).ready(function() {
     //
     new Action('Cuboid', '/static/images/cuboid.png', 
                function() { 
-		   SS.constructors.createCuboid(create_primitive('cuboid'));
+		   new SS.CuboidCreator({editingNode: create_primitive('cuboid')});
 	       }).render($('#3Dprimitives'));
     new Action('Sphere', '/static/images/sphere.png', 
                function() { 
-                   SS.constructors.createSphere(create_primitive('sphere'));
+                   new SS.SphereCreator({editingNode: create_primitive('sphere')});
 	       }).render($('#3Dprimitives'));
     new Action('Cylinder', '/static/images/cylinder.png', 
                function() { 
-		   SS.constructors.createCylinder(create_primitive('cylinder')); 
+		   new SS.CylinderCreator({editingNode: create_primitive('cylinder')}); 
 	       }).render($('#3Dprimitives'));
     new Action('Cone', '/static/images/cone.png', 
                function() { 

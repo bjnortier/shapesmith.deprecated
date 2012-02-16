@@ -475,8 +475,11 @@ SS.SceneView = function(container) {
 		}
 	    });
 	});
-	return foundSceneObjectViews;
-	    
+        
+        return foundSceneObjectViews.sort(function(a,b) {
+            return a.priority < b.priority;
+        });
+ 
     }
 
     this.triggerMouseOverSceneObjectViews = function(event) {
@@ -499,24 +502,27 @@ SS.SceneView = function(container) {
 
         if ((event.button === 0) &&
             (event.ctrlKey || !event.shiftKey)) {
-            mouseDownSceneObjectViews.map(function(sceneObjectView) {
-                sceneObjectView.trigger('mouseDrag', event);
-	    });
+
+            if (mouseDownSceneObjectViews.length > 0) {
+                mouseDownSceneObjectViews[0].trigger('mouseDrag', event);
+            }
         }
 
     }
 
     this.triggerMouseDownOnSceneObjectViews = function(event) {
         mouseDownSceneObjectViews = findSceneObjectViewsForEvent(event);
-        mouseDownSceneObjectViews.map(function(sceneObjectView) {
-            sceneObjectView.trigger('mouseDown', event);
-        });
+
+        if (mouseDownSceneObjectViews.length > 0) {
+            mouseDownSceneObjectViews[0].trigger('mouseDown', event);
+        }
     }
 
     this.triggerMouseUpOnSceneObjectViews = function(event) {
-        findSceneObjectViewsForEvent(event).map(function(sceneObjectView) {
-            sceneObjectView.trigger('mouseUp', event);
-        });
+        var sceneObjects = findSceneObjectViewsForEvent(event);
+        if (sceneObjects.length > 0) {
+            sceneObjects[0].trigger('mouseUp', event);
+        }
         mouseDownSceneObjectViews = [];
     }
 

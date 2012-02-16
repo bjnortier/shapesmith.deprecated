@@ -180,6 +180,8 @@ SS.SceneObjectView = Backbone.View.extend({
         this.model.off('change', this.render);
     },
 
+    priority: 0,
+
 });
 
 

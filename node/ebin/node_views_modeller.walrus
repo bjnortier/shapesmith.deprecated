@@ -123,6 +123,10 @@
   <script type="text/javascript" src="/static/js/src/GeomNodeRenderingManager.js"></script>
 
   <script type="text/javascript" src="/static/js/src/NodeModel.js"></script>
+  <script type="text/javascript" src="/static/js/src/Creator.js"></script>
+  <script type="text/javascript" src="/static/js/src/CuboidCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/SphereCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/CylinderCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/Triangle2DCreator.js"></script>
 
   <script type="text/javascript" src="/static/js/src/TransformerManager.js"></script>

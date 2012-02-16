@@ -27,19 +27,24 @@ SS.workplane.pointer = function(spec) {
     var scene = spec.scene, gridExtents = spec.gridExtents;
     var pointerMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00, opacity: 0.7, wireframe: false } );
     var pointerGeometry = new THREE.CubeGeometry(0.5, 0.5, 0.5);
-    var pointer = new THREE.Mesh(pointerGeometry, pointerMaterial);
-
-    pointer.position.x = 0;
-    pointer.position.y = 0;
-    scene.add(pointer);
+    var pointer;
     
     that.update = function(position) {	
-	if (gridExtents.isInsideX(position.x)) {
-	    pointer.position.x = position.x;
-	}
-	if (gridExtents.isInsideY(position.y)) {
-	    pointer.position.y = position.y;
-	}
+        if (!SS.UI_EDITING_STATE.isEditing()) {
+            if (!pointer) {
+                pointer = new THREE.Mesh(pointerGeometry, pointerMaterial); 
+            }
+            if (gridExtents.isInsideX(position.x)) {
+	        pointer.position.x = position.x;
+	    }
+	    if (gridExtents.isInsideY(position.y)) {
+	        pointer.position.y = position.y;
+	    }
+            scene.add(pointer);
+        } else {
+            scene.remove(pointer);
+            pointer = undefined;
+        }
     }
 
     return that;
