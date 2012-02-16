@@ -202,7 +202,7 @@ $(document).ready(function() {
 	       }).render($('#3Dprimitives'));
     new Action('Torus', '/static/images/torus.png', 
                function() { 
-		   SS.constructors.createTorus(create_primitive('torus'));
+		   new SS.TorusCreator({editingNode: create_primitive('torus')});
 	       }).render($('#3Dprimitives'));
 
     new Action('Ellipse 2D', '/static/images/ellipse2d.png', 

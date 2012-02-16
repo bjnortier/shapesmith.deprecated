@@ -129,6 +129,7 @@
   <script type="text/javascript" src="/static/js/src/CylinderCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/ConeCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/WedgeCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/TorusCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/Triangle2DCreator.js"></script>
 
   <script type="text/javascript" src="/static/js/src/TransformerManager.js"></script>

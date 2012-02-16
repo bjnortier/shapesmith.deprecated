@@ -6,12 +6,12 @@ SS.Triangle2DCreator = SS.Creator.extend({
         SS.Creator.prototype.initialize.call(this, attributes);
 
         this.node.parameters.vertices.map(function(vertex) {
-            vertex.u = 0;
-            vertex.v = 0;
+            vertex.u = 10;
+            vertex.v = 10;
             vertex.w = 0;
         });
-        this.node.parameters.vertices[1].u = 10;
-        this.node.parameters.vertices[2].v = 10;
+        this.node.parameters.vertices[1].u = 0;
+        this.node.parameters.vertices[2].v = 0;
 
         this.views = this.views.concat([
             new SS.Triangle2DPreview({model: this}),
@@ -22,7 +22,7 @@ SS.Triangle2DCreator = SS.Creator.extend({
     },
 
     mouseDownOnCorner: function(corner) {
-        activateCorner(corner, SS.VertexHeightCursoid, {
+        this.activateCorner(corner, SS.VertexHeightCursoid, {
             model: this,
             vertexIndex: corner.vertexIndex
         });
