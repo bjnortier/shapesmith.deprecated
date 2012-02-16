@@ -77,6 +77,7 @@ SS.DraggableUVCorner = SS.DraggableCorner.extend({
     initialize: function(options) {
         SS.DraggableCorner.prototype.initialize.call(this, options);
         this.uKey = options.uKey || 'u';
+        this.vKey = options.vKey || 'v';
         this.render();
     },
 
@@ -88,7 +89,7 @@ SS.DraggableUVCorner = SS.DraggableCorner.extend({
 
     cornerPositionFromModel: function() {
         return {x: this.model.node.origin.x + this.model.node.parameters[this.uKey],
-                y: this.model.node.origin.y + this.model.node.parameters.v,
+                y: this.model.node.origin.y + this.model.node.parameters[this.vKey],
                 z: 0};
     },
 
@@ -98,7 +99,7 @@ SS.DraggableUVCorner = SS.DraggableCorner.extend({
         var w = position.z - this.model.node.origin.z;
 
         this.model.node.parameters[this.uKey] = Math.round(u);
-        this.model.node.parameters.v = Math.round(v);
+        this.model.node.parameters[this.vKey] = Math.round(v);
     },
 
 });

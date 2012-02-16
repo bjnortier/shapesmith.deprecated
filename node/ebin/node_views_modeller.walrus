@@ -96,6 +96,7 @@
   <div id="floating-ok-cancel"></div>
   
   <script type="text/javascript" src="/static/js/src/WedgeGeometry.js"></script>
+  <script type="text/javascript" src="/static/js/src/EllipseGeometry.js"></script>
   <script type="text/javascript" src="/static/js/src/PipeGeometry.js"></script>
   <script type="text/javascript" src="/static/js/src/Spinner.js"></script>
  
@@ -130,6 +131,8 @@
   <script type="text/javascript" src="/static/js/src/ConeCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/WedgeCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/TorusCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/Ellipse2DCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/Rectangle2DCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/Triangle2DCreator.js"></script>
 
   <script type="text/javascript" src="/static/js/src/TransformerManager.js"></script>

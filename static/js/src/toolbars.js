@@ -207,11 +207,11 @@ $(document).ready(function() {
 
     new Action('Ellipse 2D', '/static/images/ellipse2d.png', 
                function() { 
-                   SS.constructors.createEllipse2d(create_primitive('ellipse2d'));
+                   new SS.Ellipse2DCreator({editingNode: create_primitive('ellipse2d')});
 	       }).render($('#2Dprimitives'));
     new Action('Rectangle 2D', '/static/images/rectangle2d.png', 
                function() { 
-                   SS.constructors.createRectangle2d(create_primitive('rectangle2d'));
+                   new SS.Rectangle2DCreator({editingNode: create_primitive('rectangle2d')});
 	       }).render($('#2Dprimitives'));
     new Action('Triangle 2D', '/static/images/triangle2d.png', 
                function() { 
