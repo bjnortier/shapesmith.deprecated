@@ -439,5 +439,10 @@ var SS = SS || {};
         
         return {min: min, max: max};
     }
+    
+    SS.centerOfGeom = function(boundingBox) {
+        return new THREE.Vector3().add(boundingBox.min, 
+                                       new THREE.Vector3().sub(boundingBox.max, boundingBox.min).divideScalar(2));
+    }
 
 })();

@@ -8,6 +8,7 @@ SS.Creator = SS.NodeModel.extend({
 
         this.views = [
             new SS.NodeDOMView({model: this}),
+            new SS.OkCancelView({model: this}),
             new SS.DraggableOriginCorner({model: this}),
         ];
 

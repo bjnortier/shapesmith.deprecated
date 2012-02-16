@@ -19,6 +19,13 @@ SS.SphereCreator = SS.Creator.extend({
         activateCorner(corner);
     },
 
+    getBoundingBox: function() {
+        var origin = this.node.origin;
+        var r = this.node.parameters.r;
+        return {min: new THREE.Vector3(origin.x - r, origin.y - r, origin.z - r),
+                max: new THREE.Vector3(origin.x + r, origin.y + r, origin.z + r)};
+    },
+
 });
 
 SS.SpherePreview = SS.PreviewWithOrigin.extend({

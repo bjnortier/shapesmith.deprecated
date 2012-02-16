@@ -25,6 +25,15 @@ SS.CylinderCreator = SS.Creator.extend({
         this.activeCornerView = new SS.RadiusHeightCursoid({model: this});
     },
 
+    getBoundingBox: function() {
+        var origin = this.node.origin;
+        var r = this.node.parameters.r;
+        var h = this.node.parameters.h;
+        return {min: new THREE.Vector3(origin.x - r, origin.y - r, origin.z),
+                max: new THREE.Vector3(origin.x + r, origin.y + r, origin.z + h)};
+    },
+
+
 });
 
 SS.CylinderPreview = SS.PreviewWithOrigin.extend({

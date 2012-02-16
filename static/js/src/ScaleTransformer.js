@@ -128,7 +128,7 @@ SS.ScaleFactorView = SS.SceneObjectView.extend({
                                                                    opacity: 0.8}));
             
             var boundingBox = SS.boundingBoxForGeomNode(this.model.editingNode);
-            var center = SS.transformers.centerOfGeom(boundingBox);
+            var center = SS.centerOfGeom(boundingBox);
             text.position.y = center.y - text.boundRadius/2;
             text.position.x = boundingBox.max.x + 5;
             text.rotation.z = Math.PI/2; 

@@ -27,6 +27,21 @@ SS.Triangle2DCreator = SS.Creator.extend({
             vertexIndex: corner.vertexIndex
         });
     },
+    
+    getBoundingBox: function() {
+        var origin = this.node.origin;
+        var min = {}, max = {};
+        this.node.parameters.vertices.map(function(vertex) {
+            var map = {x: 'u', y: 'v', z: 'w'};
+            for (key in map) {
+                var distance = origin[key] + vertex[map[key]];
+                min[key] = (min[key] && Math.min(distance, min[key])) || distance;
+                max[key] = (max[key] && Math.max(distance, max[key])) || distance;
+            }
+        });
+        return {min: new THREE.Vector3(min.x, min.y, min.z),
+                max: new THREE.Vector3(max.x, max.y, max.z)};
+    },
 
 });
 

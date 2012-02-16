@@ -34,7 +34,7 @@ SS.NodeModel = Backbone.Model.extend({
         this.trigger('change:model');
         if (this.editingNode.sceneObjects) {
             this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
-            this.center = SS.transformers.centerOfGeom(this.boundingBox);
+            this.center = SS.centerOfGeom(this.boundingBox);
         }
 
         this.trigger('change');
@@ -221,4 +221,78 @@ SS.ActiveTransformerView = SS.SceneObjectView.extend({
 	this.off('mouseLeave', this.unhighlight);
     },
     
+});
+
+SS.OkCancelView = Backbone.View.extend({
+
+    initialize: function() {
+        this.render();
+        this.model.on('change', this.update, this);
+        SS.sceneView.on('cameraChange', this.update, this);
+    },
+
+    remove: function() {
+        Backbone.View.prototype.remove.call(this);
+        this.model.off('change', this.update);
+        SS.sceneView.off('cameraChange', this.update);
+    },
+
+    render: function() {
+        var table = '<table><tr><td><input class="ok" type="submit" value="Ok"/><input class="cancel" type="submit" value="Cancel"/></td></tr></table>';
+        this.$el.html(table);
+        $('#floating-ok-cancel').append(this.$el);
+    },
+
+    update: function() {
+        var projScreenMat = new THREE.Matrix4();
+        projScreenMat.multiply(SS.sceneView.camera.projectionMatrix, 
+                               SS.sceneView.camera.matrixWorldInverse);
+
+        var boundingBox = this.model.getBoundingBox();
+        
+        var xminmax = [boundingBox.min.x, boundingBox.max.x];
+        var yminmax = [boundingBox.min.y, boundingBox.max.y];
+        var zminmax = [boundingBox.min.z, boundingBox.max.z];
+        var screenPositionMinMax = [new THREE.Vector3(2,2,0), new THREE.Vector3(-2,-2,0)];
+        for (var i = 0; i < 2; i++) {
+            for (var j = 0; j < 2; ++j) {
+                for (var k = 0; k < 2; ++k) {
+                    var pos = new THREE.Vector3(xminmax[i], yminmax[j], zminmax[k]);
+                    projScreenMat.multiplyVector3(pos);
+
+                    screenPositionMinMax[0].x = Math.min(screenPositionMinMax[0].x, pos.x);
+                    screenPositionMinMax[0].y = Math.min(screenPositionMinMax[0].y, pos.y);
+                    screenPositionMinMax[1].x = Math.max(screenPositionMinMax[1].x, pos.x);
+                    screenPositionMinMax[1].y = Math.max(screenPositionMinMax[1].y, pos.y);
+                }
+            }
+        }
+
+        var centerYPosition = (screenPositionMinMax[0].y + screenPositionMinMax[1].y)/2;
+        
+        var pixelPosition = {};
+        pixelPosition.x = window.innerWidth * ((screenPositionMinMax[1].x+1)/2) + 20;
+        pixelPosition.y = window.innerHeight * ((-centerYPosition+1)/2);
+        pixelPosition.x = Math.min(pixelPosition.x, window.innerWidth - 100);
+        pixelPosition.y = Math.min(pixelPosition.y, window.innerHeight - 100);
+        pixelPosition.x = Math.max(pixelPosition.x, 100);
+        pixelPosition.y = Math.max(pixelPosition.y, 100);
+       
+        $('#floating-ok-cancel').css('left', pixelPosition.x);
+	$('#floating-ok-cancel').css('top', pixelPosition.y);
+    },
+    
+    events: {
+        'click .ok' : 'ok',
+        'click .cancel' : 'cancel',
+    },
+
+    ok: function() {
+        this.model.tryCommit();
+    },
+
+    cancel: function() {
+        this.model.cancel();
+    },
+
 });
