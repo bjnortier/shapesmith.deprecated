@@ -48,9 +48,9 @@ SS.Creator = SS.NodeModel.extend({
     },
      
     tryCommit: function() {
-        var cmd =  update_geom_command(this.originalNode, 
-                                       this.editingNode, 
-                                       this.editingNode); 
+        var cmd = create_geom_command(this.node, {type: this.node.type,
+						 origin: this.node.origin,
+                                                 parameters: this.node.parameters});
         command_stack.execute(cmd);
     },
 

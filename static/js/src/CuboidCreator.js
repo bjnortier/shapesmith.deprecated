@@ -16,7 +16,7 @@ SS.CuboidCreator = SS.Creator.extend({
         this.trigger('change', this);
     },
 
-    mouseDownOnUVW: function(corner) {
+    mouseDownOnUV: function(corner) {
         this.activateCorner(corner, SS.UVWHeightCursoid);
     },
 
@@ -76,17 +76,18 @@ SS.DraggableUVCorner = SS.DraggableCorner.extend({
 
     initialize: function(options) {
         SS.DraggableCorner.prototype.initialize.call(this, options);
+        this.uKey = options.uKey || 'u';
         this.render();
     },
 
     priority: 1,
 
     mouseDown: function() {
-        this.model.mouseDownOnUVW && this.model.mouseDownOnUVW(this);
+        this.model.mouseDownOnUV(this);
     },
 
     cornerPositionFromModel: function() {
-        return {x: this.model.node.origin.x + this.model.node.parameters.u,
+        return {x: this.model.node.origin.x + this.model.node.parameters[this.uKey],
                 y: this.model.node.origin.y + this.model.node.parameters.v,
                 z: 0};
     },
@@ -96,7 +97,7 @@ SS.DraggableUVCorner = SS.DraggableCorner.extend({
         var v = position.y - this.model.node.origin.y;
         var w = position.z - this.model.node.origin.z;
 
-        this.model.node.parameters.u = Math.round(u);
+        this.model.node.parameters[this.uKey] = Math.round(u);
         this.model.node.parameters.v = Math.round(v);
     },
 
@@ -106,12 +107,13 @@ SS.UVWHeightCursoid = SS.HeightCursoid.extend({
 
      initialize: function(options) {
 	 SS.HeightCursoid.prototype.initialize.call(this);
+         this.uKey = options.uKey || 'u';
          this.render();
     },
 
     cornerPositionFromModel: function() {
         var parameters = this.model.node.parameters
-        return {x: this.model.node.origin.x + this.model.node.parameters.u,
+        return {x: this.model.node.origin.x + this.model.node.parameters[this.uKey],
                 y: this.model.node.origin.y + this.model.node.parameters.v,
                 z: this.model.node.origin.z + this.model.node.parameters.w};
     },    
@@ -119,7 +121,7 @@ SS.UVWHeightCursoid = SS.HeightCursoid.extend({
     updateModelFromCorner: function(position) {
         var parameters = this.model.node.parameters
         var origin = this.model.node.origin;
-        parameters.u = position.x - origin.x;
+        parameters[this.uKey] = position.x - origin.x;
         parameters.v = position.y - origin.y;
         parameters.w = position.z - origin.z;
     },
