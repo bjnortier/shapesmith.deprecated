@@ -45,7 +45,7 @@ SS.Triangle2DCreator = SS.Creator.extend({
 
 });
 
-SS.Triangle2DPreview = SS.SceneObjectView.extend({
+SS.Triangle2DPreview = SS.PreviewWithOrigin.extend({
 
     initialize: function() {
         SS.SceneObjectView.prototype.initialize.call(this);
@@ -54,44 +54,46 @@ SS.Triangle2DPreview = SS.SceneObjectView.extend({
     
     render: function() {
         this.clear();
+        SS.PreviewWithOrigin.prototype.render.call(this);
 
         var triangleGeometry = new THREE.Geometry();
         var origin = this.model.node.origin;
-        triangleGeometry.vertices = this.model.node.parameters.vertices.map(function(vertex) {
-            return new THREE.Vertex(new THREE.Vector3(origin.x + vertex.u, 
-                                                      origin.y + vertex.v, 
-                                                      origin.z + vertex.w));
+        var triangleVertices = this.model.node.parameters.vertices;
+
+        triangleGeometry.vertices = triangleVertices.map(function(vertex) {
+            return new THREE.Vertex(new THREE.Vector3(vertex.u, vertex.v, vertex.w));
         });
         triangleGeometry.faces.push(new THREE.Face3(0,1,2));
         
-        var triangleFace = new THREE.Mesh(triangleGeometry, 
-                                          new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, 
-                                                                       transparent: true, 
-                                                                       opacity: 0.5}));
+        var triangleFace = new THREE.Mesh(triangleGeometry, SS.constructors.faceMaterial);
         triangleFace.doubleSided = true;
-        var triangleWireframe = new THREE.Mesh(triangleGeometry, 
-                                               new THREE.MeshBasicMaterial({color: SS.constructors.lineColor, wireframe: true}));
+        var triangleWireframe = new THREE.Mesh(triangleGeometry, SS.constructors.wireframeMaterial);
 
 	this.sceneObject.add(triangleFace);
 	this.sceneObject.add(triangleWireframe);
 
-        var vertexGeometry = new THREE.CubeGeometry(0.1, 0.1, 0.1);
-        var vertexMaterials = [
-            new THREE.MeshBasicMaterial({color: 0xcccccc, opacity: 0.5, wireframe: false } ),
-            new THREE.MeshBasicMaterial({color: 0x999999, wireframe: true})
-        ];
-
-        var originCorner = THREE.SceneUtils.createMultiMaterialObject(vertexGeometry, vertexMaterials);
-        originCorner.position = new THREE.Vector3(origin.x, origin.y, origin.z);
-        this.sceneObject.add(originCorner);
-
         var that = this;
-        triangleGeometry.vertices.map(function(vertex) {
-            var corner = THREE.SceneUtils.createMultiMaterialObject(vertexGeometry, vertexMaterials);
-            corner.position = vertex.position;
-            that.sceneObject.add(corner);
+        triangleVertices.map(function(vertex) {
+            var vertexPointGeometry = new THREE.CubeGeometry(0.2, 0.2, 0.2);
+            var vertexPointMaterials = [
+                new THREE.MeshBasicMaterial({color: 0xcccccc, opacity: 0.5, wireframe: false } ),
+                new THREE.MeshBasicMaterial({color: 0x999999, wireframe: true})
+            ];
+            var vertexPoint = THREE.SceneUtils.createMultiMaterialObject(vertexPointGeometry, vertexPointMaterials);
+            vertexPoint.position = new THREE.Vector3(vertex.u, vertex.v, vertex.w);
+            that.sceneObject.add(vertexPoint);
         });
-        
+
+        if (origin.z) {
+            var baseGeometry = new THREE.Geometry();
+            var verticesForBase = triangleVertices.concat([triangleVertices[0]])
+            baseGeometry.vertices = verticesForBase.map(function(vertex) {
+                return new THREE.Vertex(new THREE.Vector3(vertex.u, vertex.v, 0));
+            });
+            var base = new THREE.Line(baseGeometry, SS.constructors.lineMaterial);
+            base.position.z = -origin.z;
+	    this.sceneObject.add(base);
+        }
 
         this.postRender();
     },
