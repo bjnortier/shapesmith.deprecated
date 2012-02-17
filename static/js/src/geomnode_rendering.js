@@ -413,12 +413,42 @@ var SS = SS || {};
         }
     }
 
+    SS.boundingBoxForSceneObject = function(sceneObject) {
+        var boundingBoxes = [];
+        var addRecursively = function(child) {
+            if (child.geometry) {
+                child.geometry.computeBoundingBox();
+                boundingBoxes.push(child.geometry.boundingBox);
+            }
+            for (i in child.children) {
+                addRecursively(child.children[i]);
+            }
+        };
+        addRecursively(sceneObject);
+
+        if (boundingBoxes.length == 0) {
+            return {min: new THREE.Vector3(0,0,0), max: new THREE.Vector3(0,0,0)};
+        }
+
+        var min = boundingBoxes[0].min;
+        var max = boundingBoxes[0].max;
+        for (var i = 1; i < boundingBoxes.length; ++i) {
+            var box = boundingBoxes[i];
+            min.x = Math.min(min.x, box.min.x);
+            min.y = Math.min(min.y, box.min.y);
+            min.z = Math.min(min.z, box.min.z);
+            max.x = Math.max(max.x, box.max.x);
+            max.y = Math.max(max.y, box.max.y);
+            max.z = Math.max(max.z, box.max.z);
+        }
+        
+        return {min: min, max: max};
+    }
+
     SS.boundingBoxForGeomNode = function(geomNode) {
         var boundingBoxes = [];
         var addFunction = function(child) {
-            //if (!child.geometry.boundingBox) {
-                child.geometry.computeBoundingBox();
-            //}
+            child.geometry.computeBoundingBox();
             boundingBoxes.push(child.geometry.boundingBox);
         };
             

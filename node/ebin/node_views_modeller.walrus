@@ -134,6 +134,7 @@
   <script type="text/javascript" src="/static/js/src/Ellipse2DCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/Rectangle2DCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/Triangle2DCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/Text2DCreator.js"></script>
 
   <script type="text/javascript" src="/static/js/src/TransformerManager.js"></script>
   <script type="text/javascript" src="/static/js/src/Transformer.js"></script>

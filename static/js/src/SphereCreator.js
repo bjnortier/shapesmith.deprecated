@@ -57,12 +57,11 @@ SS.SpherePreview = SS.PreviewWithOrigin.extend({
 	    var circle = new THREE.Line(circleGeom, SS.constructors.lineMaterial);
 	    this.sceneObject.add(circle);
 
-            sphere.position = new THREE.Vector3(origin.x, origin.y, origin.z);
             circle.position = sphere.position;
 
-            if (origin.z !== 0) {
+            if (origin.z) {
 	        var circle2 = new THREE.Line(circleGeom, SS.constructors.lineMaterial);
-                circle2.position = new THREE.Vector3(origin.x, origin.y, 0);
+                circle2.position.z = -origin.z;
                 this.sceneObject.add(circle2);
             }
             

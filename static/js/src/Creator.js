@@ -82,15 +82,15 @@ SS.PreviewWithOrigin = SS.SceneObjectView.extend({
     render: function() {
         var origin = this.model.node.origin;
         
-        var vertexGeometry = new THREE.CubeGeometry(0.1, 0.1, 0.1);
+        var vertexGeometry = new THREE.CubeGeometry(0.2, 0.2, 0.2);
         var vertexMaterials = [
             new THREE.MeshBasicMaterial({color: 0xcccccc, opacity: 0.5, wireframe: false } ),
             new THREE.MeshBasicMaterial({color: 0x999999, wireframe: true})
         ];
         var originCorner = THREE.SceneUtils.createMultiMaterialObject(vertexGeometry, vertexMaterials);
-        originCorner.position = new THREE.Vector3(origin.x, origin.y, origin.z);
-        this.sceneObject.add(originCorner);
         
+        this.sceneObject.add(originCorner);
+        this.sceneObject.position = new THREE.Vector3(origin.x, origin.y, origin.z);
     },
 
     priority: -1,

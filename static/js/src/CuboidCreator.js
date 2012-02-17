@@ -53,14 +53,20 @@ SS.CuboidPreview = SS.PreviewWithOrigin.extend({
         if(u && v && w) {
             var geometry = new THREE.CubeGeometry(u,v,w);
 	    var cube = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
-	    cube.position.x = origin.x + u/2;
-	    cube.position.y = origin.y + v/2;
-	    cube.position.z = origin.z + w/2;
+	    cube.position = new THREE.Vector3(u/2, v/2, w/2);
 	    this.sceneObject.add(cube);
+
+            if (origin.z) {
+                var baseGeom = new THREE.PlaneGeometry(u, v);
+                var base = new THREE.Mesh(baseGeom, SS.constructors.wireframeMaterial);
+                base.position = new THREE.Vector3(u/2, v/2, -origin.z);
+	        this.sceneObject.add(base);
+            }
+
         } else if (u && v) {
             var planeGeom = new THREE.PlaneGeometry(u, v);
             var plane = THREE.SceneUtils.createMultiMaterialObject(planeGeom, materials);
-            plane.position = new THREE.Vector3(origin.x + u/2, origin.y + v/2, origin.z);
+            plane.position = new THREE.Vector3(u/2, v/2, 0);
             
 	    this.sceneObject.add(plane);
         }

@@ -44,16 +44,28 @@ SS.Rectangle2DPreview = SS.PreviewWithOrigin.extend({
         var origin = this.model.node.origin;
         var u = this.model.node.parameters.u;
         var v = this.model.node.parameters.v;
-        var w = this.model.node.parameters.w;
 
         var materials = [ SS.constructors.faceMaterial, SS.constructors.wireframeMaterial ];
 
         if (u && v) {
             var planeGeom = new THREE.PlaneGeometry(u, v);
-            var plane = THREE.SceneUtils.createMultiMaterialObject(planeGeom, materials);
-            plane.position = new THREE.Vector3(origin.x + u/2, origin.y + v/2, origin.z);
+            var planeFace = new THREE.Mesh(planeGeom,  SS.constructors.faceMaterial);
+            planeFace.doubleSided = true;
+
+            var planeWire = new THREE.Mesh(planeGeom,  SS.constructors.wireframeMaterial);
+
+            planeFace.position = new THREE.Vector3(u/2, v/2, 0);
+            planeWire.position = planeFace.position;
             
-	    this.sceneObject.add(plane);
+	    this.sceneObject.add(planeFace);
+	    this.sceneObject.add(planeWire);
+
+            if (origin.z !== 0) {
+	        var rectangleBaseWire = new THREE.Mesh(planeGeom,  SS.constructors.wireframeMaterial);
+                rectangleBaseWire.position = new THREE.Vector3(u/2, v/2, -origin.z);
+                this.sceneObject.add(rectangleBaseWire);
+            }
+
         }
 
 

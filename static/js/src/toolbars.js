@@ -219,7 +219,7 @@ $(document).ready(function() {
 	       }).render($('#2Dprimitives'));
     new Action('Text 2D', '/static/images/text2d.png', 
                function() { 
-                   SS.constructors.createText2d(create_primitive('text2d'));
+                   new SS.Text2DCreator({editingNode: create_primitive('text2d')});
 	       }).render($('#2Dprimitives'));
 
     /*new Action('Ellipse 1D', '/static/images/ellipse1d.png', 

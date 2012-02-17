@@ -56,21 +56,27 @@ SS.CylinderPreview = SS.PreviewWithOrigin.extend({
 		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	    }
 	    var circle1 = new THREE.Line(circleGeom1, SS.constructors.lineMaterial);
-            circle1.position = new THREE.Vector3(origin.x, origin.y, origin.z);
             this.sceneObject.add(circle1);
+
+            if (origin.z) {
+                var baseWire = new THREE.Line(circleGeom1, SS.constructors.lineMaterial);
+                baseWire.position.z = -origin.z;
+                this.sceneObject.add(baseWire);
+            }
         }
+
 
         if (r && h) {
 	    var geometry = new THREE.CylinderGeometry(r, r, h, 20);
 	    var cylinder = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
-	    cylinder.position = new THREE.Vector3(origin.x, origin.y, origin.z + h/2);
+	    cylinder.position.z = h/2;
             cylinder.rotation.x = -Math.PI/2;
 
-            var circle2 = new THREE.Line(circleGeom2, SS.constructors.lineMaterial);
-	    circle2.position = new THREE.Vector3(origin.x, origin.y, origin.z + h);
+            var circle3 = new THREE.Line(circleGeom2, SS.constructors.lineMaterial);
+	    circle3.position.z = h;
 
             this.sceneObject.add(cylinder);
-	    this.sceneObject.add(circle2);
+	    this.sceneObject.add(circle3);
         }
        
         this.postRender();

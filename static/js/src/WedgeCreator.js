@@ -61,12 +61,14 @@ SS.WedgePreview = SS.PreviewWithOrigin.extend({
 	    var geometry = new THREE.WedgeGeometry(u1,v,w,u2 - u1);
 	    var materials = [ SS.constructors.faceMaterial, SS.constructors.wireframeMaterial ];
 	    var wedge =  THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
-	    wedge.position.x = origin.x + u1/2;
-	    wedge.position.y = origin.y + v/2;
-	    wedge.position.z = origin.z +  w/2;
+	    wedge.position.x = u1/2;
+	    wedge.position.y = v/2;
+	    wedge.position.z = w/2;
             this.sceneObject.add(wedge);
 
-        } else if (u1 && v && u2) {
+        } 
+
+        if (u1 && v && u2) {
 
 	    var uvLineGeom = new THREE.Geometry();
 	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
@@ -74,11 +76,18 @@ SS.WedgePreview = SS.PreviewWithOrigin.extend({
 	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(u2, v, 0)));
 	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, v, 0)));
 	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	    var uvLine = new THREE.Line(uvLineGeom, SS.constructors.lineMaterial);
-            uvLine.position = new THREE.Vector3(origin.x, origin.y, origin.z);
-	    this.sceneObject.add(uvLine);
-        }
 
+            if (!w) {
+	        var uvLine = new THREE.Line(uvLineGeom, SS.constructors.lineMaterial);
+	        this.sceneObject.add(uvLine);
+            }
+
+            if (origin.z) {
+                var uvBase = new THREE.Line(uvLineGeom, SS.constructors.lineMaterial);
+                uvBase.position.z = -origin.z;
+	        this.sceneObject.add(uvBase);                
+            }
+        }
 
         this.postRender();
     },

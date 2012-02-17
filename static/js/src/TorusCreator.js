@@ -46,32 +46,6 @@ SS.TorusPreview = SS.PreviewWithOrigin.extend({
         var r1 = this.model.node.parameters.r1;
         var r2 = this.model.node.parameters.r2;
 
-        if (r1 && r2) {
-            var circleGeom1 = new THREE.Geometry(), circleGeom2 = new THREE.Geometry();
-	    for(var i = 0; i <= 50; ++i) {
-		var theta = Math.PI*2*i/50;
-		var dx1 = (r1 + r2)*Math.cos(theta);
-		var dy1 = (r1 + r2)*Math.sin(theta);
-		var dx2 = (r1 - r2)*Math.cos(theta);
-		var dy2 = (r1 - r2)*Math.sin(theta);
-		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx1, dy1, 0)));
-		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx2, dy2, 0)));
-	    }
-	    var circle1 = new THREE.Line(circleGeom1, SS.constructors.lineMaterial);
-            circle1.position = new THREE.Vector3(origin.x, origin.y, origin.z);
-	    this.sceneObject.add(circle1);
-
-	    var circle2 = new THREE.Line(circleGeom2, SS.constructors.lineMaterial);
-            circle2.position = circle1.position;
-	    this.sceneObject.add(circle2);
-
-	    var geometry = new THREE.TorusGeometry(r1, r2, 10, 50);
-	    var torus = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
-            torus.position = circle1.position;
-            
-	    this.sceneObject.add(torus);
-        }
-        
         if (r1) {
 	    var circleGeom = new THREE.Geometry();
 	    for(var i = 0; i <= 50; ++i) {
@@ -80,10 +54,51 @@ SS.TorusPreview = SS.PreviewWithOrigin.extend({
 	        var dy = r1*Math.sin(theta);
 	        circleGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	    }
-	    var circle = new THREE.Line(circleGeom, SS.constructors.lineMaterial);
-            circle.position = new THREE.Vector3(origin.x, origin.y, origin.z);
-	    this.sceneObject.add(circle);
+	    var circle1 = new THREE.Line(circleGeom, SS.constructors.lineMaterial);
+	    this.sceneObject.add(circle1);
+
+            if (z !== 0) {
+	        var circle2 = new THREE.Line(circleGeom, SS.constructors.lineMaterial);
+                circle2.position.z = -origin.z;
+	        this.sceneObject.add(circle2);
+            }
         }
+
+        if (r1 && r2) {
+            var circleGeomA = new THREE.Geometry(), circleGeomB = new THREE.Geometry();
+	    for(var i = 0; i <= 50; ++i) {
+		var theta = Math.PI*2*i/50;
+		var dx1 = (r1 + r2)*Math.cos(theta);
+		var dy1 = (r1 + r2)*Math.sin(theta);
+		var dx2 = (r1 - r2)*Math.cos(theta);
+		var dy2 = (r1 - r2)*Math.sin(theta);
+		circleGeomA.vertices.push(new THREE.Vertex(new THREE.Vector3(dx1, dy1, 0)));
+		circleGeomB.vertices.push(new THREE.Vertex(new THREE.Vector3(dx2, dy2, 0)));
+	    }
+	    var circle3 = new THREE.Line(circleGeomA, SS.constructors.lineMaterial);
+	    this.sceneObject.add(circle3);
+
+	    var circle4 = new THREE.Line(circleGeomB, SS.constructors.lineMaterial);
+	    this.sceneObject.add(circle4);
+
+	    var geometry = new THREE.TorusGeometry(r1, r2, 10, 50);
+	    var torus = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
+
+	    this.sceneObject.add(torus);
+
+            if (origin.z !== 0) {
+	        var circle5 = new THREE.Line(circleGeomA, SS.constructors.lineMaterial);
+                circle5.position.z = -origin.z;
+	        this.sceneObject.add(circle5);
+
+	        var circle6 = new THREE.Line(circleGeomB, SS.constructors.lineMaterial);
+	        this.sceneObject.add(circle6);
+                circle6.position.z = -origin.z;
+
+            }
+        }
+        
+
        
         this.postRender();
     },
