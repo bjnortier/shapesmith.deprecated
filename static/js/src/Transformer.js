@@ -30,6 +30,7 @@ SS.TransformerInitiator = Backbone.Model.extend({
 
     destroy: function(event) {
         selectionManager.off('deselected', this.deselected);
+        selectionManager.off('selected', this.selected);
         this.views.map(function(view) {
             view.remove();
         });

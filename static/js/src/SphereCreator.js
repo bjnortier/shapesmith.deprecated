@@ -1,9 +1,9 @@
 var SS = SS || {};
 
-SS.SphereCreator = SS.Creator.extend({
+SS.SphereCreator = SS.PrimitiveCreator.extend({
 
     initialize: function(attributes) {
-        SS.Creator.prototype.initialize.call(this, attributes);
+        SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
         this.node.parameters.r = 10;
         this.node.extra = {angle: 0};

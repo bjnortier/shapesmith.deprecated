@@ -152,15 +152,17 @@ function create_transform(selected, type) {
                   z: original.origin.z};
     }
     
+    var lastMousePosition = SS.sceneView.workplane.getLastMousePosition();
     var transform = new Transform({
         type: type,
         editing: true,
-	origin: origin,
+	origin:  {x: lastMousePosition.x, y: lastMousePosition.y, z: 0},
         parameters: transformParams
     });
     replacement.transforms.push(transform);
+    original.originalSceneObjects = original.sceneObjects;
     geom_doc.replace(original, replacement);
-    return {geomNode: replacement, transform: transform};
+    return {original: original, replacement: replacement, transform: transform};
 }
 
 
@@ -250,10 +252,11 @@ $(document).ready(function() {
     /*
      * Transformations
      */
-    /*new Action('Mirror', '/static/images/mirror.png', 
+    new Action('Mirror', '/static/images/mirror.png', 
                function(selected) { 
-		   SS.constructors.createMirror(create_transform(selected, 'mirror'));
-	       }).render($('#transforms'));*/
+                   var originalReplacementAndTransform = create_transform(selected, 'mirror');
+		   new SS.AxisMirrorTransformCreator(originalReplacementAndTransform);
+	       }).render($('#transforms'));
     
 });
 

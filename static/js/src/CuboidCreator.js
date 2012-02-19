@@ -1,9 +1,9 @@
 var SS = SS || {};
 
-SS.CuboidCreator = SS.Creator.extend({
+SS.CuboidCreator = SS.PrimitiveCreator.extend({
 
     initialize: function(attributes) {
-        SS.Creator.prototype.initialize.call(this, attributes);
+        SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
         this.node.parameters.u = 10;
         this.node.parameters.v = 10;

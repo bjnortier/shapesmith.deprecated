@@ -413,6 +413,45 @@ var SS = SS || {};
         }
     }
 
+    SS.axisMirrorGeomNodeRendering = function(originalNode, editingNode, transform) {
+
+        var origin = transform.origin;
+        var axis = transform.parameters;
+        var u = axis.u, v = axis.v, w = axis.w;
+        var un, vn, wn;
+        var normUVW = new THREE.Vector3(u, v, w).normalize();
+        un = normUVW.x;
+        vn = normUVW.y;
+        wn = normUVW.z;
+        
+        for (key in editingNode.sceneObjects) {
+
+            for (var i = 0; i < editingNode.sceneObjects[key].children.length; ++i) {
+                
+                var originalGeometry = originalNode.originalSceneObjects[key].children[i].geometry;
+                var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
+
+	        editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
+	            var position = vertex.position.clone();
+                    
+                    position.x = position.x - origin.x;
+                    position.y = position.y - origin.y;
+                    position.z = position.z - origin.z;
+                    
+                    var a = (un*position.x + vn*position.y + wn*position.z);
+                    var x2 = 2*a*un - position.x + origin.x;
+                    var y2 = 2*a*vn - position.y + origin.y;
+                    var z2 = 2*a*wn - position.z + origin.z;
+                    
+	            return new THREE.Vertex(new THREE.Vector3(x2, y2, z2));
+                });
+                editingGeometry.computeCentroids();
+	        editingGeometry.computeFaceNormals();
+                editingGeometry.__dirtyVertices = true;
+            }
+        }            
+    }
+
     SS.boundingBoxForSceneObject = function(sceneObject) {
         var boundingBoxes = [];
         var addRecursively = function(child) {

@@ -3,8 +3,7 @@ var SS = SS || {};
 SS.Creator = SS.NodeModel.extend({
 
     initialize: function(attributes) {
-        this.node = attributes.editingNode;
-        this.editingNode = attributes.editingNode;
+
 
         this.views = [
             new SS.NodeDOMView({model: this}),
@@ -17,7 +16,7 @@ SS.Creator = SS.NodeModel.extend({
     },
 
     destroy: function() {
-        if (this.activeCorner) {
+        if (this.activeCornerView) {
             this.activeCornerView.remove();
         }
         this.views.map(function(view) {
@@ -47,18 +46,6 @@ SS.Creator = SS.NodeModel.extend({
         this.activateCorner(corner, SS.OriginHeightCursoid);
     },
      
-    tryCommit: function() {
-        var cmd = create_geom_command(this.node, {type: this.node.type,
-						 origin: this.node.origin,
-                                                 parameters: this.node.parameters});
-        command_stack.execute(cmd);
-    },
-
-    cancel: function() {
-        this.destroy();
-        geom_doc.remove(this.editingNode); 
-    },
-
     geomDocReplace: function(original, replacement) {
         if (original === this.editingNode) {
             this.destroy();
@@ -72,6 +59,51 @@ SS.Creator = SS.NodeModel.extend({
     },
 
 });
+
+SS.PrimitiveCreator = SS.Creator.extend({
+
+    initialize: function(attributes) {
+        this.node = attributes.editingNode;
+        this.editingNode = attributes.editingNode;
+        SS.Creator.prototype.initialize.call(this, attributes);
+    },
+
+    tryCommit: function() {
+        var cmd = create_geom_command(this.node, {type: this.node.type,
+						  origin: this.node.origin,
+                                                  parameters: this.node.parameters});
+        command_stack.execute(cmd);
+    },
+
+    cancel: function() {
+        this.destroy();
+        geom_doc.remove(this.editingNode); 
+    },
+
+});
+
+SS.TransformCreator = SS.Creator.extend({
+
+    initialize: function(attributes) {
+        this.node = attributes.transform;
+        this.originalNode = attributes.original;
+        this.editingNode = attributes.replacement;
+        SS.Creator.prototype.initialize.call(this, attributes);
+    },
+
+    tryCommit: function() {
+        var cmd = update_geom_command(this.attributes.original, 
+                                      this.editingNode,
+                                      this.editingNode);
+        command_stack.execute(cmd);
+    },
+
+    cancel: function() {
+        this.destroy();
+        geom_doc.replace(this.editingNode, this.originalNode); 
+    },
+});
+
 
 SS.PreviewWithOrigin = SS.SceneObjectView.extend({
 
@@ -252,6 +284,5 @@ SS.OriginHeightCursoid = SS.HeightCursoid.extend({
         this.model.node.origin.y = position.y;
         this.model.node.origin.z = position.z;
     },
-
 
 });
