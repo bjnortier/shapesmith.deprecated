@@ -54,6 +54,8 @@ SS.TranslateTransformer = SS.Transformer.extend({
                 new SS.TranslateGeomNodeView({model: this}),
                 new SS.ScaleBoxView({model: this}),
                 new SS.ScaleFootprintView({model: this}),
+                new SS.TranslateDimensionArrows({model: this}),
+                new SS.TranslateDimensionText({model: this}),
             ]);
             
         }
@@ -160,6 +162,81 @@ SS.TranslateHeightCursoid = SS.HeightCursoid.extend({
         this.model.node.parameters.u = position.x - this.model.node.origin.x;
         this.model.node.parameters.v = position.y - this.model.node.origin.y;
         this.model.node.parameters.w = position.z - this.model.node.origin.z;
+    },
+
+});
+
+SS.TranslateDimensionArrows = SS.SceneObjectView.extend({
+
+    render: function() {
+        this.clear();
+
+        var origin = this.model.node.origin;
+        var u = this.model.node.parameters.u;
+        var v = this.model.node.parameters.v;
+        var w = this.model.node.parameters.w;
+
+        if (u) {
+            var uDim = SS.createDimArrow(u, new THREE.Vector3(u,0,0));
+            this.sceneObject.add(uDim);
+        }
+        if (v) {
+            var vDim = SS.createDimArrow(v, new THREE.Vector3(0,v,0));
+            vDim.position = new THREE.Vector3(u,0,0);
+            this.sceneObject.add(vDim);
+        }
+        if (w) {
+            var wDim = SS.createDimArrow(v, new THREE.Vector3(0,0,w));
+            wDim.position = new THREE.Vector3(u,v,0);
+            this.sceneObject.add(wDim);
+        }
+
+        this.sceneObject.position = new THREE.Vector3(origin.x, origin.y, origin.z);
+
+        this.postRender();
+    },
+
+});
+
+SS.TranslateDimensionText = SS.DimensionText.extend({
+
+    render: function() {
+        this.clear();
+
+        var origin = this.model.node.origin;
+        var u = this.model.node.parameters.u;
+        var v = this.model.node.parameters.v;
+        var w = this.model.node.parameters.w;
+
+        if (u) {
+            this.$u = this.addElement('<div class="dimension">' + u + '</div>');
+        }
+        if (v) {
+            this.$v = this.addElement('<div class="dimension">' + v + '</div>');
+        }
+        if (w) {
+            this.$w = this.addElement('<div class="dimension">' + w + '</div>');
+        }
+
+        this.update();
+    },
+
+    update: function() {
+        var origin = this.model.node.origin;
+        var u = this.model.node.parameters.u;
+        var v = this.model.node.parameters.v;
+        var w = this.model.node.parameters.w;
+      
+        var positions = {u: new THREE.Vector3(origin.x + u/2, origin.y, origin.z),
+                         v: new THREE.Vector3(origin.x + u, origin.y + v/2, origin.z),
+                         w: new THREE.Vector3(origin.x + u, origin.y + v, origin.z + w/2)};
+        for (key in positions) {
+            if (this['$' + key]) {
+                var pixelPosition = SS.toScreenCoordinates(positions[key]);
+                this['$' + key].css('left', pixelPosition.x);
+                this['$' + key].css('top', pixelPosition.y);
+            }
+        }
     },
 
 });

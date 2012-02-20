@@ -359,7 +359,7 @@ SS.ScaleFootprintView = SS.SceneObjectView.extend({
         var planeMesh = new THREE.Mesh(planeGeometry, 
                                        new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, 
                                                                     transparent: true, 
-                                                                    opacity: 0.5}));
+                                                                    opacity: 0.2}));
         var planeBorder = new THREE.Mesh(planeGeometry, 
                                          new THREE.MeshBasicMaterial({color: SS.constructors.lineColor, 
                                                                       wireframe: true}));
