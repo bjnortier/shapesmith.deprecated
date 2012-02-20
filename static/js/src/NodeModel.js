@@ -249,35 +249,39 @@ SS.OkCancelView = Backbone.View.extend({
         projScreenMat.multiply(SS.sceneView.camera.projectionMatrix, 
                                SS.sceneView.camera.matrixWorldInverse);
 
+        var pixelPosition = {x:  window.innerWidth/2,
+                             y: window.innerHeight/2};
         var boundingBox = this.model.getBoundingBox();
-        
-        var xminmax = [boundingBox.min.x, boundingBox.max.x];
-        var yminmax = [boundingBox.min.y, boundingBox.max.y];
-        var zminmax = [boundingBox.min.z, boundingBox.max.z];
-        var screenPositionMinMax = [new THREE.Vector3(2,2,0), new THREE.Vector3(-2,-2,0)];
-        for (var i = 0; i < 2; i++) {
-            for (var j = 0; j < 2; ++j) {
-                for (var k = 0; k < 2; ++k) {
-                    var pos = new THREE.Vector3(xminmax[i], yminmax[j], zminmax[k]);
-                    projScreenMat.multiplyVector3(pos);
+        // Nested transforms don't have bounding boxes
+        if (boundingBox) {
+            var xminmax = [boundingBox.min.x, boundingBox.max.x];
+            var yminmax = [boundingBox.min.y, boundingBox.max.y];
+            var zminmax = [boundingBox.min.z, boundingBox.max.z];
+            var screenPositionMinMax = [new THREE.Vector3(2,2,0), new THREE.Vector3(-2,-2,0)];
+            for (var i = 0; i < 2; i++) {
+                for (var j = 0; j < 2; ++j) {
+                    for (var k = 0; k < 2; ++k) {
+                        var pos = new THREE.Vector3(xminmax[i], yminmax[j], zminmax[k]);
+                        projScreenMat.multiplyVector3(pos);
 
-                    screenPositionMinMax[0].x = Math.min(screenPositionMinMax[0].x, pos.x);
-                    screenPositionMinMax[0].y = Math.min(screenPositionMinMax[0].y, pos.y);
-                    screenPositionMinMax[1].x = Math.max(screenPositionMinMax[1].x, pos.x);
-                    screenPositionMinMax[1].y = Math.max(screenPositionMinMax[1].y, pos.y);
+                        screenPositionMinMax[0].x = Math.min(screenPositionMinMax[0].x, pos.x);
+                        screenPositionMinMax[0].y = Math.min(screenPositionMinMax[0].y, pos.y);
+                        screenPositionMinMax[1].x = Math.max(screenPositionMinMax[1].x, pos.x);
+                        screenPositionMinMax[1].y = Math.max(screenPositionMinMax[1].y, pos.y);
+                    }
                 }
             }
-        }
 
-        var centerYPosition = (screenPositionMinMax[0].y + screenPositionMinMax[1].y)/2;
-        
-        var pixelPosition = {};
-        pixelPosition.x = window.innerWidth * ((screenPositionMinMax[1].x+1)/2) + 20;
-        pixelPosition.y = window.innerHeight * ((-centerYPosition+1)/2);
-        pixelPosition.x = Math.min(pixelPosition.x, window.innerWidth - 100);
-        pixelPosition.y = Math.min(pixelPosition.y, window.innerHeight - 100);
-        pixelPosition.x = Math.max(pixelPosition.x, 100);
-        pixelPosition.y = Math.max(pixelPosition.y, 100);
+            var centerYPosition = (screenPositionMinMax[0].y + screenPositionMinMax[1].y)/2;
+            
+
+            pixelPosition.x = window.innerWidth * ((screenPositionMinMax[1].x+1)/2) + 20;
+            pixelPosition.y = window.innerHeight * ((-centerYPosition+1)/2);
+            pixelPosition.x = Math.min(pixelPosition.x, window.innerWidth - 100);
+            pixelPosition.y = Math.min(pixelPosition.y, window.innerHeight - 100);
+            pixelPosition.x = Math.max(pixelPosition.x, 100);
+            pixelPosition.y = Math.max(pixelPosition.y, 100);
+        }
        
         $('#floating-ok-cancel').css('left', pixelPosition.x);
 	$('#floating-ok-cancel').css('top', pixelPosition.y);
