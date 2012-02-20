@@ -12,6 +12,8 @@ SS.CylinderCreator = SS.PrimitiveCreator.extend({
         this.views = this.views.concat([
             new SS.CylinderPreview({model: this}),
             new SS.DraggableRadiusCorner({model: this}),
+            new SS.CylinderDimensionArrows({model: this}),
+            new SS.CylinderDimensionText({model: this}),
         ]);
         this.trigger('change', this);
     },
@@ -120,3 +122,63 @@ SS.RadiusHeightCursoid = SS.HeightCursoid.extend({
 
 });
 
+
+SS.CylinderDimensionArrows = SS.SceneObjectView.extend({
+
+    render: function() {
+        this.clear();
+
+        var origin = this.model.node.origin;
+        var r = this.model.node.parameters.r;
+        var h = this.model.node.parameters.h;
+        var angle = this.model.node.extra.angle;
+
+        var rVector = new THREE.Vector3(r*Math.cos(angle), r*Math.sin(angle), 0);
+        var rDim = SS.createDimArrow(r, rVector);
+        this.sceneObject.add(rDim);
+
+        var hDim = SS.createDimArrow(h, new THREE.Vector3(0,0,h));
+        hDim.position = rVector;
+        this.sceneObject.add(hDim);
+
+        this.sceneObject.position = new THREE.Vector3(origin.x, origin.y, origin.z);
+        this.postRender();
+    },
+
+});
+
+SS.CylinderDimensionText = SS.DimensionText.extend({
+    
+    render: function() {
+        this.clear();
+        var r = this.model.node.parameters.r;
+        var h = this.model.node.parameters.h;
+        this.$r = this.addElement('<div class="dimension">' + r + '</div>');
+        this.$h = this.addElement('<div class="dimension">' + h + '</div>');
+        this.update();
+    },
+
+    update: function() {
+        var origin = this.model.node.origin;
+        var r = this.model.node.parameters.r;
+        var h = this.model.node.parameters.h;
+        var angle = this.model.node.extra.angle;
+        
+        var rVector = new THREE.Vector3(r*Math.cos(angle), r*Math.sin(angle), 0);
+
+        var rPixelPosition = SS.toScreenCoordinates(
+            new THREE.Vector3(origin.x + r/2*Math.cos(angle), 
+                              origin.y + r/2*Math.sin(angle), 
+                              origin.z));
+        this.$r.css('left', rPixelPosition.x);
+        this.$r.css('top', rPixelPosition.y);
+
+        var hPixelPosition = SS.toScreenCoordinates(
+            new THREE.Vector3(origin.x + r*Math.cos(angle), 
+                              origin.y + r*Math.sin(angle), 
+                              origin.z + h/2));
+        this.$h.css('left', hPixelPosition.x);
+        this.$h.css('top', hPixelPosition.y);
+    },
+
+});
