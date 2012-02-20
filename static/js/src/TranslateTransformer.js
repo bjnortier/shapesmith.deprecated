@@ -50,6 +50,7 @@ SS.TranslateTransformer = SS.Transformer.extend({
             
             this.views = this.views.concat([
                 this.translateView,
+                new SS.TranslateHeightCursoid({model: this}),
                 new SS.TranslateGeomNodeView({model: this}),
                 new SS.ScaleBoxView({model: this}),
                 new SS.ScaleFootprintView({model: this}),
@@ -134,11 +135,32 @@ SS.TranslateGeomNodeView = Backbone.View.extend({
                                              transform.parameters.v,
                                              transform.parameters.w);
             
-            // TODO: Replace with model for geom node
             SS.translateGeomNodeRendering(this.model.originalNode, 
                                           this.model.editingNode, 
                                           position);
         }
+    },
+
+});
+
+
+SS.TranslateHeightCursoid = SS.HeightCursoid.extend({
+
+    initialize: function(options) {
+	SS.HeightCursoid.prototype.initialize.call(this);
+        this.render();
+    },
+    
+    cornerPositionFromModel: function() {
+	return {x: this.model.center.x,
+                y: this.model.center.y,
+                z: this.model.node.parameters.w};
+    },    
+
+    updateModelFromCorner: function(position) {
+        this.model.node.parameters.u = position.x - this.model.node.origin.x;
+        this.model.node.parameters.v = position.y - this.model.node.origin.y;
+        this.model.node.parameters.w = position.z - this.model.node.origin.z;
     },
 
 });
