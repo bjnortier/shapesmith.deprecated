@@ -8,6 +8,8 @@ SS.Ellipse2DCreator = SS.PrimitiveCreator.extend({
         this.views = this.views.concat([
             new SS.Ellipse2DPreview({model: this}),
             new SS.DraggableUVCorner({model: this, uKey: 'r1', vKey: 'r2'}),
+            new SS.Ellipse2DDimensionArrows({model: this}),
+            new SS.Ellipse2DDimensionText({model: this}),
         ]);
         this.trigger('change', this);
     },
@@ -28,7 +30,6 @@ SS.Ellipse2DCreator = SS.PrimitiveCreator.extend({
         return {min: new THREE.Vector3(origin.x - r1, origin.y - r2, origin.z),
                 max: new THREE.Vector3(origin.x + r1, origin.y + r2, origin.z)};
     },
-
 
 });
 
@@ -77,4 +78,58 @@ SS.Ellipse2DPreview = SS.PreviewWithOrigin.extend({
 
 });
 
+SS.Ellipse2DDimensionArrows = SS.SceneObjectView.extend({
 
+    render: function() {
+        this.clear();
+
+        var origin = this.model.node.origin;
+        var r1 = this.model.node.parameters.r1;
+        var r2 = this.model.node.parameters.r2;
+
+        var r1Vector = new THREE.Vector3(r1, 0, 0);
+        var r1Dim = SS.createDimArrow(r1, r1Vector);
+        this.sceneObject.add(r1Dim);
+
+        var r2Vector = new THREE.Vector3(0, r2, 0);
+        var r2Dim = SS.createDimArrow(r2, r2Vector);
+        this.sceneObject.add(r2Dim);
+
+        this.sceneObject.position = new THREE.Vector3(origin.x, origin.y, origin.z);
+        this.postRender();
+    },
+
+});
+
+SS.Ellipse2DDimensionText = SS.DimensionText.extend({
+    
+    render: function() {
+        this.clear();
+        var r1 = this.model.node.parameters.r1;
+        var r2 = this.model.node.parameters.r2;
+        this.$r1 = this.addElement('<div class="dimension">' + r1 + '</div>');
+        this.$r2 = this.addElement('<div class="dimension">' + r2 + '</div>');
+        this.update();
+    },
+
+    update: function() {
+        var origin = this.model.node.origin;
+        var r1 = this.model.node.parameters.r1;
+        var r2 = this.model.node.parameters.r2;
+        
+        var r1PixelPosition = SS.toScreenCoordinates(
+            new THREE.Vector3(origin.x + r1/2,
+                              origin.y,
+                              origin.z));
+        this.$r1.css('left', r1PixelPosition.x);
+        this.$r1.css('top', r1PixelPosition.y);
+
+        var r2PixelPosition = SS.toScreenCoordinates(
+            new THREE.Vector3(origin.x,
+                              origin.y + r2/2,
+                              origin.z));
+        this.$r2.css('left', r2PixelPosition.x);
+        this.$r2.css('top', r2PixelPosition.y);
+    },
+
+});
