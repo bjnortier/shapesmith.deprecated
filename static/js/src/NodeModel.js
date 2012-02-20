@@ -180,6 +180,17 @@ SS.SceneObjectView = Backbone.View.extend({
         this.model.off('change', this.render);
     },
 
+    toScreenCoordinates: function(worldCoordinates) {
+        var projScreenMat = new THREE.Matrix4();
+        projScreenMat.multiply(SS.sceneView.camera.projectionMatrix, 
+                               SS.sceneView.camera.matrixWorldInverse);
+        projScreenMat.multiplyVector3(worldCoordinates);
+        return {
+            x: window.innerWidth * ((worldCoordinates.x+1)/2),
+            y: window.innerHeight * ((-worldCoordinates.y+1)/2)
+        }
+    },
+
     priority: 0,
 
 });
@@ -245,15 +256,17 @@ SS.OkCancelView = Backbone.View.extend({
     },
 
     update: function() {
-        var projScreenMat = new THREE.Matrix4();
-        projScreenMat.multiply(SS.sceneView.camera.projectionMatrix, 
-                               SS.sceneView.camera.matrixWorldInverse);
 
         var pixelPosition = {x:  window.innerWidth/2 + 10,
                              y: window.innerHeight/2};
         var boundingBox = this.model.getBoundingBox();
         // Nested transforms don't have bounding boxes
         if (boundingBox) {
+            var projScreenMat = new THREE.Matrix4();
+            projScreenMat.multiply(SS.sceneView.camera.projectionMatrix, 
+                                   SS.sceneView.camera.matrixWorldInverse);
+
+
             var xminmax = [boundingBox.min.x, boundingBox.max.x];
             var yminmax = [boundingBox.min.y, boundingBox.max.y];
             var zminmax = [boundingBox.min.z, boundingBox.max.z];
@@ -274,7 +287,6 @@ SS.OkCancelView = Backbone.View.extend({
 
             var centerYPosition = (screenPositionMinMax[0].y + screenPositionMinMax[1].y)/2;
             
-
             pixelPosition.x = window.innerWidth * ((screenPositionMinMax[1].x+1)/2) + 20;
             pixelPosition.y = window.innerHeight * ((-centerYPosition+1)/2);
             pixelPosition.x = Math.min(pixelPosition.x, window.innerWidth - 100);

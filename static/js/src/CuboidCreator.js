@@ -12,6 +12,7 @@ SS.CuboidCreator = SS.PrimitiveCreator.extend({
         this.views = this.views.concat([
             new SS.CuboidPreview({model: this}),
             new SS.DraggableUVCorner({model: this}),
+            new SS.CuboidDimensions({model: this}),
         ]);
         this.trigger('change', this);
     },
@@ -133,3 +134,76 @@ SS.UVWHeightCursoid = SS.HeightCursoid.extend({
     },
 
 });
+
+SS.CuboidDimensions = SS.SceneObjectView.extend({
+
+    initialize: function() {
+        SS.SceneObjectView.prototype.initialize.call(this);
+        SS.sceneView.on('cameraChange', this.update, this);
+        this.render();
+    },
+
+    remove: function() {
+        SS.SceneObjectView.prototype.remove.call(this);
+        SS.sceneView.off('cameraChange', this.update);
+    },
+
+    render: function() {
+        this.clear();
+
+        var origin = this.model.node.origin;
+        var u = this.model.node.parameters.u;
+        var v = this.model.node.parameters.v;
+        var w = this.model.node.parameters.w;
+
+        var uDim = SS.createDimArrow(u, new THREE.Vector3(u,0,0));
+        var vDim = SS.createDimArrow(v, new THREE.Vector3(0,v,0));
+        var wDim = SS.createDimArrow(v, new THREE.Vector3(0,0,w));
+        vDim.position = new THREE.Vector3(u,0,0);
+        wDim.position = new THREE.Vector3(u,v,0);
+        this.sceneObject.add(uDim);
+        this.sceneObject.add(vDim);
+        this.sceneObject.add(wDim);
+
+        this.sceneObject.position = new THREE.Vector3(origin.x, origin.y, origin.z);
+
+        var that = this;
+        ['u', 'v', 'w'].map(function(dim) {
+            var key = '$' + dim;
+            that[key] && that[key].remove();
+            that[key] = $('<div class="dimension">' + that.model.node.parameters[dim] + '</div>');
+            $('body').append(that[key]);
+            that[key].css('position', 'absolute');
+        });
+
+        this.update();
+        this.postRender();
+    },
+
+    remove: function() {
+        SS.SceneObjectView.prototype.remove.call(this);
+        this.$u.remove();
+        this.$v.remove();
+        this.$w.remove();
+    },
+
+    update: function() {
+        var origin = this.model.node.origin;
+        var u = this.model.node.parameters.u;
+        var v = this.model.node.parameters.v;
+        var w = this.model.node.parameters.w;
+      
+        var positions = {u: new THREE.Vector3(origin.x + u/2, origin.y, origin.z),
+                         v: new THREE.Vector3(origin.x + u, origin.y + v/2, origin.z),
+                         w: new THREE.Vector3(origin.x+ u, origin.y + v, origin.z + w/2)};
+        for (key in positions) {
+            var pixelPosition = this.toScreenCoordinates(positions[key]);
+            this['$' + key].css('left', pixelPosition.x);
+            this['$' + key].css('top', pixelPosition.y);
+        }
+
+
+    },
+
+});
+

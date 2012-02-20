@@ -3,6 +3,7 @@ SS.SceneView = function(container) {
 
     var camera, scene, renderer, w, h;
     var overRenderer;
+    var lastCameraPosition = new THREE.Vector3(0,0,0);
 
     var mouseOnDown, lastMouseMpos, mouseDownOnActiveSceneObject;
 
@@ -167,8 +168,6 @@ SS.SceneView = function(container) {
 		target.elevation = target.elevation > Math.PI ? Math.PI : target.elevation;
 		target.elevation = target.elevation < 0 ? 0 : target.elevation;
 
-                that.trigger('cameraChange');
-
 	    } else if (SS.UI_MOUSE_STATE.panning) {
                 
                 var dMouse = {x: mouse.x - lastMousePos.x,
@@ -184,8 +183,6 @@ SS.SceneView = function(container) {
                 dPos.multiplyScalar(factor);
 
                 targetScenePosition.addSelf(dPos);
-
-                that.trigger('cameraChange');
             }
             
 	} 
@@ -372,7 +369,6 @@ SS.SceneView = function(container) {
 
     function zoom(delta) {
 	distanceTarget -= delta;
-        that.trigger('cameraChange');
     }
 
     function animate() {
@@ -399,12 +395,20 @@ SS.SceneView = function(container) {
 	    distance += dDistance;
 	}
 
-        scene.position.addSelf(new THREE.Vector3().sub(targetScenePosition, scene.position).multiplyScalar(0.2));
+        var dScenePosition = new THREE.Vector3().sub(targetScenePosition, scene.position).multiplyScalar(0.2);
+        scene.position.addSelf(dScenePosition);
+
+        lastCameraPosition = camera.position.clone();
 
 	camera.position.x = distance * Math.sin(elevation) * Math.cos(azimuth);
 	camera.position.y = distance * Math.sin(elevation) * Math.sin(azimuth);
 	camera.position.z = distance * Math.cos(elevation);
         camera.position.addSelf(scene.position);
+
+        var dCameraPosition = new THREE.Vector3().sub(camera.position, lastCameraPosition);
+        if ((dScenePosition.length() > 0.1) || (dCameraPosition.length() > 0.1)) {
+            that.trigger('cameraChange');
+        }
 
         camera.lookAt(scene.position);
 	renderer.render(scene, camera);

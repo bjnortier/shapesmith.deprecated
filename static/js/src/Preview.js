@@ -152,6 +152,31 @@ SS.preview.createDimArrow2 = function(text, u, v, w) {
     return dimObject;
 }
 
+SS.createDimArrow = function(label, vector) {
+
+    var object = new THREE.Object3D();
+
+    var arrowGeom = new THREE.Geometry();
+    arrowGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,0)));
+    arrowGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,vector.clone().length())));
+    var line = new THREE.Line(arrowGeom, SS.constructors.lineMaterial);
+
+    var pointGeom = new THREE.CylinderGeometry(0, 0.25, 1, 3);
+    var materials = [
+        SS.constructors.faceMaterial,
+        SS.constructors.wireframeMaterial,
+    ];
+    var point = THREE.SceneUtils.createMultiMaterialObject(pointGeom, materials);
+
+    point.position.z = vector.clone().length() - 0.5;
+    point.rotation.x = Math.PI/2;
+    
+    object.add(line);
+    object.add(point);
+    object.lookAt(vector.clone().normalize());
+    return object;
+}
+
 
 
 SS.preview.createDimText = function(value) {

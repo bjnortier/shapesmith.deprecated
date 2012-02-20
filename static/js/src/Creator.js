@@ -311,9 +311,39 @@ SS.HeightCursoid = SS.InteractiveSceneView.extend({
 
 SS.OriginHeightCursoid = SS.HeightCursoid.extend({
 
-     initialize: function(options) {
-	 SS.HeightCursoid.prototype.initialize.call(this);
-         this.render();
+    initialize: function(options) {
+	SS.HeightCursoid.prototype.initialize.call(this);
+        SS.sceneView.on('cameraChange', this.update, this);
+        this.render();
+    },
+
+    remove: function() {
+        SS.HeightCursoid.prototype.remove.call(this);
+        SS.sceneView.off('cameraChange', this.update);
+        this.$z && this.$z.remove();
+    },
+
+    render: function() {
+        SS.HeightCursoid.prototype.render.call(this);
+        
+        this.$z && this.$z.remove();
+        var origin = this.model.node.origin;
+        if (origin.z) {
+            this.$z = $('<div class="dimension">' + origin.z + '</div>');
+            $('body').append(this.$z);
+            this.$z.css('position', 'absolute');
+            this.update();
+        }
+        
+    },
+    
+    update: function() {
+        if (this.$z) {
+            var origin = this.model.node.origin;
+            var pixelPosition = this.toScreenCoordinates(new THREE.Vector3(origin.x, origin.y, origin.z/2));
+            this.$z.css('left', pixelPosition.x);
+            this.$z.css('top', pixelPosition.y);
+        }
     },
 
     cornerPositionFromModel: function() {
