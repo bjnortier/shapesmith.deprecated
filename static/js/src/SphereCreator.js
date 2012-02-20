@@ -11,7 +11,8 @@ SS.SphereCreator = SS.PrimitiveCreator.extend({
         this.views = this.views.concat([
             new SS.SpherePreview({model: this}),
             new SS.DraggableRadiusCorner({model: this}),
-            new SS.SphereDimensions({model: this}),
+            new SS.SphereDimensionArrow({model: this}),
+            new SS.SphereDimensionText({model: this}),
         ]);
         this.trigger('change', this);
     },
@@ -109,19 +110,7 @@ SS.DraggableRadiusCorner = SS.DraggableCorner.extend({
 
 });
 
-SS.SphereDimensions = SS.SceneObjectView.extend({
-
-    initialize: function() {
-        SS.SceneObjectView.prototype.initialize.call(this);
-        SS.sceneView.on('cameraChange', this.update, this);
-        this.render();
-    },
-
-    remove: function() {
-        SS.SceneObjectView.prototype.remove.call(this);
-        SS.sceneView.off('cameraChange', this.update);
-        this.$r.remove();
-    },
+SS.SphereDimensionArrow = SS.SceneObjectView.extend({
 
     render: function() {
         this.clear();
@@ -135,14 +124,18 @@ SS.SphereDimensions = SS.SceneObjectView.extend({
         var rDim = SS.createDimArrow(r, vector);
         this.sceneObject.add(rDim);
         this.sceneObject.position = new THREE.Vector3(origin.x, origin.y, origin.z);
-
-        this.$r && this.$r.remove();
-        this.$r = $('<div class="dimension">' + r + '</div>');
-        $('body').append(this.$r);
-        this.$r.css('position', 'absolute');
-
-        this.update();
         this.postRender();
+    },
+
+});
+
+SS.SphereDimensionText = SS.DimensionText.extend({
+    
+    render: function() {
+        this.clear();
+        var r = this.model.node.parameters.r;
+        this.$r = this.addElement('<div class="dimension">' + r + '</div>');
+        this.update();
     },
 
     update: function() {
@@ -153,7 +146,7 @@ SS.SphereDimensions = SS.SceneObjectView.extend({
         var pixelPosition = SS.toScreenCoordinates(
             new THREE.Vector3(origin.x + r/2*Math.cos(angle), 
                               origin.y + r/2*Math.sin(angle), 
-                              0));
+                              origin.z));
         this.$r.css('left', pixelPosition.x);
         this.$r.css('top', pixelPosition.y);
     },

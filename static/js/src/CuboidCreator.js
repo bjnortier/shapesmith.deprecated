@@ -165,7 +165,6 @@ SS.CuboidDimensionArrows = SS.SceneObjectView.extend({
 
 SS.CuboidDimensionText = SS.DimensionText.extend({
 
-
     render: function() {
         this.clear();
 
