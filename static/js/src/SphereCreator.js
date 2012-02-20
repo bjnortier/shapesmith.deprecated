@@ -5,6 +5,8 @@ SS.SphereCreator = SS.PrimitiveCreator.extend({
     initialize: function(attributes) {
         SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
+        this.node.extra = {angle: 0};
+
         this.views = this.views.concat([
             new SS.SpherePreview({model: this}),
             new SS.DraggableRadiusCorner({model: this}),
@@ -16,7 +18,6 @@ SS.SphereCreator = SS.PrimitiveCreator.extend({
 
     setDefaultParamters: function() {
         this.node.parameters.r = 10;
-        this.node.extra = {angle: 0};
     },
 
     mouseDownOnRadius: function(corner) {

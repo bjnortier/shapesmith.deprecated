@@ -5,10 +5,14 @@ SS.TorusCreator = SS.PrimitiveCreator.extend({
     initialize: function(attributes) {
         SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
+        this.node.extra = {angle: 0};
+
         this.views = this.views.concat([
             new SS.TorusPreview({model: this}),
             new SS.DraggableRadiusCorner({model: this, key: 'r1'}),
             new SS.TorusR2Corner({model: this}),
+            new SS.TorusDimensionArrows({model: this}),
+            new SS.TorusDimensionText({model: this}),
         ]);
         this.trigger('change', this);
     },
@@ -16,7 +20,6 @@ SS.TorusCreator = SS.PrimitiveCreator.extend({
     setDefaultParamters: function() {
         this.node.parameters.r1 = 20;
         this.node.parameters.r2 = 5;
-        this.node.extra = {angle: 0};
     },
 
     mouseDownOnRadius: function(corner) {
@@ -144,3 +147,65 @@ SS.TorusR2Corner = SS.DraggableCorner.extend({
     },
 
 });
+
+SS.TorusDimensionArrows = SS.SceneObjectView.extend({
+
+    render: function() {
+        this.clear();
+
+        var origin = this.model.node.origin;
+        var r1 = this.model.node.parameters.r1;
+        var r2 = this.model.node.parameters.r2;
+        var angle = this.model.node.extra.angle;
+
+        var r1Vector = new THREE.Vector3(r1*Math.cos(angle), r1*Math.sin(angle), 0);
+        var r1Dim = SS.createDimArrow(r1, r1Vector);
+        this.sceneObject.add(r1Dim);
+
+        var r2Vector = new THREE.Vector3(r2*Math.cos(angle), r2*Math.sin(angle), 0);
+        var r2Dim = SS.createDimArrow(r2, r2Vector);
+        r2Dim.position = r1Vector;
+        this.sceneObject.add(r2Dim);
+
+        this.sceneObject.position = new THREE.Vector3(origin.x, origin.y, origin.z);
+        this.postRender();
+    },
+
+});
+
+SS.TorusDimensionText = SS.DimensionText.extend({
+    
+    render: function() {
+        this.clear();
+        var r1 = this.model.node.parameters.r1;
+        var r2 = this.model.node.parameters.r2;
+        this.$r1 = this.addElement('<div class="dimension">' + r1 + '</div>');
+        this.$r2 = this.addElement('<div class="dimension">' + r2 + '</div>');
+        this.update();
+    },
+
+    update: function() {
+        var origin = this.model.node.origin;
+        var r1 = this.model.node.parameters.r1;
+        var r2 = this.model.node.parameters.r2;
+        var angle = this.model.node.extra.angle;
+        
+        var r1Vector = new THREE.Vector3(r1*Math.cos(angle), r1*Math.sin(angle), 0);
+
+        var r1PixelPosition = SS.toScreenCoordinates(
+            new THREE.Vector3(origin.x + r1/2*Math.cos(angle), 
+                              origin.y + r1/2*Math.sin(angle), 
+                              origin.z));
+        this.$r1.css('left', r1PixelPosition.x);
+        this.$r1.css('top', r1PixelPosition.y);
+
+        var r2PixelPosition = SS.toScreenCoordinates(
+            new THREE.Vector3(origin.x + (r1 + r2/2)*Math.cos(angle), 
+                              origin.y + (r1 + r2/2)*Math.sin(angle), 
+                              origin.z));
+        this.$r2.css('left', r2PixelPosition.x);
+        this.$r2.css('top', r2PixelPosition.y);
+    },
+
+});
+

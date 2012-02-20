@@ -5,11 +5,7 @@ SS.ConeCreator = SS.PrimitiveCreator.extend({
     initialize: function(attributes) {
         SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
-        this.node.parameters.r1 = 10;
-        this.node.parameters.r2 = 0;
-        this.node.parameters.h = 10;
         this.node.extra = {angle: 0};
-
         this.views = this.views.concat([
             new SS.ConePreview({model: this}),
             new SS.DraggableRadiusCorner({model: this, key: 'r1'}),
@@ -23,7 +19,6 @@ SS.ConeCreator = SS.PrimitiveCreator.extend({
         this.node.parameters.r1 = 10;
         this.node.parameters.r2 = 0;
         this.node.parameters.h = 10;
-        this.node.extra = {angle: 0};
     },
 
     mouseDownOnRadius: function(corner) {
