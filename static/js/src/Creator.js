@@ -49,15 +49,11 @@ SS.Creator = SS.NodeModel.extend({
     },
      
     geomDocReplace: function(original, replacement) {
-        if (original === this.editingNode) {
-            this.destroy();
-        } 
+        this.destroy();
     },
 
     geomDocRemove: function(node) {
-        if (node === this.editingNode) {
-            this.destroy();
-        } 
+        this.destroy();
     },
 
 });
@@ -67,19 +63,31 @@ SS.PrimitiveCreator = SS.Creator.extend({
     initialize: function(attributes) {
         this.node = attributes.editingNode;
         this.editingNode = attributes.editingNode;
+        this.originalNode = attributes.originalNode;
         SS.Creator.prototype.initialize.call(this, attributes);
     },
 
     tryCommit: function() {
-        var cmd = create_geom_command(this.node, {type: this.node.type,
-						  origin: this.node.origin,
-                                                  parameters: this.node.parameters});
-        command_stack.execute(cmd);
+        if (this.originalNode) {
+            var cmd = update_geom_command(this.originalNode, 
+                                          this.editingNode,
+                                          this.editingNode);
+            command_stack.execute(cmd);
+        } else {
+            var cmd = create_geom_command(this.node, {type: this.node.type,
+						      origin: this.node.origin,
+                                                      parameters: this.node.parameters});
+            command_stack.execute(cmd);
+        }
     },
 
     cancel: function() {
         this.destroy();
-        geom_doc.remove(this.editingNode); 
+        if (this.originalNode) {
+            geom_doc.replace(this.editingNode, this.originalNode);
+        } else {
+            geom_doc.remove(this.editingNode); 
+        }
     },
 
 });

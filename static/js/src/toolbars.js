@@ -63,6 +63,17 @@ function delete_geom(selected) {
 
 }
 
+SS.creators = {};
+SS.creators.sphere = SS.SphereCreator;
+SS.creators.cuboid = SS.CuboidCreator;
+SS.creators.cylinder = SS.CylinderCreator;
+SS.creators.cone = SS.ConeCreator;
+SS.creators.wedge = SS.WedgeCreator;
+SS.creators.torus = SS.TorusCreator;
+SS.creators.ellipse2d = SS.Ellipse2DCreator;
+SS.creators.rectangle2d = SS.Rectangle2DCreator;
+SS.creators.triangle2d = SS.Triangle2DCreator;
+SS.creators.text2d = SS.Text2DCreator;
 
 function create_primitive(type) {
 
@@ -100,7 +111,8 @@ function create_primitive(type) {
 	origin: {x: lastMousePosition.x, y: lastMousePosition.y, z: 0},
         parameters: geometryParams});
     geom_doc.add(geomNode);
-    return geomNode;
+    
+    new SS.creators[type]({editingNode: geomNode}); 
 }
 
 function create_modifier(selected, type) {
@@ -166,6 +178,7 @@ function create_transform(selected, type) {
 }
 
 
+
 $(document).ready(function() {
 
     // Edit
@@ -178,50 +191,49 @@ $(document).ready(function() {
 		   copy(selected)
 	       }).render($('#edit'));
 
-
     //
     // Primitives
     //
     new Action('Cuboid', '/static/images/cuboid.png', 
                function() { 
-		   new SS.CuboidCreator({editingNode: create_primitive('cuboid')});
+		   create_primitive('cuboid');
 	       }).render($('#3Dprimitives'));
     new Action('Sphere', '/static/images/sphere.png', 
                function() { 
-                   new SS.SphereCreator({editingNode: create_primitive('sphere')});
+                   create_primitive('sphere');
 	       }).render($('#3Dprimitives'));
     new Action('Cylinder', '/static/images/cylinder.png', 
                function() { 
-		   new SS.CylinderCreator({editingNode: create_primitive('cylinder')}); 
+		   create_primitive('cylinder'); 
 	       }).render($('#3Dprimitives'));
     new Action('Cone', '/static/images/cone.png', 
                function() { 
-		   new SS.ConeCreator({editingNode: create_primitive('cone')});
+		   create_primitive('cone');
 	       }).render($('#3Dprimitives'));
     new Action('Wedge', '/static/images/wedge.png', 
                function() { 
-		   new SS.WedgeCreator({editingNode: create_primitive('wedge')});
+		   create_primitive('wedge');
 	       }).render($('#3Dprimitives'));
     new Action('Torus', '/static/images/torus.png', 
                function() { 
-		   new SS.TorusCreator({editingNode: create_primitive('torus')});
+		   create_primitive('torus');
 	       }).render($('#3Dprimitives'));
 
     new Action('Ellipse 2D', '/static/images/ellipse2d.png', 
                function() { 
-                   new SS.Ellipse2DCreator({editingNode: create_primitive('ellipse2d')});
+                   create_primitive('ellipse2d');
 	       }).render($('#2Dprimitives'));
     new Action('Rectangle 2D', '/static/images/rectangle2d.png', 
                function() { 
-                   new SS.Rectangle2DCreator({editingNode: create_primitive('rectangle2d')});
+                   create_primitive('rectangle2d');
 	       }).render($('#2Dprimitives'));
     new Action('Triangle 2D', '/static/images/triangle2d.png', 
                function() { 
-                   new SS.Triangle2DCreator({editingNode: create_primitive('triangle2d')});
+                   create_primitive('triangle2d');
 	       }).render($('#2Dprimitives'));
     new Action('Text 2D', '/static/images/text2d.png', 
                function() { 
-                   new SS.Text2DCreator({editingNode: create_primitive('text2d')});
+                   create_primitive('text2d');
 	       }).render($('#2Dprimitives'));
     
     //

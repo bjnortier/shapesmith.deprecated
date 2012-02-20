@@ -142,7 +142,7 @@ function renderNode(geomNode) {
     // Children
     var childTables = geomNode.children.map(renderNode);
     
-    var childTemplate = '{{#editing}}<div id="editing-area"></div>{{/editing}}{{^editing}}<table id="{{id}}"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img><span class="{{clazz}}">{{type}}</span></td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>{{/editing}}';
+    var childTemplate = '{{#editing}}<div id="{{id}}"><div id="editing-area"></div></div>{{/editing}}{{^editing}}<table id="{{id}}"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img><span class="{{clazz}}">{{type}}</span></td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>{{/editing}}';
 
     var clazz = geom_doc.isRoot(geomNode) ? 
 	'select-geom target-' + geomNode.id : 
@@ -410,9 +410,6 @@ function TreeView() {
             toggleShowHide(this);
             return false;
         });
-
-
-        
     }
 
     this.edit = function(id) {
@@ -420,15 +417,9 @@ function TreeView() {
 	if (!geomNode.isBoolean()) {
             var editingNode = geomNode.editableCopy();
             editingNode.editing = true;
+            selectionManager.deselectAll();
             geom_doc.replace(geomNode, editingNode);
-
-            var factoryFunction = 'edit' + editingNode.type.charAt(0).toUpperCase() + editingNode.type.substring(1);
-            if (SS.constructors[factoryFunction]) {
-                SS.constructors[factoryFunction](editingNode);
-            } else if (SS.constructors[editingNode.type]) {
-		SS.constructors[editingNode.type]().edit();
-	    } 
-            
+            new SS.creators[geomNode.type]({editingNode: editingNode, originalNode: geomNode});
 	}
     }
 				 
