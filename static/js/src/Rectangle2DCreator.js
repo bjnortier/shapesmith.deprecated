@@ -8,6 +8,9 @@ SS.Rectangle2DCreator = SS.PrimitiveCreator.extend({
         this.views = this.views.concat([
             new SS.Rectangle2DPreview({model: this}),
             new SS.DraggableUVCorner({model: this}),
+            new SS.Rectangle2DDimensionArrows({model: this}),
+            new SS.Rectangle2DDimensionText({model: this}),
+
         ]);
         this.trigger('change', this);
     },
@@ -70,8 +73,63 @@ SS.Rectangle2DPreview = SS.PreviewWithOrigin.extend({
 
         }
 
+        this.postRender();
+    },
+
+});
+
+SS.Rectangle2DDimensionArrows = SS.SceneObjectView.extend({
+
+    render: function() {
+        this.clear();
+
+        var origin = this.model.node.origin;
+        var u = this.model.node.parameters.u;
+        var v = this.model.node.parameters.v;
+
+        var uDim = SS.createDimArrow(u, new THREE.Vector3(u,0,0));
+        var vDim = SS.createDimArrow(v, new THREE.Vector3(0,v,0));
+        vDim.position = new THREE.Vector3(u,0,0);
+        this.sceneObject.add(uDim);
+        this.sceneObject.add(vDim);
+
+        this.sceneObject.position = new THREE.Vector3(origin.x, origin.y, origin.z);
 
         this.postRender();
+    },
+
+});
+
+SS.Rectangle2DDimensionText = SS.DimensionText.extend({
+
+    render: function() {
+        this.clear();
+
+        var origin = this.model.node.origin;
+        var u = this.model.node.parameters.u;
+        var v = this.model.node.parameters.v;
+
+        var that = this;
+        ['u', 'v'].map(function(dim) {
+            var key = '$' + dim;
+            that[key] = that.addElement('<div class="dimension">' + that.model.node.parameters[dim] + '</div>');
+        });
+
+        this.update();
+    },
+
+    update: function() {
+        var origin = this.model.node.origin;
+        var u = this.model.node.parameters.u;
+        var v = this.model.node.parameters.v;
+      
+        var positions = {u: new THREE.Vector3(origin.x + u/2, origin.y, origin.z),
+                         v: new THREE.Vector3(origin.x + u, origin.y + v/2, origin.z)};
+        for (key in positions) {
+            var pixelPosition = SS.toScreenCoordinates(positions[key]);
+            this['$' + key].css('left', pixelPosition.x);
+            this['$' + key].css('top', pixelPosition.y);
+        }
     },
 
 });
