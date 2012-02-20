@@ -13,6 +13,8 @@ SS.ConeCreator = SS.PrimitiveCreator.extend({
         this.views = this.views.concat([
             new SS.ConePreview({model: this}),
             new SS.DraggableRadiusCorner({model: this, key: 'r1'}),
+            new SS.ConeDimensionArrows({model: this}),
+            new SS.ConeDimensionText({model: this}),
         ]);
         this.trigger('change', this);
     },
@@ -101,3 +103,83 @@ SS.ConePreview = SS.PreviewWithOrigin.extend({
 });
 
 
+SS.ConeDimensionArrows = SS.SceneObjectView.extend({
+
+    render: function() {
+        this.clear();
+
+        var origin = this.model.node.origin;
+        var r1 = this.model.node.parameters.r1;
+        var r2 = this.model.node.parameters.r2;
+        var h = this.model.node.parameters.h;
+        var angle = this.model.node.extra.angle;
+
+        var r1Vector = new THREE.Vector3(r1*Math.cos(angle), r1*Math.sin(angle), 0);
+        var r1Dim = SS.createDimArrow(r1, r1Vector);
+        this.sceneObject.add(r1Dim);
+
+        if (r2) {
+            var r2Vector = new THREE.Vector3(r2*Math.cos(angle), r2*Math.sin(angle), 0);
+            var r2Dim = SS.createDimArrow(r2, r2Vector);
+            r2Dim.position = new THREE.Vector3(0,0,h);
+            this.sceneObject.add(r2Dim);
+        }
+
+        var hDim = SS.createDimArrow(h, new THREE.Vector3(0,0,h));
+        this.sceneObject.add(hDim);
+
+        this.sceneObject.position = new THREE.Vector3(origin.x, origin.y, origin.z);
+        this.postRender();
+    },
+
+});
+
+SS.ConeDimensionText = SS.DimensionText.extend({
+    
+    render: function() {
+        this.clear();
+        var r1 = this.model.node.parameters.r1;
+        var r2 = this.model.node.parameters.r2;
+        var h = this.model.node.parameters.h;
+        this.$r1 = this.addElement('<div class="dimension">' + r1 + '</div>');
+        this.$h = this.addElement('<div class="dimension">' + h + '</div>');
+        if (r2) {
+            this.$r2 = this.addElement('<div class="dimension">' + r2 + '</div>');
+        }
+        this.update();
+    },
+
+    update: function() {
+        var origin = this.model.node.origin;
+        var r1 = this.model.node.parameters.r1;
+        var r2 = this.model.node.parameters.r2;
+        var h = this.model.node.parameters.h;
+        var angle = this.model.node.extra.angle;
+        
+        var r1Vector = new THREE.Vector3(r1*Math.cos(angle), r1*Math.sin(angle), 0);
+
+        var r1PixelPosition = SS.toScreenCoordinates(
+            new THREE.Vector3(origin.x + r1/2*Math.cos(angle), 
+                              origin.y + r1/2*Math.sin(angle), 
+                              origin.z));
+        this.$r1.css('left', r1PixelPosition.x);
+        this.$r1.css('top', r1PixelPosition.y);
+
+        if (this.$r2) {
+            var r2PixelPosition = SS.toScreenCoordinates(
+                new THREE.Vector3(origin.x + r2/2*Math.cos(angle), 
+                                  origin.y + r2/2*Math.sin(angle), 
+                                  origin.z + h));
+            this.$r2.css('left', r2PixelPosition.x);
+            this.$r2.css('top', r2PixelPosition.y);
+        }
+
+        var hPixelPosition = SS.toScreenCoordinates(
+            new THREE.Vector3(origin.x, 
+                              origin.y, 
+                              origin.z + h/2));
+        this.$h.css('left', hPixelPosition.x);
+        this.$h.css('top', hPixelPosition.y);
+    },
+
+});

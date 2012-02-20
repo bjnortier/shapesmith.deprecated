@@ -145,6 +145,7 @@ SS.NodeDOMView = Backbone.View.extend({
     },
 
     fieldChanged: function() {
+        console.log('!');
         this.preventUpdate = true;
         this.model.updateFromDOMView();
         this.preventUpdate = false;
