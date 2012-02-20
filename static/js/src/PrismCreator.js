@@ -6,23 +6,24 @@ SS.PrismCreator = SS.ParentCreator.extend({
         attributes.noOriginCorner = true;
         SS.ParentCreator.prototype.initialize.call(this, attributes);
         
-        if (!this.originalNode) {
-            this.node.parameters.u = 0;
-            this.node.parameters.v = 0;
-            this.node.parameters.w = 10;
-        }
-
-        // Editing - use the existing object
         if (this.originalNode) {
             this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
             this.center = SS.centerOfGeom(this.boundingBox);
         } else {
+            this.node.parameters.u = 0;
+            this.node.parameters.v = 0;
+            this.node.parameters.w = 10;
+
             this.views.push(new SS.PrismGeomNodeView({model: this}));
             this.trigger('change:model', this);
         }
 
-        this.views.push(new SS.PrismUVCorner({model: this}));
-        this.views.push(new SS.PrismHeightCursoid({model: this}));
+        this.views = this.views.concat([
+            new SS.PrismUVCorner({model: this}),
+            new SS.PrismHeightCursoid({model: this}),
+            new SS.PrismDimensionArrow({model: this}),
+            new SS.PrismDimensionText({model: this})
+        ]);
         this.trigger('change', this);
     },
 
@@ -151,3 +152,57 @@ SS.PrismHeightCursoid = SS.HeightCursoid.extend({
     },
 
 });
+
+SS.PrismDimensionArrow = SS.SceneObjectView.extend({
+
+    render: function() {
+        this.clear();
+
+        var origin = this.model.node.origin;
+        var u = this.model.node.parameters.u;
+        var v = this.model.node.parameters.v;
+        var w = this.model.node.parameters.w;
+
+        var dim = SS.createDimArrow(u, new THREE.Vector3(u,v,w));
+        this.sceneObject.add(dim);
+
+        this.sceneObject.position = new THREE.Vector3(this.model.center.x, 
+                                                      this.model.center.y,
+                                                      0);
+
+        this.postRender();
+    },
+
+});
+
+SS.PrismDimensionText = SS.DimensionText.extend({
+
+    render: function() {
+        this.clear();
+
+        var origin = this.model.node.origin;
+        var u = this.model.node.parameters.u;
+        var v = this.model.node.parameters.v;
+        var w = this.model.node.parameters.w;
+
+        var that = this;
+        this.$uvw = this.addElement('<div class="dimension">(' + u + ',' + v + ',' + w + ')</div>');
+
+        this.update();
+    },
+
+    update: function() {
+        var origin = this.model.node.origin;
+        var u = this.model.node.parameters.u;
+        var v = this.model.node.parameters.v;
+        var w = this.model.node.parameters.w;
+      
+        var pixelPosition = SS.toScreenCoordinates(new THREE.Vector3(this.model.center.x + u/2,
+                                                                     this.model.center.y + v/2,
+                                                                     w/2));
+        this.$uvw.css('left', pixelPosition.x);
+        this.$uvw.css('top', pixelPosition.y);
+    },
+
+});
+
