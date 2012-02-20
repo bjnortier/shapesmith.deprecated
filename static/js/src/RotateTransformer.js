@@ -134,6 +134,23 @@ SS.RotateAxesView = SS.InteractiveSceneView.extend({
             that.sceneObject.add(line);
         });
 
+        if (this.model.transform) {
+
+            var transform = this.model.transform;
+            var origin =transform.origin;
+            var u = transform.parameters.u;
+            var v = transform.parameters.v;
+            var w = transform.parameters.w;
+            var axisVector = new THREE.Vector3(u,v,w).normalize();
+            
+            var axis = new THREE.Geometry();
+            axis.vertices.push(new THREE.Vertex(axisVector.clone().multiplyScalar(1000)));
+            axis.vertices.push(new THREE.Vertex(axisVector.clone().multiplyScalar(-1000)));
+            var line = new THREE.Line(axis, SS.constructors.lineMaterial);  
+            line.position = new THREE.Vector3(origin.x, origin.y, origin.z);
+            this.sceneObject.add(line);
+        }
+
         this.postRender();
     },
 
