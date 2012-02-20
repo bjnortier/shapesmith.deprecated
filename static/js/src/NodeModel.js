@@ -249,7 +249,7 @@ SS.OkCancelView = Backbone.View.extend({
         projScreenMat.multiply(SS.sceneView.camera.projectionMatrix, 
                                SS.sceneView.camera.matrixWorldInverse);
 
-        var pixelPosition = {x:  window.innerWidth/2,
+        var pixelPosition = {x:  window.innerWidth/2 + 10,
                              y: window.innerHeight/2};
         var boundingBox = this.model.getBoundingBox();
         // Nested transforms don't have bounding boxes

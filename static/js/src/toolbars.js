@@ -162,7 +162,7 @@ function create_transform(selected, type) {
     replacement.transforms.push(transform);
     original.originalSceneObjects = original.sceneObjects;
     geom_doc.replace(original, replacement);
-    return {original: original, replacement: replacement, transform: transform};
+    return {originalNode: original, editingNode: replacement, transform: transform};
 }
 
 

@@ -13,7 +13,11 @@ SS.AxisMirrorTransformCreator = SS.TransformCreator.extend({
     },
 
     getBoundingBox: function() {
-        return SS.boundingBoxForGeomNode(this.editingNode);
+        if (!this.attributes.editingExisting) {
+            return SS.boundingBoxForGeomNode(this.editingNode);
+        } else {
+            return undefined;
+        }
     },
 
     mouseDownOnOrigin: function(corner) {

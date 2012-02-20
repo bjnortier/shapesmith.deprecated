@@ -356,6 +356,8 @@ function TreeView() {
                 constructor = SS.ScaleTransformer;
             } else if (transform.type === 'rotate') {
                 constructor = SS.RotateTransformer;
+            } else if (transform.type === 'mirror') {
+                constructor = SS.AxisMirrorTransformCreator;
             }
             new constructor({originalNode: geomNode,
                              editingNode: editingNode, 

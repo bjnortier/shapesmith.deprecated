@@ -110,13 +110,13 @@ SS.TransformCreator = SS.Creator.extend({
 
     initialize: function(attributes) {
         this.node = attributes.transform;
-        this.originalNode = attributes.original;
-        this.editingNode = attributes.replacement;
+        this.originalNode = attributes.originalNode;
+        this.editingNode = attributes.editingNode;
         SS.Creator.prototype.initialize.call(this, attributes);
     },
 
     tryCommit: function() {
-        var cmd = update_geom_command(this.attributes.original, 
+        var cmd = update_geom_command(this.attributes.originalNode, 
                                       this.editingNode,
                                       this.editingNode);
         command_stack.execute(cmd);
