@@ -10,6 +10,10 @@ SS.Triangle2DCreator = SS.PrimitiveCreator.extend({
             new SS.DraggableVertexCorner({model: this, vertexIndex: 0}),
             new SS.DraggableVertexCorner({model: this, vertexIndex: 1}),
             new SS.DraggableVertexCorner({model: this, vertexIndex: 2}), 
+            new SS.VertexDimensionText({model: this, vertexIndex: 0}),
+            new SS.VertexDimensionText({model: this, vertexIndex: 1}),
+            new SS.VertexDimensionText({model: this, vertexIndex: 2}), 
+
         ]);
     },
 
@@ -138,8 +142,8 @@ SS.DraggableVertexCorner = SS.DraggableCorner.extend({
 SS.VertexHeightCursoid = SS.HeightCursoid.extend({
 
      initialize: function(options) {
-	 SS.HeightCursoid.prototype.initialize.call(this);
          this.vertexIndex = options.vertexIndex;
+	 SS.HeightCursoid.prototype.initialize.call(this);
          this.render();
     },
 
@@ -156,6 +160,36 @@ SS.VertexHeightCursoid = SS.HeightCursoid.extend({
         vertex.u = position.x - origin.x;
         vertex.v = position.y - origin.y;
         vertex.w = position.z - origin.z;
+    },
+
+});
+
+
+SS.VertexDimensionText = SS.DimensionText.extend({
+
+    render: function() {
+        this.clear();
+
+        var vertex = this.model.node.parameters.vertices[this.options.vertexIndex];
+        var origin = this.model.node.origin;
+
+        var coordinateString = vertex.u + ',' + vertex.v;
+        if (vertex.w) {
+            coordinateString = coordinateString + ',' + vertex.w;
+        }
+        this.$uvw = this.addElement('<div class="dimension">(' + coordinateString + ')</div>');
+        this.update();
+    },
+
+    update: function() {
+        var vertex = this.model.node.parameters.vertices[this.options.vertexIndex];
+        var origin = this.model.node.origin;
+        
+        var uvPixelPosition = SS.toScreenCoordinates(new THREE.Vector3(origin.x + vertex.u,
+                                                                       origin.y + vertex.v,
+                                                                       origin.z + vertex.w));
+        this.$uvw.css('left', uvPixelPosition.x);
+        this.$uvw.css('top', uvPixelPosition.y + 10);
     },
 
 });
