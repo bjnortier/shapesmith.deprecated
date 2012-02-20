@@ -116,14 +116,14 @@ SS.PrismUVCorner = SS.DraggableCorner.extend({
     },
 
     cornerPositionFromModel: function() {
-        return {x: this.model.center.x + this.model.node.parameters.u,
-                y: this.model.center.y + this.model.node.parameters.v,
-                z: 0};
+        return {x: this.model.node.origin.x + this.model.node.parameters.u,
+                y: this.model.node.origin.y + this.model.node.parameters.v,
+                z: this.model.node.origin.z};
     },
 
     updateModelFromCorner: function(position) {
-        var u = position.x - this.model.center.x;
-        var v = position.y - this.model.center.y;
+        var u = position.x - this.model.node.origin.x;
+        var v = position.y - this.model.node.origin.y;
 
         this.model.node.parameters.u = Math.round(u);
         this.model.node.parameters.v = Math.round(v);
@@ -140,8 +140,8 @@ SS.PrismHeightCursoid = SS.HeightCursoid.extend({
 
     cornerPositionFromModel: function() {
         var parameters = this.model.node.parameters
-        return {x: this.model.center.x + this.model.node.parameters.u,
-                y: this.model.center.y + this.model.node.parameters.v,
+        return {x: this.model.node.origin.x + this.model.node.parameters.u,
+                y: this.model.node.origin.y + this.model.node.parameters.v,
                 z: this.model.node.parameters.w};
     },    
 
@@ -166,8 +166,8 @@ SS.PrismDimensionArrow = SS.SceneObjectView.extend({
         var dim = SS.createDimArrow(u, new THREE.Vector3(u,v,w));
         this.sceneObject.add(dim);
 
-        this.sceneObject.position = new THREE.Vector3(this.model.center.x, 
-                                                      this.model.center.y,
+        this.sceneObject.position = new THREE.Vector3(this.model.node.origin.x, 
+                                                      this.model.node.origin.y,
                                                       0);
 
         this.postRender();
@@ -197,9 +197,9 @@ SS.PrismDimensionText = SS.DimensionText.extend({
         var v = this.model.node.parameters.v;
         var w = this.model.node.parameters.w;
       
-        var pixelPosition = SS.toScreenCoordinates(new THREE.Vector3(this.model.center.x + u/2,
-                                                                     this.model.center.y + v/2,
-                                                                     w/2));
+        var pixelPosition = SS.toScreenCoordinates(new THREE.Vector3(this.model.node.origin.x + u/2,
+                                                                     this.model.node.origin.y + v/2,
+                                                                     this.model.node.origin.z + w/2));
         this.$uvw.css('left', pixelPosition.x);
         this.$uvw.css('top', pixelPosition.y);
     },
