@@ -442,3 +442,7 @@ div#export-options {
     border-radius: 3px;
     padding: 3px;
 }
+
+.dimension.z {
+    color: #993333;
+}

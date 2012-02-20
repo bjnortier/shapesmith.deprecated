@@ -10,8 +10,9 @@ SS.Creator = SS.NodeModel.extend({
         ];
         if (!attributes.noOriginCorner) {
             this.views.push(new SS.DraggableOriginCorner({model: this}));
+            this.views.push(new SS.OriginDimensionText({model: this}));
         }
-
+        
         geom_doc.on('replace', this.geomDocReplace, this);
         geom_doc.on('remove', this.geomDocRemove, this);
     },
@@ -249,6 +250,7 @@ SS.HeightCursoid = SS.InteractiveSceneView.extend({
      initialize: function(options) {
 	 SS.InteractiveSceneView.prototype.initialize.call(this);
          this.on('mouseDrag', this.drag);
+         this.render();
     },
 
     remove: function() {
@@ -311,41 +313,6 @@ SS.HeightCursoid = SS.InteractiveSceneView.extend({
 
 SS.OriginHeightCursoid = SS.HeightCursoid.extend({
 
-    initialize: function(options) {
-	SS.HeightCursoid.prototype.initialize.call(this);
-        SS.sceneView.on('cameraChange', this.update, this);
-        this.render();
-    },
-
-    remove: function() {
-        SS.HeightCursoid.prototype.remove.call(this);
-        SS.sceneView.off('cameraChange', this.update);
-        this.$z && this.$z.remove();
-    },
-
-    render: function() {
-        SS.HeightCursoid.prototype.render.call(this);
-        
-        this.$z && this.$z.remove();
-        var origin = this.model.node.origin;
-        if (origin.z) {
-            this.$z = $('<div class="dimension">' + origin.z + '</div>');
-            $('body').append(this.$z);
-            this.$z.css('position', 'absolute');
-            this.update();
-        }
-        
-    },
-    
-    update: function() {
-        if (this.$z) {
-            var origin = this.model.node.origin;
-            var pixelPosition = this.toScreenCoordinates(new THREE.Vector3(origin.x, origin.y, origin.z/2));
-            this.$z.css('left', pixelPosition.x);
-            this.$z.css('top', pixelPosition.y);
-        }
-    },
-
     cornerPositionFromModel: function() {
         return {x: this.model.node.origin.x,
                 y: this.model.node.origin.y,
@@ -356,6 +323,60 @@ SS.OriginHeightCursoid = SS.HeightCursoid.extend({
         this.model.node.origin.x = position.x;
         this.model.node.origin.y = position.y;
         this.model.node.origin.z = position.z;
+    },
+    
+});
+
+SS.DimensionText = Backbone.View.extend({
+
+    initialize: function(options) {
+	Backbone.View.prototype.initialize.call(this);
+        SS.sceneView.on('cameraChange', this.update, this);
+        this.model.on('change', this.render, this);
+        this.elements = [];
+        this.render();
+    },
+    
+    remove: function() {
+        Backbone.View.prototype.remove.call(this);
+        SS.sceneView.off('cameraChange', this.update);
+    },
+    
+    clear: function() {
+        this.elements.map(function(element) {
+            element.remove();
+        });
+        this.elements = [];
+    },
+
+    addElement: function(html) {
+        var element = $(html);
+        element.css('position', 'absolute');
+        $('body').append(element);
+        this.elements.push(element);
+        return element;
+    },
+    
+});
+                                 
+SS.OriginDimensionText = SS.DimensionText.extend({
+
+    render: function() {
+        this.clear();
+        var origin = this.model.node.origin;
+        if (origin.z) {
+            this.$z = this.addElement('<div class="dimension z">' + origin.z + '</div>');
+        }
+        this.update();
+    },
+    
+    update: function() {
+        if (this.$z) {
+            var origin = this.model.node.origin;
+            var pixelPosition = SS.toScreenCoordinates(new THREE.Vector3(origin.x, origin.y, origin.z/2));
+            this.$z.css('left', pixelPosition.x);
+            this.$z.css('top', pixelPosition.y);
+        }
     },
 
 });

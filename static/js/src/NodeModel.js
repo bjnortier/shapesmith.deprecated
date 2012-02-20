@@ -180,17 +180,6 @@ SS.SceneObjectView = Backbone.View.extend({
         this.model.off('change', this.render);
     },
 
-    toScreenCoordinates: function(worldCoordinates) {
-        var projScreenMat = new THREE.Matrix4();
-        projScreenMat.multiply(SS.sceneView.camera.projectionMatrix, 
-                               SS.sceneView.camera.matrixWorldInverse);
-        projScreenMat.multiplyVector3(worldCoordinates);
-        return {
-            x: window.innerWidth * ((worldCoordinates.x+1)/2),
-            y: window.innerHeight * ((-worldCoordinates.y+1)/2)
-        }
-    },
-
     priority: 0,
 
 });
@@ -313,3 +302,15 @@ SS.OkCancelView = Backbone.View.extend({
     },
 
 });
+
+
+SS.toScreenCoordinates = function(worldCoordinates) {
+    var projScreenMat = new THREE.Matrix4();
+    projScreenMat.multiply(SS.sceneView.camera.projectionMatrix, 
+                           SS.sceneView.camera.matrixWorldInverse);
+    projScreenMat.multiplyVector3(worldCoordinates);
+    return {
+        x: window.innerWidth * ((worldCoordinates.x+1)/2),
+        y: window.innerHeight * ((-worldCoordinates.y+1)/2)
+    }
+}
