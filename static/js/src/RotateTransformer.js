@@ -126,8 +126,8 @@ SS.RotateAxesView = SS.InteractiveSceneView.extend({
         ['x', 'y', 'z'].map(function(key) {
             var lineGeom = new THREE.Geometry();
             var from = that.model.center.clone(), to = that.model.center.clone();
-            from[key] = that.model.boundingBox.min[key] - 10;
-            to[key]   = that.model.boundingBox.max[key] + 10;
+            from[key] = that.model.boundingBox.min[key] - 5;
+            to[key]   = that.model.boundingBox.max[key] + 5;
 
 	    lineGeom.vertices.push(new THREE.Vertex(from), new THREE.Vertex(to));
 	    var line = new THREE.Line(lineGeom, SS.constructors.lineMaterial);
@@ -206,10 +206,10 @@ SS.RotateArrowView = SS.InteractiveSceneView.extend({
     render: function() {
         this.clear();
 
-        var width = 3;
-        var r = 30;
-        var dr = 0.5;
-        var maxAngle = 7;
+        var width = 0.5;
+        var r = 20;
+        var dr = 0.3;
+        var maxAngle = 4;
 
         var outerCurveGeometry = new THREE.Geometry();
         for (var i = -maxAngle; i <= 0; ++i) {
@@ -229,9 +229,9 @@ SS.RotateArrowView = SS.InteractiveSceneView.extend({
 
         var arrowHeadGeometry = new THREE.Geometry();
         arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r+dr)));
-        arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r+dr+1)));
-        arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(3,0,r)));
-        arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r-dr-1)));
+        arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r+dr+width)));
+        arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(1.5,0,r)));
+        arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r-dr-width)));
         arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r-dr)));
 
         var arrowLineGeometry = new THREE.Geometry();
@@ -296,7 +296,7 @@ SS.RotateArrowViewX = SS.RotateArrowView.extend({
 
     anchorFunction: function() {
         return new THREE.Vector3(this.model.center.x,
-                                 this.model.boundingBox.max.y + 10,
+                                 this.model.boundingBox.max.y + 5,
                                  this.model.center.z);
                 
     },
@@ -327,7 +327,7 @@ SS.RotateArrowViewY = SS.RotateArrowView.extend({
     anchorFunction: function() {
         return new THREE.Vector3(this.model.center.x,
                                  this.model.center.y,
-                                 this.model.boundingBox.max.z + 10);
+                                 this.model.boundingBox.max.z + 5);
     },
     
     render: function() {
@@ -350,7 +350,7 @@ SS.RotateArrowViewZ = SS.RotateArrowView.extend({
     },
 
     anchorFunction: function() {
-        return new THREE.Vector3(this.model.boundingBox.max.x + 10,
+        return new THREE.Vector3(this.model.boundingBox.max.x + 5,
                                  this.model.center.y,
                                  this.model.center.z);
     },

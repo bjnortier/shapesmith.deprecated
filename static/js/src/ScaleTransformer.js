@@ -160,11 +160,11 @@ SS.ScaleArrowView = SS.InteractiveSceneView.extend({
 
         var arrowGeometry = new THREE.Geometry();
         var positions = [[0, 0, 0], 
-                         [2, -1.5, 0], [2, -0.5, 0], 
-                         [3, -0.5, 0], [3, -1.5, 0],
-                         [5, 0, 0], 
-                         [3, 1.5, 0], [3, 0.5, 0], 
-                         [2, 0.5, 0], [2, 1.5, 0], 
+                         [1, -0.75, 0], [1, -0.25, 0], 
+                         [1.5, -0.25, 0], [1.5, -0.75, 0],
+                         [2.5, 0, 0], 
+                         [1.5, 0.75, 0], [1.5, 0.25, 0], 
+                         [1, 0.25, 0], [1, 0.75, 0], 
                          [0, 0, 0]];
 
         arrowGeometry.vertices = positions.map(function(coordinates) {
