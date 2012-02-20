@@ -185,7 +185,7 @@ SS.SceneObjectView = Backbone.View.extend({
 });
 
 
-SS.ActiveTransformerView = SS.SceneObjectView.extend({
+SS.InteractiveSceneView = SS.SceneObjectView.extend({
 
     initialize: function() {
 	SS.SceneObjectView.prototype.initialize.call(this);
@@ -221,6 +221,7 @@ SS.ActiveTransformerView = SS.SceneObjectView.extend({
 	this.off('mouseLeave', this.unhighlight);
     },
     
+    priority: 1,
 });
 
 SS.OkCancelView = Backbone.View.extend({

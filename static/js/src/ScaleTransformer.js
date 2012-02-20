@@ -41,8 +41,7 @@ SS.ScaleTransformerInitiator = SS.TransformerInitiator.extend({
                                  editingNode: editingNode, 
                                  transform: transform,
                                  anchorFunction: arrowView.anchorFunction,
-                                 arrowViews: this.arrowViews});
-        this.destroy();
+                                 mouseDownArrowViewIndex: this.arrowViews.indexOf(arrowView)});
     },
 
 });
@@ -61,9 +60,7 @@ SS.ScaleTransformer = SS.Transformer.extend({
                 new SS.ScaleArrowViewMinXMinY({model: this}),
                 new SS.ScaleArrowViewMinXMaxY({model: this}),
 	    ];
-            for (var i = 0; i < 4; ++i) {
-                SS.sceneView.replaceSceneObjectViewInMouseState(attributes.arrowViews[i], arrowViews[i]);
-            }
+            SS.sceneView.addToMouseOverAndMouseDown(arrowViews[attributes.mouseDownArrowViewIndex]);
 
             var newViews = [
                 new SS.ScaleGeomNodeView({model: this}),
@@ -140,16 +137,16 @@ SS.ScaleFactorView = SS.SceneObjectView.extend({
 
 });
 
-SS.ScaleArrowView = SS.ActiveTransformerView.extend({
+SS.ScaleArrowView = SS.InteractiveSceneView.extend({
     
     initialize: function() {
-	SS.ActiveTransformerView.prototype.initialize.call(this);
+	SS.InteractiveSceneView.prototype.initialize.call(this);
         this.on('mouseDown', this.mouseDown, this);
         this.on('mouseDrag', this.drag);
     },
 
     remove: function() {
-        SS.ActiveTransformerView.prototype.remove.call(this);
+        SS.InteractiveSceneView.prototype.remove.call(this);
         this.model.off('mouseDown', this.mouseDownOnArrow);
         this.off('mouseDrag', this.drag);
     },

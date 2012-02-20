@@ -129,16 +129,16 @@ SS.PreviewWithOrigin = SS.SceneObjectView.extend({
 
 });
 
-SS.DraggableCorner = SS.ActiveTransformerView.extend({
+SS.DraggableCorner = SS.InteractiveSceneView.extend({
 
      initialize: function(options) {
-	 SS.ActiveTransformerView.prototype.initialize.call(this);
+	 SS.InteractiveSceneView.prototype.initialize.call(this);
          this.on('mouseDown', this.mouseDown, this);
          this.on('mouseDrag', this.drag);
     },
 
     remove: function() {
-        SS.ActiveTransformerView.prototype.remove.call(this);
+        SS.InteractiveSceneView.prototype.remove.call(this);
         this.model.off('mouseDown', this.mouseDown);
         this.off('mouseDrag', this.drag);
     },
@@ -201,15 +201,15 @@ SS.DraggableOriginCorner = SS.DraggableCorner.extend({
 
 });
 
-SS.HeightCursoid = SS.ActiveTransformerView.extend({
+SS.HeightCursoid = SS.InteractiveSceneView.extend({
 
      initialize: function(options) {
-	 SS.ActiveTransformerView.prototype.initialize.call(this);
+	 SS.InteractiveSceneView.prototype.initialize.call(this);
          this.on('mouseDrag', this.drag);
     },
 
     remove: function() {
-        SS.ActiveTransformerView.prototype.remove.call(this);
+        SS.InteractiveSceneView.prototype.remove.call(this);
         this.off('mouseDrag', this.drag);
     },
 

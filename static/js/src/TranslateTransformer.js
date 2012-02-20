@@ -25,6 +25,7 @@ SS.TranslateTransformerInitiator = SS.TransformerInitiator.extend({
                          w: 0.0,
                          n: 0}
         });
+
         editingNode.transforms.push(transform);
         geomNode.originalSceneObjects = geomNode.sceneObjects;
 
@@ -33,9 +34,7 @@ SS.TranslateTransformerInitiator = SS.TransformerInitiator.extend({
 
         new SS.TranslateTransformer({originalNode: geomNode,
                                      editingNode: editingNode, 
-                                     transform: transform,
-                                     translateView: this.translateView});
-        this.destroy();
+                                     transform: transform});
     },
 
 });
@@ -47,12 +46,10 @@ SS.TranslateTransformer = SS.Transformer.extend({
 
         if (!attributes.editingExisting) {
             this.translateView = new SS.TranslateTransformerView({model: this});
-            this.views.push(this.translateView);
-            if (attributes.translateView) {
-                SS.sceneView.replaceSceneObjectViewInMouseState(attributes.translateView,  this.translateView);
-            }
+            SS.sceneView.addToMouseOverAndMouseDown(this.translateView);
             
             this.views = this.views.concat([
+                this.translateView,
                 new SS.TranslateGeomNodeView({model: this}),
                 new SS.ScaleBoxView({model: this}),
                 new SS.ScaleFootprintView({model: this}),
@@ -63,13 +60,14 @@ SS.TranslateTransformer = SS.Transformer.extend({
 
 });
 
-SS.TranslateTransformerView = SS.ActiveTransformerView.extend({
+SS.TranslateTransformerView = SS.InteractiveSceneView.extend({
     
     initialize: function() {
-	SS.ActiveTransformerView.prototype.initialize.call(this);
+	SS.InteractiveSceneView.prototype.initialize.call(this);
         this.on('mouseDown', this.mouseDown, this);
         this.on('mouseDrag', this.drag);
         this.render();
+        console.log('Translate cid: ' + this.cid);
     },
 
     mouseDown: function() {
@@ -77,7 +75,7 @@ SS.TranslateTransformerView = SS.ActiveTransformerView.extend({
     },
 
     remove: function() {
-        SS.ActiveTransformerView.prototype.remove.call(this);
+        SS.InteractiveSceneView.prototype.remove.call(this);
         this.model.off('mouseDown', this.mouseDown);
         this.off('mouseDrag', this.drag);
     },

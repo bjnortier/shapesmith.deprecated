@@ -427,14 +427,14 @@ SS.SceneView = function(container) {
     var sceneObjectViews = [];
     var mouseOverSceneObjectViews = [];
     var mouseDownSceneObjectViews = [];
+    var sortByPriority = function(a,b) {
+        return a.priority < b.priority;
+    };
 
-    this.replaceSceneObjectViewInMouseState = function(oldView, newView) {
+    this.addToMouseOverAndMouseDown = function(view) {
         [mouseOverSceneObjectViews, mouseDownSceneObjectViews].map(function(array) {
-            var index = array.indexOf(oldView);
-            if (index !== -1) {
-                array.splice(index, 1);
-                array.push(newView);
-            }
+            array.push(view);
+            array = array.sort(sortByPriority);
         });
     }
 
@@ -443,14 +443,12 @@ SS.SceneView = function(container) {
     }
 
     this.deregisterSceneObjectView = function(sceneObjectView) {
-        var index1 = sceneObjectViews.indexOf(sceneObjectView);
-        if (index1 !== -1) {
-	    sceneObjectViews.splice(index1, 1);
-        }
-        var index2 = mouseOverSceneObjectViews.indexOf(sceneObjectView);
-        if (index2 !== -1) {
-	    mouseOverSceneObjectViews.splice(index2, 1);
-        }
+        [sceneObjectViews, mouseOverSceneObjectViews, mouseDownSceneObjectViews].map(function(array) {
+            var index = array.indexOf(sceneObjectView);
+            if (index !== -1) {
+	        array.splice(index, 1);
+            }
+        });
     }
 
     var findSceneObjectViewsForEvent = function(event) {
@@ -476,9 +474,7 @@ SS.SceneView = function(container) {
 	    });
 	});
         
-        return foundSceneObjectViews.sort(function(a,b) {
-            return a.priority < b.priority;
-        });
+        return foundSceneObjectViews.sort(sortByPriority);
  
     }
 

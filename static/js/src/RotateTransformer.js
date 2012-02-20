@@ -46,7 +46,7 @@ SS.RotateTransformerInitiator = SS.TransformerInitiator.extend({
                                   transform: transform,
                                   anchorPosition: arrowView.anchorFunction(),
                                   rotationPlane: arrowView.rotationPlane,
-                                  arrowViews: this.arrowViews});
+                                  mouseDownArrowViewIndex: this.arrowViews.indexOf(arrowView)});
         this.destroy();
     },
 
@@ -65,9 +65,7 @@ SS.RotateTransformer = SS.Transformer.extend({
                 new SS.RotateArrowViewY({model: this}),
                 new SS.RotateArrowViewZ({model: this}),
 	    ];
-            for (var i = 0; i < 3; ++i) {
-                SS.sceneView.replaceSceneObjectViewInMouseState(attributes.arrowViews[i], arrowViews[i]);
-            }
+            SS.sceneView.addToMouseOverAndMouseDown(arrowViews[attributes.mouseDownArrowViewIndex]);
 
             var newViews = [
                 new SS.RotateGeomNodeView({model: this}),
@@ -114,10 +112,10 @@ SS.RotateGeomNodeView = Backbone.View.extend({
 
 });
 
-SS.RotateAxesView = SS.ActiveTransformerView.extend({
+SS.RotateAxesView = SS.InteractiveSceneView.extend({
 
     initialize: function() {
-        SS.ActiveTransformerView.prototype.initialize.call(this);
+        SS.InteractiveSceneView.prototype.initialize.call(this);
         this.render();
     },
 
@@ -141,10 +139,10 @@ SS.RotateAxesView = SS.ActiveTransformerView.extend({
 
 });
 
-SS.RotateArrowView = SS.ActiveTransformerView.extend({
+SS.RotateArrowView = SS.InteractiveSceneView.extend({
 
     initialize: function() {
-	SS.ActiveTransformerView.prototype.initialize.call(this);
+	SS.InteractiveSceneView.prototype.initialize.call(this);
         this.on('mouseDown', this.mouseDown, this);
 
         this.rotationPlane = new THREE.Mesh(
@@ -159,7 +157,7 @@ SS.RotateArrowView = SS.ActiveTransformerView.extend({
     },
 
     remove: function() {
-        SS.ActiveTransformerView.prototype.remove.call(this);
+        SS.InteractiveSceneView.prototype.remove.call(this);
         this.off('mouseDown', this.mouseDown);
         this.off('mouseDrag', this.drag);
         SS.sceneView.scene.remove(this.rotationPlane);

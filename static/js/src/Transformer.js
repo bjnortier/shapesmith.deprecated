@@ -23,7 +23,6 @@ SS.TransformerInitiator = Backbone.Model.extend({
     deselected: function(deselected) {
         if ((deselected.length === 1) &&
             (deselected[0] === this.geomNode.id)) {
-            
             this.destroy();
         }
     },
