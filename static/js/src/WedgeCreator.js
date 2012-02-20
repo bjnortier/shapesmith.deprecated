@@ -1,9 +1,9 @@
 var SS = SS || {};
 
-SS.WedgeCreator = SS.Creator.extend({
+SS.WedgeCreator = SS.PrimitiveCreator.extend({
 
     initialize: function(attributes) {
-        SS.Creator.prototype.initialize.call(this, attributes);
+        SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
         this.node.parameters.u1 = 10;
         this.node.parameters.u2 = 5;

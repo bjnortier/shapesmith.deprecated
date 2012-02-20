@@ -68,7 +68,6 @@ SS.TranslateTransformerView = SS.InteractiveSceneView.extend({
         this.on('mouseDown', this.mouseDown, this);
         this.on('mouseDrag', this.drag);
         this.render();
-        console.log('Translate cid: ' + this.cid);
     },
 
     mouseDown: function() {

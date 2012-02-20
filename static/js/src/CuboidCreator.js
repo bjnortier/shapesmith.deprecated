@@ -102,7 +102,6 @@ SS.DraggableUVCorner = SS.DraggableCorner.extend({
     updateModelFromCorner: function(position) {
         var u = position.x - this.model.node.origin.x;
         var v = position.y - this.model.node.origin.y;
-        var w = position.z - this.model.node.origin.z;
 
         this.model.node.parameters[this.uKey] = Math.round(u);
         this.model.node.parameters[this.vKey] = Math.round(v);

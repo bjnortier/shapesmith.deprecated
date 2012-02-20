@@ -1,9 +1,9 @@
 var SS = SS || {};
 
-SS.Text2DCreator = SS.Creator.extend({
+SS.Text2DCreator = SS.PrimitiveCreator.extend({
 
     initialize: function(attributes) {
-        SS.Creator.prototype.initialize.call(this, attributes);
+        SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
         this.node.parameters.text = 'Abc';
         this.node.parameters.font = 'DroidSerif';

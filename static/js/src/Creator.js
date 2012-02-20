@@ -8,8 +8,10 @@ SS.Creator = SS.NodeModel.extend({
         this.views = [
             new SS.NodeDOMView({model: this}),
             new SS.OkCancelView({model: this}),
-            new SS.DraggableOriginCorner({model: this}),
         ];
+        if (!attributes.noOriginCorner) {
+            this.views.push(new SS.DraggableOriginCorner({model: this}));
+        }
 
         geom_doc.on('replace', this.geomDocReplace, this);
         geom_doc.on('remove', this.geomDocRemove, this);
@@ -80,6 +82,28 @@ SS.PrimitiveCreator = SS.Creator.extend({
         geom_doc.remove(this.editingNode); 
     },
 
+});
+
+SS.ParentCreator = SS.Creator.extend({
+
+    initialize: function(attributes) {
+        this.node = attributes.editingNode;
+        this.childNode = attributes.childNode;
+        this.editingNode = attributes.editingNode;
+        SS.Creator.prototype.initialize.call(this, attributes);
+    },
+
+    tryCommit: function() {
+        var cmd = update_geom_command(this.childNode, 
+                                      this.editingNode,
+                                      this.editingNode);
+        command_stack.execute(cmd);
+    },
+
+    cancel: function() {
+        this.destroy();
+        geom_doc.replace(this.editingNode, this.childNode); 
+    },
 });
 
 SS.TransformCreator = SS.Creator.extend({

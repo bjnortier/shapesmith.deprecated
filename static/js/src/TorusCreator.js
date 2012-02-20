@@ -1,9 +1,9 @@
 var SS = SS || {};
 
-SS.TorusCreator = SS.Creator.extend({
+SS.TorusCreator = SS.PrimitiveCreator.extend({
 
     initialize: function(attributes) {
-        SS.Creator.prototype.initialize.call(this, attributes);
+        SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
         this.node.parameters.r1 = 20;
         this.node.parameters.r2 = 5;

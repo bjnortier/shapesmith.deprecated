@@ -1,9 +1,9 @@
 var SS = SS || {};
 
-SS.CylinderCreator = SS.Creator.extend({
+SS.CylinderCreator = SS.PrimitiveCreator.extend({
 
     initialize: function(attributes) {
-        SS.Creator.prototype.initialize.call(this, attributes);
+        SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
         this.node.parameters.r = 10;
         this.node.parameters.h = 10;

@@ -1,9 +1,9 @@
 var SS = SS || {};
 
-SS.Rectangle2DCreator = SS.Creator.extend({
+SS.Rectangle2DCreator = SS.PrimitiveCreator.extend({
 
     initialize: function(attributes) {
-        SS.Creator.prototype.initialize.call(this, attributes);
+        SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
         this.node.parameters.u = 10;
         this.node.parameters.v = 10;

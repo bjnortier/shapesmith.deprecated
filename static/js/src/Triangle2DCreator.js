@@ -1,9 +1,9 @@
 var SS = SS || {};
 
-SS.Triangle2DCreator = SS.Creator.extend({
+SS.Triangle2DCreator = SS.PrimitiveCreator.extend({
 
     initialize: function(attributes) {
-        SS.Creator.prototype.initialize.call(this, attributes);
+        SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
         this.node.parameters.vertices.map(function(vertex) {
             vertex.u = 10;

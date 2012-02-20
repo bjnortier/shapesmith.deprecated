@@ -117,16 +117,16 @@ function create_modifier(selected, type) {
     for (var key in jsonSchema.properties.parameters.properties) {
         geometryParams[key] = null;
     }
-    modifierNode = new GeomNode({
+    var parentNode = new GeomNode({
         type: type,
         editing: true,
 	origin: {x: 0, y: 0, z: 0},
         parameters: geometryParams
     }, [original]);
                                 
-    geom_doc.replace(original, modifierNode);
+    geom_doc.replace(original, parentNode);
 
-    return modifierNode;
+    return {childNode: original, editingNode: parentNode};
 }
 
 function create_transform(selected, type) {
@@ -223,11 +223,6 @@ $(document).ready(function() {
                function() { 
                    new SS.Text2DCreator({editingNode: create_primitive('text2d')});
 	       }).render($('#2Dprimitives'));
-
-    /*new Action('Ellipse 1D', '/static/images/ellipse1d.png', 
-               function() { 
-                   SS.constructors.createEllipse1d(create_primitive('ellipse1d',  ['r1', 'r2']));
-	       }).render($('#1Dprimitives'));*/
     
     //
     // Booleans
@@ -246,12 +241,12 @@ $(document).ready(function() {
     //
     new Action('Prism', '/static/images/prism.png', 
                function(selected) { 
-                   SS.constructors.createPrism(create_modifier(selected, 'prism'));
+                   new SS.PrismCreator(create_modifier(selected, 'prism'));
                }).render($('#modifiers'));
     
-    /*
-     * Transformations
-     */
+    //
+    // Transformations
+    //
     new Action('Mirror', '/static/images/mirror.png', 
                function(selected) { 
                    var originalReplacementAndTransform = create_transform(selected, 'mirror');

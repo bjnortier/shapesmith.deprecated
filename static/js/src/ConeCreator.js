@@ -1,9 +1,9 @@
 var SS = SS || {};
 
-SS.ConeCreator = SS.Creator.extend({
+SS.ConeCreator = SS.PrimitiveCreator.extend({
 
     initialize: function(attributes) {
-        SS.Creator.prototype.initialize.call(this, attributes);
+        SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
         this.node.parameters.r1 = 10;
         this.node.parameters.r2 = 0;
