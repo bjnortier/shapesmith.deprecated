@@ -74,6 +74,7 @@ SS.creators.ellipse2d = SS.Ellipse2DCreator;
 SS.creators.rectangle2d = SS.Rectangle2DCreator;
 SS.creators.triangle2d = SS.Triangle2DCreator;
 SS.creators.text2d = SS.Text2DCreator;
+SS.creators.prism = SS.PrismCreator;
 
 function create_primitive(type) {
 

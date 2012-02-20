@@ -4,7 +4,6 @@ SS.Creator = SS.NodeModel.extend({
 
     initialize: function(attributes) {
 
-
         this.views = [
             new SS.NodeDOMView({model: this}),
             new SS.OkCancelView({model: this}),
@@ -96,21 +95,33 @@ SS.ParentCreator = SS.Creator.extend({
 
     initialize: function(attributes) {
         this.node = attributes.editingNode;
-        this.childNode = attributes.childNode;
+        this.childNode = attributes.editingNode.children[0];
         this.editingNode = attributes.editingNode;
+        this.originalNode = attributes.originalNode;
         SS.Creator.prototype.initialize.call(this, attributes);
     },
 
     tryCommit: function() {
-        var cmd = update_geom_command(this.childNode, 
-                                      this.editingNode,
-                                      this.editingNode);
-        command_stack.execute(cmd);
+        if (this.originalNode) {
+            var cmd = update_geom_command(this.originalNode, 
+                                          this.editingNode,
+                                          this.editingNode);
+            command_stack.execute(cmd);
+        } else {
+            var cmd = update_geom_command(this.childNode, 
+                                          this.editingNode,
+                                          this.editingNode);
+            command_stack.execute(cmd);
+        }
     },
 
     cancel: function() {
         this.destroy();
-        geom_doc.replace(this.editingNode, this.childNode); 
+        if (this.originalNode) {
+            geom_doc.replace(this.editingNode, this.originalNode);
+        } else {
+            geom_doc.replace(this.editingNode, this.childNode); 
+        }
     },
 });
 

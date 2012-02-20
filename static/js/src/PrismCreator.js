@@ -4,15 +4,20 @@ SS.PrismCreator = SS.ParentCreator.extend({
     
     initialize: function(attributes) { 
         attributes.noOriginCorner = true;
-        SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
-        this.childNode = attributes.childNode;
+        SS.ParentCreator.prototype.initialize.call(this, attributes);
         
         this.node.parameters.u = 0;
         this.node.parameters.v = 0;
         this.node.parameters.w = 10;
 
-        this.views.push(new SS.PrismGeomNodeView({model: this}));
-        this.trigger('change:model', this);
+        // Editing - use the existing object
+        if (this.originalNode) {
+            this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
+            this.center = SS.centerOfGeom(this.boundingBox);
+        } else {
+            this.views.push(new SS.PrismGeomNodeView({model: this}));
+            this.trigger('change:model', this);
+        }
 
         this.views.push(new SS.PrismUVCorner({model: this}));
         this.views.push(new SS.PrismHeightCursoid({model: this}));
