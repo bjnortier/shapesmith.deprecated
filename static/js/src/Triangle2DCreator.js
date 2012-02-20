@@ -5,6 +5,15 @@ SS.Triangle2DCreator = SS.PrimitiveCreator.extend({
     initialize: function(attributes) {
         SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
+        this.views = this.views.concat([
+            new SS.Triangle2DPreview({model: this}),
+            new SS.DraggableVertexCorner({model: this, vertexIndex: 0}),
+            new SS.DraggableVertexCorner({model: this, vertexIndex: 1}),
+            new SS.DraggableVertexCorner({model: this, vertexIndex: 2}), 
+        ]);
+    },
+
+    setDefaultParamters: function() {
         this.node.parameters.vertices.map(function(vertex) {
             vertex.u = 10;
             vertex.v = 10;
@@ -12,13 +21,6 @@ SS.Triangle2DCreator = SS.PrimitiveCreator.extend({
         });
         this.node.parameters.vertices[1].u = 0;
         this.node.parameters.vertices[2].v = 0;
-
-        this.views = this.views.concat([
-            new SS.Triangle2DPreview({model: this}),
-            new SS.DraggableVertexCorner({model: this, vertexIndex: 0}),
-            new SS.DraggableVertexCorner({model: this, vertexIndex: 1}),
-            new SS.DraggableVertexCorner({model: this, vertexIndex: 2}), 
-        ]);
     },
 
     mouseDownOnCorner: function(corner) {

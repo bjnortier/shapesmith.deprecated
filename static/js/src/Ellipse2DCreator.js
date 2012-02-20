@@ -5,14 +5,16 @@ SS.Ellipse2DCreator = SS.PrimitiveCreator.extend({
     initialize: function(attributes) {
         SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
-        this.node.parameters.r1 = 20;
-        this.node.parameters.r2 = 10;
-
         this.views = this.views.concat([
             new SS.Ellipse2DPreview({model: this}),
             new SS.DraggableUVCorner({model: this, uKey: 'r1', vKey: 'r2'}),
         ]);
         this.trigger('change', this);
+    },
+
+    setDefaultParamters: function() {
+        this.node.parameters.r1 = 20;
+        this.node.parameters.r2 = 10;
     },
 
     mouseDownOnUV: function(corner) {

@@ -5,10 +5,6 @@ SS.CylinderCreator = SS.PrimitiveCreator.extend({
     initialize: function(attributes) {
         SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
-        this.node.parameters.r = 10;
-        this.node.parameters.h = 10;
-        this.node.extra = {angle: 0};
-
         this.views = this.views.concat([
             new SS.CylinderPreview({model: this}),
             new SS.DraggableRadiusCorner({model: this}),
@@ -16,6 +12,12 @@ SS.CylinderCreator = SS.PrimitiveCreator.extend({
             new SS.CylinderDimensionText({model: this}),
         ]);
         this.trigger('change', this);
+    },
+    
+    setDefaultParamters: function() {
+        this.node.parameters.r = 10;
+        this.node.parameters.h = 10;
+        this.node.extra = {angle: 0};
     },
 
     mouseDownOnRadius: function(corner) {

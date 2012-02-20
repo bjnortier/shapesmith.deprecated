@@ -6,9 +6,11 @@ SS.PrismCreator = SS.ParentCreator.extend({
         attributes.noOriginCorner = true;
         SS.ParentCreator.prototype.initialize.call(this, attributes);
         
-        this.node.parameters.u = 0;
-        this.node.parameters.v = 0;
-        this.node.parameters.w = 10;
+        if (!this.originalNode) {
+            this.node.parameters.u = 0;
+            this.node.parameters.v = 0;
+            this.node.parameters.w = 10;
+        }
 
         // Editing - use the existing object
         if (this.originalNode) {
@@ -24,6 +26,8 @@ SS.PrismCreator = SS.ParentCreator.extend({
         this.trigger('change', this);
     },
 
+    
+    
     mouseDownOnUV: function(corner) {
     },
 

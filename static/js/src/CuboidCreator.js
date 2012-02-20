@@ -4,11 +4,7 @@ SS.CuboidCreator = SS.PrimitiveCreator.extend({
 
     initialize: function(attributes) {
         SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
-
-        this.node.parameters.u = 10;
-        this.node.parameters.v = 10;
-        this.node.parameters.w = 10;
-
+        
         this.views = this.views.concat([
             new SS.CuboidPreview({model: this}),
             new SS.DraggableUVCorner({model: this}),
@@ -17,7 +13,13 @@ SS.CuboidCreator = SS.PrimitiveCreator.extend({
         ]);
         this.trigger('change', this);
     },
-
+    
+    setDefaultParamters: function() {
+        this.node.parameters.u = 10;
+        this.node.parameters.v = 10;
+        this.node.parameters.w = 10;
+    },
+    
     mouseDownOnUV: function(corner) {
         this.activateCorner(corner, SS.UVWHeightCursoid);
     },

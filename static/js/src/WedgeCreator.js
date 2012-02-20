@@ -5,11 +5,6 @@ SS.WedgeCreator = SS.PrimitiveCreator.extend({
     initialize: function(attributes) {
         SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
-        this.node.parameters.u1 = 10;
-        this.node.parameters.u2 = 5;
-        this.node.parameters.v = 10;
-        this.node.parameters.w = 10;
-
         this.views = this.views.concat([
             new SS.WedgePreview({model: this}),
             new SS.DraggableUVCorner({model: this, uKey: 'u2'}),
@@ -18,6 +13,13 @@ SS.WedgeCreator = SS.PrimitiveCreator.extend({
             new SS.WedgeDimensionText({model: this}),
         ]);
         this.trigger('change', this);
+    },
+
+    setDefaultParamters: function() {
+        this.node.parameters.u1 = 10;
+        this.node.parameters.u2 = 5;
+        this.node.parameters.v = 10;
+        this.node.parameters.w = 10;
     },
 
     mouseDownOnUV: function(corner) {

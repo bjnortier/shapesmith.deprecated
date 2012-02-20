@@ -5,14 +5,16 @@ SS.Text2DCreator = SS.PrimitiveCreator.extend({
     initialize: function(attributes) {
         SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
-        this.node.parameters.text = 'Abc';
-        this.node.parameters.font = 'DroidSerif';
-
         this.textPreview = new SS.Text2DPreview({model: this});
         this.views = this.views.concat([
             this.textPreview
         ]);
         this.trigger('change', this);
+    },
+
+    setDefaultParamters: function() {
+        this.node.parameters.text = 'Abc';
+        this.node.parameters.font = 'DroidSerif';
     },
 
     mouseDownOnUV: function(corner) {

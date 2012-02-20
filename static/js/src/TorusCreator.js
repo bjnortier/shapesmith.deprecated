@@ -5,16 +5,18 @@ SS.TorusCreator = SS.PrimitiveCreator.extend({
     initialize: function(attributes) {
         SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
-        this.node.parameters.r1 = 20;
-        this.node.parameters.r2 = 5;
-        this.node.extra = {angle: 0};
-
         this.views = this.views.concat([
             new SS.TorusPreview({model: this}),
             new SS.DraggableRadiusCorner({model: this, key: 'r1'}),
             new SS.TorusR2Corner({model: this}),
         ]);
         this.trigger('change', this);
+    },
+    
+    setDefaultParamters: function() {
+        this.node.parameters.r1 = 20;
+        this.node.parameters.r2 = 5;
+        this.node.extra = {angle: 0};
     },
 
     mouseDownOnRadius: function(corner) {

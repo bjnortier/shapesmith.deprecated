@@ -65,6 +65,10 @@ SS.PrimitiveCreator = SS.Creator.extend({
         this.editingNode = attributes.editingNode;
         this.originalNode = attributes.originalNode;
         SS.Creator.prototype.initialize.call(this, attributes);
+
+        if (!this.originalNode) {
+            this.setDefaultParamters();
+        }
     },
 
     tryCommit: function() {

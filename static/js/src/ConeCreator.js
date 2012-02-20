@@ -19,6 +19,13 @@ SS.ConeCreator = SS.PrimitiveCreator.extend({
         this.trigger('change', this);
     },
 
+    setDefaultParamters: function() {
+        this.node.parameters.r1 = 10;
+        this.node.parameters.r2 = 0;
+        this.node.parameters.h = 10;
+        this.node.extra = {angle: 0};
+    },
+
     mouseDownOnRadius: function(corner) {
         this.activateCorner(corner, SS.RadiusHeightCursoid, {model: this, key: 'r1'});
     },

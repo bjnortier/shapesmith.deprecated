@@ -5,14 +5,16 @@ SS.Rectangle2DCreator = SS.PrimitiveCreator.extend({
     initialize: function(attributes) {
         SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
-        this.node.parameters.u = 10;
-        this.node.parameters.v = 10;
-
         this.views = this.views.concat([
             new SS.Rectangle2DPreview({model: this}),
             new SS.DraggableUVCorner({model: this}),
         ]);
         this.trigger('change', this);
+    },
+
+    setDefaultParamters: function() {
+        this.node.parameters.u = 10;
+        this.node.parameters.v = 10;
     },
 
     mouseDownOnUV: function(corner) {
