@@ -183,8 +183,8 @@ SS.workplane.grid = function(spec) {
 	    });
 	    var text = new THREE.Mesh( textGeo, textMaterial );
 	    text.position.y = gridExtents.maxY + 3;
-	    text.position.x = x*10 + text.boundRadius/2;
-	    text.rotation.z = Math.PI;
+	    text.position.x = x*10 - text.boundRadius/2 + 0.25;
+	    //text.rotation.z = -Math.PI;
 	    scene.add(text);
 	}
 
@@ -200,9 +200,9 @@ SS.workplane.grid = function(spec) {
 	    });
 	    var text = new THREE.Mesh( textGeo, textMaterial );
             
-	    text.position.y = y*10 - text.boundRadius/2;
+	    text.position.y = y*10 - 1;
 	    text.position.x = gridExtents.maxX + 3;
-	    text.rotation.z = Math.PI/2;
+	    //text.rotation.z = Math.PI/2;
 	    scene.add(text);
 	}
     }
