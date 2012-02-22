@@ -52,8 +52,6 @@ SS.TranslateTransformer = SS.Transformer.extend({
                 this.translateView,
                 new SS.TranslateHeightCursoid({model: this}),
                 new SS.TranslateGeomNodeView({model: this}),
-                new SS.ScaleBoxView({model: this}),
-                new SS.ScaleFootprintView({model: this}),
                 new SS.TranslateDimensionArrows({model: this}),
                 new SS.TranslateDimensionText({model: this}),
             ]);
