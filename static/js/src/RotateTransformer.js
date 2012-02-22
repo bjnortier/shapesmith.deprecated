@@ -71,6 +71,7 @@ SS.RotateTransformer = SS.Transformer.extend({
                 new SS.RotateGeomNodeView({model: this}),
                 new SS.RotateAxesView({model: this}),
                 new SS.RotateAngleView({model: this}),
+                new SS.RotationAngleText({model: this}),
             ];
 
             this.views = this.views.concat(newViews);
@@ -409,7 +410,7 @@ SS.RotateAngleView = SS.SceneObjectView.extend({
         angleGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,0)));
 
         var r = new THREE.Vector3().sub(this.model.anchorPosition, 
-                                        this.model.center).length()
+                                        this.model.center).length();
 
         var angle = this.model.transform.parameters.angle || 0;
         for (var i = 0; 
@@ -431,24 +432,7 @@ SS.RotateAngleView = SS.SceneObjectView.extend({
         line.position.z = -r;
         rotationAngle.add(line);
 
-        var textGeo = new THREE.TextGeometry('' + angle, {
-	    size: 2, height: 0.01, curveSegments: 6,
-	    font: 'helvetiker', weight: 'normal', style: 'normal',
-	    bezelEnabled: false});
-        var text = new THREE.Mesh(textGeo, 
-                                  new THREE.MeshBasicMaterial({color: 0xffffff, 
-                                                               opacity: 0.8}));
 
-        text.position.z = (r+3)*Math.cos(angle/180*Math.PI) - r;
-        text.position.x = (r+3)*Math.sin(angle/180*Math.PI);
-        if (this.model.transform.parameters.v > 0) {
-            text.rotation.z = Math.PI;
-        }
-        if (this.model.transform.parameters.u > 0) {
-            text.rotation.z = -Math.PI/2;
-        }
-        text.rotation.x = -Math.PI/2;
-        rotationAngle.add(text);
 
         this.sceneObject.add(rotationAngle);
 
@@ -465,6 +449,49 @@ SS.RotateAngleView = SS.SceneObjectView.extend({
         }
 
         this.postRender();
+    },
+
+});
+
+SS.RotationAngleText = SS.DimensionText.extend({
+
+    render: function() {
+        this.clear();
+        var angle = this.model.transform.parameters.angle;
+        this.$angle = this.addElement('<div class="dimension">' + angle + '</div>');
+        this.update();
+    },
+
+    update: function() {
+        var angle = this.model.transform.parameters.angle;
+        var axis = new THREE.Vector3(this.model.transform.parameters.u,
+                                     this.model.transform.parameters.v,
+                                     this.model.transform.parameters.w).normalize();
+        var un = axis.x, vn = axis.y, wn = axis.z;
+
+        var anchorVector = new THREE.Vector3().sub(this.model.anchorPosition,
+                                               this.model.center);
+        var r = anchorVector.length();
+        var position = anchorVector.normalize().clone();
+        position.multiplyScalar(r+2);
+
+        var a = (un*position.x + vn*position.y + wn*position.z);
+        var x2 = a*un + (position.x - a*un)*Math.cos(angle/180*Math.PI) 
+            + (vn*position.z - wn*position.y)*Math.sin(angle/180*Math.PI);
+        var y2 = a*vn + (position.y - a*vn)*Math.cos(angle/180*Math.PI) 
+            + (wn*position.x - un*position.z)*Math.sin(angle/180*Math.PI);
+        var z2 = a*wn + (position.z - a*wn)*Math.cos(angle/180*Math.PI) 
+            + (un*position.y - vn*position.x)*Math.sin(angle/180*Math.PI);
+        
+	var newPosition = new THREE.Vector3(this.model.center.x + x2, 
+                                            this.model.center.y + y2, 
+                                            this.model.center.z + z2);
+        
+        var pixelPosition = SS.toScreenCoordinates(newPosition);
+            
+        this.$angle.css('left', pixelPosition.x);
+        this.$angle.css('top', pixelPosition.y);
+
     },
 
 });
