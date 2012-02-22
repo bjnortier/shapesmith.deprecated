@@ -64,7 +64,7 @@ SS.ScaleTransformer = SS.Transformer.extend({
 
             var newViews = [
                 new SS.ScaleGeomNodeView({model: this}),
-                new SS.ScaleFactorView({model: this}),
+                new SS.ScaleFactorText({model: this}),
                 new SS.ScaleBoxView({model: this}),
                 new SS.ScaleFootprintView({model: this}),
             ];
@@ -100,39 +100,6 @@ SS.ScaleGeomNodeView = Backbone.View.extend({
                                   this.model.editingNode, 
                                   scalePoint, 
                                   this.model.transform.parameters.factor);
-    },
-
-});
-
-SS.ScaleFactorView = SS.SceneObjectView.extend({
-
-    initialize: function() {
-        SS.SceneObjectView.prototype.initialize.call(this);
-        this.render();
-    },
-    
-    render: function() {
-        this.clear();
-        
-        var factor = this.model.transform.parameters.factor;
-        if (factor && (factor > 0)) {
-            var textGeo = new THREE.TextGeometry('' + factor, {
-	        size: 2, height: 0.01, curveSegments: 6,
-	        font: 'helvetiker', weight: 'normal', style: 'normal',
-	        bezelEnabled: false});
-            var text = new THREE.Mesh(textGeo, 
-                                      new THREE.MeshBasicMaterial({color: 0xffffff, 
-                                                                   opacity: 0.8}));
-            
-            var boundingBox = SS.boundingBoxForGeomNode(this.model.editingNode);
-            var center = SS.centerOfGeom(boundingBox);
-            text.position.y = center.y - text.boundRadius/2;
-            text.position.x = boundingBox.max.x + 5;
-            text.rotation.z = Math.PI/2; 
-            this.sceneObject.add(text);
-        }
-
-        this.postRender();
     },
 
 });
@@ -376,6 +343,31 @@ SS.ScaleFootprintView = SS.SceneObjectView.extend({
 
         this.postRender();
         return this;
+    },
+
+});
+
+
+SS.ScaleFactorText = SS.DimensionText.extend({
+
+    render: function() {
+        this.clear();
+
+        var factor = this.model.transform.parameters.factor;
+
+        this.$factor = this.addElement('<div class="dimension">' + factor + '</div>');
+        this.update();
+    },
+
+    update: function() {
+            
+        var factor = this.model.transform.parameters.factor;
+        var boundingBox = SS.boundingBoxForGeomNode(this.model.editingNode);
+        var center = SS.centerOfGeom(boundingBox);
+        
+        var pixelPosition = SS.toScreenCoordinates(new THREE.Vector3(boundingBox.max.x, center.y, 0));
+        this.$factor.css('left', pixelPosition.x);
+        this.$factor.css('top', pixelPosition.y);
     },
 
 });
