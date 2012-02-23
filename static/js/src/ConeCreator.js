@@ -54,7 +54,7 @@ SS.ConePreview = SS.PreviewWithOrigin.extend({
 
         if (r1 && h) {
             var geometry = new THREE.CylinderGeometry(r1, r2 || 0.000001, h, 20);
-	    var cone = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
+	    var cone = new THREE.Mesh(geometry, SS.materials.faceMaterial);
 	    cone.position.z = h/2;
             cone.rotation.x = -Math.PI/2;
 	    this.sceneObject.add(cone);
@@ -66,7 +66,7 @@ SS.ConePreview = SS.PreviewWithOrigin.extend({
 		var dy = r2*Math.sin(theta);
 		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	    }
-	    var circle2 = new THREE.Line(circleGeom2, SS.constructors.lineMaterial);
+	    var circle2 = new THREE.Line(circleGeom2, SS.materials.lineMaterial);
             circle2.position.z = h;
 	    this.sceneObject.add(circle2);
 
@@ -74,7 +74,7 @@ SS.ConePreview = SS.PreviewWithOrigin.extend({
 
         if (r1 && !h) {
             var ellipseGeom = new THREE.EllipseGeometry(r1, r1);
-	    var ellipseFace = new THREE.Mesh(ellipseGeom, SS.constructors.faceMaterial);
+	    var ellipseFace = new THREE.Mesh(ellipseGeom, SS.materials.faceMaterial);
             ellipseFace.doubleSided = true;
             this.sceneObject.add(ellipseFace);
         }
@@ -87,11 +87,11 @@ SS.ConePreview = SS.PreviewWithOrigin.extend({
 		var dy = r1*Math.sin(theta);
 		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	    }
-	    var circle1 = new THREE.Line(circleGeom1, SS.constructors.lineMaterial);
+	    var circle1 = new THREE.Line(circleGeom1, SS.materials.lineMaterial);
 	    this.sceneObject.add(circle1);
 
             if (origin.z) {
-	        var circle3 = new THREE.Line(circleGeom1, SS.constructors.lineMaterial);
+	        var circle3 = new THREE.Line(circleGeom1, SS.materials.lineMaterial);
                 circle3.position.z = -origin.z;
 	        this.sceneObject.add(circle3);
 

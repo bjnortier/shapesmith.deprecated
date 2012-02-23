@@ -58,7 +58,7 @@ SS.AxisMirrorTransformPreview = SS.PreviewWithOrigin.extend({
         var axis = new THREE.Geometry();
         axis.vertices.push(new THREE.Vertex(axisVector.clone().multiplyScalar(1000)));
         axis.vertices.push(new THREE.Vertex(axisVector.clone().multiplyScalar(-1000)));
-        var line = new THREE.Line(axis, SS.constructors.lineMaterial);  
+        var line = new THREE.Line(axis, SS.materials.lineMaterial);  
         this.sceneObject.add(line);
 
         this.postRender();

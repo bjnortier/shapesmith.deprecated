@@ -92,10 +92,10 @@ SS.PrismGeomNodeView = SS.SceneObjectView.extend({
     
     changeToPreviewColor: function(meshes) {
         meshes.faces.children.map(function(child) {
-            child.material = SS.constructors.faceMaterial;
+            child.material = SS.materials.faceMaterial;
         });
         meshes.edges.children.map(function(child) {
-            child.material = SS.constructors.lineMaterial;
+            child.material = SS.materials.lineMaterial;
 
         });
     },

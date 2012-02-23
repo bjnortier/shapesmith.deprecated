@@ -49,7 +49,7 @@ SS.SpherePreview = SS.PreviewWithOrigin.extend({
 
         if (r) {
             var geometry = new THREE.SphereGeometry(r, 50, 10);
-	    var sphere = new THREE.Mesh(geometry, SS.constructors.faceMaterial);
+	    var sphere = new THREE.Mesh(geometry, SS.materials.faceMaterial);
 	    this.sceneObject.add(sphere);
             
 	    var circleGeom = new THREE.Geometry();
@@ -59,13 +59,13 @@ SS.SpherePreview = SS.PreviewWithOrigin.extend({
 	        var dy = r*Math.sin(theta);
 	        circleGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	    }
-	    var circle = new THREE.Line(circleGeom, SS.constructors.lineMaterial);
+	    var circle = new THREE.Line(circleGeom, SS.materials.lineMaterial);
 	    this.sceneObject.add(circle);
 
             circle.position = sphere.position;
 
             if (origin.z) {
-	        var circle2 = new THREE.Line(circleGeom, SS.constructors.lineMaterial);
+	        var circle2 = new THREE.Line(circleGeom, SS.materials.lineMaterial);
                 circle2.position.z = -origin.z;
                 this.sceneObject.add(circle2);
             }

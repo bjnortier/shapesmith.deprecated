@@ -52,7 +52,7 @@ SS.CuboidPreview = SS.PreviewWithOrigin.extend({
         var v = this.model.node.parameters.v;
         var w = this.model.node.parameters.w;
 
-        var materials = [ SS.constructors.faceMaterial, SS.constructors.wireframeMaterial ];
+        var materials = [ SS.materials.faceMaterial, SS.materials.wireframeMaterial ];
 
         if(u && v && w) {
             var geometry = new THREE.CubeGeometry(u,v,w);
@@ -62,7 +62,7 @@ SS.CuboidPreview = SS.PreviewWithOrigin.extend({
 
             if (origin.z) {
                 var baseGeom = new THREE.PlaneGeometry(u, v);
-                var base = new THREE.Mesh(baseGeom, SS.constructors.wireframeMaterial);
+                var base = new THREE.Mesh(baseGeom, SS.materials.wireframeMaterial);
                 base.position = new THREE.Vector3(u/2, v/2, -origin.z);
 	        this.sceneObject.add(base);
             }

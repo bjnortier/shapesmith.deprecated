@@ -59,11 +59,11 @@ SS.WedgePreview = SS.PreviewWithOrigin.extend({
         var v = this.model.node.parameters.v;
         var w = this.model.node.parameters.w;
 
-        var materials = [ SS.constructors.faceMaterial, SS.constructors.wireframeMaterial ];
+        var materials = [ SS.materials.faceMaterial, SS.materials.wireframeMaterial ];
 
         if (u1 && v && w) {
 	    var geometry = new THREE.WedgeGeometry(u1,v,w,u2 - u1);
-	    var materials = [ SS.constructors.faceMaterial, SS.constructors.wireframeMaterial ];
+	    var materials = [ SS.materials.faceMaterial, SS.materials.wireframeMaterial ];
 	    var wedge =  THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
 	    wedge.position.x = u1/2;
 	    wedge.position.y = v/2;
@@ -82,12 +82,12 @@ SS.WedgePreview = SS.PreviewWithOrigin.extend({
 	    uvLineGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
 
             if (!w) {
-	        var uvLine = new THREE.Line(uvLineGeom, SS.constructors.lineMaterial);
+	        var uvLine = new THREE.Line(uvLineGeom, SS.materials.lineMaterial);
 	        this.sceneObject.add(uvLine);
             }
 
             if (origin.z) {
-                var uvBase = new THREE.Line(uvLineGeom, SS.constructors.lineMaterial);
+                var uvBase = new THREE.Line(uvLineGeom, SS.materials.lineMaterial);
                 uvBase.position.z = -origin.z;
 	        this.sceneObject.add(uvBase);                
             }

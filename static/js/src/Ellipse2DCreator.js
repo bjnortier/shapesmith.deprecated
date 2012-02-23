@@ -52,7 +52,7 @@ SS.Ellipse2DPreview = SS.PreviewWithOrigin.extend({
         if (r1 && r2) {
 
 	    var ellipseGeom = new THREE.EllipseGeometry(r1, r2);
-	    var ellipseFace = new THREE.Mesh(ellipseGeom, SS.constructors.faceMaterial);
+	    var ellipseFace = new THREE.Mesh(ellipseGeom, SS.materials.faceMaterial);
             ellipseFace.doubleSided = true;
             this.sceneObject.add(ellipseFace);
 
@@ -63,11 +63,11 @@ SS.Ellipse2DPreview = SS.PreviewWithOrigin.extend({
 		var dy = r2*Math.sin(theta);
 		ellipseWireGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
 	    }
-	    var ellipseWire = new THREE.Line(ellipseWireGeom, SS.constructors.lineMaterial);
+	    var ellipseWire = new THREE.Line(ellipseWireGeom, SS.materials.lineMaterial);
             this.sceneObject.add(ellipseWire);
 
             if (origin.z !== 0) {
-	        var ellipseBaseWire = new THREE.Line(ellipseWireGeom, SS.constructors.lineMaterial);
+	        var ellipseBaseWire = new THREE.Line(ellipseWireGeom, SS.materials.lineMaterial);
                 ellipseBaseWire.position = new THREE.Vector3(0, 0, -origin.z);
                 this.sceneObject.add(ellipseBaseWire);
             }

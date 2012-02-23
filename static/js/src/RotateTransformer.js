@@ -131,7 +131,7 @@ SS.RotateAxesView = SS.InteractiveSceneView.extend({
             to[key]   = that.model.boundingBox.max[key] + 5;
 
 	    lineGeom.vertices.push(new THREE.Vertex(from), new THREE.Vertex(to));
-	    var line = new THREE.Line(lineGeom, SS.constructors.lineMaterial);
+	    var line = new THREE.Line(lineGeom, SS.materials.lineMaterial);
             that.sceneObject.add(line);
         });
 
@@ -147,7 +147,7 @@ SS.RotateAxesView = SS.InteractiveSceneView.extend({
             var axis = new THREE.Geometry();
             axis.vertices.push(new THREE.Vertex(axisVector.clone().multiplyScalar(1000)));
             axis.vertices.push(new THREE.Vertex(axisVector.clone().multiplyScalar(-1000)));
-            var line = new THREE.Line(axis, SS.constructors.lineMaterial);  
+            var line = new THREE.Line(axis, SS.materials.lineMaterial);  
             line.position = new THREE.Vector3(origin.x, origin.y, origin.z);
             this.sceneObject.add(line);
         }
@@ -259,7 +259,7 @@ SS.RotateArrowView = SS.InteractiveSceneView.extend({
         arrowLineGeometry.vertices = arrowLineGeometry.vertices.concat(arrowHeadGeometry.vertices);
         arrowLineGeometry.vertices = arrowLineGeometry.vertices.concat(innerCurveGeometry.vertices);
 
-        var lineMaterial = new THREE.LineBasicMaterial({color: SS.constructors.lineColor, 
+        var lineMaterial = new THREE.LineBasicMaterial({color: SS.materials.lineColor, 
                                                         linewidth: 2.0, 
                                                         transparent: true, 
                                                         opacity: 0.5 });
@@ -284,7 +284,7 @@ SS.RotateArrowView = SS.InteractiveSceneView.extend({
         arrowFaceGeometry.computeFaceNormals();
 
         var arrowFace = new THREE.Mesh(arrowFaceGeometry,
-                                       new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, 
+                                       new THREE.MeshBasicMaterial({color: SS.materials.faceColor, 
                                                                     transparent: true, 
                                                                     opacity: 0.5}));
         arrowFace.doubleSided = true;

@@ -15,7 +15,7 @@ SS.preview.createDimArrow = function(value, angle) {
 	new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
     r1DimensionGeom.vertices.push(
 	new THREE.Vertex(new THREE.Vector3(value, 0, 0)));
-    var line = new THREE.Line(r1DimensionGeom, SS.constructors.lineMaterial);
+    var line = new THREE.Line(r1DimensionGeom, SS.materials.lineMaterial);
     
     var arrowGeometry = new THREE.Geometry();
     arrowGeometry.vertices.push(
@@ -73,7 +73,7 @@ SS.preview.createAngleArrow = function(text, x, y, z, u, v, w, angle) {
 	        new THREE.Vertex(new THREE.Vector3(r*Math.cos(i*5/180*Math.PI),r* Math.sin(i*5/180*Math.PI), 0)));
         }
     }
-    var angleLine = new THREE.Line(angleGeometry, SS.constructors.lineMaterial);
+    var angleLine = new THREE.Line(angleGeometry, SS.materials.lineMaterial);
     angleObject.add(angleLine);
 
     var arrowGeometry = new THREE.Geometry();
@@ -114,7 +114,7 @@ SS.preview.createDimArrow2 = function(text, u, v, w) {
 	new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
     r1DimensionGeom.vertices.push(
 	new THREE.Vertex(new THREE.Vector3(0, 0, r)));
-    var line = new THREE.Line(r1DimensionGeom, SS.constructors.lineMaterial);
+    var line = new THREE.Line(r1DimensionGeom, SS.materials.lineMaterial);
     
     var arrowGeometry = new THREE.Geometry();
     arrowGeometry.vertices.push(
@@ -159,12 +159,12 @@ SS.createDimArrow = function(label, vector) {
     var arrowGeom = new THREE.Geometry();
     arrowGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,0)));
     arrowGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,vector.clone().length())));
-    var line = new THREE.Line(arrowGeom, SS.constructors.lineMaterial);
+    var line = new THREE.Line(arrowGeom, SS.materials.lineMaterial);
 
     var pointGeom = new THREE.CylinderGeometry(0, 0.25, 1, 3);
     var materials = [
-        SS.constructors.faceMaterial,
-        SS.constructors.wireframeMaterial,
+        SS.materials.faceMaterial,
+        SS.materials.wireframeMaterial,
     ];
     var point = THREE.SceneUtils.createMultiMaterialObject(pointGeom, materials);
 

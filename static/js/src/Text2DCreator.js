@@ -67,7 +67,7 @@ SS.Text2DPreview = SS.PreviewWithOrigin.extend({
 		style: 'normal',
 		bezelEnabled: false
 	    });
-	    var text = new THREE.Mesh(textGeom, new THREE.MeshBasicMaterial( { color: SS.constructors.faceColor, transparent: true, opacity: 0.5 } ) );
+	    var text = new THREE.Mesh(textGeom, new THREE.MeshBasicMaterial( { color: SS.materials.faceColor, transparent: true, opacity: 0.5 } ) );
             this.sceneObject.add(text);
         }
 

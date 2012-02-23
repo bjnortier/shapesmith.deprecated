@@ -97,7 +97,7 @@ SS.SceneView = function(container) {
         SS.UI_MOUSE_STATE.free();
 
 	var cursoidName;
-	var activeConstructor = SS.constructors.active;
+	var activeConstructor = SS.materials.active;
 	if (activeConstructor) {
 	    var anchorName = activeConstructor.getAnchor(scene, camera, event);
 	    if (anchorName) {
@@ -194,8 +194,8 @@ SS.SceneView = function(container) {
         if (mouseOverActiveObjects.length > 0) {
             document.body.style.cursor = 'pointer';
         } else if (cursoid.getCursoid(scene, camera, event) ||
-	    (SS.constructors.active &&  
-	     SS.constructors.active.getAnchor(scene, camera, event))) {
+	    (SS.materials.active &&  
+	     SS.materials.active.getAnchor(scene, camera, event))) {
             document.body.style.cursor = 'pointer';
         } else if (SS.transformerManager && SS.transformerManager.cursor) {
             document.body.style.cursor = SS.transformerManager.cursor;

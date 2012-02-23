@@ -436,7 +436,7 @@ function TreeView() {
 	$(document).unbind('keyup.editing');
 
 	// Preview model is removed on cancel
-	SS.constructors.active && SS.constructors.disposeActive();
+	SS.materials.active && SS.materials.disposeActive();
 
         $('#' + geomNode.id).remove();
         delete this.domNodeLookup[geomNode];
@@ -446,7 +446,7 @@ function TreeView() {
 	$(document).unbind('keyup.editing');
 
 	// Preview model is replaced with real model on success
-	SS.constructors.active && SS.constructors.disposeActive();
+	SS.materials.active && SS.materials.disposeActive();
         
         var nodeTable = renderNode(replacement);
         $('#' + original.id).replaceWith(nodeTable);

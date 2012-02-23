@@ -144,7 +144,7 @@ SS.ScaleArrowView = SS.InteractiveSceneView.extend({
         arrowGeometry.computeFaceNormals();
         
         var arrowMesh = new THREE.Mesh(arrowGeometry, 
-                                       new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, 
+                                       new THREE.MeshBasicMaterial({color: SS.materials.faceColor, 
                                                                     transparent: true, 
                                                                     opacity: 0.5}));
         arrowMesh.doubleSided = true;
@@ -152,7 +152,7 @@ SS.ScaleArrowView = SS.InteractiveSceneView.extend({
         var lineGeom = new THREE.Geometry();
         lineGeom.vertices = arrowGeometry.vertices;
         var line = new THREE.Line(lineGeom, 
-                                  new THREE.LineBasicMaterial({color: SS.constructors.lineColor, 
+                                  new THREE.LineBasicMaterial({color: SS.materials.lineColor, 
                                                                wireframe : true, 
                                                                linewidth: 2.0, 
                                                                transparent: true, 
@@ -293,7 +293,7 @@ SS.ScaleBoxView = SS.SceneObjectView.extend({
         var height = this.model.boundingBox.max.z - this.model.boundingBox.min.z;
 
         var geometry = new THREE.CubeGeometry(width, depth, height);
-	cube = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: SS.constructors.lineColor, 
+	cube = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: SS.materials.lineColor, 
                                                                      wireframe: true}));
         
 	cube.position.x = this.model.boundingBox.min.x + width/2;
@@ -324,11 +324,11 @@ SS.ScaleFootprintView = SS.SceneObjectView.extend({
 
         var planeGeometry = new THREE.PlaneGeometry(width, depth); 
         var planeMesh = new THREE.Mesh(planeGeometry, 
-                                       new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, 
+                                       new THREE.MeshBasicMaterial({color: SS.materials.faceColor, 
                                                                     transparent: true, 
                                                                     opacity: 0.2}));
         var planeBorder = new THREE.Mesh(planeGeometry, 
-                                         new THREE.MeshBasicMaterial({color: SS.constructors.lineColor, 
+                                         new THREE.MeshBasicMaterial({color: SS.materials.lineColor, 
                                                                       wireframe: true}));
 
         planeMesh.doubleSided = true;

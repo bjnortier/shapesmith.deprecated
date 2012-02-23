@@ -71,9 +71,9 @@ SS.Triangle2DPreview = SS.PreviewWithOrigin.extend({
         });
         triangleGeometry.faces.push(new THREE.Face3(0,1,2));
         
-        var triangleFace = new THREE.Mesh(triangleGeometry, SS.constructors.faceMaterial);
+        var triangleFace = new THREE.Mesh(triangleGeometry, SS.materials.faceMaterial);
         triangleFace.doubleSided = true;
-        var triangleWireframe = new THREE.Mesh(triangleGeometry, SS.constructors.wireframeMaterial);
+        var triangleWireframe = new THREE.Mesh(triangleGeometry, SS.materials.wireframeMaterial);
 
 	this.sceneObject.add(triangleFace);
 	this.sceneObject.add(triangleWireframe);
@@ -96,7 +96,7 @@ SS.Triangle2DPreview = SS.PreviewWithOrigin.extend({
             baseGeometry.vertices = verticesForBase.map(function(vertex) {
                 return new THREE.Vertex(new THREE.Vector3(vertex.u, vertex.v, 0));
             });
-            var base = new THREE.Line(baseGeometry, SS.constructors.lineMaterial);
+            var base = new THREE.Line(baseGeometry, SS.materials.lineMaterial);
             base.position.z = -origin.z;
 	    this.sceneObject.add(base);
         }

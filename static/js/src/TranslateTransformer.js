@@ -85,8 +85,8 @@ SS.TranslateTransformerView = SS.InteractiveSceneView.extend({
 
         var geometry = new THREE.CubeGeometry(0.5, 0.5, 0.5);
         var materials = [
-            new THREE.MeshBasicMaterial({color: SS.constructors.faceColor, opacity: 0.5, wireframe: false } ),
-            new THREE.MeshBasicMaterial({color: SS.constructors.lineColor, wireframe: true})
+            new THREE.MeshBasicMaterial({color: SS.materials.faceColor, opacity: 0.5, wireframe: false } ),
+            new THREE.MeshBasicMaterial({color: SS.materials.lineColor, wireframe: true})
         ];
         var cube = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
         
