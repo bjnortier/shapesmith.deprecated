@@ -230,9 +230,7 @@ SS.TranslateDimensionText = SS.DimensionText.extend({
                          w: new THREE.Vector3(origin.x + u, origin.y + v, origin.z + w/2)};
         for (key in positions) {
             if (this['$' + key]) {
-                var pixelPosition = SS.toScreenCoordinates(positions[key]);
-                this['$' + key].css('left', pixelPosition.x);
-                this['$' + key].css('top', pixelPosition.y);
+                this.moveToScreenCoordinates(this['$' + key], positions[key]);
             }
         }
     },

@@ -361,6 +361,12 @@ SS.DimensionText = Backbone.View.extend({
         this.elements.push(element);
         return element;
     },
+
+    moveToScreenCoordinates: function(element, position) {
+        var pixelPosition = SS.toScreenCoordinates(position);
+        element.css('left', pixelPosition.x);
+        element.css('top', pixelPosition.y);
+    },
     
 });
                                  
@@ -378,9 +384,8 @@ SS.OriginDimensionText = SS.DimensionText.extend({
     update: function() {
         if (this.$z) {
             var origin = this.model.node.origin;
-            var pixelPosition = SS.toScreenCoordinates(new THREE.Vector3(origin.x, origin.y, origin.z/2));
-            this.$z.css('left', pixelPosition.x);
-            this.$z.css('top', pixelPosition.y);
+            this.moveToScreenCoordinates(this.$z, 
+                                         new THREE.Vector3(origin.x, origin.y, origin.z/2));
         }
     },
 

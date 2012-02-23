@@ -169,19 +169,15 @@ SS.CylinderDimensionText = SS.DimensionText.extend({
         
         var rVector = new THREE.Vector3(r*Math.cos(angle), r*Math.sin(angle), 0);
 
-        var rPixelPosition = SS.toScreenCoordinates(
-            new THREE.Vector3(origin.x + r/2*Math.cos(angle), 
-                              origin.y + r/2*Math.sin(angle), 
-                              origin.z));
-        this.$r.css('left', rPixelPosition.x);
-        this.$r.css('top', rPixelPosition.y);
-
-        var hPixelPosition = SS.toScreenCoordinates(
-            new THREE.Vector3(origin.x + r*Math.cos(angle), 
-                              origin.y + r*Math.sin(angle), 
-                              origin.z + h/2));
-        this.$h.css('left', hPixelPosition.x);
-        this.$h.css('top', hPixelPosition.y);
+        this.moveToScreenCoordinates(this.$r, 
+                                     new THREE.Vector3(origin.x + r/2*Math.cos(angle), 
+                                                       origin.y + r/2*Math.sin(angle), 
+                                                       origin.z));
+        
+        this.moveToScreenCoordinates(this.$h,
+                                     new THREE.Vector3(origin.x + r*Math.cos(angle), 
+                                                       origin.y + r*Math.sin(angle), 
+                                                       origin.z + h/2));
     },
 
 });

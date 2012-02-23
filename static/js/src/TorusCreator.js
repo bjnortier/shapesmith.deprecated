@@ -192,19 +192,15 @@ SS.TorusDimensionText = SS.DimensionText.extend({
         
         var r1Vector = new THREE.Vector3(r1*Math.cos(angle), r1*Math.sin(angle), 0);
 
-        var r1PixelPosition = SS.toScreenCoordinates(
-            new THREE.Vector3(origin.x + r1/2*Math.cos(angle), 
-                              origin.y + r1/2*Math.sin(angle), 
-                              origin.z));
-        this.$r1.css('left', r1PixelPosition.x);
-        this.$r1.css('top', r1PixelPosition.y);
+        this.moveToScreenCoordinates(this.$r1,
+                                     new THREE.Vector3(origin.x + r1/2*Math.cos(angle), 
+                                                       origin.y + r1/2*Math.sin(angle), 
+                                                       origin.z));
 
-        var r2PixelPosition = SS.toScreenCoordinates(
-            new THREE.Vector3(origin.x + (r1 + r2/2)*Math.cos(angle), 
-                              origin.y + (r1 + r2/2)*Math.sin(angle), 
-                              origin.z));
-        this.$r2.css('left', r2PixelPosition.x);
-        this.$r2.css('top', r2PixelPosition.y);
+        this.moveToScreenCoordinates(this.$r2, 
+                                     new THREE.Vector3(origin.x + (r1 + r2/2)*Math.cos(angle), 
+                                                       origin.y + (r1 + r2/2)*Math.sin(angle), 
+                                                       origin.z));
     },
 
 });

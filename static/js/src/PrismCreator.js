@@ -197,11 +197,10 @@ SS.PrismDimensionText = SS.DimensionText.extend({
         var v = this.model.node.parameters.v;
         var w = this.model.node.parameters.w;
       
-        var pixelPosition = SS.toScreenCoordinates(new THREE.Vector3(this.model.node.origin.x + u/2,
-                                                                     this.model.node.origin.y + v/2,
-                                                                     this.model.node.origin.z + w/2));
-        this.$uvw.css('left', pixelPosition.x);
-        this.$uvw.css('top', pixelPosition.y);
+        this.moveToScreenCoordinates(this.$uvw, 
+                                     new THREE.Vector3(this.model.node.origin.x + u/2,
+                                                       this.model.node.origin.y + v/2,
+                                                       this.model.node.origin.z + w/2));
     },
 
 });

@@ -365,9 +365,8 @@ SS.ScaleFactorText = SS.DimensionText.extend({
         var boundingBox = SS.boundingBoxForGeomNode(this.model.editingNode);
         var center = SS.centerOfGeom(boundingBox);
         
-        var pixelPosition = SS.toScreenCoordinates(new THREE.Vector3(boundingBox.max.x, center.y, 0));
-        this.$factor.css('left', pixelPosition.x);
-        this.$factor.css('top', pixelPosition.y);
+        this.moveToScreenCoordinates(this.$factor, 
+                                     new THREE.Vector3(boundingBox.max.x, center.y, 0));
     },
 
 });

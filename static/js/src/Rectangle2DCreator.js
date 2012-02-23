@@ -126,9 +126,7 @@ SS.Rectangle2DDimensionText = SS.DimensionText.extend({
         var positions = {u: new THREE.Vector3(origin.x + u/2, origin.y, origin.z),
                          v: new THREE.Vector3(origin.x + u, origin.y + v/2, origin.z)};
         for (key in positions) {
-            var pixelPosition = SS.toScreenCoordinates(positions[key]);
-            this['$' + key].css('left', pixelPosition.x);
-            this['$' + key].css('top', pixelPosition.y);
+            this.moveToScreenCoordinates(this['$' + key], positions[key]);
         }
     },
 

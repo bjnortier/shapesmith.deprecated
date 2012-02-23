@@ -160,28 +160,22 @@ SS.ConeDimensionText = SS.DimensionText.extend({
         
         var r1Vector = new THREE.Vector3(r1*Math.cos(angle), r1*Math.sin(angle), 0);
 
-        var r1PixelPosition = SS.toScreenCoordinates(
-            new THREE.Vector3(origin.x + r1/2*Math.cos(angle), 
-                              origin.y + r1/2*Math.sin(angle), 
-                              origin.z));
-        this.$r1.css('left', r1PixelPosition.x);
-        this.$r1.css('top', r1PixelPosition.y);
+        this.moveToScreenCoordinates(this.$r1,
+                                     new THREE.Vector3(origin.x + r1/2*Math.cos(angle), 
+                                                       origin.y + r1/2*Math.sin(angle), 
+                                                       origin.z));
 
         if (this.$r2) {
-            var r2PixelPosition = SS.toScreenCoordinates(
-                new THREE.Vector3(origin.x + r2/2*Math.cos(angle), 
-                                  origin.y + r2/2*Math.sin(angle), 
-                                  origin.z + h));
-            this.$r2.css('left', r2PixelPosition.x);
-            this.$r2.css('top', r2PixelPosition.y);
+            this.moveToScreenCoordinates(this.$r2, 
+                                         new THREE.Vector3(origin.x + r2/2*Math.cos(angle), 
+                                                           origin.y + r2/2*Math.sin(angle), 
+                                                           origin.z + h));
         }
 
-        var hPixelPosition = SS.toScreenCoordinates(
-            new THREE.Vector3(origin.x, 
-                              origin.y, 
-                              origin.z + h/2));
-        this.$h.css('left', hPixelPosition.x);
-        this.$h.css('top', hPixelPosition.y);
+        this.moveToScreenCoordinates(this.$h, 
+                                     new THREE.Vector3(origin.x, 
+                                                       origin.y, 
+                                                       origin.z + h/2));
     },
 
 });

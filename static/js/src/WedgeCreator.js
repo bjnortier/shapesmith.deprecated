@@ -187,9 +187,7 @@ SS.WedgeDimensionText = SS.DimensionText.extend({
                          v: new THREE.Vector3(origin.x, origin.y + v/2, origin.z),
                          w: new THREE.Vector3(origin.x + u2, origin.y + v, origin.z + w/2)};
         for (key in positions) {
-            var pixelPosition = SS.toScreenCoordinates(positions[key]);
-            this['$' + key].css('left', pixelPosition.x);
-            this['$' + key].css('top', pixelPosition.y);
+            this.moveToScreenCoordinates(this['$' + key], positions[key]);
         }
     },
 

@@ -185,11 +185,10 @@ SS.VertexDimensionText = SS.DimensionText.extend({
         var vertex = this.model.node.parameters.vertices[this.options.vertexIndex];
         var origin = this.model.node.origin;
         
-        var uvPixelPosition = SS.toScreenCoordinates(new THREE.Vector3(origin.x + vertex.u,
-                                                                       origin.y + vertex.v,
-                                                                       origin.z + vertex.w));
-        this.$uvw.css('left', uvPixelPosition.x);
-        this.$uvw.css('top', uvPixelPosition.y + 10);
+        this.moveToScreenCoordinates(this.$uvw, 
+                                     new THREE.Vector3(origin.x + vertex.u,
+                                                       origin.y + vertex.v,
+                                                       origin.z + vertex.w));
     },
 
 });

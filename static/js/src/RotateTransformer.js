@@ -483,14 +483,11 @@ SS.RotationAngleText = SS.DimensionText.extend({
         var z2 = a*wn + (position.z - a*wn)*Math.cos(angle/180*Math.PI) 
             + (un*position.y - vn*position.x)*Math.sin(angle/180*Math.PI);
         
-	var newPosition = new THREE.Vector3(this.model.center.x + x2, 
-                                            this.model.center.y + y2, 
-                                            this.model.center.z + z2);
+        this.moveToScreenCoordinates(this.$angle, 
+	                             new THREE.Vector3(this.model.center.x + x2, 
+                                                       this.model.center.y + y2, 
+                                                       this.model.center.z + z2));
         
-        var pixelPosition = SS.toScreenCoordinates(newPosition);
-            
-        this.$angle.css('left', pixelPosition.x);
-        this.$angle.css('top', pixelPosition.y);
 
     },
 

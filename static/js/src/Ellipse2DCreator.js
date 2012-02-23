@@ -117,19 +117,15 @@ SS.Ellipse2DDimensionText = SS.DimensionText.extend({
         var r1 = this.model.node.parameters.r1;
         var r2 = this.model.node.parameters.r2;
         
-        var r1PixelPosition = SS.toScreenCoordinates(
-            new THREE.Vector3(origin.x + r1/2,
-                              origin.y,
-                              origin.z));
-        this.$r1.css('left', r1PixelPosition.x);
-        this.$r1.css('top', r1PixelPosition.y);
+        
+        this.moveToScreenCoordinates(this.$r1, 
+                                     new THREE.Vector3(origin.x + r1/2,
+                                                       origin.y,
+                                                       origin.z));
 
-        var r2PixelPosition = SS.toScreenCoordinates(
-            new THREE.Vector3(origin.x,
-                              origin.y + r2/2,
-                              origin.z));
-        this.$r2.css('left', r2PixelPosition.x);
-        this.$r2.css('top', r2PixelPosition.y);
+        this.moveToScreenCoordinates(this.$r2,
+                                     new THREE.Vector3(origin.x,
+                                                       origin.y + r2/2,
     },
 
 });

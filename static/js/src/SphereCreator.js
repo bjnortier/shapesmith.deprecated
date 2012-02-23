@@ -146,12 +146,10 @@ SS.SphereDimensionText = SS.DimensionText.extend({
         var r = this.model.node.parameters.r;
         var angle = this.model.node.extra.angle;
 
-        var pixelPosition = SS.toScreenCoordinates(
-            new THREE.Vector3(origin.x + r/2*Math.cos(angle), 
-                              origin.y + r/2*Math.sin(angle), 
-                              origin.z));
-        this.$r.css('left', pixelPosition.x);
-        this.$r.css('top', pixelPosition.y);
+        this.moveToScreenCoordinates(this.$r, 
+                                     new THREE.Vector3(origin.x + r/2*Math.cos(angle), 
+                                                       origin.y + r/2*Math.sin(angle), 
+                                                       origin.z));
     },
 
 });

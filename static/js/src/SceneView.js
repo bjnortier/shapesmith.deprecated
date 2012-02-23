@@ -92,7 +92,7 @@ SS.SceneView = function(container) {
 	mouseOnDown.y = event.clientY;
         lastMousePos = mouseOnDown;
 
-	container.addEventListener('mouseup', onMouseUp, false);
+	document.addEventListener('mouseup', onMouseUp, false);
 
         SS.UI_MOUSE_STATE.free();
 
