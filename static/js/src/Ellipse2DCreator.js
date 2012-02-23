@@ -126,6 +126,7 @@ SS.Ellipse2DDimensionText = SS.DimensionText.extend({
         this.moveToScreenCoordinates(this.$r2,
                                      new THREE.Vector3(origin.x,
                                                        origin.y + r2/2,
+                                                       origin.z));
     },
 
 });
