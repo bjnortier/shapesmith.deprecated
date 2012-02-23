@@ -513,7 +513,8 @@ SS.SceneView = function(container) {
     this.triggerMouseDownOnSceneObjectViews = function(event) {
         mouseDownSceneObjectViews = findSceneObjectViewsForEvent(event);
 
-        if (mouseDownSceneObjectViews.length > 0) {
+        if ((event.button === 0) &&
+            (mouseDownSceneObjectViews.length > 0)) {
             mouseDownSceneObjectViews[0].trigger('mouseDown', event);
         }
     }
@@ -539,5 +540,6 @@ SS.SceneView = function(container) {
     this.popupMenu = popupMenu;
     this.onMouseUp = onMouseUp;
 
-    return this;
+   
+ return this;
 }

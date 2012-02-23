@@ -163,11 +163,8 @@ SS.SceneObjectView = Backbone.View.extend({
     },
 
     clear: function() {
-        var children = this.sceneObject.children;
-        var that = this
-        children.map(function(child) {
-            that.sceneObject.remove(child);
-        });
+        SS.sceneView.scene.remove(this.sceneObject);
+        this.sceneObject = new THREE.Object3D(); 
     },
 
     postRender: function() {
