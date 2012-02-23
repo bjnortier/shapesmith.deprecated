@@ -99,7 +99,6 @@ SS.Text2DTextView = Backbone.View.extend({
     events: {
         'change .field': 'fieldChanged',
         'keyup .field': 'fieldChanged',
-        'click .field': 'fieldChanged',
     },
 
     update: function() {

@@ -92,8 +92,13 @@
     <div class="toolbar" id="transforms"></div>
     <div class="toolbar" id="modifiers"></div>
   </div>
-  <div id="geom-model-doc"></div>
   <div id="floating-dom-view"><div class="params"></div><div  class="ok-cancel"></div></div>
+  <div id="treeview-container">
+    <div id="advanced">
+      <input type="checkbox" name="advanced" id="advanced-checkbox"/><label for="advanced-checkbox">advanced</label>
+    </div>
+    <div id="geom-model-doc"></div>
+  </div>
   
   <script type="text/javascript" src="/static/js/src/WedgeGeometry.js"></script>
   <script type="text/javascript" src="/static/js/src/EllipseGeometry.js"></script>
@@ -139,7 +144,6 @@
   <script type="text/javascript" src="/static/js/src/ScaleTransformer.js"></script>
   <script type="text/javascript" src="/static/js/src/RotateTransformer.js"></script>
   <script type="text/javascript" src="/static/js/src/AxisMirrorTransformCreator.js"></script>
-
 
   <script type="text/javascript">
 

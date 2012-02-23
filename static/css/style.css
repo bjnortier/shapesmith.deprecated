@@ -384,16 +384,27 @@ div#export-options {
 
 /* ---------------------------------- TreeView ------------------------------------ */
 
-#geom-model-doc {
+#treeview-container {
     position: absolute;
     left: 20px;
     top: 80px;
     color: white;
 }
 
+#advanced {
+    padding-bottom: 5px;
+}
+
+#advanced label {
+    padding: 5px;
+}
+
+#geom-model-doc {
+    display: none;
+}
+
 #geom-model-doc table {
     border-collapse:collapse;
-    /*border: solid thin grey;*/
     text-align: left;
 }
 
