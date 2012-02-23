@@ -107,15 +107,12 @@
   <script type="text/javascript" src="/static/js/src/GeomDocument.js"></script>
   <script type="text/javascript" src="/static/js/src/Preview.js"></script>
   <script type="text/javascript" src="/static/js/src/schemas.js"></script>
-  <script type="text/javascript" src="/static/js/src/NodeUpdater.js"></script>
-  <script type="text/javascript" src="/static/js/src/modifiers.js"></script>
 
   <script type="text/javascript" src="/static/js/src/materials.js"></script>
   <script type="text/javascript" src="/static/js/src/geomnode_rendering.js"></script>
   
   <script type="text/javascript" src="/static/js/src/TreeView.js"></script>
   <script type="text/javascript" src="/static/js/src/workplane.js"></script>
-  <script type="text/javascript" src="/static/js/src/Cursoid.js"></script>
   <script type="text/javascript" src="/static/js/src/popupmenu.js"></script>
   <script type="text/javascript" src="/static/js/src/SceneSelector.js"></script>
   <script type="text/javascript" src="/static/js/src/SceneView.js"></script>

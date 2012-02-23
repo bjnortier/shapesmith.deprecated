@@ -13,7 +13,7 @@ SS.SceneView = function(container) {
     var distance = 1000, distanceTarget = 300;
     var targetScenePosition = new THREE.Vector3(0,0,0);
 
-    var workplane, cursoid;
+    var workplane;
     var popupMenu = SS.popupMenu();
 
     var that = this;
@@ -48,7 +48,6 @@ SS.SceneView = function(container) {
         
         addLights();
 	workplane = new SS.Workplane({scene: scene});
-        cursoid = new SS.Cursoid({scene: scene, workplane: workplane});
 	popupMenu = SS.popupMenu();
 
 	renderer.domElement.style.position = 'absolute';
@@ -95,25 +94,6 @@ SS.SceneView = function(container) {
 	document.addEventListener('mouseup', onMouseUp, false);
 
         SS.UI_MOUSE_STATE.free();
-
-	var cursoidName;
-	var activeConstructor = SS.materials.active;
-	if (activeConstructor) {
-	    var anchorName = activeConstructor.getAnchor(scene, camera, event);
-	    if (anchorName) {
-		var initialCursoid = activeConstructor.activateAnchor(anchorName);
-		cursoidName = initialCursoid;
-	    }
-	}
-	
-	if (!cursoidName) {
-	    cursoidName = cursoid.getCursoid(scene, camera, event)
-	}
-        if (cursoidName) {
-            SS.UI_MOUSE_STATE.overCursoid = true;
-            cursoid.activate(cursoidName);
-	    popupMenu.cancel();
-        } 
 
         var mouseOverActiveObjects = mouseOverSceneObjectViews.filter(function(object) {
             return object.active;
@@ -192,10 +172,6 @@ SS.SceneView = function(container) {
             return object.active;
         });
         if (mouseOverActiveObjects.length > 0) {
-            document.body.style.cursor = 'pointer';
-        } else if (cursoid.getCursoid(scene, camera, event) ||
-	    (SS.materials.active &&  
-	     SS.materials.active.getAnchor(scene, camera, event))) {
             document.body.style.cursor = 'pointer';
         } else if (SS.transformerManager && SS.transformerManager.cursor) {
             document.body.style.cursor = SS.transformerManager.cursor;
@@ -313,7 +289,6 @@ SS.SceneView = function(container) {
 	    selectObject(event);
 	}
 
-        cursoid.deactivate();
 	popupMenu.onMouseUp(event);
 
         SS.UI_MOUSE_STATE.free();
@@ -533,7 +508,6 @@ SS.SceneView = function(container) {
     this.scene = scene;
     this.camera = camera;
     this.workplane = workplane;
-    this.cursoid = cursoid;
     this.determinePositionOnRay = determinePositionOnRay;
     this.determinePositionOnPlane = determinePositionOnPlane;
     this.determinePositionOnWorkplane = determinePositionOnWorkplane;
