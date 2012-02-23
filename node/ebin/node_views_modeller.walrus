@@ -93,7 +93,7 @@
     <div class="toolbar" id="modifiers"></div>
   </div>
   <div id="geom-model-doc"></div>
-  <div id="floating-ok-cancel"></div>
+  <div id="floating-dom-view"><div class="params"></div><div  class="ok-cancel"></div></div>
   
   <script type="text/javascript" src="/static/js/src/WedgeGeometry.js"></script>
   <script type="text/javascript" src="/static/js/src/EllipseGeometry.js"></script>

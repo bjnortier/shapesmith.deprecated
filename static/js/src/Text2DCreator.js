@@ -7,7 +7,8 @@ SS.Text2DCreator = SS.PrimitiveCreator.extend({
 
         this.textPreview = new SS.Text2DPreview({model: this});
         this.views = this.views.concat([
-            this.textPreview
+            this.textPreview,
+            new SS.Text2DTextView({model: this})
         ]);
         this.trigger('change', this);
     },
@@ -76,3 +77,39 @@ SS.Text2DPreview = SS.PreviewWithOrigin.extend({
 
 });
 
+SS.Text2DTextView = Backbone.View.extend({
+
+    initialize: function() {
+        this.render();
+        this.model.on('change', this.update, this);
+    },
+
+    remove: function() {
+        Backbone.View.prototype.remove.call(this);
+        this.model.off('change', this.update);
+    },
+
+    render: function() {
+        var text = this.model.node.parameters.text;
+        var input = '<input class="field" id="floating-text" value="{{value}}"/>';
+        this.$el.html($.mustache(input, {value: text}));
+        $('#floating-dom-view .params').append(this.$el);
+    },
+
+    events: {
+        'change .field': 'fieldChanged',
+        'keyup .field': 'fieldChanged',
+        'click .field': 'fieldChanged',
+    },
+
+    update: function() {
+        $('#floating-text').val(this.model.node.parameters.text);
+    },
+
+    fieldChanged: function() {
+        this.preventUpdate = true;
+        this.model.setParameters({text: $('#floating-text').val()});
+        this.preventUpdate = false;
+    },
+
+});

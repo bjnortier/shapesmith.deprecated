@@ -238,7 +238,7 @@ SS.OkCancelView = Backbone.View.extend({
     render: function() {
         var table = '<table><tr><td><input class="ok" type="submit" value="Ok"/><input class="cancel" type="submit" value="Cancel"/></td></tr></table>';
         this.$el.html(table);
-        $('#floating-ok-cancel').append(this.$el);
+        $('#floating-dom-view .ok-cancel').append(this.$el);
     },
 
     update: function() {
@@ -251,7 +251,6 @@ SS.OkCancelView = Backbone.View.extend({
             var projScreenMat = new THREE.Matrix4();
             projScreenMat.multiply(SS.sceneView.camera.projectionMatrix, 
                                    SS.sceneView.camera.matrixWorldInverse);
-
 
             var xminmax = [boundingBox.min.x, boundingBox.max.x];
             var yminmax = [boundingBox.min.y, boundingBox.max.y];
@@ -281,8 +280,8 @@ SS.OkCancelView = Backbone.View.extend({
             pixelPosition.y = Math.max(pixelPosition.y, 100);
         }
        
-        $('#floating-ok-cancel').css('left', pixelPosition.x);
-	$('#floating-ok-cancel').css('top', pixelPosition.y);
+        $('#floating-dom-view').css('left', pixelPosition.x);
+	$('#floating-dom-view').css('top', pixelPosition.y);
     },
     
     events: {
