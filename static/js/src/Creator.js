@@ -194,7 +194,7 @@ SS.DraggableCorner = SS.InteractiveSceneView.extend({
     render: function() {
         this.clear();
 
-        var geometry = new THREE.CubeGeometry(0.75, 0.75, 0.75);
+        var geometry = new THREE.CubeGeometry(1.0, 1.0, 1.0);
         var materials = [
             new THREE.MeshBasicMaterial({color: SS.materials.faceColor, opacity: 0.5, wireframe: false } ),
             new THREE.MeshBasicMaterial({color: SS.materials.lineColor, wireframe: true})
@@ -270,7 +270,7 @@ SS.HeightCursoid = SS.InteractiveSceneView.extend({
         axis.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,1000)));
         var line = new THREE.Line(axis, new THREE.LineBasicMaterial({ color: 0xcc6666, opacity: 0.5 }));  
 
-        var geometry = new THREE.CylinderGeometry(0, 0.5, 1, 3);
+        var geometry = new THREE.CylinderGeometry(0, 0.75, 1.5, 3);
         var materials = [
             new THREE.MeshBasicMaterial({color: 0x993333, opacity: 0.5, wireframe: false } ),
             new THREE.MeshBasicMaterial({color: 0xcc6666, wireframe: true})
@@ -284,7 +284,7 @@ SS.HeightCursoid = SS.InteractiveSceneView.extend({
 
 	cursoid.position.x = position.x;
 	cursoid.position.y = position.y;
-	cursoid.position.z = position.z + 1.5;
+	cursoid.position.z = position.z + 2.5;
         cursoid.rotation.x = Math.PI/2;
         
         this.sceneObject.add(line);
@@ -339,6 +339,10 @@ SS.DimensionText = Backbone.View.extend({
         this.model.on('change', this.render, this);
         this.elements = [];
         this.render();
+        this.elements.map(function(element) {
+            element.click(function() { console.log('!') });
+            element[0].addEventListener('mousemove', function() { console.log('%')});
+        });
     },
     
     remove: function() {

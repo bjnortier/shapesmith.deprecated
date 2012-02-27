@@ -83,7 +83,7 @@ SS.TranslateTransformerView = SS.InteractiveSceneView.extend({
     render: function() {
         this.clear();
 
-        var geometry = new THREE.CubeGeometry(0.5, 0.5, 0.5);
+        var geometry = new THREE.CubeGeometry(1.0, 1.0, 1.0);
         var materials = [
             new THREE.MeshBasicMaterial({color: SS.materials.faceColor, opacity: 0.5, wireframe: false } ),
             new THREE.MeshBasicMaterial({color: SS.materials.lineColor, wireframe: true})
