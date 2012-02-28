@@ -5,7 +5,7 @@
     
     <link href="/static/css/style.css" rel="stylesheet" type="text/css"/>
     
-    <script type="text/javascript" src="/static/js/lib/jquery-1.5.1.min.js"></script>
+    <script type="text/javascript" src="/static/js/lib/jquery-1.7.1.min.js"></script>
     <script type="text/javascript" src="/static/js/lib/jquery.mustache.js"></script>
     <script type="text/javascript" src="/static/js/lib/jquery.getQueryParam.1.0.0.min.js"></script>
     <script type="text/javascript" src="/static/js/src/ext.js"></script>
