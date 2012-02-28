@@ -363,6 +363,9 @@ SS.DimensionText = Backbone.View.extend({
         element.css('position', 'absolute');
         $('body').append(element);
         this.elements.push(element);
+        element.mousemove(SS.sceneView.onMouseMove);
+        element.mousedown(SS.sceneView.onMouseDown);
+        element.mouseup(SS.sceneView.onMouseUp);
         return element;
     },
 

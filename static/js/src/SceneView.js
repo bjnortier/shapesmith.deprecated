@@ -513,6 +513,8 @@ SS.SceneView = function(container) {
     this.determinePositionOnWorkplane = determinePositionOnWorkplane;
     this.popupMenu = popupMenu;
     this.onMouseUp = onMouseUp;
+    this.onMouseMove = onMouseMove;
+    this.onMouseDown = onMouseDown;
 
    
  return this;
