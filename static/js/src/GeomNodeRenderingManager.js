@@ -3,10 +3,13 @@ var SS = SS || {};
 SS.GeomNodeRenderingManager = function() {
 
     this.geomDocAdd = function(geomNode) {
-        SS.renderGeometry(geomNode);
+        if (geom_doc.isRoot(geomNode)) {
+            SS.renderGeometry(geomNode);
+        }
         if (geomNode.isEditingOrTransformEditing()) {
             SS.setOthersTransparent(geomNode);
         }
+
     }
 
     this.geomDocBeforeRemove = function(geomNode) {
