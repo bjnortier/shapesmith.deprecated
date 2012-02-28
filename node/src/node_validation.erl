@@ -88,6 +88,27 @@ validate_geom_test_() ->
 						   {<<"y">>, 3},
 						   {<<"z">>, 0.0},
 						   {<<"factor">>, <<"a">>}]}}]}]}]})),
+     ?_assertEqual({error, {[{<<"vertices">>, <<"three vertices required">>}]}},
+		   geom({[{<<"type">>, <<"triangle2d">>},
+			  {<<"origin">>, Origin},
+                          {<<"parameters">>, {[{<<"vertices">>, [{[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]}]}]}}
+                         ]})),
+     ?_assertEqual({error, {[{<<"vertices">>, <<"all coordinates must be numbers">>}]}},
+		   geom({[{<<"type">>, <<"triangle2d">>},
+			  {<<"origin">>, Origin},
+                          {<<"parameters">>, {[{<<"vertices">>, [{[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]},
+                                                                 {[{<<"u">>, 0}, {<<"v">>, <<"a">>}, {<<"w">>, 0}]},
+                                                                 {[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]}
+                                                                ]}]}}
+                         ]})),
+     ?_assertEqual(ok,
+		   geom({[{<<"type">>, <<"triangle2d">>},
+			  {<<"origin">>, Origin},
+                          {<<"parameters">>, {[{<<"vertices">>, [{[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]},
+                                                                 {[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]},
+                                                                 {[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]}
+                                                                ]}]}}
+                         ]})),
      ?_assertEqual({error, {[{<<"children">>, <<"only one child allowed">>}]}},
 		   geom({[{<<"type">>, <<"prism">>},
 			  {<<"origin">>, Origin},
@@ -141,9 +162,6 @@ validate_geom_type(<<"rectangle2d">>, Props) ->
 			       {<<"u">>, fun not_zero/1},
 			       {<<"v">>, fun not_zero/1}
 			      ]);
-validate_geom_type(<<"triangle2d">>, Props) ->
-    validate_primitive(Props, [
-			      ]);
 validate_geom_type(<<"ellipse1d">>, Props) ->
     validate_primitive(Props, [
 			       {<<"r1">>, fun positive/1},
@@ -156,6 +174,8 @@ validate_geom_type(<<"text2d">>, Props) ->
 			      ]);
 
 
+validate_geom_type(<<"triangle2d">>, Props) ->
+    validate_primitive(Props, [{<<"vertices">>, fun triangle_vertices/1}]);
 validate_geom_type(<<"prism">>, Props) ->
     case lists:keyfind(<<"children">>, 1, Props) of
 	false ->
@@ -499,6 +519,31 @@ zero_or_one_integer(Value) when is_integer(Value) andalso Value =:= 1 ->
     ok;
 zero_or_one_integer(_) ->
     {error, <<"must be 0 or one">>}.
+
+
+triangle_vertices([{V1}, {V2}, {V3}]) ->
+    case {triangle_vertex(V1), triangle_vertex(V2), triangle_vertex(V3)} of
+        {ok, ok, ok} ->
+            ok;
+        _ ->
+            {error, <<"all coordinates must be numbers">>}
+    end;
+triangle_vertices(_) ->
+    {error, <<"three vertices required">>}.
+
+triangle_vertex(Vertex) ->
+    case {lists:keyfind(<<"u">>, 1, Vertex), lists:keyfind(<<"v">>, 1, Vertex), lists:keyfind(<<"w">>, 1, Vertex)}of
+         {{_, U}, {_, V}, {_, W}} ->
+             case {number(U), number(V), number(W)} of
+                 {ok, ok, ok} ->
+                     ok;
+                 _ ->
+                     {error, not_all_numbers}
+             end;
+         _ ->
+             {error, not_all_numbers}
+    end.
+
 
 
 
