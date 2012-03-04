@@ -199,6 +199,43 @@ TEST(BuilderTest, Prism) {
     
 }
 
+TEST(BuilderTest, Revolve) {
+    
+    mObject origin;
+    origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
+    
+    mObject ellipseParameters;
+    ellipseParameters["r1"] = 10.0;
+    ellipseParameters["r2"] = 5.0;
+    
+    mObject ellipseJson;
+    ellipseJson["origin"] = origin;
+    ellipseJson["parameters"] = ellipseParameters;
+    
+    Ellipse2DBuilder ellipse2Dbuilder(ellipseJson);
+    
+    TopoDS_Shape ellipse2d = ellipse2Dbuilder.shape();
+    
+    ASSERT_FALSE(ellipse2d.IsNull());
+    
+    mObject revolveJson;
+    mObject revolveParameters;
+    revolveParameters["u"] = 0.0;
+    revolveParameters["v"] = 0.0;
+    revolveParameters["w"] = 5.0;
+    revolveParameters["angle"] = M_PI/2;
+    
+    
+    revolveJson["origin"] = origin;
+    revolveJson["parameters"] = revolveParameters;
+    
+    RevolveBuilder revolveBuilder(revolveJson, ellipse2d);
+    TopoDS_Shape revolve = revolveBuilder.shape();
+    
+    ASSERT_FALSE(revolve.IsNull());
+    
+}
+
 TEST(BuilderTest, Boolean) {
     
     mObject origin;

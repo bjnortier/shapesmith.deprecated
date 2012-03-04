@@ -26,9 +26,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.49497475"
-     inkscape:cx="507.4232"
-     inkscape:cy="193.57197"
+     inkscape:zoom="1.4"
+     inkscape:cx="-366.87193"
+     inkscape:cy="901.03346"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -1911,5 +1911,78 @@
        inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/triangle.png"
        inkscape:export-xdpi="16.379999"
        inkscape:export-ydpi="16.379999" />
+    <path
+       style="fill:#3bda42;fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       d="m -270,42.362186 0,119.999994 -60,0 z"
+       id="path3331-7-4"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/revolve.png"
+       inkscape:export-xdpi="16.379999"
+       inkscape:export-ydpi="16.379999" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:20, 5;stroke-dashoffset:0"
+       d="m -260,22.362183 0,209.999997"
+       id="path4184-8"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/revolve.png"
+       inkscape:export-xdpi="16.379999"
+       inkscape:export-ydpi="16.379999" />
+    <path
+       sodipodi:type="arc"
+       style="fill:none;stroke:#ffffff;stroke-width:5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:none;marker-end:none"
+       id="path3328"
+       sodipodi:cx="-280"
+       sodipodi:cy="12.362183"
+       sodipodi:rx="73.148193"
+       sodipodi:ry="40"
+       d="m -239.54206,-20.962532 a 73.148193,40 0 1 1 -113.60515,33.11757"
+       sodipodi:start="5.2984642"
+       sodipodi:end="9.4299566"
+       transform="translate(23.148194,148.14193)"
+       sodipodi:open="true"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/revolve.png"
+       inkscape:export-xdpi="16.379999"
+       inkscape:export-ydpi="16.379999" />
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:none"
+       d="m -230,117.36218 25,25 10,-20 z"
+       id="path6842"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/revolve.png"
+       inkscape:export-xdpi="16.379999"
+       inkscape:export-ydpi="16.379999" />
+    <g
+       id="g6852"
+       transform="translate(129.41811,-10.001209)"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/revolve.png"
+       inkscape:export-xdpi="16.379999"
+       inkscape:export-ydpi="16.379999">
+      <path
+         sodipodi:open="true"
+         sodipodi:end="10.960181"
+         sodipodi:start="4.7207018"
+         d="m -369.41811,22.363392 c 38.6586,0.160685 69.73706,15.960438 69.41569,35.289736 -0.32137,19.329298 -31.92087,34.86853 -70.57947,34.707845 -38.6586,-0.160684 -69.73706,-15.960437 -69.41569,-35.289736 0.31148,-18.734596 30.07355,-34.024171 67.52057,-34.687135"
+         sodipodi:ry="35"
+         sodipodi:rx="70"
+         sodipodi:cy="57.362183"
+         sodipodi:cx="-370"
+         id="path6850"
+         style="fill:#ff0000;fill-opacity:1;stroke:none"
+         sodipodi:type="arc" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text6844"
+         y="71.571785"
+         x="-412.09961"
+         style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Luxi Sans;-inkscape-font-specification:Luxi Sans"
+         xml:space="preserve"><tspan
+           y="71.571785"
+           x="-412.09961"
+           id="tspan6846"
+           sodipodi:role="line">Beta</tspan></text>
+    </g>
   </g>
 </svg>

@@ -179,6 +179,13 @@ public:
     ~PrismBuilder() {};
 };
 
+class RevolveBuilder : public BuilderND {
+public:
+    RevolveBuilder(map< string, mValue > json, TopoDS_Shape shape);
+    ~RevolveBuilder() {};
+};
+
+
     
 
 

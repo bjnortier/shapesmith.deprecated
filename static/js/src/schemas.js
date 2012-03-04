@@ -193,6 +193,23 @@ SS.schemas.prism = {
     }
 };
 
+SS.schemas.revolve = {
+    description: "Revolve",
+    type: 'object',
+    properties: {
+        origin: SS.schemas.originSchema,
+        parameters: {
+            type: 'object',
+            properties: {
+                'u' : {type: 'number'},
+                'v' : {type: 'number'},
+                'w' : {type: 'number'},
+                'angle' : {type: 'number'}
+                }
+        }
+    }
+};
+
 SS.schemas.intersect = {
     description: "Intersect",
     type: 'object',

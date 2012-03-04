@@ -113,7 +113,24 @@ validate_geom_test_() ->
 		   geom({[{<<"type">>, <<"prism">>},
 			  {<<"origin">>, Origin},
                           {<<"parameters">>, {[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]}},
-                          {<<"children">>, [<<"abc">>, <<"123">>]}]}))
+                          {<<"children">>, [<<"abc">>, <<"123">>]}]})),
+     ?_assertEqual({error, {[{<<"children">>, <<"only one child allowed">>}]}},
+		   geom({[{<<"type">>, <<"revolve">>},
+			  {<<"origin">>, Origin},
+                          {<<"parameters">>, {[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}, {<<"angle">>, 360}]}},
+                          {<<"children">>, [<<"abc">>, <<"123">>]}]})),
+     ?_assertEqual({error, {[{<<"angle">>, <<"must be non-zero">>}]}},
+		   geom({[{<<"type">>, <<"revolve">>},
+			  {<<"origin">>, Origin},
+                          {<<"parameters">>, {[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}, {<<"angle">>, <<"foo">>}]}},
+                          {<<"children">>, [<<"abc">>]}
+                         ]})),
+     ?_assertEqual({error, {[{<<"angle">>, <<"must be non-zero">>}]}},
+		   geom({[{<<"type">>, <<"revolve">>},
+			  {<<"origin">>, Origin},
+                          {<<"parameters">>, {[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}, {<<"angle">>, 0}]}},
+                          {<<"children">>, [<<"abc">>]}
+                         ]}))
 
     ].
 -endif.
@@ -188,6 +205,19 @@ validate_geom_type(<<"prism">>, Props) ->
 	_ ->
 	    {error, {[{<<"children">>, <<"only one child allowed">>}]}}
     end;
+validate_geom_type(<<"revolve">>, Props) ->
+    case lists:keyfind(<<"children">>, 1, Props) of
+	false ->
+	    {error, {[{<<"missing">>, <<"children">>}]}};
+	{_, [_Child]} ->
+            validate_primitive(Props, [{<<"u">>, fun number/1},
+                                       {<<"v">>, fun number/1},
+                                       {<<"w">>, fun number/1},
+                                       {<<"angle">>, fun not_zero/1}
+                                      ]);
+	_ ->
+	    {error, {[{<<"children">>, <<"only one child allowed">>}]}}
+    end;
 validate_geom_type(<<"union">>, Props) ->
     validate_boolean(Props);
 validate_geom_type(<<"subtract">>, Props) ->
@@ -257,8 +287,8 @@ validate_geom_type_test_() ->
 					  {<<"parameters">>, 
 					   {[{<<"r">>, -4}]}}])),
      ?_assertEqual(
-        {error, {[{<<"u">>, <<"cannot be zero">>},
-		  {<<"w">>, <<"cannot be zero">>}]}}, 
+        {error, {[{<<"u">>, <<"must be non-zero">>},
+		  {<<"w">>, <<"must be non-zero">>}]}}, 
         validate_geom_type(<<"cuboid">>, [{<<"origin">>, Origin},
 					  {<<"parameters">>,
 					   {[{<<"u">>, 0},
@@ -511,7 +541,7 @@ not_zero(Value) when is_integer(Value) andalso Value =/= 0 ->
 not_zero(Value) when is_float(Value) andalso Value =/= 0 ->
     ok;
 not_zero(_) ->
-    {error, <<"cannot be zero">>}.
+    {error, <<"must be non-zero">>}.
 
 zero_or_one_integer(Value) when is_integer(Value) andalso Value =:= 0 ->
     ok;

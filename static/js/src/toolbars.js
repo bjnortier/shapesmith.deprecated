@@ -75,6 +75,8 @@ SS.creators.rectangle2d = SS.Rectangle2DCreator;
 SS.creators.triangle2d = SS.Triangle2DCreator;
 SS.creators.text2d = SS.Text2DCreator;
 SS.creators.prism = SS.PrismCreator;
+SS.creators.revolve = SS.RevolveCreator;
+
 
 function create_primitive(type) {
 
@@ -255,6 +257,10 @@ $(document).ready(function() {
     new Action('Prism', '/static/images/prism.png', 
                function(selected) { 
                    new SS.PrismCreator(create_modifier(selected, 'prism'));
+               }).render($('#modifiers'));
+    new Action('Revolve', '/static/images/revolve.png', 
+               function(selected) { 
+                   new SS.RevolveCreator(create_modifier(selected, 'revolve'));
                }).render($('#modifiers'));
     
     //

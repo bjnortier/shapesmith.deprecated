@@ -118,7 +118,8 @@ string create_geometry(string id, map< string, mValue > json) {
     // Modifiers
     } else if (geomType == "prism") {
         return create_modifier<PrismBuilder>(id, json);
-
+    } else if (geomType == "revolve") {
+        return create_modifier<RevolveBuilder>(id, json);
     
     // Booleans
     } else if (geomType == "union") {

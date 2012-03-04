@@ -488,7 +488,6 @@ void BuilderND::Mesh() {
 }
 
 void BuilderND::PostProcess(map< string, mValue > json) {
-    this->ApplyOrigin(json);
     this->ApplyTransforms(json);
     this->Mesh();
 }
@@ -582,6 +581,26 @@ PrismBuilder::PrismBuilder(map< string, mValue > json, TopoDS_Shape shape) {
     gp_Vec prismVec(u,v,w);
 
     shape_ = BRepPrimAPI_MakePrism(shape, prismVec);
+    PostProcess(json);
+}
+
+RevolveBuilder::RevolveBuilder(map< string, mValue > json, TopoDS_Shape shape) {
+
+    map< string, mValue > origin = json["origin"].get_obj();
+    map< string, mValue > parameters = json["parameters"].get_obj();
+    
+    double x = Util::to_d(origin["x"]);
+    double y = Util::to_d(origin["y"]);
+    double z = Util::to_d(origin["z"]);
+    
+    double u = Util::to_d(parameters["u"]);
+    double v = Util::to_d(parameters["v"]);
+    double w = Util::to_d(parameters["w"]);
+    
+    double angle = Util::to_d(parameters["angle"]);
+    
+    gp_Ax1 axis(gp_Pnt(x,y,z),gp_Dir(u,v,w));
+    shape_ = BRepPrimAPI_MakeRevol(shape,axis,angle/180*M_PI);
     PostProcess(json);
 }
 
