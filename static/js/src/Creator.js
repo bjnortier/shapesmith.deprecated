@@ -68,6 +68,7 @@ SS.PrimitiveCreator = SS.Creator.extend({
 
         if (!this.originalNode) {
             this.setDefaultParamters();
+            this.trigger('change');
         }
     },
 

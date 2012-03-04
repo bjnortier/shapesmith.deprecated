@@ -1,3 +1,38 @@
+function renderValue(clazz, key,  value, context, jsonSchema) {
+
+    var item = jsonSchema.properties[key];
+    if (item.type === 'array') {
+        
+        var elements = '';
+        for (var k = 0; k < context[key].length; ++k) {
+
+            var object = context[key][k];
+            var subSchema = jsonSchema.properties[key].items;
+            var items = [];
+            for (var subKey in object) {
+                var template = '<tr><td>{{label}}</td><td>' + renderValue(clazz, subKey, object[subKey], object[subKey], subSchema) + '</td></tr>';
+                items.push($.mustache(template, {label: subKey, 
+                                                 value: context[key][k][subKey],
+                                                 key: subKey + '_' + k}));
+            }
+
+            var template = '<table><tr><td>{{index}}</td><td><table>{{#items}}{{{.}}}{{/items}}</table></td></tr></table>';
+            var view = {
+                index: k,
+                items: items
+            };
+            var x = $.mustache(template, view);
+            elements += x;
+        }
+        return elements;
+    } else {
+        return $.mustache('<span class="{{clazz}}">{{value}}</span>', 
+                          {value: value,
+                           clazz: clazz});
+    }
+    
+}
+
 function renderInputElement(key, context, jsonSchema) {
     
     var item = jsonSchema.properties[key];
@@ -63,8 +98,7 @@ function renderTransform(geomNode, transformIndex) {
 	    originArr.push({key: key, 
 		            value: transform.origin[key], 
 		            'edit-class': 'edit-transform target-' + geomNode.id + '-' + transformIndex,
-		            editing: transform.editing,
-                            inputElement: renderInputElement(key, transform.origin, schema.properties.origin)
+		            editing: transform.editing
                            });
 	}
 	var originTemplate = '<table>{{#originArr}}<tr><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}</td></tr>{{/originArr}}</table>';
@@ -77,8 +111,7 @@ function renderTransform(geomNode, transformIndex) {
         paramsArr.push({key: key,
                         value: transform.parameters[key],
                         'edit-class': 'edit-transform target-' + geomNode.id + '-' + transformIndex,
-                        editing: transform.editing,
-                        inputElement: renderInputElement(key, transform.parameters, schema.properties.parameters)
+                        editing: transform.editing
                        });
     }
     var parametersTemplate = '<table>{{#paramsArr}}<tr ><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}</td></tr>{{/paramsArr}}</table>';
@@ -110,11 +143,10 @@ function renderNode(geomNode) {
 	    originArr.push({key: key, 
 		            value: geomNode.origin[key], 
 		            clazz: 'edit-geom target-' + geomNode.id,
-		            editing: geomNode.editing,
-                            inputElement: renderInputElement(key, geomNode.origin, schema.properties.origin)
+		            editing: geomNode.editing
                            });
 	}
-	var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{clazz}}">{{value}}</span>{{/editing}}{{#editing}}{{{inputElement}}}{{/editing}}</td></tr>{{/originArr}}</table>';
+	var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{clazz}}">{{value}}</span>{{/editing}}</td></tr>{{/originArr}}</table>';
 	var originTable = $.mustache(originTemplate, {originArr : originArr});
     }
 
@@ -123,14 +155,16 @@ function renderNode(geomNode) {
     if (schema.properties.parameters) {
         for (key in geomNode.parameters) {
             paramsArr.push({key: key,
-                            value: geomNode.parameters[key],
-                            clazz: 'edit-geom target-' + geomNode.id,
-                            editing: geomNode.editing,
-                            inputElement: renderInputElement(key,  geomNode.parameters, schema.properties.parameters)
+                            element: renderValue('edit-geom target-' + geomNode.id, 
+                                                 key, 
+                                                 geomNode.parameters[key],
+                                                 geomNode.parameters, 
+                                                 schema.properties.parameters),
+                            editing: geomNode.editing
                            });
         }
     }
-    var parametersTemplate = '<table>{{#paramsArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{clazz}}">{{value}}</span>{{/editing}}{{#editing}}{{{inputElement}}}{{/editing}}</td></tr>{{/paramsArr}}</table>';
+    var parametersTemplate = '<table>{{#paramsArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}{{{element}}}{{/editing}}</td></tr>{{/paramsArr}}</table>';
     var paramsTable = $.mustache(parametersTemplate, {paramsArr : paramsArr});
 
     // Transforms
