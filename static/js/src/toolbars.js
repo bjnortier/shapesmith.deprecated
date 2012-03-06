@@ -77,7 +77,7 @@ SS.creators.text2d = SS.Text2DCreator;
 SS.creators.prism = SS.PrismCreator;
 SS.creators.revolve = SS.RevolveCreator;
 SS.creators.bezier = SS.BezierCreator;
-
+SS.creators.ellipse1d = SS.Ellipse1DCreator;
 
 function create_primitive(type) {
 
@@ -240,6 +240,10 @@ $(document).ready(function() {
                    create_primitive('text2d');
 	       }).render($('#2Dprimitives'));
 
+    new Action('Ellipse 1D', '/static/images/ellipse1d.png',
+               function() {
+                   create_primitive('ellipse1d');
+               }).render($('#1Dprimitives'));
     new Action('Bezier', '/static/images/bezier.png',
                function() {
                    create_primitive('bezier');

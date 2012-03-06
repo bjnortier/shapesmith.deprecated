@@ -110,11 +110,31 @@ SS.schemas.ellipse2d = {
             type: 'object',
             properties: {
                 'r1' : {type: 'number'},
-                'r2' : {type: 'number'}
+                'r2' : {type: 'number'},
+                'from_angle' : {type: 'number'},
+                'to_angle' : {type: 'number'}
                 }
         }
     }
 };
+
+SS.schemas.ellipse1d = {
+    description: "Ellipse1D",
+    type: 'object',
+    properties: {
+        origin: SS.schemas.originSchema,
+        parameters: {
+            type: 'object',
+            properties: {
+                'r1' : {type: 'number'},
+                'r2' : {type: 'number'},
+                'from_angle' : {type: 'number'},
+                'to_angle' : {type: 'number'}
+                }
+        }
+    }
+};
+
 
 SS.schemas.rectangle2d = {
     description: "Rectangle2D",

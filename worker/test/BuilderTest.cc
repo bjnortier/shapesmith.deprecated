@@ -147,7 +147,8 @@ TEST(BuilderTest, EllipseWithMajorSmallerThanMinor) {
     mObject parameters;
     parameters["r1"] = 5.0;
     parameters["r2"] = 10.0;
-    
+    parameters["from_angle"] = 30.0;
+    parameters["to_angle"] = 45.0;
     
     mObject json;
     json["origin"] = origin;

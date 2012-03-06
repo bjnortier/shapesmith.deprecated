@@ -139,7 +139,7 @@
   <script type="text/javascript" src="/static/js/src/PrismCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/RevolveCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/BezierCreator.js"></script>
-
+  <script type="text/javascript" src="/static/js/src/Ellipse1DCreator.js"></script>
 
   <script type="text/javascript" src="/static/js/src/TransformerManager.js"></script>
   <script type="text/javascript" src="/static/js/src/Transformer.js"></script>

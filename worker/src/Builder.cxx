@@ -203,18 +203,41 @@ Ellipse2DBuilder::Ellipse2DBuilder(map< string, mValue > json) {
     double r1 = Util::to_d(parameters["r1"]);
     double r2 = Util::to_d(parameters["r2"]);
     
+    double from_angle = Util::to_d(parameters["from_angle"], 0);
+    double to_angle = Util::to_d(parameters["to_angle"], 360);
+    
+    bool majorBigger = r1 >= r2;
+    
+    BRepBuilderAPI_MakeWire wire;
+    
     gp_Elips ellipse;
-    if (r1 > r2) {
-        ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), r1, r2);
-    } else {
-        ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), r2, r1);
+    if (!majorBigger) {
+        from_angle = from_angle - 90;
+        to_angle = to_angle - 90;
+        double tmp = r1;
+        r1 = r2;
+        r2 = tmp;
     }
-     
-    TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI*2).Edge();
-    TopoDS_Wire wire = BRepBuilderAPI_MakeWire(edge);
+
+    ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), r1, r2);
+    wire.Add(BRepBuilderAPI_MakeEdge(ellipse, from_angle/180*M_PI, to_angle/180*M_PI).Edge());
+
+    if (!((from_angle == 0) && (to_angle == 360))) {
+        wire.Add(BRepBuilderAPI_MakeEdge(gp_Pnt(r1*cos(to_angle/180*M_PI),
+                                                r2*sin(to_angle/180*M_PI),
+                                                0),
+                                        gp_Pnt(0,0,0)));
+        wire.Add(BRepBuilderAPI_MakeEdge(gp_Pnt(0,0,0),
+                                         gp_Pnt(r1*cos(from_angle/180*M_PI),
+                                                r2*sin(from_angle/180*M_PI),
+                                                0)
+                                         ));
+
+    }
+    
     TopoDS_Shape shape = BRepBuilderAPI_MakeFace(wire);
     
-    if (r1 > r2) {
+    if (majorBigger) {
         shape_ = shape;
     } else {
         shape_ = rotate90DegreesAroundZ(shape);
@@ -275,22 +298,29 @@ Ellipse1DBuilder::Ellipse1DBuilder(map< string, mValue > json) {
     double r1 = Util::to_d(parameters["r1"]);
     double r2 = Util::to_d(parameters["r2"]);
     
-    gp_Elips ellipse;
-    if (r1 < r2) {
-        ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), r2, r1);
-    } else {
-        ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), r1, r2);
-    }
+    double from_angle = Util::to_d(parameters["from_angle"], 0);
+    double to_angle = Util::to_d(parameters["to_angle"], 360);
     
-	TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI*2).Edge();
+    bool majorBigger = r1 >= r2;
     
     BRepBuilderAPI_MakeWire wire;
-    wire.Add(edge);
     
-    if (r1 < r2) {
-        shape_ = rotate90DegreesAroundZ(wire);
-    } else {
+    gp_Elips ellipse;
+    if (!majorBigger) {
+        from_angle = from_angle - 90;
+        to_angle = to_angle - 90;
+        double tmp = r1;
+        r1 = r2;
+        r2 = tmp;
+    }
+    
+    ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), r1, r2);
+    wire.Add(BRepBuilderAPI_MakeEdge(ellipse, from_angle/180*M_PI, to_angle/180*M_PI).Edge());
+    
+    if (majorBigger) {
         shape_ = wire;
+    } else {
+        shape_ = rotate90DegreesAroundZ(wire);
     }
     
     PostProcess(json);

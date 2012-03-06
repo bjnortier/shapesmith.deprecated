@@ -7,7 +7,7 @@ using namespace json_spirit;
 
 class Util {
 public:
-    static double to_d(mValue value);
+    static double to_d(mValue value, double default_value = 0);
 };
 
 #endif

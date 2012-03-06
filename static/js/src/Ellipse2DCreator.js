@@ -6,10 +6,12 @@ SS.Ellipse2DCreator = SS.PrimitiveCreator.extend({
         SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
         this.views = this.views.concat([
-            new SS.Ellipse2DPreview({model: this}),
+            new SS.EllipsePreview({model: this}),
             new SS.DraggableUVCorner({model: this, uKey: 'r1', vKey: 'r2'}),
             new SS.Ellipse2DDimensionArrows({model: this}),
             new SS.Ellipse2DDimensionText({model: this}),
+            new SS.DraggableAngleCorner({model: this, key: 'from_angle', priority: 2}),
+            new SS.DraggableAngleCorner({model: this, key: 'to_angle', priority: 3}),
         ]);
         this.trigger('change', this);
     },
@@ -17,6 +19,9 @@ SS.Ellipse2DCreator = SS.PrimitiveCreator.extend({
     setDefaultParamters: function() {
         this.node.parameters.r1 = 20;
         this.node.parameters.r2 = 10;
+        this.node.parameters.from_angle = 0;
+        this.node.parameters.to_angle = 360;
+
     },
 
     mouseDownOnUV: function(corner) {
@@ -33,7 +38,7 @@ SS.Ellipse2DCreator = SS.PrimitiveCreator.extend({
 
 });
 
-SS.Ellipse2DPreview = SS.PreviewWithOrigin.extend({
+SS.EllipsePreview = SS.PreviewWithOrigin.extend({
 
     initialize: function() {
         SS.PreviewWithOrigin.prototype.initialize.call(this);
@@ -47,30 +52,30 @@ SS.Ellipse2DPreview = SS.PreviewWithOrigin.extend({
         var origin = this.model.node.origin;
         var r1 = this.model.node.parameters.r1;
         var r2 = this.model.node.parameters.r2;
-        var h = this.model.node.parameters.h;
+        var fromAngle =  this.model.node.parameters.from_angle;
+        var toAngle =  this.model.node.parameters.to_angle || 360;
 
-        if (r1 && r2) {
+        var ellipseGeom = new THREE.EllipseGeometry(r1, r2, fromAngle, toAngle);
+	var ellipseFace = new THREE.Mesh(ellipseGeom, SS.materials.faceMaterial);
+        ellipseFace.doubleSided = true;
+        this.sceneObject.add(ellipseFace);
 
-	    var ellipseGeom = new THREE.EllipseGeometry(r1, r2);
-	    var ellipseFace = new THREE.Mesh(ellipseGeom, SS.materials.faceMaterial);
-            ellipseFace.doubleSided = true;
-            this.sceneObject.add(ellipseFace);
+        var ellipseWireGeom = new THREE.Geometry();
+        var arcAngle = toAngle - fromAngle;
+        arcAngle = arcAngle < 0 ? arcAngle + 360 : arcAngle;
+	for(var i = 0; i <= 50; ++i) {
+	    var theta = (fromAngle + arcAngle*i/50)/180*Math.PI;
+	    var dx = r1*Math.cos(theta);
+	    var dy = r2*Math.sin(theta);
+	    ellipseWireGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+	}
+	var ellipseWire = new THREE.Line(ellipseWireGeom, SS.materials.lineMaterial);
+        this.sceneObject.add(ellipseWire);
 
-            var ellipseWireGeom = new THREE.Geometry();
-	    for(var i = 0; i <= 50; ++i) {
-		var theta = Math.PI*2*i/50;
-		var dx = r1*Math.cos(theta);
-		var dy = r2*Math.sin(theta);
-		ellipseWireGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
-	    }
-	    var ellipseWire = new THREE.Line(ellipseWireGeom, SS.materials.lineMaterial);
-            this.sceneObject.add(ellipseWire);
-
-            if (origin.z !== 0) {
-	        var ellipseBaseWire = new THREE.Line(ellipseWireGeom, SS.materials.lineMaterial);
-                ellipseBaseWire.position = new THREE.Vector3(0, 0, -origin.z);
-                this.sceneObject.add(ellipseBaseWire);
-            }
+        if (origin.z !== 0) {
+	    var ellipseBaseWire = new THREE.Line(ellipseWireGeom, SS.materials.lineMaterial);
+            ellipseBaseWire.position = new THREE.Vector3(0, 0, -origin.z);
+            this.sceneObject.add(ellipseBaseWire);
         }
        
         this.postRender();
