@@ -26,14 +26,14 @@
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="-366.87193"
-     inkscape:cy="901.03346"
+     inkscape:zoom="0.24748737"
+     inkscape:cx="-724.46593"
+     inkscape:cy="630.02542"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
-     inkscape:window-width="1920"
-     inkscape:window-height="967"
+     inkscape:window-width="1806"
+     inkscape:window-height="951"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1">
@@ -1118,6 +1118,46 @@
      id="layer1"
      inkscape:groupmode="layer"
      inkscape:label="Layer 1">
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect4153"
+       width="20"
+       height="20"
+       x="-500"
+       y="342.36218"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/bezier.png"
+       inkscape:export-xdpi="19.672131"
+       inkscape:export-ydpi="19.672131" />
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect4155"
+       width="20"
+       height="20"
+       x="-590"
+       y="462.36218"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/bezier.png"
+       inkscape:export-xdpi="19.672131"
+       inkscape:export-ydpi="19.672131" />
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect4157"
+       width="20"
+       height="20"
+       x="-610"
+       y="322.36218"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/bezier.png"
+       inkscape:export-xdpi="19.672131"
+       inkscape:export-ydpi="19.672131" />
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect4159"
+       width="20"
+       height="20"
+       x="-470"
+       y="482.36218"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/bezier.png"
+       inkscape:export-xdpi="19.672131"
+       inkscape:export-ydpi="19.672131" />
     <path
        style="fill:url(#linearGradient3303);fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
        d="m 1280,-307.63782 0,160 60,0 0,80.000003 160,0 0,-160.000003 -60,0 0,-80 -160,0 z"
@@ -1984,5 +2024,30 @@
            id="tspan6846"
            sodipodi:role="line">Beta</tspan></text>
     </g>
+    <path
+       style="fill:none;stroke:#8d8d8d;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m -580,472.36218 120,20"
+       id="path4149"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/bezier.png"
+       inkscape:export-xdpi="19.672131"
+       inkscape:export-ydpi="19.672131" />
+    <path
+       style="fill:none;stroke:#8d8d8d;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m -590,332.36218 100,20"
+       id="path4151"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/bezier.png"
+       inkscape:export-xdpi="19.672131"
+       inkscape:export-ydpi="19.672131" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m -600,332.36218 c 120,20 20,140 140,160"
+       id="path3271"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/bezier.png"
+       inkscape:export-xdpi="19.672131"
+       inkscape:export-ydpi="19.672131" />
   </g>
 </svg>
