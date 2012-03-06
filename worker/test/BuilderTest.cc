@@ -34,6 +34,48 @@ TEST(BuilderTest, Ellipse1d) {
     
 }
 
+TEST(BuilderTest, Bezier1d) {
+    
+    mObject origin;
+    origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
+    mObject parameters;
+
+    mObject v0; v0["u"] = 0.0; v0["v"] = 0.0; v0["w"] = 0.0;
+    mObject v1; v1["u"] = 10.0; v1["v"] = 0.0; v1["w"] = 0.0;
+    mObject v2; v2["u"] = 0.0; v2["v"] = 10.0; v2["w"] = 0.0;
+    mObject v3; v3["u"] = 10.0; v3["v"] = 10.0; v3["w"] = 0.0;
+
+    mArray vertices;
+    vertices.push_back(v0);
+    vertices.push_back(v1);
+    vertices.push_back(v2);
+    vertices.push_back(v3);
+    parameters["vertices"] = vertices;
+                               
+    
+    mObject json;
+    json["origin"] = origin;
+    json["parameters"] = parameters;
+    
+    Bezier1DBuilder builder(json);
+    
+    TopoDS_Shape shape = builder.shape();
+    
+    ASSERT_FALSE(shape.IsNull());
+    
+    auto_ptr<Tesselator> tesselator(new Tesselator(shape));
+    mValue tesselation = tesselator->Tesselate();
+    
+    mArray facesTesselation = tesselation.get_obj()["faces"].get_obj()["positions"].get_array();
+    mArray edgeTesselation = tesselation.get_obj()["edges"].get_obj()["positions"].get_array();
+    
+    
+    ASSERT_EQ(facesTesselation.size(), 0);
+    ASSERT_NE(edgeTesselation.size(), 0);
+    
+    
+}
+
 TEST(BuilderTest, Ellipse2d) {
     
     mObject origin;

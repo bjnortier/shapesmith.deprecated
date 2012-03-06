@@ -76,6 +76,7 @@ SS.creators.triangle2d = SS.Triangle2DCreator;
 SS.creators.text2d = SS.Text2DCreator;
 SS.creators.prism = SS.PrismCreator;
 SS.creators.revolve = SS.RevolveCreator;
+SS.creators.bezier = SS.BezierCreator;
 
 
 function create_primitive(type) {
@@ -238,6 +239,11 @@ $(document).ready(function() {
                function() { 
                    create_primitive('text2d');
 	       }).render($('#2Dprimitives'));
+
+    new Action('Bezier', '/static/images/bezier.png',
+               function() {
+                   create_primitive('bezier');
+               }).render($('#1Dprimitives'));
     
     //
     // Booleans

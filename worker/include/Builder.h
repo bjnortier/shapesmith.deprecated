@@ -132,6 +132,12 @@ public:
     virtual ~Ellipse1DBuilder() {};
 };
 
+class Bezier1DBuilder : public Builder1D {
+public:
+    Bezier1DBuilder(map< string, mValue > json);
+    virtual ~Bezier1DBuilder() {};
+};
+
 
 
 #pragma mark Booleans

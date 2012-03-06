@@ -457,7 +457,7 @@ var SS = SS || {};
         var addRecursively = function(child) {
             if (child.geometry) {
                 child.geometry.computeBoundingBox();
-                boundingBoxes.push(child.geometry.boundingBox);
+                child.geometry.boundingBox && boundingBoxes.push(child.geometry.boundingBox);
             }
             for (i in child.children) {
                 addRecursively(child.children[i]);
@@ -488,7 +488,7 @@ var SS = SS || {};
         var boundingBoxes = [];
         var addFunction = function(child) {
             child.geometry.computeBoundingBox();
-            boundingBoxes.push(child.geometry.boundingBox);
+            child.geometry.boundingBox && boundingBoxes.push(child.geometry.boundingBox);
         };
             
         geomNode.sceneObjects.edges.children.map(addFunction);

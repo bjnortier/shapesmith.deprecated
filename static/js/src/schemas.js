@@ -157,6 +157,33 @@ SS.schemas.triangle2d = {
     }
 };
 
+SS.schemas.bezier = {
+    description: "Bezier",
+    type: 'object',
+    properties: {
+        origin: SS.schemas.originSchema,
+        parameters: {
+            type: 'object',
+            properties: {
+                'vertices' : {
+                    type: 'array',
+                    items: { 
+                        type: 'object',
+                        properties: {
+                            'u' : {type: 'number'},
+                            'v' : {type: 'number'},
+                            'w' : {type: 'number'}
+                        }
+                    },
+                    minItems: 4,
+                    maxItems: 4
+                }
+            }
+        }
+    }
+};
+
+
 SS.schemas.text2d = {
     description: "Text2D",
     type: 'object',

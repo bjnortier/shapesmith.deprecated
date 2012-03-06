@@ -138,6 +138,7 @@
   <script type="text/javascript" src="/static/js/src/Text2DCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/PrismCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/RevolveCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/BezierCreator.js"></script>
 
 
   <script type="text/javascript" src="/static/js/src/TransformerManager.js"></script>

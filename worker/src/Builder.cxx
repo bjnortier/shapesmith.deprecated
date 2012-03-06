@@ -293,6 +293,31 @@ Ellipse1DBuilder::Ellipse1DBuilder(map< string, mValue > json) {
     PostProcess(json);
 }
 
+Bezier1DBuilder::Bezier1DBuilder(map< string, mValue > json) {
+    map< string, mValue > parameters = json["parameters"].get_obj();
+    
+    mArray vertices = parameters["vertices"].get_array();
+    gp_Pnt points[4];
+    for (unsigned int k = 0; k < vertices.size(); ++k) {
+        map< string, mValue > vertex = vertices[k].get_obj();
+        points[k] = gp_Pnt(Util::to_d(vertex["u"]),
+                           Util::to_d(vertex["v"]),
+                           Util::to_d(vertex["w"]));
+    }
+    
+    TColgp_Array1OfPnt aPoles (1,4);
+    aPoles(1) = points[0];
+    aPoles(2) = points[1];
+    aPoles(3) = points[2];
+    aPoles(4) = points[3];
+    Handle(Geom_BezierCurve) aCurve = new Geom_BezierCurve(aPoles);
+    BRepBuilderAPI_MakeWire MainShape_Wire;
+    TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(aCurve);
+    
+    shape_ = edge;
+    
+    PostProcess(json);
+}
 
 
 class TextComposer {

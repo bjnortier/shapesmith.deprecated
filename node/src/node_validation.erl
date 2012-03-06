@@ -109,6 +109,31 @@ validate_geom_test_() ->
                                                                  {[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]}
                                                                 ]}]}}
                          ]})),
+
+     ?_assertEqual({error, {[{<<"vertices">>, <<"four vertices required">>}]}},
+		   geom({[{<<"type">>, <<"bezier">>},
+			  {<<"origin">>, Origin},
+                          {<<"parameters">>, {[{<<"vertices">>, [{[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]}]}]}}
+                         ]})),
+     ?_assertEqual({error, {[{<<"vertices">>, <<"all coordinates must be numbers">>}]}},
+		   geom({[{<<"type">>, <<"bezier">>},
+			  {<<"origin">>, Origin},
+                          {<<"parameters">>, {[{<<"vertices">>, [{[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]},
+                                                                 {[{<<"u">>, 0}, {<<"v">>, <<"a">>}, {<<"w">>, 0}]},
+                                                                 {[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]},
+                                                                 {[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 1}]}
+                                                                ]}]}}
+                         ]})),
+     ?_assertEqual(ok,
+		   geom({[{<<"type">>, <<"bezier">>},
+			  {<<"origin">>, Origin},
+                          {<<"parameters">>, {[{<<"vertices">>, [{[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]},
+                                                                 {[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]},
+                                                                 {[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]},
+                                                                 {[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]}
+                                                                ]}]}}
+                         ]})),
+
      ?_assertEqual({error, {[{<<"children">>, <<"only one child allowed">>}]}},
 		   geom({[{<<"type">>, <<"prism">>},
 			  {<<"origin">>, Origin},
@@ -189,10 +214,10 @@ validate_geom_type(<<"text2d">>, Props) ->
 			       {<<"text">>, fun non_empty_string/1},
                                {<<"font">>, fun supported_fonts/1}
 			      ]);
-
-
 validate_geom_type(<<"triangle2d">>, Props) ->
     validate_primitive(Props, [{<<"vertices">>, fun triangle_vertices/1}]);
+validate_geom_type(<<"bezier">>, Props) ->
+    validate_primitive(Props, [{<<"vertices">>, fun bezier_vertices/1}]);
 validate_geom_type(<<"prism">>, Props) ->
     case lists:keyfind(<<"children">>, 1, Props) of
 	false ->
@@ -550,9 +575,19 @@ zero_or_one_integer(Value) when is_integer(Value) andalso Value =:= 1 ->
 zero_or_one_integer(_) ->
     {error, <<"must be 0 or one">>}.
 
+bezier_vertices([{V1}, {V2}, {V3}, {V4}]) ->
+    case {vertex(V1), vertex(V2), vertex(V3), vertex(V4)} of
+        {ok, ok, ok, ok} ->
+            ok;
+        _ ->
+            {error, <<"all coordinates must be numbers">>}
+    end;
+bezier_vertices(_) ->
+    {error, <<"four vertices required">>}.
+
 
 triangle_vertices([{V1}, {V2}, {V3}]) ->
-    case {triangle_vertex(V1), triangle_vertex(V2), triangle_vertex(V3)} of
+    case {vertex(V1), vertex(V2), vertex(V3)} of
         {ok, ok, ok} ->
             ok;
         _ ->
@@ -561,17 +596,17 @@ triangle_vertices([{V1}, {V2}, {V3}]) ->
 triangle_vertices(_) ->
     {error, <<"three vertices required">>}.
 
-triangle_vertex(Vertex) ->
+vertex(Vertex) ->
     case {lists:keyfind(<<"u">>, 1, Vertex), lists:keyfind(<<"v">>, 1, Vertex), lists:keyfind(<<"w">>, 1, Vertex)}of
-         {{_, U}, {_, V}, {_, W}} ->
-             case {number(U), number(V), number(W)} of
-                 {ok, ok, ok} ->
-                     ok;
-                 _ ->
-                     {error, not_all_numbers}
-             end;
-         _ ->
-             {error, not_all_numbers}
+        {{_, U}, {_, V}, {_, W}} ->
+            case {number(U), number(V), number(W)} of
+                {ok, ok, ok} ->
+                    ok;
+                _ ->
+                    {error, not_all_numbers}
+            end;
+        _ ->
+            {error, not_all_numbers}
     end.
 
 
