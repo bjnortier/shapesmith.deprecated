@@ -137,6 +137,8 @@ SS.DraggableVertexCorner = SS.DraggableCorner.extend({
         vertex.v = position.y - origin.y;
     },
 
+    priority: 2,
+
 });
 
 SS.VertexHeightCursoid = SS.HeightCursoid.extend({

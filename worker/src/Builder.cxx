@@ -284,10 +284,13 @@ Ellipse1DBuilder::Ellipse1DBuilder(map< string, mValue > json) {
     
 	TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(ellipse, 0, M_PI*2).Edge();
     
+    BRepBuilderAPI_MakeWire wire;
+    wire.Add(edge);
+    
     if (r1 < r2) {
-        shape_ = rotate90DegreesAroundZ(edge);
+        shape_ = rotate90DegreesAroundZ(wire);
     } else {
-        shape_ = edge;
+        shape_ = wire;
     }
     
     PostProcess(json);
@@ -311,10 +314,10 @@ Bezier1DBuilder::Bezier1DBuilder(map< string, mValue > json) {
     aPoles(3) = points[2];
     aPoles(4) = points[3];
     Handle(Geom_BezierCurve) aCurve = new Geom_BezierCurve(aPoles);
-    BRepBuilderAPI_MakeWire MainShape_Wire;
-    TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(aCurve);
+    BRepBuilderAPI_MakeWire wire;
+    wire.Add(BRepBuilderAPI_MakeEdge(aCurve));
     
-    shape_ = edge;
+    shape_ = wire;
     
     PostProcess(json);
 }
@@ -517,7 +520,7 @@ void BuilderND::PostProcess(map< string, mValue > json) {
     this->Mesh();
 }
 
-TopoDS_Shape create_compound(TopoDS_Shape shape, TopExp_Explorer it) {
+TopoDS_Shape create_compound(TopExp_Explorer it) {
     
     TopoDS_Builder builder;
     TopoDS_Compound compound;
@@ -530,11 +533,11 @@ TopoDS_Shape create_compound(TopoDS_Shape shape, TopExp_Explorer it) {
 }
 
 TopoDS_Shape create_compound(TopoDS_Shape shape, TopAbs_ShapeEnum keepType, TopAbs_ShapeEnum avoidParentType) {
-    return create_compound(shape, TopExp_Explorer(shape, keepType, avoidParentType));
+    return create_compound(TopExp_Explorer(shape, keepType, avoidParentType));
 }
 
 TopoDS_Shape create_compound(TopoDS_Shape shape, TopAbs_ShapeEnum keepType) {
-    return create_compound(shape, TopExp_Explorer(shape, keepType));
+    return create_compound(TopExp_Explorer(shape, keepType));
 }
 
 
@@ -550,11 +553,24 @@ TopoDS_Shape performCompoundBoolean(TopoDS_Shape a, TopoDS_Shape b, boolean_op f
     TopoDS_Shape facesB = create_compound(b, TopAbs_FACE, TopAbs_SOLID);
     TopoDS_Shape faces = function(facesA, facesB);
     
+    TopoDS_Builder wires_builder;
+    TopoDS_Compound wires_compound;
+    wires_builder.MakeCompound(wires_compound);
+    
+    for(TopExp_Explorer it(a, TopAbs_WIRE, TopAbs_FACE); it.More(); it.Next()) {
+        wires_builder.Add(wires_compound, it.Current());
+    }
+    for(TopExp_Explorer it(b, TopAbs_WIRE, TopAbs_FACE); it.More(); it.Next()) {
+        wires_builder.Add(wires_compound, it.Current());
+    }
+
     TopoDS_Builder builder;
     TopoDS_Compound compound;
     builder.MakeCompound(compound);
     builder.Add(compound, solids);
     builder.Add(compound, faces);
+    builder.Add(compound, wires_compound);
+
 
     return compound;
 }

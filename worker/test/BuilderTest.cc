@@ -278,6 +278,41 @@ TEST(BuilderTest, Revolve) {
     
 }
 
+TEST(BuilderTest, Boolean1D) {
+    
+    mObject origin;
+    origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
+    
+    mObject ellipse1Parameters;
+    ellipse1Parameters["r1"] = 10.0;
+    ellipse1Parameters["r2"] = 10.0;
+    
+    mObject ellipse2Parameters;
+    ellipse2Parameters["r1"] = 20.0;
+    ellipse2Parameters["r2"] = 10.0;
+    
+    mObject ellipse1Json;
+    ellipse1Json["origin"] = origin;
+    ellipse1Json["parameters"] = ellipse1Parameters;
+    
+    mObject ellipse2Json;
+    ellipse2Json["origin"] = origin;
+    ellipse2Json["parameters"] = ellipse2Parameters;
+
+  
+    Ellipse1DBuilder ellipse1Builder(ellipse1Json);
+    Ellipse1DBuilder ellipse2Builder(ellipse2Json);
+    
+    mObject unionJson;
+    vector<TopoDS_Shape> group1;
+    group1.push_back(ellipse1Builder.shape());
+    group1.push_back(ellipse2Builder.shape());
+    SubtractBuilder union1(unionJson, group1);
+    
+    ASSERT_FALSE(union1.shape().IsNull());
+    
+}
+
 TEST(BuilderTest, Boolean) {
     
     mObject origin;
