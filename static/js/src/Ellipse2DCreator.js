@@ -6,7 +6,7 @@ SS.Ellipse2DCreator = SS.PrimitiveCreator.extend({
         SS.PrimitiveCreator.prototype.initialize.call(this, attributes);
 
         this.views = this.views.concat([
-            new SS.EllipsePreview({model: this}),
+            new SS.EllipsePreview({model: this, is2D: true}),
             new SS.DraggableUVCorner({model: this, uKey: 'r1', vKey: 'r2'}),
             new SS.Ellipse2DDimensionArrows({model: this}),
             new SS.Ellipse2DDimensionText({model: this}),
@@ -55,10 +55,12 @@ SS.EllipsePreview = SS.PreviewWithOrigin.extend({
         var fromAngle =  this.model.node.parameters.from_angle;
         var toAngle =  this.model.node.parameters.to_angle || 360;
 
-        var ellipseGeom = new THREE.EllipseGeometry(r1, r2, fromAngle, toAngle);
-	var ellipseFace = new THREE.Mesh(ellipseGeom, SS.materials.faceMaterial);
-        ellipseFace.doubleSided = true;
-        this.sceneObject.add(ellipseFace);
+        if (this.options.is2D) {
+            var ellipseGeom = new THREE.EllipseGeometry(r1, r2, fromAngle, toAngle);
+	    var ellipseFace = new THREE.Mesh(ellipseGeom, SS.materials.faceMaterial);
+            ellipseFace.doubleSided = true;
+            this.sceneObject.add(ellipseFace);
+        }
 
         var ellipseWireGeom = new THREE.Geometry();
         var arcAngle = toAngle - fromAngle;
