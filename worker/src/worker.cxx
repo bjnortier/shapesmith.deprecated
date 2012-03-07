@@ -124,6 +124,8 @@ string create_geometry(string id, map< string, mValue > json) {
         return create_modifier<RevolveBuilder>(id, json);
     } else if (geomType == "make_face") {
         return create_modifier<FaceBuilder>(id, json);
+    } else if (geomType == "loft") {
+        return create_boolean<LoftBuilder>(id, json);
     
     // Booleans
     } else if (geomType == "union") {

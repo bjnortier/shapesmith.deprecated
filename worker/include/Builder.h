@@ -202,6 +202,24 @@ public:
     ~FaceBuilder() {};
 };
 
+struct could_not_make_loft : std::exception { 
+    char const* what() const throw() { 
+        return "Could not make a loft. Do the wires have the same number of edges?";
+    }  
+};
+struct only_one_wire_per_shape_allowed : std::exception { 
+    char const* what() const throw() { 
+        return "Could not make a loft. Only one wire per shape allowed.";
+    }  
+};
+
+
+class LoftBuilder : public BuilderND {
+public:
+    LoftBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
+    ~LoftBuilder() {};
+};
+
 
 
     

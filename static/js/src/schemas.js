@@ -281,6 +281,12 @@ SS.schemas.make_face = {
     properties: {}
 }
 
+SS.schemas.loft = {
+    description: "Make Face",
+    type: 'object',
+    properties: {}
+}
+
 SS.schemas.translate = {
     description: "Translate",
     type: 'object',

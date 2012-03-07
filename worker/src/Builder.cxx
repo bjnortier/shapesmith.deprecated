@@ -737,6 +737,44 @@ FaceBuilder::FaceBuilder(map< string, mValue > json, TopoDS_Shape child) {
     PostProcess(json);
 }
 
+LoftBuilder::LoftBuilder(map< string, mValue > json, vector<TopoDS_Shape>& children) {
+    
+    BRepOffsetAPI_ThruSections loft_tool(Standard_True);
+
+    
+    for(vector<TopoDS_Shape>::iterator it = children.begin(); it < children.end(); ++it) {
+        TopoDS_Shape child = *it;
+
+        // No loose wires or solids allowed
+        if (TopExp_Explorer(child, TopAbs_WIRE, TopAbs_FACE).More()) {
+            //throw only_wires_allowed();
+        }
+        if (TopExp_Explorer(child, TopAbs_SOLID).More()) {
+            //throw only_wires_allowed();
+        }
+        
+        
+        TopExp_Explorer wireIt(child, TopAbs_WIRE); 
+        loft_tool.AddWire(TopoDS::Wire(wireIt.Current()));
+        
+        wireIt.Next();
+        if (wireIt.More()) {
+            throw only_one_wire_per_shape_allowed();
+        }
+    }
+    
+    loft_tool.CheckCompatibility(Standard_True);
+
+        
+    try {
+        shape_ = loft_tool.Shape();
+    } catch (...) {
+        throw could_not_make_loft();
+    }
+    
+    PostProcess(json);
+}
+
 RevolveBuilder::RevolveBuilder(map< string, mValue > json, TopoDS_Shape shape) {
 
     map< string, mValue > origin = json["origin"].get_obj();

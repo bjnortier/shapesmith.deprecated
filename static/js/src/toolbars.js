@@ -260,7 +260,10 @@ $(document).ready(function() {
                function(selected) { boolean(selected, 'intersect'); }).render($('#boolean'));
     new Action('Explode', '/static/images/explode.png', 
            function(selected) { explode(selected, 'intersect'); }).render($('#edit'));
-
+    new Action('Loft', '/static/images/loft.png', 
+               function(selected) { 
+                   boolean(selected, 'loft'); 
+               }).render($('#boolean'));
     //
     // Modifiers
     //
@@ -276,6 +279,8 @@ $(document).ready(function() {
                function(selected) { 
                    boolean(selected, 'make_face'); 
                }).render($('#modifiers'));
+    
+
     
     //
     // Transformations

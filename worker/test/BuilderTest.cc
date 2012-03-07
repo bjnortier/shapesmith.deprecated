@@ -461,7 +461,7 @@ TEST(BuilderTest, MakeFaceFromWiresNotALoop) {
     vector<TopoDS_Shape> group1;
     group1.push_back(ellipse1Builder.shape());
     group1.push_back(ellipse2Builder.shape());
-    SubtractBuilder union1(unionJson, group1);
+    UnionBuilder union1(unionJson, group1);
     
     ASSERT_FALSE(union1.shape().IsNull());
     
@@ -472,6 +472,51 @@ TEST(BuilderTest, MakeFaceFromWiresNotALoop) {
     } catch (wires_not_a_loop& e) {
         ASSERT_STREQ("Wires are not a loop", e.what());
     }
+    
+}
+
+
+TEST(BuilderTest, Loft) {
+    
+    mObject origin1;
+    origin1["x"] = 0.0; origin1["y"] = 0.0; origin1["z"] = 0.0;
+    
+    mObject origin2;
+    origin2["x"] = 0.0; origin2["y"] = 0.0; origin2["z"] = 10.0;
+    
+    mObject ellipse1Parameters;
+    ellipse1Parameters["r1"] = 10.0;
+    ellipse1Parameters["r2"] = 10.0;
+    ellipse1Parameters["from_angle"] = 0.0;
+    ellipse1Parameters["to_angle"] = 180.0;
+    
+    mObject ellipse2Parameters;
+    ellipse2Parameters["r1"] = 50.0;
+    ellipse2Parameters["r2"] = 50.0;
+    ellipse2Parameters["from_angle"] = 0.0;
+    ellipse2Parameters["to_angle"] = 180.0;
+    
+    mObject ellipse1Json;
+    ellipse1Json["origin"] = origin1;
+    ellipse1Json["parameters"] = ellipse1Parameters;
+    
+    mObject ellipse2Json;
+    ellipse2Json["origin"] = origin2;
+    ellipse2Json["parameters"] = ellipse2Parameters;
+    
+    Ellipse2DBuilder ellipse1Builder(ellipse1Json);
+    Ellipse2DBuilder ellipse2Builder(ellipse2Json);
+    
+    mObject loftJson;
+    vector<TopoDS_Shape> group1;
+    group1.push_back(ellipse1Builder.shape());
+    group1.push_back(ellipse2Builder.shape());
+
+    mObject empty;
+    LoftBuilder loft(loftJson, group1);
+    
+    
+    ASSERT_FALSE(loft.shape().IsNull());
     
 }
     
