@@ -359,6 +359,75 @@ TEST(BuilderTest, MakeFaceFromWires) {
     
 }
 
+TEST(BuilderTest, MakeFaceFromWiresRespectOrientation) {
+    
+    mObject origin;
+    origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
+    
+    mObject ellipse1Parameters;
+    ellipse1Parameters["r1"] = 10.0;
+    ellipse1Parameters["r2"] = 10.0;
+    ellipse1Parameters["from_angle"] = 0.0;
+    ellipse1Parameters["to_angle"] = 90.0;
+    
+    mObject ellipse1Json;
+    ellipse1Json["origin"] = origin;
+    ellipse1Json["parameters"] = ellipse1Parameters;
+    
+    mObject bezier1Parameters;
+    
+    mObject v0; v0["u"] = 0.0; v0["v"] = 0.0; v0["w"] = 0.0;
+    mObject v1; v1["u"] = 2.0; v1["v"] = 2.0; v1["w"] = 0.0;
+    mObject v2; v2["u"] = 2.0; v2["v"] = 2.0; v2["w"] = 0.0;
+    mObject v3; v3["u"] = 10.0; v3["v"] = 0.0; v3["w"] = 0.0;
+    mObject v3_2; v3_2["u"] = 0.0; v3_2["v"] = 10.0; v3_2["w"] = 0.0;
+    
+    mArray vertices1;
+    vertices1.push_back(v0);
+    vertices1.push_back(v1);
+    vertices1.push_back(v2);
+    vertices1.push_back(v3);
+    bezier1Parameters["vertices"] = vertices1;
+    
+    mObject bezier2Parameters;
+    
+    mArray vertices2;
+    vertices2.push_back(v0);
+    vertices2.push_back(v1);
+    vertices2.push_back(v2);
+    vertices2.push_back(v3_2);
+    bezier2Parameters["vertices"] = vertices2;
+    
+    
+    mObject bezier1json;
+    bezier1json["origin"] = origin;
+    bezier1json["parameters"] = bezier1Parameters;
+    
+    mObject bezier2json;
+    bezier2json["origin"] = origin;
+    bezier2json["parameters"] = bezier2Parameters;
+    
+    Ellipse1DBuilder ellipse1Builder(ellipse1Json);
+    Bezier1DBuilder bezier1Builder(bezier1json);
+    Bezier1DBuilder bezier2Builder(bezier2json);
+    
+    mObject unionJson;
+    vector<TopoDS_Shape> group1;
+    group1.push_back(ellipse1Builder.shape());
+    group1.push_back(bezier1Builder.shape());
+    group1.push_back(bezier2Builder.shape());
+    SubtractBuilder union1(unionJson, group1);
+    
+    ASSERT_FALSE(union1.shape().IsNull());
+    
+    mObject empty;
+    FaceBuilder makeFace(empty, union1.shape());
+    
+    
+    ASSERT_FALSE(makeFace.shape().IsNull());
+    
+}
+
 TEST(BuilderTest, MakeFaceFromWiresNotALoop) {
     
     mObject origin;

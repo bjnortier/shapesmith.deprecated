@@ -657,19 +657,24 @@ PrismBuilder::PrismBuilder(map< string, mValue > json, TopoDS_Shape shape) {
     PostProcess(json);
 }
 
-std::pair<gp_Pnt, gp_Pnt> get_start_and_end(TopoDS_Wire wire) {
+std::pair<gp_Pnt, gp_Pnt> get_start_and_end(TopoDS_Wire wire, TopoDS_Shape parent) {
     TopExp_Explorer vertexIt(wire, TopAbs_VERTEX);
     gp_Pnt first = BRep_Tool::Pnt(TopoDS::Vertex(vertexIt.Current()));
-    vertexIt.Next();
+    first = first.Transformed(parent.Location().Transformation());
     
+    vertexIt.Next();
     gp_Pnt last = first;
     for (; vertexIt.More(); vertexIt.Next()) {
         TopoDS_Vertex vertex = TopoDS::Vertex(vertexIt.Current());
         last = BRep_Tool::Pnt(vertex);
+        last = last.Transformed(parent.Location().Transformation());
     }
-    return pair<gp_Pnt, gp_Pnt>(first, last);
+    if (wire.Orientation() == TopAbs_FORWARD) {
+        return pair<gp_Pnt, gp_Pnt>(first, last);
+    } else {
+        return pair<gp_Pnt, gp_Pnt>(last, first);
+    }
 }
-
 
 
 FaceBuilder::FaceBuilder(map< string, mValue > json, TopoDS_Shape child) {
@@ -694,12 +699,12 @@ FaceBuilder::FaceBuilder(map< string, mValue > json, TopoDS_Shape child) {
     
     bool found = true;
     while((wires.size() > 0) && found) {
-        gp_Pnt next_start = get_start_and_end(sorted_wires.back()).second;
+        gp_Pnt next_start = get_start_and_end(sorted_wires.back(), child).second;
         
         found = false;
         for (vector<TopoDS_Wire>::iterator it = wires.begin(); it < wires.end(); ++it) {
             
-            pair<gp_Pnt, gp_Pnt> start_and_end = get_start_and_end(*it);
+            pair<gp_Pnt, gp_Pnt> start_and_end = get_start_and_end(*it, child);
             if (start_and_end.first.IsEqual(next_start, 0.001)) {
                 sorted_wires.push_back(*it);
                 wires.erase(it);
