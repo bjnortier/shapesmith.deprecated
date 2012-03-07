@@ -272,6 +272,10 @@ $(document).ready(function() {
                function(selected) { 
                    new SS.RevolveCreator(create_modifier(selected, 'revolve'));
                }).render($('#modifiers'));
+    new Action('Create Face', '/static/images/make_face.png', 
+               function(selected) { 
+                   boolean(selected, 'make_face'); 
+               }).render($('#modifiers'));
     
     //
     // Transformations

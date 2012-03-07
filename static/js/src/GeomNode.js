@@ -152,14 +152,6 @@ GeomNode.fromDeepJson = function(json) {
     return geomNode;
 }
 
-GeomNode.prototype.isBoolean = function() {
-    return ((this.type == 'union')
-            ||
-            (this.type == 'subtract')
-            ||
-            (this.type == 'subtract'));
-}
-
 GeomNode.prototype.isEditingOrTransformEditing = function() {
     var editingTransform = _.pluck(this.transforms, "editing").indexOf(true) >= 0;
     return this.editing || editingTransform;

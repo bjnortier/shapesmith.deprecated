@@ -448,7 +448,7 @@ function TreeView() {
 
     this.edit = function(id) {
 	var geomNode = geom_doc.findById(id);
-	if (!geomNode.isBoolean()) {
+	if (SS.creators[geomNode.type]) {
             var editingNode = geomNode.editableCopy();
             editingNode.editing = true;
             selectionManager.deselectAll();

@@ -64,7 +64,13 @@ create(ReqData, User, Design, RequestJSON) ->
 	    {error, 500, {[{<<"error">>, <<"This operation took too long.">>}]}};
 	{error, Reason} ->
 	    lager:error("Geometry create failed: ~p", [Reason]),
-	    {error, 500, {[{<<"error">>, <<"internal error">>}]} }
+            try 
+                {[{<<"error">>,WorkerError}]} =  jiffy:decode(Reason),
+                {error, 500, {[{<<"error">>,WorkerError}]}}
+            catch 
+                _:_ ->
+                    {error, 500, {[{<<"error">>, <<"internal error">>}]} }
+            end
     end.
 
 get(ReqData, User, Design) ->

@@ -275,6 +275,12 @@ SS.schemas.subtract = {
     properties: {}
 }
 
+SS.schemas.make_face = {
+    description: "Make Face",
+    type: 'object',
+    properties: {}
+}
+
 SS.schemas.translate = {
     description: "Translate",
     type: 'object',

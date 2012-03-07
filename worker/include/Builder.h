@@ -191,6 +191,16 @@ public:
     ~RevolveBuilder() {};
 };
 
+struct only_wires_allowed : std::exception { char const* what() const throw() { return "Only wires allowed"; } };
+struct wires_not_a_loop : std::exception { char const* what() const throw() { return "Wires are not a loop";}  };
+
+class FaceBuilder : public BuilderND {
+public:
+    FaceBuilder(map< string, mValue > json, TopoDS_Shape shape);
+    ~FaceBuilder() {};
+};
+
+
 
     
 

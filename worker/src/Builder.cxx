@@ -317,6 +317,8 @@ Ellipse1DBuilder::Ellipse1DBuilder(map< string, mValue > json) {
     ellipse = gp_Elips(gp_Ax2(gp_Pnt(0,0,0),gp_Dir(0,0,1)), r1, r2);
     wire.Add(BRepBuilderAPI_MakeEdge(ellipse, from_angle/180*M_PI, to_angle/180*M_PI).Edge());
     
+
+    
     if (majorBigger) {
         shape_ = wire;
     } else {
@@ -652,6 +654,76 @@ PrismBuilder::PrismBuilder(map< string, mValue > json, TopoDS_Shape shape) {
     gp_Vec prismVec(u,v,w);
 
     shape_ = BRepPrimAPI_MakePrism(shape, prismVec);
+    PostProcess(json);
+}
+
+std::pair<gp_Pnt, gp_Pnt> get_start_and_end(TopoDS_Wire wire) {
+    TopExp_Explorer vertexIt(wire, TopAbs_VERTEX);
+    gp_Pnt first = BRep_Tool::Pnt(TopoDS::Vertex(vertexIt.Current()));
+    vertexIt.Next();
+    
+    gp_Pnt last = first;
+    for (; vertexIt.More(); vertexIt.Next()) {
+        TopoDS_Vertex vertex = TopoDS::Vertex(vertexIt.Current());
+        last = BRep_Tool::Pnt(vertex);
+    }
+    return pair<gp_Pnt, gp_Pnt>(first, last);
+}
+
+
+
+FaceBuilder::FaceBuilder(map< string, mValue > json, TopoDS_Shape child) {
+    
+    if (TopExp_Explorer(child, TopAbs_FACE).More()) {
+        throw only_wires_allowed();
+    }
+    
+    if (TopExp_Explorer(child, TopAbs_SOLID).More()) {
+        throw only_wires_allowed();
+    }
+    
+    vector<TopoDS_Wire> wires;
+    for (TopExp_Explorer wireIt(child, TopAbs_WIRE); wireIt.More(); wireIt.Next()) { 
+        wires.push_back(TopoDS::Wire(wireIt.Current()));
+    }
+    
+    vector<TopoDS_Wire> sorted_wires;
+    sorted_wires.push_back(*wires.begin());
+    wires.erase(wires.begin());
+    
+    
+    bool found = true;
+    while((wires.size() > 0) && found) {
+        gp_Pnt next_start = get_start_and_end(sorted_wires.back()).second;
+        
+        found = false;
+        for (vector<TopoDS_Wire>::iterator it = wires.begin(); it < wires.end(); ++it) {
+            
+            pair<gp_Pnt, gp_Pnt> start_and_end = get_start_and_end(*it);
+            if (start_and_end.first.IsEqual(next_start, 0.001)) {
+                sorted_wires.push_back(*it);
+                wires.erase(it);
+                found = true;
+                break;
+            } else if (start_and_end.second.IsEqual(next_start, 0.001)) {
+                sorted_wires.push_back(TopoDS::Wire((*it).Reversed()));
+                wires.erase(it);
+                found = true;
+                break;
+            }
+        }
+    }
+    
+    if (wires.size() > 0) {
+        throw wires_not_a_loop();
+    }
+
+    BRepBuilderAPI_MakeWire face_wire;
+    for(vector<TopoDS_Wire>::iterator it = sorted_wires.begin(); it < sorted_wires.end(); ++it) {
+        face_wire.Add(*it);
+    }
+    
+    shape_ = BRepBuilderAPI_MakeFace(face_wire);
     PostProcess(json);
 }
 

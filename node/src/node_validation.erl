@@ -245,6 +245,15 @@ validate_geom_type(<<"revolve">>, Props) ->
 	_ ->
 	    {error, {[{<<"children">>, <<"only one child allowed">>}]}}
     end;
+validate_geom_type(<<"make_face">>, Props) ->
+    case lists:keyfind(<<"children">>, 1, Props) of
+	false ->
+	    {error, {[{<<"missing">>, <<"children">>}]}};
+	{_, [_Child]} ->
+            ok;
+	_ ->
+	    {error, {[{<<"children">>, <<"only one child allowed">>}]}}
+    end;
 validate_geom_type(<<"union">>, Props) ->
     validate_boolean(Props);
 validate_geom_type(<<"subtract">>, Props) ->
