@@ -24,6 +24,8 @@ include_directories("/opt/local/include/freetype2/")
 include_directories("/usr/include/freetype2/")
 include_directories("/usr/X11R6/include")
 include_directories("/usr/X11R6/include/freetype2")
+include_directories("/usr/X11/include")
+include_directories("/usr/X11/include/freetype2")
 
 set(ALL_CLASSES src/worker.cxx src/Builder.cxx src/Transform.cxx src/Util.cxx src/Tesselate.cxx src/base64.cpp)
 
@@ -41,7 +43,7 @@ target_link_libraries(run-tests ${GTEST_BOTH_LIBRARIES})
 
 set(CMAKE_CXX_FLAGS "-DHAVE_CONFIG_H")
 
-set(ALL_LIBS -L/usr/local/lib -L/opt/local/lib -/usr/X11R6/lib -ljson_spirit -lpthread -lfreetype -lPTKernel -lTKAdvTools -lTKBin -lTKBinL -lTKBinTObj -lTKBinXCAF -lTKBO -lTKBool -lTKBRep -lTKCAF -lTKCDF -lTKernel -lTKFeat -lTKFillet -lTKG2d -lTKG3d -lTKGeomAlgo -lTKGeomBase -lTKHLR -lTKIGES -lTKLCAF -lTKMath -lTKMesh -lTKMeshVS -lTKNIS -lTKOffset -lTKOpenGl -lTKPCAF -lTKPLCAF -lTKPrim -lTKPShape -lTKService -lTKShapeSchema -lTKShHealing -lTKStdLSchema  -lTKStdSchema -lTKSTEP -lTKSTEP209 -lTKSTEPAttr -lTKSTEPBase -lTKSTL -lTKTopAlgo -lTKV2d -lTKV3d -lTKXMesh -lTKXml -lTKXmlL -lTKXmlTObj -lTKXmlXCAF -lTKXSBase)
+set(ALL_LIBS -L/usr/local/lib -L/opt/local/lib -L/usr/X11R6/lib -L/usr/X11/lib -ljson_spirit -lpthread -lfreetype -lPTKernel -lTKAdvTools -lTKBin -lTKBinL -lTKBinTObj -lTKBinXCAF -lTKBO -lTKBool -lTKBRep -lTKCAF -lTKCDF -lTKernel -lTKFeat -lTKFillet -lTKG2d -lTKG3d -lTKGeomAlgo -lTKGeomBase -lTKHLR -lTKIGES -lTKLCAF -lTKMath -lTKMesh -lTKMeshVS -lTKNIS -lTKOffset -lTKOpenGl -lTKPCAF -lTKPLCAF -lTKPrim -lTKPShape -lTKService -lTKShapeSchema -lTKShHealing -lTKStdLSchema  -lTKStdSchema -lTKSTEP -lTKSTEP209 -lTKSTEPAttr -lTKSTEPBase -lTKSTL -lTKTopAlgo -lTKV2d -lTKV3d -lTKXMesh -lTKXml -lTKXmlL -lTKXmlTObj -lTKXmlXCAF -lTKXSBase)
 
 target_link_libraries(worker ${ALL_LIBS})
 target_link_libraries(run-tests ${ALL_LIBS})
