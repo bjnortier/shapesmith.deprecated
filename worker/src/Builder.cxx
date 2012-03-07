@@ -728,7 +728,12 @@ FaceBuilder::FaceBuilder(map< string, mValue > json, TopoDS_Shape child) {
         face_wire.Add(*it);
     }
     
-    shape_ = BRepBuilderAPI_MakeFace(face_wire);
+    try {
+        shape_ = BRepBuilderAPI_MakeFace(face_wire);
+    } catch (...) {
+        throw could_not_make_face();
+    }
+    
     PostProcess(json);
 }
 

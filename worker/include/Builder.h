@@ -193,6 +193,8 @@ public:
 
 struct only_wires_allowed : std::exception { char const* what() const throw() { return "Only wires allowed"; } };
 struct wires_not_a_loop : std::exception { char const* what() const throw() { return "Wires are not a loop";}  };
+struct could_not_make_face : std::exception { char const* what() const throw() { return "Could not make a face. Wires not on a flat surface?";}  };
+
 
 class FaceBuilder : public BuilderND {
 public:
