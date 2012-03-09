@@ -3,34 +3,34 @@
 #include "Tesselate.h"
 
 TEST(BuilderTest, Ellipse1d) {
- 
+    
     mObject origin;
     origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
     mObject parameters;
     parameters["r1"] = 10.0;
     parameters["r2"] = 5.0;
-
-
+    
+    
     mObject json;
     json["origin"] = origin;
     json["parameters"] = parameters;
     
     Ellipse1DBuilder builder(json);
-
+    
     TopoDS_Shape shape = builder.shape();
-
+    
     ASSERT_FALSE(shape.IsNull());
-
+    
     auto_ptr<Tesselator> tesselator(new Tesselator(shape));
     mValue tesselation = tesselator->Tesselate();
     
     mArray facesTesselation = tesselation.get_obj()["faces"].get_obj()["positions"].get_array();
     mArray edgeTesselation = tesselation.get_obj()["edges"].get_obj()["positions"].get_array();
-
+    
     
     ASSERT_EQ(facesTesselation.size(), 0);
     ASSERT_NE(edgeTesselation.size(), 0);
-
+    
     
 }
 
@@ -39,19 +39,19 @@ TEST(BuilderTest, Bezier1d) {
     mObject origin;
     origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
     mObject parameters;
-
+    
     mObject v0; v0["u"] = 0.0; v0["v"] = 0.0; v0["w"] = 0.0;
     mObject v1; v1["u"] = 10.0; v1["v"] = 0.0; v1["w"] = 0.0;
     mObject v2; v2["u"] = 0.0; v2["v"] = 10.0; v2["w"] = 0.0;
     mObject v3; v3["u"] = 10.0; v3["v"] = 10.0; v3["w"] = 0.0;
-
+    
     mArray vertices;
     vertices.push_back(v0);
     vertices.push_back(v1);
     vertices.push_back(v2);
     vertices.push_back(v3);
     parameters["vertices"] = vertices;
-                               
+    
     
     mObject json;
     json["origin"] = origin;
@@ -104,7 +104,7 @@ TEST(BuilderTest, Ellipse2d) {
     
     ASSERT_NE(facesTesselation.size(), 0);
     ASSERT_NE(edgeTesselation.size(), 0);
-
+    
 }
 
 TEST(BuilderTest, Rectangle2d) {
@@ -161,7 +161,7 @@ TEST(BuilderTest, EllipseWithMajorSmallerThanMinor) {
     
     auto_ptr<Tesselator> tesselator(new Tesselator(shape));
     mValue tesselation = tesselator->Tesselate();
-
+    
     mArray facesTesselation = tesselation.get_obj()["faces"].get_obj()["positions"].get_array();
     mArray edgeTesselation = tesselation.get_obj()["edges"].get_obj()["positions"].get_array();
     
@@ -170,13 +170,13 @@ TEST(BuilderTest, EllipseWithMajorSmallerThanMinor) {
     ASSERT_NE(edgeTesselation.size(), 0);
     
 }
-    
+
 
 TEST(BuilderTest, Cone1) {
     
     mObject origin;
     origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
-
+    
     mObject parameters;
     parameters["r1"] = 10.0;
     parameters["h"] = 10.0;
@@ -201,7 +201,7 @@ TEST(BuilderTest, Cone1) {
     
     ASSERT_NE(facesTesselation.size(), 0);
     ASSERT_NE(edgeTesselation.size(), 0);
-
+    
     
     
 }
@@ -230,8 +230,8 @@ TEST(BuilderTest, Prism) {
     prismParameters["u"] = 0.0;
     prismParameters["v"] = 0.0;
     prismParameters["w"] = 5.0;
-
-
+    
+    
     prismJson["origin"] = origin;
     prismJson["parameters"] = prismParameters;
     
@@ -299,8 +299,8 @@ TEST(BuilderTest, Boolean1D) {
     mObject ellipse2Json;
     ellipse2Json["origin"] = origin;
     ellipse2Json["parameters"] = ellipse2Parameters;
-
-  
+    
+    
     Ellipse1DBuilder ellipse1Builder(ellipse1Json);
     Ellipse1DBuilder ellipse2Builder(ellipse2Json);
     
@@ -343,19 +343,14 @@ TEST(BuilderTest, MakeFaceFromWires) {
     Ellipse1DBuilder ellipse1Builder(ellipse1Json);
     Ellipse1DBuilder ellipse2Builder(ellipse2Json);
     
-    mObject unionJson;
+    mObject empty;
     vector<TopoDS_Shape> group1;
     group1.push_back(ellipse1Builder.shape());
     group1.push_back(ellipse2Builder.shape());
-    SubtractBuilder union1(unionJson, group1);
-    
-    ASSERT_FALSE(union1.shape().IsNull());
-    
-    mObject empty;
-    FaceBuilder makeFace(empty, union1.shape());
-    
+    FaceBuilder makeFace(empty, group1);
     
     ASSERT_FALSE(makeFace.shape().IsNull());
+    
     
 }
 
@@ -411,19 +406,12 @@ TEST(BuilderTest, MakeFaceFromWiresRespectOrientation) {
     Bezier1DBuilder bezier1Builder(bezier1json);
     Bezier1DBuilder bezier2Builder(bezier2json);
     
-    mObject unionJson;
+    mObject empty;
     vector<TopoDS_Shape> group1;
     group1.push_back(ellipse1Builder.shape());
     group1.push_back(bezier1Builder.shape());
     group1.push_back(bezier2Builder.shape());
-    SubtractBuilder union1(unionJson, group1);
-    
-    ASSERT_FALSE(union1.shape().IsNull());
-    
-    mObject empty;
-    FaceBuilder makeFace(empty, union1.shape());
-    
-    
+    FaceBuilder makeFace(empty, group1);
     ASSERT_FALSE(makeFace.shape().IsNull());
     
 }
@@ -457,17 +445,13 @@ TEST(BuilderTest, MakeFaceFromWiresNotALoop) {
     Ellipse1DBuilder ellipse1Builder(ellipse1Json);
     Ellipse1DBuilder ellipse2Builder(ellipse2Json);
     
-    mObject unionJson;
+    mObject emptyJson;
     vector<TopoDS_Shape> group1;
     group1.push_back(ellipse1Builder.shape());
     group1.push_back(ellipse2Builder.shape());
-    UnionBuilder union1(unionJson, group1);
     
-    ASSERT_FALSE(union1.shape().IsNull());
-    
-    mObject empty;
     try {
-        FaceBuilder makeFace(empty, union1.shape());
+        FaceBuilder makeFace(emptyJson, group1);
         ASSERT_TRUE(false);
     } catch (wires_not_a_loop& e) {
         ASSERT_STREQ("Wires are not a loop", e.what());
@@ -511,7 +495,7 @@ TEST(BuilderTest, Loft) {
     vector<TopoDS_Shape> group1;
     group1.push_back(ellipse1Builder.shape());
     group1.push_back(ellipse2Builder.shape());
-
+    
     mObject empty;
     LoftBuilder loft(loftJson, group1);
     
@@ -519,7 +503,7 @@ TEST(BuilderTest, Loft) {
     ASSERT_FALSE(loft.shape().IsNull());
     
 }
-    
+
 
 TEST(BuilderTest, Boolean) {
     
@@ -562,7 +546,7 @@ TEST(BuilderTest, Boolean) {
     SubtractBuilder subtract2(subtractJson, group2);
     
     ASSERT_FALSE(subtract2.shape().IsNull());
-
+    
 }
 
 TEST(BuilderTest, Boolean2) {
@@ -570,7 +554,7 @@ TEST(BuilderTest, Boolean2) {
     mObject origin1, origin2;
     origin1["x"] = 0.0; origin1["y"] = 0.0; origin1["z"] = 0.0;
     origin2["x"] = 10.0; origin2["y"] = 0.0; origin2["z"] = 0.0;
-
+    
     mObject ellipseParameters;
     ellipseParameters["r1"] = 10.0;
     ellipseParameters["r2"] = 5.0;
@@ -582,7 +566,7 @@ TEST(BuilderTest, Boolean2) {
     mObject ellipseJson2;
     ellipseJson2["origin"] = origin2;
     ellipseJson2["parameters"] = ellipseParameters;
-
+    
     
     Ellipse2DBuilder ellipseBuilder1(ellipseJson1);
     Ellipse2DBuilder ellipseBuilder2(ellipseJson2);
@@ -639,7 +623,7 @@ TEST(BuilderTest, Boolean3) {
     Ellipse2DBuilder ellipseBuilderB(ellipseBJson);
     Ellipse2DBuilder ellipseBuilderC(ellipseCJson);
     Ellipse2DBuilder ellipseBuilderD(ellipseDJson);
-
+    
     vector<TopoDS_Shape> group1;
     group1.push_back(ellipseBuilderA.shape());
     group1.push_back(ellipseBuilderB.shape());
@@ -647,13 +631,13 @@ TEST(BuilderTest, Boolean3) {
     vector<TopoDS_Shape> group2;
     group2.push_back(ellipseBuilderC.shape());
     group2.push_back(ellipseBuilderD.shape());
-
+    
     mObject subtractJson;
     SubtractBuilder subtract1(subtractJson, group1);
     SubtractBuilder subtract2(subtractJson, group2);
     
     ASSERT_EQ(TopAbs_COMPOUND, subtract1.shape().ShapeType());
-
+    
     mObject prismOrigin;
     prismOrigin["x"] = 0.0; prismOrigin["y"] = 0.0; prismOrigin["z"] = 0.0;
     
@@ -663,20 +647,20 @@ TEST(BuilderTest, Boolean3) {
     mObject prismJson;
     prismJson["origin"] = prismOrigin;
     prismJson["parameters"] = prismParameters;
-
+    
     PrismBuilder prism1(prismJson, subtract1.shape());
     PrismBuilder prism2(prismJson, subtract2.shape());
     
     ASSERT_FALSE(prism1.shape().IsNull());
     ASSERT_FALSE(prism2.shape().IsNull());
     BRepAlgoAPI_Fuse(prism1.shape(), prism2.shape());
-
+    
     
     vector<TopoDS_Shape> finalGroup;
     finalGroup.push_back(prism1.shape());
     finalGroup.push_back(prism2.shape());
-   
-
+    
+    
     IntersectBuilder final(subtractJson, finalGroup);
     
     ASSERT_FALSE(final.shape().IsNull());
@@ -690,7 +674,7 @@ TEST(BuilderTest, Text) {
     mObject parameters;
     parameters["text"] = "12 3";
     parameters["font"] = "OpenSans";
-
+    
     
     mObject json;
     json["origin"] = origin;
@@ -701,7 +685,6 @@ TEST(BuilderTest, Text) {
     TopoDS_Shape shape = builder.shape();
     
     ASSERT_FALSE(shape.IsNull());
-
+    
     
 }
-

@@ -179,6 +179,9 @@ public:
 
 #pragma mark Modifiers
 
+struct could_not_make_prism : std::exception { char const* what() const throw() { return "Sorry, the shape was too complicated to make a prism.";}  };
+
+
 class PrismBuilder : public BuilderND {
 public:
     PrismBuilder(map< string, mValue > json, TopoDS_Shape shape);
@@ -198,7 +201,7 @@ struct could_not_make_face : std::exception { char const* what() const throw() {
 
 class FaceBuilder : public BuilderND {
 public:
-    FaceBuilder(map< string, mValue > json, TopoDS_Shape shape);
+    FaceBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
     ~FaceBuilder() {};
 };
 

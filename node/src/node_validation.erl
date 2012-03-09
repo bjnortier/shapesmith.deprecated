@@ -249,10 +249,10 @@ validate_geom_type(<<"make_face">>, Props) ->
     case lists:keyfind(<<"children">>, 1, Props) of
 	false ->
 	    {error, {[{<<"missing">>, <<"children">>}]}};
-	{_, [_Child]} ->
-            ok;
-	_ ->
-	    {error, {[{<<"children">>, <<"only one child allowed">>}]}}
+	{_, []} ->
+	    {error, {[{<<"children">>, <<"cannot be empty">>}]}};
+	{_, Children} when is_list(Children) ->
+            ok
     end;
 validate_geom_type(<<"loft">>, Props) ->
     case lists:keyfind(<<"children">>, 1, Props) of

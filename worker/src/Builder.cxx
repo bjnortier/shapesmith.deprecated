@@ -653,7 +653,11 @@ PrismBuilder::PrismBuilder(map< string, mValue > json, TopoDS_Shape shape) {
     double w = Util::to_d(parameters["w"]);
     gp_Vec prismVec(u,v,w);
 
-    shape_ = BRepPrimAPI_MakePrism(shape, prismVec);
+    try {
+        shape_ = BRepPrimAPI_MakePrism(shape, prismVec);
+    } catch (...) {
+        throw could_not_make_prism();
+    }
     PostProcess(json);
 }
 
@@ -677,7 +681,10 @@ std::pair<gp_Pnt, gp_Pnt> get_start_and_end(TopoDS_Wire wire, TopoDS_Shape paren
 }
 
 
-FaceBuilder::FaceBuilder(map< string, mValue > json, TopoDS_Shape child) {
+FaceBuilder::FaceBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes) {
+
+    UnionBuilder unionBuilder(json, shapes);
+    TopoDS_Shape child = unionBuilder.shape();
     
     if (TopExp_Explorer(child, TopAbs_FACE).More()) {
         throw only_wires_allowed();

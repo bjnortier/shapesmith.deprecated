@@ -123,7 +123,7 @@ string create_geometry(string id, map< string, mValue > json) {
     } else if (geomType == "revolve") {
         return create_modifier<RevolveBuilder>(id, json);
     } else if (geomType == "make_face") {
-        return create_modifier<FaceBuilder>(id, json);
+        return create_boolean<FaceBuilder>(id, json);
     } else if (geomType == "loft") {
         return create_boolean<LoftBuilder>(id, json);
     
