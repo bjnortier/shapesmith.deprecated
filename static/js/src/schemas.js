@@ -281,8 +281,14 @@ SS.schemas.make_face = {
     properties: {}
 }
 
+SS.schemas.make_solid = {
+    description: "Make Solid",
+    type: 'object',
+    properties: {}
+}
+
 SS.schemas.loft = {
-    description: "Make Face",
+    description: "Loft",
     type: 'object',
     properties: {}
 }

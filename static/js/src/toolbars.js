@@ -279,10 +279,14 @@ $(document).ready(function() {
                                       function(selected) { 
                                           boolean(selected, 'make_face'); 
                                       });
+    var createSolidAction = new Action('Create Solid', '/static/images/sphere.png', 
+                                       function(selected) { 
+                                          boolean(selected, 'make_solid'); 
+                                       });
     createFaceAction.render($('#modifiers'));
     createFaceAction.render($('#boolean'));
-    
-
+    createSolidAction.render($('#modifiers'));
+    createSolidAction.render($('#boolean'));
     
     //
     // Transformations

@@ -18,9 +18,15 @@
 
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepBuilderAPI_MakeSolid.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
+#include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepOffsetAPI_ThruSections.hxx>
+
+#include <BRepClass3d_SolidExplorer.hxx>
+#include <BRepClass3d_SolidClassifier.hxx>
+#include <ShapeFix_Solid.hxx>
 
 #include <StlAPI_Writer.hxx>
 

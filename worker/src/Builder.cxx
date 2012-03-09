@@ -744,6 +744,34 @@ FaceBuilder::FaceBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shape
     PostProcess(json);
 }
 
+SolidBuilder::SolidBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes) {
+    
+    UnionBuilder unionBuilder(json, shapes);
+    TopoDS_Shape child = unionBuilder.shape();
+    
+    if (TopExp_Explorer(child, TopAbs_SOLID).More()) {
+        throw only_faces_allowed();
+    }
+    
+    try {
+        BRep_Builder aBShell;
+        TopoDS_Shell shellF;
+        aBShell.MakeShell(shellF);
+        for (TopExp_Explorer faceIt(child, TopAbs_FACE); faceIt.More(); faceIt.Next()) { 
+            aBShell.Add(shellF, TopoDS::Face(faceIt.Current()));
+        }
+                
+        ShapeFix_Solid shape_fix;
+        shape_ = shape_fix.SolidFromShell(shellF);
+        
+        PostProcess(json);
+    } catch (...) {
+        throw could_not_make_solid();
+    }
+    
+
+}
+
 LoftBuilder::LoftBuilder(map< string, mValue > json, vector<TopoDS_Shape>& children) {
     
     BRepOffsetAPI_ThruSections loft_tool(Standard_True);

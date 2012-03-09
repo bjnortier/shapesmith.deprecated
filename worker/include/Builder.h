@@ -194,15 +194,24 @@ public:
     ~RevolveBuilder() {};
 };
 
-struct only_wires_allowed : std::exception { char const* what() const throw() { return "Only wires allowed"; } };
+struct only_wires_allowed : std::exception { char const* what() const throw() { return "Only wire shapes allowed"; } };
 struct wires_not_a_loop : std::exception { char const* what() const throw() { return "Wires are not a loop";}  };
-struct could_not_make_face : std::exception { char const* what() const throw() { return "Could not make a face. Wires not on a flat surface?";}  };
-
+struct could_not_make_face : std::exception { char const* what() const throw() { return "Could not make a face. Shapes not on a flat surface?";}  };
 
 class FaceBuilder : public BuilderND {
 public:
     FaceBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
     ~FaceBuilder() {};
+};
+
+struct only_faces_allowed : std::exception { char const* what() const throw() { return "Only 2D shapes allowed"; } };
+struct could_not_make_solid : std::exception { char const* what() const throw() { return "Could not make a solid. Are the faces connected?";}  };
+
+
+class SolidBuilder : public BuilderND {
+public:
+    SolidBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
+    ~SolidBuilder() {};
 };
 
 struct could_not_make_loft : std::exception { 

@@ -279,6 +279,58 @@ TEST(BuilderTest, Revolve) {
     
 }
 
+TEST(BuilderTest, MakeSolidFrom1DRevolve) {
+    
+    mObject origin;
+    origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
+    
+    mObject ellipseParameters;
+    ellipseParameters["r1"] = 10.0;
+    ellipseParameters["r2"] = 5.0;
+    ellipseParameters["from_angle"] = 0;
+    ellipseParameters["to_angle"] = 180;
+    
+    mObject ellipseJson;
+    ellipseJson["origin"] = origin;
+    ellipseJson["parameters"] = ellipseParameters;
+    
+    Ellipse1DBuilder ellipse1Dbuilder(ellipseJson);
+    
+    TopoDS_Shape ellipse1d = ellipse1Dbuilder.shape();
+    
+    ASSERT_FALSE(ellipse1d.IsNull());
+    
+    mObject revolveJson;
+    mObject revolveParameters;
+    revolveParameters["u"] = 1.0;
+    revolveParameters["v"] = 0.0;
+    revolveParameters["w"] = 0.0;
+    revolveParameters["angle"] = M_PI*2;
+    
+    revolveJson["origin"] = origin;
+    revolveJson["parameters"] = revolveParameters;
+    
+    RevolveBuilder revolveBuilder(revolveJson, ellipse1d);
+    TopoDS_Shape revolve = revolveBuilder.shape();
+    ASSERT_FALSE(revolve.IsNull());
+    ASSERT_FALSE(TopExp_Explorer(revolve, TopAbs_SOLID).More());
+    
+    mObject empty;
+    vector<TopoDS_Shape> group1;
+    group1.push_back(revolve);
+    SolidBuilder makeSolid(empty, group1);
+    
+    ASSERT_FALSE(makeSolid.shape().IsNull());
+    
+    ASSERT_TRUE(TopExp_Explorer(makeSolid.shape(), TopAbs_SOLID).More());
+    
+    BRepClass3d_SolidClassifier classifier(makeSolid.shape());
+    classifier.PerformInfinitePoint(0.1);
+    ASSERT_FALSE(classifier.State() == TopAbs_IN);
+    
+    
+}
+
 TEST(BuilderTest, Boolean1D) {
     
     mObject origin;
