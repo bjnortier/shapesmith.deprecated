@@ -22,12 +22,9 @@ SS.RevolveCreator = SS.ParentCreator.extend({
         this.views = this.views.concat([
             new SS.DraggableOriginCorner({model: this}),
             new SS.RevolveAxisPreview({model: this}),
+            new SS.XYZAxisChoice({model: this}),
         ]);
         this.trigger('change', this);
-    },
-
-    mouseDownOnOrigin: function(corner) {
-        this.activateCorner(corner);
     },
     
     getBoundingBox: function() {

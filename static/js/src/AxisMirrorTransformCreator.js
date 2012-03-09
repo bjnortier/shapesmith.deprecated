@@ -8,6 +8,7 @@ SS.AxisMirrorTransformCreator = SS.TransformCreator.extend({
 
         this.views = this.views.concat([
             new SS.AxisMirrorTransformPreview({model: this}),
+            new SS.XYZAxisChoice({model: this}),
         ]);
         this.trigger('change', this);
     },
@@ -18,10 +19,6 @@ SS.AxisMirrorTransformCreator = SS.TransformCreator.extend({
         } else {
             return undefined;
         }
-    },
-
-    mouseDownOnOrigin: function(corner) {
-        this.activateCorner(corner);
     },
 
 });
@@ -63,5 +60,52 @@ SS.AxisMirrorTransformPreview = SS.PreviewWithOrigin.extend({
 
         this.postRender();
     },
+
+});
+
+
+SS.XYZAxisChoice = Backbone.View.extend({
+
+    initialize: function() {
+        this.render();
+    },
+
+    remove: function() {
+        Backbone.View.prototype.remove.call(this);
+    },
+
+    render: function() {
+        var table = '<table><tr><td><input class="X-axis" type="submit" value="X"/><input class="Y-axis" type="submit" value="Y"/><input class="Z-axis" type="submit" value="Z"/></td></tr></table>';
+        this.$el.html(table);
+        $('#floating-dom-view').prepend(this.$el);
+    },
+
+    events: {
+        'click .X-axis' : 'xaxis',
+        'click .Y-axis' : 'yaxis',
+        'click .Z-axis' : 'zaxis',
+    },
+
+    xaxis: function() {
+        this.model.node.parameters.u = 1;
+        this.model.node.parameters.v = 0;
+        this.model.node.parameters.w = 0;
+        this.model.setParameters({});
+    },
+
+    yaxis: function() {
+        this.model.node.parameters.u = 0;
+        this.model.node.parameters.v = 1;
+        this.model.node.parameters.w = 0;
+        this.model.setParameters({});
+    },
+
+    zaxis: function() {
+        this.model.node.parameters.u = 0;
+        this.model.node.parameters.v = 0;
+        this.model.node.parameters.w = 1;
+        this.model.setParameters({});
+    },
+
 
 });
