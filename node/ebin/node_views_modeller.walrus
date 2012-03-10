@@ -147,6 +147,7 @@
   <script type="text/javascript" src="/static/js/src/ScaleTransformer.js"></script>
   <script type="text/javascript" src="/static/js/src/RotateTransformer.js"></script>
   <script type="text/javascript" src="/static/js/src/AxisMirrorTransformCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/PlaneMirrorTransformCreator.js"></script>
 
   <script type="text/javascript">
 

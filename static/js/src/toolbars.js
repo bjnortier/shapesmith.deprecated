@@ -291,10 +291,15 @@ $(document).ready(function() {
     //
     // Transformations
     //
-    new Action('Mirror', '/static/images/mirror.png', 
+    new Action('AxisMirror', '/static/images/axis_mirror.png', 
                function(selected) { 
-                   var originalReplacementAndTransform = create_transform(selected, 'mirror');
+                   var originalReplacementAndTransform = create_transform(selected, 'axis_mirror');
 		   new SS.AxisMirrorTransformCreator(originalReplacementAndTransform);
+	       }).render($('#transforms'));
+    new Action('PlaneMirror', '/static/images/plane_mirror.png', 
+               function(selected) { 
+                   var originalReplacementAndTransform = create_transform(selected, 'plane_mirror');
+		   new SS.PlaneMirrorTransformCreator(originalReplacementAndTransform);
 	       }).render($('#transforms'));
     
 });

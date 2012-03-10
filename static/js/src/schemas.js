@@ -367,3 +367,6 @@ SS.schemas.mirror = {
         }
     }
 };
+
+SS.schemas.axis_mirror = SS.schemas.mirror;
+SS.schemas.plane_mirror = SS.schemas.mirror;

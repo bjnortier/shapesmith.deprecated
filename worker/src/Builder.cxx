@@ -39,11 +39,15 @@ void Builder::ApplyTransform(map< string, mValue > transformJson) {
         auto_ptr< Transformer<Translate> > transformer(new Transformer<Translate>(shape_, origin, parameters));
         shape_ = transformer->transformed_shape();
         return;
-    } else if (transformType == "mirror") {
-        auto_ptr< Transformer<Mirror> > transformer(new Transformer<Mirror>(shape_, origin, parameters));
+    } else if ((transformType == "mirror") || (transformType == "axis_mirror")) {
+        auto_ptr< Transformer<AxisMirror> > transformer(new Transformer<AxisMirror>(shape_, origin, parameters));
         shape_ = transformer->transformed_shape();
         return;
-    }
+    } else if (transformType == "plane_mirror") {
+        auto_ptr< Transformer<PlaneMirror> > transformer(new Transformer<PlaneMirror>(shape_, origin, parameters));
+        shape_ = transformer->transformed_shape();
+        return;
+    } 
     throw "transform type not found";
 }
 

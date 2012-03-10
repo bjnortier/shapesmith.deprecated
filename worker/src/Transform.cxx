@@ -53,9 +53,9 @@ TopoDS_Shape Scale::apply(double multiplier,
 
 }
 
-TopoDS_Shape Mirror::apply(double multiplier, 
-                           map< string, mValue > origin, 
-                           map< string, mValue > parameters) {
+TopoDS_Shape AxisMirror::apply(double multiplier, 
+                               map< string, mValue > origin, 
+                               map< string, mValue > parameters) {
     
     double x = Util::to_d(origin["x"]);
     double y = Util::to_d(origin["y"]);
@@ -68,7 +68,25 @@ TopoDS_Shape Mirror::apply(double multiplier,
     transformation.SetMirror(gp_Ax1(gp_Pnt(x, y, z), gp_Dir(u, v, w)));
     
     return BRepBuilderAPI_Transform(shape_, transformation).Shape();
+    
+}
 
+TopoDS_Shape PlaneMirror::apply(double multiplier, 
+                                map< string, mValue > origin, 
+                                map< string, mValue > parameters) {
+    
+    double x = Util::to_d(origin["x"]);
+    double y = Util::to_d(origin["y"]);
+    double z = Util::to_d(origin["z"]);
+    double u = Util::to_d(parameters["u"]);
+    double v = Util::to_d(parameters["v"]);
+    double w = Util::to_d(parameters["w"]);
+    
+    gp_Trsf transformation = gp_Trsf();
+    transformation.SetMirror(gp_Ax2(gp_Pnt(x, y, z), gp_Dir(u, v, w)));
+    
+    return BRepBuilderAPI_Transform(shape_, transformation).Shape();
+    
 }
 
 TopoDS_Shape Translate::apply(double multiplier, 

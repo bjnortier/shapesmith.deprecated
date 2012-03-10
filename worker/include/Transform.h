@@ -106,15 +106,26 @@ public:
                                  map< string, mValue > parameters);
 };
 
-class Mirror : public Transform {
+class AxisMirror : public Transform {
     
 public:
-    Mirror(TopoDS_Shape shape) : Transform(shape) {}
-    virtual ~Mirror() {};
+    AxisMirror(TopoDS_Shape shape) : Transform(shape) {}
+    virtual ~AxisMirror() {};
     
     virtual TopoDS_Shape apply(double multiplier, 
                                  map< string, mValue > origin, 
                                  map< string, mValue > parameters);
+};
+
+class PlaneMirror : public Transform {
+    
+public:
+    PlaneMirror(TopoDS_Shape shape) : Transform(shape) {}
+    virtual ~PlaneMirror() {};
+    
+    virtual TopoDS_Shape apply(double multiplier, 
+                               map< string, mValue > origin, 
+                               map< string, mValue > parameters);
 };
 
 class Translate : public Transform {

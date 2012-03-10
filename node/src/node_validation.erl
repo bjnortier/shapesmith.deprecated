@@ -400,6 +400,21 @@ validate_transform_type(<<"mirror">>, Props) ->
 			       {<<"w">>, fun number/1},
 			       {<<"n">>, fun zero_or_one_integer/1}
 			      ]);
+validate_transform_type(<<"axis_mirror">>, Props) ->
+    validate_primitive(Props, [
+			       {<<"u">>, fun number/1},
+			       {<<"v">>, fun number/1},
+			       {<<"w">>, fun number/1},
+			       {<<"n">>, fun zero_or_one_integer/1}
+			      ]);
+validate_transform_type(<<"plane_mirror">>, Props) ->
+    validate_primitive(Props, [
+			       {<<"u">>, fun number/1},
+			       {<<"v">>, fun number/1},
+			       {<<"w">>, fun number/1},
+			       {<<"n">>, fun zero_or_one_integer/1}
+			      ]);
+
 validate_transform_type(_, _) ->
     {error, {[{<<"invalid">>, <<"transform">>}]}}.
 
