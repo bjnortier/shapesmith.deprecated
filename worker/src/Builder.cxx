@@ -611,7 +611,7 @@ TopoDS_Shape performCompoundBoolean(TopoDS_Shape a, TopoDS_Shape b, boolean_op f
     return compound;
 }
 
-BooleanBuilder::BooleanBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boolean_op function) {
+BooleanBuilder::BooleanBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boolean_op function, e_PostProcess post_process) {
     vector<TopoDS_Shape>::iterator it = shapes.begin();
 
     shape_ = (*it);
@@ -620,7 +620,9 @@ BooleanBuilder::BooleanBuilder(map< string, mValue > json, vector<TopoDS_Shape>&
     for ( ; it < shapes.end(); ++it ) {
         shape_ = performCompoundBoolean((*it), shape_, function);
     }
-    PostProcess(json);
+    if (post_process == PostProcess_YES) {
+        PostProcess(json);
+    }
 }
 
 TopoDS_Shape fuse(const TopoDS_Shape& a, const TopoDS_Shape& b) {
@@ -635,16 +637,16 @@ TopoDS_Shape cut(const TopoDS_Shape& a, const TopoDS_Shape& b) {
     return BRepAlgoAPI_Cut(a,b);
 }
 
-UnionBuilder::UnionBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes) 
-    : BooleanBuilder(json, shapes, &fuse) {
+UnionBuilder::UnionBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, e_PostProcess post_process) 
+    : BooleanBuilder(json, shapes, &fuse, post_process) {
 }
 
-IntersectBuilder::IntersectBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes) 
-    : BooleanBuilder(json, shapes, &common) {
+IntersectBuilder::IntersectBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, e_PostProcess post_process) 
+    : BooleanBuilder(json, shapes, &common, post_process) {
 }
 
-SubtractBuilder::SubtractBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes) 
-    : BooleanBuilder(json, shapes, &cut) {
+SubtractBuilder::SubtractBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, e_PostProcess post_process) 
+    : BooleanBuilder(json, shapes, &cut, post_process) {
 }
 
 #pragma mark Modifier builders
@@ -687,7 +689,7 @@ std::pair<gp_Pnt, gp_Pnt> get_start_and_end(TopoDS_Wire wire, TopoDS_Shape paren
 
 FaceBuilder::FaceBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes) {
 
-    UnionBuilder unionBuilder(json, shapes);
+    UnionBuilder unionBuilder(json, shapes, PostProcess_NO);
     TopoDS_Shape child = unionBuilder.shape();
     
     if (TopExp_Explorer(child, TopAbs_FACE).More()) {
@@ -750,7 +752,7 @@ FaceBuilder::FaceBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shape
 
 SolidBuilder::SolidBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes) {
     
-    UnionBuilder unionBuilder(json, shapes);
+    UnionBuilder unionBuilder(json, shapes, PostProcess_NO);
     TopoDS_Shape child = unionBuilder.shape();
     
     if (TopExp_Explorer(child, TopAbs_SOLID).More()) {

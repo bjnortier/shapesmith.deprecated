@@ -154,26 +154,31 @@ public:
 
 typedef TopoDS_Shape (*boolean_op)(const TopoDS_Shape&, const TopoDS_Shape&);
 
+typedef enum e_PostProcess {
+    PostProcess_YES,
+    PostProcess_NO
+} PostProcess;
+
 class BooleanBuilder : public BuilderND {
 public:
-    BooleanBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boolean_op fn);
+    BooleanBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boolean_op fn, e_PostProcess post_process);
 };
 
 class UnionBuilder : public BooleanBuilder {
 public:
-    UnionBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
+    UnionBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, e_PostProcess post_process = PostProcess_YES);
     virtual ~UnionBuilder() {};
 };
 
 class SubtractBuilder : public BooleanBuilder {
 public:
-    SubtractBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
+    SubtractBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, e_PostProcess post_process = PostProcess_YES);
     virtual ~SubtractBuilder() {};
 };
 
 class IntersectBuilder : public BooleanBuilder {
 public:
-    IntersectBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes);
+    IntersectBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, e_PostProcess post_process = PostProcess_YES);
     virtual ~IntersectBuilder() {};
 };
 
