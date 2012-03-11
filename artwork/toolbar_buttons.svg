@@ -14,11 +14,11 @@
    height="1052.3622047"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.1 r9760"
+   inkscape:version="0.47 r22583"
    sodipodi:docname="toolbar_buttons.svg"
-   inkscape:export-filename="/Users/bjnortier/development/isambard/web/images/save.png"
-   inkscape:export-xdpi="10.838273"
-   inkscape:export-ydpi="10.838273">
+   inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/loft.png"
+   inkscape:export-xdpi="0.95999998"
+   inkscape:export-ydpi="0.95999998">
   <sodipodi:namedview
      id="base"
      pagecolor="#000000"
@@ -26,17 +26,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.49497475"
-     inkscape:cx="1125.9801"
-     inkscape:cy="1956.4942"
+     inkscape:zoom="0.72776371"
+     inkscape:cx="2068.8583"
+     inkscape:cy="1715.5036"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
-     inkscape:window-width="751"
-     inkscape:window-height="894"
+     inkscape:window-width="1440"
+     inkscape:window-height="787"
      inkscape:window-x="0"
      inkscape:window-y="0"
-     inkscape:window-maximized="0">
+     inkscape:window-maximized="1">
     <inkscape:grid
        snapvisiblegridlinesonly="true"
        enabled="false"
@@ -54,6 +54,18 @@
   </sodipodi:namedview>
   <defs
      id="defs4">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient4508">
+      <stop
+         style="stop-color:#3bda42;stop-opacity:1;"
+         offset="0"
+         id="stop4510" />
+      <stop
+         style="stop-color:#3bda42;stop-opacity:0;"
+         offset="1"
+         id="stop4512" />
+    </linearGradient>
     <marker
        inkscape:stockid="TriangleOutS"
        orient="auto"
@@ -963,6 +975,461 @@
          offset="1"
          style="stop-color:#005d17;stop-opacity:0.64406782;" />
     </linearGradient>
+    <inkscape:perspective
+       id="perspective4379"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective4379-9"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective4379-8"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective4379-2"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective4430"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective4430-3"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4508"
+       id="linearGradient4514"
+       x1="-202.5"
+       y1="-307.63782"
+       x2="-10"
+       y2="-223.77226"
+       gradientUnits="userSpaceOnUse" />
+    <inkscape:perspective
+       id="perspective4524"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient4508-9">
+      <stop
+         style="stop-color:#3bda42;stop-opacity:1;"
+         offset="0"
+         id="stop4510-1" />
+      <stop
+         style="stop-color:#3bda42;stop-opacity:0;"
+         offset="1"
+         id="stop4512-2" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4508-9"
+       id="linearGradient4565"
+       gradientUnits="userSpaceOnUse"
+       x1="-202.5"
+       y1="-307.63782"
+       x2="-10"
+       y2="-223.77226"
+       gradientTransform="translate(-400,20.000003)" />
+    <inkscape:perspective
+       id="perspective4578"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3895-8"
+       id="linearGradient4120-0"
+       x1="1546.0715"
+       y1="673.07654"
+       x2="1716.7858"
+       y2="817.36224"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       id="linearGradient3895-8">
+      <stop
+         id="stop3897-1"
+         offset="0"
+         style="stop-color:#00d836;stop-opacity:1;" />
+      <stop
+         id="stop3899-4"
+         offset="1"
+         style="stop-color:#005d17;stop-opacity:0.64406782;" />
+    </linearGradient>
+    <inkscape:perspective
+       id="perspective4616"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <linearGradient
+       gradientTransform="translate(-2160,559.99999)"
+       y2="817.36224"
+       x2="1716.7858"
+       y1="673.07654"
+       x1="1546.0715"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient4587-5"
+       xlink:href="#linearGradient3895-8-9"
+       inkscape:collect="always" />
+    <linearGradient
+       id="linearGradient3895-8-9">
+      <stop
+         id="stop3897-1-0"
+         offset="0"
+         style="stop-color:#00d836;stop-opacity:1;" />
+      <stop
+         id="stop3899-4-2"
+         offset="1"
+         style="stop-color:#005d17;stop-opacity:0.64406782;" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3895"
+       id="linearGradient4657"
+       x1="-600"
+       y1="1222.3622"
+       x2="-515"
+       y2="1287.3622"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(160.21875,-279.82532)" />
+    <inkscape:perspective
+       id="perspective4667"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3895-6"
+       id="linearGradient3992-3"
+       x1="1126.0714"
+       y1="-53.352119"
+       x2="1211.0714"
+       y2="132.36217"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       id="linearGradient3895-6">
+      <stop
+         id="stop3897-9"
+         offset="0"
+         style="stop-color:#00d836;stop-opacity:1;" />
+      <stop
+         id="stop3899-04"
+         offset="1"
+         style="stop-color:#005d17;stop-opacity:0.64406782;" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient4676">
+      <stop
+         id="stop4678"
+         offset="0"
+         style="stop-color:#00d836;stop-opacity:1;" />
+      <stop
+         id="stop4680"
+         offset="1"
+         style="stop-color:#005d17;stop-opacity:0.64406782;" />
+    </linearGradient>
+    <linearGradient
+       y2="192.36218"
+       x2="1228.5714"
+       y1="-53.352119"
+       x1="1126.0714"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient4684"
+       xlink:href="#linearGradient3895-6"
+       inkscape:collect="always" />
+    <inkscape:perspective
+       id="perspective4723"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3895-9"
+       id="linearGradient4002-1"
+       x1="1169.9286"
+       y1="896.64795"
+       x2="1235.7858"
+       y2="776.64795"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       id="linearGradient3895-9">
+      <stop
+         id="stop3897-0"
+         offset="0"
+         style="stop-color:#00d836;stop-opacity:1;" />
+      <stop
+         id="stop3899-2"
+         offset="1"
+         style="stop-color:#005d17;stop-opacity:0.64406782;" />
+    </linearGradient>
+    <inkscape:perspective
+       id="perspective4767"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3895-5-9"
+       id="linearGradient4727-54"
+       x1="1519.5"
+       y1="1002.3622"
+       x2="1720.5"
+       y2="1002.3622"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       id="linearGradient3895-5-9">
+      <stop
+         id="stop3897-6-0"
+         offset="0"
+         style="stop-color:#00d836;stop-opacity:1;" />
+      <stop
+         id="stop3899-1-2"
+         offset="1"
+         style="stop-color:#005d17;stop-opacity:0.64406782;" />
+    </linearGradient>
+    <inkscape:perspective
+       id="perspective4767-8"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3895-5-1"
+       id="linearGradient4727-2"
+       x1="1519.5"
+       y1="1002.3622"
+       x2="1720.5"
+       y2="1002.3622"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       id="linearGradient3895-5-1">
+      <stop
+         id="stop3897-6-6"
+         offset="0"
+         style="stop-color:#00d836;stop-opacity:1;" />
+      <stop
+         id="stop3899-1-8"
+         offset="1"
+         style="stop-color:#005d17;stop-opacity:0.64406782;" />
+    </linearGradient>
+    <linearGradient
+       gradientTransform="translate(540,-320.00002)"
+       y2="1132.3622"
+       x2="1680"
+       y1="972.36218"
+       x1="1620"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient4776-3"
+       xlink:href="#linearGradient3895-5-1"
+       inkscape:collect="always" />
+    <inkscape:perspective
+       id="perspective4826"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective4826-7"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective4857"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <marker
+       style="overflow:visible"
+       id="Arrow2Lendf-48"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow2Lendf">
+      <path
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         style="font-size:12px;fill:#ffffff;fill-rule:evenodd;stroke:#ffffff;stroke-width:0.625;stroke-linejoin:round"
+         id="path4365-61" />
+    </marker>
+    <linearGradient
+       gradientTransform="translate(320,-1600)"
+       y2="1002.3622"
+       x2="1720.5"
+       y1="1002.3622"
+       x1="1519.5"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient3314-1"
+       xlink:href="#linearGradient3895-5-8-5"
+       inkscape:collect="always" />
+    <linearGradient
+       id="linearGradient3895-5-8-5">
+      <stop
+         id="stop3897-6-3-6"
+         offset="0"
+         style="stop-color:#00d836;stop-opacity:1;" />
+      <stop
+         id="stop3899-1-9-9"
+         offset="1"
+         style="stop-color:#005d17;stop-opacity:0.64406782;" />
+    </linearGradient>
+    <inkscape:perspective
+       id="perspective4857-6"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <marker
+       style="overflow:visible"
+       id="Arrow2Lendf-76"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow2Lendf">
+      <path
+         transform="matrix(-1.1,0,0,-1.1,-1.1,0)"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         style="font-size:12px;fill:#ffffff;fill-rule:evenodd;stroke:#ffffff;stroke-width:0.625;stroke-linejoin:round"
+         id="path4365-1" />
+    </marker>
+    <linearGradient
+       gradientTransform="translate(660,-1660)"
+       y2="1002.3622"
+       x2="1720.5"
+       y1="1002.3622"
+       x1="1519.5"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient3314-2"
+       xlink:href="#linearGradient3895-5-8-1"
+       inkscape:collect="always" />
+    <linearGradient
+       id="linearGradient3895-5-8-1">
+      <stop
+         id="stop3897-6-3-3"
+         offset="0"
+         style="stop-color:#00d836;stop-opacity:1;" />
+      <stop
+         id="stop3899-1-9-6"
+         offset="1"
+         style="stop-color:#005d17;stop-opacity:0.64406782;" />
+    </linearGradient>
+    <inkscape:perspective
+       id="perspective4933"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <linearGradient
+       gradientTransform="translate(260,-1600)"
+       y2="1002.3622"
+       x2="1720.5"
+       y1="1002.3622"
+       x1="1519.5"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient3314-1-3"
+       xlink:href="#linearGradient3895-5-8-5-2"
+       inkscape:collect="always" />
+    <linearGradient
+       id="linearGradient3895-5-8-5-2">
+      <stop
+         id="stop3897-6-3-6-5"
+         offset="0"
+         style="stop-color:#00d836;stop-opacity:1;" />
+      <stop
+         id="stop3899-1-9-9-0"
+         offset="1"
+         style="stop-color:#005d17;stop-opacity:0.64406782;" />
+    </linearGradient>
+    <linearGradient
+       y2="1092.3622"
+       x2="1700"
+       y1="1002.3622"
+       x1="1519.5"
+       gradientTransform="translate(460,-1660)"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient4942"
+       xlink:href="#linearGradient3895-5-8-5-2"
+       inkscape:collect="always" />
+    <inkscape:perspective
+       id="perspective4971"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <linearGradient
+       y2="1002.3622"
+       x2="1720.5"
+       y1="1002.3622"
+       x1="1519.5"
+       gradientTransform="translate(460,-1660)"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient4942-7"
+       xlink:href="#linearGradient3895-5-8-5-2-3"
+       inkscape:collect="always" />
+    <linearGradient
+       id="linearGradient3895-5-8-5-2-3">
+      <stop
+         id="stop3897-6-3-6-5-5"
+         offset="0"
+         style="stop-color:#00d836;stop-opacity:1;" />
+      <stop
+         id="stop3899-1-9-9-0-9"
+         offset="1"
+         style="stop-color:#005d17;stop-opacity:0.64406782;" />
+    </linearGradient>
+    <linearGradient
+       y2="1002.3622"
+       x2="1720.5"
+       y1="1002.3622"
+       x1="1519.5"
+       gradientTransform="translate(460,-1560)"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient4980"
+       xlink:href="#linearGradient3895-5-8-5-2-3"
+       inkscape:collect="always" />
   </defs>
   <metadata
      id="metadata7">
@@ -1183,6 +1650,23 @@
      inkscape:groupmode="layer"
      inkscape:label="Layer 1">
     <path
+       style="fill:url(#linearGradient4942);fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       d="m 1980,-747.63782 100,180.00002 100,-160.00002 z"
+       id="path4103-0-0-3"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/make_solid.png"
+       inkscape:export-xdpi="9.4700003"
+       inkscape:export-ydpi="9.4700003" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       d="m 2100,752.36218 60,120.00002 60,-140.00002 -120,20 z"
+       id="path4103-03"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/loft.png"
+       inkscape:export-xdpi="8.852459"
+       inkscape:export-ydpi="8.852459"
+       sodipodi:nodetypes="cccc" />
+    <path
        style="fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
        d="m 1160,-887.63784 100,180.00002 100,-160.00002 z"
        id="path4103-9"
@@ -1191,25 +1675,25 @@
        inkscape:export-xdpi="9.4700003"
        inkscape:export-ydpi="9.4700003" />
     <rect
-       style="fill:none;fill-opacity:1;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       style="fill:none;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect4153"
        width="20"
        height="20"
-       x="-500"
-       y="342.36218"
+       x="-480"
+       y="332.36218"
        inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/bezier.png"
-       inkscape:export-xdpi="19.672131"
-       inkscape:export-ydpi="19.672131" />
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <rect
-       style="fill:none;fill-opacity:1;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       style="fill:none;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect4155"
        width="20"
        height="20"
        x="-590"
-       y="462.36218"
+       y="432.36218"
        inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/bezier.png"
-       inkscape:export-xdpi="19.672131"
-       inkscape:export-ydpi="19.672131" />
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <rect
        style="fill:none;fill-opacity:1;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect4157"
@@ -1218,18 +1702,18 @@
        x="-610"
        y="322.36218"
        inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/bezier.png"
-       inkscape:export-xdpi="19.672131"
-       inkscape:export-ydpi="19.672131" />
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <rect
-       style="fill:none;fill-opacity:1;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       style="fill:none;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect4159"
        width="20"
        height="20"
        x="-470"
-       y="482.36218"
+       y="442.36218"
        inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/bezier.png"
-       inkscape:export-xdpi="19.672131"
-       inkscape:export-ydpi="19.672131" />
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <path
        style="fill:url(#linearGradient3303);fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
        d="m 1280,-307.63782 0,160 60,0 0,80.000003 160,0 0,-160.000003 -60,0 0,-80 -160,0 z"
@@ -1799,7 +2283,10 @@
     <g
        style="display:inline"
        id="g4186"
-       transform="translate(0,-3.8655522)">
+       transform="translate(0,-3.8655522)"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/plane_mirror.png"
+       inkscape:export-xdpi="13.742357"
+       inkscape:export-ydpi="13.742357">
       <path
          inkscape:connector-curvature="0"
          id="path3331"
@@ -1809,12 +2296,13 @@
          inkscape:connector-curvature="0"
          id="path3331-7"
          d="m -200,-427.63782 0,240 100,0 z"
-         style="fill:#3bda42;fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline" />
+         style="fill:url(#linearGradient4514);fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline" />
       <path
          inkscape:connector-curvature="0"
          id="path4184"
-         d="m -220,-447.63782 0,280"
-         style="fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:20, 5;stroke-dashoffset:0" />
+         d="m -220,-423.77227 0,240"
+         style="fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:20, 5;stroke-dashoffset:0"
+         sodipodi:nodetypes="cc" />
     </g>
     <rect
        style="fill:#ffffff;fill-opacity:0.23181817;stroke:none"
@@ -2067,30 +2555,32 @@
        inkscape:export-xdpi="20"
        inkscape:export-ydpi="20" />
     <path
-       style="fill:none;stroke:#8d8d8d;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-       d="m -580,472.36218 120,20"
+       style="fill:none;stroke:#8d8d8d;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m -580,442.36218 120,10"
        id="path4149"
        inkscape:connector-curvature="0"
        inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/bezier.png"
-       inkscape:export-xdpi="19.672131"
-       inkscape:export-ydpi="19.672131" />
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"
+       sodipodi:nodetypes="cc" />
     <path
        style="fill:none;stroke:#8d8d8d;stroke-width:3;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-       d="m -590,332.36218 100,20"
+       d="m -590,332.36218 120,10"
        id="path4151"
        inkscape:connector-curvature="0"
        inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/bezier.png"
-       inkscape:export-xdpi="19.672131"
-       inkscape:export-ydpi="19.672131" />
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"
+       sodipodi:nodetypes="cc" />
     <path
        style="fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       d="m -600,332.36218 c 120,20 20,140 140,160"
+       d="m -600,332.36218 c 130,10 20,110 140,120"
        id="path3271"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc"
        inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/bezier.png"
-       inkscape:export-xdpi="19.672131"
-       inkscape:export-ydpi="19.672131" />
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <rect
        style="fill:none;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="rect4161"
@@ -2126,6 +2616,240 @@
        x="1140"
        y="-1007.6378"
        inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/make_face.png"
+       inkscape:export-xdpi="9.4700003"
+       inkscape:export-ydpi="9.4700003" />
+    <rect
+       style="fill:none;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect4153-7"
+       width="20"
+       height="20"
+       x="-610"
+       y="622.36218"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/polyline.png"
+       inkscape:export-xdpi="27.799999"
+       inkscape:export-ydpi="27.799999" />
+    <rect
+       style="fill:none;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect4153-3"
+       width="20"
+       height="20"
+       x="-610"
+       y="722.36218"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/polyline.png"
+       inkscape:export-xdpi="27.799999"
+       inkscape:export-ydpi="27.799999" />
+    <rect
+       style="fill:none;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect4153-0"
+       width="20"
+       height="20"
+       x="-510"
+       y="622.36218"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/polyline.png"
+       inkscape:export-xdpi="27.799999"
+       inkscape:export-ydpi="27.799999" />
+    <rect
+       style="fill:none;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect4153-4"
+       width="20"
+       height="20"
+       x="-510"
+       y="682.36218"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/polyline.png"
+       inkscape:export-xdpi="27.799999"
+       inkscape:export-ydpi="27.799999" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m -600,732.36218 0,-100 100,60 0,-60"
+       id="path3483"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/polyline.png"
+       inkscape:export-xdpi="27.799999"
+       inkscape:export-ydpi="27.799999" />
+    <rect
+       style="fill:none;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect4153-3-8"
+       width="20"
+       height="20"
+       x="-815"
+       y="602.36218"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/ellipse1d.png"
+       inkscape:export-xdpi="23.58"
+       inkscape:export-ydpi="23.58" />
+    <rect
+       style="fill:none;stroke:#8d8d8d;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect4153-3-9"
+       width="20"
+       height="20"
+       x="-745"
+       y="602.36218"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/ellipse1d.png"
+       inkscape:export-xdpi="23.58"
+       inkscape:export-ydpi="23.58" />
+    <path
+       sodipodi:type="arc"
+       style="fill:none;stroke:#ffffff;stroke-width:5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="path4420"
+       sodipodi:cx="-770"
+       sodipodi:cy="522.36218"
+       sodipodi:rx="70"
+       sodipodi:ry="70"
+       d="m -733.85738,462.41462 a 70,70 0 1 1 -71.3134,-0.57529"
+       transform="translate(0.17078448,150.52285)"
+       sodipodi:start="5.254941"
+       sodipodi:end="10.469156"
+       sodipodi:open="true"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/ellipse1d.png"
+       inkscape:export-xdpi="23.58"
+       inkscape:export-ydpi="23.58" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m -640,-167.63782 0,-240 -100,0 z"
+       id="path3331-4"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/axis_mirror.png"
+       inkscape:export-xdpi="13.959184"
+       inkscape:export-ydpi="13.959184" />
+    <path
+       style="fill:url(#linearGradient4565);fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       d="m -600,-407.63782 0,240 100,0 z"
+       id="path3331-7-0"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/axis_mirror.png"
+       inkscape:export-xdpi="13.959184"
+       inkscape:export-ydpi="13.959184" />
+    <path
+       sodipodi:type="arc"
+       style="fill:none;stroke:#ffffff;stroke-width:5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="path4559"
+       sodipodi:cx="-610"
+       sodipodi:cy="-267.63782"
+       sodipodi:rx="10"
+       sodipodi:ry="10"
+       d="m -610.11049,-277.63721 a 10,10 0 1 1 -4.85946,1.32186"
+       sodipodi:start="4.7013401"
+       sodipodi:end="10.475442"
+       transform="translate(-9.9756022,-11.353878)"
+       sodipodi:open="true"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/axis_mirror.png"
+       inkscape:export-xdpi="13.959184"
+       inkscape:export-ydpi="13.959184" />
+    <rect
+       style="fill:none;stroke:#ffffff;stroke-width:5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:10, 10;stroke-dashoffset:5;display:inline"
+       id="rect4112-9"
+       width="100"
+       height="90"
+       x="-459.78125"
+       y="912.53687"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/fillet.png"
+       inkscape:export-xdpi="25.709999"
+       inkscape:export-ydpi="25.709999" />
+    <path
+       style="fill:url(#linearGradient4657);fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:5.5"
+       d="m -459.78125,912.54968 0,90.00002 100,0 0,-24.40622 c 0.003,-0.3222 0.002,-0.6466 0,-0.9688 l 0,-4.625 -0.21875,-0.1875 c -2.75894,-33.6357 -32.05915,-60.0093 -67.65625,-59.8125 l -2.125,0 -30,0 z"
+       id="path4646"
+       sodipodi:nodetypes="cccccccccc"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/fillet.png"
+       inkscape:export-xdpi="25.709999"
+       inkscape:export-ydpi="25.709999" />
+    <path
+       sodipodi:type="arc"
+       style="fill:url(#linearGradient4684);fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       id="path5119-4"
+       sodipodi:cx="1177.1428"
+       sodipodi:cy="-27.637833"
+       sodipodi:rx="128.57143"
+       sodipodi:ry="49.999985"
+       d="m 1305.7142,-27.637833 a 128.57143,49.999985 0 1 1 -257.1428,0 128.57143,49.999985 0 1 1 257.1428,0 z"
+       transform="translate(-1828.5714,1400)"
+       inkscape:export-xdpi="12.1"
+       inkscape:export-ydpi="12.1"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/ellipse2d.png" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m -780,1372.3622 40,180"
+       id="path4753"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m -555,1552.3622 30,-170"
+       id="path4755"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:round;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m -740,1552.3622 185,0"
+       id="path4757"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:url(#linearGradient4776-3);fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       d="m 2020,572.36218 140,200 140,-200 -280,0 z"
+       id="path4103-2"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/loft.png"
+       inkscape:export-xdpi="8.852459"
+       inkscape:export-ydpi="8.852459"
+       sodipodi:nodetypes="cccc" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 2100,752.36218 -80,-180"
+       id="path4816"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/loft.png"
+       inkscape:export-xdpi="8.852459"
+       inkscape:export-ydpi="8.852459" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       d="m 2220,732.36218 80,-160"
+       id="path4816-9"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/loft.png"
+       inkscape:export-xdpi="8.852459"
+       inkscape:export-ydpi="8.852459" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       d="m 2160,872.36218 0,-100"
+       id="path4816-3"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/loft.png"
+       inkscape:export-xdpi="8.852459"
+       inkscape:export-ydpi="8.852459" />
+    <rect
+       style="fill:none;stroke:none;display:inline"
+       id="rect4234-2"
+       width="380"
+       height="380"
+       x="1740"
+       y="-787.63782"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/make_face.png"
+       inkscape:export-xdpi="9.4700003"
+       inkscape:export-ydpi="9.4700003" />
+    <path
+       style="fill:#38b32f;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none;fill-opacity:0.89300412"
+       d="m 1980,-747.63782 0,100 100,180 0,-100 -100,-180 z"
+       id="path5001"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/make_solid.png"
+       inkscape:export-xdpi="9.4700003"
+       inkscape:export-ydpi="9.4700003" />
+    <path
+       style="fill:#278d1f;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none;fill-opacity:0.66255146"
+       d="m 2180,-727.63782 -100,160 0,100 100,-160 0,-100 z"
+       id="path5003"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/make_solid.png"
+       inkscape:export-xdpi="9.4700003"
+       inkscape:export-ydpi="9.4700003" />
+    <path
+       style="fill:url(#linearGradient3314-1);fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       d="m 1840,-687.63784 100,180.00002 100,-160.00002 z"
+       id="path4103-0-0"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/make_solid.png"
+       inkscape:export-xdpi="9.4700003"
+       inkscape:export-ydpi="9.4700003" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path3885-1-3-2-2"
+       d="m 1920,-587.63782 140,0"
+       style="fill:none;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2Lendf);display:inline"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/make_solid.png"
        inkscape:export-xdpi="9.4700003"
        inkscape:export-ydpi="9.4700003" />
   </g>
