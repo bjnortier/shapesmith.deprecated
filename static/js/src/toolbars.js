@@ -81,6 +81,13 @@ SS.creators.bezier = SS.BezierCreator;
 SS.creators.ellipse1d = SS.Ellipse1DCreator;
 SS.creators.polyline = SS.PolylineCreator;
 
+SS.creators.translate = SS.TranslateTransformer;
+SS.creators.scale = SS.ScaleTransformer;
+SS.creators.rotate = SS.RotateTransformer;
+SS.creators.mirror = SS.AxisMirrorTransformCreator;
+SS.creators.axis_mirror = SS.AxisMirrorTransformCreator;
+SS.creators.plane_mirror = SS.PlaneMirrorTransformCreator;
+
 
 function create_primitive(type) {
 

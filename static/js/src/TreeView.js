@@ -383,16 +383,7 @@ function TreeView() {
 
             var transform = editingNode.transforms[transformIndex];
 
-            var constructor;
-            if (transform.type === 'translate') {
-                constructor = SS.TranslateTransformer;
-            } else if (transform.type === 'scale') {
-                constructor = SS.ScaleTransformer;
-            } else if (transform.type === 'rotate') {
-                constructor = SS.RotateTransformer;
-            } else if (transform.type === 'mirror') {
-                constructor = SS.AxisMirrorTransformCreator;
-            }
+            var constructor = SS.creators[transform.type];
             new constructor({originalNode: geomNode,
                              editingNode: editingNode, 
                              editingExisting: true,
