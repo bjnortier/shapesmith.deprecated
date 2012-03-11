@@ -33,7 +33,10 @@ var SS = SS || {};
 	}
 
 	if (error.validation) {
-	    // No need for a message as there is already validation feedback
+            // Show is tree view is not visible
+            if ($('#geom-model-doc :visible').length === 0) {
+                addMessage('Validation failure. Check the parameters in the tree view', 'error');
+            }
 	    console.log(error);
 	} else if (error.string) {
 	    addMessage(error.string, 'error');
