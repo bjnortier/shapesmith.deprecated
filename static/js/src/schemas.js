@@ -177,6 +177,32 @@ SS.schemas.triangle2d = {
     }
 };
 
+SS.schemas.polyline = {
+    description: "Polyline",
+    type: 'object',
+    properties: {
+        origin: SS.schemas.originSchema,
+        parameters: {
+            type: 'object',
+            properties: {
+                'vertices' : {
+                    type: 'array',
+                    items: { 
+                        type: 'object',
+                        properties: {
+                            'u' : {type: 'number'},
+                            'v' : {type: 'number'},
+                            'w' : {type: 'number'}
+                        }
+                    },
+                    minItems: 2,
+                }
+            }
+        }
+    }
+};
+
+
 SS.schemas.bezier = {
     description: "Bezier",
     type: 'object',

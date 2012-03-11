@@ -3,9 +3,10 @@ var SS = SS || {};
 SS.Creator = SS.NodeModel.extend({
 
     initialize: function(attributes) {
-
+        
+        this.nodeDOMView = new SS.NodeDOMView({model: this});
         this.views = [
-            new SS.NodeDOMView({model: this}),
+            this.nodeDOMView,
             new SS.OkCancelView({model: this}),
         ];
         if (!attributes.noOriginCorner) {

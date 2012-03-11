@@ -138,6 +138,12 @@ public:
     virtual ~Bezier1DBuilder() {};
 };
 
+class PolylineBuilder : public Builder1D {
+public:
+    PolylineBuilder(map< string, mValue > json);
+    virtual ~PolylineBuilder() {};
+};
+
 
 
 #pragma mark Booleans

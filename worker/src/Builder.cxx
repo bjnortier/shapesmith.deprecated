@@ -358,6 +358,31 @@ Bezier1DBuilder::Bezier1DBuilder(map< string, mValue > json) {
     PostProcess(json);
 }
 
+PolylineBuilder::PolylineBuilder(map< string, mValue > json) {
+    map< string, mValue > parameters = json["parameters"].get_obj();
+    
+    mArray vertices = parameters["vertices"].get_array();
+    BRepBuilderAPI_MakeWire wireBuilder;
+    gp_Pnt previous;
+    bool first = true;
+    for (unsigned int k = 0; k < vertices.size(); ++k) {
+        map< string, mValue > vertex = vertices[k].get_obj();
+        gp_Pnt next = gp_Pnt(Util::to_d(vertex["u"]),
+                             Util::to_d(vertex["v"]),
+                             Util::to_d(vertex["w"]));
+        if (first) {
+            first = false;
+        } else {
+            TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(GC_MakeSegment(previous, next));
+            wireBuilder.Add(edge);
+        }
+        previous = next;
+    }
+    
+    shape_ = wireBuilder.Shape();
+    PostProcess(json);  
+}
+
 
 class TextComposer {
     

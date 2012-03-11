@@ -273,7 +273,7 @@ SS.OkCancelView = Backbone.View.extend({
             var centerYPosition = (screenPositionMinMax[0].y + screenPositionMinMax[1].y)/2;
             
             pixelPosition.x = window.innerWidth * ((screenPositionMinMax[1].x+1)/2) + 20;
-            pixelPosition.y = window.innerHeight * ((-centerYPosition+1)/2);
+            pixelPosition.y = window.innerHeight * ((-centerYPosition+1)/2) + 10;
             pixelPosition.x = Math.min(pixelPosition.x, window.innerWidth - 100);
             pixelPosition.y = Math.min(pixelPosition.y, window.innerHeight - 100);
             pixelPosition.x = Math.max(pixelPosition.x, 100);

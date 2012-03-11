@@ -78,6 +78,8 @@ SS.creators.prism = SS.PrismCreator;
 SS.creators.revolve = SS.RevolveCreator;
 SS.creators.bezier = SS.BezierCreator;
 SS.creators.ellipse1d = SS.Ellipse1DCreator;
+SS.creators.polyline = SS.PolylineCreator;
+
 
 function create_primitive(type) {
 
@@ -88,13 +90,8 @@ function create_primitive(type) {
         if (schema.type !== 'array') {
             context[key] = null;
         } else {
-            
-            // Only support fixed length at the moment
-            if (schema.minItems !== schema.minItems) {
-                throw 'only fixed lenght arrays supported';
-            }
             context[key] = [];
-            for (var i = 0; i < schema.maxItems; ++i) {
+            for (var i = 0; i < schema.minItems; ++i) {
                 var params = {};
                 for (subKey in schema.items.properties) {
                     createParams(subKey, params, schema.items.properties[subKey]);
@@ -244,10 +241,15 @@ $(document).ready(function() {
                function() {
                    create_primitive('ellipse1d');
                }).render($('#1Dprimitives'));
+    new Action('Polyline', '/static/images/polyline.png',
+               function() {
+                   create_primitive('polyline');
+               }).render($('#1Dprimitives'));
     new Action('Bezier', '/static/images/bezier.png',
                function() {
                    create_primitive('bezier');
                }).render($('#1Dprimitives'));
+
     
     //
     // Booleans

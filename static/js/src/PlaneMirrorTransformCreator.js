@@ -88,24 +88,15 @@ SS.PlaneChoice = Backbone.View.extend({
     },
 
     xy: function() {
-        this.model.node.parameters.u = 0;
-        this.model.node.parameters.v = 0;
-        this.model.node.parameters.w = 1;
-        this.model.setParameters({});
+        this.model.setParameters({u: 0, v: 0, w: 1});
     },
 
     yz: function() {
-        this.model.node.parameters.u = 1;
-        this.model.node.parameters.v = 0;
-        this.model.node.parameters.w = 0;
-        this.model.setParameters({});
+        this.model.setParameters({u: 1, v: 0, w: 0});
     },
 
     zx: function() {
-        this.model.node.parameters.u = 0;
-        this.model.node.parameters.v = 1;
-        this.model.node.parameters.w = 0;
-        this.model.setParameters({});
+        this.model.setParameters({u: 0, v: 1, w: 0});
     },
 
 

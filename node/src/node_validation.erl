@@ -93,6 +93,20 @@ validate_geom_test_() ->
 			  {<<"origin">>, Origin},
                           {<<"parameters">>, {[{<<"vertices">>, [{[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]}]}]}}
                          ]})),
+     ?_assertEqual({error, {[{<<"vertices">>, <<"at least 2 vertices required">>}]}},
+		   geom({[{<<"type">>, <<"polyline">>},
+			  {<<"origin">>, Origin},
+                          {<<"parameters">>, {[{<<"vertices">>, [{[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]}]}]}}
+                         ]})),
+     ?_assertEqual(ok,
+		   geom({[{<<"type">>, <<"polyline">>},
+			  {<<"origin">>, Origin},
+                          {<<"parameters">>, {[{<<"vertices">>, [{[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}]},
+                                                                 {[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 1}]}
+                                                                ]}
+                                              ]}}
+                         ]})),
+
      ?_assertEqual({error, {[{<<"vertices">>, <<"all coordinates must be numbers">>}]}},
 		   geom({[{<<"type">>, <<"triangle2d">>},
 			  {<<"origin">>, Origin},
@@ -218,6 +232,8 @@ validate_geom_type(<<"text2d">>, Props) ->
 			      ]);
 validate_geom_type(<<"triangle2d">>, Props) ->
     validate_primitive(Props, [{<<"vertices">>, fun triangle_vertices/1}]);
+validate_geom_type(<<"polyline">>, Props) ->
+    validate_primitive(Props, [{<<"vertices">>, fun polyline_vertices/1}]);
 validate_geom_type(<<"bezier">>, Props) ->
     validate_primitive(Props, [{<<"vertices">>, fun bezier_vertices/1}]);
 validate_geom_type(<<"prism">>, Props) ->
@@ -619,17 +635,6 @@ zero_or_one_integer(Value) when is_integer(Value) andalso Value =:= 1 ->
 zero_or_one_integer(_) ->
     {error, <<"must be 0 or one">>}.
 
-bezier_vertices([{V1}, {V2}, {V3}, {V4}]) ->
-    case {vertex(V1), vertex(V2), vertex(V3), vertex(V4)} of
-        {ok, ok, ok, ok} ->
-            ok;
-        _ ->
-            {error, <<"all coordinates must be numbers">>}
-    end;
-bezier_vertices(_) ->
-    {error, <<"four vertices required">>}.
-
-
 triangle_vertices([{V1}, {V2}, {V3}]) ->
     case {vertex(V1), vertex(V2), vertex(V3)} of
         {ok, ok, ok} ->
@@ -640,6 +645,27 @@ triangle_vertices([{V1}, {V2}, {V3}]) ->
 triangle_vertices(_) ->
     {error, <<"three vertices required">>}.
 
+polyline_vertices(Vertices) when is_list(Vertices) andalso length(Vertices) > 1 ->
+    lists:foldl(fun({Vertex}, ok) ->
+                        vertex(Vertex);
+                   (_, {error, Err}) ->
+                        {error, Err}
+                end,
+                ok,
+                Vertices);
+polyline_vertices(_) ->
+    {error, <<"at least 2 vertices required">>}.
+
+bezier_vertices([{V1}, {V2}, {V3}, {V4}]) ->
+    case {vertex(V1), vertex(V2), vertex(V3), vertex(V4)} of
+        {ok, ok, ok, ok} ->
+            ok;
+        _ ->
+            {error, <<"all coordinates must be numbers">>}
+    end;
+bezier_vertices(_) ->
+    {error, <<"four vertices required">>}.
+
 vertex(Vertex) ->
     case {lists:keyfind(<<"u">>, 1, Vertex), lists:keyfind(<<"v">>, 1, Vertex), lists:keyfind(<<"w">>, 1, Vertex)}of
         {{_, U}, {_, V}, {_, W}} ->
@@ -647,10 +673,10 @@ vertex(Vertex) ->
                 {ok, ok, ok} ->
                     ok;
                 _ ->
-                    {error, not_all_numbers}
+                    {error, <<"all coordinates must be numbers">>}
             end;
         _ ->
-            {error, not_all_numbers}
+            {error, <<"all coordinates must be numbers">>}
     end.
 
 

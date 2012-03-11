@@ -116,6 +116,9 @@ string create_geometry(string id, map< string, mValue > json) {
         return create_primitive<Ellipse1DBuilder>(id, json);
     } else if (geomType == "bezier") {
         return create_primitive<Bezier1DBuilder>(id, json);
+    } else if (geomType == "polyline") {
+        return create_primitive<PolylineBuilder>(id, json);
+
         
     // Modifiers
     } else if (geomType == "prism") {

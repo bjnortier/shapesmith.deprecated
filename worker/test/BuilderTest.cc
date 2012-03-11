@@ -406,6 +406,40 @@ TEST(BuilderTest, MakeFaceFromWires) {
     
 }
 
+TEST(BuilderTest, Polyline) {
+    
+    mObject origin;
+    origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
+    
+    mObject polylineParameters;
+    
+    mObject v0; v0["u"] = 0.0; v0["v"] = 0.0; v0["w"] = 0.0;
+    mObject v1; v1["u"] = 2.0; v1["v"] = 2.0; v1["w"] = 0.0;
+    
+    mArray vertices1;
+    vertices1.push_back(v0);
+    vertices1.push_back(v1);
+    polylineParameters["vertices"] = vertices1;
+    
+    mObject polylineJson;
+    polylineJson["origin"] = origin;
+    polylineJson["parameters"] = polylineParameters;
+    
+    PolylineBuilder polylineBuilder(polylineJson);
+    ASSERT_FALSE(polylineBuilder.shape().IsNull());
+    
+    auto_ptr<Tesselator> tesselator(new Tesselator(polylineBuilder.shape()));
+    mValue tesselation = tesselator->Tesselate();
+    
+    mArray facesTesselation = tesselation.get_obj()["faces"].get_obj()["positions"].get_array();
+    mArray edgeTesselation = tesselation.get_obj()["edges"].get_obj()["positions"].get_array();
+    
+    ASSERT_EQ(facesTesselation.size(), 0);
+    ASSERT_NE(edgeTesselation.size(), 0);
+    
+}
+
+
 TEST(BuilderTest, MakeFaceFromWiresRespectOrientation) {
     
     mObject origin;
