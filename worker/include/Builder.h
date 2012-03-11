@@ -243,6 +243,14 @@ public:
     ~LoftBuilder() {};
 };
 
+struct could_not_fillet : std::exception { char const* what() const throw() { return "Could not fillet shape.";}  };
+
+class FilletBuilder : public BuilderND {
+public:
+    FilletBuilder(map< string, mValue > json, TopoDS_Shape shape);
+    ~FilletBuilder() {};
+};
+
 
 
     

@@ -125,6 +125,8 @@ string create_geometry(string id, map< string, mValue > json) {
         return create_modifier<PrismBuilder>(id, json);
     } else if (geomType == "revolve") {
         return create_modifier<RevolveBuilder>(id, json);
+    } else if (geomType == "fillet") {
+        return create_modifier<FilletBuilder>(id, json);
     } else if (geomType == "make_face") {
         return create_boolean<FaceBuilder>(id, json);
     } else if (geomType == "make_solid") {

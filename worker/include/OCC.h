@@ -23,6 +23,7 @@
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepOffsetAPI_ThruSections.hxx>
+#include <BRepFilletAPI_MakeFillet.hxx>
 
 #include <BRepClass3d_SolidExplorer.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>

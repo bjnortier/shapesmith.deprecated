@@ -80,9 +80,12 @@ SS.PrimitiveCreator = SS.Creator.extend({
                                           this.editingNode);
             command_stack.execute(cmd);
         } else {
-            var cmd = create_geom_command(this.node, {type: this.node.type,
-						      origin: this.node.origin,
-                                                      parameters: this.node.parameters});
+            var geometry = {type: this.node.type,
+                            parameters: this.node.parameters};
+            if (this.node.origin) {
+		geometry.origin =  this.node.origin;
+            }
+            var cmd = create_geom_command(this.node, geometry);
             command_stack.execute(cmd);
         }
     },

@@ -75,6 +75,7 @@ SS.creators.rectangle2d = SS.Rectangle2DCreator;
 SS.creators.triangle2d = SS.Triangle2DCreator;
 SS.creators.text2d = SS.Text2DCreator;
 SS.creators.prism = SS.PrismCreator;
+SS.creators.fillet = SS.FilletCreator;
 SS.creators.revolve = SS.RevolveCreator;
 SS.creators.bezier = SS.BezierCreator;
 SS.creators.ellipse1d = SS.Ellipse1DCreator;
@@ -133,7 +134,7 @@ function create_modifier(selected, type) {
     var parentNode = new GeomNode({
         type: type,
         editing: true,
-	origin: {x: 0, y: 0, z: 0},
+	origin: jsonSchema.properties.origin ? {x: 0, y: 0, z: 0} : null,
         parameters: geometryParams
     }, [original]);
                                 
@@ -276,6 +277,10 @@ $(document).ready(function() {
     new Action('Revolve', '/static/images/revolve.png', 
                function(selected) { 
                    new SS.RevolveCreator(create_modifier(selected, 'revolve'));
+               }).render($('#modifiers'));
+    new Action('Fillet', '/static/images/fillet.png', 
+               function(selected) { 
+                   new SS.FilletCreator(create_modifier(selected, 'fillet'));
                }).render($('#modifiers'));
     var createFaceAction = new Action('Create Face', '/static/images/make_face.png', 
                                       function(selected) { 

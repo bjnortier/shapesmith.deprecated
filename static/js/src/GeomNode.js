@@ -122,15 +122,18 @@ GeomNode.prototype.editableCopy = function() {
 GeomNode.prototype.toShallowJson = function() {
     // No need to do somethign special with parameters if they are not 
     // defined, as JSON.stringify simply ignores those fields
-    return JSON.stringify({type: this.type,
-			   origin: this.origin,
-                           parameters: this.parameters,
-                           children: this.children.map(function(child) {
-                               return child.sha;
-                           }),
-                           transforms: this.transforms.map(function(tx) {
-                               return JSON.parse(tx.json());
-                           })});
+    var obj = {type: this.type,
+               parameters: this.parameters,
+               children: this.children.map(function(child) {
+                   return child.sha;
+               }),
+               transforms: this.transforms.map(function(tx) {
+                   return JSON.parse(tx.json());
+               })};
+    if (this.origin) {
+	obj.origin = this.origin;
+    }
+    return JSON.stringify(obj);
 }
 
 GeomNode.fromDeepJson = function(json) {

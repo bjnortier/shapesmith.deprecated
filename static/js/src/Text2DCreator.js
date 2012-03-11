@@ -23,6 +23,10 @@ SS.Text2DCreator = SS.PrimitiveCreator.extend({
     },
 
     getBoundingBox: function() {
+        if (!this.textPreview) {
+            return null;
+        }
+
         var boundingBox = SS.boundingBoxForSceneObject(this.textPreview.sceneObject);
         var origin = this.node.origin;
         ['min', 'max'].map(function(key) {

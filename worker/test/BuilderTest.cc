@@ -591,6 +591,34 @@ TEST(BuilderTest, Loft) {
 }
 
 
+TEST(BuilderTest, Fillet) {
+    
+    mObject origin;
+    origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
+    
+    mObject cuboidParameters;
+    cuboidParameters["u"] = 10.0;
+    cuboidParameters["v"] = 10.0;
+    cuboidParameters["w"] = 10.0;
+    
+    mObject cuboidJson;
+    cuboidJson["origin"] = origin;
+    cuboidJson["parameters"] = cuboidParameters;
+    
+    CuboidBuilder cuboidBuilder(cuboidJson);
+    ASSERT_FALSE(cuboidBuilder.shape().IsNull());
+    
+    mObject filletJSON;
+    mObject filletParameters;
+    filletParameters["r"] = 1.0;
+    filletJSON["parameters"] = filletParameters;
+    
+    FilletBuilder filletBuilder(filletJSON, cuboidBuilder.shape());
+    ASSERT_FALSE(filletBuilder.shape().IsNull());
+    
+}
+
+
 TEST(BuilderTest, Boolean) {
     
     mObject origin;

@@ -266,6 +266,19 @@ SS.schemas.prism = {
     }
 };
 
+SS.schemas.fillet = {
+    description: "Fillet",
+    type: 'object',
+    properties: {
+        parameters: {
+            type: 'object',
+            properties: {
+                'r' : {type: 'number'}
+            }
+        }
+    }
+};
+
 SS.schemas.revolve = {
     description: "Revolve",
     type: 'object',

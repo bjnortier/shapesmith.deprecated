@@ -861,3 +861,23 @@ RevolveBuilder::RevolveBuilder(map< string, mValue > json, TopoDS_Shape shape) {
     PostProcess(json);
 }
 
+FilletBuilder::FilletBuilder(map< string, mValue > json, TopoDS_Shape shape) {
+    
+    map< string, mValue > parameters = json["parameters"].get_obj();
+    
+    double r = Util::to_d(parameters["r"]);
+
+    BRepFilletAPI_MakeFillet mkFillet(shape);
+    for (TopExp_Explorer edgeIt(shape, TopAbs_EDGE); edgeIt.More(); edgeIt.Next()) { 
+        mkFillet.Add(r, TopoDS::Edge(edgeIt.Current()));
+    }
+    
+    try {
+        shape_ = mkFillet.Shape();
+    } catch (...) {
+        throw could_not_fillet();
+    }
+    PostProcess(json);
+}
+
+

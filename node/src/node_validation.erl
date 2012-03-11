@@ -169,8 +169,11 @@ validate_geom_test_() ->
 			  {<<"origin">>, Origin},
                           {<<"parameters">>, {[{<<"u">>, 0}, {<<"v">>, 0}, {<<"w">>, 0}, {<<"angle">>, 0}]}},
                           {<<"children">>, [<<"abc">>]}
-                         ]}))
-
+                         ]})),
+     ?_assertEqual(ok, 
+		   geom({[{<<"type">>, <<"fillet">>},
+                          {<<"parameters">>, {[{<<"r">>, 5}]}},
+                          {<<"children">>, [<<"abc">>]}]}))
     ].
 -endif.
 
@@ -278,6 +281,20 @@ validate_geom_type(<<"make_solid">>, Props) ->
 	    {error, {[{<<"children">>, <<"cannot be empty">>}]}};
 	{_, Children} when is_list(Children) ->
             ok
+    end;
+validate_geom_type(<<"fillet">>, Props) ->
+    case lists:keyfind(<<"children">>, 1, Props) of
+	false ->
+	    {error, {[{<<"missing">>, <<"children">>}]}};
+	{_, [_Child]} ->
+            case lists:keyfind(<<"parameters">>, 1, Props) of
+                false ->
+                    {error, {[{<<"missing">>, <<"parameters">>}]}};
+                {_, Parameters} ->
+                    validate_parameters(Parameters, [{<<"r">>, fun positive/1}])
+            end;
+	_ ->
+	    {error, {[{<<"children">>, <<"only one child allowed">>}]}}
     end;
 validate_geom_type(<<"loft">>, Props) ->
     case lists:keyfind(<<"children">>, 1, Props) of

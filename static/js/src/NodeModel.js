@@ -22,8 +22,8 @@ SS.NodeModel = Backbone.Model.extend({
 
         var node = this.node;
         var schema = SS.schemas[node.type];
-        updateValues(node.origin, schema.properties.origin);
-        updateValues(node.parameters, schema.properties.parameters);
+        node.origin && updateValues(node.origin, schema.properties.origin);
+        node.parameters && updateValues(node.parameters, schema.properties.parameters);
     },
 
     setParameters: function(parameters) {
@@ -131,8 +131,8 @@ SS.NodeDOMView = Backbone.View.extend({
 
         var node = this.model.node;
         var schema = SS.schemas[node.type];
-        updateValues(node.origin, schema.properties.origin);
-        updateValues(node.parameters, schema.properties.parameters);
+        node.origin && updateValues(node.origin, schema.properties.origin);
+        node.parameters && updateValues(node.parameters, schema.properties.parameters);
 
     },
 
