@@ -452,6 +452,38 @@ var SS = SS || {};
         }            
     }
 
+    SS.planeMirrorGeomNodeRendering = function(originalNode, editingNode, transform) {
+
+        var origin =  new THREE.Vector3(transform.origin.x, 
+                                        transform.origin.y, 
+                                        transform.origin.z); 
+        var normal = new THREE.Vector3(transform.parameters.u, 
+                                       transform.parameters.v, 
+                                       transform.parameters.w)
+            .normalize()
+            .negate();
+        
+        for (key in editingNode.sceneObjects) {
+
+            for (var i = 0; i < editingNode.sceneObjects[key].children.length; ++i) {
+                
+                var originalGeometry = originalNode.originalSceneObjects[key].children[i].geometry;
+                var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
+
+	        editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
+	            var position = vertex.position.clone();
+                    var dot = new THREE.Vector3().sub(position, origin).dot(normal);
+                    var dPos = normal.clone().multiplyScalar(-2*dot);
+                    var newPosition = new THREE.Vector3().add(position, dPos);
+	            return new THREE.Vertex(newPosition);
+                });
+                editingGeometry.computeCentroids();
+	        editingGeometry.computeFaceNormals();
+                editingGeometry.__dirtyVertices = true;
+            }
+        }            
+    }
+
     SS.boundingBoxForSceneObject = function(sceneObject) {
         var boundingBoxes = [];
         var addRecursively = function(child) {

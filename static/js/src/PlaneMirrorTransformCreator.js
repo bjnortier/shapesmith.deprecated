@@ -38,9 +38,9 @@ SS.PlaneMirrorTransformPreview = SS.PreviewWithOrigin.extend({
                                              transform.parameters.w);
             
 
-            SS.axisMirrorGeomNodeRendering(this.model.originalNode, 
-                                           this.model.editingNode, 
-                                           this.model.node);
+            SS.planeMirrorGeomNodeRendering(this.model.originalNode, 
+                                            this.model.editingNode, 
+                                            this.model.node);
         }
 
         this.clear();
