@@ -842,7 +842,11 @@ LoftBuilder::LoftBuilder(map< string, mValue > json, vector<TopoDS_Shape>& child
 }
 
 RevolveBuilder::RevolveBuilder(map< string, mValue > json, TopoDS_Shape shape) {
-
+    
+    if (TopExp_Explorer(shape, TopAbs_SOLID).More()) {
+        throw no_solids_allowed();
+    }
+    
     map< string, mValue > origin = json["origin"].get_obj();
     map< string, mValue > parameters = json["parameters"].get_obj();
     

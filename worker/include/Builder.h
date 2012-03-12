@@ -199,6 +199,8 @@ public:
     ~PrismBuilder() {};
 };
 
+struct no_solids_allowed : std::exception { char const* what() const throw() { return "No solids allowed";}  };
+
 class RevolveBuilder : public BuilderND {
 public:
     RevolveBuilder(map< string, mValue > json, TopoDS_Shape shape);
