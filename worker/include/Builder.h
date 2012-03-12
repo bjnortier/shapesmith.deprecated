@@ -244,6 +244,7 @@ public:
 };
 
 struct could_not_fillet : std::exception { char const* what() const throw() { return "Could not fillet shape.";}  };
+struct non_fillitable_edge : std::exception { char const* what() const throw() { return "The shape contains an edge that cannot be filleted.";}  };
 
 class FilletBuilder : public BuilderND {
 public:
