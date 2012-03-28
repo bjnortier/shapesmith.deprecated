@@ -33,7 +33,7 @@ methods(ReqData) ->
     end.
 
 validate(_ReqData, _User, _Design, {Props}) ->
-    ValidationFns = [fun validate_geoms/1, fun validate_parent/1, fun validate_hidden/1],
+    ValidationFns = [fun validate_geoms/1, fun validate_parent/1],
     Result = lists:foldl(fun(ValidationFn, ok) ->
                                  case ValidationFn(Props) of
                                      {error, Reason} ->
@@ -74,16 +74,6 @@ validate_parent(Props) ->
 	    ok;
 	_ ->
 	    {error, <<"parent commit must be a string">>}
-    end.
-
-validate_hidden(Props) ->
-     case lists:keyfind(<<"hidden">>, 1, Props) of 
-	false ->
-             ok;
-	{_, X} when is_list(X) ->
-	    ok;
-	_ ->
-	    {error, <<"hidden must be an array">>}
     end.
 
 create(_ReqData, User, Design, RequestJSON) ->

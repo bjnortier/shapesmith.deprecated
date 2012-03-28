@@ -52,8 +52,7 @@ validation(_Config) ->
              { {[{<<"geoms">>, [<<"ab13">>]}]}, <<"no parent commit specified">>},
              { {[{<<"geoms">>, []}, {<<"parent">>, []}]}, <<"parent commit must be a string">>},
              { {[{<<"parent">>, <<"ab13">>}]}, <<"no geoms specified">>},
-             { {[{<<"geoms">>, <<"ab18276c">>}]}, <<"geoms must be an array">>},
-             { {[{<<"geoms">>, []}, {<<"parent">>, <<"a12">>}, {<<"hidden">>, <<"f12">>}]}, <<"hidden must be an array">>}
+             { {[{<<"geoms">>, <<"ab18276c">>}]}, <<"geoms must be an array">>}
             ],
     
     lists:map(fun({Commit, ValidationError}) ->
