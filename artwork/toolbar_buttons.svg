@@ -14,7 +14,7 @@
    height="1052.3622047"
    id="svg2"
    version="1.1"
-   inkscape:version="0.47 r22583"
+   inkscape:version="0.48.1 r9760"
    sodipodi:docname="toolbar_buttons.svg"
    inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/loft.png"
    inkscape:export-xdpi="0.95999998"
@@ -26,17 +26,19 @@
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.72776371"
-     inkscape:cx="2068.8583"
-     inkscape:cy="1715.5036"
+     inkscape:zoom="0.12865167"
+     inkscape:cx="-2.6267776"
+     inkscape:cy="1830.9535"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
-     inkscape:window-width="1440"
-     inkscape:window-height="787"
+     inkscape:window-width="1920"
+     inkscape:window-height="967"
      inkscape:window-x="0"
      inkscape:window-y="0"
-     inkscape:window-maximized="1">
+     inkscape:window-maximized="1"
+     showguides="true"
+     inkscape:guide-bbox="true">
     <inkscape:grid
        snapvisiblegridlinesonly="true"
        enabled="false"
@@ -51,6 +53,10 @@
        visible="true"
        enabled="true"
        snapvisiblegridlinesonly="true" />
+    <sodipodi:guide
+       orientation="-0.70710678,0.70710678"
+       position="-1080,3920"
+       id="guide4761" />
   </sodipodi:namedview>
   <defs
      id="defs4">
@@ -2852,5 +2858,38 @@
        inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/make_solid.png"
        inkscape:export-xdpi="9.4700003"
        inkscape:export-ydpi="9.4700003" />
+    <path
+       style="fill:#ffffff;fill-opacity:0.13716814;stroke:#ffffff;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;opacity:1"
+       d="M 1761.1875 -1907.6875 C 1727.0156 -1907.8184 1692.2136 -1902.5792 1658.4375 -1891.3125 C 1587.8281 -1867.7592 1534.7153 -1822.3459 1505.4688 -1767.625 C 1534.718 -1712.9149 1587.8386 -1667.5185 1658.4375 -1643.9688 C 1797.41 -1597.6115 1953.2959 -1652.8519 2014.5312 -1767.625 C 1968.1803 -1854.5075 1867.6192 -1907.2797 1761.1875 -1907.6875 z "
+       id="path3844"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/eye_hidden.png"
+       inkscape:export-xdpi="3.1471589"
+       inkscape:export-ydpi="3.1471589" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#0090ab;fill-opacity:0.09292036;stroke:#ffffff;stroke-width:2.57142850000000012;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;opacity:1"
+       id="path4759"
+       sodipodi:cx="1680"
+       sodipodi:cy="-1787.6378"
+       sodipodi:rx="120"
+       sodipodi:ry="120"
+       d="m 1800,-1787.6378 a 120,120 0 1 1 -240,0 120,120 0 1 1 240,0 z"
+       transform="matrix(1.1666667,0,0,1.1666667,-200.00006,317.9397)"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/eye_hidden.png"
+       inkscape:export-xdpi="3.1471589"
+       inkscape:export-ydpi="3.1471589" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#000000;fill-opacity:0.13274336;stroke:#ffffff;stroke-width:6.00000107999999965;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline;opacity:1"
+       id="path4759-7"
+       sodipodi:cx="1680"
+       sodipodi:cy="-1787.6378"
+       sodipodi:rx="120"
+       sodipodi:ry="120"
+       d="m 1800,-1787.6378 a 120,120 0 1 1 -240,0 120,120 0 1 1 240,0 z"
+       transform="matrix(0.49999991,0,0,0.49999991,920.00015,-873.81908)"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/eye_hidden.png"
+       inkscape:export-xdpi="3.1471589"
+       inkscape:export-ydpi="3.1471589" />
   </g>
 </svg>

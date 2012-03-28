@@ -2,14 +2,15 @@ var SS = SS || {};
 
 SS.GeomNodeRenderingManager = function() {
 
+    var hiddenByUser = [];
+
     this.geomDocAdd = function(geomNode) {
         if (geom_doc.isRoot(geomNode)) {
             SS.renderGeometry(geomNode);
         }
         if (geomNode.isEditingOrTransformEditing()) {
-            SS.setOthersTransparent(geomNode);
+            setOtherNonHiddenNodesTransparent(geomNode);
         }
-
     }
 
     this.geomDocBeforeRemove = function(geomNode) {
@@ -18,8 +19,13 @@ SS.GeomNodeRenderingManager = function() {
 
     this.geomDocRemove = function(geomNode) {
         SS.hideGeometry(geomNode);
+
         if (geomNode.isEditingOrTransformEditing()) {
-            SS.restoreOpacity();
+            restoreOpacityOfNonHiddenNodes();
+        }
+
+        if (hiddenByUser.indexOf(geomNode.id) !== -1) {
+            hiddenByUser.splice(hiddenByUser.ondexOf(geomNode.id),1);
         }
     }
 
@@ -32,28 +38,66 @@ SS.GeomNodeRenderingManager = function() {
         this.geomDocAdd(replacement);
 
         if (replacement.isEditingOrTransformEditing()) {
-            SS.setOthersTransparent(replacement);
+            setOtherNonHiddenNodesTransparent(replacement);
         } else {
-            SS.restoreOpacity();
+            restoreOpacityOfNonHiddenNodes();
         }
+    }
+
+    var restoreOpacityOfNonHiddenNodes = function() {
+        geom_doc.rootNodes.map(function(geomNode) {
+            if (hiddenByUser.indexOf(geomNode.id) === -1) {
+                SS.restoreOpacity(geomNode);
+            }
+        });
+    }
+
+    var setOtherNonHiddenNodesTransparent = function(geomNode) {
+        geom_doc.rootNodes.map(function(rootNode) {
+            if ((geomNode.id !== rootNode.id) 
+                &&
+                (hiddenByUser.indexOf(geomNode.id) === -1)) {
+                SS.setTransparent(rootNode);
+            }
+        });
+    }
+
+    this.isHiddenByUser = function(geomNode) {
+        return (hiddenByUser.indexOf(geomNode.id) !== -1);
     }
 
     this.deselected = function(deselected) {
         for (var i in deselected) {
             var id = deselected[i];
-            SS.unhighlightGeometry(geom_doc.findById(id))
+            if (hiddenByUser.indexOf(id) === -1) {
+                SS.unhighlightGeometry(geom_doc.findById(id))
+            }
         }
     }
 
     this.selected = function(selected) {
         for (var i in selected) {
             var id = selected[i];
-            SS.highlightGeometry(geom_doc.findById(id));
+            var geomNode = geom_doc.findById(id);
+            if (hiddenByUser.indexOf(id) === -1) {
+                SS.highlightGeometry(geomNode);
+            }
+            setOtherNonHiddenNodesTransparent(geomNode);
         }
     }
 
     this.clear = function() {
         selectionManager.deselectAll();
+    }
+
+    this.setOpaque = function(id) {
+        hiddenByUser.splice(hiddenByUser.indexOf(id), 1);
+        SS.renderGeometry(geom_doc.findById(id));
+    }
+
+    this.setHidden = function(id) {
+        hiddenByUser.push(id);
+        SS.hideGeometry(geom_doc.findById(id));
     }
     
     geom_doc.on('add', this.geomDocAdd, this);

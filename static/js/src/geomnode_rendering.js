@@ -103,8 +103,6 @@ var SS = SS || {};
 
     }
 
-  
-
     var createGeometry = function(meshes) {
         return {'faces' : create3DGeometries(meshes['faces']),
                 'edges' : create1DGeometries(meshes['edges'])};
@@ -269,7 +267,6 @@ var SS = SS || {};
     }
 
     SS.highlightGeometry = function(geomNode) {
-        SS.setOthersTransparent(geomNode);
         for (key in geomNode.sceneObjects) {
             var object = geomNode.sceneObjects[key];
             SS.sceneView.scene.remove(object);
@@ -302,18 +299,14 @@ var SS = SS || {};
     }
 
   
-    SS.setOthersTransparent = function(geomNode) {
-        geom_doc.rootNodes.map(function(rootNode) {
-            if (geomNode.id !== rootNode.id) {
-                for (key in rootNode.sceneObjects) {
-                    rootNode.sceneObjects[key].children.map(function(child) {
-                        if (child.material.opacity === 1.0) {
-                            child.material.opacity = 0.5;
-                        }
-                    });
+    SS.setTransparent = function(geomNode) {
+        for (key in geomNode.sceneObjects) {
+            geomNode.sceneObjects[key].children.map(function(child) {
+                if (child.material.opacity === 1.0) {
+                    child.material.opacity = 0.5;
                 }
-            }
-         });
+            });
+        }
     }
     
     SS.restoreOpacity = function() {

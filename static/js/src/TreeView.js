@@ -176,15 +176,23 @@ function renderNode(geomNode) {
     // Children
     var childTables = geomNode.children.map(renderNode);
     
-    var childTemplate = '{{#editing}}<div id="{{id}}"><div id="editing-area"></div></div>{{/editing}}{{^editing}}<table id="{{id}}"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img><span class="{{clazz}}">{{type}}</span></td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>{{/editing}}';
+    var childTemplate = '{{#editing}}<div id="{{id}}"><div id="editing-area"></div></div>{{/editing}}{{^editing}}<table id="{{id}}"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img><span class="{{clazz}}">{{type}}</span>{{{eyeHtml}}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>{{/editing}}';
 
     var clazz = geom_doc.isRoot(geomNode) ? 
 	'select-geom target-' + geomNode.id : 
 	'target-' + geomNode.id;
+
+    var eyeTemplate = '{{#isRoot}} <img class="toggle-geom-visibility {{clazz}} opaque" src="/static/images/eye.png"/> {{/isRoot}}';
+    var eyeView = {
+        isRoot: geom_doc.isRoot(geomNode),
+        clazz:  'target-' + geomNode.id
+    };
+    var eyeHtml = $.mustache(eyeTemplate, eyeView);
 	
     var view = {type: geomNode.type,
                 editing: geomNode.editing,
 		id: geomNode.id,
+                eyeHtml: eyeHtml,
 		originTable: originTable,
                 paramsTable: paramsTable,
                 transformRows: transformRows,
@@ -428,6 +436,33 @@ function TreeView() {
                 }
             }
             return false;
+        });
+
+        $('.toggle-geom-visibility').unbind('click');
+        $('.toggle-geom-visibility').click(function() {
+            var pattern = /^target-(.*)$/;
+            var classes = $(this).attr('class').split(' ');
+            for (var i in classes) {
+                var match = classes[i].match(pattern);
+                if (match) {
+                    id = match[1];
+                }
+            }
+            if (!id) {
+                throw Error('id for editing could not be determined');
+            }
+            if ($(this).attr('class').indexOf('opaque') !== -1) {
+                $(this).attr('src', '/static/images/eye_hidden.png');
+                $(this).removeClass('opaque');
+                $(this).addClass('hidden');
+                SS.geomNodeRenderingManager.setHidden(id);
+            } else if ($(this).attr('class').indexOf('hidden') !== -1) {
+                $(this).attr('src', '/static/images/eye.png');
+                $(this).removeClass('hidden');
+                $(this).addClass('opaque');
+                SS.geomNodeRenderingManager.setOpaque(id);
+
+            }
         });
 
         // Show/Hide

@@ -41,7 +41,9 @@ SS.TransformerManager = function() {
     this.selected = function(selected) {
         if (selectionManager.size() === 1) {
             node = geom_doc.findById(selectionManager.getSelected()[0]);
-            if (!node.isEditingOrTransformEditing()) {
+            if (!node.isEditingOrTransformEditing() 
+                &&
+                !SS.geomNodeRenderingManager.isHiddenByUser(node)) {
                 activate(node);
             }
         }
