@@ -64,7 +64,26 @@ function GeomNode() {
     updateId(this);
 
     this.origin = arguments[0].origin;
-    this.parameters = arguments[0].parameters;
+
+    var copyValue = function(value) {
+        if ((value === null) || (value === undefined)) {
+            return undefined;
+        } if (value.indexOf) {
+            return value.map(function(x) {
+                return copyValue(x);
+            });
+        } else if (typeof(value) === 'object') {
+            var returnObj = {};
+            for (var key in value) {
+                returnObj[key] = copyValue(value[key]);
+            }
+            return returnObj;
+        } else {
+            return value;
+        }
+    }
+
+    this.parameters = copyValue(arguments[0].parameters);
     this.mesh = arguments[0].mesh;
     this.children = [];
 

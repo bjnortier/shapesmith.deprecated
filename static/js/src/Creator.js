@@ -344,10 +344,6 @@ SS.DimensionText = Backbone.View.extend({
         this.model.on('change', this.render, this);
         this.elements = [];
         this.render();
-        this.elements.map(function(element) {
-            element.click(function() { console.log('!') });
-            element[0].addEventListener('mousemove', function() { console.log('%')});
-        });
     },
     
     remove: function() {
