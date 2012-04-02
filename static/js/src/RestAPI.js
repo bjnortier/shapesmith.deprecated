@@ -263,9 +263,13 @@ function copy(selected) {
         alert("must have 1 object selected");
         return;
     }
-
     var id = selected[0];
     var node = geom_doc.findById(id);
+    copyNode(node);
+}
+
+
+function copyNode(node) {
     var newNode;
     
     var doFn = function() {
@@ -276,11 +280,26 @@ function copy(selected) {
 	    });
 	    return new GeomNode(node, copiedChildren);
 	};
-	
 	newNode = copyWithChildren(node);
-	selectionManager.deselectID(node.id);
-	geom_doc.add(newNode);
-	command_stack.commit();
+
+        if (newNode.mesh) {
+	    geom_doc.add(newNode);
+	    command_stack.commit();
+        } else {
+             $.ajax({
+	         type: 'GET',
+	         url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + newNode.sha,
+	         success: function(mesh) {
+		     newNode.mesh = mesh;
+	             geom_doc.add(newNode);
+	             command_stack.commit();
+                 },
+	         error: function(jqXHR, textStatus, errorThrown) {
+		     command_stack.error(jqXHR.responseText);
+	         }
+	     });
+        }
+	
     };
     var undoFn = function() {
         geom_doc.remove(newNode);

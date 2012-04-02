@@ -176,13 +176,16 @@ function renderNode(geomNode) {
     // Children
     var childTables = geomNode.children.map(renderNode);
     
-    var childTemplate = '{{#editing}}<div id="{{id}}"><div id="editing-area"></div></div>{{/editing}}{{^editing}}<table id="{{id}}" class="geomnode-table"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img><span class="{{clazz}}">{{type}}</span><span class="node-actions">{{{eyeHtml}}}{{{deleteGeomHtml}}}</span></td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>{{/editing}}';
+    var childTemplate = '{{#editing}}<div id="{{id}}"><div id="editing-area"></div></div>{{/editing}}{{^editing}}<table id="{{id}}" class="geomnode-table"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img><span class="{{clazz}}">{{type}}</span><span class="node-actions">{{{copyHtml}}}}{{{deleteGeomHtml}}}{{{eyeHtml}}</span></td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>{{/editing}}';
 
     var clazz = geom_doc.isRoot(geomNode) ? 
 	'select-geom target-' + geomNode.id : 
 	'target-' + geomNode.id;
 
-    var eyeTemplate = '{{#isRoot}} <img class="toggle-geom-visibility {{clazz}} opaque" src="/static/images/eye.png"/> {{/isRoot}}';
+    var copyTemplate = '<img class="copy-geom {{clazz}}" src="/static/images/copy_10.png"/>'
+    var copyHtml = $.mustache(copyTemplate, {clazz: 'target-' + geomNode.id});
+
+    var eyeTemplate = '{{#isRoot}}<img class="toggle-geom-visibility {{clazz}} opaque" src="/static/images/eye.png"/> {{/isRoot}}';
     var eyeView = {
         isRoot: geom_doc.isRoot(geomNode),
         clazz:  'target-' + geomNode.id
@@ -194,10 +197,12 @@ function renderNode(geomNode) {
                                     {isRoot: geom_doc.isRoot(geomNode),
                                      'delete-clazz': 'target-' + geomNode.id,
                                     });
+
 	
     var view = {type: geomNode.type,
                 editing: geomNode.editing,
 		id: geomNode.id,
+                copyHtml: copyHtml,
                 eyeHtml: eyeHtml,
                 deleteGeomHtml: deleteGeomHtml,
 		originTable: originTable,
@@ -374,6 +379,25 @@ function TreeView() {
                 throw Error('id for editing could not be determined');
             }
 	    that.edit(id);
+        });
+
+        // Copy geom
+        $('.copy-geom').unbind('click');
+        $('.copy-geom').click(function() { 
+            var id;
+            var pattern = /^target-(.*)$/;
+            var classes = $(this).attr('class').split(' ');
+            for (var i in classes) {
+                var match = classes[i].match(pattern);
+                if (match) {
+                    id = match[1];
+                }
+            }
+            if (!id) {
+                throw Error('id for editing could not be determined');
+            }
+	    var geomNode = geom_doc.findById(id);
+            copyNode(geomNode);
         });
 	
 

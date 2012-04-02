@@ -468,4 +468,12 @@ img.action:hover {
     color: #993333;
 }
 
+.node-actions {
+    margin-left: 5px;
+}
+
+.node-actions img {
+    padding-left: 2px;
+}
+
 
