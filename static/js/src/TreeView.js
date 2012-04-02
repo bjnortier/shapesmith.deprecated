@@ -117,7 +117,7 @@ function renderTransform(geomNode, transformIndex) {
     var parametersTemplate = '<table>{{#paramsArr}}<tr ><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}</td></tr>{{/paramsArr}}</table>';
     var paramsTable = $.mustache(parametersTemplate, {paramsArr : paramsArr});
 
-    var template = '{{#editing}}<div id="editing-area"></div>{{/editing}}{{^editing}}<table><tr><td><img class="show-hide-contents" src="/static/images/arrow_hidden.png"></img>{{type}}<img class="{{delete-class}}" src="/static/images/delete_button.png" alt="delete"/></td></tr><tr style="{{contentsStyle}}"><td>{{{originTable}}}</td></tr><tr style="{{contentsStyle}}"><td>       {{{paramsTable}}}</td></tr></table>{{/editing}}';
+    var template = '{{#editing}}<div id="editing-area"></div>{{/editing}}{{^editing}}<table><tr><td><img class="show-hide-contents" src="/static/images/arrow_hidden.png"></img>{{type}}<img class="{{delete-class}}" src="/static/images/delete_button_gray_10.png" alt="delete"/></td></tr><tr style="{{contentsStyle}}"><td>{{{originTable}}}</td></tr><tr style="{{contentsStyle}}"><td>       {{{paramsTable}}}</td></tr></table>{{/editing}}';
 
     var view = {
         type: transform.type,
@@ -176,7 +176,7 @@ function renderNode(geomNode) {
     // Children
     var childTables = geomNode.children.map(renderNode);
     
-    var childTemplate = '{{#editing}}<div id="{{id}}"><div id="editing-area"></div></div>{{/editing}}{{^editing}}<table id="{{id}}"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img><span class="{{clazz}}">{{type}}</span>{{{eyeHtml}}}{{{deleteGeomHtml}}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>{{/editing}}';
+    var childTemplate = '{{#editing}}<div id="{{id}}"><div id="editing-area"></div></div>{{/editing}}{{^editing}}<table id="{{id}}" class="geomnode-table"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img><span class="{{clazz}}">{{type}}</span><span class="node-actions">{{{eyeHtml}}}{{{deleteGeomHtml}}}</span></td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>{{/editing}}';
 
     var clazz = geom_doc.isRoot(geomNode) ? 
 	'select-geom target-' + geomNode.id : 
@@ -189,7 +189,7 @@ function renderNode(geomNode) {
     };
     var eyeHtml = $.mustache(eyeTemplate, eyeView);
 
-    var deleteGeomTemplate = '{{#isRoot}}<img class="delete-geom {{delete-clazz}}" src="/static/images/delete_button.png" alt="delete"/>{{/isRoot}}';
+    var deleteGeomTemplate = '{{#isRoot}}<img class="delete-geom {{delete-clazz}}" src="/static/images/delete_button_gray_10.png" alt="delete"/>{{/isRoot}}';
     var deleteGeomHtml = $.mustache(deleteGeomTemplate, 
                                     {isRoot: geom_doc.isRoot(geomNode),
                                      'delete-clazz': 'target-' + geomNode.id,

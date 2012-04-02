@@ -26,9 +26,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.12865167"
+     inkscape:zoom="0.25730334"
      inkscape:cx="-2.6267776"
-     inkscape:cy="1830.9535"
+     inkscape:cy="1209.1194"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -2332,16 +2332,16 @@
        sodipodi:start="4.5930525"
        sodipodi:end="10.869161"
        sodipodi:open="true"
-       inkscape:export-filename="/Users/bjnortier/development/isambard/node/priv/web/images/delete_button.png"
-       inkscape:export-xdpi="4.5"
-       inkscape:export-ydpi="4.5" />
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/delete_button_gray_10.png"
+       inkscape:export-xdpi="3.8567595"
+       inkscape:export-ydpi="3.8567595" />
     <g
        transform="translate(0,9.9999826)"
        id="g4232-5"
        style="stroke:#505050;stroke-width:40;stroke-linecap:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;filter:url(#filter4282)"
-       inkscape:export-filename="/Users/bjnortier/development/isambard/node/priv/web/images/delete_button.png"
-       inkscape:export-xdpi="4.5"
-       inkscape:export-ydpi="4.5">
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/delete_button_gray_10.png"
+       inkscape:export-xdpi="3.8567595"
+       inkscape:export-ydpi="3.8567595">
       <path
          sodipodi:nodetypes="cc"
          inkscape:connector-curvature="0"
@@ -2358,9 +2358,9 @@
     <g
        id="g4232"
        style="stroke:#ffffff;stroke-width:30;stroke-linecap:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       inkscape:export-filename="/Users/bjnortier/development/isambard/node/priv/web/images/delete_button.png"
-       inkscape:export-xdpi="4.5"
-       inkscape:export-ydpi="4.5">
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/delete_button_gray_10.png"
+       inkscape:export-xdpi="3.8567595"
+       inkscape:export-ydpi="3.8567595">
       <path
          sodipodi:nodetypes="cc"
          inkscape:connector-curvature="0"
