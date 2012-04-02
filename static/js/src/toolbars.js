@@ -5,26 +5,16 @@ function Action(label, iconPath, fn) {
 
     this.render = function(toolbar) {
 
-        var imgId = "action_" + label.toLowerCase().replace(/ /g, '_');
-        toolbar.append('<img id="' + imgId + '" src="' + this.iconPath + '" title="' + label + '"/>');
-        
-        // Because 'this' is the HTML element inside the function below,
-        // we have to use a reference
-        var fn = this.fn;
-	var ref = '#' + imgId;
-        jQuery(ref).mouseenter(function() {
-	    jQuery(ref).css('background-color', '#444');
-	});
-        jQuery(ref).mouseleave(function() {
-	    jQuery(ref).css('background-color', '');
-	});
-        jQuery("#" + imgId).mouseup(function(event) {
-	    // TODO: Move this to the popupmenu
+        var image = $('<img class="action" src="' + this.iconPath + '" title="' + label + '"/>');
+        toolbar.append(image);
+
+        image.click(function(event) {
 	    var selected = selectionManager.getSelected();
 	    SS.sceneView.popupMenu.disposeIfShowing();
 	    fn(selected);
             event.stopPropagation();
         });
+
     }
 }
 
@@ -36,7 +26,10 @@ function delete_geom(selected) {
     var nodes = selected.map(function(id) {
 	return geom_doc.findById(id);
     });
+    delete_geom_nodes(nodes);
+}
 
+function delete_geom_nodes(nodes) {
     var doFn = function() {
 	for (var i in nodes) {
             geom_doc.remove(nodes[i]);
@@ -60,7 +53,6 @@ function delete_geom(selected) {
 
     var cmd = new Command(doFn, undoFn, redoFn);
     command_stack.execute(cmd);
-
 }
 
 SS.creators = {};
@@ -191,10 +183,12 @@ function create_transform(selected, type) {
 $(document).ready(function() {
 
     // Edit
-    new Action('Delete', '/static/images/trash.png', 
-               function(selected) { 
-		   delete_geom(selected); 
-	       }).render($('#edit'));
+    var deleteAction = new Action('Delete', '/static/images/trash.png', 
+                                  function(selected) { 
+		                      delete_geom(selected); 
+	                          });
+    deleteAction.render($('#edit'));
+    deleteAction.render($('#boolean'));
     new Action('Copy', '/static/images/copy.png', 
                function(selected) { 
 		   copy(selected)

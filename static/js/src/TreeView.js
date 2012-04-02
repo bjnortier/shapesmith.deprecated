@@ -176,7 +176,7 @@ function renderNode(geomNode) {
     // Children
     var childTables = geomNode.children.map(renderNode);
     
-    var childTemplate = '{{#editing}}<div id="{{id}}"><div id="editing-area"></div></div>{{/editing}}{{^editing}}<table id="{{id}}"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img><span class="{{clazz}}">{{type}}</span>{{{eyeHtml}}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>{{/editing}}';
+    var childTemplate = '{{#editing}}<div id="{{id}}"><div id="editing-area"></div></div>{{/editing}}{{^editing}}<table id="{{id}}"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img><span class="{{clazz}}">{{type}}</span>{{{eyeHtml}}}{{{deleteGeomHtml}}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>{{/editing}}';
 
     var clazz = geom_doc.isRoot(geomNode) ? 
 	'select-geom target-' + geomNode.id : 
@@ -188,11 +188,18 @@ function renderNode(geomNode) {
         clazz:  'target-' + geomNode.id
     };
     var eyeHtml = $.mustache(eyeTemplate, eyeView);
+
+    var deleteGeomTemplate = '{{#isRoot}}<img class="delete-geom {{delete-clazz}}" src="/static/images/delete_button.png" alt="delete"/>{{/isRoot}}';
+    var deleteGeomHtml = $.mustache(deleteGeomTemplate, 
+                                    {isRoot: geom_doc.isRoot(geomNode),
+                                     'delete-clazz': 'target-' + geomNode.id,
+                                    });
 	
     var view = {type: geomNode.type,
                 editing: geomNode.editing,
 		id: geomNode.id,
                 eyeHtml: eyeHtml,
+                deleteGeomHtml: deleteGeomHtml,
 		originTable: originTable,
                 paramsTable: paramsTable,
                 transformRows: transformRows,
@@ -396,6 +403,21 @@ function TreeView() {
                              editingNode: editingNode, 
                              editingExisting: true,
                              transform: transform});
+        });
+
+        $('.delete-geom').unbind('click');
+        $('.delete-geom').click(function() {
+            var id;
+            var pattern = /^target-(.*)$/;
+            var classes = $(this).attr('class').split(' ');
+            for (var i in classes) {
+                var match = classes[i].match(pattern);
+                if (match) {
+                    id = match[1];
+                }
+            }
+            var geomNode = geom_doc.findById(id);
+            delete_geom_nodes([geomNode]);
         });
 
         $('.delete-transform').unbind('click');

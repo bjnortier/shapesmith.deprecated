@@ -235,8 +235,8 @@ div#export-options {
     display:inline;
 }
 
-#action-save {
-    cursor: pointer;
+img.action:hover {
+    background-color: #444;
 }
 
 #design-name {
