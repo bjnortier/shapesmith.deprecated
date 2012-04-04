@@ -68,7 +68,7 @@ validation(_Config) ->
 
 creation(_Config) ->
 
-    %% Create geometry
+    %% Create commit
     Commit = {[{<<"parent">>, <<"abc56">>},
                {<<"geoms">>, [<<"ab3f1">>, <<"9a0eb">>]}]},
     CreateURL = "http://localhost:8001/local/iphonedock/commit/", 
@@ -91,6 +91,74 @@ creation(_Config) ->
     Commit = jiffy:decode(iolist_to_binary(GetResponse)),
 
     ok.
+
+json_export(_Config) ->
+
+    %% Create the geometry
+    CreateGeomURL = "http://localhost:8001/local/iphonedock/geom/", 
+    
+    GeomA = {[{<<"type">>, <<"sphere">>},
+              {<<"origin">>, {[{<<"x">>, 0},
+                               {<<"y">>, 0},
+                               {<<"z">>, 0}]}},
+              {<<"parameters">>, {[{<<"r">>, 1.1}]}}]},
+    {ok,{{"HTTP/1.1",200,_}, _, ResponseA}} = 
+	httpc:request(post, {CreateGeomURL, [], "application/json", jiffy:encode(GeomA)}, [], []),
+    {[{<<"path">>, _},
+      {<<"SHA">>, SHAABin}]} = jiffy:decode(iolist_to_binary(ResponseA)),
+
+    GeomB = {[{<<"type">>, <<"sphere">>},
+              {<<"origin">>, {[{<<"x">>, 0},
+                               {<<"y">>, 0.5},
+                               {<<"z">>, 0}]}},
+              {<<"parameters">>, {[{<<"r">>, 1.1}]}}]},
+    {ok,{{"HTTP/1.1",200,_}, _, ResponseB}} = 
+	httpc:request(post, {CreateGeomURL, [], "application/json", jiffy:encode(GeomB)}, [], []),
+    {[{<<"path">>, _},
+      {<<"SHA">>, SHABBin}]} = jiffy:decode(iolist_to_binary(ResponseB)),
+
+    Bool = {[{<<"type">>, <<"union">>},
+             {<<"children">>, [SHAABin, SHABBin]}]},
+    {ok,{{"HTTP/1.1",200,_}, _, BoolResponse}} = 
+	httpc:request(post, {CreateGeomURL, [], "application/json", jiffy:encode(Bool)}, [], []),
+    {[{<<"path">>, _},
+      {<<"SHA">>, SHABoolBin}]} = jiffy:decode(iolist_to_binary(BoolResponse)),
+
+    %% Create commit
+    Commit = {[{<<"parent">>, <<"abc56">>},
+               {<<"geoms">>, [SHABoolBin, SHAABin]}]},
+    CreateCommitURL = "http://localhost:8001/local/iphonedock/commit/", 
+    {ok,{{"HTTP/1.1",200,_}, _, PostResponse}} = 
+	httpc:request(post, {CreateCommitURL, [], "application/json", jiffy:encode(Commit)}, [], []),
+
+    {[{<<"path">>, _},
+      {<<"SHA">>, CommitSHABin}]} = jiffy:decode(iolist_to_binary(PostResponse)),
+    CommitSHA = binary_to_list(CommitSHABin),
+
+    %% Get exported JSON
+    {ok,{{"HTTP/1.1",200,_}, _, Export}} =
+        httpc:request(get, {"http://localhost:8001/local/iphonedock/json/" ++ CommitSHA, []}, [], []),
+
+    [{[{<<"type">>,<<"union">>},
+       {<<"children">>,
+        [{[{<<"type">>,<<"sphere">>},
+           {<<"origin">>,{[{<<"x">>,0},{<<"y">>,0},{<<"z">>,0}]}},
+           {<<"parameters">>,{[{<<"r">>,1.1}]}}]},
+         {[{<<"type">>,<<"sphere">>},
+           {<<"origin">>,
+            {[{<<"x">>,0},{<<"y">>,0.5},{<<"z">>,0}]}},
+           {<<"parameters">>,{[{<<"r">>,1.1}]}}]}]}]},
+     {[{<<"type">>,<<"sphere">>},
+       {<<"origin">>,{[{<<"x">>,0},{<<"y">>,0},{<<"z">>,0}]}},
+       {<<"parameters">>,{[{<<"r">>,1.1}]}}]}]
+        = jiffy:decode(iolist_to_binary(Export)),
+
+    ok.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                                 private                                  %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
 
 check_json_content_type(Headers) ->
     {Headers, {_, "application/json"}} = {Headers, lists:keyfind("content-type", 1, Headers)}.

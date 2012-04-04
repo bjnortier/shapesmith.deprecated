@@ -68,7 +68,7 @@ function GeomNode() {
     var copyValue = function(value) {
         if ((value === null) || (value === undefined)) {
             return undefined;
-        } if (value.indexOf) {
+        } if (Object.prototype.toString.call( value ) === '[object Array]') {
             return value.map(function(x) {
                 return copyValue(x);
             });

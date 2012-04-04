@@ -317,9 +317,42 @@ $('#action-save').click(function() {
     SS.save();
 });
 
+$('#action-import-json').click(function() {
+
+    $('#json-file-select-input').click();
+
+    // For some reason multiple uploads don't work unless the input is removed and re-added
+    $('#json-file-select-input').remove();
+    var input = $('<input type="file" id="json-file-select-input" style="position: absolute; left: -200px; top: -200px;" onchange="SS.uploadJSON(this.files)">');
+    $('#import-options').append(input);
+
+});
+
+SS.uploadJSON = function(files) {
+    var reader = new FileReader();
+
+    // Closure to capture the file information.
+    reader.onload = (function(theFile) {
+        return function(e) {
+            if (e.target.readyState === 2) {
+                console.log('Uploaded: ' + e.target.result);
+                importJSON(e.target.result);
+            }
+        };
+    })(files[0]);
+
+    // Read in the image file as a data URL.
+    reader.readAsText(files[0]);
+}
+
 $('#action-export-stl').click(function() {
     window.location = '/' + SS.session.username + '/' + SS.session.design + '/stl/' + SS.session.commit + '/';
 });
+
+$('#action-export-json').click(function() {
+    window.location = '/' + SS.session.username + '/' + SS.session.design + '/json/' + SS.session.commit + '/';
+});
+
 
 $('#action-export-thingiverse').click(function() {
     $('#black-overlay').show();

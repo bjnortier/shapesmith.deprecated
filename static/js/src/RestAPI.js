@@ -268,6 +268,88 @@ function copy(selected) {
     copyNode(node);
 }
 
+function importJSON(json) {
+    var rootGeometries = JSON.parse(json);
+    var rootNodes = [];
+    var geomNodes = {};
+
+    // Find the next geometry in the tree to create. It will be the first
+    // geometry found that is not a SHA (a string)
+    var createNext = function(geometries) {
+        for (var i = 0; i < geometries.length; ++i) {
+            if (geometries[i].children) {
+                var found = createNext(geometries[i].children);
+                if (found) {
+                    return true;
+                }
+            }
+            if (typeof(geometries[i]) !== 'string') {
+                var url = (geometries === rootGeometries) ? 
+                    '/' + SS.session.username + '/' + SS.session.design + '/geom?mesh=true' :
+                    '/' + SS.session.username + '/' + SS.session.design + '/geom';
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    contentType: 'application/json',
+                    data: JSON.stringify(geometries[i]),
+	            dataType: 'json',
+                    success: function(result) {
+                        geometries[i].sha = result.SHA;
+                        
+                        var children = geometries[i].children || [];
+                        var geomNode = new GeomNode(geometries[i], children.map(function(sha) {
+                            return geomNodes[sha];
+                        }));
+                        if (result.mesh) {
+                            geomNode.mesh = result.mesh;
+                        }
+                        geomNodes[result.SHA] = geomNode;
+                        
+                        geometries[i] = result.SHA;
+                        createNext(rootGeometries);
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        command_stack.error(jqXHR.responseText);
+                    }
+                });
+                return true;
+            }
+        }
+
+        // No more to create, add them to the geom document
+        if (geometries === rootGeometries) {
+            geometries.map(function(sha) {
+                var geomNode = geomNodes[sha];
+                rootNodes.push(geomNode);
+                geom_doc.add(geomNode);
+            });
+            command_stack.commit();
+        }
+
+        return false;
+    }
+
+    var doFn = function() {
+        createNext(rootGeometries);
+    }
+
+    var undoFn = function() {
+        rootNodes.map(function(node) {
+            geom_doc.remove(node);
+        });
+	command_stack.success();
+    };
+    var redoFn = function() {
+        rootNodes.map(function(node) {
+            geom_doc.add(node);
+        });
+	command_stack.success();
+    }
+    
+    command_stack.execute(new Command(doFn, undoFn, redoFn));
+}
+
+
 
 function copyNode(node) {
     var newNode;

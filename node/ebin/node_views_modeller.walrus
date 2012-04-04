@@ -66,10 +66,19 @@
   <div class="top-menu" id="design-details">
     <span id="design-name">{{design}}</span>
     <span class="action" id="action-save">save</span>
-    <div id="exports">
+    <div id="imports" class="collapsible">
+      <span class="action">import&hellip;</span>
+      <div id="import-options" class="options">
+        <!-- Chrome and Safari doesn't pop up the file selection dialog if it's not visible, so put off-screen -->
+        <input type="file" id="json-file-select-input" style="position: absolute; left: -200px; top: -200px;" onchange="SS.uploadJSON(this.files)">
+        <span class="action" id="action-import-json">json</span>
+      </div>
+    </div>
+    <div id="exports" class="collapsible">
       <span class="action">export&hellip;</span>
-      <div id="export-options">
+      <div id="export-options" class="options">
 	<span class="action" id="action-export-stl">stl</span>
+        <span class="action" id="action-export-json">json</span>
 	{{#session}}
         <span class="action" id="action-export-thingiverse">thingiverse</span>
 	{{/session}}

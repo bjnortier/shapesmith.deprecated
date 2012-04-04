@@ -135,8 +135,16 @@ create_or_update_response({error, Code, ResponseJSON}, ReqData, Context) ->
     {{halt, Code}, node_resource:json_response(ResponseJSON, ReqData), Context}.
     
 
-provide_content(ReqData, Context = #context{ existing=Existing} ) ->
-    {jiffy:encode(Existing), ReqData, Context}.
+provide_content(ReqData, Context = #context{ adapter=Adapter,
+                                             existing=Existing,
+                                             user=User, 
+                                             design=Design} ) ->
+    ReqData1 = case erlang:function_exported(Adapter, update_reqdata_for_get, 3) of
+                   true -> Adapter:update_reqdata_for_get(ReqData, User, Design);
+                   false -> ReqData
+               end,
+            
+    {jiffy:encode(Existing), ReqData1, Context}.
 
 delete_resource(ReqData, Context = #context{adapter=Adapter, 
 					    user=User, 

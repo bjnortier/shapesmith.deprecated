@@ -189,6 +189,11 @@ img#logo {
     background: -o-linear-gradient(top, #333333, #111111);
 }
 
+#action-import-json {
+    padding: 5px;
+    border-radius: 5px;
+}
+
 .top-menu span.action:hover {
     background: none;
     border: solid thin #043c6b;
@@ -219,19 +224,19 @@ img#logo {
     -webkit-transition: opacity 0.1s linear;
 }*/
 
-#exports {
+.collapsible {
     display: inline;
 }
 
-#export-options {
+.collapsible .options {
     display: inline;
 }
 
-div#export-options {
+.collapsible .options {
     display:none;
 }
 
-#exports:hover div#export-options {
+.collapsible:hover .options {
     display:inline;
 }
 

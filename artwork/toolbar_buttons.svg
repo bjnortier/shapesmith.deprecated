@@ -28,7 +28,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="0.25730334"
      inkscape:cx="-2.6267776"
-     inkscape:cy="1209.1194"
+     inkscape:cy="587.28523"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -1435,6 +1435,37 @@
        gradientUnits="userSpaceOnUse"
        id="linearGradient4980"
        xlink:href="#linearGradient3895-5-8-5-2-3"
+       inkscape:collect="always" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3895-5-7-7-6"
+       id="linearGradient3303-2"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-100,-840.01287)"
+       x1="1546.0715"
+       y1="673.07654"
+       x2="1716.7858"
+       y2="817.36224" />
+    <linearGradient
+       id="linearGradient3895-5-7-7-6">
+      <stop
+         id="stop3897-6-7-3-9"
+         offset="0"
+         style="stop-color:#00d836;stop-opacity:1;" />
+      <stop
+         id="stop3899-1-5-7-4"
+         offset="1"
+         style="stop-color:#005d17;stop-opacity:0.64406782;" />
+    </linearGradient>
+    <linearGradient
+       y2="817.36224"
+       x2="1716.7858"
+       y1="673.07654"
+       x1="1546.0715"
+       gradientTransform="translate(-2640,-920.01287)"
+       gradientUnits="userSpaceOnUse"
+       id="linearGradient3416"
+       xlink:href="#linearGradient3895-5-7-7-6"
        inkscape:collect="always" />
   </defs>
   <metadata
@@ -2891,5 +2922,13 @@
        inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/eye_hidden.png"
        inkscape:export-xdpi="3.1471589"
        inkscape:export-ydpi="3.1471589" />
+    <path
+       style="fill:url(#linearGradient3416);fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       d="m -1260,-387.63782 0,160 60,0 0,80 160,0 0,-160 -60,0 0,-80 -160,0 z"
+       id="rect4112-7-6-9-1"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/copy_10.png"
+       inkscape:export-xdpi="4.4081631"
+       inkscape:export-ydpi="4.4081631" />
   </g>
 </svg>
