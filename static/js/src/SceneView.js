@@ -266,7 +266,7 @@ SS.SceneView = function(container) {
         });
 
 	if (foundGeomNodes.length > 0) {
-	    if (event.shiftKey) {
+	    if (event.shiftKey || event.ctrlKey || event.metaKey) {
 		selectionManager.shiftPick(foundGeomNodes[0].object.name.geomNodeId);
 	    } else {
 		selectionManager.pick(foundGeomNodes[0].object.name.geomNodeId);
