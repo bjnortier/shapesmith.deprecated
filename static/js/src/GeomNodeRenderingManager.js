@@ -25,7 +25,7 @@ SS.GeomNodeRenderingManager = function() {
         }
 
         if (hiddenByUser.indexOf(geomNode.id) !== -1) {
-            hiddenByUser.splice(hiddenByUser.ondexOf(geomNode.id),1);
+            hiddenByUser.splice(hiddenByUser.indexOf(geomNode.id),1);
         }
     }
 
