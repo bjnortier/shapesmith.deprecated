@@ -27,18 +27,18 @@
 %% @doc Start the master worker pool
 -spec start_link() -> {ok, pid()}.
 start_link() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+    gen_server:start_link({global, ?MODULE}, ?MODULE, [], []).
 
 %% @doc Stop the master pool
 -spec stop() -> ok.
 stop() ->
-    gen_server:call(?MODULE, stop).
+    gen_server:call(global:whereis_name(?MODULE), stop).
 
 %% @doc Get a worker, and wait for the given time if none are available
 %%      immediately.
 -spec get_worker(MaxWait::integer()) -> pid() | {error, no_worker_available}.
 get_worker(MaxWaitSecs) ->
-    case gen_server:call(?MODULE, {get_worker, self(), MaxWaitSecs}) of
+    case gen_server:call(global:whereis_name(?MODULE), {get_worker, self(), MaxWaitSecs}) of
 	{worker, Worker} ->
 	    Worker;
 	waiting ->
@@ -53,7 +53,7 @@ get_worker(MaxWaitSecs) ->
 %% @doc Stop the master pool
 -spec put_worker(Worker :: pid()) -> ok.
 put_worker(Worker) ->
-    gen_server:call(?MODULE, {put_worker, Worker}).
+    gen_server:call(global:whereis_name(?MODULE), {put_worker, Worker}).
 
 
 %% call(WorkerPid, Msg) ->
@@ -117,7 +117,7 @@ handle_cast(Msg, State) ->
 
 handle_info({'DOWN', _Ref, process, DeadPid, _}, State = #state{ available = Available }) ->
     lager:warning("Worker ~p died whilst in available queue", [DeadPid]),
-    Available1 = queue:filter(fun({MonitorRef, Worker}) when Worker =:= DeadPid ->
+    Available1 = queue:filter(fun({_MonitorRef, Worker}) when Worker =:= DeadPid ->
 				      false;
 				 (_) ->
 				      true
@@ -155,5 +155,5 @@ send_to_waiting_or_add_to_available(Worker, State = #state{ available = Availabl
 
 waiting_process_loop() ->
     timer:sleep(1000),
-    gen_server:cast(?MODULE, timeout_waiting_processes),
+    gen_server:cast(global:whereis_name(?MODULE), timeout_waiting_processes),
     waiting_process_loop().
