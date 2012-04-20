@@ -15,30 +15,22 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(worker_sup).
+-module(worker_master).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--behaviour(supervisor).
--export([start_link/0]).
--export([init/1]).
+-behaviour(application).
+
+%% Application callbacks
+-export([start/2, start/0, stop/1]).
 
 %% ===================================================================
-%% API functions
+%% Application callbacks
 %% ===================================================================
 
-start_link() ->
-    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+start(_StartType, _StartArgs) ->
+    worker_master_sup:start_link().
 
-%% ===================================================================
-%% Supervisor callbacks
-%% ===================================================================
+start() ->
+    application:start(worker_master).
 
-init([]) ->
-
-    {ok, WorkerPath} = application:get_env(worker_executable),
-    {ok, WorkerMaxTime} = application:get_env(worker_max_time),
-
-    {ok, {{simple_one_for_one, 5, 10},
-	  [{worker_process,
-	    {worker_process, start_link, [WorkerPath, WorkerMaxTime]},
-	    permanent, 5000, worker, [worker_process]}]}}.
-
+stop(_State) ->
+    ok.

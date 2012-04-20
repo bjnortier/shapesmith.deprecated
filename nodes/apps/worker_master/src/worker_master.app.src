@@ -7,6 +7,6 @@
                   kernel,
                   stdlib
                  ]},
-  {mod, { worker_master_app, []}},
+  {mod, { worker_master, []}},
   {env, []}
  ]}.

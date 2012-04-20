@@ -15,10 +15,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
-%% TODO: Need error return design for the worker, e.g. when there is a problem
-%% with the request. E.g. {"error" : <reason>}
-
--module(node_worker_server).
+-module(worker_process).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -52,17 +49,16 @@ call(_, _Msg) ->
 -record(state, {port, worker_max_time}).
 
 init([WorkerPath, WorkerMaxTime]) ->
-    WorkerBin = filename:join([filename:dirname(code:which(?MODULE)), "..", ".."] ++ WorkerPath),
-    lager:info("Worker bin: ~p", [WorkerBin]),
+    WorkerBin = filename:absname(filename:join([code:priv_dir(worker)] ++ WorkerPath)),
+    lager:info("starting worker process for: ~p", [WorkerBin]),
     process_flag(trap_exit, true),
     Port = open_port({spawn_executable, WorkerBin}, [{packet, 4}, 
                                                      {cd, filename:dirname(WorkerBin)}]),
+    gen_server:call(global:whereis_name(worker_master_pool), {put_worker, self()}),
     {ok, #state{port = Port, worker_max_time = WorkerMaxTime}}.
 
 handle_call(stop, _From, State) ->
-    Reason = normal,
-    Reply = stopped,
-    {stop, Reason, Reply, State};
+    {stop, normal, stopped, State};
 handle_call({call, Msg}, _From, State) ->
     Port = State#state.port,
     WorkerMaxTime = State#state.worker_max_time,
@@ -76,21 +72,22 @@ handle_call({call, Msg}, _From, State) ->
 	    {stop, {error, worker_timeout}, State}
     end;
 handle_call(Request, _From, State) ->
-    lager:warning("UNKNOWN node_worker_server:handle_call(~p)~n", [Request]),
-    {reply, ok, State}.
+    lager:warning("~p unknown call: ~p", [?MODULE, Request]),
+    {reply, unknown_call, State}.
 
-handle_cast(_Msg, State) ->
+handle_cast(Msg, State) ->
+    lager:warning("~p unknown cast: ~p", [?MODULE, Msg]),
     {noreply, State}.
 
 handle_info({'EXIT', Port, Reason}, State) when Port =:= State#state.port->
-    lager:warning("node_worker_server port has exited: ~p~n", [Reason]),
+    lager:warning("~p port has exited: ~p", [?MODULE, Reason]),
     {stop, port_process_terminated, State};
 handle_info(Info, State) ->
-    lager:info("INFO: [~p] ~p~n", [?MODULE, Info]),
+    lager:warning("~p unknown info: ~p", [?MODULE, Info]),
     {noreply, State}.
 
 terminate(Reason, State) ->
-    io:format("node_worker_server:terminate(~p)~n", [Reason]),
+    lager:info("terminating ~p: ~p", [?MODULE, Reason]),
     Port = State#state.port,
     Port ! {self(), close},
     receive 

@@ -14,6 +14,7 @@
 %%   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
+
 -module(worker_master_pool).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -behaviour(gen_server).
@@ -85,14 +86,8 @@ handle_call({get_worker, Caller, MaxWaitSecs}, _From, State = #state{ available 
 	    {reply, {worker, Worker}, State#state{ available = Remaining }}
     end;
 handle_call({put_worker, Worker}, _From, State) ->
-    case is_process_alive(Worker) of
-	true ->		
-	    State1 = send_to_waiting_or_add_to_available(Worker, State),
-	    {reply, ok, State1}; 
-	false ->
-	    lager:warning("Cannot put dead worker: ~p", [Worker]),
-	    {reply, ok, State}
-    end;
+    State1 = send_to_waiting_or_add_to_available(Worker, State),
+    {reply, ok, State1}; 
 handle_call(stop, _From, State) ->
     {stop, normal, stopped, State};
 handle_call(Request, _From, State) ->

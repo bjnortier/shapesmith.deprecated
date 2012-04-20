@@ -15,30 +15,42 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(worker_sup).
+-module(worker).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--behaviour(supervisor).
--export([start_link/0]).
--export([init/1]).
+-behaviour(application).
+
+%% Application callbacks
+-export([start/2, start/0, stop/1]).
 
 %% ===================================================================
-%% API functions
+%% Application callbacks
 %% ===================================================================
 
-start_link() ->
-    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+start(_StartType, _StartArgs) ->
+    {ok, Pid} = worker_sup:start_link(),
 
-%% ===================================================================
-%% Supervisor callbacks
-%% ===================================================================
+    %% Join the master node if this is a distributed worker application
+    {ok, Node} = application:get_env(worker_master_node),
+    case net_adm:ping(Node) of 
+	pong ->
+	    lager:info("~p joined master node ~p", [node(), Node]);
+	pang ->
+	    lager:error("could not join master worker node ~p", [Node]),
+	    throw(could_not_join_worker_master)
+    end,
+    ok = global:sync(),
+    
+    %% Spawn the workers
+    {ok, NumberOfWorkers} = application:get_env(number_of_workers),
+    lists:map(fun(_) ->
+		      {ok, _} = supervisor:start_child(worker_sup, [])
+	      end,
+	      lists:seq(1, NumberOfWorkers)),
+    
+    {ok, Pid}.
 
-init([]) ->
+start() ->
+    application:start(worker).
 
-    {ok, WorkerPath} = application:get_env(worker_executable),
-    {ok, WorkerMaxTime} = application:get_env(worker_max_time),
-
-    {ok, {{simple_one_for_one, 5, 10},
-	  [{worker_process,
-	    {worker_process, start_link, [WorkerPath, WorkerMaxTime]},
-	    permanent, 5000, worker, [worker_process]}]}}.
-
+stop(_State) ->
+    ok.

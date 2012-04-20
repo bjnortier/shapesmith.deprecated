@@ -13,6 +13,7 @@
 %%   limitations under the License.
 
 -module(worker_master_sup).
+-author('Benjamin Nortier <bjnortier@gmail.com>').
 -behaviour(supervisor).
 -export([start_link/0]).
 -export([init/1]).
