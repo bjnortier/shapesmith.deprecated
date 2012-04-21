@@ -19,7 +19,7 @@
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/2, stop/0, safe_call/2]).
+-export([start_link/2, stop/0, safe_call/2, get_stl_and_delete/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
@@ -51,6 +51,15 @@ call(_, _Msg) ->
     {error, msg_must_be_a_list_or_binary}.
 
 
+get_stl_and_delete(Pid, Filename) ->
+    try 
+        gen_server:call(Pid, {get_stl_and_delete, Filename})
+    catch 
+        Err:Reason ->
+            {error, {Err, Reason}}
+    end.
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              gen_server                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
@@ -80,6 +89,10 @@ handle_call({call, Msg}, _From, State) ->
     after WorkerMaxTime ->
 	    {stop, {error, worker_timeout}, State}
     end;
+handle_call({get_stl_and_delete, Filename}, _From, State) ->
+    Result = file:read_file(Filename),
+    file:delete(Filename),
+    {reply, Result, State};
 handle_call(Request, _From, State) ->
     lager:warning("~p unknown call: ~p", [?MODULE, Request]),
     {reply, unknown_call, State}.
