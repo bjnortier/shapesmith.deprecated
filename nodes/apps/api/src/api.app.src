@@ -15,9 +15,9 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
-{application, node,
+{application, api,
  [
-  {description, "node"},
+  {description, "api"},
   {vsn, "1"},
   {modules, []},
   {registered, []},
@@ -26,24 +26,26 @@
                   stdlib,
                   crypto,
                   mochiweb,
-                  webmachine
+                  webmachine,
+                  lager,
+                  worker_master
                  ]},
-  {mod, { node_app, []}},
+  {mod, { api_app, []}},
   {env, [{worker_executable, ["worker", "build", "worker"]},
-	 {worker_max_time, 60000},
-	 {worker_pool_size, 2},
-	 {lager, [
-		  {handlers, [
-			      {lager_console_backend, info},
-			      {lager_file_backend, [
-						    {"error.log", error, 10485760, "$D0", 5},
-						    {"console.log", info, 10485760, "$D0", 5}
-						   ]}
-			     ]}
-		 ]},
-	 {db_module, node_disk_db},
-	 {disk_db_dir, "db"},
-	 {auth_module, node_local_auth},
-	 {host, "http://localhost.shapesmith.net:8000"},
+         {worker_wait_max_secs, 60},
+         {worker_pool_size, 2},
+         {lager, [
+                  {handlers, [
+                              {lager_console_backend, info},
+                              {lager_file_backend, [
+                                                    {"error.log", error, 10485760, "$D0", 5},
+                                                    {"console.log", info, 10485760, "$D0", 5}
+                                                   ]}
+                             ]}
+                 ]},
+         {db_module, api_disk_db},
+         {disk_db_dir, "db"},
+         {auth_module, api_local_auth},
+         {host, "http://localhost.shapesmith.net:8000"},
          {port, 8000}]}
  ]}.

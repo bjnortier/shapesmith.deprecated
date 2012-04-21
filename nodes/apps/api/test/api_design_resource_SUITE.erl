@@ -15,7 +15,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_design_resource_SUITE).
+-module(api_design_resource_SUITE).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -compile(export_all).
 -include_lib("common_test/include/ct.hrl").
@@ -33,27 +33,18 @@ all() ->
 	].
 
 init_per_suite(Config) ->
-    ok = application:load(node),
-    application:set_env(node, port, 8001),
-    application:start(inets),
-    application:start(lager),
-    ok = application:set_env(node, db_module, node_mem_db),
-    ok = node:start(),
+    ok = api_deps:start_with_api(),
     Config.
 
 end_per_suite(_Config) ->
-    application:stop(node),
-    application:unload(node),
-    application:stop(lager),
-    application:stop(inets),
-    ok.
+    api_deps:stop_with_api().
 
 init_per_testcase(_Testcase, Config) ->
-    {ok, _} = node_mem_db:start_link(),
+    {ok, _} = api_mem_db:start_link(),
     Config.
 
 end_per_testcase(_Testcase, _Config) ->
-    node_mem_db:stop(),
+    api_mem_db:stop(),
     ok.
 
 -define(EMPTY_DESIGN, {[{<<"refs">>,

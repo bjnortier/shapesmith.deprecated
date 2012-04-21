@@ -17,20 +17,17 @@
 
 -module(worker_master).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--behaviour(application).
+-export([start/0]).
 
-%% Application callbacks
--export([start/2, start/0, stop/1]).
-
-%% ===================================================================
-%% Application callbacks
-%% ===================================================================
-
-start(_StartType, _StartArgs) ->
-    worker_master_sup:start_link().
+ensure_started(App) ->
+    case application:start(App) of
+        ok ->
+            ok;
+        {error, {already_started, App}} ->
+            ok
+    end.
 
 start() ->
+	ensure_started(lager),
     application:start(worker_master).
 
-stop(_State) ->
-    ok.

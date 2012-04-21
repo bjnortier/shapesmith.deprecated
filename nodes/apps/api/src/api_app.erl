@@ -18,14 +18,14 @@
 -module(api_app).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -behaviour(application).
--export([start/2,stop/1]).
+-export([start/2, stop/1]).
 
 %% @spec start(_Type, _StartArgs) -> ServerRet
-%% @doc application start callback for node.
+%% @doc application start callback for api.
 start(_Type, _StartArgs) ->
     api_sup:start_link().
 
 %% @spec stop(_State) -> ServerRet
-%% @doc application stop callback for node.
+%% @doc application stop callback for api.
 stop(_State) ->
     ok.

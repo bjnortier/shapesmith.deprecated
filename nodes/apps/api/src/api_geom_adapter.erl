@@ -62,6 +62,8 @@ create(ReqData, User, Design, RequestJSON) ->
 
 	{error, worker_timeout} ->
 	    {error, 500, {[{<<"error">>, <<"This operation took too long.">>}]}};
+        {error, no_worker_available} ->
+	    {error, 500, {[{<<"error">>, <<"No workers available.">>}]}};
 	{error, Reason} ->
 	    lager:error("Geometry create failed: ~p", [Reason]),
             try 

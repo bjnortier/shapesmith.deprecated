@@ -56,16 +56,6 @@ get_worker(MaxWaitSecs) ->
 put_worker(Worker) ->
     gen_server:call(global:whereis_name(?MODULE), {put_worker, Worker}).
 
-
-%% call(WorkerPid, Msg) ->
-%%     case catch(worker_process:call(WorkerPid, Msg)) of
-%% 	{'EXIT', {{error, Reason}, _}} ->
-%% 	    {error, Reason};
-%% 	Result ->
-%% 	    Result
-%%     end.
-
-
 %% ===================================================================
 %% gen_server
 %% ===================================================================
@@ -102,7 +92,7 @@ handle_cast(timeout_waiting_processes,  State = #state{ waiting = WaitingQueue }
 			      WaitingPid ! no_worker_available,
 			      false;
 			 ({SecsRemaining, WaitingPid}) ->
-				[{SecsRemaining - 1, WaitingPid}]
+                              [{SecsRemaining - 1, WaitingPid}]
 		      end,
 		      WaitingQueue),
     {noreply, State#state{ waiting = WaitingQueue1 }};
@@ -136,15 +126,15 @@ code_change(_OldVsn, State, _Extra) ->
 %% @doc Send to the first waiting process if there are any, otherwise
 %%      add to available workers
 send_to_waiting_or_add_to_available(Worker, State = #state{ available = Available,
-							    waiting   = Waiting }) ->
-    case queue:out(Waiting) of
+							    waiting   = WaitingQueue }) ->
+    case queue:out(WaitingQueue) of
 	{empty, _} ->
 	    lager:info("worker ~p available", [Worker]),
 	    MonitorRef = monitor(process, Worker),
 	    State#state{ available = queue:in({MonitorRef, Worker}, Available) };
-	{{value, {_WaitSecs, Waiting}}, LeftWaiting} ->
-	    lager:info("worker ~p to waiting process ~p", [Worker, Waiting]),
-	    Waiting ! {worker, Worker},
+	{{value, {_WaitSecs, WaitingPid}}, LeftWaiting} ->
+	    lager:info("worker ~p to waiting process ~p", [Worker, WaitingPid]),
+	    WaitingPid ! {worker, Worker},
 	    State#state{ waiting = LeftWaiting }
     end.
 

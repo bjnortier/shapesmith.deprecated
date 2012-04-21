@@ -15,20 +15,17 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
-{application, worker,
- [
-  {description, ""},
-  {vsn, "1"},
-  {registered, []},
-  {applications, [
-                  kernel,
-                  stdlib,
-                  lager
-                 ]},
-  {mod, { worker_app, []}},
-  {env, [{worker_executable, ["build", "worker"]},
-	 {worker_max_time, 60000},
-	 {number_of_workers, 2},
-	 {worker_master_node, 'master@127.0.0.1'}
-	]}
- ]}.
+-module(worker_master_app).
+-author('Benjamin Nortier <bjnortier@gmail.com>').
+-behaviour(application).
+-export([start/2, stop/1]).
+
+%% ===================================================================
+%% Application callbacks
+%% ===================================================================
+
+start(_StartType, _StartArgs) ->
+    worker_master_sup:start_link().
+
+stop(_State) ->
+    ok.

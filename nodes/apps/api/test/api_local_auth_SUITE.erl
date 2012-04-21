@@ -15,7 +15,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_local_auth_SUITE).
+-module(api_local_auth_SUITE).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -compile(export_all).
 -include_lib("common_test/include/ct.hrl").
@@ -28,16 +28,16 @@ all() ->
 	].
 
 init_per_suite(Config) ->
-    ok = application:load(node),
-    application:set_env(node, port, 8001),
-    application:set_env(node, host, "http://localhost:8001"),
-    ok = application:set_env(node, auth_module, node_local_auth),
-    ok = node:start(),
+    api_deps:start_without_api(),
+    ok = application:load(api),
+    ok = application:set_env(api, port, 8001),
+    ok = application:set_env(api, host, "http://localhost:8001"),
+    ok = application:set_env(api, auth_module, api_local_auth),
+    ok = application:start(api),
     Config.
 
 end_per_suite(_Config) ->
-    application:stop(node),
-    application:unload(node),
+    api_deps:stop_with_api(),
     ok.
 
 redirect_signin_and_signup(_Config) ->

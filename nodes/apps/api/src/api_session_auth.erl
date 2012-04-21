@@ -26,7 +26,7 @@ session_username(ReqData) ->
 	undefined ->
 	    undefined;
 	SessionSHA ->
-	    {ok, DB} = application:get_env(node, db_module),
+	    {ok, DB} = application:get_env(api, db_module),
 	    case DB:get(<<"_sessions">>, list_to_binary(SessionSHA)) of
 		undefined ->
 		    undefined;
@@ -42,12 +42,12 @@ create_session(Username) ->
     JSON = {[{<<"created">>, list_to_binary(RFC1123Date)},
 	     {<<"username">>, list_to_binary(Username)}]},
     SessionSHA = api_hash:hash_json(JSON),
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     ok = DB:put(<<"_sessions">>, list_to_binary(SessionSHA), jiffy:encode(JSON)),
     SessionSHA.
 
 delete_session(SessionSHA) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     DB:delete(<<"_sessions">>, list_to_binary(SessionSHA)),
     ok.
 

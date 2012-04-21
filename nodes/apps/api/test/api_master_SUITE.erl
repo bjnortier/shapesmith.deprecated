@@ -1,4 +1,4 @@
--module(node_master_SUITE).
+-module(api_master_SUITE).
 -compile(export_all).
 
 -include_lib("common_test/include/ct.hrl").
@@ -8,37 +8,37 @@ suite() -> [{timetrap,{minutes,1}}].
 
 all() ->
 	[
-         create_simple,
+         create_simple, 
          create_boolean,
-	 timeout,
-	 parallel_workers
+	 parallel_workers,
+         no_worker
 	].
 
 init_per_suite(Config) ->
+    ok = api_deps:start_without_api(),
     Config.
 
 end_per_suite(_Config) ->
-    ok.
-    
+    ok = api_deps:stop_without_api().
 
 init_per_testcase(Testcase, Config) ->
-    ok = application:load(node),
-    ok = application:set_env(node, port, 8001),
-    ok = application:set_env(node, db_module, node_mem_db),
+    ok = application:load(api),
+    ok = application:set_env(api, port, 8001),
+    ok = application:set_env(api, db_module, api_mem_db),
     case Testcase of 
-	timeout -> 
-	    ok = application:set_env(node, worker_max_time, 0);
-	_ ->
-	    ok
+        no_worker -> 
+            ok = application:set_env(api, worker_wait_max_secs, 0);
+        _ ->
+            ok
     end,
-    ok = node:start(),
-    {ok, _} = node_mem_db:start_link(),
+    ok = application:start(api),
+    {ok, _} = api_mem_db:start_link(),
     Config.
 
 end_per_testcase(_Testcase, _Config) ->
-    stopped = node_mem_db:stop(),
-    ok = application:stop(node),
-    ok = application:unload(node),
+    stopped = api_mem_db:stop(),
+    ok = application:stop(api),
+    ok = application:unload(api),
     ok.
 
 create_simple(_Config) ->
@@ -47,16 +47,23 @@ create_simple(_Config) ->
 				  {<<"y">>, 0},
 				  {<<"z">>, 0}]}},
 		 {<<"parameters">>, {[{<<"r">>, 1.0}]}}]},
-    {ok, SHA} = node_master:create_geom("bjnortier", "iphonedock", Geometry),
-    {ok, {_}} = node_master:mesh_geom("bjnortier", "iphonedock", SHA),
-    {ok, Stl} = node_master:stl("bjnortier", "iphonedock", SHA),
+    {ok, SHA} = api_master:create_geom("bjnortier", "iphonedock", Geometry),
+    {ok, {_}} = api_master:mesh_geom("bjnortier", "iphonedock", SHA),
+    {ok, Stl} = api_master:stl("bjnortier", "iphonedock", SHA),
     true = is_binary(Stl),
     ok.
 
-timeout(_Config) ->
-    Geometry = {[{<<"type">>, <<"sphere">>},
-		 {<<"parameters">>, {[{<<"radius">>, 1.0}]}}]},
-    {error, _} = node_master:create_geom("bjnortier", "iphonedock", Geometry),
+no_worker(_Config) ->
+    GeomFn = fun(R) -> 
+                     {[{<<"type">>,<<"sphere">>}, 
+                       {<<"origin">>, {[{<<"x">>, 0},
+                                        {<<"y">>, 0},
+                                        {<<"z">>, 0}]}},
+                       {<<"parameters">>,{[{<<"r">>, R}]}}]}
+             end,
+    _Pid1 = worker_master_pool:get_worker(0),
+    _Pid2 = worker_master_pool:get_worker(0),
+    {error, no_worker_available} = api_master:create_geom("bjnortier", "iphonedock", GeomFn(11)),
     ok.
 
 create_boolean(_Config) ->
@@ -82,18 +89,18 @@ create_boolean(_Config) ->
 							    ]}}]}
 				     ]}]},
 
-    {ok, SHA1} = node_master:create_geom("bjnortier", "iphonedock", Geometry1),
-    {ok, SHA2} = node_master:create_geom("bjnortier", "iphonedock", Geometry2),
+    {ok, SHA1} = api_master:create_geom("bjnortier", "iphonedock", Geometry1),
+    {ok, SHA2} = api_master:create_geom("bjnortier", "iphonedock", Geometry2),
 
     Geometry3 = {[{<<"type">>, <<"union">>},
 		  {<<"children">>, [
 				    list_to_binary(SHA1),
 				    list_to_binary(SHA2)
 				   ]}]},
-    {ok, SHA3} = node_master:create_geom("bjnortier", "iphonedock", Geometry3),
+    {ok, SHA3} = api_master:create_geom("bjnortier", "iphonedock", Geometry3),
 
-    {ok, _} = node_master:mesh_geom("bjnortier", "iphonedock", SHA3),
-    {ok, Stl} = node_master:stl("bjnortier", "iphonedock", SHA3),
+    {ok, _} = api_master:mesh_geom("bjnortier", "iphonedock", SHA3),
+    {ok, Stl} = api_master:stl("bjnortier", "iphonedock", SHA3),
     true = is_binary(Stl),
 
     ok.
@@ -105,7 +112,7 @@ parallel_workers(_Config) ->
 						      {<<"y">>, 0},
 						      {<<"z">>, 0}]}},
 				     {<<"parameters">>,{[{<<"r">>, R}]}}]},
-			   node_master:create_geom("bjnortier", "iphonedock", Geom) end, 
+			   api_master:create_geom("bjnortier", "iphonedock", Geom) end, 
 		   lists:seq(1,10)),
     lists:map(fun(Result) ->
 		      {ok, _SHA} = Result

@@ -15,9 +15,9 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node).
+-module(api).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([start/0, stop/0]).
+-export([start/0]).
 
 ensure_started(App) ->
     case application:start(App) of
@@ -28,7 +28,7 @@ ensure_started(App) ->
     end.
 
 %% @spec start() -> ok
-%% @doc Start the node server.
+%% @doc Start the api server.
 start() ->
     ensure_started(inets),
     ensure_started(crypto),
@@ -38,16 +38,7 @@ start() ->
     application:set_env(webmachine, webmachine_logger_module, 
                         webmachine_logger),
     ensure_started(webmachine),
-    application:start(node).
+    ensure_started(worker_master),
+    application:start(api).
 
-%% @spec stop() -> ok
-%% @doc Stop the node server.
-stop() ->
-    Res = application:stop(node),
-    application:stop(webmachine),
-    application:stop(mochiweb),
-    application:stop(lager),
-    application:stop(bcrypt),
-    application:stop(crypto),
-    application:stop(inets),
-    Res.
+

@@ -14,7 +14,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_geom_resource_SUITE).
+-module(api_geom_resource_SUITE).
 -compile(export_all).
 
 -include_lib("common_test/include/ct.hrl").
@@ -23,33 +23,27 @@ suite() -> [{timetrap,{minutes,1}}].
 
 all() ->
 	[
-	 validation,
+         validation,
 	 creation,
          boolean
 	].
 
+-define(APPS, [inets, crypto, bcrypt, lager, mochiweb, webmachine]).
+
+
 init_per_suite(Config) ->
-    ok = application:load(node),
-    application:set_env(node, port, 8001),
-    application:set_env(node, db_module, node_mem_db),
-    application:start(inets),
-    application:start(lager),
-    ok = node:start(),
+    api_deps:start_with_api(),
     Config.
 
 end_per_suite(_Config) ->
-    application:stop(lager),
-    application:stop(inets),
-    application:stop(node),
-    application:unload(node),
-    ok.
+    api_deps:stop_with_api().
 
 init_per_testcase(_Testcase, Config) ->
-    {ok, _} = node_mem_db:start_link(),
+    {ok, _} = api_mem_db:start_link(),
     Config.
 
 end_per_testcase(_Testcase, _Config) ->
-    node_mem_db:stop(),
+    api_mem_db:stop(),
     ok.
 
 validation(_Config) ->

@@ -73,7 +73,7 @@ delete(Bucket, Id) when is_binary(Bucket) andalso is_binary(Id)->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 get_client() ->
-    {ok, {Host, Port}} = application:get_env(node, riak_host),
+    {ok, {Host, Port}} = application:get_env(api, riak_host),
     {ok, Pid} = riakc_pb_socket:start_link(Host, Port),
     Pid.
 

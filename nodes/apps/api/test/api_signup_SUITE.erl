@@ -15,7 +15,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_signup_SUITE).
+-module(api_signup_SUITE).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -compile(export_all).
 -include_lib("common_test/include/ct.hrl").
@@ -24,33 +24,29 @@ suite() -> [{timetrap,{minutes,1}}].
 
 all() ->
 	[
-	 validate_required,
-	 validate_username,
+         validate_required,
+         validate_username,
 	 validate_email,
 	 validate_password,
 	 signup_signin_signout
 	].
 
 init_per_suite(Config) ->
-    ok = application:load(node),
-    application:set_env(node, port, 8001),
-    application:set_env(node, host, "http://localhost.shapesmith.net:8001"),
-    ok = application:set_env(node, db_module, node_mem_db),
-    ok = application:set_env(node, auth_module, node_session_auth),
-    ok = node:start(),
+    ok = api_deps:start_with_api(fun() ->
+                                         ok = application:set_env(api, host, "http://localhost.shapesmith.net:8001"),
+                                         ok = application:set_env(api, auth_module, api_session_auth)
+                                 end),
     Config.
 
 end_per_suite(_Config) ->
-    application:stop(node),
-    application:unload(node),
-    ok.
+    ok = api_deps:stop_with_api().
 
 init_per_testcase(_Testcase, Config) ->
-    {ok, _} = node_mem_db:start_link(),
+    {ok, _} = api_mem_db:start_link(),
     Config.
 
 end_per_testcase(_Testcase, _Config) ->
-    node_mem_db:stop(),
+    api_mem_db:stop(),
     ok.
 
 validate_required(_Config) ->

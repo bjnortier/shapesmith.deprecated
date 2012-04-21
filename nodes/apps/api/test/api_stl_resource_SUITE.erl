@@ -1,6 +1,22 @@
--module(node_stl_resource_SUITE).
--compile(export_all).
+%% -*- mode: erlang -*-
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil -*-
+%% ex: ts=4 sw=4 et
+%% Copyright 2011 Benjamin Nortier
+%%
+%%   Licensed under the Apache License, Version 2.0 (the "License");
+%%   you may not use this file except in compliance with the License.
+%%   You may obtain a copy of the License at
+%%
+%%       http://www.apache.org/licenses/LICENSE-2.0
+%%
+%%   Unless required by applicable law or agreed to in writing, software
+%%   distributed under the License is distributed on an "AS IS" BASIS,
+%%   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+%%   See the License for the specific language governing permissions and
+%%   limitations under the License.
 
+-module(api_stl_resource_SUITE).
+-compile(export_all).
 -include_lib("common_test/include/ct.hrl").
 
 suite() -> [{timetrap,{minutes,1}}].
@@ -12,25 +28,22 @@ all() ->
 	].
 
 init_per_suite(Config) ->
+    api_deps:start_with_api(fun() ->
+                                    ok = application:set_env(api, auth_module, api_session_auth),
+                                    ok = application:set_env(api, host, "http://localhost.shapesmith.net:8001")
+                            end),
     Config.
 
 end_per_suite(_Config) ->
+    api_deps:stop_with_api(),
     ok.
 
 init_per_testcase(_, Config) ->
-    {ok, _} = node_mem_db:start_link(),
-    ok = application:load(node),
-    application:set_env(node, port, 8001),
-    application:set_env(node, db_module, node_mem_db),
-    application:set_env(node, auth_module, node_session_auth),
-    ok = node:start(),
+    {ok, _} = api_mem_db:start_link(),
     Config.
 
-
 end_per_testcase(_Testcase, _Config) ->
-    node_mem_db:stop(),
-    application:stop(node),
-    application:unload(node),
+    api_mem_db:stop(),
     ok.
 
 

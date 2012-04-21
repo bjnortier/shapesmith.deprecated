@@ -47,14 +47,14 @@ provide_content(ReqData, Context) ->
     User = wrq:path_info(user, ReqData),
     Design = wrq:path_info(design, ReqData),
     Commit = wrq:get_qs_value("commit", ReqData),
-    {ok, Host} = application:get_env(node, host),
+    {ok, Host} = application:get_env(api, host),
     WalrusContext =  [{username, User},
 		      {design, Design},
 		      {commit, Commit},
 		      {host, Host}
 		     ],
 
-    {ok, AuthModule} = application:get_env(node, auth_module),
+    {ok, AuthModule} = application:get_env(api, auth_module),
     WalrusContext1 = AuthModule:add_session_walrus_ctx(User, WalrusContext),
 
     Rendered = api_walrus:render_template(api_views_modeller, WalrusContext1),

@@ -15,7 +15,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_home_resource_SUITE).
+-module(api_home_resource_SUITE).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -compile(export_all).
 -include_lib("common_test/include/ct.hrl").
@@ -29,30 +29,34 @@ all() ->
 	].
 
 init_per_suite(Config) ->
-    ok = application:load(node),
-    application:set_env(node, port, 8001), 
-    application:set_env(node, host, "http://localhost.shapesmith.net:8001"),
-    ok = application:set_env(node, db_module, node_mem_db),
-    {ok, _} = node_mem_db:start(),
+    ok = api_deps:start_without_api(),   
+    {ok, _} = api_mem_db:start(),
     Config.
 
 end_per_suite(_Config) ->
-    node_mem_db:stop(),
-    application:unload(node),
+    stopped = api_mem_db:stop(),
+    api_deps:stop_without_api(),
     ok.
+
 
 init_per_testcase(redirect_to_session_designs, Config) ->
-    ok = application:set_env(node, auth_module, node_session_auth),
-    ok = node:start(),
+    init_testcase_with_auth_module(api_session_auth),
     Config;
 init_per_testcase(redirect_to_local_designs, Config) ->
-    ok = application:set_env(node, auth_module, node_local_auth),
-    ok = node:start(),
+    init_testcase_with_auth_module(api_local_auth),
     Config.
 
+init_testcase_with_auth_module(AuthModule) ->
+    ok = application:load(api),
+    ok = application:set_env(api, port, 8001),
+    ok = application:set_env(api, host, "http://localhost.shapesmith.net:8001"),
+    ok = application:set_env(api, auth_module, AuthModule),
+    ok = application:set_env(api, db_module, api_mem_db),
+    ok = application:start(api).
+
 end_per_testcase(_Testcase, _Config) ->
-    ok = application:stop(node),
-    ok.
+    ok = application:stop(api),
+    ok = application:unload(api).
 
 redirect_to_local_designs(_Config) ->
     {ok,{{"HTTP/1.1",302,_}, Headers, _Response}} = 

@@ -53,7 +53,7 @@ create(WorkerPid, SHA, Geometry) ->
             Msg = {[{<<"type">>, <<"deserialize">>},
 		    {<<"id">>, list_to_binary(SHA)},
 		    {<<"s11n">>, S11N}]},
-            case api_worker_pool:call(WorkerPid, jiffy:encode(Msg)) of
+            case worker_process:safe_call(WorkerPid, jiffy:encode(Msg)) of
 		<<"\"ok\"">> ->
 		    ok;
 		{error, Reason} ->
@@ -71,7 +71,7 @@ purge(WorkerPid, SHA) ->
 	    ok
     end,
     Msg = {[{<<"purge">>, list_to_binary(SHA)}]},
-    case api_worker_pool:call(WorkerPid, jiffy:encode(Msg)) of
+    case worker_process:safe_call(WorkerPid, jiffy:encode(Msg)) of
 	"true" ->
 	    ok;
         "false" ->
@@ -85,7 +85,7 @@ purge(WorkerPid, SHA) ->
 
 purge_all(WorkerPid) ->
     Msg = <<"purge_all">>,
-    case api_worker_pool:call(WorkerPid, jiffy:encode(Msg)) of
+    case worker_process:safe_call(WorkerPid, jiffy:encode(Msg)) of
 	<<"\"ok\"">> ->
 	    ok;
 	{error, Reason} ->
@@ -105,7 +105,7 @@ serialize(WorkerPid, Hash) ->
 serialize_to_disk(WorkerPid, SHA) ->
     Msg = {[{<<"type">>, <<"serialize">>},
 	    {<<"id">>, list_to_binary(SHA)}]},
-    {[{<<"s11n">>, S11N}]} = jiffy:decode(api_worker_pool:call(WorkerPid, jiffy:encode(Msg))),
+    {[{<<"s11n">>, S11N}]} = jiffy:decode(worker_process:safe_call(WorkerPid, jiffy:encode(Msg))),
     api_db:put_brep(SHA, S11N).
     
 
@@ -136,4 +136,4 @@ worker_create(WorkerPid, SHA, Geometry) ->
 	    {<<"id">>, list_to_binary(SHA)},
 	    {<<"geometry">>, Geometry}
 	   ]},
-    api_worker_pool:call(WorkerPid, jiffy:encode(Msg)).
+    worker_process:safe_call(WorkerPid, jiffy:encode(Msg)).

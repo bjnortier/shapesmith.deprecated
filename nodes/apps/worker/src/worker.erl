@@ -17,40 +17,17 @@
 
 -module(worker).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--behaviour(application).
+-export([start/0]).
 
-%% Application callbacks
--export([start/2, start/0, stop/1]).
-
-%% ===================================================================
-%% Application callbacks
-%% ===================================================================
-
-start(_StartType, _StartArgs) ->
-    {ok, Pid} = worker_sup:start_link(),
-
-    %% Join the master node if this is a distributed worker application
-    {ok, Node} = application:get_env(worker_master_node),
-    case net_adm:ping(Node) of 
-	pong ->
-	    lager:info("~p joined master node ~p", [node(), Node]);
-	pang ->
-	    lager:error("could not join master worker node ~p", [Node]),
-	    throw(could_not_join_worker_master)
-    end,
-    ok = global:sync(),
-    
-    %% Spawn the workers
-    {ok, NumberOfWorkers} = application:get_env(number_of_workers),
-    lists:map(fun(_) ->
-		      {ok, _} = supervisor:start_child(worker_sup, [])
-	      end,
-	      lists:seq(1, NumberOfWorkers)),
-    
-    {ok, Pid}.
+ensure_started(App) ->
+    case application:start(App) of
+        ok ->
+            ok;
+        {error, {already_started, App}} ->
+            ok
+    end.
 
 start() ->
+    ensure_started(lager),
     application:start(worker).
 
-stop(_State) ->
-    ok.

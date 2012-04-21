@@ -19,7 +19,7 @@
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -behaviour(gen_server).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
--export([start_link/2, stop/0, call/2]).
+-export([start_link/2, stop/0, safe_call/2]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                              Public API                                  %%%
@@ -29,6 +29,15 @@ start_link(WorkerPath, WorkerMaxTime) ->
     gen_server:start_link(?MODULE, [WorkerPath, WorkerMaxTime], []).
 stop() ->
     gen_server:call(?MODULE, stop).
+
+
+safe_call(WorkerPid, Msg) ->
+    case catch(call(WorkerPid, Msg)) of
+        {'EXIT', {{error, Reason}, _}} ->
+            {error, Reason};
+        Result ->
+	    Result
+    end.
 
 call(Pid, Msg) when is_list(Msg) andalso length(Msg) > 0 ->
     call(Pid, list_to_binary(Msg));

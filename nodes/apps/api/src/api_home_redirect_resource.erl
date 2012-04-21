@@ -24,10 +24,10 @@
 init([]) -> {ok, undefined}.
 
 to_html(ReqData, Context) ->
-    {ok, AuthModule} = application:get_env(node, auth_module),
+    {ok, AuthModule} = application:get_env(api, auth_module),
     case AuthModule:session_username(ReqData) of
 	undefined ->
-	    {ok, Host} = application:get_env(node, host),
+	    {ok, Host} = application:get_env(api, host),
 	    Location = Host ++ "/signin",
 	    {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context};
 	_Username ->

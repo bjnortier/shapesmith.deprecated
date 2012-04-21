@@ -43,8 +43,8 @@ provide_content(ReqData, Context) ->
 	undefined ->
 	    ok;
 	SessionSHA ->
-	    {ok, AuthModule} = application:get_env(node, auth_module),
+	    {ok, AuthModule} = application:get_env(api, auth_module),
 	    AuthModule:delete_session(SessionSHA)
     end,
-    {ok, Host} = application:get_env(node, host),
+    {ok, Host} = application:get_env(api, host),
     {{halt, 302}, wrq:set_resp_header("Location", Host, ReqData), Context}.

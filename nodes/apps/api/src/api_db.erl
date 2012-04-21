@@ -32,17 +32,17 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 exists(User, Design, Type, SHA) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     DB:exists(bucket(User, Design), key(Type, SHA)).
 
 create(User, Design, Type, JSON) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     SHA = api_hash:hash_json(JSON),
     ok = DB:put(bucket(User, Design), key(Type, SHA), jiffy:encode(JSON)),
     {ok, SHA}.
 
 get(User, Design, Type, SHA) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     case DB:get(bucket(User, Design), key(Type, SHA)) of
 	undefined ->
 	    undefined;
@@ -51,11 +51,11 @@ get(User, Design, Type, SHA) ->
     end.
 
 exists_root(User, Design) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     DB:exists(bucket(User, Design), <<"_root">>).
 
 get_root(User, Design) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     case DB:get(bucket(User, Design), <<"_root">>) of
 	undefined ->
 	    undefined;
@@ -64,16 +64,16 @@ get_root(User, Design) ->
     end.
 
 put_root(User, Design, JSON) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     DB:put(bucket(User, Design), <<"_root">>, jiffy:encode(JSON)).
 
 delete_root(User, Design) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     DB:delete(bucket(User, Design), <<"_root">>).
 
 
 create_user(User, Password, EmailAddress) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     case DB:exists(bucket(User), <<"_user">>) of
     	false ->
 	    {ok, Salt} = api_bcrypt:gen_salt(),
@@ -93,7 +93,7 @@ create_user(User, Password, EmailAddress) ->
     end.
 
 validate_password(User, Password) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     case DB:get(bucket(User), <<"_user">>) of
 	undefined ->
 	    user_doesnt_exist;
@@ -110,7 +110,7 @@ validate_password(User, Password) ->
     end.
 
 get_designs(User) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     case DB:get(bucket(User), <<"_designs">>) of
 	undefined ->
 	    [];
@@ -119,7 +119,7 @@ get_designs(User) ->
     end.
 
 add_design(User, Design) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     ExistingDesigns = case DB:get(bucket(User), <<"_designs">>) of
 			  undefined ->
 			      [];
@@ -130,7 +130,7 @@ add_design(User, Design) ->
     DB:put(bucket(User), <<"_designs">>, jiffy:encode(NewDesigns)).
 
 remove_design(User, Design) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     ExistingDesigns = case DB:get(bucket(User), <<"_designs">>) of
 			  undefined ->
 			      [];
@@ -141,7 +141,7 @@ remove_design(User, Design) ->
     DB:put(bucket(User), <<"_designs">>, jiffy:encode(RemainingDesigns)).
 
 publish_stl(User, Design, CommitSHA) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     Key = <<"_stls_published">>, 
     case DB:get(bucket(User, Design), Key) of
 	undefined ->
@@ -157,7 +157,7 @@ publish_stl(User, Design, CommitSHA) ->
     end.
 
 is_published_stl(User, Design, CommitSHA) ->
-    {ok, DB} = application:get_env(node, db_module),	    
+    {ok, DB} = application:get_env(api, db_module),	    
     Key = <<"_stls_published">>, 
     case DB:get(bucket(User, Design), Key) of
 	undefined ->
@@ -167,11 +167,11 @@ is_published_stl(User, Design, CommitSHA) ->
     end.
 
 exists_brep(SHA) when is_list(SHA) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     DB:exists(<<"_brep">>, list_to_binary(SHA)).
 
 get_brep(SHA) when is_list(SHA) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     case DB:get(<<"_brep">>, list_to_binary(SHA)) of
 	undefined ->
 	    undefined;
@@ -180,7 +180,7 @@ get_brep(SHA) when is_list(SHA) ->
     end.
 
 put_brep(SHA, BRep) when is_list(SHA) ->
-    {ok, DB} = application:get_env(node, db_module),
+    {ok, DB} = application:get_env(api, db_module),
     DB:put(<<"_brep">>, list_to_binary(SHA), jiffy:encode(BRep)).
 
 
@@ -212,7 +212,7 @@ user_exists_test_() ->
      fun() -> 
 	     meck:new(application, [unstick]),
 	     meck:new(db),
-	     meck:expect(application, get_env, fun(node, db_module) -> {ok, db} end),
+	     meck:expect(application, get_env, fun(api, db_module) -> {ok, db} end),
 	     meck:expect(db, exists, fun(<<"bjnortier">>, <<"_user">>) -> true end)
      end, 
      fun(_) -> 
@@ -233,7 +233,7 @@ create_user_with_email_test_() ->
 	     meck:new(api_bcrypt),
 	     meck:new(db),
 
-	     meck:expect(application, get_env, fun(node, db_module) -> {ok, db} end),
+	     meck:expect(application, get_env, fun(api, db_module) -> {ok, db} end),
 	     meck:expect(db, exists, fun(<<"bjnortier">>, <<"_user">>) -> false end),
 	     meck:expect(api_bcrypt, gen_salt, fun() -> {ok, "salt"} end),
 	     meck:expect(api_bcrypt, hashpw, fun("password", "salt") -> {ok, "hash"} end),
@@ -263,7 +263,7 @@ create_user_without_email_test_() ->
 	     meck:new(api_bcrypt),
 	     meck:new(db),
 
-	     meck:expect(application, get_env, fun(node, db_module) -> {ok, db} end),
+	     meck:expect(application, get_env, fun(api, db_module) -> {ok, db} end),
 	     meck:expect(db, exists, fun(<<"bjnortier">>, <<"_user">>) -> false end),
 	     meck:expect(api_bcrypt, gen_salt, fun() -> {ok, "salt"} end),
 	     meck:expect(api_bcrypt, hashpw, fun("password", "salt") -> {ok, "hash"} end),
@@ -293,7 +293,7 @@ validate_password_test_() ->
 	     meck:new(db),
 	     meck:new(api_bcrypt),
 
-	     meck:expect(application, get_env, fun(node, db_module) -> {ok, db} end),
+	     meck:expect(application, get_env, fun(api, db_module) -> {ok, db} end),
 	     meck:expect(db, get, fun(<<"bjnortier">>, <<"_user">>) -> 
 					  <<"{\"password[bcrypt]\":\"hash\"}">>;
 				     (<<"foo">>, <<"_user">>) ->

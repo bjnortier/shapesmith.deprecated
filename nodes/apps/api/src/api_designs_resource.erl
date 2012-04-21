@@ -53,7 +53,7 @@ provide_content(ReqData, Context) ->
     WalrusContext =  [{username, User},
 		      {designs, Designs}],
 
-    {ok, AuthModule} = application:get_env(node, auth_module),
+    {ok, AuthModule} = application:get_env(api, auth_module),
     WalrusContext1 = AuthModule:add_session_walrus_ctx(User, WalrusContext),
 
     Rendered = api_walrus:render_template(api_views_designs, WalrusContext1),

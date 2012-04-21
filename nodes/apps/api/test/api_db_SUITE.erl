@@ -15,7 +15,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(node_db_SUITE).
+-module(api_db_SUITE).
 -compile(export_all).
 
 -include_lib("common_test/include/ct.hrl").
@@ -33,31 +33,31 @@ init_per_suite(Config) ->
     Config.
 
 end_per_suite(_Config) ->
-    application:stop(node),
-    application:unload(node),
+    application:stop(api),
+    application:unload(api),
     ok.
 
 init_per_testcase(in_mem, Config) ->
-    node_mem_db:start_link(),
+    api_mem_db:start_link(),
     Config;
 init_per_testcase(riak, Config) ->
-    ok = application:load(node),
-    application:set_env(node, port, 8001),
-    application:set_env(node, riak_host, {"127.0.0.1", 8087}),
+    ok = application:load(api),
+    application:set_env(api, port, 8001),
+    application:set_env(api, riak_host, {"127.0.0.1", 8087}),
     application:start(inets),
-    ok = node:start(),
+    ok = api:start(),
     Config;
 init_per_testcase(disk, Config) ->
-    application:set_env(node, disk_db_dir, "test_db"),
+    application:set_env(api, disk_db_dir, "test_db"),
     Config.
 
 end_per_testcase(in_mem, _Config) ->
-    node_mem_db:stop();
+    api_mem_db:stop();
 end_per_testcase(riak, _Config) ->
-    application:stop(node),
-    application:unload(node);
+    application:stop(api),
+    application:unload(api);
 end_per_testcase(disk, _Config) ->
-    {ok, DbDir} = application:get_env(node, disk_db_dir),
+    {ok, DbDir} = application:get_env(api, disk_db_dir),
     TestDBDir = filename:join(
 		  [filename:dirname(code:which(?MODULE)),
 		   "..", DbDir]),
@@ -65,13 +65,13 @@ end_per_testcase(disk, _Config) ->
     ok.
 
 in_mem(_Config) ->
-    test(node_mem_db).
+    test(api_mem_db).
 
 riak(_Config) ->
-    test(node_riak_db).
+    test(api_riak_db).
 
 disk(_Config) ->
-    test(node_disk_db).
+    test(api_disk_db).
 
 test(DB) ->
     Bucket = <<"bucket">>,

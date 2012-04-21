@@ -24,9 +24,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 mesh(WorkerPid, Hash) ->
-    case api_worker_pool:call(
-	   WorkerPid,
-	   jiffy:encode(
+    case worker_process:safe_call(
+           WorkerPid,
+           jiffy:encode(
 	     {[{<<"tesselate">>, list_to_binary(Hash)}]})) of
 
 	{error, Reason} ->
@@ -46,7 +46,7 @@ stl(WorkerPid, Hash) ->
 	    {<<"id">>, list_to_binary(Hash)},
 	    {<<"filename">>, list_to_binary(Filename)}
 	   ]},
-    case api_worker_pool:call(WorkerPid, jiffy:encode(Msg)) of
+    case worker_process:safe_call(WorkerPid, jiffy:encode(Msg)) of
 	<<"\"ok\"">> ->
 	    Result = file:read_file(Filename),
             file:delete(Filename),

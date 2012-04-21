@@ -80,7 +80,8 @@ stl(User, Design, SHA) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 ensure_brep_exists(User, Design, SHA, Geometry, TopLevelFn) ->
-    case api_worker_pool:get_worker() of
+    {ok, MaxWait} = application:get_env(api, worker_wait_max_secs),
+    case worker_master_pool:get_worker(MaxWait) of
 	{error, Error} ->
 	    {error, Error};
 	WorkerPid ->
@@ -90,7 +91,8 @@ ensure_brep_exists(User, Design, SHA, Geometry, TopLevelFn) ->
 	    %% Some brep may be left over if error occured and cleanup wasn't complete
 	    try_with_logging(api_brep_db, purge, [WorkerPid, SHA]),
 	    try_with_logging(api_brep_db, purge_all, [WorkerPid]),
-	    api_worker_pool:return_worker(WorkerPid),
+            
+            ok = worker_master_pool:put_worker(WorkerPid),
 	    Result
 	    
     end.

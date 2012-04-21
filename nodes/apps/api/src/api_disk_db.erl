@@ -62,7 +62,7 @@ delete(Bucket, Id) when is_binary(Bucket)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 filename(Bucket, Id) ->
-    {ok, DbDir} = application:get_env(node, disk_db_dir),
+    {ok, DbDir} = application:get_env(api, disk_db_dir),
     filename:join(
       [filename:dirname(code:which(?MODULE)),
        "..", DbDir, binary_to_list(Bucket), binary_to_list(Id)]).
