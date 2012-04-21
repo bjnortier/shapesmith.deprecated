@@ -16,6 +16,7 @@ configure_file (
 # so that we will find TutorialConfig.h
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("include")	
+include_directories("/usr/include/oce")
 include_directories("/usr/local/include")
 include_directories("/usr/local/include/freetype2")
 include_directories("/usr/local/inc")
