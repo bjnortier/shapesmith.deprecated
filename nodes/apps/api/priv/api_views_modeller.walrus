@@ -86,6 +86,8 @@
     </div>
   </div>
   <div class="top-menu" id="session">
+    <span class="action"><a href="https://github.com/bjnortier/shapesmith/wiki">help</a></span>
+    &nbsp;
     <span class="action"><a href="/{{username}}/designs">my designs</a></span>
     {{#session}}
     <span class="action"><a href="/signout">sign out</a></span>
