@@ -3,10 +3,7 @@ SS.popupMenu = function() {
 
     var that = {};
 
-    var holding = false, cancelled = false, holdDelayTime = 500;
-    // The reference counter is used to couple a mouse down and mouse up event, so
-    // that the holding down of the button (delayed popup) is coupled correctly
-    var referenceCounter = 0;
+    var cancelled = false;
 
     var updateToolWheelPosition = function(event) {
 	$('#toolWheel').css('left', event.clientX);
@@ -52,26 +49,17 @@ SS.popupMenu = function() {
     }
 
     that.onMouseUp = function(event) {
-	holding = false;
-	++referenceCounter;
+	if ((event.button == 2) 
+            ||
+	    ((event.button == 0) && event.shiftKey)) {
+	    showIfNotCancelled(event);
+        } else {
+            SS.UI_MOUSE_STATE.free();
+        }
     }
 
     that.onMouseDown = function(event) {
-	var reference = referenceCounter;
-	cancelled = false;
-	holding = true;
-	that.disposeIfShowing();
-	
-	if (event.button == 2) {
-	    showIfNotCancelled(event);
-	} else {
-	    /*setTimeout(function() {
-		if (holding && (reference == referenceCounter)) {
-		    showIfNotCancelled(event);
-		}
-	    }, holdDelayTime);*/
-	}
-	
+        that.disposeIfShowing();
     }
 
     // Cancel the popup when for example the view has been rotated

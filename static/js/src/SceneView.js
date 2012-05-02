@@ -266,9 +266,9 @@ SS.SceneView = function(container) {
         });
 
 	if (foundGeomNodes.length > 0) {
-	    if (event.shiftKey || event.ctrlKey || event.metaKey) {
+	    if (event.ctrlKey || event.metaKey) {
 		selectionManager.shiftPick(foundGeomNodes[0].object.name.geomNodeId);
-	    } else {
+	    } else if (!event.shiftKey) {
 		selectionManager.pick(foundGeomNodes[0].object.name.geomNodeId);
 	    }
 	} else {
@@ -290,8 +290,6 @@ SS.SceneView = function(container) {
 	}
 
 	popupMenu.onMouseUp(event);
-
-        SS.UI_MOUSE_STATE.free();
 
 	mouseOnDown = null;
 	container.removeEventListener('mouseup', onMouseUp, false);
