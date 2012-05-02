@@ -48,7 +48,7 @@ stl(WorkerPid, Hash) ->
 	   ]},
     case worker_process:safe_call(WorkerPid, jiffy:encode(Msg)) of
 	<<"\"ok\"">> ->
-            Result = worker_process:get_stl_and_delete(WorkerPid, Filename);
+            worker_process:get_stl_and_delete(WorkerPid, Filename);
         <<"\"empty\"">> ->
             empty;
 	{error, Reason} ->
