@@ -6,8 +6,6 @@ These instructions have been verified on a circa-2006 Core Duo (32-bit) MacBook 
 ### Erlang (R140B3)
 Erlang is the language in which Shapesmith is written.
 
-*Do not install erlang via MacPorts; it is a later non-compatible version!*
-
 A 32-bit compatible version of Erlang/OTP (R140B3) can only be installed from source. It requires these libraries:
 
 * /opt/local/lib/libpng14.14.dylib
