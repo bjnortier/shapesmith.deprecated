@@ -65,8 +65,7 @@ SS.SceneView = function(container) {
 	    overRenderer = false;
 	}, false);
 	container.addEventListener('dblclick', function() {
-	    popupMenu.cancel();
-	    if (selectionManager.size() == 1) {
+            if (selectionManager.size() == 1) {
 		var id = selectionManager.getSelected()[0];
 
 		$('#' + id + ' > tbody > tr:nth-child(1)').addClass('selected');

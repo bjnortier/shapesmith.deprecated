@@ -3,8 +3,6 @@ SS.popupMenu = function() {
 
     var that = {};
 
-    var cancelled = false;
-
     var updateToolWheelPosition = function(event) {
 	$('#toolWheel').css('left', event.clientX);
 	$('#toolWheel').css('top', event.clientY);
@@ -29,9 +27,8 @@ SS.popupMenu = function() {
 	SS.UI_MOUSE_STATE.popupShowing = true;
     }
     
-    var showIfNotCancelled = function(event) {
-	if (!cancelled && 
-            SS.UI_MOUSE_STATE.isFree() &&
+    var showIfFree = function(event) {
+	if (SS.UI_MOUSE_STATE.isFree() &&
             !SS.UI_EDITING_STATE.isEditing()) {
 	    updateToolWheelPosition(event);
 	    addActions();
@@ -52,7 +49,7 @@ SS.popupMenu = function() {
 	if ((event.button == 2) 
             ||
 	    ((event.button == 0) && event.shiftKey)) {
-	    showIfNotCancelled(event);
+	    showIfFree(event);
         } else {
             SS.UI_MOUSE_STATE.free();
         }
@@ -60,11 +57,6 @@ SS.popupMenu = function() {
 
     that.onMouseDown = function(event) {
         that.disposeIfShowing();
-    }
-
-    // Cancel the popup when for example the view has been rotated
-    that.cancel = function() {
-	cancelled = true;
     }
 
     return that;
