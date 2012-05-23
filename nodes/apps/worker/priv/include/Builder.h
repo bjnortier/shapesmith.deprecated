@@ -84,6 +84,12 @@ public:
     virtual ~TorusBuilder() {};
 };
 
+class STLImportBuilder : public Builder3D {
+public:
+    STLImportBuilder(string id, map< string, mValue > json);
+    virtual ~STLImportBuilder() {};
+};
+
 #pragma mark 2D Primitives
 
 class Builder2D : public Builder {

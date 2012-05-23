@@ -84,35 +84,9 @@ template < typename T > string create_modifier(string id, map< string, mValue > 
 }
 
 string import_stl(string id, map< string, mValue > json) {
-
-    // Temp filename
-    char fileName[100];
-    sprintf(fileName, "/tmp/%s.stl", id.c_str());
     
-    // Decode base64
-    string contents = json["contents"].get_str();
-    string decoded = base64_decode(contents);
-    
-    ofstream tmpFile;
-    tmpFile.open (fileName);
-    tmpFile << decoded;
-    tmpFile.close();
-    
-    // Read from temp file
-    StlAPI_Reader reader;
-    TopoDS_Shape shape;
-    reader.Read(shape, fileName);
-    
-    // Mesh it
-    TopExp_Explorer ex(shape, TopAbs_FACE);
-    if (ex.More()) {
-        BRepMesh().Mesh(shape, TRIANGLE_SIZE);
-    }
-    
-    // Delete file
-    remove(fileName);
-    
-    shapes[id] = shape;
+    STLImportBuilder builder(id, json);
+    shapes[id] = builder.shape();
     return "ok";
 }
 

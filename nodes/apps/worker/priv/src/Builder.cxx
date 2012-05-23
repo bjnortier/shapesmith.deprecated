@@ -3,6 +3,7 @@
 #include "Tesselate.h"
 #include "Transform.h"
 #include "Util.h"
+#include "base64.h"
 
 
 TopoDS_Shape Builder::shape() {
@@ -176,6 +177,34 @@ TorusBuilder::TorusBuilder(map< string, mValue > json) {
     double r1 = Util::to_d(parameters["r1"]);
     double r2 = Util::to_d(parameters["r2"]);
     shape_ = BRepPrimAPI_MakeTorus(r1, r2).Shape();
+    PostProcess(json);
+}
+
+STLImportBuilder::STLImportBuilder(string id, map< string, mValue > json) {
+    
+    // Temp filename
+    char fileName[100];
+    sprintf(fileName, "/tmp/%s.stl", id.c_str());
+    
+    // Decode base64
+    string contents = json["contents"].get_str();
+    string decoded = base64_decode(contents);
+    
+    ofstream tmpFile;
+    tmpFile.open (fileName);
+    tmpFile << decoded;
+    tmpFile.close();
+    
+    // Read from temp file
+    StlAPI_Reader reader;
+    TopoDS_Shape shape;
+    reader.Read(shape, fileName);
+    
+    shape_ = shape;
+    
+    // Delete file
+    remove(fileName);
+    
     PostProcess(json);
 }
 
