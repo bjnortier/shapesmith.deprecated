@@ -47,3 +47,6 @@ SS.UIEditingState = function() {
     
 }
 
+var geom_doc = new GeomDocument();
+SS.UI_MOUSE_STATE = new SS.UIMouseState();
+SS.UI_EDITING_STATE = new SS.UIEditingState();
