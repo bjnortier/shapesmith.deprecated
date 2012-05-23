@@ -106,7 +106,11 @@ function create_geom_command(prototype, geometry) {
                 geomNode = new GeomNode(geometry);
                 geomNode.mesh = result.mesh;
 
-                geom_doc.replace(prototype, geomNode);
+                if (prototype) {
+                    geom_doc.replace(prototype, geomNode);
+                } else {
+                    geom_doc.add(geomNode);
+                }
                 command_stack.commit();
             },
             error: function(jqXHR, textStatus, errorThrown) {

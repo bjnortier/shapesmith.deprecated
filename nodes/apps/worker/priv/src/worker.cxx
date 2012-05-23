@@ -83,6 +83,39 @@ template < typename T > string create_modifier(string id, map< string, mValue > 
     return "ok";
 }
 
+string import_stl(string id, map< string, mValue > json) {
+
+    // Temp filename
+    char fileName[100];
+    sprintf(fileName, "/tmp/%s.stl", id.c_str());
+    
+    // Decode base64
+    string contents = json["contents"].get_str();
+    string decoded = base64_decode(contents);
+    
+    ofstream tmpFile;
+    tmpFile.open (fileName);
+    tmpFile << decoded;
+    tmpFile.close();
+    
+    // Read from temp file
+    StlAPI_Reader reader;
+    TopoDS_Shape shape;
+    reader.Read(shape, fileName);
+    
+    // Mesh it
+    TopExp_Explorer ex(shape, TopAbs_FACE);
+    if (ex.More()) {
+        BRepMesh().Mesh(shape, TRIANGLE_SIZE);
+    }
+    
+    // Delete file
+    remove(fileName);
+    
+    shapes[id] = shape;
+    return "ok";
+}
+
 string create_geometry(string id, map< string, mValue > json) {
     string geomType = json["type"].get_str();
     
@@ -142,7 +175,12 @@ string create_geometry(string id, map< string, mValue > json) {
         return create_boolean<SubtractBuilder>(id, json);
     } else if (geomType == "intersect") {
         return create_boolean<IntersectBuilder>(id, json);
+    
+    // STL Import
+    } else if (geomType == "import_stl") {
+        return import_stl(id, json);
     }
+    
     return "geometry type not found";
 }
 
@@ -272,6 +310,8 @@ TopoDS_Shape deserialize_shape(string s11n, string sha) {
 }
 
 
+
+
 #pragma mark main()
 
 int main (int argc, char *argv[]) {
@@ -368,6 +408,7 @@ int main (int argc, char *argv[]) {
                     write_cmd(output.c_str(), output.size());
                     continue;
                 }
+                
                 
                 if (!msgType.is_null() && (msgType.type() == str_type) && (msgType.get_str() == string("serialize"))
                     &&

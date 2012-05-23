@@ -83,6 +83,7 @@ function GeomNode() {
         }
     }
 
+    this.contents = arguments[0].contents;
     this.parameters = copyValue(arguments[0].parameters);
     this.mesh = arguments[0].mesh;
     this.children = [];

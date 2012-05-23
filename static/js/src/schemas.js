@@ -407,5 +407,12 @@ SS.schemas.mirror = {
     }
 };
 
+SS.schemas.import_stl = {
+    description: "STL",
+    type: 'object',
+    properties: {
+    }
+};
+
 SS.schemas.axis_mirror = SS.schemas.mirror;
 SS.schemas.plane_mirror = SS.schemas.mirror;

@@ -30,6 +30,7 @@
 #include <ShapeFix_Solid.hxx>
 
 #include <StlAPI_Writer.hxx>
+#include <StlAPI_Reader.hxx>
 
 #include <gp.hxx>
 #include <gp_Pnt.hxx>

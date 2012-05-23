@@ -173,7 +173,18 @@ validate_geom_test_() ->
      ?_assertEqual(ok, 
 		   geom({[{<<"type">>, <<"fillet">>},
                           {<<"parameters">>, {[{<<"r">>, 5}]}},
-                          {<<"children">>, [<<"abc">>]}]}))
+                          {<<"children">>, [<<"abc">>]}]})),
+     
+     %% Import STL
+     ?_assertEqual({error, {[{<<"missing">>, <<"contents">>}]}},
+		   geom({[{<<"type">>, <<"import_stl">>}]})),
+     ?_assertEqual({error, {[{<<"contents">>, <<"'contents' must be base64 encoded">>}]}},
+        	   geom({[{<<"type">>, <<"import_stl">>},
+                          {<<"contents">>, <<"a">>}]})),
+     ?_assertEqual(ok, 
+        	   geom({[{<<"type">>, <<"import_stl">>},
+                          {<<"contents">>, <<"Zm9v">>}]}))
+
     ].
 -endif.
 
@@ -311,6 +322,19 @@ validate_geom_type(<<"subtract">>, Props) ->
     validate_boolean(Props);
 validate_geom_type(<<"intersect">>, Props) ->
     validate_boolean(Props);
+validate_geom_type(<<"import_stl">>, Props) ->
+    case lists:keyfind(<<"contents">>, 1, Props) of
+        false ->
+            {error, {[{<<"missing">>, <<"contents">>}]}};
+        {_, Contents} ->
+            try
+                base64:decode(Contents),
+                ok
+            catch 
+                _:_ ->
+                    {error, {[{<<"contents">>, <<"'contents' must be base64 encoded">>}]}}
+            end
+    end;
 validate_geom_type(_, _) ->
     {error, {[{<<"invalid">>, <<"unknown geometry type">>}]}}.
 

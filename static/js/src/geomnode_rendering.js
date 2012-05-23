@@ -231,15 +231,18 @@ var SS = SS || {};
         });
         lines.name = objectName;
 
-        var selectionGeometriesForLines = create1DSelectionGeometries(geomNode.mesh['edges']);
+        // Only render line selections when there are no triangles
         var selectionMeshes = new THREE.Object3D();
-        selectionGeometriesForLines.map(function(selectionGeometriesForLine) {
-            var mesh = new THREE.Mesh(selectionGeometriesForLine, new THREE.MeshBasicMaterial({ color: 0x666666, opacity: 0 })); 
-            mesh.name = objectName
-            mesh.doubleSided = true;
-            selectionMeshes.add(mesh);
-        });
-        selectionMeshes.name = objectName;                       
+        if (triangles.children.length > 0) {
+            var selectionGeometriesForLines = create1DSelectionGeometries(geomNode.mesh['edges']);
+            selectionGeometriesForLines.map(function(selectionGeometriesForLine) {
+                var mesh = new THREE.Mesh(selectionGeometriesForLine, new THREE.MeshBasicMaterial({ color: 0x666666, opacity: 0 })); 
+                mesh.name = objectName
+                mesh.doubleSided = true;
+                selectionMeshes.add(mesh);
+            });
+            selectionMeshes.name = objectName; 
+        }                      
         
         return {'faces': triangles, 
                 //'vertices' : vertices,

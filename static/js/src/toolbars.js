@@ -318,32 +318,50 @@ $('#action-save').click(function() {
 });
 
 $('#action-import-json').click(function() {
-
     $('#json-file-select-input').click();
-
-    // For some reason multiple uploads don't work unless the input is removed and re-added
-    $('#json-file-select-input').remove();
-    var input = $('<input type="file" id="json-file-select-input" style="position: absolute; left: -200px; top: -200px;" onchange="SS.uploadJSON(this.files)">');
-    $('#import-options').append(input);
-
 });
 
-SS.uploadJSON = function(files) {
-    var reader = new FileReader();
+$('#action-import-stl').click(function() {
+    $('#stl-file-select-input').click();
+});
 
-    // Closure to capture the file information.
-    reader.onload = (function(theFile) {
-        return function(e) {
-            if (e.target.readyState === 2) {
-                console.log('Uploaded: ' + e.target.result);
-                importJSON(e.target.result);
-            }
-        };
-    })(files[0]);
+(function() {
 
-    // Read in the image file as a data URL.
-    reader.readAsText(files[0]);
-}
+    var uploadFile = function(input, successFn) {
+        var reader = new FileReader();
+
+        // Closure to capture the file information.
+        reader.onload = (function(theFile) {
+            return function(e) {
+                if (e.target.readyState === 2) {
+                    console.log('Uploaded: ' + e.target.result);
+                    successFn(e.target.result);
+                    input.value = "";
+                }
+            };
+        })(input.files[0]);
+
+        // Read in the file as a data URL.
+        reader.readAsText(input.files[0]);
+    }
+
+    $('#json-file-select-input').change(function() {
+        uploadFile(this, importJSON);
+    });
+
+    $('#stl-file-select-input').change(function() {
+        uploadFile(this, function(contents) {
+            var geomNode = new GeomNode({
+                type: 'import_stl',
+                contents: btoa(contents)
+            });
+            // No prototype for STL import
+            var cmd = create_geom_command(undefined, geomNode);
+            command_stack.execute(cmd);
+        })
+    });
+})();
+    
 
 $('#action-export-stl').click(function() {
     window.location = '/' + SS.session.username + '/' + SS.session.design + '/stl/' + SS.session.commit + '/';
