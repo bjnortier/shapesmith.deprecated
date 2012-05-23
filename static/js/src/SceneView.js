@@ -75,9 +75,7 @@ SS.SceneView = function(container) {
 	});
 
 	window.addEventListener('resize', onWindowResize, false);
-	
     }
-
 
     function onMouseDown(event) {
 	event.preventDefault();
@@ -100,6 +98,7 @@ SS.SceneView = function(container) {
         mouseDownOnActiveSceneObject = mouseOverActiveObjects.length > 0;
         
 	that.triggerMouseDownOnSceneObjectViews(event);
+        that.updateScene = true;
     }
     
     function onMouseMove(event) {
@@ -190,6 +189,7 @@ SS.SceneView = function(container) {
         }
 
         lastMousePos = mouse;
+        that.updateScene = true;
     }
 
     function determinePositionOnWorkplane(event) {
@@ -292,6 +292,8 @@ SS.SceneView = function(container) {
 
 	mouseOnDown = null;
 	container.removeEventListener('mouseup', onMouseUp, false);
+        that.updateScene = true;
+        
     }
 
     function onMouseOut(event) {
@@ -380,10 +382,15 @@ SS.SceneView = function(container) {
         var dCameraPosition = new THREE.Vector3().sub(camera.position, lastCameraPosition);
         if ((dScenePosition.length() > 0.1) || (dCameraPosition.length() > 0.1)) {
             that.trigger('cameraChange');
+            camera.lookAt(scene.position);
+            that.updateScene = true;
         }
 
-        camera.lookAt(scene.position);
-	renderer.render(scene, camera);
+        if (that.updateScene) {
+	    renderer.render(scene, camera);
+            that.updateScene = false;
+        }
+
     }
     
     function addLights() {
@@ -395,10 +402,7 @@ SS.SceneView = function(container) {
         pointLight = new THREE.PointLight( 0x999999 );
 	pointLight.position.set(0, 0, -100);
         scene.add(pointLight);
-
-
     }
-
 
     var sceneObjectViews = [];
     var mouseOverSceneObjectViews = [];
@@ -454,32 +458,34 @@ SS.SceneView = function(container) {
  
     }
 
-    this.triggerMouseOverSceneObjectViews = function(event) {
-	var previousOverObjects = mouseOverSceneObjectViews.map(function(x) { return x; });
-        var leaveObjects = mouseOverSceneObjectViews.map(function(x) { return x; });
-        mouseOverSceneObjectViews = [];
-	findSceneObjectViewsForEvent(event).map(function(sceneObjectView) {
-            if (previousOverObjects.indexOf(sceneObjectView) === -1) {
-		sceneObjectView.trigger('mouseEnter', event);
-	    }
-	    mouseOverSceneObjectViews.push(sceneObjectView);
-            var index = leaveObjects.indexOf(sceneObjectView);
-            if (index !== -1) {
-	        leaveObjects.splice(index, 1);
-            }
-	});
-	leaveObjects.map(function(sceneObjectView) {
-	    sceneObjectView.trigger('mouseLeave', event);
-	});
+    if (SS.UI_MOUSE_STATE.isFree()) {
+        this.triggerMouseOverSceneObjectViews = function(event) {
+	    var previousOverObjects = mouseOverSceneObjectViews.map(function(x) { return x; });
+            var leaveObjects = mouseOverSceneObjectViews.map(function(x) { return x; });
+            mouseOverSceneObjectViews = [];
+	    findSceneObjectViewsForEvent(event).map(function(sceneObjectView) {
+                if (previousOverObjects.indexOf(sceneObjectView) === -1) {
+		    sceneObjectView.trigger('mouseEnter', event);
+	        }
+	        mouseOverSceneObjectViews.push(sceneObjectView);
+                var index = leaveObjects.indexOf(sceneObjectView);
+                if (index !== -1) {
+	            leaveObjects.splice(index, 1);
+                }
+	    });
+	    leaveObjects.map(function(sceneObjectView) {
+	        sceneObjectView.trigger('mouseLeave', event);
+	    });
 
-        if ((event.button === 0) &&
-            (event.ctrlKey || !event.shiftKey)) {
+            if ((event.button === 0) &&
+                (event.ctrlKey || !event.shiftKey)) {
 
-            if (mouseDownSceneObjectViews.length > 0) {
-                mouseDownSceneObjectViews[0].trigger('mouseDrag', event);
+                if (mouseDownSceneObjectViews.length > 0) {
+                    mouseDownSceneObjectViews[0].trigger('mouseDrag', event);
+                }
             }
+
         }
-
     }
 
     this.triggerMouseDownOnSceneObjectViews = function(event) {
@@ -514,5 +520,5 @@ SS.SceneView = function(container) {
     this.onMouseDown = onMouseDown;
 
    
- return this;
+    return this;
 }
