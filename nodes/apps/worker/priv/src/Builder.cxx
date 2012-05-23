@@ -205,7 +205,7 @@ STLImportBuilder::STLImportBuilder(string id, map< string, mValue > json) {
     // Delete file
     remove(fileName);
     
-    PostProcess(json);
+    this->Mesh();
 }
 
 #pragma mark 2D Builders

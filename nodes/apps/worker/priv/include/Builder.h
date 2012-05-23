@@ -37,9 +37,8 @@ public:
 #pragma mark 3D primitives
 
 class Builder3D : public Builder {
-private:
-    void Mesh();
 protected:
+    void Mesh();
     virtual void PostProcess(map< string, mValue > json);
     virtual ~Builder3D() {};
 public:

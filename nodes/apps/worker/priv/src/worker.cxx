@@ -85,8 +85,13 @@ template < typename T > string create_modifier(string id, map< string, mValue > 
 
 string import_stl(string id, map< string, mValue > json) {
     
-    STLImportBuilder builder(id, json);
-    shapes[id] = builder.shape();
+    
+    STLImportBuilder importBuilder(id, json);
+
+    vector<TopoDS_Shape> childShapes;
+    childShapes.push_back(importBuilder.shape());
+    std::auto_ptr<Builder> solidBuilder(new SolidBuilder(json, childShapes));
+    shapes[id] = solidBuilder->shape();
     return "ok";
 }
 
@@ -245,7 +250,7 @@ TopoDS_Shape deserialize_shape(string s11n, string sha) {
     sprintf(fileName, "/tmp/%s.bin", sha.c_str());
     
     // Decode base64
-    std::string decoded = base64_decode(s11n);
+    string decoded = base64_decode(s11n);
     
     ofstream tmpFile;
     tmpFile.open (fileName);
