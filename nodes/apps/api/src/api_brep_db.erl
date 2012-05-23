@@ -115,6 +115,20 @@ create_type(WorkerPid, SHA, <<"subtract">>, Geometry) ->
     create_boolean(WorkerPid, SHA, <<"subtract">>, Geometry);
 create_type(WorkerPid, SHA, <<"intersect">>, Geometry) ->
     create_boolean(WorkerPid, SHA, <<"intersect">>, Geometry);
+create_type(WorkerPid, SHA, <<"import_stl">>, {GeomProps}) ->
+    {_, Contents} = lists:keyfind(<<"contents">>, 1, GeomProps),
+    Decoded = base64:decode(Contents),
+    << A:6/binary, _/binary >> = Decoded,
+    case A of
+        <<"solid ">> ->
+            worker_create(WorkerPid, SHA, {GeomProps});
+        _ ->
+            AsciiSTL = api_stl_utils:binary_to_ascii(Decoded),
+            Encoded = base64:encode(AsciiSTL),
+            NewGeomProps = lists:keyreplace(<<"contents">>, 1, GeomProps, {<<"contents">>, Encoded}),
+            worker_create(WorkerPid, SHA, {NewGeomProps})
+    end;
+
 %% Non-bool pass through
 create_type(WorkerPid, SHA, _, Geometry) ->
     worker_create(WorkerPid, SHA, Geometry).

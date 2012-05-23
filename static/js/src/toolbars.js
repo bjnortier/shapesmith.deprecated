@@ -334,15 +334,14 @@ $('#action-import-stl').click(function() {
         reader.onload = (function(theFile) {
             return function(e) {
                 if (e.target.readyState === 2) {
-                    console.log('Uploaded: ' + e.target.result);
-                    successFn(e.target.result);
                     input.value = "";
+                    successFn(e.target.result);
                 }
             };
         })(input.files[0]);
 
         // Read in the file as a data URL.
-        reader.readAsText(input.files[0]);
+        reader.readAsBinaryString(input.files[0]);
     }
 
     $('#json-file-select-input').change(function() {
