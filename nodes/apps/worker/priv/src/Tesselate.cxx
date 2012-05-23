@@ -32,29 +32,39 @@ mValue Tesselator1D::Tesselate() {
     mArray segments;
     TopExp_Explorer Ex;
     
-    int index = 0;
-    for (Ex.Init(shape_,TopAbs_EDGE); Ex.More(); Ex.Next()) { 
-        
-        TopoDS_Edge edge = TopoDS::Edge(Ex.Current());
-        
-        BRepAdaptor_Curve curve_adaptor(edge);
-        GCPnts_UniformDeflection discretizer;
-        discretizer.Initialize(curve_adaptor, 0.05);
-        
-        for (int i = 0; i < discretizer.NbPoints(); i++) {
-            gp_Pnt pt = curve_adaptor.Value(discretizer.Parameter(i + 1));
-            positions.push_back(pt.X());
-            positions.push_back(pt.Y());
-            positions.push_back(pt.Z());
+    int edgeCount = 0;
+    for (TopExp_Explorer ex(shape_,TopAbs_EDGE); ex.More(); ex.Next()) { 
+        edgeCount += 1;
+    }
+    
+    bool hasFaces = TopExp_Explorer(shape_,TopAbs_FACE).More();
+    
+    // Don't tesselate the edges of 3D objects with a lot of edges, e.g. STL imports
+    if (!(hasFaces && (edgeCount > 50))) {
+        int index = 0;
+        for (Ex.Init(shape_,TopAbs_EDGE); Ex.More(); Ex.Next()) { 
+            
+            TopoDS_Edge edge = TopoDS::Edge(Ex.Current());
+            
+            BRepAdaptor_Curve curve_adaptor(edge);
+            GCPnts_UniformDeflection discretizer;
+            discretizer.Initialize(curve_adaptor, 0.05);
+            
+            for (int i = 0; i < discretizer.NbPoints(); i++) {
+                gp_Pnt pt = curve_adaptor.Value(discretizer.Parameter(i + 1));
+                positions.push_back(pt.X());
+                positions.push_back(pt.Y());
+                positions.push_back(pt.Z());
+            }
+            int newIndex = index + discretizer.NbPoints()*3;
+            
+            mObject segment;
+            segment["start"] = index;
+            segment["end"]   = newIndex - 1;
+            segments.push_back(segment);
+            
+            index = newIndex;
         }
-        int newIndex = index + discretizer.NbPoints()*3;
-        
-        mObject segment;
-        segment["start"] = index;
-        segment["end"]   = newIndex - 1;
-        segments.push_back(segment);
-        
-        index = newIndex;
     }
     
     mObject result;

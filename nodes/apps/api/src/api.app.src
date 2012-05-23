@@ -31,9 +31,7 @@
                   worker_master
                  ]},
   {mod, { api_app, []}},
-  {env, [{worker_executable, ["worker", "build", "worker"]},
-         {worker_wait_max_secs, 60},
-         {worker_pool_size, 2},
+  {env, [{worker_wait_max_secs, 60},
          {lager, [
                   {handlers, [
                               {lager_console_backend, info},

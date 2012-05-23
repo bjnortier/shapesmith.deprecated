@@ -259,7 +259,7 @@ SS.SceneView = function(container) {
 
     function selectObject(event) {
 	
-        var found = SS.selectInScene(scene, camera, event);
+        var found = SS.selectGeomNodesInScene(scene, camera, event);
         var foundGeomNodes = found.filter(function(obj) {
             return obj.object.name.geomNodeId;
         });
@@ -433,7 +433,7 @@ SS.SceneView = function(container) {
 
     var findSceneObjectViewsForEvent = function(event) {
 	
-	var found = SS.selectInScene(scene, camera, event);
+	var found = SS.selectNonGeomNodesInScene(scene, camera, event);
 	var objects = _.pluck(found, 'object');
 
 	// Select the hightest-level THREE.Object3D objects in the scene

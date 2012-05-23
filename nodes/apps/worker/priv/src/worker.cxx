@@ -215,7 +215,7 @@ mValue serialize_shape(string sha, TopoDS_Shape shape) {
     Handle(Storage_Data) d = new Storage_Data;
     
     PTColStd_TransientPersistentMap aMap;
-    Handle(PTopoDS_HShape) aPShape = MgtBRep::Translate(shape, aMap, MgtBRep_WithTriangle);
+    Handle(PTopoDS_HShape) aPShape = MgtBRep::Translate(shape, aMap, MgtBRep_WithoutTriangle);
     
     d->AddRoot("ObjectName", aPShape);
     Handle(ShapeSchema) s = new ShapeSchema;
@@ -277,7 +277,7 @@ TopoDS_Shape deserialize_shape(string s11n, string sha) {
     // Create the shape
     PTColStd_PersistentTransientMap aMap;
     TopoDS_Shape resultingShape;
-    MgtBRep::Translate(aPShape, aMap, resultingShape, MgtBRep_WithTriangle);
+    MgtBRep::Translate(aPShape, aMap, resultingShape, MgtBRep_WithoutTriangle);
     
     // Mesh it
     TopExp_Explorer ex(resultingShape, TopAbs_FACE);

@@ -180,8 +180,9 @@ var SS = SS || {};
 	}
 	geometry.computeCentroids();
 	geometry.computeFaceNormals();
+        geometry.mergeVertices();
         geometry.dynamic = true;
-	return [geometry];
+        return [geometry];
     }
 
     SS.createGeometry = function(geomNode) {
