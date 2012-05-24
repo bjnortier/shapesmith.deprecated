@@ -118,9 +118,9 @@ create_type(WorkerPid, SHA, <<"intersect">>, Geometry) ->
 create_type(WorkerPid, SHA, <<"import_stl">>, {GeomProps}) ->
     {_, Contents} = lists:keyfind(<<"contents">>, 1, GeomProps),
     Decoded = base64:decode(Contents),
-    << A:6/binary, _/binary >> = Decoded,
+    << A:5/binary, _/binary >> = Decoded,
     case A of
-        <<"solid ">> ->
+        <<"solid">> ->
             worker_create(WorkerPid, SHA, {GeomProps});
         _ ->
             AsciiSTL = api_stl_utils:binary_to_ascii(Decoded),
