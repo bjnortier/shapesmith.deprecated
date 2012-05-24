@@ -206,39 +206,34 @@ int write_cmd(const char *buf, int len) {
 #pragma mark export/import
 
 mValue serialize_shape(string sha, TopoDS_Shape shape) {
-    char fileName[100];
-    sprintf(fileName, "/tmp/%s.bin", sha.c_str());
+    char filename[100];
+    sprintf(filename, "/tmp/%s.bin", sha.c_str());
     
     // Write to temporary file
-    FSD_BinaryFile f;
-    f.Open(fileName, Storage_VSWrite);
-    Handle(Storage_Data) d = new Storage_Data;
+    BRepTools::Write(shape, filename);
     
-    PTColStd_TransientPersistentMap aMap;
-    Handle(PTopoDS_HShape) aPShape = MgtBRep::Translate(shape, aMap, MgtBRep_WithoutTriangle);
-    
-    d->AddRoot("ObjectName", aPShape);
-    Handle(ShapeSchema) s = new ShapeSchema;
-    s->Write(f, d);
-    f.Close();
-    
-    // Read from tmp
-    int index = 0;
-    char s11nBuf[1024*1024];
-    
-    ifstream tmpFile(fileName);
-    while(!tmpFile.eof())
+    ifstream inputFile (filename, ios::in|ios::binary|ios::ate);
+    char* memblock;
+    ifstream::pos_type size;
+    if (inputFile.is_open())
     {
-        tmpFile.get(s11nBuf[index]);
-        ++index;
+        size = inputFile.tellg();
+        memblock = new char [size];
+        inputFile.seekg (0, ios::beg);
+        inputFile.read (memblock, size);
+        inputFile.close();
+        
+        delete[] memblock;
     }
-    tmpFile.close();
 
-    // Delete file
-    remove(fileName);
-    
     // Base64
-    std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(s11nBuf), index - 1);
+    unsigned char* to_encode = (unsigned char*) new char [size];
+    memcpy(to_encode, memblock, size);
+    std::string encoded = base64_encode(to_encode, size);
+    
+    // Delete file
+    remove(filename);
+
     
     return encoded;
 }
@@ -258,34 +253,20 @@ TopoDS_Shape deserialize_shape(string s11n, string sha) {
     tmpFile.close();
     
     // Read from temp file
-    
-    FSD_BinaryFile f;
-    f.Open(fileName, Storage_VSRead);
-    
-    Handle(ShapeSchema) s = new ShapeSchema;
-    Handle(Storage_Data) d = s->Read( f );
-    Handle(Storage_HSeqOfRoot)  roots = d->Roots();
-    Handle(Storage_Root) r = d->Find("ObjectName");
-    //= roots->Value(0);
-    Handle(Standard_Persistent) p = r->Object();
-    Handle(PTopoDS_HShape) aPShape  = Handle(PTopoDS_HShape)::DownCast(p);
-    f.Close();
-    
+    BRep_Builder builder;
+    TopoDS_Shape shape;
+    BRepTools::Read(shape, fileName, builder);
+
     // Delete file
     remove(fileName);
     
-    // Create the shape
-    PTColStd_PersistentTransientMap aMap;
-    TopoDS_Shape resultingShape;
-    MgtBRep::Translate(aPShape, aMap, resultingShape, MgtBRep_WithoutTriangle);
-    
     // Mesh it
-    TopExp_Explorer ex(resultingShape, TopAbs_FACE);
+    TopExp_Explorer ex(shape, TopAbs_FACE);
     if (ex.More()) {
-        BRepMesh().Mesh(resultingShape, TRIANGLE_SIZE);
+        BRepMesh().Mesh(shape, TRIANGLE_SIZE);
     }
     
-    return resultingShape;
+    return shape;
 }
 
 
