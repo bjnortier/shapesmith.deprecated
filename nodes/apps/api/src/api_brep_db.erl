@@ -124,7 +124,8 @@ create_type(WorkerPid, SHA, <<"import_stl">>, {GeomProps}) ->
             worker_create(WorkerPid, SHA, {GeomProps});
         _ ->
             AsciiSTL = api_stl_utils:binary_to_ascii(Decoded),
-            Encoded = base64:encode(AsciiSTL),
+            Coarsened = api_stl_utils:coarsen(AsciiSTL),
+            Encoded = base64:encode(Coarsened),
             NewGeomProps = lists:keyreplace(<<"contents">>, 1, GeomProps, {<<"contents">>, Encoded}),
             worker_create(WorkerPid, SHA, {NewGeomProps})
     end;

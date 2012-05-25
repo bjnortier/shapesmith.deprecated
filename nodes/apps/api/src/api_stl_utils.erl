@@ -17,7 +17,7 @@
 
 -module(api_stl_utils).
 -author('Benjamin Nortier <bjnortier@shapesmith.net>').
--export([binary_to_ascii/1]).
+-export([binary_to_ascii/1, coarsen/1]).
 
 binary_to_ascii(Contents) ->
     <<_Header:80/binary, N:32/little-integer, Rest/binary>> = Contents,
@@ -39,9 +39,42 @@ triangles(N, Acc, <<Nx:32/little-float, Ny:32/little-float, Nz:32/little-float,
 to_facet({{Nx, Ny, Nz}, {V1x, V1y, V1z}, {V2x, V2y, V2z}, {V3x, V3y, V3z}}) ->
     io_lib:format("facet normal ~e ~e ~e\nouter loop\nvertex ~e ~e ~e\nvertex ~e ~e ~e\nvertex ~e ~e ~e\nendloop\nendfacet\n",
                   [Nx, Ny, Nz, V1x, V1y, V1z, V2x, V2y, V2z, V3x, V3y, V3z]).
-    
 
+coarsen(Stl) ->
+    process_flag(trap_exit, true),
+    try 
+        Gts = stdio_command("stl2gts", binary_to_list(Stl)),
+        lager:info("Coarsening STL..."),
+        Coarse = stdio_command("coarsen", ["-n 2000"], Gts ++ "\r\n"),
+        Stl2 = stdio_command("gts2stl", Coarse ++ "\r\n"),
+        iolist_to_binary(Stl2)
+    catch
+        Err:Reason ->
+            lager:warning("STL coarsening not available: ~p:~p", [Err, Reason]),
+            Stl
+    end.
 
+stdio_command(Command, Data) ->
+    stdio_command(Command, [], Data).
 
+stdio_command(Command, Args, Data) ->
+    case os:find_executable(Command) of
+        false -> 
+            throw({not_found, Command});
+        FullCommand ->
+            Port = open_port({spawn_executable, FullCommand}, [{args, Args},
+                                                               stream,
+                                                               use_stdio]),
+            Port ! {self(), {command, Data}},
+            concatenate(Port, Command, [])
+    end.
 
-
+concatenate(Port, Command, Acc) ->
+    receive
+        {Port, {data, Result}} ->
+            concatenate(Port, Command, Acc ++ Result);
+        {'EXIT', Port, normal} ->
+            Acc
+    after 5000 ->
+            throw({no_response, Command})
+    end.
