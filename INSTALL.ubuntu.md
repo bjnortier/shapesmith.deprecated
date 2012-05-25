@@ -1,5 +1,4 @@
-Install dependencies on Ubuntu
-==============================
+# Install dependencies on Ubuntu
 
 Erlang and various other libraries are required:
 
