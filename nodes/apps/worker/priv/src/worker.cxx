@@ -213,27 +213,24 @@ mValue serialize_shape(string sha, TopoDS_Shape shape) {
     // Write to temporary file
     BRepTools::Write(shape, filename);
     
-    ifstream inputFile (filename, ios::in|ios::ate);
-    char* memblock;
-    ifstream::pos_type size;
-    if (inputFile.is_open())
+    // Read from tmp
+    int index = 0;
+    char s11nBuf[10*1024*1024];
+    
+    
+    ifstream tmpFile(filename);
+    while(!tmpFile.eof())
     {
-        size = inputFile.tellg();
-        memblock = new char [(int)size];
-        inputFile.seekg (0, ios::beg);
-        inputFile.read (memblock, size);
-        inputFile.close();
-        
-        delete[] memblock;
+        tmpFile.get(s11nBuf[index]);
+        ++index;
     }
-
-    // Base64
-    unsigned char* to_encode = (unsigned char*) new char [(int)size];
-    memcpy(to_encode, memblock, size);
-    std::string encoded = base64_encode(to_encode, size);
+    tmpFile.close();
     
     // Delete file
-    //remove(filename);
+    //remove(fileName);
+    
+    // Base64
+    std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(s11nBuf), index - 1);
 
     
     return encoded;
