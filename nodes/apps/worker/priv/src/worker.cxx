@@ -206,13 +206,14 @@ int write_cmd(const char *buf, int len) {
 #pragma mark export/import
 
 mValue serialize_shape(string sha, TopoDS_Shape shape) {
+    
     char filename[100];
     sprintf(filename, "/tmp/%s.out", sha.c_str());
     
     // Write to temporary file
     BRepTools::Write(shape, filename);
     
-    ifstream inputFile (filename, ios::in|ios::binary|ios::ate);
+    ifstream inputFile (filename, ios::in);
     char* memblock;
     ifstream::pos_type size;
     if (inputFile.is_open())
@@ -242,15 +243,15 @@ TopoDS_Shape deserialize_shape(string s11n, string sha) {
     
     // Temp filename
     char fileName[100];
-    sprintf(fileName, "/tmp/%s.out", sha.c_str());
+    sprintf(fileName, "/tmp/%s.in", sha.c_str());
     
-//    // Decode base64
-//    string decoded = base64_decode(s11n);
-//    
-//    ofstream tmpFile;
-//    tmpFile.open (fileName);
-//    tmpFile << decoded;
-//    tmpFile.close();
+    // Decode base64
+    string decoded = base64_decode(s11n);
+    
+    ofstream tmpFile;
+    tmpFile.open (fileName, ios::out);
+    tmpFile << decoded;
+    tmpFile.close();
     
     // Read from temp file
     BRep_Builder builder;
