@@ -207,7 +207,7 @@ int write_cmd(const char *buf, int len) {
 
 mValue serialize_shape(string sha, TopoDS_Shape shape) {
     char filename[100];
-    sprintf(filename, "/tmp/%s.bin", sha.c_str());
+    sprintf(filename, "/tmp/%s.in", sha.c_str());
     
     // Write to temporary file
     BRepTools::Write(shape, filename);
@@ -218,7 +218,7 @@ mValue serialize_shape(string sha, TopoDS_Shape shape) {
     if (inputFile.is_open())
     {
         size = inputFile.tellg();
-        memblock = new char [size];
+        memblock = new char [(int)size];
         inputFile.seekg (0, ios::beg);
         inputFile.read (memblock, size);
         inputFile.close();
@@ -227,12 +227,12 @@ mValue serialize_shape(string sha, TopoDS_Shape shape) {
     }
 
     // Base64
-    unsigned char* to_encode = (unsigned char*) new char [size];
+    unsigned char* to_encode = (unsigned char*) new char [(int)size];
     memcpy(to_encode, memblock, size);
     std::string encoded = base64_encode(to_encode, size);
     
     // Delete file
-    remove(filename);
+    //remove(filename);
 
     
     return encoded;
@@ -242,7 +242,7 @@ TopoDS_Shape deserialize_shape(string s11n, string sha) {
     
     // Temp filename
     char fileName[100];
-    sprintf(fileName, "/tmp/%s.bin", sha.c_str());
+    sprintf(fileName, "/tmp/%s.out", sha.c_str());
     
     // Decode base64
     string decoded = base64_decode(s11n);
@@ -258,7 +258,7 @@ TopoDS_Shape deserialize_shape(string s11n, string sha) {
     BRepTools::Read(shape, fileName, builder);
 
     // Delete file
-    remove(fileName);
+    //remove(fileName);
     
     // Mesh it
     TopExp_Explorer ex(shape, TopAbs_FACE);

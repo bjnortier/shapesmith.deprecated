@@ -32,6 +32,7 @@ include_directories("/usr/X11/include/freetype2")
 set(ALL_CLASSES src/worker.cxx src/Builder.cxx src/Transform.cxx src/Util.cxx src/Tesselate.cxx src/base64.cpp)
 
 add_executable(worker  src/worker.cxx ${ALL_CLASSES})
+add_executable(s11n  src/s11n.cxx src/Builder.cxx src/Transform.cxx src/Util.cxx src/Tesselate.cxx src/base64.cpp)
 
 # Unit tests
 enable_testing()
@@ -48,6 +49,7 @@ set(CMAKE_CXX_FLAGS "-DHAVE_CONFIG_H")
 set(ALL_LIBS -L/usr/local/lib -L/opt/local/lib -L/usr/X11R6/lib -L/usr/X11/lib -ljson_spirit -lpthread -lfreetype -lPTKernel -lTKAdvTools -lTKBin -lTKBinL -lTKBinTObj -lTKBinXCAF -lTKBO -lTKBool -lTKBRep -lTKCAF -lTKCDF -lTKernel -lTKFeat -lTKFillet -lTKG2d -lTKG3d -lTKGeomAlgo -lTKGeomBase -lTKHLR -lTKIGES -lTKLCAF -lTKMath -lTKMesh -lTKMeshVS -lTKNIS -lTKOffset -lTKOpenGl -lTKPCAF -lTKPLCAF -lTKPrim -lTKPShape -lTKService -lTKShapeSchema -lTKShHealing -lTKStdLSchema  -lTKStdSchema -lTKSTEP -lTKSTEP209 -lTKSTEPAttr -lTKSTEPBase -lTKSTL -lTKTopAlgo -lTKV2d -lTKV3d -lTKXMesh -lTKXml -lTKXmlL -lTKXmlTObj -lTKXmlXCAF -lTKXSBase)
 
 target_link_libraries(worker ${ALL_LIBS})
+target_link_libraries(s11n ${ALL_LIBS})
 target_link_libraries(run-tests ${ALL_LIBS})
 
 file(COPY "${PROJECT_SOURCE_DIR}/fonts" DESTINATION "${PROJECT_BINARY_DIR}")
