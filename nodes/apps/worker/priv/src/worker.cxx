@@ -213,7 +213,7 @@ mValue serialize_shape(string sha, TopoDS_Shape shape) {
     // Write to temporary file
     BRepTools::Write(shape, filename);
     
-    ifstream inputFile (filename, ios::in);
+    ifstream inputFile (filename, ios::in|ios::ate);
     char* memblock;
     ifstream::pos_type size;
     if (inputFile.is_open())
