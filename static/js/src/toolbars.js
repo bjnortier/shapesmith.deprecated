@@ -328,6 +328,10 @@ $('#action-import-stl').click(function() {
 (function() {
 
     var uploadFile = function(input, successFn) {
+        if (!window.FileReader) {
+          alert('No FileReader support yet in this browser. Please try Google Chrome or Firefox');
+          return;
+        }
         var reader = new FileReader();
 
         // Closure to capture the file information.
