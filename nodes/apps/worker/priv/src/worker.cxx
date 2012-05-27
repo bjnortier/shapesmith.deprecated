@@ -207,33 +207,22 @@ int write_cmd(const char *buf, int len) {
 
 mValue serialize_shape(string sha, TopoDS_Shape shape) {
     char filename[100];
-    sprintf(filename, "/tmp/%s.bin", sha.c_str());
+    sprintf(filename, "/tmp/%s.out", sha.c_str());
     
     // Write to temporary file
     BRepTools::Write(shape, filename);
     
-    ifstream inputFile (filename, ios::in|ios::binary|ios::ate);
-    char* memblock;
-    ifstream::pos_type size;
-    if (inputFile.is_open())
-    {
-        size = inputFile.tellg();
-        memblock = new char [size];
-        inputFile.seekg (0, ios::beg);
-        inputFile.read (memblock, size);
-        inputFile.close();
-        
-        delete[] memblock;
-    }
-
-    // Base64
-    unsigned char* to_encode = (unsigned char*) new char [size];
-    memcpy(to_encode, memblock, size);
-    std::string encoded = base64_encode(to_encode, size);
+    // Read from tmp
+    std::ifstream t(filename);
+    std::string str((std::istreambuf_iterator<char>(t)),
+                    std::istreambuf_iterator<char>());
     
     // Delete file
     remove(filename);
-
+    
+    // Base64
+    std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(str.c_str()), str.size());
+    
     
     return encoded;
 }
