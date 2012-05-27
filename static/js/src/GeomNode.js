@@ -83,6 +83,7 @@ function GeomNode() {
         }
     }
 
+    this.contents = arguments[0].contents;
     this.parameters = copyValue(arguments[0].parameters);
     this.mesh = arguments[0].mesh;
     this.children = [];
@@ -125,8 +126,10 @@ GeomNode.prototype.editableCopy = function() {
     var copiedTransforms = this.transforms.map(function(transform) {
         return transform.editableCopy();
     });
+
         
     var newNode = new GeomNode({type : this.type,
+                                contents: this.contents,
 				origin: copiedOrigin,
                                 parameters : copiedParameters,
                                 transforms : copiedTransforms,
@@ -143,6 +146,7 @@ GeomNode.prototype.toShallowJson = function() {
     // defined, as JSON.stringify simply ignores those fields
     var obj = {type: this.type,
                parameters: this.parameters,
+               contents: this.contents,
                children: this.children.map(function(child) {
                    return child.sha;
                }),

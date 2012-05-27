@@ -37,9 +37,8 @@ public:
 #pragma mark 3D primitives
 
 class Builder3D : public Builder {
-private:
-    void Mesh();
 protected:
+    void Mesh();
     virtual void PostProcess(map< string, mValue > json);
     virtual ~Builder3D() {};
 public:
@@ -82,6 +81,12 @@ class TorusBuilder : public Builder3D {
 public:
     TorusBuilder(map< string, mValue > json);
     virtual ~TorusBuilder() {};
+};
+
+class STLImportBuilder : public Builder3D {
+public:
+    STLImportBuilder(string id, map< string, mValue > json);
+    virtual ~STLImportBuilder() {};
 };
 
 #pragma mark 2D Primitives

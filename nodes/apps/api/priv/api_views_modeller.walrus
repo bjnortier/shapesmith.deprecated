@@ -69,8 +69,9 @@
     <div id="imports" class="collapsible">
       <span class="action">import&hellip;</span>
       <div id="import-options" class="options">
-        <!-- Chrome and Safari doesn't pop up the file selection dialog if it's not visible, so put off-screen -->
-        <input type="file" id="json-file-select-input" style="position: absolute; left: -200px; top: -200px;" onchange="SS.uploadJSON(this.files)">
+        <input type="file" class="offscreen" id="stl-file-select-input"/>
+        <input type="file" class="offscreen" id="json-file-select-input"/>
+        <span class="action" id="action-import-stl">stl</span>
         <span class="action" id="action-import-json">json</span>
       </div>
     </div>

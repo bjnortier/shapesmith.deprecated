@@ -1,5 +1,6 @@
 // OpenCASCADE
 #include <BRep_Tool.hxx>
+#include <BRepTools.hxx>
 #include <BRepLib.hxx>
 #include <BRepMesh.hxx>
 #include <BRepAdaptor_Curve.hxx>
@@ -30,6 +31,7 @@
 #include <ShapeFix_Solid.hxx>
 
 #include <StlAPI_Writer.hxx>
+#include <StlAPI_Reader.hxx>
 
 #include <gp.hxx>
 #include <gp_Pnt.hxx>

@@ -1,12 +1,10 @@
-Install dependencies on Mac OS X
-================================
+# Install dependencies on Mac OS X
 
 The preferred method for installing the dependencies is Homebrew: [http://mxcl.github.com/homebrew/](http://mxcl.github.com/homebrew/)
 
     $ brew install erlang cmake ftgl json_spirit gtest
 
-Other options
--------------
+## Other options
 
 Install from MacPorts from http://www.macports.org/
 

@@ -15,7 +15,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(api_stl_resource).
+-module(api_export_stl_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
          init/1, 
