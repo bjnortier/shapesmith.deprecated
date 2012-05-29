@@ -73,6 +73,7 @@ handle_call({get_worker, Caller, MaxWaitSecs}, _From, State = #state{ available 
 	    {reply, waiting, State#state{ waiting = queue:in({MaxWaitSecs, Caller}, Waiting) }};
 	{{value, {MonitorRef, Worker}}, Remaining} ->
 	    true = demonitor(MonitorRef),
+            lager:info("worker ~p allocated. total remaining: ~p", [Worker, queue:len(Remaining)]),
 	    {reply, {worker, Worker}, State#state{ available = Remaining }}
     end;
 handle_call({put_worker, Worker}, _From, State) ->
@@ -129,7 +130,7 @@ send_to_waiting_or_add_to_available(Worker, State = #state{ available = Availabl
 							    waiting   = WaitingQueue }) ->
     case queue:out(WaitingQueue) of
 	{empty, _} ->
-	    lager:info("worker ~p available", [Worker]),
+	    lager:info("worker ~p available. total available: ~p", [Worker, queue:len(Available) + 1]),
 	    MonitorRef = monitor(process, Worker),
 	    State#state{ available = queue:in({MonitorRef, Worker}, Available) };
 	{{value, {_WaitSecs, WaitingPid}}, LeftWaiting} ->
