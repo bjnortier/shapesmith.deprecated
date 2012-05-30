@@ -8,7 +8,6 @@
     <script type="text/javascript" src="/static/js/lib/jquery-1.7.1.min.js"></script>
     <script type="text/javascript" src="/static/js/lib/jquery.mustache.js"></script>
     <script type="text/javascript" src="/static/js/lib/jquery.getQueryParam.1.0.0.min.js"></script>
-    <script type="text/javascript" src="/static/js/src/ext.js"></script>
     <script type="text/javascript" src="/static/js/lib/RequestAnimationFrame.js"></script>
     <script type="text/javascript" src="/static/js/lib/Detector.js"></script>
     <script type="text/javascript" src="/static/js/lib/Three.js"></script>
@@ -112,9 +111,9 @@
     <div id="geom-model-doc"></div>
   </div>
   
-  <script type="text/javascript" src="/static/js/src/WedgeGeometry.js"></script>
-  <script type="text/javascript" src="/static/js/src/EllipseGeometry.js"></script>
-  <script type="text/javascript" src="/static/js/src/PipeGeometry.js"></script>
+  <script type="text/javascript" src="/static/js/src/geometry/WedgeGeometry.js"></script>
+  <script type="text/javascript" src="/static/js/src/geometry/EllipseGeometry.js"></script>
+  <script type="text/javascript" src="/static/js/src/geometry/PipeGeometry.js"></script>
   <script type="text/javascript" src="/static/js/src/Spinner.js"></script>
  
   <script type="text/javascript" src="/static/js/src/Messages.js"></script>
@@ -135,33 +134,36 @@
   <script type="text/javascript" src="/static/js/src/SceneView.js"></script>
   <script type="text/javascript" src="/static/js/src/GeomNodeRenderingManager.js"></script>
 
-  <script type="text/javascript" src="/static/js/src/NodeModel.js"></script>
-  <script type="text/javascript" src="/static/js/src/Creator.js"></script>
-  <script type="text/javascript" src="/static/js/src/DimensionArrowsView.js"></script>
-  <script type="text/javascript" src="/static/js/src/CuboidCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/SphereCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/CylinderCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/ConeCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/WedgeCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/TorusCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/Ellipse2DCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/Rectangle2DCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/Triangle2DCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/Text2DCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/PrismCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/RevolveCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/BezierCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/Ellipse1DCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/PolylineCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/FilletCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/NodeModel.js"></script>
 
-  <script type="text/javascript" src="/static/js/src/TransformerManager.js"></script>
-  <script type="text/javascript" src="/static/js/src/Transformer.js"></script>
-  <script type="text/javascript" src="/static/js/src/TranslateTransformer.js"></script>
-  <script type="text/javascript" src="/static/js/src/ScaleTransformer.js"></script>
-  <script type="text/javascript" src="/static/js/src/RotateTransformer.js"></script>
-  <script type="text/javascript" src="/static/js/src/AxisMirrorTransformCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/PlaneMirrorTransformCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/Creator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/DimensionArrowsView.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/CuboidCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/SphereCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/CylinderCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/ConeCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/WedgeCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/TorusCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/Ellipse2DCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/Rectangle2DCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/Triangle2DCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/Text2DCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/PrismCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/RevolveCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/BezierCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/Ellipse1DCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/PolylineCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/FilletCreator.js"></script>
+
+
+  <script type="text/javascript" src="/static/js/src/creators/Transformer.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/TranslateTransformer.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/ScaleTransformer.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/RotateTransformer.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/AxisMirrorTransformCreator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/PlaneMirrorTransformCreator.js"></script>
+
+  <script type="text/javascript" src="/static/js/src/TransformerManager.js"></script> 
 
   <script type="text/javascript">
 
