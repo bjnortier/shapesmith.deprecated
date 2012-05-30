@@ -3,6 +3,9 @@ var SS = SS || {};
 
 SS.DimensionArrowsView = SS.InteractiveSceneView.extend({
 
+    priority: -1,    
+    active: false,
+
     createDimArrow: function(label, vector) {
         var scale = this.cameraScale;
 

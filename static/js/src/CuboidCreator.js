@@ -140,9 +140,6 @@ SS.UVWHeightCursoid = SS.HeightCursoid.extend({
 
 SS.CuboidDimensionArrows = SS.DimensionArrowsView.extend({
 
-    priority: 1,    
-    active: false,
-
     render: function() {
         this.clear();
 

@@ -214,11 +214,15 @@ SS.InteractiveSceneView = SS.SceneObjectView.extend({
     },
 
     highlight: function() {
-        this.recursiveHighlightFn(this.sceneObject, 1.0);
+        if (this.active) {
+            this.recursiveHighlightFn(this.sceneObject, 1.0);
+        }
     },
 
     unhighlight: function() {
-        this.recursiveHighlightFn(this.sceneObject, 0.5);
+        if (this.active) {
+            this.recursiveHighlightFn(this.sceneObject, 0.5);
+        }
     },
 
     updateCameraScale: function() {
