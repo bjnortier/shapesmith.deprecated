@@ -16,23 +16,27 @@ Transform.prototype.editableCopy = function() {
     for (key in this.parameters) {
         copiedParameters[key] = this.parameters[key];
     }
-    return new Transform({type: this.type,
-			  origin: this.origin,
-                          parameters: copiedParameters,
-                          editing: this.editing});
+    return new Transform({
+            type: this.type,
+            origin: this.origin,
+            parameters: copiedParameters,
+            editing: this.editing
+        });
 }
 
 Transform.prototype.json = function() {
-    return JSON.stringify({type: this.type,
-			   origin: this.origin,
-                           parameters: this.parameters});
+    return JSON.stringify({
+                type: this.type,
+                origin: this.origin,
+                parameters: this.parameters
+            });
 }
 
 SS.createNextGeomNodeCounter = function() {
     var count = 0;
     var closure = function() {
-	++count;
-	return count;
+        ++count;
+        return count;
     }
     return closure;
 }
@@ -46,12 +50,12 @@ function GeomNode() {
 
     var that = this;
     var updateId = function(geomNode) {
-	geomNode.id = SS.nextGeomCounter() + '_' + geomNode.sha;
+        geomNode.id = SS.nextGeomCounter() + '_' + geomNode.sha;
     };
 
     this.setSHA = function(sha) {
-	that.sha = sha;
-	updateId(that);
+        that.sha = sha;
+        updateId(that);
     }
 
     if (!arguments[0].type) {
@@ -90,7 +94,7 @@ function GeomNode() {
 
     var transformDescriptions = arguments[0].transforms || [];
     this.transforms = transformDescriptions.map(function(transformDescription) {
-	return new Transform(transformDescription);
+        return new Transform(transformDescription);
     });
 
     if (arguments[1]) {
@@ -113,10 +117,10 @@ GeomNode.prototype.editableCopy = function() {
 
     var copiedOrigin = null;
     if (this.origin) {
-	copiedOrigin = {};
-	for (key in this.origin) {
+        copiedOrigin = {};
+        for (key in this.origin) {
             copiedOrigin[key] = this.origin[key];
-	}
+        }
     }
 
     var copiedParameters = {};
@@ -127,14 +131,15 @@ GeomNode.prototype.editableCopy = function() {
         return transform.editableCopy();
     });
 
-        
+    
     var newNode = new GeomNode({type : this.type,
                                 contents: this.contents,
-				origin: copiedOrigin,
+                                origin: copiedOrigin,
                                 parameters : copiedParameters,
                                 transforms : copiedTransforms,
                                 mesh : this.mesh,
-                               }, this.children);
+                               }, 
+                               this.children);
     return newNode;
 }
 
@@ -144,17 +149,19 @@ GeomNode.prototype.editableCopy = function() {
 GeomNode.prototype.toShallowJson = function() {
     // No need to do somethign special with parameters if they are not 
     // defined, as JSON.stringify simply ignores those fields
-    var obj = {type: this.type,
-               parameters: this.parameters,
-               contents: this.contents,
-               children: this.children.map(function(child) {
-                   return child.sha;
-               }),
-               transforms: this.transforms.map(function(tx) {
-                   return JSON.parse(tx.json());
-               })};
+    var obj = {
+        type: this.type,
+        parameters: this.parameters,
+        contents: this.contents,
+        children: this.children.map(function(child) {
+           return child.sha;
+        }),
+        transforms: this.transforms.map(function(tx) {
+           return JSON.parse(tx.json());
+        })
+    };
     if (this.origin) {
-	obj.origin = this.origin;
+        obj.origin = this.origin;
     }
     return JSON.stringify(obj);
 }
@@ -163,14 +170,12 @@ GeomNode.fromDeepJson = function(json) {
     var geometry = json.geometry;
     var jsonChildren = json.geometry.children;
     if (json.geometry.children) {
-	delete json.geometry.children;
+        delete json.geometry.children;
     }
     geometry.sha = json.sha;
     var geomNode = new GeomNode(geometry);
     
-    if (jsonChildren && 
-	(jsonChildren.length > 0)) {
-
+    if (jsonChildren && (jsonChildren.length > 0)) {
         geomNode.children = jsonChildren.map(function(childJson) {
             return GeomNode.fromDeepJson(childJson);
         });
