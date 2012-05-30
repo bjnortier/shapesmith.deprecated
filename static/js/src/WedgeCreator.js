@@ -125,7 +125,7 @@ SS.DraggableUCorner = SS.DraggableCorner.extend({
 
 });
 
-SS.WedgeDimensionArrows = SS.SceneObjectView.extend({
+SS.WedgeDimensionArrows = SS.DimensionArrowsView.extend({
 
     render: function() {
         this.clear();
@@ -136,10 +136,10 @@ SS.WedgeDimensionArrows = SS.SceneObjectView.extend({
         var v = this.model.node.parameters.v;
         var w = this.model.node.parameters.w;
 
-        var u1Dim = SS.createDimArrow(u1, new THREE.Vector3(u1,0,0));
-        var u2Dim = SS.createDimArrow(u2, new THREE.Vector3(u2,0,0));
-        var vDim = SS.createDimArrow(v, new THREE.Vector3(0,v,0));
-        var wDim = SS.createDimArrow(v, new THREE.Vector3(0,0,w));
+        var u1Dim = this.createDimArrow(u1, new THREE.Vector3(u1,0,0));
+        var u2Dim = this.createDimArrow(u2, new THREE.Vector3(u2,0,0));
+        var vDim = this.createDimArrow(v, new THREE.Vector3(0,v,0));
+        var wDim = this.createDimArrow(v, new THREE.Vector3(0,0,w));
         u2Dim.position = new THREE.Vector3(0,v,0);
         vDim.position = new THREE.Vector3(0,0,0);
         wDim.position = new THREE.Vector3(u2,v,0);

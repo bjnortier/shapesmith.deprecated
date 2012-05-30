@@ -113,7 +113,7 @@ SS.DraggableRadiusCorner = SS.DraggableCorner.extend({
 
 });
 
-SS.SphereDimensionArrow = SS.SceneObjectView.extend({
+SS.SphereDimensionArrow = SS.DimensionArrowsView.extend({
 
     render: function() {
         this.clear();
@@ -124,7 +124,7 @@ SS.SphereDimensionArrow = SS.SceneObjectView.extend({
 
         var vector = new THREE.Vector3(r*Math.cos(angle), r*Math.sin(angle), 0);
 
-        var rDim = SS.createDimArrow(r, vector);
+        var rDim = this.createDimArrow(r, vector);
         this.sceneObject.add(rDim);
         this.sceneObject.position = new THREE.Vector3(origin.x, origin.y, origin.z);
         this.postRender();

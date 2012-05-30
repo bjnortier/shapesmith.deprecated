@@ -153,7 +153,7 @@ SS.PrismHeightCursoid = SS.HeightCursoid.extend({
 
 });
 
-SS.PrismDimensionArrow = SS.SceneObjectView.extend({
+SS.PrismDimensionArrow = SS.DimensionArrowsView.extend({
 
     render: function() {
         this.clear();
@@ -163,13 +163,11 @@ SS.PrismDimensionArrow = SS.SceneObjectView.extend({
         var v = this.model.node.parameters.v;
         var w = this.model.node.parameters.w;
 
-        var dim = SS.createDimArrow(u, new THREE.Vector3(u,v,w));
+        var dim = this.createDimArrow(u, new THREE.Vector3(u,v,w));
         this.sceneObject.add(dim);
-
         this.sceneObject.position = new THREE.Vector3(this.model.node.origin.x, 
                                                       this.model.node.origin.y,
                                                       0);
-
         this.postRender();
     },
 

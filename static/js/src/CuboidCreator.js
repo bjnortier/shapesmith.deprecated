@@ -115,10 +115,10 @@ SS.DraggableUVCorner = SS.DraggableCorner.extend({
 
 SS.UVWHeightCursoid = SS.HeightCursoid.extend({
 
-     initialize: function(options) {
-	 SS.HeightCursoid.prototype.initialize.call(this);
-         this.uKey = options.uKey || 'u';
-         this.render();
+    initialize: function(options) {
+	SS.HeightCursoid.prototype.initialize.call(this);
+        this.uKey = options.uKey || 'u';
+        this.render();
     },
 
     cornerPositionFromModel: function() {
@@ -138,7 +138,10 @@ SS.UVWHeightCursoid = SS.HeightCursoid.extend({
 
 });
 
-SS.CuboidDimensionArrows = SS.SceneObjectView.extend({
+SS.CuboidDimensionArrows = SS.DimensionArrowsView.extend({
+
+    priority: 1,    
+    active: false,
 
     render: function() {
         this.clear();
@@ -148,9 +151,9 @@ SS.CuboidDimensionArrows = SS.SceneObjectView.extend({
         var v = this.model.node.parameters.v;
         var w = this.model.node.parameters.w;
 
-        var uDim = SS.createDimArrow(u, new THREE.Vector3(u,0,0));
-        var vDim = SS.createDimArrow(v, new THREE.Vector3(0,v,0));
-        var wDim = SS.createDimArrow(v, new THREE.Vector3(0,0,w));
+        var uDim = this.createDimArrow(u, new THREE.Vector3(u,0,0));
+        var vDim = this.createDimArrow(v, new THREE.Vector3(0,v,0));
+        var wDim = this.createDimArrow(v, new THREE.Vector3(0,0,w));
         vDim.position = new THREE.Vector3(u,0,0);
         wDim.position = new THREE.Vector3(u,v,0);
         this.sceneObject.add(uDim);

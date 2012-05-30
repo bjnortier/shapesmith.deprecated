@@ -224,9 +224,9 @@ SS.RotateArrowView = SS.InteractiveSceneView.extend({
     render: function() {
         this.clear();
 
-        var width = 0.5;
-        var r = 20;
-        var dr = 0.3;
+        var width = 0.5*this.cameraScale;
+        var r = 20*this.cameraScale;
+        var dr = 0.3*this.cameraScale;
         var maxAngle = 4;
 
         var outerCurveGeometry = new THREE.Geometry();
@@ -248,7 +248,7 @@ SS.RotateArrowView = SS.InteractiveSceneView.extend({
         var arrowHeadGeometry = new THREE.Geometry();
         arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r+dr)));
         arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r+dr+width)));
-        arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(1.5,0,r)));
+        arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(1.5*this.cameraScale,0,r)));
         arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r-dr-width)));
         arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r-dr)));
 

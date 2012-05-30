@@ -85,7 +85,7 @@ SS.EllipsePreview = SS.PreviewWithOrigin.extend({
 
 });
 
-SS.Ellipse2DDimensionArrows = SS.SceneObjectView.extend({
+SS.Ellipse2DDimensionArrows = SS.DimensionArrowsView.extend({
 
     render: function() {
         this.clear();
@@ -95,11 +95,11 @@ SS.Ellipse2DDimensionArrows = SS.SceneObjectView.extend({
         var r2 = this.model.node.parameters.r2;
 
         var r1Vector = new THREE.Vector3(r1, 0, 0);
-        var r1Dim = SS.createDimArrow(r1, r1Vector);
+        var r1Dim = this.createDimArrow(r1, r1Vector);
         this.sceneObject.add(r1Dim);
 
         var r2Vector = new THREE.Vector3(0, r2, 0);
-        var r2Dim = SS.createDimArrow(r2, r2Vector);
+        var r2Dim = this.createDimArrow(r2, r2Vector);
         this.sceneObject.add(r2Dim);
 
         this.sceneObject.position = new THREE.Vector3(origin.x, origin.y, origin.z);

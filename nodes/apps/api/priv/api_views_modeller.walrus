@@ -122,7 +122,6 @@
   <script type="text/javascript" src="/static/js/src/Command.js"></script>
   <script type="text/javascript" src="/static/js/src/GeomNode.js"></script>
   <script type="text/javascript" src="/static/js/src/GeomDocument.js"></script>
-  <script type="text/javascript" src="/static/js/src/Preview.js"></script>
   <script type="text/javascript" src="/static/js/src/schemas.js"></script>
 
   <script type="text/javascript" src="/static/js/src/materials.js"></script>
@@ -138,6 +137,7 @@
 
   <script type="text/javascript" src="/static/js/src/NodeModel.js"></script>
   <script type="text/javascript" src="/static/js/src/Creator.js"></script>
+  <script type="text/javascript" src="/static/js/src/DimensionArrowsView.js"></script>
   <script type="text/javascript" src="/static/js/src/CuboidCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/SphereCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/CylinderCreator.js"></script>

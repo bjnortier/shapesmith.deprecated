@@ -126,7 +126,7 @@ SS.RadiusHeightCursoid = SS.HeightCursoid.extend({
 });
 
 
-SS.CylinderDimensionArrows = SS.SceneObjectView.extend({
+SS.CylinderDimensionArrows = SS.DimensionArrowsView.extend({
 
     render: function() {
         this.clear();
@@ -137,10 +137,10 @@ SS.CylinderDimensionArrows = SS.SceneObjectView.extend({
         var angle = this.model.node.extra.angle;
 
         var rVector = new THREE.Vector3(r*Math.cos(angle), r*Math.sin(angle), 0);
-        var rDim = SS.createDimArrow(r, rVector);
+        var rDim = this.createDimArrow(r, rVector);
         this.sceneObject.add(rDim);
 
-        var hDim = SS.createDimArrow(h, new THREE.Vector3(0,0,h));
+        var hDim = this.createDimArrow(h, new THREE.Vector3(0,0,h));
         hDim.position = rVector;
         this.sceneObject.add(hDim);
 

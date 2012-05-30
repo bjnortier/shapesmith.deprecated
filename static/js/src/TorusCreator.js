@@ -148,7 +148,7 @@ SS.TorusR2Corner = SS.DraggableCorner.extend({
 
 });
 
-SS.TorusDimensionArrows = SS.SceneObjectView.extend({
+SS.TorusDimensionArrows = SS.DimensionArrowsView.extend({
 
     render: function() {
         this.clear();
@@ -159,11 +159,11 @@ SS.TorusDimensionArrows = SS.SceneObjectView.extend({
         var angle = this.model.node.extra.angle;
 
         var r1Vector = new THREE.Vector3(r1*Math.cos(angle), r1*Math.sin(angle), 0);
-        var r1Dim = SS.createDimArrow(r1, r1Vector);
+        var r1Dim = this.createDimArrow(r1, r1Vector);
         this.sceneObject.add(r1Dim);
 
         var r2Vector = new THREE.Vector3(r2*Math.cos(angle), r2*Math.sin(angle), 0);
-        var r2Dim = SS.createDimArrow(r2, r2Vector);
+        var r2Dim = this.createDimArrow(r2, r2Vector);
         r2Dim.position = r1Vector;
         this.sceneObject.add(r2Dim);
 

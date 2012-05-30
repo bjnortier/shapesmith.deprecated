@@ -62,15 +62,15 @@ SS.NodeDOMView = Backbone.View.extend({
         // Origin & Orientation
         var originTable = null;
         if (node.origin) {
-	    var originArr = ['x', 'y', 'z'].map(function(key) {
-	        return {key: key, 
-		        value: node.origin[key], 
-		        editing: node.editing,
+        var originArr = ['x', 'y', 'z'].map(function(key) {
+            return {key: key, 
+                value: node.origin[key], 
+                editing: node.editing,
                         inputElement: renderInputElement(key, node.origin, schema.properties.origin)
                        }
-	    });
-	    var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}{{{inputElement}}}{{/editing}}</td></tr>{{/originArr}}</table>';
-	    var originTable = $.mustache(originTemplate, {originArr : originArr});
+        });
+        var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}{{{inputElement}}}{{/editing}}</td></tr>{{/originArr}}</table>';
+        var originTable = $.mustache(originTemplate, {originArr : originArr});
         }
 
         // Params
@@ -89,9 +89,9 @@ SS.NodeDOMView = Backbone.View.extend({
 
         var view = {
             type: node.type,
-	    editing: node.editing,
-	    originTable: originTable,
-	    paramsTable: paramsTable};
+        editing: node.editing,
+        originTable: originTable,
+        paramsTable: paramsTable};
         var nodeTable = $.mustache(template, view);
 
         this.$el.html(nodeTable);
@@ -157,8 +157,7 @@ SS.SceneObjectView = Backbone.View.extend({
     
     initialize: function() {
         this.sceneObject = new THREE.Object3D(); 
-	SS.sceneView.registerSceneObjectView(this);
-
+        SS.sceneView.registerSceneObjectView(this);
         this.model.on('change', this.render, this);
     },
 
@@ -172,7 +171,7 @@ SS.SceneObjectView = Backbone.View.extend({
     },
 
     remove: function() {
-	SS.sceneView.deregisterSceneObjectView(this);
+        SS.sceneView.deregisterSceneObjectView(this);
         SS.sceneView.scene.remove(this.sceneObject);
         this.model.off('change', this.render);
     },
@@ -185,40 +184,60 @@ SS.SceneObjectView = Backbone.View.extend({
 SS.InteractiveSceneView = SS.SceneObjectView.extend({
 
     initialize: function() {
-	SS.SceneObjectView.prototype.initialize.call(this);
-	this.on('mouseEnter', this.highlight);
-	this.on('mouseLeave', this.unhighlight);
+        SS.SceneObjectView.prototype.initialize.call(this);
+        this.on('mouseEnter', this.highlight);
+        this.on('mouseLeave', this.unhighlight);
+        this.updateCameraScale();
+        SS.sceneView.on('cameraChange', this.cameraChange, this);
     },
 
+    remove: function() {
+        SS.SceneObjectView.prototype.remove.call(this);
+        SS.sceneView.off('cameraChange', this.cameraChange, this);
+        this.off('mouseEnter', this.highlight);
+        this.off('mouseLeave', this.unhighlight);
+    },
+
+    priority: 1,
     active: true,
 
     recursiveHighlightFn:  function(object, opacity) {
         var functor = function(object) {
-	    if (object.material) {
-	        object.material.opacity = opacity;
-	    }
-	    if (object.children) {
-	        object.children.map(functor);
-	    }
+            if (object.material) {
+                object.material.opacity = opacity;
+            }
+            if (object.children) {
+                object.children.map(functor);
+            }
         }
         functor(object);
     },
 
     highlight: function() {
-	this.recursiveHighlightFn(this.sceneObject, 1.0);
+        this.recursiveHighlightFn(this.sceneObject, 1.0);
     },
 
     unhighlight: function() {
-	this.recursiveHighlightFn(this.sceneObject, 0.5);
+        this.recursiveHighlightFn(this.sceneObject, 0.5);
     },
 
-    remove: function() {
-        SS.SceneObjectView.prototype.remove.call(this);
-        this.off('mouseEnter', this.highlight);
-	this.off('mouseLeave', this.unhighlight);
+    updateCameraScale: function() {
+        var cameraDistance = SS.sceneView.camera.position.length();
+        var newScale = cameraDistance/100;
+        if (newScale !== this.cameraScale) {
+            this.cameraScale = newScale;
+            return true;
+        } else {
+            return false;
+        }
     },
-    
-    priority: 1,
+
+    cameraChange: function() {
+        if (this.updateCameraScale()) {
+            this.render();
+        }
+    },
+ 
 });
 
 SS.OkCancelView = Backbone.View.extend({
@@ -281,7 +300,7 @@ SS.OkCancelView = Backbone.View.extend({
         }
        
         $('#floating-dom-view').css('left', pixelPosition.x);
-	$('#floating-dom-view').css('top', pixelPosition.y);
+    $('#floating-dom-view').css('top', pixelPosition.y);
     },
     
     events: {

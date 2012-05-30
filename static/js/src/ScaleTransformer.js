@@ -6,11 +6,11 @@ SS.ScaleTransformerInitiator = SS.TransformerInitiator.extend({
         SS.TransformerInitiator.prototype.initialize.call(this, attributes);
 
         this.arrowViews = [
-	    new SS.ScaleArrowViewMaxXMaxY({model: this}),
+        new SS.ScaleArrowViewMaxXMaxY({model: this}),
             new SS.ScaleArrowViewMaxXMinY({model: this}),
             new SS.ScaleArrowViewMinXMinY({model: this}),
             new SS.ScaleArrowViewMinXMaxY({model: this}),
-	];
+        ];
         
         this.views = this.views.concat(this.arrowViews);
         this.views = this.views.concat([
@@ -21,12 +21,12 @@ SS.ScaleTransformerInitiator = SS.TransformerInitiator.extend({
 
     mouseDownOnArrow: function(arrowView) {
         
-	var geomNode = this.geomNode;
+    var geomNode = this.geomNode;
         var editingNode = geomNode.editableCopy();
         var transform = new Transform({
             type: 'scale',
             editing: true,
-	    origin: {x: Math.round(this.center.x), 
+            origin: {x: Math.round(this.center.x), 
                      y: Math.round(this.center.y), 
                      z: 0},
             parameters: {factor: 1.0}
@@ -55,11 +55,11 @@ SS.ScaleTransformer = SS.Transformer.extend({
             this.anchorPosition = attributes.anchorFunction(this.boundingBox);
 
             var arrowViews = [
-	        new SS.ScaleArrowViewMaxXMaxY({model: this}),
+            new SS.ScaleArrowViewMaxXMaxY({model: this}),
                 new SS.ScaleArrowViewMaxXMinY({model: this}),
                 new SS.ScaleArrowViewMinXMinY({model: this}),
                 new SS.ScaleArrowViewMinXMaxY({model: this}),
-	    ];
+        ];
             SS.sceneView.addToMouseOverAndMouseDown(arrowViews[attributes.mouseDownArrowViewIndex]);
 
             var newViews = [
@@ -107,7 +107,7 @@ SS.ScaleGeomNodeView = Backbone.View.extend({
 SS.ScaleArrowView = SS.InteractiveSceneView.extend({
     
     initialize: function() {
-	SS.InteractiveSceneView.prototype.initialize.call(this);
+    SS.InteractiveSceneView.prototype.initialize.call(this);
         this.on('mouseDown', this.mouseDown, this);
         this.on('mouseDrag', this.drag);
     },
@@ -133,6 +133,12 @@ SS.ScaleArrowView = SS.InteractiveSceneView.extend({
                          [1.5, 0.75, 0], [1.5, 0.25, 0], 
                          [1, 0.25, 0], [1, 0.75, 0], 
                          [0, 0, 0]];
+        var that = this;
+        positions = positions.map(function(pos) {
+            return [pos[0]*that.cameraScale,
+                    pos[1]*that.cameraScale, 
+                    pos[2]*that.cameraScale]; 
+        });
 
         arrowGeometry.vertices = positions.map(function(coordinates) {
             return new THREE.Vertex(new THREE.Vector3(coordinates[0], coordinates[1], coordinates[2]));
@@ -192,7 +198,7 @@ SS.ScaleArrowView = SS.InteractiveSceneView.extend({
 SS.ScaleArrowViewMaxXMaxY = SS.ScaleArrowView.extend({
 
     initialize: function() {
-	SS.ScaleArrowView.prototype.initialize.call(this);
+    SS.ScaleArrowView.prototype.initialize.call(this);
         this.render();
     },
     
@@ -214,7 +220,7 @@ SS.ScaleArrowViewMaxXMaxY = SS.ScaleArrowView.extend({
 SS.ScaleArrowViewMinXMaxY = SS.ScaleArrowView.extend({
 
     initialize: function() {
-	SS.ScaleArrowView.prototype.initialize.call(this);
+    SS.ScaleArrowView.prototype.initialize.call(this);
         this.render();
     },
 
@@ -236,7 +242,7 @@ SS.ScaleArrowViewMinXMaxY = SS.ScaleArrowView.extend({
 SS.ScaleArrowViewMinXMinY = SS.ScaleArrowView.extend({
 
     initialize: function() {
-	SS.ScaleArrowView.prototype.initialize.call(this);
+    SS.ScaleArrowView.prototype.initialize.call(this);
         this.render();
     },
 
@@ -258,7 +264,7 @@ SS.ScaleArrowViewMinXMinY = SS.ScaleArrowView.extend({
 SS.ScaleArrowViewMaxXMinY = SS.ScaleArrowView.extend({
 
     initialize: function() {
-	SS.ScaleArrowView.prototype.initialize.call(this);
+    SS.ScaleArrowView.prototype.initialize.call(this);
         this.render();
     },
 
@@ -281,7 +287,7 @@ SS.ScaleArrowViewMaxXMinY = SS.ScaleArrowView.extend({
 SS.ScaleBoxView = SS.SceneObjectView.extend({
 
     initialize: function() {
-	SS.SceneObjectView.prototype.initialize.call(this);
+    SS.SceneObjectView.prototype.initialize.call(this);
         this.render();
     },
     
@@ -293,13 +299,13 @@ SS.ScaleBoxView = SS.SceneObjectView.extend({
         var height = this.model.boundingBox.max.z - this.model.boundingBox.min.z;
 
         var geometry = new THREE.CubeGeometry(width, depth, height);
-	cube = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: SS.materials.lineColor, 
+    cube = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: SS.materials.lineColor, 
                                                                      wireframe: true}));
         
-	cube.position.x = this.model.boundingBox.min.x + width/2;
-	cube.position.y = this.model.boundingBox.min.y + depth/2;
-	cube.position.z = this.model.boundingBox.min.z + height/2;
-	this.sceneObject.add(cube);
+    cube.position.x = this.model.boundingBox.min.x + width/2;
+    cube.position.y = this.model.boundingBox.min.y + depth/2;
+    cube.position.z = this.model.boundingBox.min.z + height/2;
+    this.sceneObject.add(cube);
 
         this.postRender();
         return this;
@@ -310,7 +316,7 @@ SS.ScaleBoxView = SS.SceneObjectView.extend({
 SS.ScaleFootprintView = SS.SceneObjectView.extend({
 
     initialize: function() {
-	SS.SceneObjectView.prototype.initialize.call(this);
+    SS.SceneObjectView.prototype.initialize.call(this);
         this.render();
     },
 
@@ -338,8 +344,8 @@ SS.ScaleFootprintView = SS.SceneObjectView.extend({
         planeMesh.position.z = -0.05;
         planeBorder.position = planeMesh.position;
 
-	this.sceneObject.add(planeMesh);
-	this.sceneObject.add(planeBorder);
+    this.sceneObject.add(planeMesh);
+    this.sceneObject.add(planeBorder);
 
         this.postRender();
         return this;

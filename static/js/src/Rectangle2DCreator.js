@@ -78,7 +78,7 @@ SS.Rectangle2DPreview = SS.PreviewWithOrigin.extend({
 
 });
 
-SS.Rectangle2DDimensionArrows = SS.SceneObjectView.extend({
+SS.Rectangle2DDimensionArrows = SS.DimensionArrowsView.extend({
 
     render: function() {
         this.clear();
@@ -87,8 +87,8 @@ SS.Rectangle2DDimensionArrows = SS.SceneObjectView.extend({
         var u = this.model.node.parameters.u;
         var v = this.model.node.parameters.v;
 
-        var uDim = SS.createDimArrow(u, new THREE.Vector3(u,0,0));
-        var vDim = SS.createDimArrow(v, new THREE.Vector3(0,v,0));
+        var uDim = this.createDimArrow(u, new THREE.Vector3(u,0,0));
+        var vDim = this.createDimArrow(v, new THREE.Vector3(0,v,0));
         vDim.position = new THREE.Vector3(u,0,0);
         this.sceneObject.add(uDim);
         this.sceneObject.add(vDim);

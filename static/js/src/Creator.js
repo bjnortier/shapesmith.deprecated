@@ -83,7 +83,7 @@ SS.PrimitiveCreator = SS.Creator.extend({
             var geometry = {type: this.node.type,
                             parameters: this.node.parameters};
             if (this.node.origin) {
-		geometry.origin =  this.node.origin;
+        geometry.origin =  this.node.origin;
             }
             var cmd = create_geom_command(this.node, geometry);
             command_stack.execute(cmd);
@@ -184,10 +184,10 @@ SS.PreviewWithOrigin = SS.SceneObjectView.extend({
 
 SS.DraggableCorner = SS.InteractiveSceneView.extend({
 
-     initialize: function(options) {
-	 SS.InteractiveSceneView.prototype.initialize.call(this);
-         this.on('mouseDown', this.mouseDown, this);
-         this.on('mouseDrag', this.drag);
+    initialize: function(options) {
+        SS.InteractiveSceneView.prototype.initialize.call(this);
+        this.on('mouseDown', this.mouseDown);
+        this.on('mouseDrag', this.drag);
     },
 
     remove: function() {
@@ -199,7 +199,8 @@ SS.DraggableCorner = SS.InteractiveSceneView.extend({
     render: function() {
         this.clear();
 
-        var geometry = new THREE.CubeGeometry(1.0, 1.0, 1.0);
+        var width = 1.0*this.cameraScale;
+        var geometry = new THREE.CubeGeometry(width, width, width);
         var materials = [
             new THREE.MeshBasicMaterial({color: SS.materials.faceColor, opacity: 0.5, wireframe: false } ),
             new THREE.MeshBasicMaterial({color: SS.materials.lineColor, wireframe: true})
@@ -208,10 +209,10 @@ SS.DraggableCorner = SS.InteractiveSceneView.extend({
         
         var position = this.cornerPositionFromModel();
 
-	cube.position.x = position.x
-	cube.position.y = position.y;
-	cube.position.z = 0;
-	this.sceneObject.add(cube);
+        cube.position.x = position.x;
+        cube.position.y = position.y;
+        cube.position.z = 0;
+        this.sceneObject.add(cube);
         this.postRender();
         return this;
     },
@@ -256,10 +257,10 @@ SS.DraggableOriginCorner = SS.DraggableCorner.extend({
 
 SS.HeightCursoid = SS.InteractiveSceneView.extend({
 
-     initialize: function(options) {
-	 SS.InteractiveSceneView.prototype.initialize.call(this);
-         this.on('mouseDrag', this.drag);
-         this.render();
+    initialize: function(options) {
+        SS.InteractiveSceneView.prototype.initialize.call(this);
+        this.on('mouseDrag', this.drag);
+        this.render();
     },
 
     remove: function() {
@@ -275,7 +276,7 @@ SS.HeightCursoid = SS.InteractiveSceneView.extend({
         axis.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,1000)));
         var line = new THREE.Line(axis, new THREE.LineBasicMaterial({ color: 0xcc6666, opacity: 0.5 }));  
 
-        var geometry = new THREE.CylinderGeometry(0, 0.75, 1.5, 3);
+        var geometry = new THREE.CylinderGeometry(0, 0.75*this.cameraScale, 1.5*this.cameraScale, 3);
         var materials = [
             new THREE.MeshBasicMaterial({color: 0x993333, opacity: 0.5, wireframe: false } ),
             new THREE.MeshBasicMaterial({color: 0xcc6666, wireframe: true})
@@ -287,13 +288,13 @@ SS.HeightCursoid = SS.InteractiveSceneView.extend({
         line.position.x = position.x;
         line.position.y = position.y;
 
-	cursoid.position.x = position.x;
-	cursoid.position.y = position.y;
-	cursoid.position.z = position.z + 2.5;
+        cursoid.position.x = position.x;
+        cursoid.position.y = position.y;
+        cursoid.position.z = position.z + 2.5*this.cameraScale;
         cursoid.rotation.x = Math.PI/2;
         
         this.sceneObject.add(line);
-	this.sceneObject.add(cursoid);
+        this.sceneObject.add(cursoid);
         this.postRender();
         return this;
     },
@@ -303,9 +304,9 @@ SS.HeightCursoid = SS.InteractiveSceneView.extend({
         var position = this.cornerPositionFromModel();
 
         var origin = new THREE.Vector3(position.x, position.y, 0);
-	var direction = new THREE.Vector3(0, 0, 1);
-	var ray = new THREE.Ray(origin, direction);
-	var positionOnVertical = SS.sceneView.determinePositionOnRay(event, ray);
+        var direction = new THREE.Vector3(0, 0, 1);
+        var ray = new THREE.Ray(origin, direction);
+        var positionOnVertical = SS.sceneView.determinePositionOnRay(event, ray);
         if (positionOnVertical) {
             
             if (!event.ctrlKey) {
@@ -339,7 +340,7 @@ SS.OriginHeightCursoid = SS.HeightCursoid.extend({
 SS.DimensionText = Backbone.View.extend({
 
     initialize: function(options) {
-	Backbone.View.prototype.initialize.call(this);
+        Backbone.View.prototype.initialize.call(this);
         SS.sceneView.on('cameraChange', this.update, this);
         this.model.on('change', this.render, this);
         this.elements = [];
@@ -348,7 +349,7 @@ SS.DimensionText = Backbone.View.extend({
     
     remove: function() {
         Backbone.View.prototype.remove.call(this);
-        SS.sceneView.off('cameraChange', this.update);
+        SS.sceneView.off('cameraChange', this.update, this);
         this.clear();
     },
     

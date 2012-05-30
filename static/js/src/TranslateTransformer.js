@@ -17,7 +17,7 @@ SS.TranslateTransformerInitiator = SS.TransformerInitiator.extend({
         var transform = new Transform({
             type: 'translate',
             editing: true,
-	    origin: {x: Math.round(this.center.x), 
+        origin: {x: Math.round(this.center.x), 
                      y: Math.round(this.center.y), 
                      z: 0},
             parameters: {u: 0.0,
@@ -64,7 +64,7 @@ SS.TranslateTransformer = SS.Transformer.extend({
 SS.TranslateTransformerView = SS.InteractiveSceneView.extend({
     
     initialize: function() {
-	SS.InteractiveSceneView.prototype.initialize.call(this);
+    SS.InteractiveSceneView.prototype.initialize.call(this);
         this.on('mouseDown', this.mouseDown, this);
         this.on('mouseDrag', this.drag);
         this.render();
@@ -83,17 +83,18 @@ SS.TranslateTransformerView = SS.InteractiveSceneView.extend({
     render: function() {
         this.clear();
 
-        var geometry = new THREE.CubeGeometry(1.0, 1.0, 1.0);
+        var width = this.cameraScale*1.0;
+        var geometry = new THREE.CubeGeometry(width, width, width);
         var materials = [
             new THREE.MeshBasicMaterial({color: SS.materials.faceColor, opacity: 0.5, wireframe: false } ),
             new THREE.MeshBasicMaterial({color: SS.materials.lineColor, wireframe: true})
         ];
         var cube = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
         
-	cube.position.x = this.model.center.x;
-	cube.position.y = this.model.center.y;
-	cube.position.z = 0;
-	this.sceneObject.add(cube);
+        cube.position.x = this.model.center.x;
+        cube.position.y = this.model.center.y;
+        cube.position.z = 0;
+        this.sceneObject.add(cube);
 
         this.postRender();
         return this;
@@ -146,14 +147,14 @@ SS.TranslateGeomNodeView = Backbone.View.extend({
 SS.TranslateHeightCursoid = SS.HeightCursoid.extend({
 
     initialize: function(options) {
-	SS.HeightCursoid.prototype.initialize.call(this);
+    SS.HeightCursoid.prototype.initialize.call(this);
         this.render();
     },
     
     cornerPositionFromModel: function() {
-	return {x: this.model.center.x,
-                y: this.model.center.y,
-                z: this.model.node.parameters.w};
+    return {x: this.model.center.x,
+            y: this.model.center.y,
+            z: this.model.node.parameters.w};
     },    
 
     updateModelFromCorner: function(position) {
@@ -164,7 +165,7 @@ SS.TranslateHeightCursoid = SS.HeightCursoid.extend({
 
 });
 
-SS.TranslateDimensionArrows = SS.SceneObjectView.extend({
+SS.TranslateDimensionArrows = SS.DimensionArrowsView.extend({
 
     render: function() {
         this.clear();
@@ -175,16 +176,16 @@ SS.TranslateDimensionArrows = SS.SceneObjectView.extend({
         var w = this.model.node.parameters.w;
 
         if (u) {
-            var uDim = SS.createDimArrow(u, new THREE.Vector3(u,0,0));
+            var uDim = this.createDimArrow(u, new THREE.Vector3(u,0,0));
             this.sceneObject.add(uDim);
         }
         if (v) {
-            var vDim = SS.createDimArrow(v, new THREE.Vector3(0,v,0));
+            var vDim = this.createDimArrow(v, new THREE.Vector3(0,v,0));
             vDim.position = new THREE.Vector3(u,0,0);
             this.sceneObject.add(vDim);
         }
         if (w) {
-            var wDim = SS.createDimArrow(v, new THREE.Vector3(0,0,w));
+            var wDim = this.createDimArrow(v, new THREE.Vector3(0,0,w));
             wDim.position = new THREE.Vector3(u,v,0);
             this.sceneObject.add(wDim);
         }
