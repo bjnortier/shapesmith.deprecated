@@ -411,6 +411,13 @@ img.action:hover {
     color: white;
 }
 
+#workplane-container {
+    position: absolute;
+    right: 20px;
+    top: 80px;
+    color: white;
+}
+
 #advanced {
     padding-bottom: 5px;
 }

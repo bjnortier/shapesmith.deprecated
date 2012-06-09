@@ -110,6 +110,10 @@
     </div>
     <div id="geom-model-doc"></div>
   </div>
+
+  <div id="workplane-container">
+    <div id="workplane"></div>
+  </div>
   
   <script type="text/javascript" src="/static/js/src/geometry/WedgeGeometry.js"></script>
   <script type="text/javascript" src="/static/js/src/geometry/EllipseGeometry.js"></script>
@@ -125,6 +129,7 @@
 
   <script type="text/javascript" src="/static/js/src/materials.js"></script>
   <script type="text/javascript" src="/static/js/src/geomnode_rendering.js"></script>
+  <script type="text/javascript" src="/static/js/src/dom_rendering.js"></script>
 
   <script type="text/javascript" src="/static/js/src/UIState.js"></script>
   <script type="text/javascript" src="/static/js/src/TreeView.js"></script>
@@ -135,6 +140,7 @@
   <script type="text/javascript" src="/static/js/src/GeomNodeRenderingManager.js"></script>
 
   <script type="text/javascript" src="/static/js/src/creators/NodeModel.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/WorkplaneEditor.js"></script>
 
   <script type="text/javascript" src="/static/js/src/creators/Creator.js"></script>
   <script type="text/javascript" src="/static/js/src/creators/DimensionArrowsView.js"></script>

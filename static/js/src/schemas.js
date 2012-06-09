@@ -414,5 +414,15 @@ SS.schemas.import_stl = {
     }
 };
 
+SS.schemas.workplane = {
+    description: "Workplane",
+    type: 'object',
+    properties: {
+        origin: SS.schemas.originSchema,
+        'u-axis' : SS.schemas.originSchema,
+        'w-axis' : SS.schemas.originSchema,
+    }
+};
+
 SS.schemas.axis_mirror = SS.schemas.mirror;
 SS.schemas.plane_mirror = SS.schemas.mirror;

@@ -247,6 +247,24 @@ SS.Workplane = function(spec) {
 
     _.extend(that, Backbone.Events);
 
+    that.node = {
+        origin: {
+            x: 0,
+            y: 0,
+            z: 0
+        },
+        'u-axis': {
+            x: 1,
+            y: 0,
+            z: 0
+        },
+        'w-axis': {
+            x: 0,
+            y: 0,
+            z: 1
+        }
+    };
+
     that.updateXYLocation = function(position, originalEvent) {
 
 	if (position) {
@@ -267,7 +285,7 @@ SS.Workplane = function(spec) {
 		originalEvent: originalEvent
 	    });
 	}
-    }
+    };
 
     that.updateZLocation = function(position, originalEvent) {
         var gridZ = Math.round(position.z);
@@ -275,15 +293,15 @@ SS.Workplane = function(spec) {
 	    z: gridZ, 
 	    originalEvent: originalEvent
 	});
-    }
+    };
 
     that.getPlaneMesh = function() {
 	return grid.intersectionPlane;
-    }
+    };
     
     that.getLastMousePosition = function() {
 	return mouseOnWorkplane;
-    }
+    };
 
     return that;
 }

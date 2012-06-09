@@ -89,11 +89,12 @@ SS.NodeDOMView = Backbone.View.extend({
 
         var view = {
             type: node.type,
-        editing: node.editing,
-        originTable: originTable,
-        paramsTable: paramsTable};
+            editing: node.editing,
+            originTable: originTable,
+            paramsTable: paramsTable
+        };
         var nodeTable = $.mustache(template, view);
-
+        
         this.$el.html(nodeTable);
         $('#editing-area').append(this.$el);
         return this;

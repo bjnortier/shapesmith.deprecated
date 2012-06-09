@@ -19,3 +19,5 @@ SS.geomNodeRenderingManager = new SS.GeomNodeRenderingManager();
     geom_doc.on('replace', setUpdateScene);
 })();
 
+
+new SS.WorkplaneDisplayModel();
