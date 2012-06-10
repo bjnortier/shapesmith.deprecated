@@ -201,6 +201,7 @@ SS.InteractiveSceneView = SS.SceneObjectView.extend({
 
     priority: 1,
     active: true,
+    cameraScale: 1,
 
     recursiveHighlightFn:  function(object, opacity) {
         var functor = function(object) {
@@ -228,7 +229,7 @@ SS.InteractiveSceneView = SS.SceneObjectView.extend({
 
     updateCameraScale: function() {
         var cameraDistance = SS.sceneView.camera.position.length();
-        var newScale = cameraDistance/100;
+        var newScale = cameraDistance/150;
         if (newScale !== this.cameraScale) {
             this.cameraScale = newScale;
             return true;

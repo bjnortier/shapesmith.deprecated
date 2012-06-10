@@ -1,63 +1,75 @@
 var SS = SS || {};
 
-SS.renderDisplayDOM = function(schema, object)  {
+SS.renderDisplayDOM = function(name, schema, object) {
+    var nodeDOM = SS.renderRecursiveDisplayDOM(name, schema, object);
+    var view = {rows: [name, nodeDOM]};
+    return  $.mustache('<table>{{#rows}}<tr><td>{{{.}}}</td></tr>{{/rows}}</table>', view);
+}
+
+SS.renderRecursiveDisplayDOM = function(name, schema, object)  {
 
     if ((schema.type === 'number') || (schema.type === 'string')) {
-        return '<span class="value">' + object + '</span>';
+        return $.mustache('<span class="value">{{value}}</span>', {value: object});
+
     } else if (schema.type === 'object') {
         var rows = [];
         for (key in schema.properties) {
-            rows.push('<tr><td>' + key + '</td><td>' + 
-                      SS.renderDisplayDOM(schema.properties[key], object[key]) + 
-                      '</td></tr>');
+            rows.push({name: key, dom: SS.renderRecursiveDisplayDOM(key, schema.properties[key], object[key])});
         }
-        return '<table>' + rows.join('') + '</table>';
+        return $.mustache('<table>{{#rows}}<tr><td>{{name}}</td><td>{{{dom}}}</td></tr>{{/rows}}</table>',
+                          {rows: rows});
+
     } else if (schema.type === 'array') {
         var rows = object.map(function(element) {
-            return '<tr><td>' + 
-                SS.renderDisplayDOM(schema.items, element) + 
-                '</td></tr>';
+            SS.renderRecursiveDisplayDOM(key, schema.items, element);
         });
-        return '<table>' + rows.join('') + '</table>';
+        return $.mustache('<table>{{#rows}}<tr><td>{{{.}}}</td></tr>{{/rows}}</table>', {rows:rows});
     }
 }
 
-SS.renderEditingDOM = function(schema, object)  {
+SS.renderEditingDOM = function(name, schema, object) {
+    var nodeDOM = SS.renderRecursiveEditingDOM(name, schema, object);
+    var okCancel = '<input class="ok" type="submit" value="Ok"/><input class="cancel" type="submit" value="Cancel"/>';
+    var view = {rows: [name, nodeDOM, okCancel]};
+    return  $.mustache('<table>{{#rows}}<tr><td>{{{.}}}</td></tr>{{/rows}}</table>', view);
+}
+
+SS.renderRecursiveEditingDOM = function(name, schema, object)  {
 
     if ((schema.type === 'number') || (schema.type === 'integer')) {
-        var element = '<input class="field" type="number" value="' + object + '"';
-        if (schema.minimum !== undefined) {
-            element += ' min="' + schema.minimum + '"';
-        }
-        if (schema.maximum !== undefined) {
-            element += ' max="' + schema.maximum + '"';
-        }
-        element += '/>';
-        return element;
+        var template = 
+            '<input size="5" class="field {{name}}" type="number" value="{{value}}" ' +
+            '{{#min}}min="{{.}}"{{/min}} {{#max}}max="{{.}}"{{/max}} />';
+        return $.mustache(template, {name: name,
+                                     value: object, 
+                                     min: schema.minimum, 
+                                     max:schema.maximum});
+
     } else if (schema.type === 'string') {
         if (schema['enum']) {
             var data = {
+                name: name,
                 options: item['enum']
             };
-            var template = '<select>{{#options}}<option value="{{.}}">{{.}}</option>{{/options}}</select>';
+            var template = '<select name={{name}}>{{#options}}<option value="{{.}}">{{.}}</option>{{/options}}</select>';
             return $.mustache(template, data);
         } else {
-            return '<input type="text" value="' + object + '"/>';
+            return $.mustache('<input type="text" value="{{value}}"/>', {value: object});
         }
+
     } else if (schema.type === 'object') {
         var rows = [];
         for (key in schema.properties) {
-            rows.push('<tr><td>' + key + '</td><td>' + 
-                      SS.renderEditingDOM(schema.properties[key], object[key]) + 
-                      '</td></tr>');
+            rows.push({name: key, dom: SS.renderRecursiveEditingDOM(key, schema.properties[key], object[key])});
         }
-        return '<table>' + rows.join('') + '</table>';
+        return $.mustache('<table class="{{name}}">{{#rows}}<tr><td>{{name}}</td><td>{{{dom}}}</td></tr>{{/rows}}</table>',
+                          {name:name, rows:rows});
+
     } else if (schema.type === 'array') {
-        var rows = object.map(function(element) {
-            return '<tr><td>' + 
-                SS.renderEditingDOM(schema.items, element) + 
-                '</td></tr>';
+        var rows = object.map(function(element, index) {
+            return {row: SS.renderRecursiveEditingDOM(key, schema.items, element),
+                    index: index};
         });
-        return '<table>' + rows.join('') + '</table>';
+        return $.mustache('<table class="{{name}}">{{#rows}}<tr class="{{index}}"><td>{{{row}}}</td></tr>{{/rows}}</table>', {rows:rows, name:name});
     }
 }
