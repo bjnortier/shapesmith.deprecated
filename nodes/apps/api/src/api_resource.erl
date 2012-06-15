@@ -31,8 +31,9 @@ json_response(JSON, ReqData) ->
 
 create_session(ReqData, Username) ->
     {ok, AuthModule} = application:get_env(api, auth_module),
+    {ok, CookieDomain} = application:get_env(api, cookie_domain),
     SessionSHA = AuthModule:create_session(Username),
-    wrq:set_resp_header("Set-Cookie", "session=" ++ SessionSHA ++ ";Domain=.shapesmith.net; Path=/;", ReqData).
+    wrq:set_resp_header("Set-Cookie", "session=" ++ SessionSHA ++ ";Domain=" ++ CookieDomain ++ "; Path=/;", ReqData).
 
 prevent_caching(ReqData) ->
     wrq:set_resp_header(

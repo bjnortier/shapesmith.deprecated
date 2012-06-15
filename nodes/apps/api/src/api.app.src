@@ -45,5 +45,6 @@
          {disk_db_dir, "db"},
          {auth_module, api_local_auth},
          {host, "http://localhost.shapesmith.net:8000"},
+         {cookie_domain, ".shapesmith.net"},
          {port, 8000}]}
  ]}.
