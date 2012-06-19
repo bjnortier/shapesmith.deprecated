@@ -64,7 +64,7 @@ SS.WorkplaneEditorModel = SS.NodeEditorModel.extend({
             new SS.WorkplaneEditorView({model: this}),
             new SS.WorkplanePreview({model: this}),
             new SS.WorkplaneURotationPreview({model: this}),
-            //new SS.WorkplaneVRotationPreview({model: this}),
+            new SS.WorkplaneVRotationPreview({model: this}),
             new SS.WorkplaneWRotationPreview({model: this}),
         ];
     },
@@ -213,18 +213,26 @@ SS.WorkplanePreview = SS.PreviewWithOrigin.extend({
         var planeGeometry = new THREE.PlaneGeometry(120, 120);
         var topPlane = THREE.SceneUtils.createMultiMaterialObject(planeGeometry, materials);
         var bottomPlane = THREE.SceneUtils.createMultiMaterialObject(planeGeometry, materials);
-        bottomPlane.rotation.x = Math.PI;
+        topPlane.rotation.x = Math.PI/2;
+        bottomPlane.rotation.x = 3*Math.PI/2;
+
 
         this.sceneObject.add(topPlane);        
         this.sceneObject.add(bottomPlane);
 
-        var uAxis = this.model.node['u-axis'];
-        var wAxis = this.model.node['w-axis'];
-        this.sceneObject.rotation.z = Math.atan2(uAxis.y, uAxis.x);
-        this.sceneObject.rotation.x = Math.atan2(wAxis.y, wAxis.z);
-        
-        //this.sceneObject.lookAt(new THREE.Vector3(0,0,1));
+        var quaternion = new THREE.Quaternion();
+        var axis = new THREE.Vector3(this.model.node.axis.x, 
+                                     this.model.node.axis.y,
+                                     this.model.node.axis.z);
+        var angle = this.model.node.angle/180*Math.PI;
+        quaternion.setFromAxisAngle(axis, angle);
 
+        // if (this.model.node.quaternion) {
+        //     quaternion = this.model.node.quaternion;
+        // }
+
+        this.sceneObject.useQuaternion = true;
+        this.sceneObject.quaternion = quaternion;
         this.postRender();
     },
 
@@ -250,7 +258,7 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
     render: function() {
         this.clear();
         SS.InteractiveSceneView.prototype.render.call(this);
-        
+
         var origin = this.model.node.origin;
 
         var circleGeom = new THREE.Geometry();
@@ -258,12 +266,12 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
             var angle = i/180*Math.PI;
             var x = (60)*Math.cos(angle);
             var y = (60)*Math.sin(angle);
-            circleGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(x,y,0)));
+            circleGeom.vertices.push(new THREE.Vector3(x,y,0));
         }
         var circle = new THREE.Line(circleGeom, 
                                     new THREE.LineBasicMaterial({ color: SS.materials.lineColor, wireframe : true, linewidth: 1.0, opacity: 0.5 }));
 
-        var arrowGeometry = new THREE.CylinderGeometry(0, 0.75*this.cameraScale, 1.5*this.cameraScale, 3);
+        var arrowGeometry = new THREE.CylinderGeometry(0, 0.75*this.cameraScale, 2*this.cameraScale, 3);
         var arrowMaterials = [
             new THREE.MeshBasicMaterial({color: 0x993333, opacity: 0.5, wireframe: false } ),
             new THREE.MeshBasicMaterial({color: 0xcc6666, wireframe: true})
@@ -277,40 +285,71 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
         this.circleAndArrow.position = new THREE.Vector3(origin.x, origin.y, origin.z);
         this.sceneObject.add(this.circleAndArrow);
        
-        this.rotationMesh = new THREE.Mesh(
-            new THREE.PlaneGeometry(160, 160),
-            new THREE.MeshBasicMaterial({ color: 0x333366, opacity: 0.5, transparent: true }));
-        this.rotationPlane = new THREE.Object3D();
-        this.rotationPlane.add(this.rotationMesh);
+        var quaternion = new THREE.Quaternion();
+        // if (this.model.node.quaternion) {
+        //     quaternion = this.model.node.quaternion;
+        // }
 
+        var axis = new THREE.Vector3(this.model.node.axis.x, 
+                                     this.model.node.axis.y,
+                                     this.model.node.axis.z);
+        var angle = this.model.node.angle/180*Math.PI;
+        quaternion.setFromAxisAngle(axis, angle);
 
-        var uAxis = this.model.node['u-axis'];
-        var wAxis = this.model.node['w-axis'];
-        [this.sceneObject, this.rotationPlane].map(function(obj) {
-            obj.rotation.z = Math.atan2(uAxis.y, uAxis.x);
-            obj.rotation.x = Math.atan2(wAxis.y, wAxis.z);
-        });
+        this.sceneObject.useQuaternion = true;
+        this.sceneObject.quaternion = quaternion;
 
         
     },
 
     mouseDown: function() {
-        var uAxisParams = this.model.node['u-axis'];
-        this.originalUAxis = new THREE.Vector3(uAxisParams.x, uAxisParams.y, uAxisParams.z);
+        var that = this;
+        var rotationFn = function(position, axis, angle) {
+            var un = axis.x, vn = axis.y, wn = axis.z;
+            var a = (un*position.x + vn*position.y + wn*position.z);
+            var x2 = a*un + (position.x - a*un)*Math.cos(angle/180*Math.PI) 
+                + (vn*position.z - wn*position.y)*Math.sin(angle/180*Math.PI);
+            var y2 = a*vn + (position.y - a*vn)*Math.cos(angle/180*Math.PI) 
+                + (wn*position.x - un*position.z)*Math.sin(angle/180*Math.PI);
+            var z2 = a*wn + (position.z - a*wn)*Math.cos(angle/180*Math.PI) 
+                + (un*position.y - vn*position.x)*Math.sin(angle/180*Math.PI);
+            return new THREE.Vector3(x2, y2, z2);
+        }
 
-        var wAxisParams = this.model.node['w-axis'];
-        this.originalWAxis = new THREE.Vector3(wAxisParams.x, wAxisParams.y, wAxisParams.z);
+        this.startAxis = new THREE.Vector3(this.model.node.axis.x, this.model.node.axis.y, this.model.node.axis.z).normalize();
+        this.startAngle = this.model.node.angle;
+                
+        this.anchorPosition = rotationFn(this.relativeAnchorPosition, this.startAxis, this.startAngle);
+        this.rotationAxis = rotationFn(this.relativeRotationAxis, this.startAxis, this.startAngle);
+
     },
 
     drag: function(event) {
-        var positionOnRotationPlane = SS.sceneView.determinePositionOnPlane(event, this.rotationPlane);
-        if (!positionOnRotationPlane) {
-            return;
-        }
+        var mouse = {};
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5);
+        var projector = new THREE.Projector();
+        var mouse3D = projector.unprojectVector(vector, SS.sceneView.camera);
+
+        var ray = new THREE.Ray(SS.sceneView.camera.position, null);
+        ray.direction = mouse3D.subSelf(SS.sceneView.camera.position).normalize();
 
         var origin = new THREE.Vector3(this.model.node.origin.x,
                                        this.model.node.origin.y,
                                        this.model.node.origin.z);
+
+        var p0 = origin;
+        var l0 = ray.origin;
+        var l = ray.direction;
+        var n = this.rotationAxis;
+
+        var d = new THREE.Vector3().sub(p0, l0).dot(n)/l.dot(n);
+        if (d === 0) {
+            return;
+        }
+        var positionOnRotationPlane = new THREE.Vector3().add(l0, l.clone().multiplyScalar(d));
 
         var v1 = new THREE.Vector3().sub(
             new THREE.Vector3(
@@ -326,37 +365,36 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
         if (this.rotationAxis.dot(v2CrossV1) < 0) {
             angle = -angle;
         }
+
+        var quat1 = new THREE.Quaternion().setFromAxisAngle(this.startAxis, this.startAngle/180*Math.PI);
+        var quat2 = new THREE.Quaternion().setFromAxisAngle(this.relativeRotationAxis, Math.PI*angle/180);
+        var quat3 = new THREE.Quaternion().multiply(quat1, quat2);
+        quat3.normalize();
+
+        var quaternionToAxisAngle = function(q) {
+            var angle = 2*Math.acos(q.w);
+            var axis = new THREE.Vector3(q.x/Math.sqrt(1-q.w*q.w),
+                                         q.y/Math.sqrt(1-q.w*q.w),
+                                         q.z/Math.sqrt(1-q.w*q.w));
+            return {angle: angle/Math.PI*180, axis: axis};
+        }
+        var axisAngle = quaternionToAxisAngle(quat3);
         if (!event.ctrlKey) {
-            angle = Math.round(angle/5)*5;
-        }
-        if (this.swapAngle) {
-            angle = -angle;
-        }
-
-        var that = this;
-        var rotationFn = function(position) {
-            var un = that.rotationAxis.x, vn = that.rotationAxis.y, wn = that.rotationAxis.z;
-            var a = (un*position.x + vn*position.y + wn*position.z);
-            var x2 = a*un + (position.x - a*un)*Math.cos(angle/180*Math.PI) 
-                + (vn*position.z - wn*position.y)*Math.sin(angle/180*Math.PI);
-            var y2 = a*vn + (position.y - a*vn)*Math.cos(angle/180*Math.PI) 
-                + (wn*position.x - un*position.z)*Math.sin(angle/180*Math.PI);
-            var z2 = a*wn + (position.z - a*wn)*Math.cos(angle/180*Math.PI) 
-                + (un*position.y - vn*position.x)*Math.sin(angle/180*Math.PI);
-            var newPosition = new THREE.Vector3(x2, y2, z2);
-            return newPosition;
+            var roundFn = function(obj, key, tolerance) {
+                obj[key] = Math.round(obj[key]/tolerance)*tolerance;
+            }
+            // roundFn(axisAngle.axis, 'x', 0.01);
+            // roundFn(axisAngle.axis, 'y', 0.01);
+            // roundFn(axisAngle.axis, 'z', 0.01);
+            roundFn(axisAngle, 'angle', 5);
         }
 
-        var newUAxis = rotationFn(this.originalUAxis);
-        var newWAxis = rotationFn(this.originalWAxis);
+        this.model.node['axis'].x = axisAngle.axis.x;
+        this.model.node['axis'].y = axisAngle.axis.y;
+        this.model.node['axis'].z = axisAngle.axis.z;
+        this.model.node['angle'] = axisAngle.angle;
 
-        this.model.node['u-axis'].x = newUAxis.x;
-        this.model.node['u-axis'].y = newUAxis.y;
-        this.model.node['u-axis'].z = newUAxis.z;
-
-        this.model.node['w-axis'].x = newWAxis.x;
-        this.model.node['w-axis'].y = newWAxis.y;
-        this.model.node['w-axis'].z = newWAxis.z;
+        this.model.node.quaternion = quat3;
 
         this.model.trigger('change');
     },
@@ -371,54 +409,40 @@ SS.WorkplaneURotationPreview = SS.WorkplaneRotationPreview.extend({
 
         this.circleAndArrow.rotation.y = Math.PI/2;
         this.circleAndArrow.rotation.z = Math.PI/2;
-       
-        this.rotationMesh.rotation.z = Math.PI/2;
-        this.rotationMesh.rotation.y = Math.PI/2;        
 
         this.postRender();
     },
 
-    anchorPosition: new THREE.Vector3(0,60,0),
-    rotationAxis: new THREE.Vector3(1,0,0),
-    swapAngle: true,
-
+    relativeAnchorPosition: new THREE.Vector3(0,60,0),
+    relativeRotationAxis: new THREE.Vector3(1,0,0),
 
 });
 
-// SS.WorkplaneVRotationPreview = SS.WorkplaneRotationPreview.extend({
+SS.WorkplaneVRotationPreview = SS.WorkplaneRotationPreview.extend({
     
-//     render: function() {
-//         SS.WorkplaneRotationPreview.prototype.render.call(this);
-//         this.sceneObject.rotation.x = -Math.PI/2;
-//         this.sceneObject.rotation.z = -Math.PI/2;
+    render: function() {
 
+        SS.WorkplaneRotationPreview.prototype.render.call(this);
 
-//         //this.rotationPlane.rotation.y = Math.PI/2;
+        this.circleAndArrow.rotation.x = -Math.PI/2;
+        this.circleAndArrow.rotation.z = -Math.PI/2;
+       
+        this.postRender();
+    },
 
-//         //this.sceneObject.add(this.rotationPlane);
-        
+    relativeAnchorPosition: new THREE.Vector3(0,0,60),
+    relativeRotationAxis: new THREE.Vector3(0,1,0),
 
-//         this.postRender();
-
-//     },
-
-//     //anchorPosition: new THREE.Vector3(0,60,0),
-//     //axis: new THREE.Vector3(1,0,0),
-
-// });
+});
 
 SS.WorkplaneWRotationPreview = SS.WorkplaneRotationPreview.extend({
     
     render: function() {
         SS.WorkplaneRotationPreview.prototype.render.call(this);
-
-        //this.rotationMesh.rotation.z = Math.PI/2;
-
         this.postRender();
-
     },
 
-    anchorPosition: new THREE.Vector3(60,0,0),
-    rotationAxis: new THREE.Vector3(0,0,1),
+    relativeAnchorPosition: new THREE.Vector3(60,0,0),
+    relativeRotationAxis: new THREE.Vector3(0,0,1),
 
 });

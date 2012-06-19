@@ -263,8 +263,8 @@ SS.HeightCursoid = SS.InteractiveSceneView.extend({
         this.clear();
 
         var axis = new THREE.Geometry();
-        axis.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,-1000)));
-        axis.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,1000)));
+        axis.vertices.push(new THREE.Vector3(0,0,-1000));
+        axis.vertices.push(new THREE.Vector3(0,0,1000));
         var line = new THREE.Line(axis, new THREE.LineBasicMaterial({ color: 0xcc6666, opacity: 0.5 }));  
 
         var geometry = new THREE.CylinderGeometry(0, 0.75*this.cameraScale, 1.5*this.cameraScale, 3);
