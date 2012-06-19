@@ -64,7 +64,7 @@ SS.WorkplaneEditorModel = SS.NodeEditorModel.extend({
             new SS.WorkplaneEditorView({model: this}),
             new SS.WorkplanePreview({model: this}),
             new SS.WorkplaneURotationPreview({model: this}),
-            new SS.WorkplaneVRotationPreview({model: this}),
+            //new SS.WorkplaneVRotationPreview({model: this}),
             new SS.WorkplaneWRotationPreview({model: this}),
         ];
     },
@@ -194,7 +194,13 @@ SS.WorkplanePreview = SS.PreviewWithOrigin.extend({
     initialize: function() {
         SS.PreviewWithOrigin.prototype.initialize.call(this);
         this.render();
+        this.model.on('change', this.render, this);
     },
+
+    remove: function() {
+        SS.PreviewWithOrigin.prototype.remove.call(this);
+        this.model.off('change', this.render);
+    },    
     
     render: function() {
         this.clear();
@@ -213,7 +219,9 @@ SS.WorkplanePreview = SS.PreviewWithOrigin.extend({
         this.sceneObject.add(bottomPlane);
 
         var uAxis = this.model.node['u-axis'];
-        this.sceneObject.rotation.z = Math.atan2(uAxis.y, uAxis.x, 0);
+        var wAxis = this.model.node['w-axis'];
+        this.sceneObject.rotation.z = Math.atan2(uAxis.y, uAxis.x);
+        this.sceneObject.rotation.x = Math.atan2(wAxis.y, wAxis.z);
         
         //this.sceneObject.lookAt(new THREE.Vector3(0,0,1));
 
@@ -263,13 +271,35 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
         var arrow = THREE.SceneUtils.createMultiMaterialObject(arrowGeometry, arrowMaterials);
         arrow.position.x = 60;
 
-        this.sceneObject.add(arrow);
-        this.sceneObject.add(circle);
-        this.sceneObject.position = new THREE.Vector3(origin.x, origin.y, origin.z);
+        this.circleAndArrow = new THREE.Object3D();
+        this.circleAndArrow.add(arrow);
+        this.circleAndArrow.add(circle);
+        this.circleAndArrow.position = new THREE.Vector3(origin.x, origin.y, origin.z);
+        this.sceneObject.add(this.circleAndArrow);
+       
+        this.rotationMesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(160, 160),
+            new THREE.MeshBasicMaterial({ color: 0x333366, opacity: 0.5, transparent: true }));
+        this.rotationPlane = new THREE.Object3D();
+        this.rotationPlane.add(this.rotationMesh);
+
+
+        var uAxis = this.model.node['u-axis'];
+        var wAxis = this.model.node['w-axis'];
+        [this.sceneObject, this.rotationPlane].map(function(obj) {
+            obj.rotation.z = Math.atan2(uAxis.y, uAxis.x);
+            obj.rotation.x = Math.atan2(wAxis.y, wAxis.z);
+        });
+
+        
     },
 
     mouseDown: function() {
-        //this.model.mouseDownOnArrow && this.model.mouseDownOnArrow(this);
+        var uAxisParams = this.model.node['u-axis'];
+        this.originalUAxis = new THREE.Vector3(uAxisParams.x, uAxisParams.y, uAxisParams.z);
+
+        var wAxisParams = this.model.node['w-axis'];
+        this.originalWAxis = new THREE.Vector3(wAxisParams.x, wAxisParams.y, wAxisParams.z);
     },
 
     drag: function(event) {
@@ -291,24 +321,44 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
         var v2 = new THREE.Vector3().sub(this.anchorPosition,
                                          origin).normalize();
         var v2CrossV1 = new THREE.Vector3().cross(v2, v1);
-        var rotationVector = this.axis;
 
         var angle = parseFloat((Math.acos(v1.dot(v2))/Math.PI*180).toFixed(0));
-        if (rotationVector.dot(v2CrossV1) < 0) {
+        if (this.rotationAxis.dot(v2CrossV1) < 0) {
             angle = -angle;
         }
         if (!event.ctrlKey) {
             angle = Math.round(angle/5)*5;
         }
+        if (this.swapAngle) {
+            angle = -angle;
+        }
 
-        console.log(v1, v2, angle);
-        
-        /*this.model.setParameters({
-            u: this.axis.x,
-            v: this.axis.y,
-            w: this.axis.z,
-            angle: angle,
-        });*/
+        var that = this;
+        var rotationFn = function(position) {
+            var un = that.rotationAxis.x, vn = that.rotationAxis.y, wn = that.rotationAxis.z;
+            var a = (un*position.x + vn*position.y + wn*position.z);
+            var x2 = a*un + (position.x - a*un)*Math.cos(angle/180*Math.PI) 
+                + (vn*position.z - wn*position.y)*Math.sin(angle/180*Math.PI);
+            var y2 = a*vn + (position.y - a*vn)*Math.cos(angle/180*Math.PI) 
+                + (wn*position.x - un*position.z)*Math.sin(angle/180*Math.PI);
+            var z2 = a*wn + (position.z - a*wn)*Math.cos(angle/180*Math.PI) 
+                + (un*position.y - vn*position.x)*Math.sin(angle/180*Math.PI);
+            var newPosition = new THREE.Vector3(x2, y2, z2);
+            return newPosition;
+        }
+
+        var newUAxis = rotationFn(this.originalUAxis);
+        var newWAxis = rotationFn(this.originalWAxis);
+
+        this.model.node['u-axis'].x = newUAxis.x;
+        this.model.node['u-axis'].y = newUAxis.y;
+        this.model.node['u-axis'].z = newUAxis.z;
+
+        this.model.node['w-axis'].x = newWAxis.x;
+        this.model.node['w-axis'].y = newWAxis.y;
+        this.model.node['w-axis'].z = newWAxis.z;
+
+        this.model.trigger('change');
     },
 
 
@@ -318,44 +368,57 @@ SS.WorkplaneURotationPreview = SS.WorkplaneRotationPreview.extend({
     
     render: function() {
         SS.WorkplaneRotationPreview.prototype.render.call(this);
-        this.sceneObject.rotation.x = -Math.PI/2;
-        this.sceneObject.rotation.z = -Math.PI/2;
-        this.postRender();
-    },
 
-});
-
-SS.WorkplaneVRotationPreview = SS.WorkplaneRotationPreview.extend({
-    
-    render: function() {
-        SS.WorkplaneRotationPreview.prototype.render.call(this);
-        this.sceneObject.rotation.z = Math.PI/2;
-        this.sceneObject.rotation.y = Math.PI/2;
-
-
-        this.rotationPlane = new THREE.Mesh(
-            new THREE.PlaneGeometry(1000, 1000),
-            new THREE.MeshBasicMaterial({ color: 0x333366, opacity: 0.2, transparent: true }));
-        this.rotationPlane.rotation.z = Math.PI/2;
-        this.rotationPlane.rotation.y = Math.PI/2;
-
-        //this.sceneObject.add(this.rotationPlane);
-        
+        this.circleAndArrow.rotation.y = Math.PI/2;
+        this.circleAndArrow.rotation.z = Math.PI/2;
+       
+        this.rotationMesh.rotation.z = Math.PI/2;
+        this.rotationMesh.rotation.y = Math.PI/2;        
 
         this.postRender();
-
     },
 
     anchorPosition: new THREE.Vector3(0,60,0),
-    axis: new THREE.Vector3(1,0,0),
+    rotationAxis: new THREE.Vector3(1,0,0),
+    swapAngle: true,
+
 
 });
+
+// SS.WorkplaneVRotationPreview = SS.WorkplaneRotationPreview.extend({
+    
+//     render: function() {
+//         SS.WorkplaneRotationPreview.prototype.render.call(this);
+//         this.sceneObject.rotation.x = -Math.PI/2;
+//         this.sceneObject.rotation.z = -Math.PI/2;
+
+
+//         //this.rotationPlane.rotation.y = Math.PI/2;
+
+//         //this.sceneObject.add(this.rotationPlane);
+        
+
+//         this.postRender();
+
+//     },
+
+//     //anchorPosition: new THREE.Vector3(0,60,0),
+//     //axis: new THREE.Vector3(1,0,0),
+
+// });
 
 SS.WorkplaneWRotationPreview = SS.WorkplaneRotationPreview.extend({
     
     render: function() {
         SS.WorkplaneRotationPreview.prototype.render.call(this);
+
+        //this.rotationMesh.rotation.z = Math.PI/2;
+
         this.postRender();
+
     },
+
+    anchorPosition: new THREE.Vector3(60,0,0),
+    rotationAxis: new THREE.Vector3(0,0,1),
 
 });

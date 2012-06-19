@@ -22,9 +22,9 @@ var SS = SS || {};
            var vertices = [];
            for (var i = segment.start; i < segment.end; i += 3) {
                var position = new THREE.Vector3(mesh.positions[i], 
-					        mesh.positions[i + 1], 
-					        mesh.positions[i + 2]);
-	       var vertex = new THREE.Vertex(position);
+                            mesh.positions[i + 1], 
+                            mesh.positions[i + 2]);
+           var vertex = new THREE.Vertex(position);
                vertices.push(vertex);
            }
            
@@ -113,8 +113,8 @@ var SS = SS || {};
            var positions = [];
             for (var i = segment.start; i < segment.end; i+=3) {
                 positions.push(new THREE.Vector3(mesh.positions[i], 
-					         mesh.positions[i + 1], 
-					         mesh.positions[i + 2]));
+                             mesh.positions[i + 1], 
+                             mesh.positions[i + 2]));
             }
             return new THREE.PipeGeometry(3, positions);
         });
@@ -131,11 +131,11 @@ var SS = SS || {};
         var vertexMaterial = new THREE.MeshBasicMaterial({color: 0xffffff, opacity: 0.8});
         mesh.segments.map(function(segment) {
             var startPosition = new THREE.Vector3(mesh.positions[segment.start], 
-					          mesh.positions[segment.start + 1], 
-					          mesh.positions[segment.start + 2]);
+                              mesh.positions[segment.start + 1], 
+                              mesh.positions[segment.start + 2]);
             var endPosition = new THREE.Vector3(mesh.positions[segment.end - 2], 
-					      mesh.positions[segment.end - 1], 
-					      mesh.positions[segment.end]);
+                          mesh.positions[segment.end - 1], 
+                          mesh.positions[segment.end]);
             [startPosition, endPosition].map(function(position) {
                 var key = keyForPosition(position);
                 if (!positions[key]) {
@@ -153,33 +153,33 @@ var SS = SS || {};
     }
 
     var create3DGeometries = function(mesh) {
-	var geometry = new THREE.Geometry();
+    var geometry = new THREE.Geometry();
 
-	for (var i = 0; i  < mesh.positions.length/3; ++i) {
-	    var position = new THREE.Vector3(mesh.positions[i * 3], 
-					     mesh.positions[i * 3 + 1], 
-					     mesh.positions[i * 3 + 2]);
-	    var vertex = new THREE.Vertex(position);
-	    geometry.vertices.push(vertex);
-	}
-	
-	for (var i = 0; i < mesh.indices.length/3; ++i) {
-	    var a = mesh.indices[i * 3],
-	    b = mesh.indices[i * 3 + 1],
-	    c = mesh.indices[i * 3 + 2];
+    for (var i = 0; i  < mesh.positions.length/3; ++i) {
+        var position = new THREE.Vector3(mesh.positions[i * 3], 
+                         mesh.positions[i * 3 + 1], 
+                         mesh.positions[i * 3 + 2]);
+        var vertex = new THREE.Vertex(position);
+        geometry.vertices.push(vertex);
+    }
+    
+    for (var i = 0; i < mesh.indices.length/3; ++i) {
+        var a = mesh.indices[i * 3],
+        b = mesh.indices[i * 3 + 1],
+        c = mesh.indices[i * 3 + 2];
 
-	    var face = new THREE.Face3(a,b,c);
-	    face.vertexNormals = [new THREE.Vector3(mesh.normals[a*3], 
-						    mesh.normals[a*3+1], 
-						    mesh.normals[a*3+2]),
-				  new THREE.Vector3(mesh.normals[b*3], 
-						    mesh.normals[b*3+1], mesh.normals[b*3+2]),
-				  new THREE.Vector3(mesh.normals[c*3], 
-						    mesh.normals[c*3+1], mesh.normals[c*3+2])];
-	    geometry.faces.push(face);
-	}
-	geometry.computeCentroids();
-	geometry.computeFaceNormals();
+        var face = new THREE.Face3(a,b,c);
+        face.vertexNormals = [new THREE.Vector3(mesh.normals[a*3], 
+                            mesh.normals[a*3+1], 
+                            mesh.normals[a*3+2]),
+                  new THREE.Vector3(mesh.normals[b*3], 
+                            mesh.normals[b*3+1], mesh.normals[b*3+2]),
+                  new THREE.Vector3(mesh.normals[c*3], 
+                            mesh.normals[c*3+1], mesh.normals[c*3+2])];
+        geometry.faces.push(face);
+    }
+    geometry.computeCentroids();
+    geometry.computeFaceNormals();
         geometry.mergeVertices();
         geometry.dynamic = true;
         return [geometry];
@@ -194,13 +194,13 @@ var SS = SS || {};
         var color = unselectedColor, opacity = 1.0;
         var isEditing = geomNode.editing;
         for (index in geomNode.transforms) {
-	    if (geomNode.transforms[index].editing) {
-	        isEditing = true;
-	    }
+        if (geomNode.transforms[index].editing) {
+            isEditing = true;
+        }
         }
         if (isEditing) {
-	    color = 0xdddd00;
-	    opacity = 0.5;
+        color = 0xdddd00;
+        opacity = 0.5;
         }
         var objectName = {geomNodeId: geomNode.id};
 
@@ -264,7 +264,7 @@ var SS = SS || {};
     SS.hideGeometry = function(geomNode) {
         if (geomNode.sceneObjects) {
             for (key in geomNode.sceneObjects) {
-	        scene.remove(geomNode.sceneObjects[key]);
+            scene.remove(geomNode.sceneObjects[key]);
             }
             geomNode.sceneObjects = {};
         }
@@ -278,8 +278,8 @@ var SS = SS || {};
         };
         geomNode.sceneObjects['faces'].children.map(function(child) {
             child.material.color.setHex(selectedColor);
-	    child.material.ambient.setHex(selectedColor);
-	    child.material.specular.setHex(selectedColor);
+        child.material.ambient.setHex(selectedColor);
+        child.material.specular.setHex(selectedColor);
             child.material.opacity = 0.7;
         });
         geomNode.sceneObjects['edges'].children.map(function(child) {
@@ -292,8 +292,8 @@ var SS = SS || {};
         SS.restoreOpacity();
         geomNode.sceneObjects['faces'].children.map(function(child) {
             child.material.color.setHex(unselectedColor);
-	    child.material.ambient.setHex(unselectedColor);
-	    child.material.specular.setHex(unselectedColor);
+        child.material.ambient.setHex(unselectedColor);
+        child.material.specular.setHex(unselectedColor);
             child.material.opacity = 1.0;
         });
         geomNode.sceneObjects['edges'].children.map(function(child) {
@@ -336,15 +336,15 @@ var SS = SS || {};
                 var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
 
                 editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
-	            var position = vertex.position.clone();
-	            position.x = position.x + translation.x;
-	            position.y = position.y + translation.y;
-	            position.z = position.z + translation.z;
-	            return new THREE.Vertex(position);
-	        });
+                var position = vertex.position.clone();
+                position.x = position.x + translation.x;
+                position.y = position.y + translation.y;
+                position.z = position.z + translation.z;
+                return new THREE.Vertex(position);
+            });
 
                 editingGeometry.computeCentroids();
-	        editingGeometry.computeFaceNormals();
+            editingGeometry.computeFaceNormals();
                 editingGeometry.__dirtyVertices = true;
             }
         }
@@ -358,15 +358,15 @@ var SS = SS || {};
                 var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
 
                 editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
-	            var position = vertex.position.clone();
-	            position.x = scalePoint.x + (position.x - scalePoint.x)*factor;
-	            position.y = scalePoint.y + (position.y - scalePoint.y)*factor;
-	            position.z = scalePoint.z + (position.z - scalePoint.z)*factor;
-	            return new THREE.Vertex(position);
-	        });
+                var position = vertex.position.clone();
+                position.x = scalePoint.x + (position.x - scalePoint.x)*factor;
+                position.y = scalePoint.y + (position.y - scalePoint.y)*factor;
+                position.z = scalePoint.z + (position.z - scalePoint.z)*factor;
+                return new THREE.Vertex(position);
+            });
 
                 editingGeometry.computeCentroids();
-	        editingGeometry.computeFaceNormals();
+            editingGeometry.computeFaceNormals();
                 editingGeometry.__dirtyVertices = true;
             }
         }
@@ -383,28 +383,28 @@ var SS = SS || {};
                 var originalGeometry = originalNode.originalSceneObjects[key].children[i].geometry;
                 var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
 
-	        editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
-	            var position = vertex.position.clone();
-                    position.x = position.x - center.x;
-                    position.y = position.y - center.y;
-                    position.z = position.z - center.z;
-                    
-                    // http://blog.client9.com/2007/09/rotating-point-around-vector.html
-                    var a = (un*position.x + vn*position.y + wn*position.z);
-                    var x2 = a*un + (position.x - a*un)*Math.cos(angle/180*Math.PI) 
-                        + (vn*position.z - wn*position.y)*Math.sin(angle/180*Math.PI);
-                    var y2 = a*vn + (position.y - a*vn)*Math.cos(angle/180*Math.PI) 
-                        + (wn*position.x - un*position.z)*Math.sin(angle/180*Math.PI);
-                    var z2 = a*wn + (position.z - a*wn)*Math.cos(angle/180*Math.PI) 
-                        + (un*position.y - vn*position.x)*Math.sin(angle/180*Math.PI);
-                    
-	            var newPosition = new THREE.Vector3(center.x + x2, 
-                                                        center.y + y2, 
-                                                        center.z + z2);
-	            return new THREE.Vertex(newPosition);
-	        });
+                editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
+                var position = vertex.position.clone();
+                position.x = position.x - center.x;
+                position.y = position.y - center.y;
+                position.z = position.z - center.z;
+                
+                // http://blog.client9.com/2007/09/rotating-point-around-vector.html
+                var a = (un*position.x + vn*position.y + wn*position.z);
+                var x2 = a*un + (position.x - a*un)*Math.cos(angle/180*Math.PI) 
+                    + (vn*position.z - wn*position.y)*Math.sin(angle/180*Math.PI);
+                var y2 = a*vn + (position.y - a*vn)*Math.cos(angle/180*Math.PI) 
+                    + (wn*position.x - un*position.z)*Math.sin(angle/180*Math.PI);
+                var z2 = a*wn + (position.z - a*wn)*Math.cos(angle/180*Math.PI) 
+                    + (un*position.y - vn*position.x)*Math.sin(angle/180*Math.PI);
+                
+                var newPosition = new THREE.Vector3(center.x + x2, 
+                                                    center.y + y2, 
+                                                    center.z + z2);
+                return new THREE.Vertex(newPosition);
+            });
                 editingGeometry.computeCentroids();
-	        editingGeometry.computeFaceNormals();
+            editingGeometry.computeFaceNormals();
                 editingGeometry.__dirtyVertices = true;
             }
         }
@@ -428,8 +428,8 @@ var SS = SS || {};
                 var originalGeometry = originalNode.originalSceneObjects[key].children[i].geometry;
                 var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
 
-	        editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
-	            var position = vertex.position.clone();
+               editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
+                var position = vertex.position.clone();
                     
                     position.x = position.x - origin.x;
                     position.y = position.y - origin.y;
@@ -440,10 +440,10 @@ var SS = SS || {};
                     var y2 = 2*a*vn - position.y + origin.y;
                     var z2 = 2*a*wn - position.z + origin.z;
                     
-	            return new THREE.Vertex(new THREE.Vector3(x2, y2, z2));
+                return new THREE.Vertex(new THREE.Vector3(x2, y2, z2));
                 });
                 editingGeometry.computeCentroids();
-	        editingGeometry.computeFaceNormals();
+            editingGeometry.computeFaceNormals();
                 editingGeometry.__dirtyVertices = true;
             }
         }            
@@ -467,15 +467,15 @@ var SS = SS || {};
                 var originalGeometry = originalNode.originalSceneObjects[key].children[i].geometry;
                 var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
 
-	        editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
-	            var position = vertex.position.clone();
+            editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
+                var position = vertex.position.clone();
                     var dot = new THREE.Vector3().sub(position, origin).dot(normal);
                     var dPos = normal.clone().multiplyScalar(-2*dot);
                     var newPosition = new THREE.Vector3().add(position, dPos);
-	            return new THREE.Vertex(newPosition);
+                return new THREE.Vertex(newPosition);
                 });
                 editingGeometry.computeCentroids();
-	        editingGeometry.computeFaceNormals();
+            editingGeometry.computeFaceNormals();
                 editingGeometry.__dirtyVertices = true;
             }
         }            
