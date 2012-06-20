@@ -239,16 +239,23 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
     initialize: function() {
         SS.InteractiveSceneView.prototype.initialize.call(this);
         this.on('mouseDown', this.mouseDown, this);
+        this.on('mouseUp', this.mouseUp, this);
         this.on('mouseDrag', this.drag);
-
+        this.relativeAngle = 0;
+        this.angleDimensionSubview
+            = new SS.RelativeAngleDimensionText({
+                model: this.model, 
+                parentView: this,
+                color: this.textColor});
         this.render();
     },
 
     remove: function() {
         SS.InteractiveSceneView.prototype.remove.call(this);
         this.off('mouseDown', this.mouseDown);
+        this.off('mouseUp', this.mouseUp);
         this.off('mouseDrag', this.drag);
-        
+        this.angleDimensionSubview.remove();
     },
     
     render: function() {
@@ -256,7 +263,7 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
         SS.InteractiveSceneView.prototype.render.call(this);
 
         var circleGeom = new THREE.Geometry();
-        for (var i = 0; i <= 360; ++i) {
+        for (var i = 0; i <= 360 - this.relativeAngle; ++i) {
             var angle = i/180*Math.PI;
             var x = (60)*Math.cos(angle);
             var y = (60)*Math.sin(angle);
@@ -265,10 +272,26 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
         var circleMaterial = new THREE.LineBasicMaterial({ 
             color: this.arrowLineColor, 
             wireframe : true, 
-            linewidth: 1.5, 
+            linewidth: 1.0, 
             opacity: this.opacity });
-
         var circle = new THREE.Line(circleGeom, circleMaterial);
+
+
+        var arcGeom = new THREE.Geometry();
+        if (this.relativeAngle !== 0) {
+            var arcStartAngle = Math.min(-this.relativeAngle, 0);
+            var arcEndAngle = Math.max(-this.relativeAngle, 0);
+
+            arcGeom.vertices.push(new THREE.Vector3(0,0,0))
+            for (var i = arcStartAngle; i <= arcEndAngle; ++i) {
+                var angle = i/180*Math.PI;
+                var x = (60)*Math.cos(angle);
+                var y = (60)*Math.sin(angle);
+                arcGeom.vertices.push(new THREE.Vector3(x,y,0));
+            }
+            arcGeom.vertices.push(new THREE.Vector3(0,0,0));
+        }
+        var angleArc = new THREE.Line(arcGeom, circleMaterial);
                                     
         var arrowGeometry = new THREE.CylinderGeometry(0, 0.75*this.cameraScale, 2*this.cameraScale, 3);
         var arrowMaterials = [
@@ -281,6 +304,7 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
         this.circleAndArrow = new THREE.Object3D();
         this.circleAndArrow.add(arrow);
         this.circleAndArrow.add(circle);
+        this.circleAndArrow.add(angleArc);
         this.sceneObject.add(this.circleAndArrow);
        
         var quaternion = new THREE.Quaternion();
@@ -292,30 +316,35 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
         this.sceneObject.useQuaternion = true;
         this.sceneObject.quaternion = quaternion;
 
-        this.sceneObject.position = SS.objToVector(this.model.node.origin);
+        // Update the angle dimension
+        var origin = SS.objToVector(this.model.node.origin);
+        this.sceneObject.position = origin;
+
+        if (this.showDimensionAngleText) {
+            this.angleDimensionSubview.angle = this.relativeAngle; 
+            this.angleDimensionSubview.position = this.relativeAnchorPosition;
+            this.angleDimensionSubview.render();
+        } else {
+            this.angleDimensionSubview.clear();
+            this.angleDimensionSubview.position = undefined;
+        }
+
     },
 
     mouseDown: function() {
-        var that = this;
-        var rotationFn = function(position, axis, angle) {
-            var un = axis.x, vn = axis.y, wn = axis.z;
-            var a = (un*position.x + vn*position.y + wn*position.z);
-            var x2 = a*un + (position.x - a*un)*Math.cos(angle/180*Math.PI) 
-                + (vn*position.z - wn*position.y)*Math.sin(angle/180*Math.PI);
-            var y2 = a*vn + (position.y - a*vn)*Math.cos(angle/180*Math.PI) 
-                + (wn*position.x - un*position.z)*Math.sin(angle/180*Math.PI);
-            var z2 = a*wn + (position.z - a*wn)*Math.cos(angle/180*Math.PI) 
-                + (un*position.y - vn*position.x)*Math.sin(angle/180*Math.PI);
-            return new THREE.Vector3(x2, y2, z2);
-        }
-
         this.startAxis = SS.objToVector(this.model.node.axis).normalize();
         this.startAngle = this.model.node.angle;
                 
-        this.anchorPosition = rotationFn(this.relativeAnchorPosition, this.startAxis, this.startAngle);
+        this.anchorPosition = SS.rotateAroundAxis(this.relativeAnchorPosition, this.startAxis, this.startAngle);
         this.anchorPosition.addSelf(SS.objToVector(this.model.node.origin));        
-        this.rotationAxis = rotationFn(this.relativeRotationAxis, this.startAxis, this.startAngle);
+        this.rotationAxis = SS.rotateAroundAxis(this.relativeRotationAxis, this.startAxis, this.startAngle);
+        this.showDimensionAngleText = true;
+    },
 
+    mouseUp: function() {
+        this.relativeAngle = 0;
+        this.showDimensionAngleText = false;
+        this.render();
     },
 
     drag: function(event) {
@@ -349,6 +378,9 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
         this.relativeAngle = angle;
         if (!event.ctrlKey) {
             this.relativeAngle = round(this.relativeAngle, 5);
+            if (this.relativeAngle === 360) {
+                this.relativeAngle = 0;
+            }
         }
 
         if (this.relativeAngle !== this.previousRelativeAngle) {
@@ -371,9 +403,7 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
             this.model.node['axis'].z = round(axisAngle.axis.z, 0.001);
             this.model.node['angle'] = round(axisAngle.angle, 0.01);
         }
-
         this.model.trigger('change');
-
     },
 
 
@@ -395,8 +425,7 @@ SS.WorkplaneURotationPreview = SS.WorkplaneRotationPreview.extend({
 
     arrowLineColor: 0x333399,
     arrowFaceColor: 0x6666cc,
-
-
+    textColor: '#6666cc',
 });
 
 SS.WorkplaneVRotationPreview = SS.WorkplaneRotationPreview.extend({
@@ -416,8 +445,7 @@ SS.WorkplaneVRotationPreview = SS.WorkplaneRotationPreview.extend({
 
     arrowLineColor: 0x339933,
     arrowFaceColor: 0x66cc66,
-
-
+    textColor: '#339933',
 });
 
 SS.WorkplaneWRotationPreview = SS.WorkplaneRotationPreview.extend({
@@ -432,5 +460,41 @@ SS.WorkplaneWRotationPreview = SS.WorkplaneRotationPreview.extend({
 
     arrowLineColor: 0x993333,
     arrowFaceColor: 0xcc6666,
+    textColor: '#993333',
+});
+
+SS.RelativeAngleDimensionText = SS.DimensionText.extend({
+
+    position: undefined,
+    angle: 0,
+
+    initialize: function(options) {
+        this.color = options.color;
+        this.parentView = options.parentView;
+        SS.DimensionText.prototype.initialize.call(this);
+    },
+
+    render: function() {
+        this.clear();
+        var label = this.angle > 180 ? -360 + this.angle : this.angle;
+        this.$angle = this.addElement('<div class="dimension">' + label + '&deg;</div>');
+        this.$angle.css('color', this.color);
+        this.update();
+    },
+
+    update: function() {
+        if (this.parentView.showDimensionAngleText && this.position) {
+            var origin = SS.objToVector(this.model.node.origin);
+            var axis = SS.objToVector(this.model.node.axis);
+            var finalPosition = SS.rotateAroundAxis(this.position, axis, this.model.node.angle);
+            finalPosition.addSelf(origin);     
+
+            this.moveToScreenCoordinates(this.$angle, finalPosition, 20, -20);
+            this.$angle.show();
+        } else {
+            this.$angle.hide();
+        }
+
+    }
 
 });

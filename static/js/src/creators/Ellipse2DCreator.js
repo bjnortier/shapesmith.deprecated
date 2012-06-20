@@ -57,7 +57,7 @@ SS.EllipsePreview = SS.PreviewWithOrigin.extend({
 
         if (this.options.is2D) {
             var ellipseGeom = new THREE.EllipseGeometry(r1, r2, fromAngle, toAngle);
-	    var ellipseFace = new THREE.Mesh(ellipseGeom, SS.materials.faceMaterial);
+            var ellipseFace = new THREE.Mesh(ellipseGeom, SS.materials.faceMaterial);
             ellipseFace.doubleSided = true;
             this.sceneObject.add(ellipseFace);
         }
