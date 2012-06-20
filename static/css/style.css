@@ -486,7 +486,15 @@ img.action:hover {
     padding: 3px;
 }
 
-.dimension.z {
+.dimension .x {
+    color: #6666cc;
+}
+
+.dimension .y {
+    color: #339933;
+}
+
+.dimension .z {
     color: #993333;
 }
 

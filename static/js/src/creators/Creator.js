@@ -377,17 +377,25 @@ SS.OriginDimensionText = SS.DimensionText.extend({
     render: function() {
         this.clear();
         var origin = this.model.node.origin;
-        if (origin.z) {
-            this.$z = this.addElement('<div class="dimension z">' + origin.z + '</div>');
+
+        if (origin.x || origin.y || origin.z) {
+            this.$xyz = this.addElement($.mustache(
+                '<div class="dimension">(<span class="x">{{x}}</span>,' + 
+                                        '<span class="y">{{y}}</span>,' +
+                                        '<span class="z">{{z}}</span>)</div>',
+                origin));
         }
         this.update();
     },
     
     update: function() {
-        if (this.$z) {
+        if (this.$xyz) {
             var origin = this.model.node.origin;
-            this.moveToScreenCoordinates(this.$z, 
-                                         new THREE.Vector3(origin.x, origin.y, origin.z/2));
+            this.moveToScreenCoordinates(
+                this.$xyz, 
+                new THREE.Vector3(origin.x, origin.y, origin.z/2),
+                30,
+                -10);
         }
     },
 
