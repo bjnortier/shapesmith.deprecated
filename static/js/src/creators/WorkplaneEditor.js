@@ -379,22 +379,22 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
             return {angle: angle/Math.PI*180, axis: axis};
         }
         var axisAngle = quaternionToAxisAngle(quat3);
+
         if (!event.ctrlKey) {
-            var roundFn = function(obj, key, tolerance) {
-                obj[key] = Math.round(obj[key]/tolerance)*tolerance;
+            var currentAngle = this.model.node['angle'];
+            var newAngle = Math.round(axisAngle.angle/5)*5;
+            if (newAngle !== currentAngle) {
+                this.model.node['axis'].x = axisAngle.axis.x;
+                this.model.node['axis'].y = axisAngle.axis.y;
+                this.model.node['axis'].z = axisAngle.axis.z;
+                this.model.node['angle'] = newAngle;
             }
-            // roundFn(axisAngle.axis, 'x', 0.01);
-            // roundFn(axisAngle.axis, 'y', 0.01);
-            // roundFn(axisAngle.axis, 'z', 0.01);
-            roundFn(axisAngle, 'angle', 5);
+        } else {
+            this.model.node['axis'].x = axisAngle.axis.x;
+            this.model.node['axis'].y = axisAngle.axis.y;
+            this.model.node['axis'].z = axisAngle.axis.z;
+            this.model.node['angle'] = axisAngle.angle;
         }
-
-        this.model.node['axis'].x = axisAngle.axis.x;
-        this.model.node['axis'].y = axisAngle.axis.y;
-        this.model.node['axis'].z = axisAngle.axis.z;
-        this.model.node['angle'] = axisAngle.angle;
-
-        this.model.node.quaternion = quat3;
 
         this.model.trigger('change');
     },
