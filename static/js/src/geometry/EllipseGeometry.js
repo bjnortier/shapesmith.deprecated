@@ -11,7 +11,7 @@ THREE.EllipseGeometry = function (r1, r2, theta1, theta2) {
 
     var segments = segments || 20;
 
-    this.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,0)));
+    this.vertices.push(new THREE.Vector3(0,0,0));
     for (var x = 0; x <= segments; x ++) {
 
         var dTheta = x/segments*arcAngle;
@@ -20,7 +20,7 @@ THREE.EllipseGeometry = function (r1, r2, theta1, theta2) {
 	var ypos = r2 * Math.sin((theta1 + dTheta)/180*Math.PI);
 	var zpos = 0;
         
-	this.vertices.push(new THREE.Vertex(new THREE.Vector3(xpos, ypos, zpos)));
+	this.vertices.push(new THREE.Vector3(xpos, ypos, zpos));
 
         if (x > 0) {
 	    this.faces.push(new THREE.Face3(0, this.vertices.length - 2, this.vertices.length - 1));

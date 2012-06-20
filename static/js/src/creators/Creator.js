@@ -393,7 +393,7 @@ SS.OriginDimensionText = SS.DimensionText.extend({
             var origin = this.model.node.origin;
             this.moveToScreenCoordinates(
                 this.$xyz, 
-                new THREE.Vector3(origin.x, origin.y, origin.z/2),
+                new THREE.Vector3(origin.x, origin.y, origin.z),
                 30,
                 -10);
         }

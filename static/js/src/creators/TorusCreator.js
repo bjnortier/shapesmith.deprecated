@@ -57,7 +57,7 @@ SS.TorusPreview = SS.PreviewWithOrigin.extend({
 	        var theta = Math.PI*2*i/50;
 	        var dx = r1*Math.cos(theta);
 	        var dy = r1*Math.sin(theta);
-	        circleGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+	        circleGeom.vertices.push(new THREE.Vector3(dx, dy, 0));
 	    }
 	    var circle1 = new THREE.Line(circleGeom, SS.materials.lineMaterial);
 	    this.sceneObject.add(circle1);
@@ -77,8 +77,8 @@ SS.TorusPreview = SS.PreviewWithOrigin.extend({
 		var dy1 = (r1 + r2)*Math.sin(theta);
 		var dx2 = (r1 - r2)*Math.cos(theta);
 		var dy2 = (r1 - r2)*Math.sin(theta);
-		circleGeomA.vertices.push(new THREE.Vertex(new THREE.Vector3(dx1, dy1, 0)));
-		circleGeomB.vertices.push(new THREE.Vertex(new THREE.Vector3(dx2, dy2, 0)));
+		circleGeomA.vertices.push(new THREE.Vector3(dx1, dy1, 0));
+		circleGeomB.vertices.push(new THREE.Vector3(dx2, dy2, 0));
 	    }
 	    var circle3 = new THREE.Line(circleGeomA, SS.materials.lineMaterial);
 	    this.sceneObject.add(circle3);

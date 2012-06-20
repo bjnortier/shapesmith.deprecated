@@ -62,26 +62,26 @@ SS.BezierCreator = SS.PrimitiveCreator.extend({
 
 THREE.CubicBezierCurve3 = THREE.Curve.create(
 
-	function ( v0, v1, v2, v3 ) {
+    function ( v0, v1, v2, v3 ) {
 
-		this.v0 = v0;
-		this.v1 = v1;
-		this.v2 = v2;
-		this.v3 = v3;
+        this.v0 = v0;
+        this.v1 = v1;
+        this.v2 = v2;
+        this.v3 = v3;
 
-	},
+    },
 
-	function ( t ) {
+    function ( t ) {
 
-		var tx, ty, tz;
+        var tx, ty, tz;
 
-		tx = THREE.Shape.Utils.b3( t, this.v0.x, this.v1.x, this.v2.x, this.v3.x );
-		ty = THREE.Shape.Utils.b3( t, this.v0.y, this.v1.y, this.v2.y, this.v3.y );
-		tz = THREE.Shape.Utils.b3( t, this.v0.z, this.v1.z, this.v2.z, this.v3.z );
+        tx = THREE.Shape.Utils.b3( t, this.v0.x, this.v1.x, this.v2.x, this.v3.x );
+        ty = THREE.Shape.Utils.b3( t, this.v0.y, this.v1.y, this.v2.y, this.v3.y );
+        tz = THREE.Shape.Utils.b3( t, this.v0.z, this.v1.z, this.v2.z, this.v3.z );
 
-		return new THREE.Vector3( tx, ty, tz );
+        return new THREE.Vector3( tx, ty, tz );
 
-	}
+    }
 
 );
 
@@ -102,19 +102,19 @@ SS.BezierPreview = SS.PreviewWithOrigin.extend({
         });
 
         var constructor1 = new THREE.Geometry();
-        constructor1.vertices.push(new THREE.Vertex(positions[0]));
-        constructor1.vertices.push(new THREE.Vertex(positions[1]));
+        constructor1.vertices.push(positions[0]);
+        constructor1.vertices.push(positions[1]);
         this.sceneObject.add(new THREE.Line(constructor1, SS.materials.constructionLineMaterial));
         
         var constructor2 = new THREE.Geometry();
-        constructor2.vertices.push(new THREE.Vertex(positions[2]));
-        constructor2.vertices.push(new THREE.Vertex(positions[3]));
+        constructor2.vertices.push(positions[2]);
+        constructor2.vertices.push(positions[3]);
         this.sceneObject.add(new THREE.Line(constructor2, SS.materials.constructionLineMaterial));
 
         var curve = new THREE.CubicBezierCurve3(positions[0], positions[1], positions[2], positions[3]);
         var baseGeometry = new THREE.Geometry();
         for (var t = 0; t <= 100; ++t) {
-            baseGeometry.vertices.push(new THREE.Vertex(curve.getPoint(t/100)));
+            baseGeometry.vertices.push(curve.getPoint(t/100));
         }
         var bezierCurve = new THREE.Line(baseGeometry, SS.materials.lineMaterial);
         this.sceneObject.add(bezierCurve);

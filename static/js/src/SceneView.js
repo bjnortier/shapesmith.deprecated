@@ -12,6 +12,7 @@ SS.SceneView = function(container) {
     var targetOnDown = { azimuth: target.azimuth, elevation: target.elevation };
     var distance = 1000, distanceTarget = 300;
     var targetScenePosition = new THREE.Vector3(0,0,0);
+    var selectionOnlyMeshes = [];
 
     var workplane;
     var popupMenu = SS.popupMenu();
@@ -281,8 +282,9 @@ SS.SceneView = function(container) {
     }
 
     function selectObject(event) {
+
         
-        var found = SS.selectGeomNodesInScene(scene, camera, event);
+        var found = SS.selectGeomNodesInScene(scene.children.concat(selectionOnlyMeshes), camera, event);
         var foundGeomNodes = found.filter(function(obj) {
             return obj.object.name.geomNodeId;
         });
@@ -456,7 +458,7 @@ SS.SceneView = function(container) {
 
     var findSceneObjectViewsForEvent = function(event) {
         
-        var found = SS.selectNonGeomNodesInScene(scene, camera, event);
+        var found = SS.selectNonGeomNodesInScene(scene.children, camera, event);
         var objects = _.pluck(found, 'object');
 
         // Select the hightest-level THREE.Object3D objects in the scene
@@ -533,6 +535,7 @@ SS.SceneView = function(container) {
     this.animate = animate;
     this.renderer = renderer;
     this.scene = scene;
+    this.selectionOnlyMeshes = selectionOnlyMeshes;
     this.camera = camera;
     this.workplane = workplane;
     this.determinePositionOnRay = determinePositionOnRay;

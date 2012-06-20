@@ -57,8 +57,8 @@ SS.CylinderPreview = SS.PreviewWithOrigin.extend({
 		var theta = Math.PI*2*i/50;
 		var dx = r*Math.cos(theta);
 		var dy = r*Math.sin(theta);
-		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
-		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+		circleGeom1.vertices.push(new THREE.Vector3(dx, dy, 0));
+		circleGeom2.vertices.push(new THREE.Vector3(dx, dy, 0));
 	    }
 	    var circle1 = new THREE.Line(circleGeom1, SS.materials.lineMaterial);
             this.sceneObject.add(circle1);

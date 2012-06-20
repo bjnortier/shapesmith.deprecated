@@ -71,7 +71,7 @@ SS.PrismGeomNodeView = SS.SceneObjectView.extend({
 	            position.x = position.x + translation.x;
 	            position.y = position.y + translation.y;
 	            position.z = position.z + translation.z;
-	            return new THREE.Vertex(position);
+	            return position;
                 });
 	    }
         });

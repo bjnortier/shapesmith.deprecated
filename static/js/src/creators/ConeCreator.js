@@ -64,7 +64,7 @@ SS.ConePreview = SS.PreviewWithOrigin.extend({
 		var theta = Math.PI*2*i/50;
 		var dx = r2*Math.cos(theta);
 		var dy = r2*Math.sin(theta);
-		circleGeom2.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+		circleGeom2.vertices.push(new THREE.Vector3(dx, dy, 0));
 	    }
 	    var circle2 = new THREE.Line(circleGeom2, SS.materials.lineMaterial);
             circle2.position.z = h;
@@ -85,7 +85,7 @@ SS.ConePreview = SS.PreviewWithOrigin.extend({
 		var theta = Math.PI*2*i/50;
 		var dx = r1*Math.cos(theta);
 		var dy = r1*Math.sin(theta);
-		circleGeom1.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+		circleGeom1.vertices.push(new THREE.Vector3(dx, dy, 0));
 	    }
 	    var circle1 = new THREE.Line(circleGeom1, SS.materials.lineMaterial);
 	    this.sceneObject.add(circle1);

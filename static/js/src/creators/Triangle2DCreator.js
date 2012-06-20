@@ -67,7 +67,7 @@ SS.Triangle2DPreview = SS.PreviewWithOrigin.extend({
         var triangleVertices = this.model.node.parameters.vertices;
 
         triangleGeometry.vertices = triangleVertices.map(function(vertex) {
-            return new THREE.Vertex(new THREE.Vector3(vertex.u, vertex.v, vertex.w));
+            return new THREE.Vector3(vertex.u, vertex.v, vertex.w);
         });
         triangleGeometry.faces.push(new THREE.Face3(0,1,2));
         
@@ -94,7 +94,7 @@ SS.Triangle2DPreview = SS.PreviewWithOrigin.extend({
             var baseGeometry = new THREE.Geometry();
             var verticesForBase = triangleVertices.concat([triangleVertices[0]])
             baseGeometry.vertices = verticesForBase.map(function(vertex) {
-                return new THREE.Vertex(new THREE.Vector3(vertex.u, vertex.v, 0));
+                return new THREE.Vector3(vertex.u, vertex.v, 0);
             });
             var base = new THREE.Line(baseGeometry, SS.materials.lineMaterial);
             base.position.z = -origin.z;

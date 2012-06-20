@@ -87,8 +87,8 @@ SS.RevolveAxisPreview = SS.PreviewWithOrigin.extend({
         var axisVector = new THREE.Vector3(u,v,w).normalize();
         
         var axis = new THREE.Geometry();
-        axis.vertices.push(new THREE.Vertex(axisVector.clone().multiplyScalar(1000)));
-        axis.vertices.push(new THREE.Vertex(axisVector.clone().multiplyScalar(-1000)));
+        axis.vertices.push(axisVector.clone().multiplyScalar(1000));
+        axis.vertices.push(axisVector.clone().multiplyScalar(-1000));
         var line = new THREE.Line(axis, SS.materials.lineMaterial);  
         this.sceneObject.add(line);
 

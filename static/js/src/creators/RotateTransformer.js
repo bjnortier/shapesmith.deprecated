@@ -130,7 +130,7 @@ SS.RotateAxesView = SS.InteractiveSceneView.extend({
             from[key] = that.model.boundingBox.min[key] - 5;
             to[key]   = that.model.boundingBox.max[key] + 5;
 
-	    lineGeom.vertices.push(new THREE.Vertex(from), new THREE.Vertex(to));
+	    lineGeom.vertices.push(from, to);
 	    var line = new THREE.Line(lineGeom, SS.materials.lineMaterial);
             that.sceneObject.add(line);
         });
@@ -145,8 +145,8 @@ SS.RotateAxesView = SS.InteractiveSceneView.extend({
             var axisVector = new THREE.Vector3(u,v,w).normalize();
             
             var axis = new THREE.Geometry();
-            axis.vertices.push(new THREE.Vertex(axisVector.clone().multiplyScalar(1000)));
-            axis.vertices.push(new THREE.Vertex(axisVector.clone().multiplyScalar(-1000)));
+            axis.vertices.push(axisVector.clone().multiplyScalar(1000));
+            axis.vertices.push(axisVector.clone().multiplyScalar(-1000));
             var line = new THREE.Line(axis, SS.materials.lineMaterial);  
             line.position = new THREE.Vector3(origin.x, origin.y, origin.z);
             this.sceneObject.add(line);
@@ -165,13 +165,16 @@ SS.RotateArrowView = SS.InteractiveSceneView.extend({
 
         this.rotationPlane = new THREE.Mesh(
             new THREE.PlaneGeometry(1000, 1000),
-            new THREE.MeshBasicMaterial({ color: 0x333366, opacity: 0.0, transparent: true }));
+            new THREE.MeshBasicMaterial({ color: 0x333366, opacity: 0, transparent: true }));
         this.rotationPlane.position = this.model.center;
+        this.rotationPlane.rotation.x = Math.PI/2;
         this.rotationPlane.doubleSided = true;
+        this.rotationPlane.updateMatrix();
+        this.rotationPlane.updateMatrixWorld();
 
         this.on('mouseDrag', this.drag);
 
-        SS.sceneView.scene.add(this.rotationPlane);
+        //SS.sceneView.scene.add(this.rotationPlane);
     },
 
     remove: function() {
@@ -234,7 +237,7 @@ SS.RotateArrowView = SS.InteractiveSceneView.extend({
             var angle = i/180*Math.PI;
             var z = (r+dr)*Math.cos(angle);
             var x = (r+dr)*Math.sin(angle);
-            outerCurveGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(x,0,z)));
+            outerCurveGeometry.vertices.push(new THREE.Vector3(x,0,z));
         }
 
         var innerCurveGeometry = new THREE.Geometry();
@@ -242,15 +245,15 @@ SS.RotateArrowView = SS.InteractiveSceneView.extend({
             var angle = i/180*Math.PI;
             var z = (r-dr)*Math.cos(angle);
             var x = (r-dr)*Math.sin(angle);
-            innerCurveGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(x,0,z)));
+            innerCurveGeometry.vertices.push(new THREE.Vector3(x,0,z));
         }
 
         var arrowHeadGeometry = new THREE.Geometry();
-        arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r+dr)));
-        arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r+dr+width)));
-        arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(1.5*this.cameraScale,0,r)));
-        arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r-dr-width)));
-        arrowHeadGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,r-dr)));
+        arrowHeadGeometry.vertices.push(new THREE.Vector3(0,0,r+dr));
+        arrowHeadGeometry.vertices.push(new THREE.Vector3(0,0,r+dr+width));
+        arrowHeadGeometry.vertices.push(new THREE.Vector3(1.5*this.cameraScale,0,r));
+        arrowHeadGeometry.vertices.push(new THREE.Vector3(0,0,r-dr-width));
+        arrowHeadGeometry.vertices.push(new THREE.Vector3(0,0,r-dr));
 
         var arrowLineGeometry = new THREE.Geometry();
         arrowLineGeometry.vertices.push(innerCurveGeometry.vertices[maxAngle]);
@@ -407,7 +410,7 @@ SS.RotateAngleView = SS.SceneObjectView.extend({
         var rotationAngle = new THREE.Object3D();
         
         var angleGeometry = new THREE.Geometry();
-        angleGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,0)));
+        angleGeometry.vertices.push(new THREE.Vector3(0,0,0));
 
         var r = new THREE.Vector3().sub(this.model.anchorPosition, 
                                         this.model.center).length();
@@ -419,9 +422,9 @@ SS.RotateAngleView = SS.SceneObjectView.extend({
             var theta = i/180*Math.PI;
             var z = r*Math.cos(theta);
             var x = r*Math.sin(theta);
-            angleGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(x,0,z)));
+            angleGeometry.vertices.push(new THREE.Vector3(x,0,z));
         }
-        angleGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,0)));
+        angleGeometry.vertices.push(new THREE.Vector3(0,0,0));
         
         var lineMaterial = new THREE.LineBasicMaterial({color: 0xeeeeee, 
                                                         linewidth: 2.0, 

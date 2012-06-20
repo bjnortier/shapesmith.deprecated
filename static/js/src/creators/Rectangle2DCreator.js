@@ -11,7 +11,7 @@ SS.Rectangle2DCreator = SS.PrimitiveCreator.extend({
             new SS.Rectangle2DDimensionArrows({model: this}),
             new SS.Rectangle2DDimensionText({model: this}),
 
-        ]);
+            ]);
         this.trigger('change', this);
     },
 
@@ -29,11 +29,11 @@ SS.Rectangle2DCreator = SS.PrimitiveCreator.extend({
         var u = this.node.parameters.u;
         var v = this.node.parameters.v;
         return {min: new THREE.Vector3(origin.x, origin.y, origin.z),
-                max: new THREE.Vector3(origin.x + u, origin.y + v, origin.z)};
-    },
+            max: new THREE.Vector3(origin.x + u, origin.y + v, origin.z)};
+        },
 
 
-});
+    });
 
 SS.Rectangle2DPreview = SS.PreviewWithOrigin.extend({
 
@@ -54,20 +54,20 @@ SS.Rectangle2DPreview = SS.PreviewWithOrigin.extend({
 
         if (u && v) {
             var planeGeom = new THREE.PlaneGeometry(u, v);
-            var planeFace = new THREE.Mesh(planeGeom,  SS.materials.faceMaterial);
-            planeFace.doubleSided = true;
 
-            var planeWire = new THREE.Mesh(planeGeom,  SS.materials.wireframeMaterial);
+            var rectangle = THREE.SceneUtils.createMultiMaterialObject(
+                planeGeom, [SS.materials.faceMaterial, SS.materials.wireframeMaterial]);
+            rectangle.doubleSided = true;
 
-            planeFace.position = new THREE.Vector3(u/2, v/2, 0);
-            planeWire.position = planeFace.position;
+            rectangle.position = new THREE.Vector3(u/2, v/2, 0);
+            rectangle.rotation.x = Math.PI/2;
             
-	    this.sceneObject.add(planeFace);
-	    this.sceneObject.add(planeWire);
+            this.sceneObject.add(rectangle);
 
             if (origin.z !== 0) {
-	        var rectangleBaseWire = new THREE.Mesh(planeGeom,  SS.materials.wireframeMaterial);
+                var rectangleBaseWire = new THREE.Mesh(planeGeom,  SS.materials.wireframeMaterial);
                 rectangleBaseWire.position = new THREE.Vector3(u/2, v/2, -origin.z);
+                rectangleBaseWire.rotation.x = Math.PI/2;
                 this.sceneObject.add(rectangleBaseWire);
             }
 
@@ -122,10 +122,10 @@ SS.Rectangle2DDimensionText = SS.DimensionText.extend({
         var origin = this.model.node.origin;
         var u = this.model.node.parameters.u;
         var v = this.model.node.parameters.v;
-      
+
         var positions = {u: new THREE.Vector3(origin.x + u/2, origin.y, origin.z),
-                         v: new THREE.Vector3(origin.x + u, origin.y + v/2, origin.z)};
-        for (key in positions) {
+           v: new THREE.Vector3(origin.x + u, origin.y + v/2, origin.z)};
+           for (key in positions) {
             this.moveToScreenCoordinates(this['$' + key], positions[key]);
         }
     },

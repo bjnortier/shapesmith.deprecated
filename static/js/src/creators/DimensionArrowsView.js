@@ -12,8 +12,8 @@ SS.DimensionArrowsView = SS.InteractiveSceneView.extend({
         var object = new THREE.Object3D();
 
         var arrowGeom = new THREE.Geometry();
-        arrowGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,0)));
-        arrowGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(0,0,vector.clone().length())));
+        arrowGeom.vertices.push(new THREE.Vector3(0,0,0));
+        arrowGeom.vertices.push(new THREE.Vector3(0,0,vector.clone().length()));
         var line = new THREE.Line(arrowGeom, SS.materials.lineMaterial);
 
         var pointGeom = new THREE.CylinderGeometry(0, 0.5*scale, 1.5*scale, 3);

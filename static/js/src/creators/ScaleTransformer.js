@@ -141,7 +141,7 @@ SS.ScaleArrowView = SS.InteractiveSceneView.extend({
         });
 
         arrowGeometry.vertices = positions.map(function(coordinates) {
-            return new THREE.Vertex(new THREE.Vector3(coordinates[0], coordinates[1], coordinates[2]));
+            return new THREE.Vector3(coordinates[0], coordinates[1], coordinates[2]);
         });
         arrowGeometry.faces.push(new THREE.Face4(2,3,7,8));
         arrowGeometry.faces.push(new THREE.Face3(0,1,9));
@@ -342,7 +342,9 @@ SS.ScaleFootprintView = SS.SceneObjectView.extend({
         planeMesh.position.x = this.model.boundingBox.min.x + width/2;
         planeMesh.position.y = this.model.boundingBox.min.y + depth/2;
         planeMesh.position.z = -0.05;
+        planeMesh.rotation.x = Math.PI/2;
         planeBorder.position = planeMesh.position;
+        planeBorder.rotation.x = Math.PI/2;
 
     this.sceneObject.add(planeMesh);
     this.sceneObject.add(planeBorder);

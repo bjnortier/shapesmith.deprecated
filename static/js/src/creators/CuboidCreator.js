@@ -10,7 +10,7 @@ SS.CuboidCreator = SS.PrimitiveCreator.extend({
             new SS.DraggableUVCorner({model: this}),
             new SS.CuboidDimensionArrows({model: this}),
             new SS.CuboidDimensionText({model: this}),
-        ]);
+            ]);
         this.trigger('change', this);
     },
     
@@ -30,11 +30,11 @@ SS.CuboidCreator = SS.PrimitiveCreator.extend({
         var v = this.node.parameters.v;
         var w = this.node.parameters.w;
         return {min: new THREE.Vector3(origin.x, origin.y, origin.z),
-                max: new THREE.Vector3(origin.x + u, origin.y + v, origin.z + w)};
-    },
+            max: new THREE.Vector3(origin.x + u, origin.y + v, origin.z + w)};
+        },
 
 
-});
+    });
 
 SS.CuboidPreview = SS.PreviewWithOrigin.extend({
 
@@ -56,15 +56,16 @@ SS.CuboidPreview = SS.PreviewWithOrigin.extend({
 
         if(u && v && w) {
             var geometry = new THREE.CubeGeometry(u,v,w);
-	    var cube = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
-	    cube.position = new THREE.Vector3(u/2, v/2, w/2);
-	    this.sceneObject.add(cube);
+            var cube = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
+            cube.position = new THREE.Vector3(u/2, v/2, w/2);
+            this.sceneObject.add(cube);
 
             if (origin.z) {
                 var baseGeom = new THREE.PlaneGeometry(u, v);
                 var base = new THREE.Mesh(baseGeom, SS.materials.wireframeMaterial);
                 base.position = new THREE.Vector3(u/2, v/2, -origin.z);
-	        this.sceneObject.add(base);
+                base.rotation.x = Math.PI/2;
+                this.sceneObject.add(base);
             }
 
         } else if (u && v) {
@@ -72,7 +73,7 @@ SS.CuboidPreview = SS.PreviewWithOrigin.extend({
             var plane = THREE.SceneUtils.createMultiMaterialObject(planeGeom, materials);
             plane.position = new THREE.Vector3(u/2, v/2, 0);
             
-	    this.sceneObject.add(plane);
+            this.sceneObject.add(plane);
         }
 
 
@@ -99,24 +100,24 @@ SS.DraggableUVCorner = SS.DraggableCorner.extend({
 
     cornerPositionFromModel: function() {
         return {x: this.model.node.origin.x + this.model.node.parameters[this.uKey],
-                y: this.model.node.origin.y + this.model.node.parameters[this.vKey],
-                z: 0};
-    },
+            y: this.model.node.origin.y + this.model.node.parameters[this.vKey],
+            z: 0};
+        },
 
-    updateModelFromCorner: function(position) {
-        var u = position.x - this.model.node.origin.x;
-        var v = position.y - this.model.node.origin.y;
+        updateModelFromCorner: function(position) {
+            var u = position.x - this.model.node.origin.x;
+            var v = position.y - this.model.node.origin.y;
 
-        this.model.node.parameters[this.uKey] = Math.round(u);
-        this.model.node.parameters[this.vKey] = Math.round(v);
-    },
+            this.model.node.parameters[this.uKey] = Math.round(u);
+            this.model.node.parameters[this.vKey] = Math.round(v);
+        },
 
-});
+    });
 
 SS.UVWHeightCursoid = SS.HeightCursoid.extend({
 
     initialize: function(options) {
-	SS.HeightCursoid.prototype.initialize.call(this);
+        SS.HeightCursoid.prototype.initialize.call(this);
         this.uKey = options.uKey || 'u';
         this.render();
     },
@@ -124,19 +125,19 @@ SS.UVWHeightCursoid = SS.HeightCursoid.extend({
     cornerPositionFromModel: function() {
         var parameters = this.model.node.parameters
         return {x: this.model.node.origin.x + this.model.node.parameters[this.uKey],
-                y: this.model.node.origin.y + this.model.node.parameters.v,
-                z: this.model.node.origin.z + this.model.node.parameters.w};
-    },    
+            y: this.model.node.origin.y + this.model.node.parameters.v,
+            z: this.model.node.origin.z + this.model.node.parameters.w};
+        },    
 
-    updateModelFromCorner: function(position) {
-        var parameters = this.model.node.parameters
-        var origin = this.model.node.origin;
-        parameters[this.uKey] = position.x - origin.x;
-        parameters.v = position.y - origin.y;
-        parameters.w = position.z - origin.z;
-    },
+        updateModelFromCorner: function(position) {
+            var parameters = this.model.node.parameters
+            var origin = this.model.node.origin;
+            parameters[this.uKey] = position.x - origin.x;
+            parameters.v = position.y - origin.y;
+            parameters.w = position.z - origin.z;
+        },
 
-});
+    });
 
 SS.CuboidDimensionArrows = SS.DimensionArrowsView.extend({
 
@@ -189,11 +190,11 @@ SS.CuboidDimensionText = SS.DimensionText.extend({
         var u = this.model.node.parameters.u;
         var v = this.model.node.parameters.v;
         var w = this.model.node.parameters.w;
-      
+
         var positions = {u: new THREE.Vector3(origin.x + u/2, origin.y, origin.z),
-                         v: new THREE.Vector3(origin.x + u, origin.y + v/2, origin.z),
-                         w: new THREE.Vector3(origin.x+ u, origin.y + v, origin.z + w/2)};
-        for (key in positions) {
+           v: new THREE.Vector3(origin.x + u, origin.y + v/2, origin.z),
+           w: new THREE.Vector3(origin.x+ u, origin.y + v, origin.z + w/2)};
+           for (key in positions) {
             this.moveToScreenCoordinates(this['$' + key], positions[key]);
         }
     },

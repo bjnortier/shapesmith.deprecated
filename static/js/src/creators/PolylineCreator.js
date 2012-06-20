@@ -84,7 +84,7 @@ SS.PolylinePreview = SS.PreviewWithOrigin.extend({
         var vertices = this.model.node.parameters.vertices;
 
         polylineGeometry.vertices = vertices.map(function(vertex) {
-            return new THREE.Vertex(new THREE.Vector3(vertex.u, vertex.v, vertex.w));
+            return new THREE.Vector3(vertex.u, vertex.v, vertex.w);
         });
         
         var polyline = new THREE.Line(polylineGeometry, SS.materials.lineMaterial);
@@ -106,7 +106,7 @@ SS.PolylinePreview = SS.PreviewWithOrigin.extend({
             var baseGeometry = new THREE.Geometry();
             var verticesForBase = triangleVertices.concat([triangleVertices[0]])
             baseGeometry.vertices = verticesForBase.map(function(vertex) {
-                return new THREE.Vertex(new THREE.Vector3(vertex.u, vertex.v, 0));
+                return new THREE.Vector3(vertex.u, vertex.v, 0);
             });
             var base = new THREE.Line(baseGeometry, SS.materials.lineMaterial);
             base.position.z = -origin.z;

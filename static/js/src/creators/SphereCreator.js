@@ -57,7 +57,7 @@ SS.SpherePreview = SS.PreviewWithOrigin.extend({
 	        var theta = Math.PI*2*i/50;
 	        var dx = r*Math.cos(theta);
 	        var dy = r*Math.sin(theta);
-	        circleGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+	        circleGeom.vertices.push(new THREE.Vector3(dx, dy, 0));
 	    }
 	    var circle = new THREE.Line(circleGeom, SS.materials.lineMaterial);
 	    this.sceneObject.add(circle);

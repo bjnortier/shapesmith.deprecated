@@ -69,7 +69,7 @@ SS.EllipsePreview = SS.PreviewWithOrigin.extend({
 	    var theta = (fromAngle + arcAngle*i/50)/180*Math.PI;
 	    var dx = r1*Math.cos(theta);
 	    var dy = r2*Math.sin(theta);
-	    ellipseWireGeom.vertices.push(new THREE.Vertex(new THREE.Vector3(dx, dy, 0)));
+	    ellipseWireGeom.vertices.push(new THREE.Vector3(dx, dy, 0));
 	}
 	var ellipseWire = new THREE.Line(ellipseWireGeom, SS.materials.lineMaterial);
         this.sceneObject.add(ellipseWire);
