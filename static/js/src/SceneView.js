@@ -200,7 +200,7 @@ SS.SceneView = function(container) {
     }
 
     function determinePositionOnPlane(event, planeMesh) {
-        
+        console.warn('DEPRECATED: SceneView.determinePositionOnPlane');
         var mouse = {};
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -255,6 +255,32 @@ SS.SceneView = function(container) {
         var tc = (a*e - b*d)/(a*c - b*b);
         
         return  new THREE.Vector3().add(givenRay.origin, u.clone().multiplyScalar(sc));
+    }
+
+    function determinePositionOnPlane2(event, origin, normal) {
+        var mouse = {};
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5);
+        var projector = new THREE.Projector();
+        var mouse3D = projector.unprojectVector(vector, camera);
+
+        var ray = new THREE.Ray(camera.position, null);
+        ray.direction = mouse3D.subSelf(camera.position).normalize();
+
+        // http://en.wikipedia.org/wiki/Line-plane_intersection
+        var p0 = origin;
+        var l0 = ray.origin;
+        var l = ray.direction;
+        var n = normal;
+
+        var d = new THREE.Vector3().sub(p0, l0).dot(n)/l.dot(n);
+        if (d === 0) {
+            return undefined;
+        }
+        return new THREE.Vector3().add(l0, l.clone().multiplyScalar(d));
+
     }
 
     function selectObject(event) {
@@ -458,6 +484,8 @@ SS.SceneView = function(container) {
  
     }
 
+
+
     if (SS.UI_MOUSE_STATE.isFree()) {
         this.triggerMouseOverSceneObjectViews = function(event) {
             var previousOverObjects = mouseOverSceneObjectViews.map(function(x) { return x; });
@@ -513,6 +541,7 @@ SS.SceneView = function(container) {
     this.workplane = workplane;
     this.determinePositionOnRay = determinePositionOnRay;
     this.determinePositionOnPlane = determinePositionOnPlane;
+    this.determinePositionOnPlane2 = determinePositionOnPlane2;
     this.determinePositionOnWorkplane = determinePositionOnWorkplane;
     this.popupMenu = popupMenu;
     this.onMouseUp = onMouseUp;

@@ -325,40 +325,19 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
     },
 
     drag: function(event) {
-        var mouse = {};
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        
+        var planeOrigin = new THREE.Vector3(this.model.node.origin.x,
+                                            this.model.node.origin.y,
+                                            this.model.node.origin.z);
+        var positionOnRotationPlane = 
+            SS.sceneView.determinePositionOnPlane2(event, planeOrigin, this.rotationAxis);
 
-        var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5);
-        var projector = new THREE.Projector();
-        var mouse3D = projector.unprojectVector(vector, SS.sceneView.camera);
-
-        var ray = new THREE.Ray(SS.sceneView.camera.position, null);
-        ray.direction = mouse3D.subSelf(SS.sceneView.camera.position).normalize();
-
-        var origin = new THREE.Vector3(this.model.node.origin.x,
-                                       this.model.node.origin.y,
-                                       this.model.node.origin.z);
-
-        var p0 = origin;
-        var l0 = ray.origin;
-        var l = ray.direction;
-        var n = this.rotationAxis;
-
-        var d = new THREE.Vector3().sub(p0, l0).dot(n)/l.dot(n);
-        if (d === 0) {
+        if (!positionOnRotationPlane) {
             return;
         }
-        var positionOnRotationPlane = new THREE.Vector3().add(l0, l.clone().multiplyScalar(d));
 
-        var v1 = new THREE.Vector3().sub(
-            new THREE.Vector3(
-                positionOnRotationPlane.x, 
-                positionOnRotationPlane.y, 
-                positionOnRotationPlane.z),
-            origin).normalize();
-        var v2 = new THREE.Vector3().sub(this.anchorPosition,
-                                         origin).normalize();
+        var v1 = new THREE.Vector3().sub(positionOnRotationPlane, planeOrigin).normalize();
+        var v2 = new THREE.Vector3().sub(this.anchorPosition, planeOrigin).normalize();
         var v2CrossV1 = new THREE.Vector3().cross(v2, v1);
 
         var angle = parseFloat((Math.acos(v1.dot(v2))/Math.PI*180).toFixed(0));
@@ -366,37 +345,44 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
             angle = -angle;
         }
 
-        var quat1 = new THREE.Quaternion().setFromAxisAngle(this.startAxis, this.startAngle/180*Math.PI);
-        var quat2 = new THREE.Quaternion().setFromAxisAngle(this.relativeRotationAxis, Math.PI*angle/180);
-        var quat3 = new THREE.Quaternion().multiply(quat1, quat2);
-        quat3.normalize();
-
-        var quaternionToAxisAngle = function(q) {
-            var angle = 2*Math.acos(q.w);
-            var axis = new THREE.Vector3(q.x/Math.sqrt(1-q.w*q.w),
-                                         q.y/Math.sqrt(1-q.w*q.w),
-                                         q.z/Math.sqrt(1-q.w*q.w));
-            return {angle: angle/Math.PI*180, axis: axis};
-        }
-        var axisAngle = quaternionToAxisAngle(quat3);
-
-        if (!event.ctrlKey) {
-            var currentAngle = this.model.node['angle'];
-            var newAngle = Math.round(axisAngle.angle/5)*5;
-            if (newAngle !== currentAngle) {
-                this.model.node['axis'].x = axisAngle.axis.x;
-                this.model.node['axis'].y = axisAngle.axis.y;
-                this.model.node['axis'].z = axisAngle.axis.z;
-                this.model.node['angle'] = newAngle;
-            }
+        if (this.previousRelativeAngle == undefined) {
+            this.previousRelativeAngle = 0;
         } else {
-            this.model.node['axis'].x = axisAngle.axis.x;
-            this.model.node['axis'].y = axisAngle.axis.y;
-            this.model.node['axis'].z = axisAngle.axis.z;
-            this.model.node['angle'] = axisAngle.angle;
+            this.previousRelativeAngle = this.relativeAngle;
+        }
+
+        var round = function(value, tolerance) {
+            return Math.round(value/tolerance)*tolerance;
+        }
+
+        this.relativeAngle = angle;
+        if (!event.ctrlKey) {
+            this.relativeAngle = round(this.relativeAngle, 5);
+        }
+
+        if (this.relativeAngle !== this.previousRelativeAngle) {
+            var quat1 = new THREE.Quaternion().setFromAxisAngle(this.startAxis, this.startAngle/180*Math.PI);
+            var quat2 = new THREE.Quaternion().setFromAxisAngle(this.relativeRotationAxis, Math.PI*this.relativeAngle/180);
+            var quat3 = new THREE.Quaternion().multiply(quat1, quat2);
+            quat3.normalize();
+
+            var quaternionToAxisAngle = function(q) {
+                var angle = 2*Math.acos(q.w);
+                var axis = new THREE.Vector3(q.x/Math.sqrt(1-q.w*q.w),
+                                             q.y/Math.sqrt(1-q.w*q.w),
+                                             q.z/Math.sqrt(1-q.w*q.w));
+                return {angle: angle/Math.PI*180, axis: axis};
+            }
+            var axisAngle = quaternionToAxisAngle(quat3);
+
+            this.model.node['axis'].x = round(axisAngle.axis.x, 0.001);
+            this.model.node['axis'].y = round(axisAngle.axis.y, 0.001);
+            this.model.node['axis'].z = round(axisAngle.axis.z, 0.001);
+            this.model.node['angle'] = round(axisAngle.angle, 0.01);
         }
 
         this.model.trigger('change');
+
     },
 
 
