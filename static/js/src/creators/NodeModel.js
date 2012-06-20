@@ -186,8 +186,11 @@ SS.InteractiveSceneView = SS.SceneObjectView.extend({
 
     initialize: function() {
         SS.SceneObjectView.prototype.initialize.call(this);
-        this.on('mouseEnter', this.highlight);
-        this.on('mouseLeave', this.unhighlight);
+        this.on('mouseEnter', this.enterHighlight);
+        this.on('mouseLeave', this.leaveHighlight);
+        this.on('mouseDown', this.downHighlight);
+        this.on('mouseUp', this.upHighlight);
+
         this.updateCameraScale();
         SS.sceneView.on('cameraChange', this.cameraChange, this);
     },
@@ -195,8 +198,10 @@ SS.InteractiveSceneView = SS.SceneObjectView.extend({
     remove: function() {
         SS.SceneObjectView.prototype.remove.call(this);
         SS.sceneView.off('cameraChange', this.cameraChange, this);
-        this.off('mouseEnter', this.highlight);
-        this.off('mouseLeave', this.unhighlight);
+        this.off('mouseEnter', this.enterHighlight);
+        this.off('mouseLeave', this.leaveHighlight);
+        this.off('mouseDown', this.downHighlight);
+        this.off('mouseUp', this.upHighlight);
     },
 
     priority: 1,
@@ -215,16 +220,35 @@ SS.InteractiveSceneView = SS.SceneObjectView.extend({
         functor(object);
     },
 
-    highlight: function() {
+    highlighted: false,
+    mouseIsDown: false,
+    opacity: 0.5,
+
+    enterHighlight: function() {
         if (this.active) {
             this.recursiveHighlightFn(this.sceneObject, 1.0);
+            this.highlighted = true;
+            this.opacity = 1.0;
         }
     },
 
-    unhighlight: function() {
-        if (this.active) {
-            this.recursiveHighlightFn(this.sceneObject, 0.5);
+    leaveHighlight: function() {
+        if (!this.mouseIsDown) {
+            this.upHighlight();
         }
+    },
+
+    downHighlight: function() {
+        this.mouseIsDown = true;
+    },
+
+    upHighlight:function() {
+        if (this.highlighted) {
+            this.recursiveHighlightFn(this.sceneObject, 0.5);
+            this.highlighted = false;
+            this.opacity = 0.5;
+        }
+        this.mouseIsDown = false;
     },
 
     updateCameraScale: function() {

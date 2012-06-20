@@ -485,8 +485,8 @@ SS.SceneView = function(container) {
 
     if (SS.UI_MOUSE_STATE.isFree()) {
         this.triggerMouseOverSceneObjectViews = function(event) {
-            var previousOverObjects = mouseOverSceneObjectViews.map(function(x) { return x; });
-            var leaveObjects = mouseOverSceneObjectViews.map(function(x) { return x; });
+            var previousOverObjects = mouseOverSceneObjectViews.slice(0);
+            var leaveObjects = mouseOverSceneObjectViews.slice(0);
             mouseOverSceneObjectViews = [];
             findSceneObjectViewsForEvent(event).map(function(sceneObjectView) {
                 if (previousOverObjects.indexOf(sceneObjectView) === -1) {
@@ -523,10 +523,9 @@ SS.SceneView = function(container) {
     }
 
     this.triggerMouseUpOnSceneObjectViews = function(event) {
-        var sceneObjects = findSceneObjectViewsForEvent(event);
-        if (sceneObjects.length > 0) {
-            sceneObjects[0].trigger('mouseUp', event);
-        }
+        mouseDownSceneObjectViews.map(function(obj) {
+            obj.trigger('mouseUp', event);
+        });
         mouseDownSceneObjectViews = [];
     }
 

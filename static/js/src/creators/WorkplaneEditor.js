@@ -262,12 +262,17 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
             var y = (60)*Math.sin(angle);
             circleGeom.vertices.push(new THREE.Vector3(x,y,0));
         }
-        var circle = new THREE.Line(circleGeom, 
-                                    new THREE.LineBasicMaterial({ color: SS.materials.lineColor, wireframe : true, linewidth: 1.0, opacity: 0.5 }));
+        var circleMaterial = new THREE.LineBasicMaterial({ 
+            color: SS.materials.lineColor, 
+            wireframe : true, 
+            linewidth: 1.0, 
+            opacity: this.opacity });
 
+        var circle = new THREE.Line(circleGeom, circleMaterial);
+                                    
         var arrowGeometry = new THREE.CylinderGeometry(0, 0.75*this.cameraScale, 2*this.cameraScale, 3);
         var arrowMaterials = [
-            new THREE.MeshBasicMaterial({color: 0x993333, opacity: 0.5, wireframe: false } ),
+            new THREE.MeshBasicMaterial({color: 0x993333, opacity: this.opacity, wireframe: false } ),
             new THREE.MeshBasicMaterial({color: 0xcc6666, wireframe: true})
         ];
         var arrow = THREE.SceneUtils.createMultiMaterialObject(arrowGeometry, arrowMaterials);

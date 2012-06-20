@@ -193,7 +193,7 @@ SS.DraggableCorner = SS.InteractiveSceneView.extend({
         var width = 1.0*this.cameraScale;
         var geometry = new THREE.CubeGeometry(width, width, width);
         var materials = [
-            new THREE.MeshBasicMaterial({color: SS.materials.faceColor, opacity: 0.5, wireframe: false } ),
+            new THREE.MeshBasicMaterial({color: SS.materials.faceColor, opacity: this.opacity, wireframe: false } ),
             new THREE.MeshBasicMaterial({color: SS.materials.lineColor, wireframe: true})
         ];
         var cube = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
@@ -265,11 +265,11 @@ SS.HeightCursoid = SS.InteractiveSceneView.extend({
         var axis = new THREE.Geometry();
         axis.vertices.push(new THREE.Vector3(0,0,-1000));
         axis.vertices.push(new THREE.Vector3(0,0,1000));
-        var line = new THREE.Line(axis, new THREE.LineBasicMaterial({ color: 0xcc6666, opacity: 0.5 }));  
+        var line = new THREE.Line(axis, new THREE.LineBasicMaterial({ color: 0xcc6666, opacity: this.opacity }));  
 
         var geometry = new THREE.CylinderGeometry(0, 0.75*this.cameraScale, 1.5*this.cameraScale, 3);
         var materials = [
-            new THREE.MeshBasicMaterial({color: 0x993333, opacity: 0.5, wireframe: false } ),
+            new THREE.MeshBasicMaterial({color: 0x993333, opacity: this.opacity, wireframe: false } ),
             new THREE.MeshBasicMaterial({color: 0xcc6666, wireframe: true})
         ];
         var cursoid = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
