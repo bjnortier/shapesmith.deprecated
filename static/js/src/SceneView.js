@@ -193,10 +193,12 @@ SS.SceneView = function(container) {
     }
 
     function determinePositionOnWorkplane(event) {
-        var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
-        var planeMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 0 }));
-        planeMesh.doubleSided = true;
-        return determinePositionOnPlane(event, planeMesh);
+        var origin = SS.objToVector(workplane.node.origin);
+        var normal = SS.objToVector(workplane.node.axis);        
+        var position = determinePositionOnPlane2(event, origin, normal);
+        return new THREE.Vector3(Math.round(position.x),
+                                 Math.round(position.y),
+                                 Math.round(position.z));
     }
 
     function determinePositionOnPlane(event, planeMesh) {
@@ -233,14 +235,9 @@ SS.SceneView = function(container) {
         var mouseRay = new THREE.Ray(camera.position, null);
         mouseRay.direction = mouse3D.subSelf(camera.position).normalize();
 
-        var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
-        var planeMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 0 }));
-
-        var intersects = mouseRay.intersectObject(planeMesh);
-        if (intersects.length == 1) {
-            mouseRay.origin = intersects[0].point.clone();
-        } else {
-            return null;
+        mouseRay.origin = determinePositionOnPlane2(event, new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,1));
+        if (mouseRay.origin === undefined) {
+            return;
         }
 
         // http://softsurfer.com/Archive/algorithm_0106/algorithm_0106.htm

@@ -171,6 +171,7 @@
   <script type="text/javascript" src="/static/js/src/creators/PlaneMirrorTransformCreator.js"></script>
 
   <script type="text/javascript" src="/static/js/src/TransformerManager.js"></script> 
+  <script type="text/javascript" src="/static/js/src/utils.js"></script>  
 
   <script type="text/javascript">
 
