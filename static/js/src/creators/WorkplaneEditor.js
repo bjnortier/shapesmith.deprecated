@@ -263,17 +263,17 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
             circleGeom.vertices.push(new THREE.Vector3(x,y,0));
         }
         var circleMaterial = new THREE.LineBasicMaterial({ 
-            color: SS.materials.lineColor, 
+            color: this.arrowLineColor, 
             wireframe : true, 
-            linewidth: 1.0, 
+            linewidth: 1.5, 
             opacity: this.opacity });
 
         var circle = new THREE.Line(circleGeom, circleMaterial);
                                     
         var arrowGeometry = new THREE.CylinderGeometry(0, 0.75*this.cameraScale, 2*this.cameraScale, 3);
         var arrowMaterials = [
-            new THREE.MeshBasicMaterial({color: 0x993333, opacity: this.opacity, wireframe: false } ),
-            new THREE.MeshBasicMaterial({color: 0xcc6666, wireframe: true})
+            new THREE.MeshBasicMaterial({color: this.arrowLineColor, opacity: this.opacity, wireframe: false } ),
+            new THREE.MeshBasicMaterial({color: this.arrowFaceColor, wireframe: true})
         ];
         var arrow = THREE.SceneUtils.createMultiMaterialObject(arrowGeometry, arrowMaterials);
         arrow.position.x = 60;
@@ -393,6 +393,10 @@ SS.WorkplaneURotationPreview = SS.WorkplaneRotationPreview.extend({
     relativeAnchorPosition: new THREE.Vector3(0,60,0),
     relativeRotationAxis: new THREE.Vector3(1,0,0),
 
+    arrowLineColor: 0x333399,
+    arrowFaceColor: 0x6666cc,
+
+
 });
 
 SS.WorkplaneVRotationPreview = SS.WorkplaneRotationPreview.extend({
@@ -410,6 +414,10 @@ SS.WorkplaneVRotationPreview = SS.WorkplaneRotationPreview.extend({
     relativeAnchorPosition: new THREE.Vector3(0,0,60),
     relativeRotationAxis: new THREE.Vector3(0,1,0),
 
+    arrowLineColor: 0x339933,
+    arrowFaceColor: 0x66cc66,
+
+
 });
 
 SS.WorkplaneWRotationPreview = SS.WorkplaneRotationPreview.extend({
@@ -421,5 +429,8 @@ SS.WorkplaneWRotationPreview = SS.WorkplaneRotationPreview.extend({
 
     relativeAnchorPosition: new THREE.Vector3(60,0,0),
     relativeRotationAxis: new THREE.Vector3(0,0,1),
+
+    arrowLineColor: 0x993333,
+    arrowFaceColor: 0xcc6666,
 
 });
