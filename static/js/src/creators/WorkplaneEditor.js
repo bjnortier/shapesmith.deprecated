@@ -207,19 +207,26 @@ SS.WorkplanePreview = SS.PreviewWithOrigin.extend({
         SS.PreviewWithOrigin.prototype.render.call(this);
         
         var origin = this.model.node.origin;
-
         var materials = [ SS.materials.faceMaterial, SS.materials.wireframeMaterial ];
 
-        var planeGeometry = new THREE.PlaneGeometry(120, 120);
-        var topPlane = THREE.SceneUtils.createMultiMaterialObject(planeGeometry, materials);
-        var bottomPlane = THREE.SceneUtils.createMultiMaterialObject(planeGeometry, materials);
-        topPlane.rotation.x = Math.PI/2;
-        bottomPlane.rotation.x = 3*Math.PI/2;
+        var planeGeometry = new THREE.PlaneGeometry(60, 60);
+        var view = this;
+        [-30, 30].map(function(xpos) {
+            [-30, 30].map(function(ypos) {
+                var topPlane = THREE.SceneUtils.createMultiMaterialObject(planeGeometry, materials);
+                var bottomPlane = THREE.SceneUtils.createMultiMaterialObject(planeGeometry, materials);
+                topPlane.position.x = xpos;
+                topPlane.position.y = ypos;
+                topPlane.rotation.x = Math.PI/2;
+                bottomPlane.rotation.x = 3*Math.PI/2;
+                bottomPlane.position.x = xpos;
+                bottomPlane.position.y = ypos;
 
-
-        this.sceneObject.add(topPlane);        
-        this.sceneObject.add(bottomPlane);
-
+                view.sceneObject.add(topPlane);        
+                view.sceneObject.add(bottomPlane);
+            });
+        });
+        
         var quaternion = new THREE.Quaternion();
         var axis = new THREE.Vector3(this.model.node.axis.x, 
                                      this.model.node.axis.y,
@@ -282,14 +289,18 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
             var arcStartAngle = Math.min(-this.relativeAngle, 0);
             var arcEndAngle = Math.max(-this.relativeAngle, 0);
 
-            arcGeom.vertices.push(new THREE.Vector3(0,0,0))
+            if (arcStartAngle == -this.relativeAngle) {
+                arcGeom.vertices.push(new THREE.Vector3(0,0,0))
+            }
             for (var i = arcStartAngle; i <= arcEndAngle; ++i) {
                 var angle = i/180*Math.PI;
                 var x = (60)*Math.cos(angle);
                 var y = (60)*Math.sin(angle);
                 arcGeom.vertices.push(new THREE.Vector3(x,y,0));
             }
-            arcGeom.vertices.push(new THREE.Vector3(0,0,0));
+            if (arcEndAngle == -this.relativeAngle) {
+                arcGeom.vertices.push(new THREE.Vector3(0,0,0));
+            }
         }
         var angleArc = new THREE.Line(arcGeom, circleMaterial);
                                     
@@ -460,7 +471,7 @@ SS.WorkplaneWRotationPreview = SS.WorkplaneRotationPreview.extend({
 
     arrowLineColor: 0x993333,
     arrowFaceColor: 0xcc6666,
-    textColor: '#993333',
+    textColor: '#cc6666',
 });
 
 SS.RelativeAngleDimensionText = SS.DimensionText.extend({
