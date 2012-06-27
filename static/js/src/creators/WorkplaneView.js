@@ -324,8 +324,8 @@ SS.WorkplaneRulerText = SS.DimensionText.extend({
             if (triggerCheckpoint === view.updateCheckpoint) {
                 var origin = SS.objToVector(view.model.node.origin);
                 var axis = SS.objToVector(view.model.node.axis);
-                var position = new THREE.Vector3().add(view.options.position, origin);
-                var finalPosition = SS.rotateAroundAxis(position, axis, view.model.node.angle);
+                var rotatedPosition = SS.rotateAroundAxis(view.options.position, axis, view.model.node.angle);
+                var finalPosition = new THREE.Vector3().add(rotatedPosition, origin);
 
                 view.moveToScreenCoordinates(view.$xy, finalPosition);
                 view.$xy.fadeIn(100);

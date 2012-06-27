@@ -169,6 +169,7 @@ SS.SceneObjectView = Backbone.View.extend({
 
     postRender: function() {
         SS.sceneView.scene.add(this.sceneObject);
+        SS.sceneView.updateScene = true;
     },
 
     remove: function() {
@@ -276,6 +277,7 @@ SS.OkCancelView = Backbone.View.extend({
         this.render();
         this.model.on('change', this.update, this);
         SS.sceneView.on('cameraChange', this.update, this);
+        this.update();
     },
 
     remove: function() {

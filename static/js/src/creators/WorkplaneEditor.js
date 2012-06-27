@@ -32,6 +32,7 @@ SS.WorkplaneEditorModel = SS.NodeEditorModel.extend({
             new SS.DraggableOriginCorner({model: this}),
             new SS.OriginDimensionText({model: this}),
             new SS.WorkplaneEditorDOMView({model: this}),
+            new SS.WorkplaneEditorOkCancelView({model: this}),
             new SS.WorkplanePreview({model: this}),
             new SS.WorkplaneURotationPreview({model: this}),
             new SS.WorkplaneVRotationPreview({model: this}),
@@ -67,6 +68,37 @@ SS.WorkplaneEditorModel = SS.NodeEditorModel.extend({
         this.activateCorner(corner, SS.OriginHeightCursoid);
     },
 
+    ok: function() {
+        if (SS.workplaneModel.setNewNode(this.node)) {
+            this.destroy();
+        }
+    },
+
+    cancel: function() {
+        SS.workplaneModel.cancelEditing();
+        this.destroy();
+    },
+
+    xy: function() {
+        this.node = new SS.WorkplaneNode();
+        this.trigger('change');
+    },
+
+    yz: function() {
+        this.node = new SS.WorkplaneNode();
+        this.node.axis.x = this.node.axis.y = this.node.axis.z = Math.tan(Math.PI/6).toFixed(4);
+        this.node.angle = 120;
+        this.trigger('change');
+    },
+
+    zx: function() {
+        this.node = new SS.WorkplaneNode();
+        this.node.axis.x = this.node.axis.y = this.node.axis.z = -Math.tan(Math.PI/6).toFixed(4);
+        this.node.angle = 120;
+        this.trigger('change');
+    },
+
+
 });
 
 SS.WorkplaneEditorDOMView = SS.NodeEditorDOMView.extend({
@@ -77,14 +109,11 @@ SS.WorkplaneEditorDOMView = SS.NodeEditorDOMView.extend({
     },
 
     ok: function() {
-        if (SS.workplaneModel.setNewNode(this.model.node)) {
-            this.model.destroy();
-        }
+        this.model.ok();
     },
 
     cancel: function() {
-        SS.workplaneModel.cancelEditing();
-        this.model.destroy();
+        this.model.cancel();
     },
 
     preventRecursiveUpdate: false,
@@ -142,6 +171,72 @@ SS.WorkplaneEditorDOMView = SS.NodeEditorDOMView.extend({
         this.preventRecursiveUpdate = true;
         this.updateFromDOM();
         this.preventRecursiveUpdate = false;
+    },
+
+});
+
+SS.WorkplaneEditorOkCancelView = Backbone.View.extend({
+
+    initialize: function() {
+        this.render();
+        this.model.on('change', this.update, this);
+        SS.sceneView.on('cameraChange', this.update, this);
+        this.update();
+    },
+
+    remove: function() {
+        Backbone.View.prototype.remove.call(this);
+        this.model.off('change', this.update);
+        SS.sceneView.off('cameraChange', this.update);
+    },
+
+    render: function() {
+        var template = '<div>{{#planes}}<input class="{{value}}" type="submit" value="{{value}}"/>{{/planes}}</div>';
+        var planes = $.mustache(template, {planes: [{value: 'XY'}, 
+                                                    {value: 'YZ'}, 
+                                                    {value: 'ZX'}]});
+        var okCancel = $.mustache(template, {planes: [{value: 'Ok'}, 
+                                                    {value: 'Cancel'}]});
+        this.$el.html(planes + okCancel);
+        $('#floating-dom-view .ok-cancel').append(this.$el);
+    },
+
+    update: function() {
+
+        var boundingBox = {min: {x: -this.model.node.extents.x, y: -this.model.node.extents.y, z:0},
+                           max: {x: this.model.node.extents.x, y: this.model.node.extents.y, z:0}};
+        var screenPosition = SS.boundingBoxToScreenPosition(boundingBox);
+        $('#floating-dom-view').css('left', screenPosition.x);
+        $('#floating-dom-view').css('top', screenPosition.y);
+    },
+    
+    events: {
+        'click .Ok' : 'ok',
+        'click .Cancel' : 'cancel',
+        'click .XY' : 'xy',
+        'click .YZ' : 'yz',
+        'click .ZX' : 'zx',
+
+    },
+
+    ok: function() {
+        this.model.ok();
+    },
+
+    cancel: function() {
+        this.model.cancel();
+    },
+
+    xy: function() {
+        this.model.xy();
+    },
+
+    yz: function() {
+        this.model.yz();
+    },
+
+    zx: function() {
+        this.model.zx();
     },
 
 });

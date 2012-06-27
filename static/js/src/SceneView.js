@@ -7,8 +7,8 @@ SS.SceneView = function(container) {
 
     var mouseOnDown, lastMouseMpos, mouseDownOnActiveSceneObject;
 
-    var elevation = Math.PI*2/8, azimuth = Math.PI/4;
-    var target = { azimuth: Math.PI/ 4, elevation: Math.PI*2/8 };
+    var elevation = Math.PI/4, azimuth = Math.PI/4;
+    var target = { azimuth: Math.PI/ 4, elevation: Math.PI*3/8 };
     var targetOnDown = { azimuth: target.azimuth, elevation: target.elevation };
     var distance = 1000, distanceTarget = 300;
     var targetScenePosition = new THREE.Vector3(0,0,0);
