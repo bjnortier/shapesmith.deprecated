@@ -227,10 +227,10 @@ SS.workplane.grid = function(spec) {
 	}
     }
 
-    addAxes();
-    addMainGrid();
-    addLabels();
-    addFadingTiles();
+    // addAxes();
+    // addMainGrid();
+    // addLabels();
+    // addFadingTiles();
 
     return that;
 

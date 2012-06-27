@@ -161,6 +161,7 @@
   <script type="text/javascript" src="/static/js/src/creators/PolylineCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/creators/FilletCreator.js"></script>
 
+  <script type="text/javascript" src="/static/js/src/creators/WorkplaneView.js"></script>
   <script type="text/javascript" src="/static/js/src/creators/WorkplaneEditor.js"></script>
 
   <script type="text/javascript" src="/static/js/src/creators/Transformer.js"></script>

@@ -1,26 +1,9 @@
 var SS = SS || {};
 
-SS.NodeDisplayModel = Backbone.Model.extend({
-});
-
-SS.NodeEditorModel = Backbone.Model.extend({
-});
-   
-SS.NodeDisplayView = Backbone.View.extend({
+SS.NodeEditorDOMView = Backbone.View.extend({
 
     initialize: function() {
-        this.render();
-    },
-
-    events: {
-        "click .value": "edit"
-    },
-
-});
-
-SS.NodeEditorView = Backbone.View.extend({
-
-    initialize: function() {
+        Backbone.View.prototype.initialize.call(this);
         this.render();
         this.update();
         this.model.on('change', this.update, this);
@@ -41,27 +24,14 @@ SS.NodeEditorView = Backbone.View.extend({
 
 });
 
-SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
-
-    initialize: function(attributes) {
-        this.node = SS.sceneView.workplane.node;
-        this.view = new SS.WorkplaneDisplayView({model: this});
-    },
-
-    destroy: function() {
-        this.view.remove();
-    },
-
-});
-
 SS.WorkplaneEditorModel = SS.NodeEditorModel.extend({
 
     initialize: function(attributes) {
-        this.node = new SS.WorkplaneNode();
+        this.node = attributes.editingNode;
         this.views = [
             new SS.DraggableOriginCorner({model: this}),
             new SS.OriginDimensionText({model: this}),
-            new SS.WorkplaneEditorView({model: this}),
+            new SS.WorkplaneEditorDOMView({model: this}),
             new SS.WorkplanePreview({model: this}),
             new SS.WorkplaneURotationPreview({model: this}),
             new SS.WorkplaneVRotationPreview({model: this}),
@@ -99,21 +69,7 @@ SS.WorkplaneEditorModel = SS.NodeEditorModel.extend({
 
 });
 
-SS.WorkplaneDisplayView = SS.NodeDisplayView.extend({
-
-    render: function() {
-        this.$el.html(SS.renderDisplayDOM('Workplane', SS.schemas.workplane, this.model.node));
-        $('#workplane').append(this.$el);
-    },
-
-    edit: function() {
-        this.model.destroy();
-        new SS.WorkplaneEditorModel();
-    },
-
-});
-
-SS.WorkplaneEditorView = SS.NodeEditorView.extend({
+SS.WorkplaneEditorDOMView = SS.NodeEditorDOMView.extend({
 
     render: function() {
         this.$el.html(SS.renderEditingDOM('Workplane', SS.schemas.workplane, this.model.node));
@@ -121,12 +77,14 @@ SS.WorkplaneEditorView = SS.NodeEditorView.extend({
     },
 
     ok: function() {
-        console.log('ok');
+        if (SS.workplaneModel.setNewNode(this.model.node)) {
+            this.model.destroy();
+        }
     },
 
     cancel: function() {
+        SS.workplaneModel.cancelEditing();
         this.model.destroy();
-        new SS.WorkplaneDisplayModel();
     },
 
     preventRecursiveUpdate: false,
