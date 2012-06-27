@@ -367,10 +367,10 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
             }
             var axisAngle = quaternionToAxisAngle(quat3);
 
-            this.model.node['axis'].x = round(axisAngle.axis.x, 0.001);
-            this.model.node['axis'].y = round(axisAngle.axis.y, 0.001);
-            this.model.node['axis'].z = round(axisAngle.axis.z, 0.001);
-            this.model.node['angle'] = round(axisAngle.angle, 0.01);
+            this.model.node['axis'].x = axisAngle.axis.x.toFixed(3);
+            this.model.node['axis'].y = axisAngle.axis.y.toFixed(3);
+            this.model.node['axis'].z = axisAngle.axis.z.toFixed(3);
+            this.model.node['angle']  = axisAngle.angle.toFixed(2);
         }
         this.model.trigger('change');
     },

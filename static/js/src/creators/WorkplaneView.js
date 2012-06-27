@@ -322,7 +322,12 @@ SS.WorkplaneRulerText = SS.DimensionText.extend({
         var view = this;
         setTimeout(function() {
             if (triggerCheckpoint === view.updateCheckpoint) {
-                view.moveToScreenCoordinates(view.$xy, view.options.position);
+                var origin = SS.objToVector(view.model.node.origin);
+                var axis = SS.objToVector(view.model.node.axis);
+                var position = new THREE.Vector3().add(view.options.position, origin);
+                var finalPosition = SS.rotateAroundAxis(position, axis, view.model.node.angle);
+
+                view.moveToScreenCoordinates(view.$xy, finalPosition);
                 view.$xy.fadeIn(100);
                 view.hidden = false;
             }

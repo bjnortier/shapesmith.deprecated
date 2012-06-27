@@ -500,6 +500,7 @@ img.action:hover {
 
 .dimension.ruler {
     font-size: 8pt;
+    background: none;
 }
 
 .node-actions {
