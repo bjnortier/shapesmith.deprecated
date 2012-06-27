@@ -24,12 +24,30 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
     initialize: function(attributes) {
         this.node = new SS.WorkplaneNode();
         this.domView = new SS.WorkplaneDisplayDOMView({model: this});
-        this.permanentViews = [
+        this.views = [
             new SS.WorkplaneAxesSceneView({model: this}),
             new SS.WorkplaneMainGridSceneView({model: this}),
             new SS.WorkplaneFadingGridSceneView({model: this}),
             new SS.WorkplaneGlobalXYPlaneView({model: this}),
         ];
+        this.views.concat(this.addRulers());
+    },
+
+    addRulers: function() {
+        var rulers = [];
+        for (var x = -this.node.extents.x/10; x <= this.node.extents.x/10; ++x) {
+            rulers.push(new SS.WorkplaneRulerText({model: this,
+                                                  position: new THREE.Vector3(x*10,this.node.extents.y+5,0),
+                                                  label: x*10,
+                                                  axis: 'x'}));
+        }
+        for (var y = -this.node.extents.y/10; y <= this.node.extents.y/10; ++y) {
+            rulers.push(new SS.WorkplaneRulerText({model: this,
+                                                  position: new THREE.Vector3(this.node.extents.x+5,y*10,0),
+                                                  label: y*10,
+                                                  axis: 'y'}));
+        }
+        return rulers;
     },
 
     destroy: function() {
@@ -283,6 +301,42 @@ SS.WorkplaneGlobalXYPlaneView = SS.SceneObjectView.extend({
             this.sceneObject.add(plane);        
         }
         this.postRender();
+    },
+
+});
+
+SS.WorkplaneRulerText = SS.DimensionText.extend({
+
+    render: function() {
+        this.clear();
+        this.$xy = this.addElement($.mustache(
+                '<div class="dimension ruler {{axis}}">{{label}}</div>',
+                this.options));
+        this.update();
+    },
+
+    updateCheckpoint: 0,
+    hidden: false,
+
+    delayedUpdate: function(triggerCheckpoint) {
+        var view = this;
+        setTimeout(function() {
+            if (triggerCheckpoint === view.updateCheckpoint) {
+                view.moveToScreenCoordinates(view.$xy, view.options.position);
+                view.$xy.fadeIn(100);
+                view.hidden = false;
+            }
+        }, 500);
+    },
+    
+    update: function() {
+        this.updateCheckpoint += 1;
+        if (!this.hidden) {
+            this.$xy.fadeOut(100);
+        }
+        var checkpoint = this.updateCheckpoint;
+        this.delayedUpdate(checkpoint);
+        
     },
 
 });

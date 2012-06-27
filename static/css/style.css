@@ -486,16 +486,20 @@ img.action:hover {
     padding: 3px;
 }
 
-.dimension .x {
+.dimension .x, .dimension.x {
     color: #6666cc;
 }
 
-.dimension .y {
+.dimension .y, .dimension.y {
     color: #339933;
 }
 
-.dimension .z {
+.dimension .z, .dimension.z {
     color: #993333;
+}
+
+.dimension.ruler {
+    font-size: 8pt;
 }
 
 .node-actions {

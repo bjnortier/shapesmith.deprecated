@@ -365,7 +365,7 @@ SS.DimensionText = Backbone.View.extend({
     moveToScreenCoordinates: function(element, position, leftOffset, topOffset) {
         leftOffset = leftOffset || 0;
         topOffset = topOffset || 0;
-        var pixelPosition = SS.toScreenCoordinates(position);
+        var pixelPosition = SS.toScreenCoordinates(position.clone());
         element.css('left', pixelPosition.x - element.width()/2 + leftOffset);
         element.css('top', pixelPosition.y - element.height()/2 + topOffset);
     },
