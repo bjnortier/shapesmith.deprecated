@@ -2,30 +2,6 @@ var SS = SS || {};
 
 SS.NodeModel = Backbone.Model.extend({
 
-    updateFromDOMView: function() {
-        var updateValues = function(object, schema) {
-            for (key in schema.properties) {
-                var itemSchema = schema.properties[key];
-                if (itemSchema.type === 'array') {
-                    for (var k = 0; k < object[key].length; ++k) {
-                        for (var subKey in object[key][k]) {
-                            object[key][k][subKey] = parseFloat($('#' + subKey + '_' + k).val());
-                        }
-                    }
-                } else if (itemSchema.type === 'string') {
-                    object[key] = $('#' + key).val();
-                } else {
-                    object[key] = parseFloat($('#' + key).val());
-                }
-            }
-        };
-
-        var node = this.node;
-        var schema = SS.schemas[node.type];
-        node.origin && updateValues(node.origin, schema.properties.origin);
-        node.parameters && updateValues(node.parameters, schema.properties.parameters);
-    },
-
     setParameters: function(parameters) {
         for (var key in parameters) {
             this.node.parameters[key] = parameters[key];
@@ -42,62 +18,18 @@ SS.NodeModel = Backbone.Model.extend({
 
 });
 
-
-SS.NodeDOMView = Backbone.View.extend({
+SS.NodeEditorDOMView = Backbone.View.extend({
 
     initialize: function() {
+        Backbone.View.prototype.initialize.call(this);
         this.render();
+        this.update();
         this.model.on('change', this.update, this);
     },
 
     remove: function() {
         Backbone.View.prototype.remove.call(this);
         this.model.off('change', this.update);
-    },
-
-    render: function() {
-        var node = this.model.node;
-        var schema = SS.schemas[node.type];
-    
-        // Origin & Orientation
-        var originTable = null;
-        if (node.origin) {
-        var originArr = ['x', 'y', 'z'].map(function(key) {
-            return {key: key, 
-                value: node.origin[key], 
-                editing: node.editing,
-                        inputElement: renderInputElement(key, node.origin, schema.properties.origin)
-                       }
-        });
-        var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}{{{inputElement}}}{{/editing}}</td></tr>{{/originArr}}</table>';
-        var originTable = $.mustache(originTemplate, {originArr : originArr});
-        }
-
-        // Params
-        var paramsArr = [];
-        for (key in node.parameters) {
-            paramsArr.push({key: key,
-                            value: node.parameters[key],
-                            editing: node.editing,
-                            inputElement: renderInputElement(key, node.parameters, schema.properties.parameters)
-                           });
-        }
-        var parametersTemplate = '<table>{{#paramsArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}{{#editing}}{{{inputElement}}}{{/editing}}</td></tr>{{/paramsArr}}</table>';
-        var paramsTable = $.mustache(parametersTemplate, {paramsArr : paramsArr});
-
-        var template = '<table><tr><td>{{type}}</td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#editing}}<tr><td><input class="ok" type="submit" value="Ok"/><input class="cancel" type="submit" value="Cancel"/></td></tr>{{/editing}}</table>';
-
-        var view = {
-            type: node.type,
-            editing: node.editing,
-            originTable: originTable,
-            paramsTable: paramsTable
-        };
-        var nodeTable = $.mustache(template, view);
-        
-        this.$el.html(nodeTable);
-        $('#editing-area').append(this.$el);
-        return this;
     },
 
     events: {
@@ -108,33 +40,82 @@ SS.NodeDOMView = Backbone.View.extend({
         'click .field': 'fieldChanged',
     },
 
-    preventUpdate: false,
+    preventRecursiveUpdate: false,
+
+    traverseSchemaAndMatchInputs: function(rootSchema, targetNode, matchFunction) {
+
+        var view = this;
+        var updateFunction = function(ancestry, schema, targetNode) {
+            for (key in schema.properties) {
+                var ancestryCSS = '.' + ancestry.join('_');
+                var possibleInput = view.$el.find(ancestryCSS + ' input.' + key);
+                if (possibleInput.length == 1) {
+                    var targetObject = targetNode;
+                    ancestry.map(function(ancestor) {
+                        targetObject = targetObject[ancestor];
+                    });
+                    matchFunction(schema.properties[key], possibleInput, targetObject, key);
+                }
+                updateFunction(ancestry.concat(key), schema.properties[key], targetNode);
+            }
+         }
+
+        updateFunction([this.model.node.type], rootSchema, targetNode);
+    },
 
     update: function() {
-        if (this.preventUpdate) {
+        if (this.preventRecursiveUpdate) {
             return;
         }
 
-        var updateValues = function(object, schema) {
-            for (key in schema.properties) {
-                if (schema.properties[key].type === 'array') {
-                    for (var k = 0; k < object[key].length; ++k) {
-                        for (subKey in object[key][k]) {
-                            var id = '#' + subKey + '_' + k;
-                            $(id).val(object[key][k][subKey])
-                        }
-                    }
-                } else {
-                    $('#' + key).val(object[key]);
-                }
+        var matchFunction = function(schema, input, targetObject, key) {
+            input.val(targetObject[key]);
+        }
+        rootObject = {};
+        rootObject[this.model.node.type] = this.model.node,
+        this.traverseSchemaAndMatchInputs(
+            SS.schemas[this.model.node.type], 
+            rootObject,
+            matchFunction);
+    }, 
+
+    updateFromDOM: function() {
+        var matchFunction = function(schema, input, targetObject, key) {
+            var val =  input.val();
+            switch(schema.type) {
+            case "number":
+                val = parseFloat(val);
+                break;
+            case "integer":
+                val = parseInt(val);
+                break;
             }
-        };
+            targetObject[key] = val;
+        }
+        rootObject = {};
+        rootObject[this.model.node.type] = this.model.node,
+        this.traverseSchemaAndMatchInputs(
+            SS.schemas[this.model.node.type], 
+            rootObject,
+            matchFunction);
+        this.model.trigger('change');
+    },
 
-        var node = this.model.node;
-        var schema = SS.schemas[node.type];
-        node.origin && updateValues(node.origin, schema.properties.origin);
-        node.parameters && updateValues(node.parameters, schema.properties.parameters);
+    fieldChanged: function(x) {
+        this.preventRecursiveUpdate = true;
+        this.updateFromDOM();
+        this.preventRecursiveUpdate = false;
+    },
 
+});
+
+SS.NodeDOMView = SS.NodeEditorDOMView.extend({
+
+    render: function() {
+        var schema = SS.schemas[this.model.node.type];
+        this.$el.html(SS.renderEditingDOM(this.model.node.type, schema, this.model.node));
+        $('#editing-area').append(this.$el);
+        return this;
     },
 
     ok: function() {
@@ -143,12 +124,6 @@ SS.NodeDOMView = Backbone.View.extend({
 
     cancel: function() {
         this.model.cancel();
-    },
-
-    fieldChanged: function() {
-        this.preventUpdate = true;
-        this.model.updateFromDOMView();
-        this.preventUpdate = false;
     },
     
 });

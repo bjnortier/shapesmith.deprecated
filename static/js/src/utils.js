@@ -55,3 +55,21 @@ SS.boundingBoxToScreenPosition = function(boundingBox) {
     return {x: xPos, y:yPos};
 
 }
+
+SS.copyObj = function(value) {
+    if ((value === null) || (value === undefined)) {
+        return undefined;
+    } if (Object.prototype.toString.call( value ) === '[object Array]') {
+        return value.map(function(x) {
+            return SS.copyObj(x);
+        });
+    } else if (typeof(value) === 'object') {
+        var returnObj = {};
+        for (var key in value) {
+            returnObj[key] = SS.copyObj(value[key]);
+        }
+        return returnObj;
+    } else {
+        return value;
+    }
+}

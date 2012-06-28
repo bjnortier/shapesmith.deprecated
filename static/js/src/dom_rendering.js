@@ -28,14 +28,14 @@ SS.renderRecursiveDisplayDOM = function(name, schema, object)  {
 }
 
 SS.renderEditingDOM = function(name, schema, object) {
-    var nodeDOM = SS.renderRecursiveEditingDOM(name, schema, object);
+    var nodeDOM = SS.renderRecursiveEditingDOM([name], name, schema, object);
     var okCancel = '<input class="ok" type="submit" value="Ok"/><input class="cancel" type="submit" value="Cancel"/>';
     var view = {rows: [name, nodeDOM, okCancel]};
     return  $.mustache('<table>{{#rows}}<tr><td>{{{.}}}</td></tr>{{/rows}}</table>', view);
 }
 
-SS.renderRecursiveEditingDOM = function(name, schema, object)  {
-
+SS.renderRecursiveEditingDOM = function(ancestors, name, schema, object)  {
+    var tableClass = ancestors.join('_');
     if ((schema.type === 'number') || (schema.type === 'integer')) {
         var template = 
             '<input size="5" class="field {{name}}" type="number" value="{{value}}" ' +
@@ -60,16 +60,19 @@ SS.renderRecursiveEditingDOM = function(name, schema, object)  {
     } else if (schema.type === 'object') {
         var rows = [];
         for (key in schema.properties) {
-            rows.push({name: key, dom: SS.renderRecursiveEditingDOM(key, schema.properties[key], object[key])});
+            rows.push({name: key, dom: SS.renderRecursiveEditingDOM(ancestors.concat(key), key, schema.properties[key], object[key])});
         }
-        return $.mustache('<table class="{{name}}">{{#rows}}<tr><td>{{name}}</td><td>{{{dom}}}</td></tr>{{/rows}}</table>',
-                          {name:name, rows:rows});
+        return $.mustache(
+            '<table class="{{tableClass}}">{{#rows}}<tr><td>{{name}}</td><td>{{{dom}}}</td></tr>{{/rows}}</table>',
+            {name:name, tableClass: tableClass, rows:rows});
 
     } else if (schema.type === 'array') {
         var rows = object.map(function(element, index) {
-            return {row: SS.renderRecursiveEditingDOM(key, schema.items, element),
+            return {row: SS.renderRecursiveEditingDOM(ancestors.concat(key), key, schema.items, element),
                     index: index};
         });
-        return $.mustache('<table class="{{name}}">{{#rows}}<tr class="{{index}}"><td>{{{row}}}</td></tr>{{/rows}}</table>', {rows:rows, name:name});
+        return $.mustache(
+            '<table class="{{tableClass}}">{{#rows}}<tr class="{{index}}"><td>{{{row}}}</td></tr>{{/rows}}</table>', 
+            {rows:rows, tableClass: tableClass, name:name});
     }
 }

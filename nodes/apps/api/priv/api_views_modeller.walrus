@@ -141,8 +141,10 @@
   <script type="text/javascript" src="/static/js/src/GeomNodeRenderingManager.js"></script>
 
   <script type="text/javascript" src="/static/js/src/creators/NodeModel.js"></script>
-
   <script type="text/javascript" src="/static/js/src/creators/Creator.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/WorkplaneView.js"></script>
+  <script type="text/javascript" src="/static/js/src/creators/WorkplaneEditor.js"></script>
+
   <script type="text/javascript" src="/static/js/src/creators/DimensionArrowsView.js"></script>
   <script type="text/javascript" src="/static/js/src/creators/CuboidCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/creators/SphereCreator.js"></script>
@@ -161,8 +163,6 @@
   <script type="text/javascript" src="/static/js/src/creators/PolylineCreator.js"></script>
   <script type="text/javascript" src="/static/js/src/creators/FilletCreator.js"></script>
 
-  <script type="text/javascript" src="/static/js/src/creators/WorkplaneView.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/WorkplaneEditor.js"></script>
 
   <script type="text/javascript" src="/static/js/src/creators/Transformer.js"></script>
   <script type="text/javascript" src="/static/js/src/creators/TranslateTransformer.js"></script>

@@ -83,7 +83,7 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
 SS.WorkplaneDisplayDOMView = SS.NodeDisplayDOMView.extend({
 
     render: function() {
-        this.$el.html(SS.renderDisplayDOM('Workplane', SS.schemas.workplane, this.model.node));
+        this.$el.html(SS.renderDisplayDOM('workplane', SS.schemas.workplane, this.model.node));
         $('#workplane').append(this.$el);
     },
 

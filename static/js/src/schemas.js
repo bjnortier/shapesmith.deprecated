@@ -8,10 +8,21 @@ SS.schemas.vectorSchema =  {
                  'z' : {type: 'number'}}
 };
 
+SS.schemas.workplane = {
+    description: "Workplane",
+    type: 'object',
+    properties: {
+        origin: SS.schemas.vectorSchema,
+        'axis' : SS.schemas.vectorSchema,
+        'angle' : {type: 'number'},
+    }
+};
+
 SS.schemas.cuboid = {
     description: "Cuboid",
     type: 'object',
     properties: {
+        workplane: SS.schemas.workplane,
         origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
@@ -411,16 +422,6 @@ SS.schemas.import_stl = {
     description: "STL",
     type: 'object',
     properties: {
-    }
-};
-
-SS.schemas.workplane = {
-    description: "Workplane",
-    type: 'object',
-    properties: {
-        origin: SS.schemas.vectorSchema,
-        'axis' : SS.schemas.vectorSchema,
-        'angle' : {type: 'number'},
     }
 };
 

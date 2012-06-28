@@ -68,29 +68,16 @@ function GeomNode() {
     updateId(this);
 
     this.origin = arguments[0].origin;
-
-    var copyValue = function(value) {
-        if ((value === null) || (value === undefined)) {
-            return undefined;
-        } if (Object.prototype.toString.call( value ) === '[object Array]') {
-            return value.map(function(x) {
-                return copyValue(x);
-            });
-        } else if (typeof(value) === 'object') {
-            var returnObj = {};
-            for (var key in value) {
-                returnObj[key] = copyValue(value[key]);
-            }
-            return returnObj;
-        } else {
-            return value;
-        }
-    }
-
     this.contents = arguments[0].contents;
-    this.parameters = copyValue(arguments[0].parameters);
+    this.parameters = SS.copyObj(arguments[0].parameters);
     this.mesh = arguments[0].mesh;
     this.children = [];
+
+    if (arguments[0].workplane) {
+        this.workplane = SS.copyObj(arguments[0].workplane);
+    } else {
+        this.workplane = new SS.WorkplaneNode();
+    }
 
     var transformDescriptions = arguments[0].transforms || [];
     this.transforms = transformDescriptions.map(function(transformDescription) {
@@ -123,19 +110,17 @@ GeomNode.prototype.editableCopy = function() {
         }
     }
 
-    var copiedParameters = {};
-    for (key in this.parameters) {
-        copiedParameters[key] = this.parameters[key];
-    }
+    var copiedWorkplane = SS.copyObj(this.workplane);
+    var copiedParameters = SS.copyObj(this.parameters);
     var copiedTransforms = this.transforms.map(function(transform) {
         return transform.editableCopy();
     });
-
     
     var newNode = new GeomNode({type : this.type,
                                 contents: this.contents,
                                 origin: copiedOrigin,
                                 parameters : copiedParameters,
+                                workplane: copiedWorkplane,
                                 transforms : copiedTransforms,
                                 mesh : this.mesh,
                                }, 
@@ -160,6 +145,11 @@ GeomNode.prototype.toShallowJson = function() {
            return JSON.parse(tx.json());
         })
     };
+
+    if (!(new SS.WorkplaneNode(this.workplane).isGlobalXY())) {
+        obj.workplane = this.workplane
+    }
+
     if (this.origin) {
         obj.origin = this.origin;
     }

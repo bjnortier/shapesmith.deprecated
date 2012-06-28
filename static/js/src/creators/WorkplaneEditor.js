@@ -1,28 +1,6 @@
 var SS = SS || {};
 
-SS.NodeEditorDOMView = Backbone.View.extend({
 
-    initialize: function() {
-        Backbone.View.prototype.initialize.call(this);
-        this.render();
-        this.update();
-        this.model.on('change', this.update, this);
-    },
-
-    remove: function() {
-        Backbone.View.prototype.remove.call(this);
-        this.model.off('change', this.update);
-    },
-
-    events: {
-        'click .ok' : 'ok',
-        'click .cancel' : 'cancel',
-        'change .field': 'fieldChanged',
-        'keyup .field': 'fieldChanged',
-        'click .field': 'fieldChanged',
-    },
-
-});
 
 SS.WorkplaneEditorModel = SS.NodeEditorModel.extend({
 
@@ -48,6 +26,8 @@ SS.WorkplaneEditorModel = SS.NodeEditorModel.extend({
             view.remove();
         });
     },
+
+    schema: SS.schemas.workplane,
 
     activateCorner: function(corner, constructor, args) {
         if (this.activeCorner === corner) {
@@ -116,62 +96,7 @@ SS.WorkplaneEditorDOMView = SS.NodeEditorDOMView.extend({
         this.model.cancel();
     },
 
-    preventRecursiveUpdate: false,
-
-    traverseSchemaAndMatchInputs: function(rootSchema, targetNode, matchFunction) {
-
-        var view = this;
-        var updateFunction = function(ancestry, schema, targetNode) {
-            for (key in schema.properties) {
-                var ancestryCSS = ancestry.reduce(function(acc, clazz) { return acc + ' .' + clazz; }, '');
-                var possibleInput = view.$el.find(ancestryCSS + ' input.' + key);
-                if (possibleInput.length == 1) {
-                    var targetObject = targetNode;
-                    ancestry.map(function(ancestor) {
-                        targetObject = targetObject[ancestor];
-                    });
-                    matchFunction(schema.properties[key], possibleInput, targetObject, key);
-                }
-                updateFunction(ancestry.concat(key), schema.properties[key], targetNode);
-            }
-         }
-
-        updateFunction([], rootSchema, targetNode);
-    },
-
-    update: function() {
-        if (this.preventRecursiveUpdate) {
-            return;
-        }
-
-        var matchFunction = function(schema, input, targetObject, key) {
-            input.val(targetObject[key]);
-        }
-        this.traverseSchemaAndMatchInputs(SS.schemas.workplane, this.model.node, matchFunction);
-    }, 
-
-    updateFromDOM: function() {
-        var matchFunction = function(schema, input, targetObject, key) {
-            var val =  input.val();
-            switch(schema.type) {
-            case "number":
-                val = parseFloat(val);
-                break;
-            case "integer":
-                val = parseInt(val);
-                break;
-            }
-            targetObject[key] = val;
-        }
-        this.traverseSchemaAndMatchInputs(SS.schemas.workplane, this.model.node, matchFunction);
-        this.model.trigger('change');
-    },
-
-    fieldChanged: function(x) {
-        this.preventRecursiveUpdate = true;
-        this.updateFromDOM();
-        this.preventRecursiveUpdate = false;
-    },
+    
 
 });
 

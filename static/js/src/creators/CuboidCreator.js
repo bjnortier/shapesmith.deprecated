@@ -29,12 +29,13 @@ SS.CuboidCreator = SS.PrimitiveCreator.extend({
         var u = this.node.parameters.u;
         var v = this.node.parameters.v;
         var w = this.node.parameters.w;
-        return {min: new THREE.Vector3(origin.x, origin.y, origin.z),
-            max: new THREE.Vector3(origin.x + u, origin.y + v, origin.z + w)};
-        },
+        return {
+            min: new THREE.Vector3(origin.x, origin.y, origin.z),
+            max: new THREE.Vector3(origin.x + u, origin.y + v, origin.z + w)
+        };
+    },
 
-
-    });
+});
 
 SS.CuboidPreview = SS.PreviewWithOrigin.extend({
 
