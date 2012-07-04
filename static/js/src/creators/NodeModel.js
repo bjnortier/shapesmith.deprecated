@@ -72,7 +72,7 @@ SS.NodeEditorDOMView = Backbone.View.extend({
             input.val(targetObject[key]);
         }
         rootObject = {};
-        rootObject[this.model.node.type] = this.model.node,
+        rootObject[this.model.node.type] = this.model.node;
         this.traverseSchemaAndMatchInputs(
             SS.schemas[this.model.node.type], 
             rootObject,
@@ -143,6 +143,22 @@ SS.SceneObjectView = Backbone.View.extend({
     },
 
     postRender: function() {
+        if (this.model.node && this.model.node.workplane) {
+            var quaternion = new THREE.Quaternion();
+            var axis = SS.objToVector(this.model.node.workplane.axis);
+            var angle = this.model.node.workplane.angle/180*Math.PI;
+            quaternion.setFromAxisAngle(axis, angle);
+            this.sceneObject.useQuaternion = true;
+            this.sceneObject.quaternion = quaternion;
+
+            this.sceneObject.position = new THREE.Vector3().add(
+                SS.rotateAroundAxis(
+                    this.sceneObject.position, 
+                    axis, 
+                    this.model.node.workplane.angle),
+                SS.objToVector(this.model.node.workplane.origin));
+        }
+        
         SS.sceneView.scene.add(this.sceneObject);
         SS.sceneView.updateScene = true;
     },

@@ -1,7 +1,5 @@
 var SS = SS || {};
 
-
-
 SS.WorkplaneEditorModel = SS.NodeEditorModel.extend({
 
     initialize: function(attributes) {
@@ -66,14 +64,14 @@ SS.WorkplaneEditorModel = SS.NodeEditorModel.extend({
 
     yz: function() {
         this.node = new SS.WorkplaneNode();
-        this.node.axis.x = this.node.axis.y = this.node.axis.z = Math.tan(Math.PI/6).toFixed(4);
+        this.node.axis.x = this.node.axis.y = this.node.axis.z = parseFloat(Math.tan(Math.PI/6).toFixed(4));
         this.node.angle = 120;
         this.trigger('change');
     },
 
     zx: function() {
         this.node = new SS.WorkplaneNode();
-        this.node.axis.x = this.node.axis.y = this.node.axis.z = -Math.tan(Math.PI/6).toFixed(4);
+        this.node.axis.x = this.node.axis.y = this.node.axis.z = parseFloat(-Math.tan(Math.PI/6).toFixed(4));
         this.node.angle = 120;
         this.trigger('change');
     },
@@ -84,7 +82,7 @@ SS.WorkplaneEditorModel = SS.NodeEditorModel.extend({
 SS.WorkplaneEditorDOMView = SS.NodeEditorDOMView.extend({
 
     render: function() {
-        this.$el.html(SS.renderEditingDOM('Workplane', SS.schemas.workplane, this.model.node));
+        this.$el.html(SS.renderEditingDOM('workplane', SS.schemas.workplane, this.model.node));
         $('#workplane').append(this.$el);
     },
 
@@ -95,8 +93,6 @@ SS.WorkplaneEditorDOMView = SS.NodeEditorDOMView.extend({
     cancel: function() {
         this.model.cancel();
     },
-
-    
 
 });
 
@@ -206,9 +202,7 @@ SS.WorkplanePreview = SS.PreviewWithOrigin.extend({
         });
         
         var quaternion = new THREE.Quaternion();
-        var axis = new THREE.Vector3(this.model.node.axis.x, 
-                                     this.model.node.axis.y,
-                                     this.model.node.axis.z);
+        var axis = SS.objToVector(this.model.node.axis);
         var angle = this.model.node.angle/180*Math.PI;
         quaternion.setFromAxisAngle(axis, angle);
 
@@ -387,10 +381,10 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
             }
             var axisAngle = quaternionToAxisAngle(quat3);
 
-            this.model.node['axis'].x = axisAngle.axis.x.toFixed(3);
-            this.model.node['axis'].y = axisAngle.axis.y.toFixed(3);
-            this.model.node['axis'].z = axisAngle.axis.z.toFixed(3);
-            this.model.node['angle']  = axisAngle.angle.toFixed(2);
+            this.model.node['axis'].x = parseFloat(axisAngle.axis.x.toFixed(3));
+            this.model.node['axis'].y = parseFloat(axisAngle.axis.y.toFixed(3));
+            this.model.node['axis'].z = parseFloat(axisAngle.axis.z.toFixed(3));
+            this.model.node['angle']  = parseFloat(axisAngle.angle.toFixed(2));
         }
         this.model.trigger('change');
     },

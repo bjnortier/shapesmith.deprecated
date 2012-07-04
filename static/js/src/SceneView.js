@@ -14,7 +14,6 @@ SS.SceneView = function(container) {
     var targetScenePosition = new THREE.Vector3(0,0,0);
     var selectionOnlyMeshes = [];
 
-    var workplane;
     var popupMenu = SS.popupMenu();
 
     var that = this;
@@ -48,7 +47,6 @@ SS.SceneView = function(container) {
         scene.add( new THREE.AmbientLight( 0x404040 ) );
         
         addLights();
-        workplane = new SS.Workplane({scene: scene});
         popupMenu = SS.popupMenu();
 
         renderer.domElement.style.position = 'absolute';
@@ -179,50 +177,32 @@ SS.SceneView = function(container) {
         }
 
         var positionOnWorkplane = determinePositionOnWorkplane(event);
-        workplane.updateXYLocation(positionOnWorkplane, event);
 
-        var origin = new THREE.Vector3(0, 0, 0);
-        var direction = new THREE.Vector3(0, 0, 1);
-        var ray = new THREE.Ray(origin, direction);
-        var positionOnVertical = that.determinePositionOnRay(event, ray);
-        if (positionOnVertical) {
-            workplane.updateZLocation(positionOnVertical, event);
-        }
+        // var origin = new THREE.Vector3(0, 0, 0);
+        // var direction = new THREE.Vector3(0, 0, 1);
+        // var ray = new THREE.Ray(origin, direction);
+        // var positionOnVertical = that.determinePositionOnRay(event, ray);
+        // if (positionOnVertical) {
+        //     workplane.updateZLocation(positionOnVertical, event);
+        // }
 
         lastMousePos = mouse;
         that.updateScene = true;
     }
 
     function determinePositionOnWorkplane(event) {
-        var origin = SS.objToVector(workplane.node.origin);
-        var normal = SS.objToVector(workplane.node.axis);        
-        var position = determinePositionOnPlane2(event, origin, normal);
-        return new THREE.Vector3(Math.round(position.x),
-                                 Math.round(position.y),
-                                 Math.round(position.z));
-    }
+        var origin = SS.objToVector(SS.workplaneModel.node.origin);
+        var axis = SS.objToVector(SS.workplaneModel.node.axis);   
+        var normal = SS.rotateAroundAxis(new THREE.Vector3(0,0,1), axis,SS.workplaneModel.node.angle);
+        var worldPosition = determinePositionOnPlane2(event, origin, normal);
 
-    function determinePositionOnPlane(event, planeMesh) {
-        console.warn('DEPRECATED: SceneView.determinePositionOnPlane');
-        var mouse = {};
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-            
-        var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-        var projector = new THREE.Projector();
-        var mouse3D = projector.unprojectVector(vector, camera);
-        var ray = new THREE.Ray(camera.position, null);
-        ray.direction = mouse3D.subSelf(camera.position).normalize();
+        worldPosition.subSelf(origin);
+        var workplanePosition = 
+            SS.rotateAroundAxis(worldPosition, axis, -SS.workplaneModel.node.angle);
 
-        var intersects = ray.intersectObject(planeMesh);
-        if (intersects.length == 1) {
-            return {x: Math.round(intersects[0].point.x), 
-                    y: Math.round(intersects[0].point.y),
-                    z: Math.round(intersects[0].point.z)};
-        } else {
-            return null;
-        }
-
+        return new THREE.Vector3(Math.round(workplanePosition.x),
+                                 Math.round(workplanePosition.y),
+                                 Math.round(workplanePosition.z));
     }
 
     function determinePositionOnRay(event, givenRay) {
@@ -537,9 +517,7 @@ SS.SceneView = function(container) {
     this.scene = scene;
     this.selectionOnlyMeshes = selectionOnlyMeshes;
     this.camera = camera;
-    this.workplane = workplane;
     this.determinePositionOnRay = determinePositionOnRay;
-    this.determinePositionOnPlane = determinePositionOnPlane;
     this.determinePositionOnPlane2 = determinePositionOnPlane2;
     this.determinePositionOnWorkplane = determinePositionOnWorkplane;
     this.popupMenu = popupMenu;

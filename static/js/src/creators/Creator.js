@@ -83,7 +83,10 @@ SS.PrimitiveCreator = SS.Creator.extend({
             var geometry = {type: this.node.type,
                             parameters: this.node.parameters};
             if (this.node.origin) {
-        geometry.origin =  this.node.origin;
+                geometry.origin =  this.node.origin;
+            }
+            if(!(this.node.workplane).isGlobalXY()) {
+                geometry.workplane = this.node.workplane;
             }
             var cmd = create_geom_command(this.node, geometry);
             command_stack.execute(cmd);
@@ -292,20 +295,37 @@ SS.HeightCursoid = SS.InteractiveSceneView.extend({
 
     drag: function(event) {
 
-        var position = this.cornerPositionFromModel();
 
-        var origin = new THREE.Vector3(position.x, position.y, 0);
+        var workplaneOrigin = SS.objToVector(SS.workplaneModel.node.origin);
+        var workplaneAxis = SS.objToVector(SS.workplaneModel.node.axis);   
+        var workplaneAngle = SS.workplaneModel.node.angle;
+
+        var cornerPosition = this.cornerPositionFromModel();
+        var rayOrigin = 
+            SS.rotateAroundAxis(new THREE.Vector3(cornerPosition.x, cornerPosition.y, 0), 
+                                workplaneAxis, 
+                                workplaneAngle)
+            .addSelf(workplaneOrigin);
+
+
         var direction = new THREE.Vector3(0, 0, 1);
-        var ray = new THREE.Ray(origin, direction);
-        var positionOnVertical = SS.sceneView.determinePositionOnRay(event, ray);
-        if (positionOnVertical) {
-            
+        var rotatedDirection = SS.rotateAroundAxis(direction, workplaneAxis, workplaneAngle);
+
+        var ray = new THREE.Ray(rayOrigin, rotatedDirection);
+        var positionOnRay = SS.sceneView.determinePositionOnRay(event, ray);
+        if (positionOnRay) {
+
+            positionOnRay.subSelf(rayOrigin);
+            var normalizedPosition = SS.rotateAroundAxis(positionOnRay, workplaneAxis, -workplaneAngle);
+
+            var newCornerPosition = new THREE.Vector3(cornerPosition.x, 
+                                                      cornerPosition.y, 
+                                                      normalizedPosition.z);
+
             if (!event.ctrlKey) {
-                positionOnVertical.x = Math.round(positionOnVertical.x);
-                positionOnVertical.y = Math.round(positionOnVertical.y);
-                positionOnVertical.z = Math.round(positionOnVertical.z);
+                newCornerPosition.z = Math.round(newCornerPosition.z);
             }
-            this.updateModelFromCorner(positionOnVertical);
+            this.updateModelFromCorner(newCornerPosition);
             this.model.setParameters({});
         }
     },
@@ -363,6 +383,9 @@ SS.DimensionText = Backbone.View.extend({
     },
 
     moveToScreenCoordinates: function(element, position, leftOffset, topOffset) {
+        if (this.model.node.workplane) {
+            position = SS.worldPositionFromWorkplanePosition(position, this.model.node.workplane);
+        }
         leftOffset = leftOffset || 0;
         topOffset = topOffset || 0;
         var pixelPosition = SS.toScreenCoordinates(position.clone());

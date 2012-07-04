@@ -6,6 +6,7 @@ SS.WorkplaneNode = function() {
     this['extents'] = (arguments[0] && arguments[0]['extents']) || {x: 60, y:60};
     this['angle'] = (arguments[0] && arguments[0]['angle']) || 0;
     this['boundary'] = (arguments[0] && arguments[0]['boundary']) || 50;
+    this['type'] = 'workplane';
 }
 
 SS.WorkplaneNode.prototype.editableCopy = function() {

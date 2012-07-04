@@ -65,6 +65,7 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
 
     cancelEditing: function() {
         this.domView = new SS.WorkplaneDisplayDOMView({model: this});
+        SS.UI_EDITING_STATE.editing = false;
     },
 
     setNewNode: function(newNode) {
@@ -74,6 +75,7 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
             this.node = newNode;
             this.trigger('change');
             this.domView = new SS.WorkplaneDisplayDOMView({model: this});
+            SS.UI_EDITING_STATE.editing = false;
         }
         return validated;
     },
@@ -88,7 +90,10 @@ SS.WorkplaneDisplayDOMView = SS.NodeDisplayDOMView.extend({
     },
 
     edit: function() {
-        this.model.setEditing();
+        if (!SS.UI_EDITING_STATE.isEditing()) {
+            SS.UI_EDITING_STATE.editing = true;
+            this.model.setEditing();
+        }
     },
 
 });

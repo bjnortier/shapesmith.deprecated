@@ -21,6 +21,28 @@ void Builder::ApplyOrigin(map< string, mValue > json) {
         
         shape_ = BRepBuilderAPI_Transform(shape_, transformation).Shape();
     }
+
+    if (!json["workplane"].is_null()) {
+        map< string, mValue > workplane_origin = json["workplane"].get_obj()["origin"].get_obj();
+        double x = Util::to_d(workplane_origin["x"]);
+        double y = Util::to_d(workplane_origin["y"]);
+        double z = Util::to_d(workplane_origin["z"]);
+
+        map< string, mValue > workplane_axis = json["workplane"].get_obj()["axis"].get_obj();
+        double u = Util::to_d(workplane_axis["x"]);
+        double v = Util::to_d(workplane_axis["y"]);
+        double w = Util::to_d(workplane_axis["z"]);
+
+        double angle = Util::to_d(json["workplane"].get_obj()["angle"]);
+
+        gp_Trsf transformation1 = gp_Trsf();
+        transformation1.SetRotation(gp_Ax1(gp_Pnt(0.0,0.0,0.0), gp_Dir(u,v,w)), angle/180*M_PI);
+        shape_ = BRepBuilderAPI_Transform(shape_, transformation1).Shape();
+
+        gp_Trsf transformation2 = gp_Trsf();
+        transformation2.SetTranslation(gp_Vec(x,y,z));
+        shape_ = BRepBuilderAPI_Transform(shape_, transformation2).Shape();
+    }
 }
 
 void Builder::ApplyTransform(map< string, mValue > transformJson) {

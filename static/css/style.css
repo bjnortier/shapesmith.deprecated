@@ -484,7 +484,6 @@ img.action:hover {
     background-color: rgba(50,50,50,0.2);
     border-radius: 3px;
     padding: 3px;
-    z-index: -1;
 }
 
 .dimension .x, .dimension.x {
@@ -500,6 +499,7 @@ img.action:hover {
 }
 
 .dimension.ruler {
+    z-index: -1;
     font-size: 8pt;
     background: none;
 }
