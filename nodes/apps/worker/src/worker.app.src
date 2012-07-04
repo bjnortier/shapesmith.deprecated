@@ -26,9 +26,9 @@
                   lager
                  ]},
   {mod, { worker_app, []}},
-  {env, [{worker_executable, ["xcode", "Debug", "worker"]},
+  {env, [{worker_executable, ["build", "worker"]},
 	 {worker_max_time, 60000},
-	 {number_of_workers, 1},
+	 {number_of_workers, 2},
 	 {worker_master_node, 'master@127.0.0.1'}
 	]}
  ]}.
