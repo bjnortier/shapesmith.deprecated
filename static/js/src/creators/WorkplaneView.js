@@ -27,7 +27,7 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
         this.views = [
             new SS.WorkplaneAxesSceneView({model: this}),
             new SS.WorkplaneMainGridSceneView({model: this}),
-            new SS.WorkplaneFadingGridSceneView({model: this}),
+            //new SS.WorkplaneFadingGridSceneView({model: this}),
             new SS.WorkplaneGlobalXYPlaneView({model: this}),
         ];
         this.views.concat(this.addRulers());
@@ -59,6 +59,7 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
 
     setEditing: function() {
         this.domView.remove();
+        this.domView = undefined;
         var editableWorkplaneNode = this.node.editableCopy();
         this.editingModel = new SS.WorkplaneEditorModel({editingNode: editableWorkplaneNode});
     },
@@ -72,12 +73,40 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
         // TODO: Validation
         var validated = true;
         if (validated) {
-            this.node = newNode;
-            this.trigger('change');
-            this.domView = new SS.WorkplaneDisplayDOMView({model: this});
-            SS.UI_EDITING_STATE.editing = false;
+
+            var oldNode = this.node;
+            var model = this;
+            var doFn = function() {
+                model.node = newNode;
+                model.trigger('change');
+                if (model.domView) {
+                    model.domView.remove();
+                }2
+                model.domView = new SS.WorkplaneDisplayDOMView({model: model});
+                SS.UI_EDITING_STATE.editing = false;
+                command_stack.commit()
+            }
+
+            var undoFn = function() {
+                model.loadNode(oldNode);
+                command_stack.success();
+            }
+
+            var redoFn = function() {
+                model.loadNode(newNode);
+                command_stack.success();
+            }
+
+            var cmd = new Command(doFn, undoFn, redoFn);
+            command_stack.execute(cmd);
+
         }
         return validated;
+    },
+
+    loadNode: function(newNode) {
+        this.node = newNode;
+        this.trigger('change');
     },
 
 });

@@ -9,88 +9,86 @@ function Command(executeFn, undoFn, redoFn) {
     this.redo = function() { redoFn(); };
 }
 
-function CommandStack(ss) {
+function CommandStack() {
     var successFn;
     var commandInProgress;
 
     var undoStack = new Stack();
     var redoStack = new Stack();
-    var ss = ss;
-    var that = this;
 
     _.extend(this, Backbone.Events);
 
     this.commit = function() {
-	commandInProgress.fromCommit = SS.session.commit;
-	ss.commit();
+        commandInProgress.fromCommit = SS.session.commit;
+        SS.commit();
     }
 
     this.pop = function(commit) {
         this.trigger('beforePop');
 
-	if (undoStack.peek() && undoStack.peek().fromCommit === commit) {
-	    console.info('UNDO: ' + undoStack.peek().fromCommit);
-	    this.undo();
-	    return true;
-	}
-	
-	if (redoStack.peek() && redoStack.peek().toCommit === commit) {
-	    console.info('REDO: ' + redoStack.peek().toCommit);
-	    this.redo();
-	    return true;
-	}
+        if (undoStack.peek() && undoStack.peek().fromCommit === commit) {
+            console.info('UNDO: ' + undoStack.peek().fromCommit);
+            this.undo();
+            return true;
+        }
+        
+        if (redoStack.peek() && redoStack.peek().toCommit === commit) {
+            console.info('REDO: ' + redoStack.peek().toCommit);
+            this.redo();
+            return true;
+        }
     }
 
     this.execute = function(command) {
 
         successFn = function() {
-	    command.toCommit = ss.session.commit;
-	    undoStack.push(command);
+            command.toCommit = SS.session.commit;
+            undoStack.push(command);
         }
-	ss.spinner.show();
-	commandInProgress = command;
+        SS.spinner.show();
+        commandInProgress = command;
         command.execute();
     }
 
     this.undo = function() {
-	if (!this.canUndo()) {
-	    throw "Nothing to undo";
-	}
-	ss.spinner.show();
-        successFn = function() {
-	    redoStack.push(undoStack.pop());
+        if (!this.canUndo()) {
+            throw "Nothing to undo";
         }
-	undoStack.peek().undo();
+        SS.spinner.show();
+        successFn = function() {
+            redoStack.push(undoStack.pop());
+        }
+        undoStack.peek().undo();
     }
 
     this.redo = function() {
-	if (!this.canRedo()) {
-	    throw "Nothing to redo";
-	}
-	ss.spinner.show();
-        successFn = function() {
-	    undoStack.push(redoStack.pop());
+        if (!this.canRedo()) {
+            throw "Nothing to redo";
         }
-	redoStack.peek().redo();
+        SS.spinner.show();
+        successFn = function() {
+            undoStack.push(redoStack.pop());
+        }
+        redoStack.peek().redo();
     };
 
     this.canUndo = function() {
-	return undoStack.peek() !== undefined;
+        return undoStack.peek() !== undefined;
     };
 
     this.canRedo = function() {
-	return redoStack.peek() !== undefined;
+        return redoStack.peek() !== undefined;
     };
 
     
     this.success = function() {
         successFn();
-	ss.spinner.hide();
+        SS.spinner.hide();
     }
 
     this.error = function(error) {
-	SS.renderErrorMessage(error);
-	ss.spinner.hide();
+        SS.renderErrorMessage(error);
+        SS.spinner.hide();
     }
     
 }

@@ -26,6 +26,10 @@ SS.WorkplaneNode.prototype.editableCopy = function() {
     return new SS.WorkplaneNode(copies);
 }
 
+SS.WorkplaneNode.prototype.jsonify = function() {
+    return JSON.stringify(this);
+}
+
 SS.WorkplaneNode.prototype.isGlobalXY = function() {
     return (this.origin.x === 0) 
             &&

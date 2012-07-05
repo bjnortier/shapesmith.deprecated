@@ -108,7 +108,11 @@ function create_primitive(type) {
     geomNode = new GeomNode({
         type: type,
         editing: true,
-        origin: {x: 0, y: 0, z: 0},
+        origin: {
+            x: SS.sceneView.lastPositionOnWorkplane.x || 0,
+            y: SS.sceneView.lastPositionOnWorkplane.y || 0,
+            z: 0
+        },
         workplane: SS.workplaneModel.node.editableCopy(),
         parameters: geometryParams
     });

@@ -429,7 +429,8 @@ SS.commit = function() {
         return x.sha;
     });
     var json = {'geoms' : rootSHAs,
-    'parent' : SS.session.commit};
+                'workplane' : SS.workplaneModel.node,
+                'parent' : SS.session.commit};
     $.ajax({
         type: 'POST',
         url: '/' + SS.session.username + '/' + SS.session.design + '/commit/',
@@ -490,6 +491,12 @@ SS.load_commit = function(commit) {
         success: function(design) { 
             SS.spinner.hide();
             console.log('Load design: ' + JSON.stringify(design));
+            if (design.workplane) {
+                SS.workplaneModel.loadNode(new SS.WorkplaneNode(design.workplane));
+            } else {
+                SS.workplaneModel.loadNode(new SS.WorkplaneNode());
+            }
+
             var geoms = design.geoms;
             geoms.map(function(geom) {
                 SS.load_geom(geom);

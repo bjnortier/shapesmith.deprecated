@@ -3,7 +3,7 @@ var SS = SS || {};
 var selectionManager = new SelectionManager();
 
 SS.selectionManager = selectionManager;
-var command_stack = new CommandStack(SS);
+var command_stack = new CommandStack();
 
 var treeView = new TreeView();
 

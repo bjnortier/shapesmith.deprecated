@@ -1,6 +1,8 @@
 var SS = SS || {};
 SS.SceneView = function(container) {
 
+    this.lastPositionOnWorkplane = new THREE.Vector3(0,0,0);
+
     var camera, scene, renderer, w, h;
     var overRenderer;
     var lastCameraPosition = new THREE.Vector3(0,0,0);
@@ -176,16 +178,7 @@ SS.SceneView = function(container) {
             document.body.style.cursor = 'default';
         }
 
-        var positionOnWorkplane = determinePositionOnWorkplane(event);
-
-        // var origin = new THREE.Vector3(0, 0, 0);
-        // var direction = new THREE.Vector3(0, 0, 1);
-        // var ray = new THREE.Ray(origin, direction);
-        // var positionOnVertical = that.determinePositionOnRay(event, ray);
-        // if (positionOnVertical) {
-        //     workplane.updateZLocation(positionOnVertical, event);
-        // }
-
+        that.lastPositionOnWorkplane = determinePositionOnWorkplane(event);
         lastMousePos = mouse;
         that.updateScene = true;
     }
@@ -524,7 +517,6 @@ SS.SceneView = function(container) {
     this.onMouseUp = onMouseUp;
     this.onMouseMove = onMouseMove;
     this.onMouseDown = onMouseDown;
-
    
     return this;
 }
