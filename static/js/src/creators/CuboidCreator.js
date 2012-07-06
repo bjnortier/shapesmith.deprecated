@@ -73,6 +73,7 @@ SS.CuboidPreview = SS.PreviewWithOrigin.extend({
             var planeGeom = new THREE.PlaneGeometry(u, v);
             var plane = THREE.SceneUtils.createMultiMaterialObject(planeGeom, materials);
             plane.position = new THREE.Vector3(u/2, v/2, 0);
+            plane.rotation.x = Math.PI/2;
             
             this.sceneObject.add(plane);
         }
