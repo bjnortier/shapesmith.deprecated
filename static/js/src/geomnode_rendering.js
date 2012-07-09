@@ -345,11 +345,12 @@ SS.translateGeomNodeRendering = function(originalNode, editingNode,  translation
             var originalGeometry = originalNode.originalSceneObjects[key].children[i].geometry;
             var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
 
+            var axis = SS.objToVector(originalNode.workplane.axis);
+            var angle = originalNode.workplane.angle;
+
             editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
                 var position = vertex.clone();
-                position.x = position.x + translation.x;
-                position.y = position.y + translation.y;
-                position.z = position.z + translation.z;
+                position.addSelf(SS.rotateAroundAxis(SS.objToVector(translation), axis, angle));
                 return position;
             });
 
@@ -523,11 +524,13 @@ SS.boundingBoxForSceneObject = function(sceneObject) {
     return {min: min, max: max};
 }
 
-SS.boundingBoxForGeomNode = function(geomNode) {
+var computeBox = function(workplane, geomNode) {
     var boundingBoxes = [];
     var addFunction = function(child) {
-        child.geometry.computeBoundingBox();
-        child.geometry.boundingBox && boundingBoxes.push(child.geometry.boundingBox);
+        var childBox = SS.computeNormalizedBoundingBox(workplane, child.geometry);
+        if (childBox) {
+            boundingBoxes.push(childBox);
+        }
     };
 
     geomNode.sceneObjects.edges.children.map(addFunction);
@@ -544,10 +547,65 @@ SS.boundingBoxForGeomNode = function(geomNode) {
         max.y = Math.max(max.y, box.max.y);
         max.z = Math.max(max.z, box.max.z);
     }
-
     return {min: min, max: max};
 }
 
+SS.boundingBoxForGeomNode = function(geomNode) {
+    return computeBox(new SS.WorkplaneNode(), geomNode);
+}
+
+SS.normalizedBoundingBoxForGeomNode = function(geomNode) {
+    return computeBox(geomNode.workplane, geomNode);
+}
+
+SS.computeNormalizedBoundingBox = function(workplane, geometry) {
+
+    var boundingBox = { min: new THREE.Vector3(), max: new THREE.Vector3() };
+    var axis = SS.objToVector(workplane.axis);
+    var angle = workplane.angle;
+    var origin = SS.objToVector(workplane.origin);
+
+    var normalize = function(position) {
+        return SS.rotateAroundAxis(position.clone().subSelf(origin), axis, -angle);
+    }
+
+    if (geometry.vertices.length > 0) {
+
+        var position = normalize(geometry.vertices[0]);
+
+        boundingBox.min.copy(position);
+        boundingBox.max.copy(position);
+
+        var min = boundingBox.min,
+            max = boundingBox.max;
+
+        for (var v = 1, vl = geometry.vertices.length; v < vl; ++v) {
+            position = normalize(geometry.vertices[v]);
+            if (position.x < min.x) {
+                min.x = position.x;
+            } else if ( position.x > max.x ) {
+                max.x = position.x;
+            }
+
+            if (position.y < min.y) {
+                min.y = position.y;
+            } else if (position.y > max.y) {
+                max.y = position.y;
+            }
+
+            if (position.z < min.z) {
+                min.z = position.z;
+            } else if ( position.z > max.z ) {
+                max.z = position.z;
+            }
+        }
+        return boundingBox;
+    } else {
+        return undefined;
+    }
+}
+
+    
 SS.centerOfGeom = function(boundingBox) {
     return new THREE.Vector3().add(boundingBox.min, 
      new THREE.Vector3().sub(boundingBox.max, boundingBox.min).divideScalar(2));

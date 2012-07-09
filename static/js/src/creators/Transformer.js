@@ -4,9 +4,9 @@ var SS = SS || {};
 SS.TransformerInitiator = Backbone.Model.extend({
     
     initialize: function(attributes) {
-        this.geomNode = attributes.geomNode;
-        this.boundingBox = SS.boundingBoxForGeomNode(this.geomNode);
-        this.center = SS.centerOfGeom(this.boundingBox);
+        this.node = attributes.geomNode;
+        this.normalizedBoundingBox = SS.normalizedBoundingBoxForGeomNode(this.node);
+        this.normalizedCenter = SS.centerOfGeom(this.normalizedBoundingBox);
 
         this.views = [];
 
@@ -22,7 +22,7 @@ SS.TransformerInitiator = Backbone.Model.extend({
 
     deselected: function(deselected) {
         if ((deselected.length === 1) &&
-            (deselected[0] === this.geomNode.id)) {
+            (deselected[0] === this.node.id)) {
             this.destroy();
         }
     },
@@ -48,7 +48,8 @@ SS.Transformer = SS.NodeModel.extend({
 
         if (!attributes.editingExisting) {
             this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
-            this.center = SS.centerOfGeom(this.boundingBox);
+            this.normalizedBoundingBox = SS.normalizedBoundingBoxForGeomNode(this.editingNode);
+            this.normalizedCenter = SS.centerOfGeom(this.normalizedBoundingBox);
         }
 
         this.views = [
@@ -66,18 +67,6 @@ SS.Transformer = SS.NodeModel.extend({
         });
         geom_doc.off('replace', this.geomDocReplace);
         command_stack.off('beforePop', this.cancel, this);
-    },
-
-    updateFromDOMView: function() {
-        SS.NodeModel.prototype.updateFromDOMView.call(this);
-
-        if (!this.attributes.editingExisting) {
-            this.trigger('change:model');
-            this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
-            this.center = SS.centerOfGeom(this.boundingBox);
-        }
-
-        this.trigger('change');
     },
 
     getBoundingBox: function() {

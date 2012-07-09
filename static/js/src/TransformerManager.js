@@ -24,7 +24,7 @@ SS.TransformerManager = function() {
             initiator.destroy();
         });
         initiators = [];
-        initiators.push(new SS.RotateTransformerInitiator({geomNode: geomNode}));
+        //initiators.push(new SS.RotateTransformerInitiator({geomNode: geomNode}));
         initiators.push(new SS.TranslateTransformerInitiator({geomNode: geomNode}));
     }
     

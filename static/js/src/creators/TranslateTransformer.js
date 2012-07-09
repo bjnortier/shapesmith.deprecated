@@ -17,8 +17,8 @@ SS.TranslateTransformerInitiator = SS.TransformerInitiator.extend({
         var transform = new Transform({
             type: 'translate',
             editing: true,
-        origin: {x: Math.round(this.center.x), 
-                     y: Math.round(this.center.y), 
+            origin: {x: Math.round(this.normalizedCenter.x), 
+                     y: Math.round(this.normalizedCenter.y), 
                      z: 0},
             parameters: {u: 0.0,
                          v: 0.0,
@@ -64,21 +64,24 @@ SS.TranslateTransformer = SS.Transformer.extend({
 SS.TranslateTransformerView = SS.InteractiveSceneView.extend({
     
     initialize: function() {
-    SS.InteractiveSceneView.prototype.initialize.call(this);
+        SS.InteractiveSceneView.prototype.initialize.call(this);
         this.on('mouseDown', this.mouseDown, this);
         this.on('mouseDrag', this.drag);
+        this.model.on('change', this.render, this);
         this.render();
-    },
-
-    mouseDown: function() {
-        this.model.mouseDownOnTranslate && this.model.mouseDownOnTranslate(this);
     },
 
     remove: function() {
         SS.InteractiveSceneView.prototype.remove.call(this);
         this.model.off('mouseDown', this.mouseDown);
         this.off('mouseDrag', this.drag);
+        this.model.off('change', this.render, this);
     },
+
+    mouseDown: function() {
+        this.model.mouseDownOnTranslate && this.model.mouseDownOnTranslate(this);
+    },
+
 
     render: function() {
         this.clear();
@@ -91,8 +94,8 @@ SS.TranslateTransformerView = SS.InteractiveSceneView.extend({
         ];
         var cube = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
         
-        cube.position.x = this.model.center.x;
-        cube.position.y = this.model.center.y;
+        cube.position.x = this.model.normalizedCenter.x; 
+        cube.position.y = this.model.normalizedCenter.y;
         cube.position.z = 0;
         this.sceneObject.add(cube);
 
@@ -124,8 +127,14 @@ SS.TranslateTransformerView = SS.InteractiveSceneView.extend({
 SS.TranslateGeomNodeView = Backbone.View.extend({
 
     initialize: function() {
+        Backbone.View.prototype.initialize.call(this);
         this.render();
-        this.model.on('change:model', this.render, this);
+        this.model.on('beforeChange', this.render, this);
+    },
+
+    remove: function() {
+        Backbone.View.prototype.remove.call(this);
+        this.model.off('beforeChange', this.render, this);
     },
 
     render: function() {
@@ -147,19 +156,17 @@ SS.TranslateGeomNodeView = Backbone.View.extend({
 SS.TranslateHeightCursoid = SS.HeightCursoid.extend({
 
     initialize: function(options) {
-    SS.HeightCursoid.prototype.initialize.call(this);
+        SS.HeightCursoid.prototype.initialize.call(this);
         this.render();
     },
     
     cornerPositionFromModel: function() {
-    return {x: this.model.center.x,
-            y: this.model.center.y,
-            z: this.model.node.parameters.w};
+        return {x: this.model.normalizedCenter.x,
+                y: this.model.normalizedCenter.y,
+                z: this.model.node.parameters.w};
     },    
 
     updateModelFromCorner: function(position) {
-        this.model.node.parameters.u = position.x - this.model.node.origin.x;
-        this.model.node.parameters.v = position.y - this.model.node.origin.y;
         this.model.node.parameters.w = position.z - this.model.node.origin.z;
     },
 
@@ -191,7 +198,6 @@ SS.TranslateDimensionArrows = SS.DimensionArrowsView.extend({
         }
 
         this.sceneObject.position = new THREE.Vector3(origin.x, origin.y, origin.z);
-
         this.postRender();
     },
 

@@ -11,6 +11,12 @@ SS.NodeDisplayDOMView = Backbone.View.extend({
 
     initialize: function() {
         this.render();
+        this.model.on('change', this.render, this);
+    },
+
+    remove: function() {
+        Backbone.View.prototype.remove.call(this);
+        this.model.off('change', this.render);
     },
 
     events: {
@@ -27,7 +33,7 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
         this.views = [
             new SS.WorkplaneAxesSceneView({model: this}),
             new SS.WorkplaneMainGridSceneView({model: this}),
-            //new SS.WorkplaneFadingGridSceneView({model: this}),
+            new SS.WorkplaneFadingGridSceneView({model: this}),
             new SS.WorkplaneGlobalXYPlaneView({model: this}),
         ];
         this.views.concat(this.addRulers());

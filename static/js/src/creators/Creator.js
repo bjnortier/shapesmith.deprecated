@@ -383,8 +383,10 @@ SS.DimensionText = Backbone.View.extend({
     },
 
     moveToScreenCoordinates: function(element, position, leftOffset, topOffset) {
-        if (this.model.node.workplane) {
-            position = SS.worldPositionFromWorkplanePosition(position, this.model.node.workplane);
+        var workplane = ((this.model.node && this.model.node.workplane) ||
+                         (this.model.originalNode && this.model.originalNode.workplane));
+        if (workplane) { 
+            position = SS.worldPositionFromWorkplanePosition(position, workplane);
         }
         leftOffset = leftOffset || 0;
         topOffset = topOffset || 0;

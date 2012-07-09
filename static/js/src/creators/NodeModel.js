@@ -7,10 +7,11 @@ SS.NodeModel = Backbone.Model.extend({
             this.node.parameters[key] = parameters[key];
         }
 
-        this.trigger('change:model');
+        this.trigger('beforeChange');
         if (this.editingNode.sceneObjects) {
             this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
-            this.center = SS.centerOfGeom(this.boundingBox);
+            this.normalizedBoundingBox = SS.normalizedBoundingBoxForGeomNode(this.editingNode);
+            this.normalizedCenter = SS.centerOfGeom(this.normalizedBoundingBox);
         }
 
         this.trigger('change');
@@ -98,6 +99,7 @@ SS.NodeEditorDOMView = Backbone.View.extend({
             SS.schemas[this.model.node.type], 
             rootObject,
             matchFunction);
+        this.model.trigger('beforeChange');
         this.model.trigger('change');
     },
 
@@ -143,10 +145,14 @@ SS.SceneObjectView = Backbone.View.extend({
     },
 
     postRender: function() {
-        if (this.model.node && this.model.node.workplane) {
+        // geometry node or transform
+        var workplane = ((this.model.node && this.model.node.workplane) ||
+                         (this.model.originalNode && this.model.originalNode.workplane));
+        
+        if  (workplane) {
             var quaternion = new THREE.Quaternion();
-            var axis = SS.objToVector(this.model.node.workplane.axis);
-            var angle = this.model.node.workplane.angle/180*Math.PI;
+            var axis = SS.objToVector(workplane.axis);
+            var angle = workplane.angle/180*Math.PI;
             quaternion.setFromAxisAngle(axis, angle);
             this.sceneObject.useQuaternion = true;
             this.sceneObject.quaternion = quaternion;
@@ -155,8 +161,8 @@ SS.SceneObjectView = Backbone.View.extend({
                 SS.rotateAroundAxis(
                     this.sceneObject.position, 
                     axis, 
-                    this.model.node.workplane.angle),
-                SS.objToVector(this.model.node.workplane.origin));
+                    workplane.angle),
+                SS.objToVector(workplane.origin));
         }
         
         SS.sceneView.scene.add(this.sceneObject);
