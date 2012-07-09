@@ -368,12 +368,18 @@ SS.scaleGeomNodeRendering = function(originalNode, editingNode, scalePoint, fact
             var originalGeometry = originalNode.originalSceneObjects[key].children[i].geometry;
             var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
 
+            var axis = SS.objToVector(originalNode.workplane.axis);
+            var angle = originalNode.workplane.angle;
+            var globalScalePoint = SS.rotateAroundAxis(scalePoint, axis, angle);
+            globalScalePoint.addSelf(SS.objToVector(originalNode.workplane.origin));
+
             editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
                 var position = vertex.clone();
                 return new THREE.Vector3(
-                    scalePoint.x + (position.x - scalePoint.x)*factor,
-                    scalePoint.y + (position.y - scalePoint.y)*factor,
-                    scalePoint.z + (position.z - scalePoint.z)*factor);
+
+                    globalScalePoint.x + (position.x - globalScalePoint.x)*factor,
+                    globalScalePoint.y + (position.y - globalScalePoint.y)*factor,
+                    globalScalePoint.z + (position.z - globalScalePoint.z)*factor);
             });
 
             editingGeometry.computeCentroids();

@@ -21,7 +21,7 @@ SS.ScaleTransformerInitiator = SS.TransformerInitiator.extend({
 
     mouseDownOnArrow: function(arrowView) {
         
-    var geomNode = this.geomNode;
+        var geomNode = this.node;
         var editingNode = geomNode.editableCopy();
         var transform = new Transform({
             type: 'scale',
@@ -52,7 +52,7 @@ SS.ScaleTransformer = SS.Transformer.extend({
         SS.Transformer.prototype.initialize.call(this, attributes);
 
         if (!attributes.editingExisting) {
-            this.anchorPosition = attributes.anchorFunction(this.boundingBox);
+            this.anchorPosition = attributes.anchorFunction(this.normalizedBoundingBox);
 
             var arrowViews = [
             new SS.ScaleArrowViewMaxXMaxY({model: this}),
@@ -86,7 +86,7 @@ SS.ScaleGeomNodeView = Backbone.View.extend({
 
     initialize: function() {
         this.render();
-        this.model.on('change:model', this.render, this);
+        this.model.on('beforeChange', this.render, this);
     },
 
     render: function() {
@@ -114,7 +114,7 @@ SS.ScaleArrowView = SS.InteractiveSceneView.extend({
 
     remove: function() {
         SS.InteractiveSceneView.prototype.remove.call(this);
-        this.model.off('mouseDown', this.mouseDownOnArrow);
+        this.off('mouseDown', this.mouseDown);
         this.off('mouseDrag', this.drag);
     },
 
@@ -164,8 +164,11 @@ SS.ScaleArrowView = SS.InteractiveSceneView.extend({
                                                                transparent: true, 
                                                                opacity: 0.5 }));
 
-        this.sceneObject.add(arrowMesh);
-        this.sceneObject.add(line);
+        this.arrowObject = new THREE.Object3D();
+
+        this.arrowObject.add(arrowMesh);
+        this.arrowObject.add(line);
+        this.sceneObject.add(this.arrowObject);
        
         return this;
     },
@@ -202,16 +205,16 @@ SS.ScaleArrowViewMaxXMaxY = SS.ScaleArrowView.extend({
         this.render();
     },
 
-    anchorFunction: function(boundingBox) {
-        return {x: boundingBox.max.x, 
-                y: boundingBox.max.y};
+    anchorFunction: function(normalizedBoundingBox) {
+        return {x: normalizedBoundingBox.max.x, 
+                y: normalizedBoundingBox.max.y};
     },
 
     render: function() {
         SS.ScaleArrowView.prototype.render.call(this);
-        this.sceneObject.position.x = this.model.normalizedBoundingBox.max.x + 1;
-        this.sceneObject.position.y = this.model.normalizedBoundingBox.max.y + 1;
-        this.sceneObject.rotation.z = 1/4*Math.PI;
+        this.arrowObject.position.x = this.model.normalizedBoundingBox.max.x + 1;
+        this.arrowObject.position.y = this.model.normalizedBoundingBox.max.y + 1;
+        this.arrowObject.rotation.z = 1/4*Math.PI;
         this.postRender();
         return this;
     },
@@ -224,16 +227,16 @@ SS.ScaleArrowViewMinXMaxY = SS.ScaleArrowView.extend({
         this.render();
     },
 
-    anchorFunction: function(boundingBox) {
-        return {x: boundingBox.min.x, 
-                y: boundingBox.max.y};
+    anchorFunction: function(normalizedBoundingBox) {
+        return {x: normalizedBoundingBox.min.x, 
+                y: normalizedBoundingBox.max.y};
     },
 
     render: function() {
         SS.ScaleArrowView.prototype.render.call(this);
-        this.sceneObject.position.x = this.model.normalizedBoundingBox.min.x - 1;
-        this.sceneObject.position.y = this.model.normalizedBoundingBox.max.y + 1;
-        this.sceneObject.rotation.z = 3/4*Math.PI;
+        this.arrowObject.position.x = this.model.normalizedBoundingBox.min.x - 1;
+        this.arrowObject.position.y = this.model.normalizedBoundingBox.max.y + 1;
+        this.arrowObject.rotation.z = 3/4*Math.PI;
         this.postRender();
         return this;
     },
@@ -246,16 +249,16 @@ SS.ScaleArrowViewMinXMinY = SS.ScaleArrowView.extend({
         this.render();
     },
 
-    anchorFunction: function(boundingBox) {
-        return {x: boundingBox.min.x, 
-                y: boundingBox.min.y};
+    anchorFunction: function(normalizedBoundingBox) {
+        return {x: normalizedBoundingBox.min.x, 
+                y: normalizedBoundingBox.min.y};
     },
 
     render: function() {
         SS.ScaleArrowView.prototype.render.call(this);
-        this.sceneObject.position.x = this.model.normalizedBoundingBox.min.x - 1;
-        this.sceneObject.position.y = this.model.normalizedBoundingBox.min.y - 1;
-        this.sceneObject.rotation.z = 5/4*Math.PI;
+        this.arrowObject.position.x = this.model.normalizedBoundingBox.min.x - 1;
+        this.arrowObject.position.y = this.model.normalizedBoundingBox.min.y - 1;
+        this.arrowObject.rotation.z = 5/4*Math.PI;
         this.postRender();
         return this;
     },
@@ -268,16 +271,16 @@ SS.ScaleArrowViewMaxXMinY = SS.ScaleArrowView.extend({
         this.render();
     },
 
-    anchorFunction: function(boundingBox) {
-        return {x: boundingBox.max.x, 
-                y: boundingBox.min.y};
+    anchorFunction: function(normalizedBoundingBox) {
+        return {x: normalizedBoundingBox.max.x, 
+                y: normalizedBoundingBox.min.y};
     },
 
     render: function() {
         SS.ScaleArrowView.prototype.render.call(this);
-        this.sceneObject.position.x = this.model.normalizedBoundingBox.max.x + 1;
-        this.sceneObject.position.y = this.model.normalizedBoundingBox.min.y - 1;
-        this.sceneObject.rotation.z = 7/4*Math.PI;
+        this.arrowObject.position.x = this.model.normalizedBoundingBox.max.x + 1;
+        this.arrowObject.position.y = this.model.normalizedBoundingBox.min.y - 1;
+        this.arrowObject.rotation.z = 7/4*Math.PI;
         this.postRender();
         return this;
     },
@@ -299,13 +302,13 @@ SS.ScaleBoxView = SS.SceneObjectView.extend({
         var height = this.model.normalizedBoundingBox.max.z - this.model.normalizedBoundingBox.min.z;
 
         var geometry = new THREE.CubeGeometry(width, depth, height);
-    cube = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: SS.materials.lineColor, 
-                                                                     wireframe: true}));
-        
-    cube.position.x = this.model.normalizedBoundingBox.min.x + width/2;
-    cube.position.y = this.model.normalizedBoundingBox.min.y + depth/2;
-    cube.position.z = this.model.normalizedBoundingBox.min.z + height/2;
-    this.sceneObject.add(cube);
+        cube = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color: SS.materials.lineColor, 
+                                                                         wireframe: true}));
+            
+        cube.position.x = this.model.normalizedBoundingBox.min.x + width/2;
+        cube.position.y = this.model.normalizedBoundingBox.min.y + depth/2;
+        cube.position.z = this.model.normalizedBoundingBox.min.z + height/2;
+        this.sceneObject.add(cube);
 
         this.postRender();
         return this;

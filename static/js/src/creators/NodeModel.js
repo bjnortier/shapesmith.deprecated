@@ -99,8 +99,7 @@ SS.NodeEditorDOMView = Backbone.View.extend({
             SS.schemas[this.model.node.type], 
             rootObject,
             matchFunction);
-        this.model.trigger('beforeChange');
-        this.model.trigger('change');
+        this.model.setParameters({});
     },
 
     fieldChanged: function(x) {
@@ -139,6 +138,12 @@ SS.SceneObjectView = Backbone.View.extend({
         this.model.on('change', this.render, this);
     },
 
+    remove: function() {
+        SS.sceneView.deregisterSceneObjectView(this);
+        SS.sceneView.scene.remove(this.sceneObject);
+        this.model.off('change', this.render);
+    },
+
     clear: function() {
         SS.sceneView.scene.remove(this.sceneObject);
         this.sceneObject = new THREE.Object3D(); 
@@ -167,12 +172,6 @@ SS.SceneObjectView = Backbone.View.extend({
         
         SS.sceneView.scene.add(this.sceneObject);
         SS.sceneView.updateScene = true;
-    },
-
-    remove: function() {
-        SS.sceneView.deregisterSceneObjectView(this);
-        SS.sceneView.scene.remove(this.sceneObject);
-        this.model.off('change', this.render);
     },
 
     priority: 0,
