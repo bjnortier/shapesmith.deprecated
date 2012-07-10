@@ -105,8 +105,8 @@ SS.TranslateTransformerView = SS.InteractiveSceneView.extend({
 
     drag: function() {
         var workplanePosition = SS.sceneView.determinePositionOnWorkplane(event);
-        var u = workplanePosition.x - this.model.transform.origin.x;
-        var v = workplanePosition.y - this.model.transform.origin.y;
+        var u = workplanePosition.x - this.model.node.origin.x;
+        var v = workplanePosition.y - this.model.node.origin.y;
 
         var parameters = {
             u: parseFloat(u.toFixed(3)),
@@ -139,11 +139,8 @@ SS.TranslateGeomNodeView = Backbone.View.extend({
 
     render: function() {
         if (this.model.originalNode.originalSceneObjects) {
-            var transform = this.model.transform;
-            var position = new THREE.Vector3(transform.parameters.u,
-                                             transform.parameters.v,
-                                             transform.parameters.w);
-            
+            var transform = this.model.node;
+            var position = SS.objToVector(transform.parameters);
             SS.translateGeomNodeRendering(this.model.originalNode, 
                                           this.model.editingNode, 
                                           position);

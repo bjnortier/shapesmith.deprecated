@@ -1,7 +1,7 @@
 var SS = SS || {};
 
 SS.objToVector = function(obj) {
-    if (obj.x) {
+    if (obj.hasOwnProperty('x')) {
         return new THREE.Vector3(obj.x, obj.y, obj.z);
     } else {
         return new THREE.Vector3(obj.u, obj.v, obj.w);
@@ -9,9 +9,13 @@ SS.objToVector = function(obj) {
 }
 
 SS.rotateAroundAxis = function(position, axis, angle) {
-    var quaternion = new THREE.Quaternion().setFromAxisAngle(axis, angle/180*Math.PI);
-    var newPosition = quaternion.multiplyVector3(position, new THREE.Vector3());
-    return newPosition;
+    if (angle !== 0) {
+        var quaternion = new THREE.Quaternion().setFromAxisAngle(axis, angle/180*Math.PI);
+        var newPosition = quaternion.multiplyVector3(position, new THREE.Vector3());
+        return newPosition;
+    } else {
+        return position.clone();
+    }
 }
 
 SS.worldPositionFromWorkplanePosition = function(position, workplaneNode) {

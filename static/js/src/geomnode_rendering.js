@@ -348,9 +348,10 @@ SS.translateGeomNodeRendering = function(originalNode, editingNode,  translation
             var axis = SS.objToVector(originalNode.workplane.axis);
             var angle = originalNode.workplane.angle;
 
+            var translationVec = SS.objToVector(translation);
             editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
                 var position = vertex.clone();
-                position.addSelf(SS.rotateAroundAxis(SS.objToVector(translation), axis, angle));
+                position.addSelf(SS.rotateAroundAxis(translationVec, axis, angle));
                 return position;
             });
 

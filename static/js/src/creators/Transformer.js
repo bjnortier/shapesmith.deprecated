@@ -42,7 +42,6 @@ SS.Transformer = SS.NodeModel.extend({
 
     initialize: function(attributes) {
         this.node = attributes.transform;
-        this.transform = attributes.transform;
         this.originalNode = attributes.originalNode;
         this.editingNode = attributes.editingNode;
 
