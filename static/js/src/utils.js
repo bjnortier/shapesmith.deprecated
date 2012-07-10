@@ -1,7 +1,11 @@
 var SS = SS || {};
 
 SS.objToVector = function(obj) {
-    return new THREE.Vector3(obj.x, obj.y, obj.z);
+    if (obj.x) {
+        return new THREE.Vector3(obj.x, obj.y, obj.z);
+    } else {
+        return new THREE.Vector3(obj.u, obj.v, obj.w);
+    }
 }
 
 SS.rotateAroundAxis = function(position, axis, angle) {

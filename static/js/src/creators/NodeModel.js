@@ -154,7 +154,7 @@ SS.SceneObjectView = Backbone.View.extend({
         var workplane = ((this.model.node && this.model.node.workplane) ||
                          (this.model.originalNode && this.model.originalNode.workplane));
         
-        if  (workplane) {
+        if  (workplane && !this.dontApplyWorkplane) {
             var quaternion = new THREE.Quaternion();
             var axis = SS.objToVector(workplane.axis);
             var angle = workplane.angle/180*Math.PI;

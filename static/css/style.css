@@ -402,8 +402,6 @@ img.action:hover {
 }
 
 
-/* ---------------------------------- TreeView ------------------------------------ */
-
 #treeview-container {
     position: absolute;
     left: 20px;
@@ -418,8 +416,13 @@ img.action:hover {
     color: white;
 }
 
+
 #workplane-container input[type="number"] {
     width: 50px;
+}
+
+#workplane-container .value {
+    cursor: pointer;
 }
     
 

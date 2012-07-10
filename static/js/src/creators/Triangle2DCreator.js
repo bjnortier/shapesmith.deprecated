@@ -190,7 +190,8 @@ SS.VertexDimensionText = SS.DimensionText.extend({
         this.moveToScreenCoordinates(this.$uvw, 
                                      new THREE.Vector3(origin.x + vertex.u,
                                                        origin.y + vertex.v,
-                                                       origin.z + vertex.w));
+                                                       origin.z + vertex.w),
+                                     20, -20);
     },
 
 });

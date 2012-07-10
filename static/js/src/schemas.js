@@ -39,6 +39,7 @@ SS.schemas.sphere = {
     description: "Sphere",
     type: 'object',
     properties: {
+        workplane: SS.schemas.workplane,
         origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
@@ -53,6 +54,7 @@ SS.schemas.cylinder = {
     description: "Cylinder",
     type: 'object',
     properties: {
+        workplane: SS.schemas.workplane,
         origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
@@ -68,6 +70,7 @@ SS.schemas.cone = {
     description: "Cone",
     type: 'object',
     properties: {
+        workplane: SS.schemas.workplane,
         origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
@@ -84,6 +87,7 @@ SS.schemas.wedge = {
     description: "Wedge",
     type: 'object',
     properties: {
+        workplane: SS.schemas.workplane,
         origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
@@ -116,6 +120,7 @@ SS.schemas.ellipse2d = {
     description: "Ellipse2D",
     type: 'object',
     properties: {
+        workplane: SS.schemas.workplane,
         origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
@@ -133,6 +138,7 @@ SS.schemas.ellipse1d = {
     description: "Ellipse1D",
     type: 'object',
     properties: {
+        workplane: SS.schemas.workplane,
         origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
@@ -151,6 +157,7 @@ SS.schemas.rectangle2d = {
     description: "Rectangle2D",
     type: 'object',
     properties: {
+        workplane: SS.schemas.workplane,
         origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
@@ -166,6 +173,7 @@ SS.schemas.triangle2d = {
     description: "Triangle2D",
     type: 'object',
     properties: {
+        workplane: SS.schemas.workplane,
         origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
@@ -192,6 +200,7 @@ SS.schemas.polyline = {
     description: "Polyline",
     type: 'object',
     properties: {
+        workplane: SS.schemas.workplane,
         origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
@@ -218,6 +227,7 @@ SS.schemas.bezier = {
     description: "Bezier",
     type: 'object',
     properties: {
+        workplane: SS.schemas.workplane,
         origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
@@ -245,6 +255,7 @@ SS.schemas.text2d = {
     description: "Text2D",
     type: 'object',
     properties: {
+        workplane: SS.schemas.workplane,
         origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
@@ -265,6 +276,7 @@ SS.schemas.prism = {
     description: "Prism",
     type: 'object',
     properties: {
+        workplane: SS.schemas.workplane,
         origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
@@ -294,6 +306,7 @@ SS.schemas.revolve = {
     description: "Revolve",
     type: 'object',
     properties: {
+        workplane: SS.schemas.workplane,
         origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
@@ -310,19 +323,25 @@ SS.schemas.revolve = {
 SS.schemas.intersect = {
     description: "Intersect",
     type: 'object',
-    properties: {}
+    properties: {
+        workplane: SS.schemas.workplane,
+    }
 }
 
 SS.schemas.union = {
     description: "Intersect",
     type: 'object',
-    properties: {}
+    properties: {
+        workplane: SS.schemas.workplane,
+    }
 }
 
 SS.schemas.subtract = {
     description: "Intersect",
     type: 'object',
-    properties: {}
+    properties: {
+        workplane: SS.schemas.workplane,
+    }
 }
 
 SS.schemas.make_face = {

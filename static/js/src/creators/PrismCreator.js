@@ -27,8 +27,6 @@ SS.PrismCreator = SS.ParentCreator.extend({
         this.trigger('change', this);
     },
 
-    
-    
     mouseDownOnUV: function(corner) {
     },
 
@@ -53,27 +51,28 @@ SS.PrismGeomNodeView = SS.SceneObjectView.extend({
         this.model.off('change:model', this.render);
     },
 
+    dontApplyWorkplane: true,
+
     render: function() {
         this.clear();
         this.sceneObject.add(this.bottomMeshes['faces']);
         this.sceneObject.add(this.bottomMeshes['edges']);
 
-        var translation = new THREE.Vector3(this.model.node.parameters.u,
-                                            this.model.node.parameters.v,
-                                            this.model.node.parameters.w);
+        
+        var axis = SS.objToVector(this.model.node.workplane.axis);
+        var angle = this.model.node.workplane.angle;
+        var translation = SS.rotateAroundAxis(SS.objToVector(this.model.node.parameters), axis, angle);
+
         var topMeshes = SS.createGeometry(this.model.childNode);
+
         ['faces', 'edges'].map(function(topology) {
             var meshes = topMeshes[topology];
             for (var i = 0; i < meshes.children.length; ++i) {
                 var geometry = meshes.children[i].geometry;
                 geometry.vertices = geometry.vertices.map(function(vertex) {
-	            var position = vertex.clone();
-	            position.x = position.x + translation.x;
-	            position.y = position.y + translation.y;
-	            position.z = position.z + translation.z;
-	            return position;
+                    return vertex.addSelf(translation);
                 });
-	    }
+        }
         });
 
         this.changeToPreviewColor(topMeshes);
@@ -134,7 +133,7 @@ SS.PrismUVCorner = SS.DraggableCorner.extend({
 SS.PrismHeightCursoid = SS.HeightCursoid.extend({
 
      initialize: function(options) {
-	 SS.HeightCursoid.prototype.initialize.call(this);
+     SS.HeightCursoid.prototype.initialize.call(this);
          this.render();
     },
 

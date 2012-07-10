@@ -138,8 +138,9 @@ function create_modifier(selected, type) {
     var parentNode = new GeomNode({
         type: type,
         editing: true,
-	origin: jsonSchema.properties.origin ? {x: 0, y: 0, z: 0} : null,
-        parameters: geometryParams
+        origin: jsonSchema.properties.origin ? {x: 0, y: 0, z: 0} : null,
+        parameters: geometryParams,
+        workplane: SS.workplaneModel.node.editableCopy(),
     }, [original]);
                                 
     geom_doc.replace(original, parentNode);

@@ -4,6 +4,7 @@
 #include "Transform.h"
 #include "Util.h"
 #include "base64.h"
+#include "quaternion.hpp"
 
 
 TopoDS_Shape Builder::shape() {
@@ -633,7 +634,7 @@ void BuilderND::Mesh() {
 
 void BuilderND::PostProcess(map< string, mValue > json) {
     this->ApplyTransforms(json);
-    this->ApplyWorkplane(json);
+    // this->ApplyWorkplane(json);
     this->Mesh();
 }
 
@@ -738,8 +739,33 @@ PrismBuilder::PrismBuilder(map< string, mValue > json, TopoDS_Shape shape) {
     double u = Util::to_d(parameters["u"]);
     double v = Util::to_d(parameters["v"]);
     double w = Util::to_d(parameters["w"]);
+    
     gp_Vec prismVec(u,v,w);
+    if (!json["workplane"].is_null()) {
+        map< string, mValue > workplane = json["workplane"].get_obj();
+        map< string, mValue > axis = workplane["axis"].get_obj();
+        double half_angle = Util::to_d(workplane["angle"])/2/180*M_PI;
+        double s = sin(half_angle);
 
+        double x = Util::to_d(axis["x"]);
+        double y = Util::to_d(axis["y"]);
+        double z = Util::to_d(axis["z"]);
+
+        double qx = x*s;
+        double qy = y*s;
+        double qz = z*s;
+        double qw = cos(half_angle);
+
+        double ix =  qw * u + qy * w - qz * v;
+        double iy =  qw * v + qz * u - qx * w;
+        double iz =  qw * w + qx * v - qy * u;
+        double iw = -qx * u - qy * v - qz * w;
+
+        prismVec = gp_Vec(ix * qw + iw * -qx + iy * -qz - iz * -qy,
+                          iy * qw + iw * -qy + iz * -qx - ix * -qz,
+                          iz * qw + iw * -qz + ix * -qy - iy * -qx);
+    } 
+        
     try {
         shape_ = BRepPrimAPI_MakePrism(shape, prismVec);
     } catch (...) {
