@@ -209,12 +209,15 @@ function boolean(selected, type) {
     var childNodes;
 
     var doFn = function() {
-        var geometry = {type: type,
-            children: selected.map(function(id) {
-                var pattern = /^([0-9]+)_(.*)$/;
-                var match = id.match(pattern);
-                return match[2];
-            })};
+        var geometry = {
+                type: type,
+                children: selected.map(function(id) {
+                    var pattern = /^([0-9]+)_(.*)$/;
+                    var match = id.match(pattern);
+                    return match[2];
+                }),
+                workplane: SS.workplaneModel.node.editableCopy(),
+            };
             $.ajax({
                 type: "POST",
                 url: '/' + SS.session.username + '/' + SS.session.design + '/geom?mesh=true',

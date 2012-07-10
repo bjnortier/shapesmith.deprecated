@@ -90,16 +90,14 @@ SS.ScaleGeomNodeView = Backbone.View.extend({
     },
 
     render: function() {
-        var transform = this.model.transform;
-        var scalePoint = new THREE.Vector3(transform.origin.x,
-                                           transform.origin.y,
-                                           transform.origin.z);
+        var transform = this.model.node;
+        var scalePoint = SS.objToVector(transform.origin.x);
 
         // TODO: Replace with model for geom node
         SS.scaleGeomNodeRendering(this.model.originalNode, 
                                   this.model.editingNode, 
                                   scalePoint, 
-                                  this.model.transform.parameters.factor);
+                                  this.model.node.parameters.factor);
     },
 
 });
@@ -175,14 +173,14 @@ SS.ScaleArrowView = SS.InteractiveSceneView.extend({
 
     drag: function(event) {
 
-        var dxFrom = this.model.anchorPosition.x - this.model.transform.origin.x;
-        var dyFrom = this.model.anchorPosition.y - this.model.transform.origin.y;
+        var dxFrom = this.model.anchorPosition.x - this.model.node.origin.x;
+        var dyFrom = this.model.anchorPosition.y - this.model.node.origin.y;
 
         var r1 = Math.sqrt(dxFrom*dxFrom + dyFrom*dyFrom);
 
         var workplanePosition = SS.sceneView.determinePositionOnWorkplane(event);
-        var dxTo = workplanePosition.x - this.model.transform.origin.x;
-        var dyTo = workplanePosition.y - this.model.transform.origin.y;
+        var dxTo = workplanePosition.x - this.model.node.origin.x;
+        var dyTo = workplanePosition.y - this.model.node.origin.y;
         var r2 = Math.sqrt(dxTo*dxTo + dyTo*dyTo);
 
         var factor = parseFloat((r2/r1).toFixed(3));
@@ -363,7 +361,7 @@ SS.ScaleFactorText = SS.DimensionText.extend({
     render: function() {
         this.clear();
 
-        var factor = this.model.transform.parameters.factor;
+        var factor = this.model.node.parameters.factor;
 
         this.$factor = this.addElement('<div class="dimension">' + factor + '</div>');
         this.update();
@@ -371,7 +369,7 @@ SS.ScaleFactorText = SS.DimensionText.extend({
 
     update: function() {
             
-        var factor = this.model.transform.parameters.factor;
+        var factor = this.model.node.parameters.factor;
         var boundingBox = SS.boundingBoxForGeomNode(this.model.editingNode);
         var center = SS.centerOfGeom(boundingBox);
         

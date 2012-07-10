@@ -634,7 +634,6 @@ void BuilderND::Mesh() {
 
 void BuilderND::PostProcess(map< string, mValue > json) {
     this->ApplyTransforms(json);
-    // this->ApplyWorkplane(json);
     this->Mesh();
 }
 
@@ -706,6 +705,13 @@ BooleanBuilder::BooleanBuilder(map< string, mValue > json, vector<TopoDS_Shape>&
         PostProcess(json);
     }
 }
+
+void BooleanBuilder::PostProcess(map< string, mValue > json) {
+    this->ApplyTransforms(json);
+    this->ApplyWorkplane(json);
+    this->Mesh();
+}
+
 
 TopoDS_Shape fuse(const TopoDS_Shape& a, const TopoDS_Shape& b) {
     return BRepAlgoAPI_Fuse(a,b);
