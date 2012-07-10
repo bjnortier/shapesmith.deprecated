@@ -377,7 +377,6 @@ SS.scaleGeomNodeRendering = function(originalNode, editingNode, scalePoint, fact
             editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
                 var position = vertex.clone();
                 return new THREE.Vector3(
-
                     globalScalePoint.x + (position.x - globalScalePoint.x)*factor,
                     globalScalePoint.y + (position.y - globalScalePoint.y)*factor,
                     globalScalePoint.z + (position.z - globalScalePoint.z)*factor);

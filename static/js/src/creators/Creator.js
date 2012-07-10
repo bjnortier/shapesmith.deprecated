@@ -419,8 +419,8 @@ SS.OriginDimensionText = SS.DimensionText.extend({
             this.moveToScreenCoordinates(
                 this.$xyz, 
                 new THREE.Vector3(origin.x, origin.y, origin.z),
-                30,
-                -10);
+                -30,
+                10);
         }
     },
 

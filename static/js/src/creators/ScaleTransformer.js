@@ -91,7 +91,7 @@ SS.ScaleGeomNodeView = Backbone.View.extend({
 
     render: function() {
         var transform = this.model.node;
-        var scalePoint = SS.objToVector(transform.origin.x);
+        var scalePoint = SS.objToVector(transform.origin);
 
         // TODO: Replace with model for geom node
         SS.scaleGeomNodeRendering(this.model.originalNode, 

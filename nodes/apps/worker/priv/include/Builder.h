@@ -26,6 +26,7 @@ protected:
     void ApplyTransform(map< string, mValue > json);
     void ApplyTransforms(map< string, mValue > json);
     void ApplyWorkplane(map< string, mValue > json);
+    void ApplyReverseWorkplane(map< string, mValue > json);
     virtual void PostProcess(map< string, mValue > json) = 0;
     
 public:

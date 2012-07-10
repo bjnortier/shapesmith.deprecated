@@ -65,7 +65,7 @@ SS.Text2DPreview = SS.PreviewWithOrigin.extend({
             var textGeom = new THREE.TextGeometry(text, {
 		size: 10, 
 		height: 0.01,
-		curveSegments: curveSegments,
+		curveSegments: 6,
 		font: threeJSFont,
 		weight: 'normal',
 		style: 'normal',

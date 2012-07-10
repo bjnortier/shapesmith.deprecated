@@ -87,6 +87,19 @@ void Builder::ApplyWorkplane(map< string, mValue> json) {
     }
 }
 
+void Builder::ApplyReverseWorkplane(map< string, mValue> json) {
+    if (!json["workplane"].is_null()) {
+        map< string, mValue > reverse_workplane;
+        reverse_workplane["origin"] = json["workplane"].get_obj()["origin"].get_obj();
+        reverse_workplane["axis"] = json["workplane"].get_obj()["axis"].get_obj();
+        reverse_workplane["angle"] = -Util::to_d(json["workplane"].get_obj()["angle"]);
+
+        map< string, mValue > reverseJSON;
+        reverseJSON["workplane"] = reverse_workplane;
+        this->ApplyWorkplane(reverseJSON);
+    }
+}
+
 #pragma mark 3D builders
 
 void Builder3D::Mesh() {
@@ -113,25 +126,25 @@ CuboidBuilder::CuboidBuilder(map< string, mValue > json) {
     double width = Util::to_d(parameters["u"]);
     double depth = Util::to_d(parameters["v"]);
     double height = Util::to_d(parameters["w"]);
-	 
+         
     map< string, mValue > origin = json["origin"].get_obj();
-	 
+         
     if (width < 0) {
-	origin["x"] = Util::to_d(origin["x"]) + width;
-	width = -width;
+        origin["x"] = Util::to_d(origin["x"]) + width;
+        width = -width;
     }
 
     if (depth < 0) {
-	origin["y"] = Util::to_d(origin["y"]) + depth;
-	depth = -depth;
+        origin["y"] = Util::to_d(origin["y"]) + depth;
+        depth = -depth;
     }
-	 
+         
     if (height < 0) {
-	origin["z"] = Util::to_d(origin["z"]) + height;
-	height = -height;
+        origin["z"] = Util::to_d(origin["z"]) + height;
+        height = -height;
     }
     json["origin"] = origin;
-	 
+         
     shape_ = BRepPrimAPI_MakeBox(width, depth, height).Shape();
     PostProcess(json);
 }
@@ -150,8 +163,8 @@ CylinderBuilder::CylinderBuilder(map< string, mValue > json) {
     
     map< string, mValue > origin = json["origin"].get_obj();
     if(h < 0) {
-	origin["z"] = Util::to_d(origin["z"]) + h;
-	h = -h;
+        origin["z"] = Util::to_d(origin["z"]) + h;
+        h = -h;
     }
     json["origin"] = origin;
     
@@ -170,9 +183,9 @@ ConeBuilder::ConeBuilder(map< string, mValue > json) {
 
     map< string, mValue > origin = json["origin"].get_obj();
     if(h < 0) {
-	origin["z"] = Util::to_d(origin["z"]) + h;
-	h = -h;
-	swap(r1, r2);
+        origin["z"] = Util::to_d(origin["z"]) + h;
+        h = -h;
+        swap(r1, r2);
     }
     json["origin"] = origin;
         
@@ -189,8 +202,8 @@ WedgeBuilder::WedgeBuilder(map< string, mValue > json) {
 
     map< string, mValue > origin = json["origin"].get_obj();
     if(w < 0) {
-	origin["z"] = Util::to_d(origin["z"]) + w;
-	w = -w;
+        origin["z"] = Util::to_d(origin["z"]) + w;
+        w = -w;
     }
     json["origin"] = origin;
     shape_ = BRepPrimAPI_MakeWedge(u1, v, w, u2).Shape();
@@ -633,7 +646,9 @@ void BuilderND::Mesh() {
 }
 
 void BuilderND::PostProcess(map< string, mValue > json) {
+    this->ApplyReverseWorkplane(json);
     this->ApplyTransforms(json);
+    this->ApplyWorkplane(json);
     this->Mesh();
 }
 
