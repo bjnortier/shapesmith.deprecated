@@ -733,14 +733,8 @@ SubtractBuilder::SubtractBuilder(map< string, mValue > json, vector<TopoDS_Shape
 
 #pragma mark Modifier builders
 
-PrismBuilder::PrismBuilder(map< string, mValue > json, TopoDS_Shape shape) {
-
-    map< string, mValue > parameters = json["parameters"].get_obj();
-    double u = Util::to_d(parameters["u"]);
-    double v = Util::to_d(parameters["v"]);
-    double w = Util::to_d(parameters["w"]);
-    
-    gp_Vec prismVec(u,v,w);
+map< string, mValue > rotateAroundWorkplane(map< string, mValue > json, double u, double v, double w) {
+    map< string, mValue > rotated = map< string, mValue >();
     if (!json["workplane"].is_null()) {
         map< string, mValue > workplane = json["workplane"].get_obj();
         map< string, mValue > axis = workplane["axis"].get_obj();
@@ -761,10 +755,29 @@ PrismBuilder::PrismBuilder(map< string, mValue > json, TopoDS_Shape shape) {
         double iz =  qw * w + qx * v - qy * u;
         double iw = -qx * u - qy * v - qz * w;
 
-        prismVec = gp_Vec(ix * qw + iw * -qx + iy * -qz - iz * -qy,
-                          iy * qw + iw * -qy + iz * -qx - ix * -qz,
-                          iz * qw + iw * -qz + ix * -qy - iy * -qx);
-    } 
+        rotated["x"] = ix * qw + iw * -qx + iy * -qz - iz * -qy;
+        rotated["y"] = iy * qw + iw * -qy + iz * -qx - ix * -qz;
+        rotated["z"] = iz * qw + iw * -qz + ix * -qy - iy * -qx;
+    } else {
+        rotated["x"] = u;
+        rotated["y"] = v;
+        rotated["z"] = w;
+    }
+    return rotated;
+}
+
+PrismBuilder::PrismBuilder(map< string, mValue > json, TopoDS_Shape shape) {
+
+    map< string, mValue > parameters = json["parameters"].get_obj();
+    double u = Util::to_d(parameters["u"]);
+    double v = Util::to_d(parameters["v"]);
+    double w = Util::to_d(parameters["w"]);
+    
+    map< string, mValue > rotated = rotateAroundWorkplane(json, u, v, w);
+    gp_Vec prismVec(
+        Util::to_d(rotated["x"]),
+        Util::to_d(rotated["y"]),
+        Util::to_d(rotated["z"]));
         
     try {
         shape_ = BRepPrimAPI_MakePrism(shape, prismVec);
@@ -935,14 +948,25 @@ RevolveBuilder::RevolveBuilder(map< string, mValue > json, TopoDS_Shape shape) {
     double x = Util::to_d(origin["x"]);
     double y = Util::to_d(origin["y"]);
     double z = Util::to_d(origin["z"]);
+    map< string, mValue > rotatedOrigin = rotateAroundWorkplane(json, x, y, z);
+    gp_Pnt axisOrigin = gp_Pnt(
+        Util::to_d(rotatedOrigin["x"]),
+        Util::to_d(rotatedOrigin["y"]),
+        Util::to_d(rotatedOrigin["z"]));
+
     
     double u = Util::to_d(parameters["u"]);
     double v = Util::to_d(parameters["v"]);
     double w = Util::to_d(parameters["w"]);
+    map< string, mValue > rotatedDir = rotateAroundWorkplane(json, u, v, w);
+    gp_Dir axisDir = gp_Dir(
+        Util::to_d(rotatedDir["x"]),
+        Util::to_d(rotatedDir["y"]),
+        Util::to_d(rotatedDir["z"]));
     
     double angle = Util::to_d(parameters["angle"]);
     
-    gp_Ax1 axis(gp_Pnt(x,y,z),gp_Dir(u,v,w));
+    gp_Ax1 axis(axisOrigin, axisDir);
     shape_ = BRepPrimAPI_MakeRevol(shape,axis,angle/180*M_PI);
     PostProcess(json);
 }

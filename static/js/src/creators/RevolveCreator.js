@@ -48,6 +48,8 @@ SS.ParentGeomNodeView = SS.SceneObjectView.extend({
         SS.SceneObjectView.prototype.remove.call(this);
         this.model.off('change:model', this.render);
     },
+    
+    dontApplyWorkplane: true,
 
     render: function() {
         this.clear();
