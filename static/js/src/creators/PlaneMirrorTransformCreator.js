@@ -49,6 +49,8 @@ SS.PlaneMirrorTransformPreview = SS.PreviewWithOrigin.extend({
 
         var axisVector = new THREE.Vector3(u,v,w).normalize();
         
+        // Somehow that plane chaneg for planegeometry broke the compatibility with
+        // lookAt, so use the old plane geometry
         var planeGeometry = new THREE.PlaneGeometry2(120, 120);
         var plane = new THREE.Mesh(planeGeometry, SS.materials.faceMaterial);  
         plane.lookAt(new THREE.Vector3(u,v,w));
