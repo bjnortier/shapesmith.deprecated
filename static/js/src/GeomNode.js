@@ -74,7 +74,7 @@ function GeomNode() {
     this.children = [];
 
     if (arguments[0].workplane) {
-        this.workplane = SS.copyObj(arguments[0].workplane);
+        this.workplane = new SS.WorkplaneNode(arguments[0].workplane);
     } else {
         this.workplane = new SS.WorkplaneNode();
     }

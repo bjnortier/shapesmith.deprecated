@@ -37,6 +37,21 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
             new SS.WorkplaneGlobalXYPlaneView({model: this}),
         ];
         this.views.concat(this.addRulers());
+
+        selectionManager.on('selected', this.selectionChanged, this);
+        selectionManager.on('deselected', this.selectionChanged, this);
+        geom_doc.on('replace', this.geomDocReplace, this);
+    },
+
+    destroy: function() {
+        this.view.remove();
+        this.permanentViews.concat(this.domView).map(function(view) {
+            view.remove();
+        });
+
+        selectionManager.off('selected', this.selectionChanged, this);
+        selectionManager.off('deselected', this.selectionChanged, this);
+        geom_doc.on('replace', this.geomDocReplace, this);
     },
 
     addRulers: function() {
@@ -56,11 +71,36 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
         return rulers;
     },
 
-    destroy: function() {
-        this.view.remove();
-        this.permanentViews.concat(this.domView).map(function(view) {
-            view.remove();
-        });
+    persistentWorkplaneNode: undefined,
+
+    pushNode: function(geomNode) {
+        this.persistentWorkplaneNode = this.node;
+        this.loadNode(geomNode.workplane);
+    },
+
+    popNode: function(geomNode) {
+        if (this.persistentWorkplaneNode !== undefined) {
+            this.loadNode(this.persistentWorkplaneNode);
+            this.persistentWorkplaneNode = undefined;
+        }
+    },
+
+    selectionChanged: function(selected) {
+        if (this.persistentWorkplaneNode) {
+            this.popNode();
+        }
+        var selected = selectionManager.getSelected();
+        if (selected.length == 1) {
+            this.pushNode(geom_doc.findById(selected[0]));
+        } 
+    },
+
+    geomDocReplace: function(original, replacement) {
+        if (replacement.isEditingOrTransformEditing()) {
+            this.pushNode(replacement);
+        } else {
+            this.popNode();
+        }
     },
 
     setEditing: function() {
@@ -137,39 +177,36 @@ SS.WorkplaneDisplaySceneView = SS.SceneObjectView.extend({
 
     initialize: function() {
         SS.SceneObjectView.prototype.initialize.call(this);
-        this.model.on('change', this.update, this);
-        this.update();
-    },
 
-    update:function() {
         this.extents = this.model.node.extents;
         this.minX = -this.extents.x;
         this.minY = -this.extents.y;
         this.maxX = this.extents.x;
         this.maxY = this.extents.y;
         this.boundary = this.model.node.boundary;
+
+        this.create();
         this.render();
     },
 
     remove: function() {
         SS.SceneObjectView.prototype.remove.call(this);
-        this.model.off('change', this.render);
+    },
+
+    render: function() {
+        var quaternion = new THREE.Quaternion();
+        var axis = SS.objToVector(this.model.node.axis);
+        var angle = this.model.node.angle/180*Math.PI;
+        
+        quaternion.setFromAxisAngle(axis, angle);
+        this.sceneObject.useQuaternion = true;
+        this.sceneObject.quaternion = quaternion;
+        this.sceneObject.position = SS.objToVector(this.model.node.origin);
     },
 
     postRender: function() {
-        var quaternion = new THREE.Quaternion();
-        var axis = new THREE.Vector3(this.model.node.axis.x, 
-                                     this.model.node.axis.y,
-                                     this.model.node.axis.z);
-        var angle = this.model.node.angle/180*Math.PI;
-        quaternion.setFromAxisAngle(axis, angle);
-
-        this.sceneObject.useQuaternion = true;
-        this.sceneObject.quaternion = quaternion;
-
-        this.sceneObject.position = SS.objToVector(this.model.node.origin);
-
-        SS.SceneObjectView.prototype.postRender.call(this);
+        SS.sceneView.scene.add(this.sceneObject);
+        SS.sceneView.updateScene = true;
     },
 
 
@@ -177,7 +214,7 @@ SS.WorkplaneDisplaySceneView = SS.SceneObjectView.extend({
 
 SS.WorkplaneAxesSceneView = SS.WorkplaneDisplaySceneView.extend({
 
-    render: function() {
+    create: function() {
         this.clear();
 
         var axes = [new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry(), 
@@ -219,7 +256,7 @@ SS.WorkplaneAxesSceneView = SS.WorkplaneDisplaySceneView.extend({
 
 SS.WorkplaneMainGridSceneView = SS.WorkplaneDisplaySceneView.extend({
 
-    render: function() {
+    create: function() {
         this.clear();
 
         for (var x = this.minX; x <= this.maxX; ++x) {
@@ -253,7 +290,7 @@ SS.WorkplaneMainGridSceneView = SS.WorkplaneDisplaySceneView.extend({
 
 SS.WorkplaneFadingGridSceneView = SS.WorkplaneDisplaySceneView.extend({
 
-    render: function() {
+    create: function() {
         this.clear();
 
 
