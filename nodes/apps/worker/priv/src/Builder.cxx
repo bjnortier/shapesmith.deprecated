@@ -646,9 +646,7 @@ void BuilderND::Mesh() {
 }
 
 void BuilderND::PostProcess(map< string, mValue > json) {
-    this->ApplyReverseWorkplane(json);
     this->ApplyTransforms(json);
-    this->ApplyWorkplane(json);
     this->Mesh();
 }
 
@@ -754,10 +752,11 @@ SubtractBuilder::SubtractBuilder(map< string, mValue > json, vector<TopoDS_Shape
 
 #pragma mark Modifier builders
 
-map< string, mValue > rotateAroundWorkplane(map< string, mValue > json, double u, double v, double w) {
+map< string, mValue > toGlobalUsingWorkplane(map< string, mValue > json, double u, double v, double w) {
     map< string, mValue > rotated = map< string, mValue >();
     if (!json["workplane"].is_null()) {
         map< string, mValue > workplane = json["workplane"].get_obj();
+        map< string, mValue > origin = workplane["origin"].get_obj();
         map< string, mValue > axis = workplane["axis"].get_obj();
         double half_angle = Util::to_d(workplane["angle"])/2/180*M_PI;
         double s = sin(half_angle);
@@ -775,10 +774,16 @@ map< string, mValue > rotateAroundWorkplane(map< string, mValue > json, double u
         double iy =  qw * v + qz * u - qx * w;
         double iz =  qw * w + qx * v - qy * u;
         double iw = -qx * u - qy * v - qz * w;
+        
+        double ox = Util::to_d(origin["x"]);
+        double oy = Util::to_d(origin["y"]);
+        double oz = Util::to_d(origin["z"]);
 
-        rotated["x"] = ix * qw + iw * -qx + iy * -qz - iz * -qy;
-        rotated["y"] = iy * qw + iw * -qy + iz * -qx - ix * -qz;
-        rotated["z"] = iz * qw + iw * -qz + ix * -qy - iy * -qx;
+
+        rotated["x"] = ox + (ix * qw + iw * -qx + iy * -qz - iz * -qy);
+        rotated["y"] = oy + (iy * qw + iw * -qy + iz * -qx - ix * -qz);
+        rotated["z"] = oz + (iz * qw + iw * -qz + ix * -qy - iy * -qx);
+        
     } else {
         rotated["x"] = u;
         rotated["y"] = v;
@@ -794,11 +799,12 @@ PrismBuilder::PrismBuilder(map< string, mValue > json, TopoDS_Shape shape) {
     double v = Util::to_d(parameters["v"]);
     double w = Util::to_d(parameters["w"]);
     
-    map< string, mValue > rotated = rotateAroundWorkplane(json, u, v, w);
+    map< string, mValue > rotatedTo = toGlobalUsingWorkplane(json, u, v, w);
+    map< string, mValue > rotatedFrom = toGlobalUsingWorkplane(json, 0, 0, 0);
     gp_Vec prismVec(
-        Util::to_d(rotated["x"]),
-        Util::to_d(rotated["y"]),
-        Util::to_d(rotated["z"]));
+        Util::to_d(rotatedTo["x"]) - Util::to_d(rotatedFrom["x"]),
+        Util::to_d(rotatedTo["y"]) - Util::to_d(rotatedFrom["y"]),
+        Util::to_d(rotatedTo["z"]) - Util::to_d(rotatedFrom["z"]));
         
     try {
         shape_ = BRepPrimAPI_MakePrism(shape, prismVec);
@@ -969,21 +975,22 @@ RevolveBuilder::RevolveBuilder(map< string, mValue > json, TopoDS_Shape shape) {
     double x = Util::to_d(origin["x"]);
     double y = Util::to_d(origin["y"]);
     double z = Util::to_d(origin["z"]);
-    map< string, mValue > rotatedOrigin = rotateAroundWorkplane(json, x, y, z);
+    map< string, mValue > globalOrigin = toGlobalUsingWorkplane(json, x, y, z);
     gp_Pnt axisOrigin = gp_Pnt(
-        Util::to_d(rotatedOrigin["x"]),
-        Util::to_d(rotatedOrigin["y"]),
-        Util::to_d(rotatedOrigin["z"]));
+        Util::to_d(globalOrigin["x"]),
+        Util::to_d(globalOrigin["y"]),
+        Util::to_d(globalOrigin["z"]));
 
     
     double u = Util::to_d(parameters["u"]);
     double v = Util::to_d(parameters["v"]);
     double w = Util::to_d(parameters["w"]);
-    map< string, mValue > rotatedDir = rotateAroundWorkplane(json, u, v, w);
+    map< string, mValue > axisTo = toGlobalUsingWorkplane(json, u, v, w);
+    map< string, mValue > axisFrom = toGlobalUsingWorkplane(json, 0, 0, 0);
     gp_Dir axisDir = gp_Dir(
-        Util::to_d(rotatedDir["x"]),
-        Util::to_d(rotatedDir["y"]),
-        Util::to_d(rotatedDir["z"]));
+        Util::to_d(axisTo["x"]) - Util::to_d(axisFrom["x"]),
+        Util::to_d(axisTo["y"]) - Util::to_d(axisFrom["y"]),
+        Util::to_d(axisTo["z"]) - Util::to_d(axisFrom["z"]));
     
     double angle = Util::to_d(parameters["angle"]);
     

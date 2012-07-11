@@ -33,11 +33,7 @@ SS.AxisMirrorTransformPreview = SS.PreviewWithOrigin.extend({
     render: function() {
         if (this.model.originalNode.originalSceneObjects) {
             var transform = this.model.node;
-            var position = new THREE.Vector3(transform.parameters.u,
-                                             transform.parameters.v,
-                                             transform.parameters.w);
-            
-
+            var position = SS.objToVector(transform.parameters);
             SS.axisMirrorGeomNodeRendering(this.model.originalNode, 
                                            this.model.editingNode, 
                                            this.model.node);
@@ -46,11 +42,7 @@ SS.AxisMirrorTransformPreview = SS.PreviewWithOrigin.extend({
         this.clear();
         SS.PreviewWithOrigin.prototype.render.call(this);
 
-        var origin = this.model.node.origin;
-        var u = this.model.node.parameters.u;
-        var v = this.model.node.parameters.v;
-        var w = this.model.node.parameters.w;
-        var axisVector = new THREE.Vector3(u,v,w).normalize();
+        var axisVector = SS.objToVector(this.model.node.parameters).normalize();
         
         var axis = new THREE.Geometry();
         axis.vertices.push(axisVector.clone().multiplyScalar(1000));

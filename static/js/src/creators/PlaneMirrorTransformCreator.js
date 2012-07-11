@@ -43,17 +43,13 @@ SS.PlaneMirrorTransformPreview = SS.PreviewWithOrigin.extend({
         SS.PreviewWithOrigin.prototype.render.call(this);
 
         var origin = this.model.node.origin;
-        var u = this.model.node.parameters.u;
-        var v = this.model.node.parameters.v;
-        var w = this.model.node.parameters.w;
-
-        var axisVector = new THREE.Vector3(u,v,w).normalize();
+        var axisVector = SS.objToVector(this.model.node.parameters).normalize();
         
         // Somehow that plane chaneg for planegeometry broke the compatibility with
         // lookAt, so use the old plane geometry
         var planeGeometry = new THREE.PlaneGeometry2(120, 120);
         var plane = new THREE.Mesh(planeGeometry, SS.materials.faceMaterial);  
-        plane.lookAt(new THREE.Vector3(u,v,w));
+        plane.lookAt(axisVector);
         plane.doubleSided = true;
         this.sceneObject.add(plane);
 

@@ -429,15 +429,16 @@ SS.rotateGeomNodeRendering = function(originalNode, editingNode, center, axis, a
 
 SS.axisMirrorGeomNodeRendering = function(originalNode, editingNode, transform) {
 
-    var origin = transform.origin;
-    var axis = transform.parameters;
-    var u = axis.u, v = axis.v, w = axis.w;
-    var un, vn, wn;
-    var normUVW = new THREE.Vector3(u, v, w).normalize();
-    un = normUVW.x;
-    vn = normUVW.y;
-    wn = normUVW.z;
+    var workplaneOrigin = SS.objToVector(originalNode.workplane.origin);
+    var workplaneAxis   = SS.objToVector(originalNode.workplane.axis);
+    var workplaneAngle  = originalNode.workplane.angle;
 
+    var transformOrigin = SS.objToVector(transform.origin);
+    var localRotationAxis = SS.objToVector(transform.parameters);
+    var rotationAxis = SS.rotateAroundAxis(localRotationAxis, workplaneAxis, workplaneAngle);
+
+    var globalTransformOrigin = SS.rotateAroundAxis(transformOrigin, workplaneAxis, workplaneAngle);
+    
     for (key in editingNode.sceneObjects) {
 
         for (var i = 0; i < editingNode.sceneObjects[key].children.length; ++i) {
@@ -448,16 +449,13 @@ SS.axisMirrorGeomNodeRendering = function(originalNode, editingNode, transform) 
             editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
                 var position = vertex.clone();
 
-                position.x = position.x - origin.x;
-                position.y = position.y - origin.y;
-                position.z = position.z - origin.z;
+                position.subSelf(workplaneOrigin);
+                position.subSelf(globalTransformOrigin);
+                position = SS.rotateAroundAxis(position, rotationAxis, 180);
+                position.addSelf(globalTransformOrigin);
+                position.addSelf(workplaneOrigin);                               
 
-                var a = (un*position.x + vn*position.y + wn*position.z);
-                var x2 = 2*a*un - position.x + origin.x;
-                var y2 = 2*a*vn - position.y + origin.y;
-                var z2 = 2*a*wn - position.z + origin.z;
-
-                return new THREE.Vector3(x2, y2, z2);
+                return position;
             });
             editingGeometry.computeCentroids();
             editingGeometry.computeFaceNormals();
@@ -468,11 +466,13 @@ SS.axisMirrorGeomNodeRendering = function(originalNode, editingNode, transform) 
 
 SS.planeMirrorGeomNodeRendering = function(originalNode, editingNode, transform) {
 
-    var origin = SS.objToVector(transform.origin); 
-    var normal = SS.objToVector(transform.parameters).normalize().negate();
+    var localNormal = SS.objToVector(transform.parameters).normalize().negate();
     var axis   = SS.objToVector(originalNode.workplane.axis);
     var angle  = originalNode.workplane.angle;
-    var normal = SS.rotateAroundAxis(normal, axis, angle);
+    var normal = SS.rotateAroundAxis(localNormal, axis, angle);
+
+    var transformOrigin = SS.objToVector(transform.origin);
+    var globalTransformOrigin = SS.rotateAroundAxis(transformOrigin, axis, angle);
 
     for (key in editingNode.sceneObjects) {
 
@@ -481,12 +481,9 @@ SS.planeMirrorGeomNodeRendering = function(originalNode, editingNode, transform)
             var originalGeometry = originalNode.originalSceneObjects[key].children[i].geometry;
             var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
 
-            var axis = SS.objToVector(originalNode.workplane.axis);
-            var angle = originalNode.workplane.angle;
-
             editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
                 var position = vertex.clone();
-                var dot = new THREE.Vector3().sub(position, origin).dot(normal);
+                var dot = new THREE.Vector3().sub(position, globalTransformOrigin).dot(normal);
                 var dPos = normal.clone().multiplyScalar(-2*dot);
                 var newPosition = new THREE.Vector3().add(position, dPos);
                 return newPosition;
