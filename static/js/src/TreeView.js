@@ -161,8 +161,6 @@ function renderNode(geomNode) {
                };
     var nodeTableContents = $.mustache(childTemplate, view);
     return nodeTableContents;
-
-    //return SS.renderDisplayDOM(geomNode.type, SS.schemas[geomNode.type], geomNode);
 }
 
 
@@ -314,8 +312,8 @@ function TreeView() {
         });
 
         // Edit geom
-        $('.edit-geom').unbind('dblclick');
-        $('.edit-geom').dblclick(function() { 
+        $('.edit-geom').unbind('click');
+        $('.edit-geom').click(function() { 
             var id;
             var pattern = /^target-(.*)$/;
             var classes = $(this).attr('class').split(' ');
@@ -352,8 +350,8 @@ function TreeView() {
         
 
         // Edit transform
-        $('.edit-transform').unbind('dblclick');
-        $('.edit-transform').dblclick(function() { 
+        $('.edit-transform').unbind('click');
+        $('.edit-transform').click(function() { 
             var id;
             var transformIndex;
             var pattern = /^target-(.*)-(.*)$/;

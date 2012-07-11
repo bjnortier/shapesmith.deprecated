@@ -184,6 +184,11 @@ SS.SceneView = function(container) {
     }
 
     function determinePositionOnWorkplane(event) {
+        // May happen if there's a mouse event before the workplane
+        // is created
+        if (!SS.workplaneModel) {
+            return new THREE.Vector3();
+        }
         var origin = SS.objToVector(SS.workplaneModel.node.origin);
         var axis = SS.objToVector(SS.workplaneModel.node.axis);   
         var normal = SS.rotateAroundAxis(new THREE.Vector3(0,0,1), axis,SS.workplaneModel.node.angle);

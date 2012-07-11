@@ -417,11 +417,11 @@ img.action:hover {
 }
 
 
-#workplane-container input[type="number"] {
+#treeview-container input[type="number"], #workplane-container input[type="number"] {
     width: 50px;
 }
 
-#workplane-container .value {
+#treeview-container .edit-geom, #treeview-container .edit-transform, #workplane-container .value {
     cursor: pointer;
 }
     

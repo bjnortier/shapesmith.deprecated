@@ -38,7 +38,7 @@ SS.renderRecursiveEditingDOM = function(ancestors, name, schema, object)  {
     var tableClass = ancestors.join('_');
     if ((schema.type === 'number') || (schema.type === 'integer')) {
         var template = 
-            '<input size="5" class="field {{name}}" type="number" value="{{value}}" ' +
+            '<input class="field {{name}}" type="number" value="{{value}}" ' +
             '{{#min}}min="{{.}}"{{/min}} {{#max}}max="{{.}}"{{/max}} />';
         return $.mustache(template, {name: name,
                                      value: object, 

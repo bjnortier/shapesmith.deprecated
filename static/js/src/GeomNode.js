@@ -147,7 +147,7 @@ GeomNode.prototype.toShallowJson = function() {
     };
 
     if (!(new SS.WorkplaneNode(this.workplane).isGlobalXY())) {
-        obj.workplane = this.workplane;
+        obj.workplane = this.workplane.serializableSubset();
     }
 
     if (this.origin) {

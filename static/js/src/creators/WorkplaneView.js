@@ -151,8 +151,10 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
     },
 
     loadNode: function(newNode) {
-        this.node = newNode;
-        this.trigger('change');
+        if (!newNode.isEqual(this.node)) {
+            this.node = newNode;
+            this.trigger('change');
+        }
     },
 
 });

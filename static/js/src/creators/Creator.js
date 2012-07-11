@@ -86,7 +86,7 @@ SS.PrimitiveCreator = SS.Creator.extend({
                 geometry.origin =  this.node.origin;
             }
             if(!(this.node.workplane).isGlobalXY()) {
-                geometry.workplane = this.node.workplane;
+                geometry.workplane = this.node.workplane.serializableSubset();
             }
             var cmd = create_geom_command(this.node, geometry);
             command_stack.execute(cmd);
