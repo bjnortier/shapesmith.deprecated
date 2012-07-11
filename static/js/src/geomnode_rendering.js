@@ -363,23 +363,23 @@ SS.translateGeomNodeRendering = function(originalNode, editingNode,  translation
 }
 
 SS.scaleGeomNodeRendering = function(originalNode, editingNode, scalePoint, factor) {
+    var axis = SS.objToVector(originalNode.workplane.axis);
+    var angle = originalNode.workplane.angle;
+    var globalScalePoint = SS.rotateAroundAxis(scalePoint, axis, angle);
+
     for (key in editingNode.sceneObjects) {
         for (var i = 0; i < editingNode.sceneObjects[key].children.length; ++i) {
 
             var originalGeometry = originalNode.originalSceneObjects[key].children[i].geometry;
             var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
 
-            var axis = SS.objToVector(originalNode.workplane.axis);
-            var angle = originalNode.workplane.angle;
-            var globalScalePoint = SS.rotateAroundAxis(scalePoint, axis, angle);
             globalScalePoint.addSelf(SS.objToVector(originalNode.workplane.origin));
 
             editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
                 var position = vertex.clone();
-                return new THREE.Vector3(
-                    globalScalePoint.x + (position.x - globalScalePoint.x)*factor,
-                    globalScalePoint.y + (position.y - globalScalePoint.y)*factor,
-                    globalScalePoint.z + (position.z - globalScalePoint.z)*factor);
+                return new THREE.Vector3().add(
+                    globalScalePoint,
+                    new THREE.Vector3().sub(position, globalScalePoint).multiplyScalar(factor));
             });
 
             editingGeometry.computeCentroids();
@@ -468,14 +468,11 @@ SS.axisMirrorGeomNodeRendering = function(originalNode, editingNode, transform) 
 
 SS.planeMirrorGeomNodeRendering = function(originalNode, editingNode, transform) {
 
-    var origin =  new THREE.Vector3(transform.origin.x, 
-        transform.origin.y, 
-        transform.origin.z); 
-    var normal = new THREE.Vector3(transform.parameters.u, 
-     transform.parameters.v, 
-     transform.parameters.w)
-    .normalize()
-    .negate();
+    var origin = SS.objToVector(transform.origin); 
+    var normal = SS.objToVector(transform.parameters).normalize().negate();
+    var axis   = SS.objToVector(originalNode.workplane.axis);
+    var angle  = originalNode.workplane.angle;
+    var normal = SS.rotateAroundAxis(normal, axis, angle);
 
     for (key in editingNode.sceneObjects) {
 
@@ -483,6 +480,9 @@ SS.planeMirrorGeomNodeRendering = function(originalNode, editingNode, transform)
 
             var originalGeometry = originalNode.originalSceneObjects[key].children[i].geometry;
             var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
+
+            var axis = SS.objToVector(originalNode.workplane.axis);
+            var angle = originalNode.workplane.angle;
 
             editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
                 var position = vertex.clone();

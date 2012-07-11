@@ -33,11 +33,7 @@ SS.PlaneMirrorTransformPreview = SS.PreviewWithOrigin.extend({
     render: function() {
         if (this.model.originalNode.originalSceneObjects) {
             var transform = this.model.node;
-            var position = new THREE.Vector3(transform.parameters.u,
-                                             transform.parameters.v,
-                                             transform.parameters.w);
-            
-
+            var position = SS.objToVector(transform.parameters);
             SS.planeMirrorGeomNodeRendering(this.model.originalNode, 
                                             this.model.editingNode, 
                                             this.model.node);
@@ -53,7 +49,7 @@ SS.PlaneMirrorTransformPreview = SS.PreviewWithOrigin.extend({
 
         var axisVector = new THREE.Vector3(u,v,w).normalize();
         
-        var planeGeometry = new THREE.PlaneGeometry(120, 120);
+        var planeGeometry = new THREE.PlaneGeometry2(120, 120);
         var plane = new THREE.Mesh(planeGeometry, SS.materials.faceMaterial);  
         plane.lookAt(new THREE.Vector3(u,v,w));
         plane.doubleSided = true;

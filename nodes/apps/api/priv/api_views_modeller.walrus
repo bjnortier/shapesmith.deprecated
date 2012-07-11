@@ -115,6 +115,7 @@
     <div id="workplane"></div>
   </div>
   
+  <script type="text/javascript" src="/static/js/src/geometry/PlaneGeometry2.js"></script>
   <script type="text/javascript" src="/static/js/src/geometry/WedgeGeometry.js"></script>
   <script type="text/javascript" src="/static/js/src/geometry/EllipseGeometry.js"></script>
   <script type="text/javascript" src="/static/js/src/geometry/PipeGeometry.js"></script>
