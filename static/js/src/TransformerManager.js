@@ -16,7 +16,7 @@ SS.TransformerManager = function() {
         });
         initiators = [];
         initiators.push(new SS.TranslateTransformerInitiator({geomNode: geomNode}));
-        initiators.push(new SS.ScaleTransformerInitiator({geomNode: geomNode}));
+        initiators.push(new SS.RotateTransformerInitiator({geomNode: geomNode}));
     }
 
     var activateRotateAndTranslate = function(geomNode) {
@@ -24,7 +24,7 @@ SS.TransformerManager = function() {
             initiator.destroy();
         });
         initiators = [];
-        //initiators.push(new SS.RotateTransformerInitiator({geomNode: geomNode}));
+        initiators.push(new SS.ScaleTransformerInitiator({geomNode: geomNode}));
         initiators.push(new SS.TranslateTransformerInitiator({geomNode: geomNode}));
     }
     

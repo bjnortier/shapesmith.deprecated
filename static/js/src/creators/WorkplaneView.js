@@ -371,14 +371,14 @@ SS.WorkplaneGlobalXYPlaneView = SS.SceneObjectView.extend({
     
     render: function() {
         this.clear();
-        if (!this.model.node.isGlobalXY()) {
+        //if (!this.model.node.isGlobalXY()) {
             var origin = this.model.node.origin;
             var materials = [ SS.materials.wireframeMaterial ];
             var planeGeometry = new THREE.PlaneGeometry(this.model.node.extents.x*2, this.model.node.extents.y*2);
             var plane = THREE.SceneUtils.createMultiMaterialObject(planeGeometry, SS.materials.globalXYPlane);
             plane.rotation.x = Math.PI/2;
             this.sceneObject.add(plane);        
-        }
+        //}
         this.postRender();
     },
 

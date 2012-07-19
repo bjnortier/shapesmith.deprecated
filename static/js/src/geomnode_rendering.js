@@ -389,9 +389,19 @@ SS.scaleGeomNodeRendering = function(originalNode, editingNode, scalePoint, fact
     }
 }
 
-SS.rotateGeomNodeRendering = function(originalNode, editingNode, center, axis, angle) {
-    var normUVW = axis.clone().normalize();
-    var un = normUVW.x, vn = normUVW.y, wn = normUVW.z;
+SS.rotateGeomNodeRendering = function(originalNode, editingNode, transform) {
+
+    var workplaneOrigin = SS.objToVector(originalNode.workplane.origin);
+    var workplaneAxis   = SS.objToVector(originalNode.workplane.axis);
+    var workplaneAngle  = originalNode.workplane.angle;
+
+    var transformOrigin = SS.objToVector(transform.origin);
+    var localRotationAxis = SS.objToVector(transform.parameters);
+    var rotationAxis = SS.rotateAroundAxis(localRotationAxis, workplaneAxis, workplaneAngle);
+
+    var angle = transform.parameters.angle;
+
+    var globalTransformOrigin = SS.rotateAroundAxis(transformOrigin, workplaneAxis, workplaneAngle);
 
     for (key in editingNode.sceneObjects) {
 
@@ -402,23 +412,14 @@ SS.rotateGeomNodeRendering = function(originalNode, editingNode, center, axis, a
 
             editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
                 var position = vertex.clone();
-                position.x = position.x - center.x;
-                position.y = position.y - center.y;
-                position.z = position.z - center.z;
 
-                // http://blog.client9.com/2007/09/rotating-point-around-vector.html
-                var a = (un*position.x + vn*position.y + wn*position.z);
-                var x2 = a*un + (position.x - a*un)*Math.cos(angle/180*Math.PI) 
-                + (vn*position.z - wn*position.y)*Math.sin(angle/180*Math.PI);
-                var y2 = a*vn + (position.y - a*vn)*Math.cos(angle/180*Math.PI) 
-                + (wn*position.x - un*position.z)*Math.sin(angle/180*Math.PI);
-                var z2 = a*wn + (position.z - a*wn)*Math.cos(angle/180*Math.PI) 
-                + (un*position.y - vn*position.x)*Math.sin(angle/180*Math.PI);
-                
-                var newPosition = new THREE.Vector3(center.x + x2, 
-                    center.y + y2, 
-                    center.z + z2);
-                return newPosition;
+                position.subSelf(workplaneOrigin);
+                position.subSelf(globalTransformOrigin);
+                position = SS.rotateAroundAxis(position, rotationAxis, angle);
+                position.addSelf(globalTransformOrigin);
+                position.addSelf(workplaneOrigin);                               
+
+                return position;
             });
             editingGeometry.computeCentroids();
             editingGeometry.computeFaceNormals();

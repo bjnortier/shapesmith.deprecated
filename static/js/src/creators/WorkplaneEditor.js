@@ -10,9 +10,9 @@ SS.WorkplaneEditorModel = SS.NodeEditorModel.extend({
             new SS.WorkplaneEditorDOMView({model: this}),
             new SS.WorkplaneEditorOkCancelView({model: this}),
             new SS.WorkplanePreview({model: this}),
-            new SS.WorkplaneURotationPreview({model: this}),
-            new SS.WorkplaneVRotationPreview({model: this}),
-            new SS.WorkplaneWRotationPreview({model: this}),
+            new SS.WorkplaneURotationPreview({model: this, radius: 60}),
+            new SS.WorkplaneVRotationPreview({model: this, radius: 60}),
+            new SS.WorkplaneWRotationPreview({model: this, radius: 60}),
         ];
     },
 
@@ -221,11 +221,11 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
         this.on('mouseUp', this.mouseUp, this);
         this.on('mouseDrag', this.drag);
         this.relativeAngle = 0;
-        this.angleDimensionSubview
-            = new SS.RelativeAngleDimensionText({
-                model: this.model, 
-                parentView: this,
-                color: this.textColor});
+        this.angleDimensionSubview = new SS.RelativeAngleDimensionText({
+            model: this.model, 
+            parentView: this,
+            color: this.textColor});
+        this.updateAxis();
         this.render();
     },
 
@@ -240,12 +240,12 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
     render: function() {
         this.clear();
         SS.InteractiveSceneView.prototype.render.call(this);
-
+        var radius = this.options.radius;
         var circleGeom = new THREE.Geometry();
         for (var i = 0; i <= 360 - this.relativeAngle; ++i) {
             var angle = i/180*Math.PI;
-            var x = (60)*Math.cos(angle);
-            var y = (60)*Math.sin(angle);
+            var x = (radius)*Math.cos(angle);
+            var y = (radius)*Math.sin(angle);
             circleGeom.vertices.push(new THREE.Vector3(x,y,0));
         }
         var circleMaterial = new THREE.LineBasicMaterial({ 
@@ -266,8 +266,8 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
             }
             for (var i = arcStartAngle; i <= arcEndAngle; ++i) {
                 var angle = i/180*Math.PI;
-                var x = (60)*Math.cos(angle);
-                var y = (60)*Math.sin(angle);
+                var x = (radius)*Math.cos(angle);
+                var y = (radius)*Math.sin(angle);
                 arcGeom.vertices.push(new THREE.Vector3(x,y,0));
             }
             if (arcEndAngle == -this.relativeAngle) {
@@ -282,7 +282,7 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
             new THREE.MeshBasicMaterial({color: this.arrowFaceColor, wireframe: true})
         ];
         var arrow = THREE.SceneUtils.createMultiMaterialObject(arrowGeometry, arrowMaterials);
-        arrow.position.x = 60;
+        arrow.position.x = this.options.radius;
 
         this.circleAndArrow = new THREE.Object3D();
         this.circleAndArrow.add(arrow);
@@ -292,9 +292,8 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
        
         var quaternion = new THREE.Quaternion();
         
-        var axis = SS.objToVector(this.model.node.axis);
-        var angle = this.model.node.angle/180*Math.PI;
-        quaternion.setFromAxisAngle(axis, angle);
+        var angle = this.getAngle()/180*Math.PI;
+        quaternion.setFromAxisAngle(this.getAxis(), angle);
 
         this.sceneObject.useQuaternion = true;
         this.sceneObject.quaternion = quaternion;
@@ -314,14 +313,52 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
 
     },
 
-    mouseDown: function() {
-        this.startAxis = SS.objToVector(this.model.node.axis).normalize();
-        this.startAngle = this.model.node.angle;
+    getAngle: function() {
+        return this.model.node.hasOwnProperty('angle') ?
+            this.model.node.angle : this.model.node.parameters.angle;
+    },
+
+    getAxis: function() {
+        return this.model.node.hasOwnProperty('axis') ?
+            SS.objToVector(this.model.node.axis) : SS.objToVector(this.model.node.parameters);
+    },
+
+    updateAxis: function() {
+        // Workplane rotation
+        this.startAxis = this.getAxis().normalize();
+        if (this.model.node.hasOwnProperty('angle')) {
+            this.startAngle = this.model.node.angle;
+        } else {
+            this.startAngle = this.model.node.parameters.angle;
+        }
                 
-        this.anchorPosition = SS.rotateAroundAxis(this.relativeAnchorPosition, this.startAxis, this.startAngle);
-        this.anchorPosition.addSelf(SS.objToVector(this.model.node.origin));        
+        if (this.model.originalNode) {
+            // Rotation transform
+            this.arrowStartPosition = SS.rotateAroundAxis(this.relativeAnchorPosition, this.startAxis, this.startAngle);
+            this.arrowStartPosition.addSelf(SS.objToVector(this.model.node.origin));
+
+            var workplaneAxis = SS.objToVector(this.model.originalNode.workplane.axis);
+            var workplaneOrigin = SS.objToVector(this.model.originalNode.workplane.origin);
+            var workplaneAngle = this.model.originalNode.workplane.angle;
+
+            this.arrowStartPosition = SS.rotateAroundAxis(this.arrowStartPosition, workplaneAxis, workplaneAngle);
+            this.arrowStartPosition.addSelf(workplaneOrigin);
+        } else {
+            this.arrowStartPosition = SS.rotateAroundAxis(this.relativeAnchorPosition, this.startAxis, this.startAngle);
+            this.arrowStartPosition.addSelf(SS.objToVector(this.model.node.origin));
+        }
+
         this.rotationAxis = SS.rotateAroundAxis(this.relativeRotationAxis, this.startAxis, this.startAngle);
+
+    },
+
+    mouseDown: function() {
+        this.updateAxis();
         this.showDimensionAngleText = true;
+        if (this.model.mouseDownOnArrow) {
+            // For rotation transformer
+            this.model.mouseDownOnArrow(this.rotationAxis, this.options.index);
+        } 
     },
 
     mouseUp: function() {
@@ -332,19 +369,39 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
 
     drag: function(event) {
         
-        var planeOrigin = SS.objToVector(this.model.node.origin);
+
+        if (this.model.originalNode) {
+            // Rotation transform
+            var transformOrigin = SS.objToVector(this.model.node.origin);
+            var transformAxis = this.rotationAxis;
+
+            var workplaneAxis = SS.objToVector(this.model.originalNode.workplane.axis);
+            var workplaneOrigin = SS.objToVector(this.model.originalNode.workplane.origin);
+            var workplaneAngle = this.model.originalNode.workplane.angle;
+            
+            var planeOrigin = SS.rotateAroundAxis(transformOrigin, workplaneAxis, workplaneAngle).addSelf(workplaneOrigin);
+            var planeAxis = SS.rotateAroundAxis(this.rotationAxis, workplaneAxis, workplaneAngle);
+
+
+        } else {
+            // Editing workplane
+            var planeOrigin = SS.objToVector(this.model.node.origin);
+            var planeAxis = this.rotationAxis;
+
+        }
+
         var positionOnRotationPlane = 
-            SS.sceneView.determinePositionOnPlane2(event, planeOrigin, this.rotationAxis);
+            SS.sceneView.determinePositionOnPlane2(event, planeOrigin, planeAxis);
         if (!positionOnRotationPlane) {
             return;
         }
 
         var v1 = new THREE.Vector3().sub(positionOnRotationPlane, planeOrigin).normalize();
-        var v2 = new THREE.Vector3().sub(this.anchorPosition, planeOrigin).normalize();
+        var v2 = new THREE.Vector3().sub(this.arrowStartPosition, planeOrigin).normalize();
         var v2CrossV1 = new THREE.Vector3().cross(v2, v1);
 
         var angle = parseFloat((Math.acos(v1.dot(v2))/Math.PI*180).toFixed(0));
-        if (this.rotationAxis.dot(v2CrossV1) < 0) {
+        if (planeAxis.dot(v2CrossV1) < 0) {
             angle = -angle;
         }
 
@@ -366,6 +423,8 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
             }
         }
 
+        console.log('positionOnRotationPlane:' + JSON.stringify(positionOnRotationPlane) + ' arrowStartPosition:' + JSON.stringify(this.arrowStartPosition) + ' angle:' + angle);
+
         if (this.relativeAngle !== this.previousRelativeAngle) {
             var quat1 = new THREE.Quaternion().setFromAxisAngle(this.startAxis, this.startAngle/180*Math.PI);
             var quat2 = new THREE.Quaternion().setFromAxisAngle(this.relativeRotationAxis, Math.PI*this.relativeAngle/180);
@@ -381,11 +440,22 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
             }
             var axisAngle = quaternionToAxisAngle(quat3);
 
-            this.model.node['axis'].x = parseFloat(axisAngle.axis.x.toFixed(3));
-            this.model.node['axis'].y = parseFloat(axisAngle.axis.y.toFixed(3));
-            this.model.node['axis'].z = parseFloat(axisAngle.axis.z.toFixed(3));
-            this.model.node['angle']  = parseFloat(axisAngle.angle.toFixed(2));
+            if (this.model.node.hasOwnProperty('angle')) {
+                // Workplane
+                this.model.node.axis.x = parseFloat(axisAngle.axis.x.toFixed(3));
+                this.model.node.axis.y = parseFloat(axisAngle.axis.y.toFixed(3));
+                this.model.node.axis.z = parseFloat(axisAngle.axis.z.toFixed(3));
+                this.model.node.angle  = parseFloat(axisAngle.angle.toFixed(2));
+            } else {
+                // Rotation transform
+                this.model.node.parameters.u = parseFloat(axisAngle.axis.x.toFixed(3));
+                this.model.node.parameters.v = parseFloat(axisAngle.axis.y.toFixed(3));
+                this.model.node.parameters.w = parseFloat(axisAngle.axis.z.toFixed(3));
+                this.model.node.parameters.angle  = parseFloat(axisAngle.angle.toFixed(2));
+   
+            }
         }
+        this.model.trigger('beforeChange');
         this.model.trigger('change');
     },
 
@@ -393,6 +463,12 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
 });
 
 SS.WorkplaneURotationPreview = SS.WorkplaneRotationPreview.extend({
+
+    initialize: function(options) {
+        this.relativeAnchorPosition = new THREE.Vector3(0,this.options.radius,0);
+        SS.WorkplaneRotationPreview.prototype.initialize.call(this, options);
+    },
+
     
     render: function() {
         SS.WorkplaneRotationPreview.prototype.render.call(this);
@@ -403,7 +479,6 @@ SS.WorkplaneURotationPreview = SS.WorkplaneRotationPreview.extend({
         this.postRender();
     },
 
-    relativeAnchorPosition: new THREE.Vector3(0,60,0),
     relativeRotationAxis: new THREE.Vector3(1,0,0),
 
     arrowLineColor: 0x333399,
@@ -412,6 +487,11 @@ SS.WorkplaneURotationPreview = SS.WorkplaneRotationPreview.extend({
 });
 
 SS.WorkplaneVRotationPreview = SS.WorkplaneRotationPreview.extend({
+
+    initialize: function(options) {
+        this.relativeAnchorPosition = new THREE.Vector3(0,0,this.options.radius);
+        SS.WorkplaneRotationPreview.prototype.initialize.call(this, options);
+    },
     
     render: function() {
 
@@ -423,7 +503,6 @@ SS.WorkplaneVRotationPreview = SS.WorkplaneRotationPreview.extend({
         this.postRender();
     },
 
-    relativeAnchorPosition: new THREE.Vector3(0,0,60),
     relativeRotationAxis: new THREE.Vector3(0,1,0),
 
     arrowLineColor: 0x339933,
@@ -432,13 +511,18 @@ SS.WorkplaneVRotationPreview = SS.WorkplaneRotationPreview.extend({
 });
 
 SS.WorkplaneWRotationPreview = SS.WorkplaneRotationPreview.extend({
+
+    initialize: function(options) {
+        this.relativeAnchorPosition = new THREE.Vector3(this.options.radius, 0, 0);
+        SS.WorkplaneRotationPreview.prototype.initialize.call(this, options);
+    },
+
     
     render: function() {
         SS.WorkplaneRotationPreview.prototype.render.call(this);
         this.postRender();
     },
 
-    relativeAnchorPosition: new THREE.Vector3(60,0,0),
     relativeRotationAxis: new THREE.Vector3(0,0,1),
 
     arrowLineColor: 0x993333,
@@ -468,9 +552,12 @@ SS.RelativeAngleDimensionText = SS.DimensionText.extend({
     update: function() {
         if (this.parentView.showDimensionAngleText && this.position) {
             var origin = SS.objToVector(this.model.node.origin);
-            var axis = SS.objToVector(this.model.node.axis);
-            var finalPosition = SS.rotateAroundAxis(this.position, axis, this.model.node.angle);
-            finalPosition.addSelf(origin);     
+            var axis = (this.model.node.hasOwnProperty('axis')) ?
+                SS.objToVector(this.model.node.axis) : SS.objToVector(this.model.node.parameters);
+            var angle = (this.model.node.hasOwnProperty('angle')) ? 
+                this.model.node.angle : this.model.node.parameters.angle;
+            var finalPosition = SS.rotateAroundAxis(this.position, axis, angle);
+            finalPosition.addSelf(origin);  
 
             this.moveToScreenCoordinates(this.$angle, finalPosition, 20, -20);
             this.$angle.show();

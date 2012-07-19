@@ -150,24 +150,39 @@ SS.SceneObjectView = Backbone.View.extend({
     },
 
     postRender: function() {
-        // geometry node or transform
-        var workplane = ((this.model.node && this.model.node.workplane) ||
-                         (this.model.originalNode && this.model.originalNode.workplane));
+        // Workplane of geometry node
+        var workplane = ((this.model.node && this.model.node.workplane) || 
+                         (this.model.originalNode && this.model.originalNode.workplane)); 
+
         
         if  (workplane && !this.dontApplyWorkplane) {
+            this.sceneObject.useQuaternion = true;
+            this.sceneObject.quaternion = new THREE.Quaternion();
+
             var quaternion = new THREE.Quaternion();
             var axis = SS.objToVector(workplane.axis);
             var angle = workplane.angle/180*Math.PI;
             quaternion.setFromAxisAngle(axis, angle);
-            this.sceneObject.useQuaternion = true;
             this.sceneObject.quaternion = quaternion;
-
             this.sceneObject.position = new THREE.Vector3().add(
                 SS.rotateAroundAxis(
                     this.sceneObject.position, 
                     axis, 
                     workplane.angle),
                 SS.objToVector(workplane.origin));
+
+            // Rotation transformer
+            if (this.model.node && this.model.node.type === 'rotate') {
+                var transform = this.model.node;
+                var quaternion = new THREE.Quaternion();
+                var axis = SS.objToVector(transform.parameters);
+                var angle = transform.parameters.angle/180*Math.PI;
+                quaternion.setFromAxisAngle(axis, angle);
+
+                this.sceneObject.quaternion = new THREE.Quaternion().multiply(
+                    this.sceneObject.quaternion, quaternion);
+
+            }
         }
         
         SS.sceneView.scene.add(this.sceneObject);

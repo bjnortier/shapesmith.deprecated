@@ -4,8 +4,8 @@ var SS = SS || {};
 SS.TransformerInitiator = Backbone.Model.extend({
     
     initialize: function(attributes) {
-        this.node = attributes.geomNode;
-        this.normalizedBoundingBox = SS.normalizedBoundingBoxForGeomNode(this.node);
+        this.originalNode = attributes.geomNode;
+        this.normalizedBoundingBox = SS.normalizedBoundingBoxForGeomNode(this.originalNode);
         this.normalizedCenter = SS.centerOfGeom(this.normalizedBoundingBox);
 
         this.views = [];
@@ -22,7 +22,7 @@ SS.TransformerInitiator = Backbone.Model.extend({
 
     deselected: function(deselected) {
         if ((deselected.length === 1) &&
-            (deselected[0] === this.node.id)) {
+            (deselected[0] === this.originalNode.id)) {
             this.destroy();
         }
     },

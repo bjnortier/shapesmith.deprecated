@@ -4,8 +4,6 @@
 #include "Transform.h"
 #include "Util.h"
 #include "base64.h"
-#include "quaternion.hpp"
-
 
 TopoDS_Shape Builder::shape() {
     return shape_;
@@ -84,19 +82,6 @@ void Builder::ApplyWorkplane(map< string, mValue> json) {
         gp_Trsf transformation2 = gp_Trsf();
         transformation2.SetTranslation(gp_Vec(x,y,z));
         shape_ = BRepBuilderAPI_Transform(shape_, transformation2).Shape();
-    }
-}
-
-void Builder::ApplyReverseWorkplane(map< string, mValue> json) {
-    if (!json["workplane"].is_null()) {
-        map< string, mValue > reverse_workplane;
-        reverse_workplane["origin"] = json["workplane"].get_obj()["origin"].get_obj();
-        reverse_workplane["axis"] = json["workplane"].get_obj()["axis"].get_obj();
-        reverse_workplane["angle"] = -Util::to_d(json["workplane"].get_obj()["angle"]);
-
-        map< string, mValue > reverseJSON;
-        reverseJSON["workplane"] = reverse_workplane;
-        this->ApplyWorkplane(reverseJSON);
     }
 }
 
