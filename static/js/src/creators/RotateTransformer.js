@@ -6,9 +6,9 @@ SS.RotateTransformerInitiator = SS.TransformerInitiator.extend({
         SS.TransformerInitiator.prototype.initialize.call(this, attributes);
         this.node = {origin: this.normalizedCenter, axis:{x:0, y:0, z:1}, angle:0};
         this.views = this.views.concat([
-            new SS.WorkplaneURotationPreview({model: this, radius: 30, index: 0}),
-            new SS.WorkplaneVRotationPreview({model: this, radius: 30, index: 1}),
-            new SS.WorkplaneWRotationPreview({model: this, radius: 30, index: 2}),
+            new SS.WorkplaneURotationPreview({model: this, radius: this.normalizedBoundingRadius + 10, index: 0}),
+            new SS.WorkplaneVRotationPreview({model: this, radius: this.normalizedBoundingRadius + 10, index: 1}),
+            new SS.WorkplaneWRotationPreview({model: this, radius: this.normalizedBoundingRadius + 10, index: 2}),
         ]);
     },
 
@@ -54,9 +54,9 @@ SS.RotateTransformer = SS.Transformer.extend({
         if (!attributes.editingExisting) {
             this.anchorPosition = attributes.anchorPosition;
             var arrowViews = [
-                new SS.WorkplaneURotationPreview({model: this, radius: 30}),
-                new SS.WorkplaneVRotationPreview({model: this, radius: 30}),
-                new SS.WorkplaneWRotationPreview({model: this, radius: 30}),
+                new SS.WorkplaneURotationPreview({model: this, radius: this.normalizedBoundingRadius + 10}),
+                new SS.WorkplaneVRotationPreview({model: this, radius: this.normalizedBoundingRadius + 10}),
+                new SS.WorkplaneWRotationPreview({model: this, radius: this.normalizedBoundingRadius + 10}),
             ];
             SS.sceneView.addToMouseOverAndMouseDown(arrowViews[attributes.mouseDownArrowViewIndex]);
             arrowViews[attributes.mouseDownArrowViewIndex].mouseDown();

@@ -7,6 +7,7 @@ SS.TransformerInitiator = Backbone.Model.extend({
         this.originalNode = attributes.geomNode;
         this.normalizedBoundingBox = SS.normalizedBoundingBoxForGeomNode(this.originalNode);
         this.normalizedCenter = SS.centerOfGeom(this.normalizedBoundingBox);
+        this.normalizedBoundingRadius = SS.normalizedBoundingRadius(this.normalizedBoundingBox);
 
         this.views = [];
 
@@ -49,6 +50,7 @@ SS.Transformer = SS.NodeModel.extend({
             this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
             this.normalizedBoundingBox = SS.normalizedBoundingBoxForGeomNode(this.editingNode);
             this.normalizedCenter = SS.centerOfGeom(this.normalizedBoundingBox);
+            this.normalizedBoundingRadius = SS.normalizedBoundingRadius(this.normalizedBoundingBox);
         }
 
         this.views = [

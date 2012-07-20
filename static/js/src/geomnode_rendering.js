@@ -615,4 +615,8 @@ SS.centerOfGeom = function(boundingBox) {
      new THREE.Vector3().sub(boundingBox.max, boundingBox.min).divideScalar(2));
 }
 
+SS.normalizedBoundingRadius = function(boundingBox) {
+    return new THREE.Vector3().sub(boundingBox.max, boundingBox.min).length()/2;
+}
+
 })();
