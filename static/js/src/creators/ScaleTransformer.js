@@ -21,7 +21,7 @@ SS.ScaleTransformerInitiator = SS.TransformerInitiator.extend({
 
     mouseDownOnArrow: function(arrowView) {
         
-        var geomNode = this.node;
+        var geomNode = this.originalNode;
         var editingNode = geomNode.editableCopy();
         var transform = new Transform({
             type: 'scale',
