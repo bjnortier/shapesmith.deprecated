@@ -115,7 +115,7 @@ SS.SceneView = function(container) {
             var panRotateThreshold = 10;
             var transformerThreshold = 5;
             
-            if (SS.UI_MOUSE_STATE.isFree()) {
+            if (SS.UI_MOUSE_STATE.isFree() && (!mouseDownOnActiveSceneObject)) {
                 
                 var overPanRotateThreshold = ((Math.abs(event.clientX - mouseOnDown.x) > panRotateThreshold)
                                               ||
