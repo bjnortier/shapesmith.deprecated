@@ -423,8 +423,6 @@ SS.WorkplaneRotationPreview = SS.InteractiveSceneView.extend({
             }
         }
 
-        console.log('positionOnRotationPlane:' + JSON.stringify(positionOnRotationPlane) + ' arrowStartPosition:' + JSON.stringify(this.arrowStartPosition) + ' angle:' + angle);
-
         if (this.relativeAngle !== this.previousRelativeAngle) {
             var quat1 = new THREE.Quaternion().setFromAxisAngle(this.startAxis, this.startAngle/180*Math.PI);
             var quat2 = new THREE.Quaternion().setFromAxisAngle(this.relativeRotationAxis, Math.PI*this.relativeAngle/180);
