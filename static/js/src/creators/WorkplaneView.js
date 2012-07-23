@@ -31,6 +31,8 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
         this.node = new SS.WorkplaneNode();
         this.domView = new SS.WorkplaneDisplayDOMView({model: this});
         this.views = [
+            this.domView,
+            new SS.WorkplanePointerView({model: this}),
             new SS.WorkplaneAxesSceneView({model: this}),
             new SS.WorkplaneMainGridSceneView({model: this}),
             new SS.WorkplaneFadingGridSceneView({model: this}),
@@ -157,6 +159,11 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
         }
     },
 
+    updatePointer: function(position) {
+        this.pointerPosition = position;
+        this.trigger('pointerUpdated');
+    },
+
 });
 
 SS.WorkplaneDisplayDOMView = SS.NodeDisplayDOMView.extend({
@@ -253,6 +260,33 @@ SS.WorkplaneAxesSceneView = SS.WorkplaneDisplaySceneView.extend({
             new THREE.LineBasicMaterial({ color: SS.colors.zAxis, opacity: 0.2 })));
         this.postRender();
     },
+
+});
+
+SS.WorkplanePointerView = SS.SceneObjectView.extend({
+
+    initialize: function() {
+        SS.SceneObjectView.prototype.initialize.call(this);
+        this.model.on('pointerUpdated', this.render, this);
+    },
+
+    remove: function() {
+        SS.SceneObjectView.prototype.remove.call(this);
+        this.model.on('pointerUpdated', this.render, this);
+    },
+
+    render: function() {
+        this.clear();
+
+        var pointerMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00, opacity: 0.7, wireframe: false } );
+        var pointerGeometry = new THREE.CubeGeometry(0.5, 0.5, 0.5);
+        this.pointer = new THREE.Mesh(pointerGeometry, pointerMaterial); 
+        this.pointer.position = this.model.pointerPosition;
+        this.sceneObject.add(this.pointer);
+
+        this.postRender();
+    },
+
 
 });
 

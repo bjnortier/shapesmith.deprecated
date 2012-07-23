@@ -179,6 +179,7 @@ SS.SceneView = function(container) {
         }
 
         that.lastPositionOnWorkplane = determinePositionOnWorkplane(event);
+        SS.workplaneModel.updatePointer(that.lastPositionOnWorkplane);
         lastMousePos = mouse;
         that.updateScene = true;
     }

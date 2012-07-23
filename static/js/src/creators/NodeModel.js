@@ -305,8 +305,10 @@ SS.OkCancelView = Backbone.View.extend({
 
     update: function() {
 
-        var pixelPosition = {x:  window.innerWidth/2 + 10,
-                             y: window.innerHeight/2};
+        var pixelPosition = {
+            x: window.innerWidth/2 + 10,
+            y: window.innerHeight/2
+        };
         var boundingBox = this.model.getBoundingBox();
         // Nested transforms don't have bounding boxes
         if (boundingBox) {
