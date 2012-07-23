@@ -366,6 +366,7 @@ SS.scaleGeomNodeRendering = function(originalNode, editingNode, scalePoint, fact
     var axis = SS.objToVector(originalNode.workplane.axis);
     var angle = originalNode.workplane.angle;
     var globalScalePoint = SS.rotateAroundAxis(scalePoint, axis, angle);
+    globalScalePoint.addSelf(SS.objToVector(originalNode.workplane.origin));
 
     for (key in editingNode.sceneObjects) {
         for (var i = 0; i < editingNode.sceneObjects[key].children.length; ++i) {
@@ -373,7 +374,6 @@ SS.scaleGeomNodeRendering = function(originalNode, editingNode, scalePoint, fact
             var originalGeometry = originalNode.originalSceneObjects[key].children[i].geometry;
             var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
 
-            globalScalePoint.addSelf(SS.objToVector(originalNode.workplane.origin));
 
             editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
                 var position = vertex.clone();
