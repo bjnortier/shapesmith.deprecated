@@ -147,7 +147,7 @@ body {
 
 img#logo {
     position: absolute;
-    left: 10px;
+    right: 10px;
     bottom: 0px;
 }
 
@@ -405,8 +405,15 @@ img.action:hover {
 #treeview-container {
     position: absolute;
     left: 20px;
-    top: 80px;
+    bottom: 20px;
     color: white;
+    height: 85%;
+}
+
+#geom-model-doc {
+    overflow: scroll;
+    display: none;
+    height: 95%;
 }
 
 #workplane-container {
@@ -415,7 +422,6 @@ img.action:hover {
     top: 80px;
     color: white;
 }
-
 
 #treeview-container input[type="number"], #workplane-container input[type="number"] {
     width: 50px;
@@ -434,9 +440,7 @@ img.action:hover {
     padding: 5px;
 }
 
-#geom-model-doc {
-    display: none;
-}
+
 
 #geom-model-doc table {
     border-collapse:collapse;
