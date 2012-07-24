@@ -173,9 +173,12 @@ GeomNode.fromDeepJson = function(json) {
     return geomNode;
 }
 
+GeomNode.prototype.isTransformEditing = function() {
+    return _.pluck(this.transforms, "editing").indexOf(true) >= 0;
+}
+
 GeomNode.prototype.isEditingOrTransformEditing = function() {
-    var editingTransform = _.pluck(this.transforms, "editing").indexOf(true) >= 0;
-    return this.editing || editingTransform;
+    return this.editing || this.isTransformEditing();
 }
 
 

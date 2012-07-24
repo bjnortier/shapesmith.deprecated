@@ -35,11 +35,14 @@ SS.GeomNodeRenderingManager = function() {
 
     this.geomDocReplace = function(original, replacement) {
         this.geomDocRemove(original);
-        this.geomDocAdd(replacement);
 
         if (replacement.isEditingOrTransformEditing()) {
+            if (replacement.isTransformEditing()) {
+                this.geomDocAdd(replacement);
+            }
             setOtherNonHiddenNodesTransparent(replacement);
         } else {
+            this.geomDocAdd(replacement);
             restoreOpacityOfNonHiddenNodes();
         }
     }
