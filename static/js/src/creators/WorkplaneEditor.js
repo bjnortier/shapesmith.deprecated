@@ -4,15 +4,16 @@ SS.WorkplaneEditorModel = SS.NodeEditorModel.extend({
 
     initialize: function(attributes) {
         this.node = attributes.editingNode;
+        this.extents = attributes.extents;
         this.views = [
             new SS.DraggableOriginCorner({model: this}),
             new SS.OriginDimensionText({model: this}),
             new SS.WorkplaneEditorDOMView({model: this}),
             new SS.WorkplaneEditorOkCancelView({model: this}),
             new SS.WorkplanePreview({model: this}),
-            new SS.WorkplaneURotationPreview({model: this, radius: 60}),
-            new SS.WorkplaneVRotationPreview({model: this, radius: 60}),
-            new SS.WorkplaneWRotationPreview({model: this, radius: 60}),
+            new SS.WorkplaneURotationPreview({model: this, radius: this.extents}),
+            new SS.WorkplaneVRotationPreview({model: this, radius: this.extents}),
+            new SS.WorkplaneWRotationPreview({model: this, radius: this.extents}),
         ];
     },
 
@@ -123,9 +124,8 @@ SS.WorkplaneEditorOkCancelView = Backbone.View.extend({
     },
 
     update: function() {
-
-        var boundingBox = {min: {x: -this.model.node.extents.x, y: -this.model.node.extents.y, z:0},
-                           max: {x: this.model.node.extents.x, y: this.model.node.extents.y, z:0}};
+        var boundingBox = {min: {x: -this.model.extents, y: -this.model.extents, z:0},
+                           max: {x: this.model.extents, y: this.model.extents, z:0}};
         var screenPosition = SS.boundingBoxToScreenPosition(boundingBox);
         $('#floating-dom-view').css('left', screenPosition.x);
         $('#floating-dom-view').css('top', screenPosition.y);
@@ -183,10 +183,10 @@ SS.WorkplanePreview = SS.PreviewWithOrigin.extend({
         var origin = this.model.node.origin;
         var materials = [ SS.materials.faceMaterial, SS.materials.wireframeMaterial ];
 
-        var planeGeometry = new THREE.PlaneGeometry(60, 60);
+        var planeGeometry = new THREE.PlaneGeometry(this.model.extents, this.model.extents);
         var view = this;
-        [-30, 30].map(function(xpos) {
-            [-30, 30].map(function(ypos) {
+        [-view.model.extents/2, view.model.extents/2].map(function(xpos) {
+            [-view.model.extents/2, view.model.extents/2].map(function(ypos) {
                 var topPlane = THREE.SceneUtils.createMultiMaterialObject(planeGeometry, materials);
                 var bottomPlane = THREE.SceneUtils.createMultiMaterialObject(planeGeometry, materials);
                 topPlane.position.x = xpos;

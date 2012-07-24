@@ -3,9 +3,7 @@ var SS = SS || {};
 SS.WorkplaneNode = function() {
     this['origin'] = (arguments[0] && arguments[0].origin) || {x: 0, y:0, z:0};
     this['axis'] = (arguments[0] && arguments[0]['axis']) || {x: 0, y: 0, z:1};
-    this['extents'] = (arguments[0] && arguments[0]['extents']) || {x: 60, y:60};
     this['angle'] = (arguments[0] && arguments[0]['angle']) || 0;
-    this['boundary'] = (arguments[0] && arguments[0]['boundary']) || 50;
     this['type'] = 'workplane';
 }
 

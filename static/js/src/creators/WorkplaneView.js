@@ -29,9 +29,11 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
 
     initialize: function(attributes) {
         this.node = new SS.WorkplaneNode();
+        this.minExtents = 60;
+        this.extents = 60;
+        this.boundary = 50;
         this.domView = new SS.WorkplaneDisplayDOMView({model: this});
         this.views = [
-            this.domView,
             new SS.WorkplanePointerView({model: this}),
             new SS.WorkplanePointerDimensionText({model: this}),
             new SS.WorkplaneAxesSceneView({model: this}),
@@ -39,37 +41,54 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
             new SS.WorkplaneFadingGridSceneView({model: this}),
             new SS.WorkplaneGlobalXYPlaneView({model: this}),
         ];
-        this.views.concat(this.addRulers());
+        this.rulers = this.addRulers();
 
         selectionManager.on('selected', this.selectionChanged, this);
         selectionManager.on('deselected', this.selectionChanged, this);
+        geom_doc.on('add', this.updateExtents, this);
+        geom_doc.on('remove', this.updateExtents, this);
+        geom_doc.on('replace', this.updateExtents, this);
         geom_doc.on('replace', this.geomDocReplace, this);
     },
 
     destroy: function() {
-        this.view.remove();
-        this.permanentViews.concat(this.domView).map(function(view) {
+        this.views.map(function(view) {
             view.remove();
         });
+        this.rulers.map(function(ruler) {
+            ruler.remove();
+        });
+        domView.remove();
 
         selectionManager.off('selected', this.selectionChanged, this);
         selectionManager.off('deselected', this.selectionChanged, this);
-        geom_doc.on('replace', this.geomDocReplace, this);
+        geom_doc.off('add', this.updateExtents, this);
+        geom_doc.off('remove', this.updateExtents, this);
+        geom_doc.off('replace', this.updateExtents, this);
+        geom_doc.off('replace', this.geomDocReplace, this);
     },
 
     addRulers: function() {
         var rulers = [];
-        for (var x = -this.node.extents.x/10; x <= this.node.extents.x/10; ++x) {
-            rulers.push(new SS.WorkplaneRulerText({model: this,
-                                                  position: new THREE.Vector3(x*10,this.node.extents.y+5,0),
-                                                  label: x*10,
-                                                  axis: 'x'}));
+        var spacing = 10;
+        if (this.extents > 100) {
+            spacing = 20;
         }
-        for (var y = -this.node.extents.y/10; y <= this.node.extents.y/10; ++y) {
-            rulers.push(new SS.WorkplaneRulerText({model: this,
-                                                  position: new THREE.Vector3(this.node.extents.x+5,y*10,0),
-                                                  label: y*10,
-                                                  axis: 'y'}));
+        for (var x = -this.extents/spacing; x <= this.extents/spacing; ++x) {
+            rulers.push(new SS.WorkplaneRulerText({
+                model: this,
+                position: new THREE.Vector3(x*spacing,this.extents+5,0),
+                label: x*spacing,
+                axis: 'x'
+            }));
+        }
+        for (var y = -this.extents/spacing; y <= this.extents/spacing; ++y) {
+            rulers.push(new SS.WorkplaneRulerText({
+                model: this,
+                position: new THREE.Vector3(this.extents+5,y*spacing,0),
+                label: y*spacing,
+                axis: 'y'
+            }));
         }
         return rulers;
     },
@@ -106,11 +125,46 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
         }
     },
 
+    updateExtents: function() {
+        var boundingBox = {min: new THREE.Vector3(), max: new THREE.Vector3()};
+        geom_doc.rootNodes.map(function(rootNode) {
+            var box = SS.normalizedBoundingBoxForGeomNode(rootNode);
+                if (box) {
+                boundingBox.min = new THREE.Vector3(
+                    Math.min(boundingBox.min.x, box.min.x),
+                    Math.min(boundingBox.min.y, box.min.y),
+                    Math.min(boundingBox.min.z, box.min.z));
+                boundingBox.max = new THREE.Vector3(
+                    Math.max(boundingBox.max.x, box.max.x),
+                    Math.max(boundingBox.max.y, box.max.y),
+                    Math.max(boundingBox.max.z, box.max.z));
+            }
+        });
+        console.log(JSON.stringify(boundingBox));
+        var max = 0;
+        max = Math.max(Math.abs(boundingBox.min.x), max)
+        max = Math.max(Math.abs(boundingBox.max.x), max)
+        max = Math.max(Math.abs(boundingBox.min.y), max)
+        max = Math.max(Math.abs(boundingBox.max.y), max)
+        var newExtents = this.minExtents;
+        if (max > this.minExtents) {
+            newExtents = Math.round(max/10)*10 + 10;
+        } 
+        if (newExtents !== this.extents) {
+            this.extents = newExtents;
+            this.rulers.map(function(ruler) {
+                ruler.remove();
+            });
+            this.rulers = this.addRulers();
+            this.trigger('changeExtents');
+        }
+    },
+
     setEditing: function() {
         this.domView.remove();
         this.domView = undefined;
         var editableWorkplaneNode = this.node.editableCopy();
-        this.editingModel = new SS.WorkplaneEditorModel({editingNode: editableWorkplaneNode});
+        this.editingModel = new SS.WorkplaneEditorModel({editingNode: editableWorkplaneNode, extents: this.extents});
     },
 
     cancelEditing: function() {
@@ -187,20 +241,18 @@ SS.WorkplaneDisplaySceneView = SS.SceneObjectView.extend({
 
     initialize: function() {
         SS.SceneObjectView.prototype.initialize.call(this);
-
-        this.extents = this.model.node.extents;
-        this.minX = -this.extents.x;
-        this.minY = -this.extents.y;
-        this.maxX = this.extents.x;
-        this.maxY = this.extents.y;
-        this.boundary = this.model.node.boundary;
-
-        this.create();
-        this.render();
+        this.model.on('changeExtents', this.recreate, this);
+        this.recreate();
     },
 
     remove: function() {
         SS.SceneObjectView.prototype.remove.call(this);
+        this.model.off('changeExtents', this.recreate, this);
+    },
+
+    recreate: function() {
+        this.create();
+        this.render();
     },
 
     render: function() {
@@ -361,11 +413,11 @@ SS.WorkplaneMainGridSceneView = SS.WorkplaneDisplaySceneView.extend({
     create: function() {
         this.clear();
 
-        for (var x = this.minX; x <= this.maxX; ++x) {
+        for (var x = -this.model.extents; x <= this.model.extents; ++x) {
             if (x != 0) {
                 var gridLineGeometry = new THREE.Geometry();
-                gridLineGeometry.vertices.push(new THREE.Vector3(x, this.minY, 0));
-                gridLineGeometry.vertices.push(new THREE.Vector3(x, this.maxY, 0));
+                gridLineGeometry.vertices.push(new THREE.Vector3(x, -this.model.extents, 0));
+                gridLineGeometry.vertices.push(new THREE.Vector3(x, this.model.extents, 0));
 
                 var material = (x % 10 == 0) ? SS.materials.gridMajor : SS.materials.gridMinor;
                 var line = new THREE.Line(gridLineGeometry, material);
@@ -373,11 +425,11 @@ SS.WorkplaneMainGridSceneView = SS.WorkplaneDisplaySceneView.extend({
             }
         }
 
-        for (var y = this.minY; y <= this.maxY; ++y) {
+        for (var y = -this.model.extents; y <= this.model.extents; ++y) {
             if (y != 0) {
                 var gridLineGeometry = new THREE.Geometry();
-                gridLineGeometry.vertices.push(new THREE.Vector3(this.minX, y, 0));
-                gridLineGeometry.vertices.push(new THREE.Vector3(this.maxX, y, 0));
+                gridLineGeometry.vertices.push(new THREE.Vector3(-this.model.extents, y, 0));
+                gridLineGeometry.vertices.push(new THREE.Vector3(this.model.extents, y, 0));
 
                 var material = (y % 10 == 0) ? SS.materials.gridMajor : SS.materials.gridMinor;
                 var line = new THREE.Line(gridLineGeometry, material);
@@ -396,8 +448,8 @@ SS.WorkplaneFadingGridSceneView = SS.WorkplaneDisplaySceneView.extend({
         this.clear();
 
 
-        for(var x = this.minX - this.boundary; x <= this.maxX + this.boundary; ++x) {
-            for(var y = this.minY - this.boundary; y <= this.maxY + this.boundary; ++y) {
+        for(var x = -this.model.extents - this.model.boundary; x <= this.model.extents + this.model.boundary; ++x) {
+            for(var y = -this.model.extents - this.model.boundary; y <= this.model.extents + this.model.boundary; ++y) {
 
                 var inside = this.isInsideX(x) && this.isInsideY(y);
                 if ((x % 10 == 0) && (y % 10 == 0)
@@ -412,11 +464,11 @@ SS.WorkplaneFadingGridSceneView = SS.WorkplaneDisplaySceneView.extend({
     },
 
     isInsideX: function(x) {
-        return ((x >= this.minX) && (x <= this.maxX));
+        return ((x >= -this.model.extents) && (x <= this.model.extents));
     }
     ,
     isInsideY: function(y) {
-        return ((y >= this.minY) && (y <= this.maxY));
+        return ((y >= -this.model.extents) && (y <= this.model.extents));
     },
 
     addFadingGridTile:function(x,y) {
@@ -426,16 +478,16 @@ SS.WorkplaneFadingGridSceneView = SS.WorkplaneDisplaySceneView.extend({
         fadingGridLineGeometry.vertices.push(new THREE.Vector3(10, 0, 0));
 
         var dx = 0;
-        if (x < this.minX) {
-            dx = this.minX - x;
-        } else if (x > this.maxX) {
-            dx = x - this.maxX;
+        if (x < -this.model.extents) {
+            dx = -this.model.extents - x;
+        } else if (x > this.model.extents) {
+            dx = x - this.model.extents;
         }
         var dy = 0;
-        if (y < this.minY) {
-            dy = this.minY - y;
-        } else if (y > this.maxY) {
-            dy = y - this.maxY;
+        if (y < -this.model.extents) {
+            dy = -this.model.extents - y;
+        } else if (y > this.model.extents) {
+            dy = y - this.model.extents;
         }
 
         var r = Math.sqrt(dx*dx + dy*dy);
@@ -474,7 +526,7 @@ SS.WorkplaneGlobalXYPlaneView = SS.SceneObjectView.extend({
         if (!this.model.node.isGlobalXY()) {
             var origin = this.model.node.origin;
             var materials = [ SS.materials.wireframeMaterial ];
-            var planeGeometry = new THREE.PlaneGeometry(this.model.node.extents.x*2, this.model.node.extents.y*2);
+            var planeGeometry = new THREE.PlaneGeometry(this.model.extents.x*2, this.model.extents.y*2);
             var plane = THREE.SceneUtils.createMultiMaterialObject(planeGeometry, SS.materials.globalXYPlane);
             plane.rotation.x = Math.PI/2;
             this.sceneObject.add(plane);        

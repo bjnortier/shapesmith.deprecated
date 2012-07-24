@@ -361,6 +361,7 @@ SS.DimensionText = Backbone.View.extend({
     remove: function() {
         Backbone.View.prototype.remove.call(this);
         SS.sceneView.off('cameraChange', this.update, this);
+        this.model.off('change', this.render, this);
         this.clear();
     },
     

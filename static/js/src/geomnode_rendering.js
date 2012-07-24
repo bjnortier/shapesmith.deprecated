@@ -537,8 +537,12 @@ var computeBox = function(workplane, geomNode) {
         }
     };
 
-    geomNode.sceneObjects.edges.children.map(addFunction);
-    geomNode.sceneObjects.faces.children.map(addFunction);
+    geomNode.sceneObjects && geomNode.sceneObjects.edges.children.map(addFunction);
+    geomNode.sceneObjects && geomNode.sceneObjects.faces.children.map(addFunction);
+
+    if (boundingBoxes.length == 0) {
+        return undefined;
+    }
 
     var min = boundingBoxes[0].min;
     var max = boundingBoxes[0].max;
