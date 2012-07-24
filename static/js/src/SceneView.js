@@ -178,8 +178,11 @@ SS.SceneView = function(container) {
             document.body.style.cursor = 'default';
         }
 
-        that.lastPositionOnWorkplane = determinePositionOnWorkplane(event);
-        SS.workplaneModel.updatePointer(that.lastPositionOnWorkplane);
+        var positionOnWorkplane = determinePositionOnWorkplane(event);
+        if (!positionOnWorkplane.equals(that.lastPositionOnWorkplane)) {
+            that.lastPositionOnWorkplane = positionOnWorkplane; 
+            SS.workplaneModel.updatePointer(that.lastPositionOnWorkplane);
+        }
         lastMousePos = mouse;
         that.updateScene = true;
     }

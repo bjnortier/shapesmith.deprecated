@@ -33,6 +33,7 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
         this.views = [
             this.domView,
             new SS.WorkplanePointerView({model: this}),
+            new SS.WorkplanePointerDimensionText({model: this}),
             new SS.WorkplaneAxesSceneView({model: this}),
             new SS.WorkplaneMainGridSceneView({model: this}),
             new SS.WorkplaneFadingGridSceneView({model: this}),
@@ -276,24 +277,84 @@ SS.WorkplanePointerView = SS.WorkplaneDisplaySceneView.extend({
     },
 
     create: function() {
-        this.clear();
-        var pointerMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00, opacity: 0.7, wireframe: false } );
-        var pointerGeometry = new THREE.CubeGeometry(0.5, 0.5, 0.5);
-        this.pointer = new THREE.Mesh(pointerGeometry, pointerMaterial); 
-        if (this.model.pointerPosition) {
-            this.pointer.position = this.model.pointerPosition;
-        }
-        this.sceneObject.add(this.pointer);
-        this.postRender();
+        // do nothing
     },
 
     render: function() {
-        this.pointer.position = this.model.pointerPosition;
-        SS.WorkplaneDisplaySceneView.prototype.render.call(this);
+        this.clear();
+        if (!SS.UI_EDITING_STATE.isEditing()) {
+            var pointerMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00, opacity: 0.7, wireframe: false } );
+            var pointerGeometry = new THREE.CubeGeometry(0.5, 0.5, 0.5);
+            this.pointer = new THREE.Mesh(pointerGeometry, pointerMaterial); 
+            this.sceneObject.add(this.pointer);
+            
+            if (this.model.pointerPosition) {
+                this.pointer.position = this.model.pointerPosition;
+            }
+            SS.WorkplaneDisplaySceneView.prototype.render.call(this);
+        }
+        this.postRender();
     },
 
+});
+
+SS.WorkplanePointerDimensionText = SS.DimensionText.extend({
+
+    initialize: function() {
+        SS.DimensionText.prototype.initialize.call(this);
+        this.model.on('pointerUpdated', this.render, this);
+        SS.UI_EDITING_STATE.on('change', this.render, this);
+    },
+
+    remove: function() {
+        SS.DimensionText.prototype.remove.call(this);
+        this.model.on('pointerUpdated', this.render, this);
+        SS.UI_EDITING_STATE.off('change', this.render, this);
+    },
+
+    render: function() {
+        this.clear();
+        if (this.model.pointerPosition && !SS.UI_EDITING_STATE.isEditing()) {
+            var origin = this.model.pointerPosition;
+
+            if (origin.x || origin.y) {
+                if (origin.z) {
+                    this.$xyz = this.addElement($.mustache(
+                        '<div class="dimension">(<span class="x">{{x}}</span>,' + 
+                                                '<span class="y">{{y}}</span>,' +
+                                                '<span class="z">{{z}}</span>)</div>',
+                        origin));
+                } else {
+                    this.$xyz = this.addElement($.mustache(
+                        '<div class="dimension">(<span class="x">{{x}}</span>,' + 
+                                                '<span class="y">{{y}}</span>)</div>',
+                        origin));
+                }
+            }
+            this.update();
+        } 
+    },
+    
+    update: function() {
+        if (this.$xyz) {
+            if (this.model.pointerPosition) {
+                var position = SS.worldPositionFromWorkplanePosition(
+                    this.model.pointerPosition, this.model.node);
+
+                this.moveToScreenCoordinates(
+                    this.$xyz, 
+                    position,
+                    -30,
+                    10);
+            } 
+            if (!this.model.pointerPosition || SS.UI_EDITING_STATE.isEditing()) {
+                this.$xyz.hide();
+            } 
+        } 
+    },
 
 });
+
 
 SS.WorkplaneMainGridSceneView = SS.WorkplaneDisplaySceneView.extend({
 
@@ -410,14 +471,14 @@ SS.WorkplaneGlobalXYPlaneView = SS.SceneObjectView.extend({
     
     render: function() {
         this.clear();
-        //if (!this.model.node.isGlobalXY()) {
+        if (!this.model.node.isGlobalXY()) {
             var origin = this.model.node.origin;
             var materials = [ SS.materials.wireframeMaterial ];
             var planeGeometry = new THREE.PlaneGeometry(this.model.node.extents.x*2, this.model.node.extents.y*2);
             var plane = THREE.SceneUtils.createMultiMaterialObject(planeGeometry, SS.materials.globalXYPlane);
             plane.rotation.x = Math.PI/2;
             this.sceneObject.add(plane);        
-        //}
+        }
         this.postRender();
     },
 
