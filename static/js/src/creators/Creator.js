@@ -416,6 +416,10 @@ SS.OriginDimensionText = SS.DimensionText.extend({
                                             '<span class="y">{{y}}</span>)</div>',
                     origin));
             }
+        } else if (origin.z) {
+                this.$xyz = this.addElement($.mustache(
+                    '<div class="dimension">(<span class="z">{{z}}</span>)</div>',
+                    origin));
         }
         this.update();
     },
