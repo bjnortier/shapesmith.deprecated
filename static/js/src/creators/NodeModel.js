@@ -312,6 +312,14 @@ SS.OkCancelView = Backbone.View.extend({
         var boundingBox = this.model.getBoundingBox();
         // Nested transforms don't have bounding boxes
         if (boundingBox) {
+            if (this.model.node.workplane) {
+                boundingBox.min = SS.worldPositionFromWorkplanePosition(
+                    boundingBox.min, this.model.node.workplane);
+                boundingBox.max = SS.worldPositionFromWorkplanePosition(
+                    boundingBox.max, this.model.node.workplane);
+            }
+
+
             var projScreenMat = new THREE.Matrix4();
             projScreenMat.multiply(SS.sceneView.camera.projectionMatrix, 
                                    SS.sceneView.camera.matrixWorldInverse);
