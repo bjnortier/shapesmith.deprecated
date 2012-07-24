@@ -263,28 +263,33 @@ SS.WorkplaneAxesSceneView = SS.WorkplaneDisplaySceneView.extend({
 
 });
 
-SS.WorkplanePointerView = SS.SceneObjectView.extend({
+SS.WorkplanePointerView = SS.WorkplaneDisplaySceneView.extend({
 
     initialize: function() {
-        SS.SceneObjectView.prototype.initialize.call(this);
+        SS.WorkplaneDisplaySceneView.prototype.initialize.call(this);
         this.model.on('pointerUpdated', this.render, this);
     },
 
     remove: function() {
-        SS.SceneObjectView.prototype.remove.call(this);
+        SS.WorkplaneDisplaySceneView.prototype.remove.call(this);
         this.model.on('pointerUpdated', this.render, this);
     },
 
-    render: function() {
+    create: function() {
         this.clear();
-
         var pointerMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00, opacity: 0.7, wireframe: false } );
         var pointerGeometry = new THREE.CubeGeometry(0.5, 0.5, 0.5);
         this.pointer = new THREE.Mesh(pointerGeometry, pointerMaterial); 
-        this.pointer.position = this.model.pointerPosition;
+        if (this.model.pointerPosition) {
+            this.pointer.position = this.model.pointerPosition;
+        }
         this.sceneObject.add(this.pointer);
-
         this.postRender();
+    },
+
+    render: function() {
+        this.pointer.position = this.model.pointerPosition;
+        SS.WorkplaneDisplaySceneView.prototype.render.call(this);
     },
 
 
