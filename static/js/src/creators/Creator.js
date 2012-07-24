@@ -403,12 +403,19 @@ SS.OriginDimensionText = SS.DimensionText.extend({
         this.clear();
         var origin = this.model.node.origin;
 
-        if (origin.x || origin.y || origin.z) {
-            this.$xyz = this.addElement($.mustache(
-                '<div class="dimension">(<span class="x">{{x}}</span>,' + 
-                                        '<span class="y">{{y}}</span>,' +
-                                        '<span class="z">{{z}}</span>)</div>',
-                origin));
+        if (origin.x || origin.y) {
+            if (origin.z) {
+                this.$xyz = this.addElement($.mustache(
+                    '<div class="dimension">(<span class="x">{{x}}</span>,' + 
+                                            '<span class="y">{{y}}</span>,' +
+                                            '<span class="z">{{z}}</span>)</div>',
+                    origin));
+            } else {
+                this.$xyz = this.addElement($.mustache(
+                    '<div class="dimension">(<span class="x">{{x}}</span>,' + 
+                                            '<span class="y">{{y}}</span>)</div>',
+                    origin));
+            }
         }
         this.update();
     },
