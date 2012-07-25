@@ -9,7 +9,6 @@ SS.WorkplaneEditorModel = SS.NodeEditorModel.extend({
             new SS.DraggableOriginCorner({model: this}),
             new SS.OriginDimensionText({model: this}),
             new SS.WorkplaneEditorDOMView({model: this}),
-            new SS.WorkplaneEditorOkCancelView({model: this}),
             new SS.WorkplanePreview({model: this}),
             new SS.WorkplaneURotationPreview({model: this, radius: this.extents}),
             new SS.WorkplaneVRotationPreview({model: this, radius: this.extents}),
@@ -83,61 +82,20 @@ SS.WorkplaneEditorModel = SS.NodeEditorModel.extend({
 SS.WorkplaneEditorDOMView = SS.NodeEditorDOMView.extend({
 
     render: function() {
-        this.$el.html(SS.renderEditingDOM('workplane', SS.schemas.workplane, this.model.node));
-        $('#workplane').append(this.$el);
-    },
-
-    ok: function() {
-        this.model.ok();
-    },
-
-    cancel: function() {
-        this.model.cancel();
-    },
-
-});
-
-SS.WorkplaneEditorOkCancelView = Backbone.View.extend({
-
-    initialize: function() {
-        this.render();
-        this.model.on('change', this.update, this);
-        SS.sceneView.on('cameraChange', this.update, this);
-        this.update();
-    },
-
-    remove: function() {
-        Backbone.View.prototype.remove.call(this);
-        this.model.off('change', this.update);
-        SS.sceneView.off('cameraChange', this.update);
-    },
-
-    render: function() {
-        var template = '<div>{{#planes}}<input class="{{value}}" type="submit" value="{{value}}"/>{{/planes}}</div>';
+        var template = '{{#planes}}<input class="{{value}}" type="submit" value="{{value}}"/>{{/planes}}';
         var planes = $.mustache(template, {planes: [{value: 'XY'}, 
                                                     {value: 'YZ'}, 
                                                     {value: 'ZX'}]});
-        var okCancel = $.mustache(template, {planes: [{value: 'Ok'}, 
-                                                    {value: 'Cancel'}]});
-        this.$el.html(planes + okCancel);
-        $('#floating-dom-view .ok-cancel').append(this.$el);
+        this.$el.html(SS.renderEditingDOM('workplane', SS.schemas.workplane, this.model.node, planes));
+        $('#workplane').append(this.$el);
     },
 
-    update: function() {
-        var boundingBox = {min: {x: -this.model.extents, y: -this.model.extents, z:0},
-                           max: {x: this.model.extents, y: this.model.extents, z:0}};
-        var screenPosition = SS.boundingBoxToScreenPosition(boundingBox);
-        $('#floating-dom-view').css('left', screenPosition.x);
-        $('#floating-dom-view').css('top', screenPosition.y);
-    },
-    
     events: {
-        'click .Ok' : 'ok',
-        'click .Cancel' : 'cancel',
+        'click .ok' : 'ok',
+        'click .cancel' : 'cancel',
         'click .XY' : 'xy',
         'click .YZ' : 'yz',
         'click .ZX' : 'zx',
-
     },
 
     ok: function() {
@@ -161,7 +119,6 @@ SS.WorkplaneEditorOkCancelView = Backbone.View.extend({
     },
 
 });
-
 
 SS.WorkplanePreview = SS.PreviewWithOrigin.extend({
 

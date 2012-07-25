@@ -401,13 +401,21 @@ img.action:hover {
     text-shadow: none;
 }
 
-
 #treeview-container {
     position: absolute;
-    left: 20px;
-    bottom: 20px;
+    bottom: 0px;
     color: white;
-    height: 85%;
+    height: 92%;
+}
+
+#workplane-container {
+    position: absolute;
+    top: 8%;
+    color: white;
+}
+
+#treeview-container {
+    left: 20px;
 }
 
 #geom-model-doc {
@@ -417,10 +425,12 @@ img.action:hover {
 }
 
 #workplane-container {
-    position: absolute;
     right: 20px;
-    top: 80px;
-    color: white;
+}
+
+
+#workplane {
+    display: none;
 }
 
 #treeview-container input[type="number"], #workplane-container input[type="number"] {
@@ -432,15 +442,13 @@ img.action:hover {
 }
     
 
-#advanced {
+.advanced {
     padding-bottom: 5px;
 }
 
-#advanced label {
+.advanced label {
     padding: 5px;
 }
-
-
 
 #geom-model-doc table {
     border-collapse:collapse;
@@ -451,7 +459,6 @@ img.action:hover {
     border: 1px solid #666;
     padding: 3px;
 }
-
 
 #geom-model-doc table tr.odd {
     background-color: #000;

@@ -140,7 +140,6 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
                     Math.max(boundingBox.max.z, box.max.z));
             }
         });
-        console.log(JSON.stringify(boundingBox));
         var max = 0;
         max = Math.max(Math.abs(boundingBox.min.x), max)
         max = Math.max(Math.abs(boundingBox.max.x), max)
@@ -224,7 +223,7 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
 SS.WorkplaneDisplayDOMView = SS.NodeDisplayDOMView.extend({
 
     render: function() {
-        this.$el.html(SS.renderDisplayDOM('workplane', SS.schemas.workplane, this.model.node));
+        this.$el.html(SS.renderDisplayDOM('', SS.schemas.workplane, this.model.node));
         $('#workplane').append(this.$el);
     },
 

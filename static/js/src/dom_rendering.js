@@ -27,10 +27,15 @@ SS.renderRecursiveDisplayDOM = function(name, schema, object)  {
     }
 }
 
-SS.renderEditingDOM = function(name, schema, object) {
+SS.renderEditingDOM = function(name, schema, object, pluginrow) {
     var nodeDOM = SS.renderRecursiveEditingDOM([name], name, schema, object);
     var okCancel = '<input class="ok" type="submit" value="Ok"/><input class="cancel" type="submit" value="Cancel"/>';
-    var view = {rows: [name, nodeDOM, okCancel]};
+    var rows = [name, nodeDOM];
+    if (pluginrow) {
+        rows.push(pluginrow);
+    }
+    rows.push(okCancel);
+    var view = {rows: rows};
     return  $.mustache('<table>{{#rows}}<tr><td>{{{.}}}</td></tr>{{/rows}}</table>', view);
 }
 

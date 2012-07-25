@@ -521,13 +521,19 @@ function TreeView() {
         }
     }
     
-    $('#advanced').change(function() {
+    $('#advanced-geometry-checkbox').change(function() {
         $('#geom-model-doc :visible').length > 0 ? 
             $('#geom-model-doc').hide() :
             $('#geom-model-doc').show();
         
     });
+
+    $('#advanced-workplane-checkbox').change(function() {
+    $('#workplane :visible').length > 0 ? 
+        $('#workplane').hide() :
+        $('#workplane').show();
         
+    });
 
     geom_doc.on('add', this.geomDocAdd, this);
     geom_doc.on('remove', this.geomDocRemove, this);

@@ -105,13 +105,16 @@
   </div>
   <div id="floating-dom-view"><div class="params"></div><div  class="ok-cancel"></div></div>
   <div id="treeview-container">
-    <div id="advanced">
-      <input type="checkbox" name="advanced" id="advanced-checkbox"/><label for="advanced-checkbox">advanced</label>
+    <div class="advanced">
+      <input type="checkbox" name="advanced" id="advanced-geometry-checkbox"/><label for="advanced-geometry-checkbox">geometry</label>
     </div>
     <div id="geom-model-doc"></div>
   </div>
 
   <div id="workplane-container">
+    <div class="advanced">
+      <input type="checkbox" name="advanced" id="advanced-workplane-checkbox"/><label for="advanced-workplane-checkbox">workplane</label>
+    </div>
     <div id="workplane"></div>
   </div>
   
