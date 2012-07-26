@@ -49,7 +49,7 @@ SS.NodeEditorDOMView = Backbone.View.extend({
         var updateFunction = function(ancestry, schema, targetNode) {
             for (key in schema.properties) {
                 var ancestryCSS = '.' + ancestry.join('_');
-                var possibleInput = view.$el.find(ancestryCSS + ' input.' + key);
+                var possibleInput = view.$el.find(ancestryCSS + ' .field.' + key);
                 if (possibleInput.length == 1) {
                     var targetObject = targetNode;
                     ancestry.map(function(ancestor) {

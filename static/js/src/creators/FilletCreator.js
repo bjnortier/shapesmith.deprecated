@@ -8,7 +8,6 @@ SS.FilletCreator = SS.ParentCreator.extend({
         
         if (this.originalNode) {
             this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
-            this.center = SS.centerOfGeom(this.boundingBox);
         } else {
             this.node.parameters.r = 1.0;
 

@@ -8,7 +8,6 @@ SS.RevolveCreator = SS.ParentCreator.extend({
         
         if (this.originalNode) {
             this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
-            this.center = SS.centerOfGeom(this.boundingBox);
         } else {
             this.node.parameters.u = 0;
             this.node.parameters.v = 0;

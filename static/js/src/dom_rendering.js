@@ -56,10 +56,14 @@ SS.renderRecursiveEditingDOM = function(ancestors, name, schema, object)  {
                 name: name,
                 options: schema['enum']
             };
-            var template = '<select name={{name}}>{{#options}}<option value="{{.}}">{{.}}</option>{{/options}}</select>';
+            var template = '<select class="field {{name}}" name={{name}}>{{#options}}<option value="{{.}}">{{.}}</option>{{/options}}</select>';
             return $.mustache(template, data);
         } else {
-            return $.mustache('<input type="text" value="{{value}}"/>', {value: object});
+            var view = {
+                name: name,
+                value: object
+            };
+            return $.mustache('<input class="field {{name}}" type="text" value="{{value}}"/>', view);
         }
 
     } else if (schema.type === 'object') {

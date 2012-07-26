@@ -537,8 +537,10 @@ var computeBox = function(workplane, geomNode) {
         }
     };
 
-    geomNode.sceneObjects && geomNode.sceneObjects.edges.children.map(addFunction);
-    geomNode.sceneObjects && geomNode.sceneObjects.faces.children.map(addFunction);
+    // Preview geometry have no scene objects, and hidden
+    // geometry have ampty scene objects
+    geomNode.sceneObjects && geomNode.sceneObjects.edges && geomNode.sceneObjects.edges.children.map(addFunction);
+    geomNode.sceneObjects && geomNode.sceneObjects.faces && geomNode.sceneObjects.faces.children.map(addFunction);
 
     if (boundingBoxes.length == 0) {
         return undefined;
