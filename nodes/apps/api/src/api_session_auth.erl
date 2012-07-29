@@ -23,24 +23,24 @@
     
 session_username(ReqData) ->
     case wrq:get_cookie_value("session", ReqData) of
-	undefined ->
-	    undefined;
-	SessionSHA ->
-	    {ok, DB} = application:get_env(api, db_module),
-	    case DB:get(<<"_sessions">>, list_to_binary(SessionSHA)) of
-		undefined ->
-		    undefined;
-		JSON ->
-		    {Props} = jiffy:decode(JSON),
-		    {_, UsernameBin} = lists:keyfind(<<"username">>, 1, Props),
-		    binary_to_list(UsernameBin)
-	    end
+        undefined ->
+            undefined;
+        SessionSHA ->
+            {ok, DB} = application:get_env(api, db_module),
+            case DB:get(<<"_sessions">>, list_to_binary(SessionSHA)) of
+                undefined ->
+                    undefined;
+                JSON ->
+                    {Props} = jiffy:decode(JSON),
+                    {_, UsernameBin} = lists:keyfind(<<"username">>, 1, Props),
+                    binary_to_list(UsernameBin)
+            end
     end.
 
 create_session(Username) ->
     RFC1123Date = httpd_util:rfc1123_date(calendar:now_to_universal_time(erlang:now())),
     JSON = {[{<<"created">>, list_to_binary(RFC1123Date)},
-	     {<<"username">>, list_to_binary(Username)}]},
+             {<<"username">>, list_to_binary(Username)}]},
     SessionSHA = api_hash:hash_json(JSON),
     {ok, DB} = application:get_env(api, db_module),
     ok = DB:put(<<"_sessions">>, list_to_binary(SessionSHA), jiffy:encode(JSON)),
@@ -53,7 +53,7 @@ delete_session(SessionSHA) ->
 
 add_session_walrus_ctx(User, WalrusContext) ->
     [{session, [[{username, User}]]}|WalrusContext].
-		      
+                      
     
 
     
