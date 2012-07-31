@@ -35,6 +35,8 @@ SS.PolylineCreator = SS.PrimitiveCreator.extend({
     },
 
     removePoint:function() {
+        this.activeCornerView && this.activeCornerView.remove();
+        
         this.views.pop().remove();
         this.views.pop().remove();
 
