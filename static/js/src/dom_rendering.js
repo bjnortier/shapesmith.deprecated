@@ -77,11 +77,11 @@ SS.renderRecursiveEditingDOM = function(ancestors, name, schema, object)  {
 
     } else if (schema.type === 'array') {
         var rows = object.map(function(element, index) {
-            return {row: SS.renderRecursiveEditingDOM(ancestors.concat(key), key, schema.items, element),
+            return {row: SS.renderRecursiveEditingDOM(ancestors.concat(index), key, schema.items, element),
                     index: index};
         });
         return $.mustache(
-            '<table class="{{tableClass}}">{{#rows}}<tr class="{{index}}"><td>{{{row}}}</td></tr>{{/rows}}</table>', 
+            '<table class="{{tableClass}}">{{#rows}}<tr><td>{{{row}}}</td></tr>{{/rows}}</table>', 
             {rows:rows, tableClass: tableClass, name:name});
     }
 }
