@@ -96,6 +96,9 @@ SS.WorkplaneEditorDOMView = SS.NodeEditorDOMView.extend({
         'click .XY' : 'xy',
         'click .YZ' : 'yz',
         'click .ZX' : 'zx',
+        'change .field': 'fieldChanged',
+        'keyup .field': 'fieldChanged',
+        'click .field': 'fieldChanged',
     },
 
     ok: function() {
