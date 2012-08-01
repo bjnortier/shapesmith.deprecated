@@ -365,7 +365,7 @@ function copyNode(node) {
 
         var copyWithChildren = function(node) {
             var copiedChildren = node.children.map(function(child) {
-                return new GeomNode(child);
+                return copyWithChildren(child);
             });
             return new GeomNode(node, copiedChildren);
         };
