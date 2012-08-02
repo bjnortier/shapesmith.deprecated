@@ -35,11 +35,14 @@ SS.GeomNodeRenderingManager = function() {
 
     this.geomDocReplace = function(original, replacement) {
         this.geomDocRemove(original);
-        this.geomDocAdd(replacement);
 
         if (replacement.isEditingOrTransformEditing()) {
+            if (replacement.isTransformEditing()) {
+                this.geomDocAdd(replacement);
+            }
             setOtherNonHiddenNodesTransparent(replacement);
         } else {
+            this.geomDocAdd(replacement);
             restoreOpacityOfNonHiddenNodes();
         }
     }
@@ -54,12 +57,24 @@ SS.GeomNodeRenderingManager = function() {
 
     var setOtherNonHiddenNodesTransparent = function(geomNode) {
         geom_doc.rootNodes.map(function(rootNode) {
-            if ((geomNode.id !== rootNode.id) 
-                &&
-                (hiddenByUser.indexOf(geomNode.id) === -1)) {
+            if (geomNode) {
+                if ((geomNode.id !== rootNode.id)
+                    && (hiddenByUser.indexOf(geomNode.id) === -1)) {
+                    SS.setTransparent(rootNode);
+                }   
+            } else {
                 SS.setTransparent(rootNode);
             }
+
         });
+    }
+
+    var uiStateChanged = function(editing) {
+        if (editing) {
+            setOtherNonHiddenNodesTransparent();
+        } else {
+            restoreOpacityOfNonHiddenNodes();
+        }
     }
 
     this.isHiddenByUser = function(geomNode) {
@@ -105,6 +120,8 @@ SS.GeomNodeRenderingManager = function() {
     geom_doc.on('remove', this.geomDocRemove, this);
     geom_doc.on('beforeReplace', this.geomDocBeforeReplace, this);  
     geom_doc.on('replace', this.geomDocReplace, this);  
+
+    SS.UI_EDITING_STATE.on('change', uiStateChanged, this);
 
     selectionManager.on('selected', this.selected, this);
     selectionManager.on('deselected', this.deselected, this);

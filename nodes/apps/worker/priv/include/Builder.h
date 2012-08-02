@@ -25,9 +25,8 @@ protected:
     void ApplyOrigin(map< string, mValue > json);
     void ApplyTransform(map< string, mValue > json);
     void ApplyTransforms(map< string, mValue > json);
+    void ApplyWorkplane(map< string, mValue > json);
     virtual void PostProcess(map< string, mValue > json) = 0;
-    
-    
     
 public:
     TopoDS_Shape shape();
@@ -39,7 +38,7 @@ public:
 class Builder3D : public Builder {
 protected:
     void Mesh();
-    virtual void PostProcess(map< string, mValue > json);
+    void PostProcess(map< string, mValue > json);
     virtual ~Builder3D() {};
 public:
     Builder3D() {};
@@ -95,7 +94,7 @@ class Builder2D : public Builder {
 private:
     void Mesh();
 protected:
-    virtual void PostProcess(map< string, mValue > json);
+    void PostProcess(map< string, mValue > json);
     virtual ~Builder2D() {};
 };
 
@@ -127,7 +126,7 @@ public:
 
 class Builder1D : public Builder {
 protected:
-    virtual void PostProcess(map< string, mValue > json);
+    void PostProcess(map< string, mValue > json);
     virtual ~Builder1D() {};
 };
 
@@ -150,14 +149,12 @@ public:
 };
 
 
-
 #pragma mark Booleans
 
 class BuilderND : public Builder {
-private:
-    void Mesh();
 protected:
-    virtual void PostProcess(map< string, mValue > json);
+    void Mesh();
+    void PostProcess(map< string, mValue > json);
 public:
     BuilderND() {};
     virtual ~BuilderND() {};
@@ -171,6 +168,8 @@ typedef enum e_PostProcess {
 } PostProcess;
 
 class BooleanBuilder : public BuilderND {
+protected:
+    void PostProcess(map< string, mValue > json);
 public:
     BooleanBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boolean_op fn, e_PostProcess post_process);
 };

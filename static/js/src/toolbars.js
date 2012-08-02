@@ -105,12 +105,17 @@ function create_primitive(type) {
         createParams(key, geometryParams, jsonSchema.properties.parameters.properties[key]);
     }
 
-    var lastMousePosition = SS.sceneView.workplane.getLastMousePosition();
     geomNode = new GeomNode({
         type: type,
         editing: true,
-	origin: {x: lastMousePosition.x, y: lastMousePosition.y, z: 0},
-        parameters: geometryParams});
+        origin: {
+            x: SS.sceneView.lastPositionOnWorkplane.x || 0,
+            y: SS.sceneView.lastPositionOnWorkplane.y || 0,
+            z: 0
+        },
+        workplane: SS.workplaneModel.node.editableCopy(),
+        parameters: geometryParams
+    });
     geom_doc.add(geomNode);
     
     new SS.creators[type]({editingNode: geomNode}); 
@@ -133,8 +138,9 @@ function create_modifier(selected, type) {
     var parentNode = new GeomNode({
         type: type,
         editing: true,
-	origin: jsonSchema.properties.origin ? {x: 0, y: 0, z: 0} : null,
-        parameters: geometryParams
+        origin: jsonSchema.properties.origin ? {x: 0, y: 0, z: 0} : null,
+        parameters: geometryParams,
+        workplane: SS.workplaneModel.node.editableCopy(),
     }, [original]);
                                 
     geom_doc.replace(original, parentNode);
@@ -160,16 +166,15 @@ function create_transform(selected, type) {
     var replacement = original.editableCopy();
     var origin = {x: 0, y: 0, z: 0};
     if (((type === 'translate') || (type === 'scale')) && (original.origin)) {
-	origin = {x: original.origin.x,
+        origin = {x: original.origin.x,
                   y: original.origin.y,
                   z: original.origin.z};
     }
     
-    var lastMousePosition = SS.sceneView.workplane.getLastMousePosition();
     var transform = new Transform({
         type: type,
         editing: true,
-	origin:  {x: lastMousePosition.x, y: lastMousePosition.y, z: 0},
+        origin: {x: 0, y: 0, z:0},
         parameters: transformParams
     });
     replacement.transforms.push(transform);

@@ -8,40 +8,40 @@ function update_geom_command(originalNode, nodeInDoc, replacement) {
         var nextTo = toChain[index];
 
         if (nextTo) {
-	    var isLast = !(index + 1 < fromChain.length);
-	    var createUrl = isLast ? 
-		'/' + SS.session.username + '/' + SS.session.design + '/geom?mesh=true' :
-		'/' + SS.session.username + '/' + SS.session.design + '/geom/';
+            var isLast = !(index + 1 < fromChain.length);
+            var createUrl = isLast ? 
+            '/' + SS.session.username + '/' + SS.session.design + '/geom?mesh=true' :
+            '/' + SS.session.username + '/' + SS.session.design + '/geom/';
             $.ajax({
-		type: 'POST',
-		url: createUrl,
+                type: 'POST',
+                url: createUrl,
                 contentType: 'application/json',
                 data: nextTo.toShallowJson(),
-		dataType: 'json',
+                dataType: 'json',
                 success: function(result) {
-		    var sha = result.SHA;
-		    nextTo.setSHA(sha);
+                    var sha = result.SHA;
+                    nextTo.setSHA(sha);
                     nextTo.editing = false;
                     for (var i in nextTo.transforms) {
                         nextTo.transforms[i].editing = false;
                     }
 
-		    // Update the children of the next boolean node
-		    // with the new SHA
-		    if (index + 1 < fromChain.length) {
-			var foundChildIndex = -1;
-			var fromParent = fromChain[index+1];
-			for (var childIndex in fromParent.children) {
-			    if ((fromParent.children[childIndex] == nextFrom) ||
-				(fromParent.children[childIndex] == replacement)) {
-				foundChildIndex = childIndex;
-			    }
-			}
-			if (foundChildIndex === -1) {
-			    throw('child not found');
-			}
-			toChain[index+1].children.splice(foundChildIndex, 1, nextTo);
-		    }
+                    // Update the children of the next boolean node
+                    // with the new SHA
+                    if (index + 1 < fromChain.length) {
+                        var foundChildIndex = -1;
+                        var fromParent = fromChain[index+1];
+                        for (var childIndex in fromParent.children) {
+                            if ((fromParent.children[childIndex] == nextFrom) ||
+                                (fromParent.children[childIndex] == replacement)) {
+                                foundChildIndex = childIndex;
+                            }
+                        }
+                        if (foundChildIndex === -1) {
+                            throw('child not found');
+                        }
+                        toChain[index+1].children.splice(foundChildIndex, 1, nextTo);
+                    }
 
                     if (index + 1 < fromChain.length) {
                         chainedPostFn(index + 1, fromChain, toChain);
@@ -49,19 +49,19 @@ function update_geom_command(originalNode, nodeInDoc, replacement) {
                         // No more -> update the root node
                         nextTo.mesh = result.mesh;
 
-			// If the 'to' node is the preview node, or node that 
-			// was edited, that one is to be replaced, not the original
-			// node
-			if (index == 0) {
-			    geom_doc.replace(nodeInDoc, nextTo);
-			} else {
+                        // If the 'to' node is the preview node, or node that 
+                        // was edited, that one is to be replaced, not the original
+                        // node
+                        if (index == 0) {
+                            geom_doc.replace(nodeInDoc, nextTo);
+                        } else {
                             geom_doc.replace(nextFrom, nextTo);
-			}
-			command_stack.commit();
+                        }
+                        command_stack.commit();
                     }
                 },
-		error: function(jqXHR, textStatus, errorThrown) {
-		    command_stack.error(jqXHR.responseText);
+                error: function(jqXHR, textStatus, errorThrown) {
+                    command_stack.error(jqXHR.responseText);
                 }
             });
         }
@@ -80,12 +80,12 @@ function update_geom_command(originalNode, nodeInDoc, replacement) {
         chainedPostFn(0, fromChain, toChain);
     };
     var undoFn = function() {
-	geom_doc.replace(toChain[toChain.length - 1], fromChain[fromChain.length - 1]);
-	command_stack.success();
+        geom_doc.replace(toChain[toChain.length - 1], fromChain[fromChain.length - 1]);
+        command_stack.success();
     };
     var redoFn = function() {
-	geom_doc.replace(fromChain[toChain.length - 1], toChain[fromChain.length - 1]);
-	command_stack.success();
+        geom_doc.replace(fromChain[toChain.length - 1], toChain[fromChain.length - 1]);
+        command_stack.success();
     }
 
     return new Command(doFn, undoFn, redoFn);
@@ -95,14 +95,14 @@ function update_geom_command(originalNode, nodeInDoc, replacement) {
 function create_geom_command(prototype, geometry) {
     var geomNode;
     var doFn = function() {
-         $.ajax({
+        $.ajax({
             type: 'POST',
             url: '/' + SS.session.username + '/' + SS.session.design + '/geom?mesh=true',
             contentType: 'application/json',
             data: JSON.stringify(geometry),
-	    dataType: 'json',
+            dataType: 'json',
             success: function(result) {
-   		geometry.sha = result.SHA;
+                geometry.sha = result.SHA;
                 geomNode = new GeomNode(geometry);
                 geomNode.mesh = result.mesh;
 
@@ -120,13 +120,12 @@ function create_geom_command(prototype, geometry) {
     };
     var undoFn = function() {
         geom_doc.remove(geomNode);
-	command_stack.success();
+        command_stack.success();
     }
     var redoFn = function() {
         geom_doc.add(geomNode);
-	command_stack.success();
+        command_stack.success();
     }
-
     return new Command(doFn, undoFn, redoFn);
 }
 
@@ -164,19 +163,19 @@ function explode(selected, type) {
             var copies = childrenToFetchMeshesFor.slice(0);
             copies.map(function(childNode) {
                 $.ajax({
-	            type: 'GET',
-	            url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + childNode.sha,
-	            success: function(mesh) {
-		        childNode.mesh = mesh;
+                    type: 'GET',
+                    url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + childNode.sha,
+                    success: function(mesh) {
+                        childNode.mesh = mesh;
                         childrenToFetchMeshesFor.splice(childrenToFetchMeshesFor.indexOf(childNode), 1);
                         if (childrenToFetchMeshesFor.length == 0) {
                             replaceInGeomDoc();
                         }
                     },
-	            error: function(jqXHR, textStatus, errorThrown) {
-		        command_stack.error(jqXHR.responseText);
-	            }
-	        });
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        command_stack.error(jqXHR.responseText);
+                    }
+                });
             });
         }
 
@@ -187,7 +186,7 @@ function explode(selected, type) {
             geom_doc.remove(child);
         });
         geom_doc.add(boolNode);
-	command_stack.success();
+        command_stack.success();
     }
 
     var redoFn = function() {
@@ -195,7 +194,7 @@ function explode(selected, type) {
         childNodes.reverse().map(function(child) {
             geom_doc.add(child);
         });
-	command_stack.success();
+        command_stack.success();
     }
 
     var cmd = new Command(doFn, undoFn, redoFn);
@@ -210,44 +209,48 @@ function boolean(selected, type) {
     var childNodes;
 
     var doFn = function() {
-        var geometry = {type: type,
-                        children: selected.map(function(id) {
-			    var pattern = /^([0-9]+)_(.*)$/;
-			    var match = id.match(pattern);
-			    return match[2];
-			})};
-        $.ajax({
-            type: "POST",
-	    url: '/' + SS.session.username + '/' + SS.session.design + '/geom?mesh=true',
-            contentType: "application/json",
-            data: JSON.stringify(geometry),
-            success: function(result) {
-		var sha = result.SHA;
-		geometry.sha = sha;
-		
-                childNodes = selected.map(function(id) {
-                    var node = geom_doc.findById(id);
-                    geom_doc.remove(node);
-                    return node;
-                });
+        var geometry = {
+                type: type,
+                children: selected.map(function(id) {
+                    var pattern = /^([0-9]+)_(.*)$/;
+                    var match = id.match(pattern);
+                    return match[2];
+                }),
+                workplane: SS.workplaneModel.node.editableCopy(),
+            };
+            $.ajax({
+                type: "POST",
+                url: '/' + SS.session.username + '/' + SS.session.design + '/geom?mesh=true',
+                contentType: "application/json",
+                data: JSON.stringify(geometry),
+                success: function(result) {
+                    var sha = result.SHA;
+                    geometry.sha = sha;
 
-                boolNode = new GeomNode(geometry, childNodes);
-                boolNode.mesh = result.mesh;
-		
-                geom_doc.add(boolNode);
-		command_stack.commit();
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                command_stack.error(jqXHR.responseText);
-            }
-        })};
+                    childNodes = selected.map(function(id) {
+                        var node = geom_doc.findById(id);
+                        geom_doc.remove(node);
+                        return node;
+                    });
+
+                    boolNode = new GeomNode(geometry, childNodes);
+                    boolNode.mesh = result.mesh;
+
+                    geom_doc.add(boolNode);
+                    command_stack.commit();
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    command_stack.error(jqXHR.responseText);
+                }
+            })
+        };
 
     var undoFn = function() {
         geom_doc.remove(boolNode);
         childNodes.reverse().map(function(child) {
             geom_doc.add(child);
         });
-	command_stack.success();
+        command_stack.success();
     }
 
     var redoFn = function() {
@@ -255,7 +258,7 @@ function boolean(selected, type) {
             geom_doc.remove(child);
         });
         geom_doc.add(boolNode);
-	command_stack.success();
+        command_stack.success();
     }
 
     var cmd = new Command(doFn, undoFn, redoFn);
@@ -289,14 +292,14 @@ function importJSON(json) {
             }
             if (typeof(geometries[i]) !== 'string') {
                 var url = (geometries === rootGeometries) ? 
-                    '/' + SS.session.username + '/' + SS.session.design + '/geom?mesh=true' :
-                    '/' + SS.session.username + '/' + SS.session.design + '/geom';
+                '/' + SS.session.username + '/' + SS.session.design + '/geom?mesh=true' :
+                '/' + SS.session.username + '/' + SS.session.design + '/geom';
                 $.ajax({
                     type: 'POST',
                     url: url,
                     contentType: 'application/json',
                     data: JSON.stringify(geometries[i]),
-	            dataType: 'json',
+                    dataType: 'json',
                     success: function(result) {
                         geometries[i].sha = result.SHA;
                         
@@ -316,7 +319,7 @@ function importJSON(json) {
                         command_stack.error(jqXHR.responseText);
                     }
                 });
-                return true;
+            return true;
             }
         }
 
@@ -341,13 +344,13 @@ function importJSON(json) {
         rootNodes.map(function(node) {
             geom_doc.remove(node);
         });
-	command_stack.success();
+        command_stack.success();
     };
     var redoFn = function() {
         rootNodes.map(function(node) {
             geom_doc.add(node);
         });
-	command_stack.success();
+        command_stack.success();
     }
     
     command_stack.execute(new Command(doFn, undoFn, redoFn));
@@ -360,45 +363,45 @@ function copyNode(node) {
     
     var doFn = function() {
 
-	var copyWithChildren = function(node) {
-	    var copiedChildren = node.children.map(function(child) {
-		return new GeomNode(child);
-	    });
-	    return new GeomNode(node, copiedChildren);
-	};
-	newNode = copyWithChildren(node);
+        var copyWithChildren = function(node) {
+            var copiedChildren = node.children.map(function(child) {
+                return new GeomNode(child);
+            });
+            return new GeomNode(node, copiedChildren);
+        };
+        newNode = copyWithChildren(node);
 
         if (newNode.mesh) {
-	    geom_doc.add(newNode);
-	    command_stack.commit();
+            geom_doc.add(newNode);
+            command_stack.commit();
         } else {
-             $.ajax({
-	         type: 'GET',
-	         url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + newNode.sha,
-	         success: function(mesh) {
-		     newNode.mesh = mesh;
-	             geom_doc.add(newNode);
-	             command_stack.commit();
-                 },
-	         error: function(jqXHR, textStatus, errorThrown) {
-		     command_stack.error(jqXHR.responseText);
-	         }
-	     });
-        }
-	
+            $.ajax({
+                type: 'GET',
+                url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + newNode.sha,
+                success: function(mesh) {
+                    newNode.mesh = mesh;
+                    geom_doc.add(newNode);
+                    command_stack.commit();
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    command_stack.error(jqXHR.responseText);
+                }
+            });
+       }
+
     };
     var undoFn = function() {
         geom_doc.remove(newNode);
-	command_stack.success();
+        command_stack.success();
     }
     var redoFn = function() {
         geom_doc.add(newNode);
-	command_stack.success();
+        command_stack.success();
     }
 
     var cmd = new Command(doFn, undoFn, redoFn);
     command_stack.execute(cmd);
-    
+
 }
 
 SS.save = function() {
@@ -410,14 +413,14 @@ SS.save = function() {
         contentType: 'application/json',
         data: JSON.stringify(SS.session.commit),
         success: function(response) {
-	    console.info('SAVE: ' + SS.session.commit);
-	    var url = window.location.origin + window.location.pathname + '?ref=heads.master';
-	    SS.renderInfoMessage('Saved');
-	    SS.spinner.hide();
+            console.info('SAVE: ' + SS.session.commit);
+            var url = window.location.origin + window.location.pathname + '?ref=heads.master';
+            SS.renderInfoMessage('Saved');
+            SS.spinner.hide();
         },
         error: function(jqXHR, textStatus, errorThrown) {
-	    SS.spinner.hide();
-	    SS.renderErrorMessage(jqXHR.responseText);
+            SS.spinner.hide();
+            SS.renderErrorMessage(jqXHR.responseText);
         }
     });
 }
@@ -429,23 +432,24 @@ SS.commit = function() {
         return x.sha;
     });
     var json = {'geoms' : rootSHAs,
-		'parent' : SS.session.commit};
+                'workplane' : SS.workplaneModel.node,
+                'parent' : SS.session.commit};
     $.ajax({
         type: 'POST',
         url: '/' + SS.session.username + '/' + SS.session.design + '/commit/',
         contentType: 'application/json',
         data: JSON.stringify(json),
         success: function(response) {
-	    var commit = response.SHA;
-	    console.info('COMMIT: ' + commit);
+            var commit = response.SHA;
+            console.info('COMMIT: ' + commit);
 
-	    var url = window.location.pathname + '?commit=' + commit;
-	    history.pushState({commit: commit}, SS.session.design, url);
-	    SS.session.commit = commit;
-	    command_stack.success();
+            var url = window.location.pathname + '?commit=' + commit;
+            history.pushState({commit: commit}, SS.session.design, url);
+            SS.session.commit = commit;
+            command_stack.success();
         },
         error: function(jqXHR, textStatus, errorThrown) {
-	    command_stack.error(jqXHR.responseText);
+            command_stack.error(jqXHR.responseText);
         }
     });
 }
@@ -457,12 +461,12 @@ SS.commit = function() {
  * the need to $(document).ready() and the workaround variable.
  */
 
-SS.loadCommitFromStateOrParam = function(state) {
+ SS.loadCommitFromStateOrParam = function(state) {
     var commit = (state && state.commit) || $.getQueryParam("commit");
     SS.session.commit = commit;
     if (!command_stack.pop(commit)) {
-	// No command stack available - load from disk
-	SS.load_commit(commit);
+        // No command stack available - load from disk
+        SS.load_commit(commit);
     }
 };
 
@@ -473,7 +477,7 @@ window.onpopstate = function(event) {
 $(document).ready(function() {
     // Only necessary in FF since. See above comment.
     if (navigator.userAgent.indexOf("Firefox") != -1) {
-	SS.loadCommitFromStateOrParam(undefined);
+        SS.loadCommitFromStateOrParam(undefined);
     }
 });
 
@@ -487,19 +491,25 @@ SS.load_commit = function(commit) {
         type: 'GET',
         url: '/' + SS.session.username + '/' + SS.session.design + '/commit/' + commit,
         dataType: 'json',
-	success: function(design) { 
-	    SS.spinner.hide();
-	    console.log('Load design: ' + JSON.stringify(design));
-	    var geoms = design.geoms;
-	    geoms.map(function(geom) {
-		SS.load_geom(geom);
-	    });
-			 
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-	    SS.spinner.hide();
-	    SS.renderErrorMessage(jqXHR.responseText);
-	}
+        success: function(design) { 
+            SS.spinner.hide();
+            console.log('Load design: ' + JSON.stringify(design));
+            if (design.workplane) {
+                SS.workplaneModel.loadNode(new SS.WorkplaneNode(design.workplane));
+            } else {
+                SS.workplaneModel.loadNode(new SS.WorkplaneNode());
+            }
+
+            var geoms = design.geoms;
+            geoms.map(function(geom) {
+                SS.load_geom(geom);
+            });
+
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            SS.spinner.hide();
+            SS.renderErrorMessage(jqXHR.responseText);
+        }
     });
 }
 
@@ -509,30 +519,30 @@ SS.load_geom = function(sha) {
     SS.spinner.show();
 
     $.ajax({
-	type: 'GET',
-	url: '/' + SS.session.username + '/' + SS.session.design + '/geom/' + sha + '?recursive=true',
-	dataType: 'json',
-	success: function(json) {
-	    var newNode = GeomNode.fromDeepJson(json);
-	    $.ajax({
-		type: 'GET',
-		url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
-		success: function(mesh) {
-		    newNode.mesh = mesh;
-		    geom_doc.add(newNode);
-		    SS.spinner.hide();
-		},
-		error: function(jqXHR, textStatus, errorThrown) {
-		    SS.spinner.hide();
-		    SS.renderErrorMessage(jqXHR.responseText);
-		}
-	    });
-	    
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-	    SS.spinner.hide();
-	    SS.renderErrorMessage(jqXHR.responseText);
-	}
+        type: 'GET',
+        url: '/' + SS.session.username + '/' + SS.session.design + '/geom/' + sha + '?recursive=true',
+        dataType: 'json',
+        success: function(json) {
+            var newNode = GeomNode.fromDeepJson(json);
+            $.ajax({
+                type: 'GET',
+                url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
+                success: function(mesh) {
+                    newNode.mesh = mesh;
+                    geom_doc.add(newNode);
+                    SS.spinner.hide();
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    SS.spinner.hide();
+                    SS.renderErrorMessage(jqXHR.responseText);
+                }
+            });
+
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            SS.spinner.hide();
+            SS.renderErrorMessage(jqXHR.responseText);
+        }
     });
 }
-    
+

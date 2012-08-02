@@ -1,19 +1,21 @@
 var SS = SS || {};
 SS.SceneView = function(container) {
 
+    this.lastPositionOnWorkplane = new THREE.Vector3(0,0,0);
+
     var camera, scene, renderer, w, h;
     var overRenderer;
     var lastCameraPosition = new THREE.Vector3(0,0,0);
 
     var mouseOnDown, lastMouseMpos, mouseDownOnActiveSceneObject;
 
-    var elevation = Math.PI*2/8, azimuth = -4*Math.PI/9;
-    var target = { azimuth: -4*Math.PI/9, elevation: Math.PI*2/8 };
+    var azimuth = -1.373, elevation = 1.08;
+    var target = { azimuth: -1.373, elevation: 1.08 };
     var targetOnDown = { azimuth: target.azimuth, elevation: target.elevation };
     var distance = 1000, distanceTarget = 300;
     var targetScenePosition = new THREE.Vector3(0,0,0);
+    var selectionOnlyMeshes = [];
 
-    var workplane;
     var popupMenu = SS.popupMenu();
 
     var that = this;
@@ -47,7 +49,6 @@ SS.SceneView = function(container) {
         scene.add( new THREE.AmbientLight( 0x404040 ) );
         
         addLights();
-        workplane = new SS.Workplane({scene: scene});
         popupMenu = SS.popupMenu();
 
         renderer.domElement.style.position = 'absolute';
@@ -114,7 +115,7 @@ SS.SceneView = function(container) {
             var panRotateThreshold = 10;
             var transformerThreshold = 5;
             
-            if (SS.UI_MOUSE_STATE.isFree()) {
+            if (SS.UI_MOUSE_STATE.isFree() && (!mouseDownOnActiveSceneObject)) {
                 
                 var overPanRotateThreshold = ((Math.abs(event.clientX - mouseOnDown.x) > panRotateThreshold)
                                               ||
@@ -178,48 +179,32 @@ SS.SceneView = function(container) {
         }
 
         var positionOnWorkplane = determinePositionOnWorkplane(event);
-        workplane.updateXYLocation(positionOnWorkplane, event);
-
-        var origin = new THREE.Vector3(0, 0, 0);
-        var direction = new THREE.Vector3(0, 0, 1);
-        var ray = new THREE.Ray(origin, direction);
-        var positionOnVertical = that.determinePositionOnRay(event, ray);
-        if (positionOnVertical) {
-            workplane.updateZLocation(positionOnVertical, event);
+        if (!positionOnWorkplane.equals(that.lastPositionOnWorkplane)) {
+            that.lastPositionOnWorkplane = positionOnWorkplane; 
+            SS.workplaneModel.updatePointer(that.lastPositionOnWorkplane);
         }
-
         lastMousePos = mouse;
         that.updateScene = true;
     }
 
     function determinePositionOnWorkplane(event) {
-        var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
-        var planeMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 0 }));
-        planeMesh.doubleSided = true;
-        return determinePositionOnPlane(event, planeMesh);
-    }
-
-    function determinePositionOnPlane(event, planeMesh) {
-        
-        var mouse = {};
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-            
-        var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
-        var projector = new THREE.Projector();
-        var mouse3D = projector.unprojectVector(vector, camera);
-        var ray = new THREE.Ray(camera.position, null);
-        ray.direction = mouse3D.subSelf(camera.position).normalize();
-
-        var intersects = ray.intersectObject(planeMesh);
-        if (intersects.length == 1) {
-            return {x: Math.round(intersects[0].point.x), 
-                    y: Math.round(intersects[0].point.y),
-                    z: Math.round(intersects[0].point.z)};
-        } else {
-            return null;
+        // May happen if there's a mouse event before the workplane
+        // is created
+        if (!SS.workplaneModel) {
+            return new THREE.Vector3();
         }
+        var origin = SS.objToVector(SS.workplaneModel.node.origin);
+        var axis = SS.objToVector(SS.workplaneModel.node.axis);   
+        var normal = SS.rotateAroundAxis(new THREE.Vector3(0,0,1), axis,SS.workplaneModel.node.angle);
+        var worldPosition = determinePositionOnPlane2(event, origin, normal);
 
+        worldPosition.subSelf(origin);
+        var workplanePosition = 
+            SS.rotateAroundAxis(worldPosition, axis, -SS.workplaneModel.node.angle);
+
+        return new THREE.Vector3(Math.round(workplanePosition.x),
+                                 Math.round(workplanePosition.y),
+                                 Math.round(workplanePosition.z));
     }
 
     function determinePositionOnRay(event, givenRay) {
@@ -233,14 +218,9 @@ SS.SceneView = function(container) {
         var mouseRay = new THREE.Ray(camera.position, null);
         mouseRay.direction = mouse3D.subSelf(camera.position).normalize();
 
-        var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
-        var planeMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({ color: 0x080808, opacity: 0 }));
-
-        var intersects = mouseRay.intersectObject(planeMesh);
-        if (intersects.length == 1) {
-            mouseRay.origin = intersects[0].point.clone();
-        } else {
-            return null;
+        mouseRay.origin = determinePositionOnPlane2(event, new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,1));
+        if (mouseRay.origin === undefined) {
+            return;
         }
 
         // http://softsurfer.com/Archive/algorithm_0106/algorithm_0106.htm
@@ -257,9 +237,36 @@ SS.SceneView = function(container) {
         return  new THREE.Vector3().add(givenRay.origin, u.clone().multiplyScalar(sc));
     }
 
+    function determinePositionOnPlane2(event, origin, normal) {
+        var mouse = {};
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5);
+        var projector = new THREE.Projector();
+        var mouse3D = projector.unprojectVector(vector, camera);
+
+        var ray = new THREE.Ray(camera.position, null);
+        ray.direction = mouse3D.subSelf(camera.position).normalize();
+
+        // http://en.wikipedia.org/wiki/Line-plane_intersection
+        var p0 = origin;
+        var l0 = ray.origin;
+        var l = ray.direction;
+        var n = normal;
+
+        var d = new THREE.Vector3().sub(p0, l0).dot(n)/l.dot(n);
+        if (d === 0) {
+            return undefined;
+        }
+        return new THREE.Vector3().add(l0, l.clone().multiplyScalar(d));
+
+    }
+
     function selectObject(event) {
+
         
-        var found = SS.selectGeomNodesInScene(scene, camera, event);
+        var found = SS.selectGeomNodesInScene(scene.children.concat(selectionOnlyMeshes), camera, event);
         var foundGeomNodes = found.filter(function(obj) {
             return obj.object.name.geomNodeId;
         });
@@ -433,7 +440,7 @@ SS.SceneView = function(container) {
 
     var findSceneObjectViewsForEvent = function(event) {
         
-        var found = SS.selectNonGeomNodesInScene(scene, camera, event);
+        var found = SS.selectNonGeomNodesInScene(scene.children, camera, event);
         var objects = _.pluck(found, 'object');
 
         // Select the hightest-level THREE.Object3D objects in the scene
@@ -458,10 +465,12 @@ SS.SceneView = function(container) {
  
     }
 
+
+
     if (SS.UI_MOUSE_STATE.isFree()) {
         this.triggerMouseOverSceneObjectViews = function(event) {
-            var previousOverObjects = mouseOverSceneObjectViews.map(function(x) { return x; });
-            var leaveObjects = mouseOverSceneObjectViews.map(function(x) { return x; });
+            var previousOverObjects = mouseOverSceneObjectViews.slice(0);
+            var leaveObjects = mouseOverSceneObjectViews.slice(0);
             mouseOverSceneObjectViews = [];
             findSceneObjectViewsForEvent(event).map(function(sceneObjectView) {
                 if (previousOverObjects.indexOf(sceneObjectView) === -1) {
@@ -498,10 +507,9 @@ SS.SceneView = function(container) {
     }
 
     this.triggerMouseUpOnSceneObjectViews = function(event) {
-        var sceneObjects = findSceneObjectViewsForEvent(event);
-        if (sceneObjects.length > 0) {
-            sceneObjects[0].trigger('mouseUp', event);
-        }
+        mouseDownSceneObjectViews.map(function(obj) {
+            obj.trigger('mouseUp', event);
+        });
         mouseDownSceneObjectViews = [];
     }
 
@@ -509,16 +517,15 @@ SS.SceneView = function(container) {
     this.animate = animate;
     this.renderer = renderer;
     this.scene = scene;
+    this.selectionOnlyMeshes = selectionOnlyMeshes;
     this.camera = camera;
-    this.workplane = workplane;
     this.determinePositionOnRay = determinePositionOnRay;
-    this.determinePositionOnPlane = determinePositionOnPlane;
+    this.determinePositionOnPlane2 = determinePositionOnPlane2;
     this.determinePositionOnWorkplane = determinePositionOnWorkplane;
     this.popupMenu = popupMenu;
     this.onMouseUp = onMouseUp;
     this.onMouseMove = onMouseMove;
     this.onMouseDown = onMouseDown;
-
    
     return this;
 }

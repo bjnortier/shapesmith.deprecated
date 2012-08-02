@@ -47,7 +47,7 @@ describe("CommandStack", function() {
 	},
 	commit : function() {},
 	renderErrorMessage: function() {},
-	clearMessages: function() {}
+	clearMessages: function() {},
 	selectionManager: {
 	    deselectAll: function() {
 	    }
