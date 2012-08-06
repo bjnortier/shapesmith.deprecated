@@ -90,7 +90,7 @@ SS.PolylinePreview = SS.PreviewWithOrigin.extend({
         });
         
         var polyline = new THREE.Line(polylineGeometry, SS.materials.lineMaterial);
-	this.sceneObject.add(polyline);
+        this.sceneObject.add(polyline);
 
         var that = this;
         vertices.map(function(vertex) {
@@ -112,7 +112,7 @@ SS.PolylinePreview = SS.PreviewWithOrigin.extend({
             });
             var base = new THREE.Line(baseGeometry, SS.materials.lineMaterial);
             base.position.z = -origin.z;
-	    this.sceneObject.add(base);
+            this.sceneObject.add(base);
         }
 
         this.postRender();
