@@ -47,18 +47,40 @@ SS.NodeEditorDOMView = Backbone.View.extend({
 
         var view = this;
         var updateFunction = function(ancestry, schema, targetNode) {
-            for (key in schema.properties) {
-                var ancestryCSS = '.' + ancestry.join('_');
-                var possibleInput = view.$el.find(ancestryCSS + ' .field.' + key);
-                if (possibleInput.length == 1) {
-                    var targetObject = targetNode;
-                    ancestry.map(function(ancestor) {
-                        targetObject = targetObject[ancestor];
-                    });
-                    matchFunction(schema.properties[key], possibleInput, targetObject, key);
-                }
-                updateFunction(ancestry.concat(key), schema.properties[key], targetNode);
+            if (!schema.properties) {
+                return;
             }
+            _.keys(schema.properties).map(function(key) {
+                var ancestryCSS = '.' + ancestry.join('_');
+                if (schema.properties[key].type !== 'array') {
+                    var selector = ancestryCSS + ' .field.' + key;
+                    var possibleInput = view.$el.find(selector);
+                    if (possibleInput.length == 1) {
+                        var targetObject = targetNode;
+                        ancestry.map(function(ancestor) {
+                            targetObject = targetObject[ancestor];
+                        });
+                        if (targetObject) {
+                            // When remove a vertex from a polyline, the targetObject can be removed
+                            matchFunction(schema.properties[key], possibleInput, targetObject, key);
+                        }
+                    }
+                    updateFunction(ancestry.concat(key), schema.properties[key], targetNode);
+                } else {
+                    var i = 0;
+                    while(true) {
+                        var selector = ancestryCSS + '_' + key + '_' + i;  
+                        var possibleInput = view.$el.find(selector);
+                        if (possibleInput.length === 0) {
+                            break;
+                        } else {
+                            updateFunction(ancestry.concat(key).concat('' + i), schema.properties[key]['items'], targetNode);
+                        }
+                        ++i;
+                    }
+                }
+                
+            });
          }
 
         updateFunction([this.model.node.type], rootSchema, targetNode);

@@ -79,7 +79,9 @@ SS.copyObj = function(value) {
     } else if (typeof(value) === 'object') {
         var returnObj = {};
         for (var key in value) {
-            returnObj[key] = SS.copyObj(value[key]);
+            if (value.hasOwnProperty(key)) {
+                returnObj[key] = SS.copyObj(value[key]);
+            }
         }
         return returnObj;
     } else {
