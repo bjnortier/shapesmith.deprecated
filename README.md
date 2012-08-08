@@ -16,5 +16,11 @@ There is also a twitter account for this project, [@shapesmith](http://www.twitt
 Feel free to email me personally at bjnortier@shapesmith.net
 
 Build something
+
 Benjamin Nortier
+
+[![Flattr this][2]][1]
+
+[1]: http://flattr.com/thing/640870/Shapesmith
+[2]: http://api.flattr.com/button/button-static-50x60.png
 
