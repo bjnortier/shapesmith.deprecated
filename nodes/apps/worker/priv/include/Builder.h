@@ -26,6 +26,7 @@ protected:
     void ApplyTransform(map< string, mValue > json);
     void ApplyTransforms(map< string, mValue > json);
     void ApplyWorkplane(map< string, mValue > json);
+    void ApplyReverseWorkplane(map< string, mValue > json);
     virtual void PostProcess(map< string, mValue > json) = 0;
     
 public:
@@ -168,8 +169,6 @@ typedef enum e_PostProcess {
 } PostProcess;
 
 class BooleanBuilder : public BuilderND {
-protected:
-    void PostProcess(map< string, mValue > json);
 public:
     BooleanBuilder(map< string, mValue > json, vector<TopoDS_Shape>& shapes, boolean_op fn, e_PostProcess post_process);
 };
