@@ -69,35 +69,35 @@ SS.workplane.grid = function(spec) {
     style = "normal",
     scene = spec.scene;
 
-    majorGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(gridExtents.minX, 0, 0)));
-    majorGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(gridExtents.maxX, 0, 0)));
-    minorGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(gridExtents.minY, 0, 0)));
-    minorGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(gridExtents.maxY, 0, 0)));
-    fadingGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-    fadingGridLineGeometry.vertices.push(new THREE.Vertex(new THREE.Vector3(majorTick, 0, 0)));
+    majorGridLineGeometry.vertices.push(new THREE.Vector3(gridExtents.minX, 0, 0));
+    majorGridLineGeometry.vertices.push(new THREE.Vector3(gridExtents.maxX, 0, 0));
+    minorGridLineGeometry.vertices.push(new THREE.Vector3(gridExtents.minY, 0, 0));
+    minorGridLineGeometry.vertices.push(new THREE.Vector3(gridExtents.maxY, 0, 0));
+    fadingGridLineGeometry.vertices.push(new THREE.Vector3(0, 0, 0));
+    fadingGridLineGeometry.vertices.push(new THREE.Vector3(majorTick, 0, 0));
 
 
     var addAxes = function() {
 
 	axes = [new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry(), 
 		new THREE.Geometry(), new THREE.Geometry(), new THREE.Geometry()];
-	axes[0].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	axes[0].vertices.push(new THREE.Vertex(new THREE.Vector3(gridExtents.maxX + gridExtents.fadingWidth, 0, 0)));
+	axes[0].vertices.push(new THREE.Vector3(0, 0, 0));
+	axes[0].vertices.push(new THREE.Vector3(gridExtents.maxX + gridExtents.fadingWidth, 0, 0));
 
-	axes[1].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	axes[1].vertices.push(new THREE.Vertex(new THREE.Vector3(0, gridExtents.maxY + gridExtents.fadingWidth, 0)));
+	axes[1].vertices.push(new THREE.Vector3(0, 0, 0));
+	axes[1].vertices.push(new THREE.Vector3(0, gridExtents.maxY + gridExtents.fadingWidth, 0));
 
-	axes[2].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	axes[2].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 500)));
+	axes[2].vertices.push(new THREE.Vector3(0, 0, 0));
+	axes[2].vertices.push(new THREE.Vector3(0, 0, 500));
 
-	axes[3].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	axes[3].vertices.push(new THREE.Vertex(new THREE.Vector3(gridExtents.minX - gridExtents.fadingWidth, 0, 0)));
+	axes[3].vertices.push(new THREE.Vector3(0, 0, 0));
+	axes[3].vertices.push(new THREE.Vector3(gridExtents.minX - gridExtents.fadingWidth, 0, 0));
 
-	axes[4].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	axes[4].vertices.push(new THREE.Vertex(new THREE.Vector3(0, gridExtents.minY - gridExtents.fadingWidth, 0)));
+	axes[4].vertices.push(new THREE.Vector3(0, 0, 0));
+	axes[4].vertices.push(new THREE.Vector3(0, gridExtents.minY - gridExtents.fadingWidth, 0));
 
-	axes[5].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, 0)));
-	axes[5].vertices.push(new THREE.Vertex(new THREE.Vector3(0, 0, -500)));
+	axes[5].vertices.push(new THREE.Vector3(0, 0, 0));
+	axes[5].vertices.push(new THREE.Vector3(0, 0, -500));
 
 	scene.add(new THREE.Line(axes[0], new THREE.LineBasicMaterial({ color: 0x0000ff, opacity: 0.5 }))); 
 	scene.add(new THREE.Line(axes[1], new THREE.LineBasicMaterial({ color: 0x00ff00, opacity: 0.5 })));
@@ -227,10 +227,10 @@ SS.workplane.grid = function(spec) {
 	}
     }
 
-    addAxes();
-    addMainGrid();
-    addLabels();
-    addFadingTiles();
+    // addAxes();
+    // addMainGrid();
+    // addLabels();
+    // addFadingTiles();
 
     return that;
 
@@ -246,6 +246,20 @@ SS.Workplane = function(spec) {
     var grid = SS.workplane.grid({scene: scene, gridExtents: gridExtents});
 
     _.extend(that, Backbone.Events);
+
+    that.node = {
+        origin: {
+            x: 0,
+            y: 0,
+            z: 0
+        },
+        'axis': {
+            x: 0,
+            y: 0,
+            z: 1
+        },
+        'angle': 0
+    };
 
     that.updateXYLocation = function(position, originalEvent) {
 
@@ -267,7 +281,7 @@ SS.Workplane = function(spec) {
 		originalEvent: originalEvent
 	    });
 	}
-    }
+    };
 
     that.updateZLocation = function(position, originalEvent) {
         var gridZ = Math.round(position.z);
@@ -275,15 +289,15 @@ SS.Workplane = function(spec) {
 	    z: gridZ, 
 	    originalEvent: originalEvent
 	});
-    }
+    };
 
     that.getPlaneMesh = function() {
 	return grid.intersectionPlane;
-    }
+    };
     
     that.getLastMousePosition = function() {
 	return mouseOnWorkplane;
-    }
+    };
 
     return that;
 }

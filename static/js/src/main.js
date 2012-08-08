@@ -3,7 +3,7 @@ var SS = SS || {};
 var selectionManager = new SelectionManager();
 
 SS.selectionManager = selectionManager;
-var command_stack = new CommandStack(SS);
+var command_stack = new CommandStack();
 
 var treeView = new TreeView();
 
@@ -19,3 +19,4 @@ SS.geomNodeRenderingManager = new SS.GeomNodeRenderingManager();
     geom_doc.on('replace', setUpdateScene);
 })();
 
+SS.workplaneModel = new SS.WorkplaneDisplayModel();

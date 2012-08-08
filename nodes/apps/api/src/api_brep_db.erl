@@ -108,13 +108,6 @@ serialize_to_disk(WorkerPid, SHA) ->
     {[{<<"s11n">>, S11N}]} = jiffy:decode(worker_process:safe_call(WorkerPid, jiffy:encode(Msg))),
     api_db:put_brep(SHA, S11N).
     
-
-create_type(WorkerPid, SHA, <<"union">>, Geometry) ->
-    create_boolean(WorkerPid, SHA, <<"union">>, Geometry);
-create_type(WorkerPid, SHA, <<"subtract">>, Geometry) ->
-    create_boolean(WorkerPid, SHA, <<"subtract">>, Geometry);
-create_type(WorkerPid, SHA, <<"intersect">>, Geometry) ->
-    create_boolean(WorkerPid, SHA, <<"intersect">>, Geometry);
 create_type(WorkerPid, SHA, <<"import_stl">>, {GeomProps}) ->
     {_, Contents} = lists:keyfind(<<"contents">>, 1, GeomProps),
     Decoded = base64:decode(Contents),
@@ -133,18 +126,6 @@ create_type(WorkerPid, SHA, <<"import_stl">>, {GeomProps}) ->
 %% Non-bool pass through
 create_type(WorkerPid, SHA, _, Geometry) ->
     worker_create(WorkerPid, SHA, Geometry).
-
-create_boolean(WorkerPid, SHA, Type, Geometry) ->
-    {GeomProps} = Geometry,
-    {<<"children">>, ChildSHAs} = lists:keyfind(<<"children">>, 1, GeomProps),
-    Transforms = case lists:keyfind(<<"transforms">>, 1, GeomProps) of
-                     false -> [];
-                     {<<"transforms">>, T} -> T
-                 end,
-    worker_create(WorkerPid, SHA, {[{<<"type">>, Type},
-				     {<<"children">>, ChildSHAs},
-				     {<<"transforms">>, Transforms}
-				    ]}).
 
 worker_create(WorkerPid, SHA, Geometry) ->
     Msg = {[{<<"type">>, <<"create">>},

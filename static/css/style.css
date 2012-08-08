@@ -147,7 +147,7 @@ body {
 
 img#logo {
     position: absolute;
-    left: 10px;
+    right: 10px;
     bottom: 0px;
 }
 
@@ -401,26 +401,53 @@ img.action:hover {
     text-shadow: none;
 }
 
-
-/* ---------------------------------- TreeView ------------------------------------ */
-
 #treeview-container {
     position: absolute;
-    left: 20px;
-    top: 80px;
+    bottom: 0px;
+    color: white;
+    height: 92%;
+}
+
+#workplane-container {
+    position: absolute;
+    top: 8%;
     color: white;
 }
 
-#advanced {
-    padding-bottom: 5px;
-}
-
-#advanced label {
-    padding: 5px;
+#treeview-container {
+    left: 20px;
 }
 
 #geom-model-doc {
+    overflow: scroll;
     display: none;
+    height: 95%;
+}
+
+#workplane-container {
+    right: 20px;
+}
+
+
+#workplane {
+    display: none;
+}
+
+#treeview-container input[type="number"], #workplane-container input[type="number"] {
+    width: 50px;
+}
+
+#treeview-container .edit-geom, #treeview-container .edit-transform, #workplane-container .value {
+    cursor: pointer;
+}
+    
+
+.advanced {
+    padding-bottom: 5px;
+}
+
+.advanced label {
+    padding: 5px;
 }
 
 #geom-model-doc table {
@@ -432,7 +459,6 @@ img.action:hover {
     border: 1px solid #666;
     padding: 3px;
 }
-
 
 #geom-model-doc table tr.odd {
     background-color: #000;
@@ -474,8 +500,22 @@ img.action:hover {
     padding: 3px;
 }
 
-.dimension.z {
+.dimension .x, .dimension.x {
+    color: #6666cc;
+}
+
+.dimension .y, .dimension.y {
+    color: #339933;
+}
+
+.dimension .z, .dimension.z {
     color: #993333;
+}
+
+.dimension.ruler {
+    z-index: -1;
+    font-size: 8pt;
+    background: none;
 }
 
 .node-actions {

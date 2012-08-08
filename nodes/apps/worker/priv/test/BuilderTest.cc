@@ -590,6 +590,41 @@ TEST(BuilderTest, Loft) {
     
 }
 
+TEST(BuilderTest, Workplane) {
+    
+    mObject origin;
+    origin["x"] = 0.0; origin["y"] = 0.0; origin["z"] = 0.0;
+    
+    mObject cuboidParameters;
+    cuboidParameters["u"] = 10.0;
+    cuboidParameters["v"] = 10.0;
+    cuboidParameters["w"] = 10.0;
+
+    mObject workplaneOrigin;
+    workplaneOrigin["x"] = 0.0;
+    workplaneOrigin["y"] = 0.0;
+    workplaneOrigin["z"] = 10.0;
+    
+    mObject workplaneAxis;
+    workplaneAxis["x"] = 0.0;
+    workplaneAxis["y"] = 0.0;
+    workplaneAxis["z"] = 1.0;
+
+    mObject workplane;
+    workplane["origin"] = workplaneOrigin;
+    workplane["axis"]   = workplaneAxis;
+    workplane["angle"]  = 45.0;
+
+    mObject cuboidJson;
+    cuboidJson["origin"] = origin;
+    cuboidJson["parameters"] = cuboidParameters;
+    cuboidJson["workplane"]  = workplane;
+    
+    CuboidBuilder cuboidBuilder(cuboidJson);
+    ASSERT_FALSE(cuboidBuilder.shape().IsNull());
+
+}
+
 
 TEST(BuilderTest, Fillet) {
     

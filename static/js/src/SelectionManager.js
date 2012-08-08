@@ -13,7 +13,7 @@ function SelectionManager() {
     }
 
     this.shiftPick = function(id) {
-	var alreadySelected = false;
+        var alreadySelected = false;
         for (var i in selected) {
             if (selected[i] == id) {
                 alreadySelected = true;
@@ -56,9 +56,9 @@ function SelectionManager() {
         }
         selected = [id];
         
-	if (deselected.length > 0) {
+        if (deselected.length > 0) {
             this.trigger('deselected', deselected);
-	}
+        }
         this.trigger('selected', [id]);
     }
     
