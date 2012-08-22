@@ -30,7 +30,14 @@ SS.PrismCreator = SS.ParentCreator.extend({
     },
 
     getBoundingBox: function() {
-        return this.boundingBox;
+        if (this.boundingBox) {
+            return {
+                'min': this.boundingBox.min.clone(),
+                'max': this.boundingBox.max.clone()
+            }
+        } else {
+            return undefined;
+        }
     },
     
 });

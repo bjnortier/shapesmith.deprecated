@@ -24,7 +24,14 @@ SS.FilletCreator = SS.ParentCreator.extend({
     },
 
     getBoundingBox: function() {
-        return this.boundingBox;
+        if (this.boundingBox) {
+            return {
+                'min': this.boundingBox.min.clone(),
+                'max': this.boundingBox.max.clone()
+            }
+        } else {
+            return undefined;
+        }
     },
     
 });
@@ -36,6 +43,7 @@ SS.FilletGeomNodeView = SS.SceneObjectView.extend({
         this.model.on('change:model', this.render, this);
         this.meshes = SS.createGeometry(this.model.childNode);
         this.changeToPreviewColor(this.meshes);
+        this.dontApplyWorkplane = true;
         this.render();
     },
 
