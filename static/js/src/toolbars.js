@@ -109,8 +109,8 @@ function create_primitive(type) {
         type: type,
         editing: true,
         origin: {
-            x: SS.sceneView.lastPositionOnWorkplane.x || 0,
-            y: SS.sceneView.lastPositionOnWorkplane.y || 0,
+            x: SS.sceneView.lastClickedPositionOnWorkplane.x || 0,
+            y: SS.sceneView.lastClickedPositionOnWorkplane.y || 0,
             z: 0
         },
         workplane: SS.workplaneModel.node.editableCopy(),

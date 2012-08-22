@@ -2,12 +2,13 @@ var SS = SS || {};
 SS.SceneView = function(container) {
 
     this.lastPositionOnWorkplane = new THREE.Vector3(0,0,0);
+    this.lastClickedPositionOnWorkplane = new THREE.Vector3(0,0,0);
 
     var camera, scene, renderer, w, h;
     var overRenderer;
     var lastCameraPosition = new THREE.Vector3(0,0,0);
 
-    var mouseOnDown, lastMouseMpos, mouseDownOnActiveSceneObject;
+    var mouseOnDown, lastMousePos, mouseDownOnActiveSceneObject;
 
     var azimuth = -1.373, elevation = 1.08;
     var target = { azimuth: -1.373, elevation: 1.08 };
@@ -97,6 +98,9 @@ SS.SceneView = function(container) {
             return object.active;
         });
         mouseDownOnActiveSceneObject = mouseOverActiveObjects.length > 0;
+
+        var positionOnWorkplane = determinePositionOnWorkplane(event);
+        that.lastClickedPositionOnWorkplane = positionOnWorkplane; 
         
         that.triggerMouseDownOnSceneObjectViews(event);
         that.updateScene = true;
