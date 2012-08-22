@@ -467,6 +467,7 @@ SS.axisMirrorGeomNodeRendering = function(originalNode, editingNode, transform) 
 
 SS.planeMirrorGeomNodeRendering = function(originalNode, editingNode, transform) {
 
+    var workplaneOrigin = SS.objToVector(originalNode.workplane.origin);
     var localNormal = SS.objToVector(transform.parameters).normalize().negate();
     var axis   = SS.objToVector(originalNode.workplane.axis);
     var angle  = originalNode.workplane.angle;
@@ -483,10 +484,11 @@ SS.planeMirrorGeomNodeRendering = function(originalNode, editingNode, transform)
             var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
 
             editingGeometry.vertices = originalGeometry.vertices.map(function(vertex) {
-                var position = vertex.clone();
+                var position = vertex.clone().subSelf(workplaneOrigin);
                 var dot = new THREE.Vector3().sub(position, globalTransformOrigin).dot(normal);
                 var dPos = normal.clone().multiplyScalar(-2*dot);
-                var newPosition = new THREE.Vector3().add(position, dPos);
+                var newPosition = new THREE.Vector3().add(position, dPos)
+                newPosition.addSelf(workplaneOrigin);
                 return newPosition;
             });
             editingGeometry.computeCentroids();
