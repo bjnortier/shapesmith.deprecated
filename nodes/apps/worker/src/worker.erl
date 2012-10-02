@@ -29,5 +29,6 @@ ensure_started(App) ->
 
 start() ->
     ensure_started(lager),
+    ensure_started(folsom),
     application:start(worker).
 

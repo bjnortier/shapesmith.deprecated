@@ -19,7 +19,7 @@
 -export([start_with_api/0, start_with_api/1, start_without_api/0]).
 -export([stop_with_api/0, stop_without_api/0]).
 
--define(APPS, [inets, crypto, bcrypt, lager, mochiweb, webmachine]).
+-define(APPS, [inets, crypto, bcrypt, lager, mochiweb, webmachine, folsom]).
 
 start_with_api() ->
     start_with_api(fun() -> ok end).                   

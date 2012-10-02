@@ -25,5 +25,7 @@
                   stdlib
                  ]},
   {mod, { worker_master_app, []}},
-  {env, []}
+  {env, [
+         {metrics_module, folsom_metrics}
+        ]}
  ]}.

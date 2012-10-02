@@ -35,6 +35,7 @@ start() ->
     ensure_started(bcrypt),
     ensure_started(lager),
     ensure_started(mochiweb),
+    ensure_started(folsom),
     application:set_env(webmachine, webmachine_logger_module, 
                         webmachine_logger),
     ensure_started(webmachine),
