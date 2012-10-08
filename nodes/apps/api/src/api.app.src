@@ -30,7 +30,7 @@
                   lager,
                   worker_master
                  ]},
-  {mod, { api_app, []}},
+  {mod, {api_app, []}},
   {env, [{worker_wait_max_secs, 60},
          {lager, [
                   {handlers, [

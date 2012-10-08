@@ -37,10 +37,12 @@ end_per_suite(_Config) ->
     ok.
 
 init_per_testcase(_, Config) ->
+    ok = application:start(folsom),
     ok = application:start(worker_master),
     Config.
 
 end_per_testcase(_, _Config) ->
+    ok = application:stop(folsom),
     ok = application:stop(worker_master).
 
 %% ===================================================================
