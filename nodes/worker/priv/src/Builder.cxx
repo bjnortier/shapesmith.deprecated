@@ -120,7 +120,7 @@ void Builder3D::Mesh() {
     }
     
     if (numFaces > 0) {
-        BRepMesh().Mesh(shape_, 1.0);
+        BRepMesh().Mesh(shape_, 0.2);
     }
 }
 

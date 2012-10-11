@@ -13,6 +13,7 @@
     <script type="text/javascript" src="/static/js/lib/Three.js"></script>
     <script type="text/javascript" src="/static/js/lib/underscore-min.js"></script>
     <script type="text/javascript" src="/static/js/lib/backbone.js"></script>
+    <script type="text/javascript" src="/static/js/lib/csg2.js"></script>
 
     <script type="text/javascript" src="/static/js/lib/fonts/helvetiker_bold.typeface.js"></script>
     <script type="text/javascript" src="/static/js/lib/fonts/helvetiker_regular.typeface.js"></script>
@@ -177,6 +178,7 @@
 
   <script type="text/javascript" src="/static/js/src/TransformerManager.js"></script> 
   <script type="text/javascript" src="/static/js/src/utils.js"></script>  
+  <script type="text/javascript" src="/static/js/src/csgutils.js"></script>
 
   <script type="text/javascript">
 
