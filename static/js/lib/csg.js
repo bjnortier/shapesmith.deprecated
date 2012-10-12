@@ -6,6 +6,7 @@ var _CSGDEBUG=false;
 Copyright (c) 2012 Joost Nieuwenhuijse (joost@newhouse.nl)
 Copyright (c) 2011 Evan Wallace (http://evanw.github.com/csg.js/)
 Copyright (c) 2012 Alexandre Girard (https://github.com/alx)
+Copyright (c) 2012 Benjamin Nortier (https://github.com/bjnortier)
 
 All code released under MIT license
 
@@ -118,7 +119,7 @@ CSG.fromObject = function(obj) {
 
 // Reconstruct a CSG from the output of toCompactBinary()
 CSG.fromCompactBinary = function(bin) {
-  if(bin.class != "CSG") throw new Error("Not a CSG");
+  if(bin.clazz != "CSG") throw new Error("Not a CSG");
   var planes = [];
   var planeData = bin.planeData;
   var numplanes = planeData.length / 4;
@@ -976,7 +977,7 @@ CSG.prototype = {
       planeData[planesArrayIndex++] = p.w;
     });
     var result = {
-      class: "CSG",
+      clazz: "CSG",
       numPolygons: numpolygons,
       numVerticesPerPolygon: numVerticesPerPolygon,
       polygonPlaneIndexes: polygonPlaneIndexes,
@@ -5199,7 +5200,7 @@ CAG.roundedRectangle = function(options) {
 
 // Reconstruct a CAG from the output of toCompactBinary()
 CAG.fromCompactBinary = function(bin) {
-  if(bin.class != "CAG") throw new Error("Not a CAG");
+  if(bin.clazz != "CAG") throw new Error("Not a CAG");
   var vertices = [];
   var vertexData = bin.vertexData;
   var numvertices = vertexData.length / 2;
@@ -5689,7 +5690,7 @@ CAG.prototype = {
       vertexData[verticesArrayIndex++] = pos._y; 
     });
     var result = {
-      class: "CAG",
+      clazz: "CAG",
       sideVertexIndices: sideVertexIndices,
       vertexData: vertexData,
     };
