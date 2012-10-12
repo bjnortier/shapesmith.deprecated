@@ -1,3 +1,4 @@
+var SS = SS || {};
 
 function Command(executeFn, undoFn, redoFn) {
     var executeFn = executeFn;
@@ -9,7 +10,7 @@ function Command(executeFn, undoFn, redoFn) {
     this.redo = function() { redoFn(); };
 }
 
-function CommandStack() {
+SS.CommandStack = function() {
     var successFn;
     var commandInProgress;
 

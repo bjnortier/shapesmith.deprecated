@@ -57,11 +57,11 @@ function update_geom_command(originalNode, nodeInDoc, replacement) {
                         } else {
                             geom_doc.replace(nextFrom, nextTo);
                         }
-                        command_stack.commit();
+                        SS.commandStack.commit();
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    command_stack.error(jqXHR.responseText);
+                    SS.commandStack.error(jqXHR.responseText);
                 }
             });
         }
@@ -81,11 +81,11 @@ function update_geom_command(originalNode, nodeInDoc, replacement) {
     };
     var undoFn = function() {
         geom_doc.replace(toChain[toChain.length - 1], fromChain[fromChain.length - 1]);
-        command_stack.success();
+        SS.commandStack.success();
     };
     var redoFn = function() {
         geom_doc.replace(fromChain[toChain.length - 1], toChain[fromChain.length - 1]);
-        command_stack.success();
+        SS.commandStack.success();
     }
 
     return new Command(doFn, undoFn, redoFn);
@@ -111,20 +111,20 @@ function create_geom_command(prototype, geometry) {
                 } else {
                     geom_doc.add(geomNode);
                 }
-                command_stack.commit();
+                SS.commandStack.commit();
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                command_stack.error(jqXHR.responseText);
+                SS.commandStack.error(jqXHR.responseText);
             }
         });
     };
     var undoFn = function() {
         geom_doc.remove(geomNode);
-        command_stack.success();
+        SS.commandStack.success();
     }
     var redoFn = function() {
         geom_doc.add(geomNode);
-        command_stack.success();
+        SS.commandStack.success();
     }
     return new Command(doFn, undoFn, redoFn);
 }
@@ -154,7 +154,7 @@ function explode(selected, type) {
             childNodes.map(function(childNode) {
                 geom_doc.add(childNode);
             });
-            command_stack.commit();
+            SS.commandStack.commit();
         };
 
         if (childrenToFetchMeshesFor.length == 0) {
@@ -173,7 +173,7 @@ function explode(selected, type) {
                         }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        command_stack.error(jqXHR.responseText);
+                        SS.commandStack.error(jqXHR.responseText);
                     }
                 });
             });
@@ -186,7 +186,7 @@ function explode(selected, type) {
             geom_doc.remove(child);
         });
         geom_doc.add(boolNode);
-        command_stack.success();
+        SS.commandStack.success();
     }
 
     var redoFn = function() {
@@ -194,11 +194,11 @@ function explode(selected, type) {
         childNodes.reverse().map(function(child) {
             geom_doc.add(child);
         });
-        command_stack.success();
+        SS.commandStack.success();
     }
 
     var cmd = new Command(doFn, undoFn, redoFn);
-    command_stack.execute(cmd);
+    SS.commandStack.execute(cmd);
 }
 
 
@@ -237,10 +237,10 @@ function boolean(selected, type) {
                     boolNode.mesh = result.mesh;
 
                     geom_doc.add(boolNode);
-                    command_stack.commit();
+                    SS.commandStack.commit();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    command_stack.error(jqXHR.responseText);
+                    SS.commandStack.error(jqXHR.responseText);
                 }
             })
         };
@@ -250,7 +250,7 @@ function boolean(selected, type) {
         childNodes.reverse().map(function(child) {
             geom_doc.add(child);
         });
-        command_stack.success();
+        SS.commandStack.success();
     }
 
     var redoFn = function() {
@@ -258,11 +258,11 @@ function boolean(selected, type) {
             geom_doc.remove(child);
         });
         geom_doc.add(boolNode);
-        command_stack.success();
+        SS.commandStack.success();
     }
 
     var cmd = new Command(doFn, undoFn, redoFn);
-    command_stack.execute(cmd);
+    SS.commandStack.execute(cmd);
 }
 
 function copy(selected) {
@@ -316,7 +316,7 @@ function importJSON(json) {
                         createNext(rootGeometries);
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        command_stack.error(jqXHR.responseText);
+                        SS.commandStack.error(jqXHR.responseText);
                     }
                 });
             return true;
@@ -330,7 +330,7 @@ function importJSON(json) {
                 rootNodes.push(geomNode);
                 geom_doc.add(geomNode);
             });
-            command_stack.commit();
+            SS.commandStack.commit();
         }
 
         return false;
@@ -344,16 +344,16 @@ function importJSON(json) {
         rootNodes.map(function(node) {
             geom_doc.remove(node);
         });
-        command_stack.success();
+        SS.commandStack.success();
     };
     var redoFn = function() {
         rootNodes.map(function(node) {
             geom_doc.add(node);
         });
-        command_stack.success();
+        SS.commandStack.success();
     }
     
-    command_stack.execute(new Command(doFn, undoFn, redoFn));
+    SS.commandStack.execute(new Command(doFn, undoFn, redoFn));
 }
 
 
@@ -373,7 +373,7 @@ function copyNode(node) {
 
         if (newNode.mesh) {
             geom_doc.add(newNode);
-            command_stack.commit();
+            SS.commandStack.commit();
         } else {
             $.ajax({
                 type: 'GET',
@@ -381,10 +381,10 @@ function copyNode(node) {
                 success: function(mesh) {
                     newNode.mesh = mesh;
                     geom_doc.add(newNode);
-                    command_stack.commit();
+                    SS.commandStack.commit();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    command_stack.error(jqXHR.responseText);
+                    SS.commandStack.error(jqXHR.responseText);
                 }
             });
        }
@@ -392,15 +392,15 @@ function copyNode(node) {
     };
     var undoFn = function() {
         geom_doc.remove(newNode);
-        command_stack.success();
+        SS.commandStack.success();
     }
     var redoFn = function() {
         geom_doc.add(newNode);
-        command_stack.success();
+        SS.commandStack.success();
     }
 
     var cmd = new Command(doFn, undoFn, redoFn);
-    command_stack.execute(cmd);
+    SS.commandStack.execute(cmd);
 
 }
 
@@ -446,10 +446,10 @@ SS.commit = function() {
             var url = window.location.pathname + '?commit=' + commit;
             history.pushState({commit: commit}, SS.session.design, url);
             SS.session.commit = commit;
-            command_stack.success();
+            SS.commandStack.success();
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            command_stack.error(jqXHR.responseText);
+            SS.commandStack.error(jqXHR.responseText);
         }
     });
 }
@@ -461,10 +461,10 @@ SS.commit = function() {
  * the need to $(document).ready() and the workaround variable.
  */
 
- SS.loadCommitFromStateOrParam = function(state) {
+SS.loadCommitFromStateOrParam = function(state) {
     var commit = (state && state.commit) || $.getQueryParam("commit");
     SS.session.commit = commit;
-    if (!command_stack.pop(commit)) {
+    if (!SS.commandStack.pop(commit)) {
         // No command stack available - load from disk
         SS.load_commit(commit);
     }
@@ -474,12 +474,6 @@ window.onpopstate = function(event) {
     SS.loadCommitFromStateOrParam(event.state);
 };
 
-$(document).ready(function() {
-    // Only necessary in FF since. See above comment.
-    if (navigator.userAgent.indexOf("Firefox") != -1) {
-        SS.loadCommitFromStateOrParam(undefined);
-    }
-});
 
 
 SS.load_commit = function(commit) {

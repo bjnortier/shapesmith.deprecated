@@ -67,11 +67,11 @@ SS.SceneView = function(container) {
             overRenderer = false;
         }, false);
         container.addEventListener('dblclick', function() {
-            if (selectionManager.size() == 1) {
-                var id = selectionManager.getSelected()[0];
+            if (SS.selectionManager.size() == 1) {
+                var id = SS.selectionManager.getSelected()[0];
 
                 $('#' + id + ' > tbody > tr:nth-child(1)').addClass('selected');
-                treeView.edit(id);
+                SS.treeView.edit(id);
             }
             
         });
@@ -277,12 +277,12 @@ SS.SceneView = function(container) {
 
         if (foundGeomNodes.length > 0) {
             if (event.ctrlKey || event.metaKey) {
-                selectionManager.shiftPick(foundGeomNodes[0].object.name.geomNodeId);
+                SS.selectionManager.shiftPick(foundGeomNodes[0].object.name.geomNodeId);
             } else if (!event.shiftKey) {
-                selectionManager.pick(foundGeomNodes[0].object.name.geomNodeId);
+                SS.selectionManager.pick(foundGeomNodes[0].object.name.geomNodeId);
             }
         } else {
-            selectionManager.deselectAll();
+            SS.selectionManager.deselectAll();
         }
     }
 

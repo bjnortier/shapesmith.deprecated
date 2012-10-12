@@ -1,3 +1,5 @@
+var SS = SS || {};
+
 function renderValue(clazz, key,  value, context, jsonSchema) {
 
     var item = jsonSchema.properties[key];
@@ -164,7 +166,7 @@ function renderNode(geomNode) {
 }
 
 
-function TreeView() {
+SS.TreeView = function() {
 
     var that = this;
     this.domNodeLookup = {};
@@ -256,7 +258,7 @@ function TreeView() {
                 } else {
                     cmd = okTransformFn();
                 }
-                command_stack.execute(cmd);
+                SS.commandStack.execute(cmd);
                 
             });
 
@@ -308,7 +310,7 @@ function TreeView() {
             if (!id) {
                 throw Error('id for editing could not be determined');
             }
-            selectionManager.pick(id);
+            SS.selectionManager.pick(id);
         });
 
         // Edit geom
@@ -409,7 +411,7 @@ function TreeView() {
             var editingNode = geomNode.editableCopy();
             editingNode.transforms.splice(transformIndex, 1);
             var cmd = update_geom_command(geomNode, geomNode, editingNode);
-            command_stack.execute(cmd);
+            SS.commandStack.execute(cmd);
         });
 
         // Show/Hide
@@ -471,7 +473,7 @@ function TreeView() {
         if (SS.creators[geomNode.type]) {
             var editingNode = geomNode.editableCopy();
             editingNode.editing = true;
-            selectionManager.deselectAll();
+            SS.selectionManager.deselectAll();
             geom_doc.replace(geomNode, editingNode);
             new SS.creators[geomNode.type]({editingNode: editingNode, originalNode: geomNode});
         }
@@ -539,8 +541,8 @@ function TreeView() {
     geom_doc.on('remove', this.geomDocRemove, this);
     geom_doc.on('replace', this.geomDocReplace, this);
 
-    selectionManager.on('selected', this.selected, this);
-    selectionManager.on('deselected', this.deselected, this);
+    SS.selectionManager.on('selected', this.selected, this);
+    SS.selectionManager.on('deselected', this.deselected, this);
 }
 
 

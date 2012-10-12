@@ -14,7 +14,7 @@ SS.GeomNodeRenderingManager = function() {
     }
 
     this.geomDocBeforeRemove = function(geomNode) {
-        selectionManager.deselectID(geomNode.id);
+        SS.selectionManager.deselectID(geomNode.id);
     }
 
     this.geomDocRemove = function(geomNode) {
@@ -30,7 +30,7 @@ SS.GeomNodeRenderingManager = function() {
     }
 
     this.geomDocBeforeReplace = function(original, replacement) {
-        selectionManager.deselectID(original.id);
+        SS.selectionManager.deselectID(original.id);
     }
 
     this.geomDocReplace = function(original, replacement) {
@@ -102,7 +102,7 @@ SS.GeomNodeRenderingManager = function() {
     }
 
     this.clear = function() {
-        selectionManager.deselectAll();
+        SS.selectionManager.deselectAll();
     }
 
     this.setOpaque = function(id) {
@@ -123,9 +123,9 @@ SS.GeomNodeRenderingManager = function() {
 
     SS.UI_EDITING_STATE.on('change', uiStateChanged, this);
 
-    selectionManager.on('selected', this.selected, this);
-    selectionManager.on('deselected', this.deselected, this);
+    SS.selectionManager.on('selected', this.selected, this);
+    SS.selectionManager.on('deselected', this.deselected, this);
 
-    command_stack.on('beforePop', this.clear, this);
+    SS.commandStack.on('beforePop', this.clear, this);
 
 }

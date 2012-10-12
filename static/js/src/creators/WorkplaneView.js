@@ -1,11 +1,5 @@
 var SS = SS || {};
 
-SS.NodeDisplayModel = Backbone.Model.extend({
-});
-
-SS.NodeEditorModel = Backbone.Model.extend({
-});
-
   
 SS.NodeDisplayDOMView = Backbone.View.extend({
 
@@ -25,7 +19,7 @@ SS.NodeDisplayDOMView = Backbone.View.extend({
 
 });
 
-SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
+SS.WorkplaneDisplayModel = Backbone.Model.extend({
 
     initialize: function(attributes) {
         this.node = new SS.WorkplaneNode();
@@ -43,8 +37,8 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
         ];
         this.rulers = this.addRulers();
 
-        selectionManager.on('selected', this.selectionChanged, this);
-        selectionManager.on('deselected', this.selectionChanged, this);
+        SS.selectionManager.on('selected', this.selectionChanged, this);
+        SS.selectionManager.on('deselected', this.selectionChanged, this);
         geom_doc.on('add', this.updateExtents, this);
         geom_doc.on('remove', this.updateExtents, this);
         geom_doc.on('replace', this.updateExtents, this);
@@ -60,8 +54,8 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
         });
         domView.remove();
 
-        selectionManager.off('selected', this.selectionChanged, this);
-        selectionManager.off('deselected', this.selectionChanged, this);
+        SS.selectionManager.off('selected', this.selectionChanged, this);
+        SS.selectionManager.off('deselected', this.selectionChanged, this);
         geom_doc.off('add', this.updateExtents, this);
         geom_doc.off('remove', this.updateExtents, this);
         geom_doc.off('replace', this.updateExtents, this);
@@ -111,7 +105,7 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
         if (this.persistentWorkplaneNode) {
             this.popNode();
         }
-        var selected = selectionManager.getSelected();
+        var selected = SS.selectionManager.getSelected();
         if (selected.length == 1) {
             this.pushNode(geom_doc.findById(selected[0]));
         } 
@@ -186,21 +180,21 @@ SS.WorkplaneDisplayModel = SS.NodeDisplayModel.extend({
                 }2
                 model.domView = new SS.WorkplaneDisplayDOMView({model: model});
                 SS.UI_EDITING_STATE.editing = false;
-                command_stack.commit()
+                SS.commandStack.commit()
             }
 
             var undoFn = function() {
                 model.loadNode(oldNode);
-                command_stack.success();
+                SS.commandStack.success();
             }
 
             var redoFn = function() {
                 model.loadNode(newNode);
-                command_stack.success();
+                SS.commandStack.success();
             }
 
             var cmd = new Command(doFn, undoFn, redoFn);
-            command_stack.execute(cmd);
+            SS.commandStack.execute(cmd);
 
         }
         return validated;

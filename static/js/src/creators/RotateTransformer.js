@@ -33,7 +33,7 @@ SS.RotateTransformerInitiator = SS.TransformerInitiator.extend({
         editingNode.transforms.push(transform);
         geomNode.originalSceneObjects = geomNode.sceneObjects;
 
-        selectionManager.deselectID(geomNode.id);
+        SS.selectionManager.deselectID(geomNode.id);
         geom_doc.replace(geomNode, editingNode);
 
         new SS.RotateTransformer({originalNode: geomNode,

@@ -78,7 +78,7 @@ SS.PrimitiveCreator = SS.Creator.extend({
             var cmd = update_geom_command(this.originalNode, 
                                           this.editingNode,
                                           this.editingNode);
-            command_stack.execute(cmd);
+            SS.commandStack.execute(cmd);
         } else {
             var geometry = {type: this.node.type,
                             parameters: this.node.parameters};
@@ -89,7 +89,7 @@ SS.PrimitiveCreator = SS.Creator.extend({
                 geometry.workplane = this.node.workplane.serializableSubset();
             }
             var cmd = create_geom_command(this.node, geometry);
-            command_stack.execute(cmd);
+            SS.commandStack.execute(cmd);
         }
     },
 
@@ -119,12 +119,12 @@ SS.ParentCreator = SS.Creator.extend({
             var cmd = update_geom_command(this.originalNode, 
                                           this.editingNode,
                                           this.editingNode);
-            command_stack.execute(cmd);
+            SS.commandStack.execute(cmd);
         } else {
             var cmd = update_geom_command(this.childNode, 
                                           this.editingNode,
                                           this.editingNode);
-            command_stack.execute(cmd);
+            SS.commandStack.execute(cmd);
         }
     },
 
@@ -151,7 +151,7 @@ SS.TransformCreator = SS.Creator.extend({
         var cmd = update_geom_command(this.attributes.originalNode, 
                                       this.editingNode,
                                       this.editingNode);
-        command_stack.execute(cmd);
+        SS.commandStack.execute(cmd);
     },
 
     cancel: function() {

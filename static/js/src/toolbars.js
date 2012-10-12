@@ -9,7 +9,7 @@ function Action(label, iconPath, fn) {
         toolbar.append(image);
 
         image.click(function(event) {
-	    var selected = selectionManager.getSelected();
+	    var selected = SS.selectionManager.getSelected();
 	    SS.sceneView.popupMenu.disposeIfShowing();
 	    fn(selected);
             event.stopPropagation();
@@ -34,25 +34,25 @@ function delete_geom_nodes(nodes) {
 	for (var i in nodes) {
             geom_doc.remove(nodes[i]);
 	}
-	command_stack.commit();
+	SS.commandStack.commit();
     }
 
     var undoFn = function() {
 	for (var i in nodes) {
             geom_doc.add(nodes[i]);
 	}
-	command_stack.success();
+	SS.commandStack.success();
     }
 
     var redoFn = function() {
 	for (var i in nodes) {
             geom_doc.remove(nodes[i]);
 	}
-	command_stack.success();
+	SS.commandStack.success();
     }
 
     var cmd = new Command(doFn, undoFn, redoFn);
-    command_stack.execute(cmd);
+    SS.commandStack.execute(cmd);
 }
 
 SS.creators = {};
@@ -365,7 +365,7 @@ $('#action-import-stl').click(function() {
             });
             // No prototype for STL import
             var cmd = create_geom_command(undefined, geomNode);
-            command_stack.execute(cmd);
+            SS.commandStack.execute(cmd);
         })
     });
 })();

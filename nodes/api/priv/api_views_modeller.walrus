@@ -12,8 +12,8 @@
     <script type="text/javascript" src="/static/js/lib/Detector.js"></script>
     <script type="text/javascript" src="/static/js/lib/Three.js"></script>
     <script type="text/javascript" src="/static/js/lib/underscore-min.js"></script>
-    <script type="text/javascript" src="/static/js/lib/backbone.js"></script>
-    <script type="text/javascript" src="/static/js/lib/csg2.js"></script>
+    <script type="text/javascript" src="/static/js/lib/backbone-min.js"></script>
+    <script type="text/javascript" src="/static/js/lib/csg.js"></script>
 
     <script type="text/javascript" src="/static/js/lib/fonts/helvetiker_bold.typeface.js"></script>
     <script type="text/javascript" src="/static/js/lib/fonts/helvetiker_regular.typeface.js"></script>
@@ -22,14 +22,15 @@
     <script type="text/javascript" src="/static/js/lib/fonts/inconsolata_medium.typeface.js"></script>
     <script type="text/javascript" src="/static/js/lib/fonts/open_sans_regular.typeface.js"></script>
 
-   <script type="text/javascript">
-      var SS = SS || {};
-      SS.session = {
-        username: '{{username}}',
-        design:   '{{design}}',
-        host:     '{{host}}'
+    <script data-main="/static/js/main.js" src="/static/js/lib/require.js"></script> 
 
-      }
+    <script type="text/javascript">
+        var SS = SS || {};
+        SS.session = {
+            username: '{{username}}',
+            design:   '{{design}}',
+            host:     '{{host}}'
+        }
     </script>
   
   </head>
@@ -118,85 +119,6 @@
     </div>
     <div id="workplane"></div>
   </div>
-  
-  <script type="text/javascript" src="/static/js/src/geometry/PlaneGeometry2.js"></script>
-  <script type="text/javascript" src="/static/js/src/geometry/WedgeGeometry.js"></script>
-  <script type="text/javascript" src="/static/js/src/geometry/EllipseGeometry.js"></script>
-  <script type="text/javascript" src="/static/js/src/geometry/PipeGeometry.js"></script>
-  <script type="text/javascript" src="/static/js/src/Spinner.js"></script>
- 
-  <script type="text/javascript" src="/static/js/src/Messages.js"></script>
-  <script type="text/javascript" src="/static/js/src/Stack.js"></script>
-  <script type="text/javascript" src="/static/js/src/Command.js"></script>
-  <script type="text/javascript" src="/static/js/src/GeomNode.js"></script>
-  <script type="text/javascript" src="/static/js/src/WorkplaneNode.js"></script>
-  <script type="text/javascript" src="/static/js/src/GeomDocument.js"></script>
-  <script type="text/javascript" src="/static/js/src/schemas.js"></script>
-
-  <script type="text/javascript" src="/static/js/src/materials.js"></script>
-  <script type="text/javascript" src="/static/js/src/geomnode_rendering.js"></script>
-  <script type="text/javascript" src="/static/js/src/dom_rendering.js"></script>
-
-  <script type="text/javascript" src="/static/js/src/UIState.js"></script>
-  <script type="text/javascript" src="/static/js/src/TreeView.js"></script>
-  <script type="text/javascript" src="/static/js/src/workplane.js"></script>
-  <script type="text/javascript" src="/static/js/src/popupmenu.js"></script>
-  <script type="text/javascript" src="/static/js/src/SceneSelector.js"></script>
-  <script type="text/javascript" src="/static/js/src/SceneView.js"></script>
-  <script type="text/javascript" src="/static/js/src/GeomNodeRenderingManager.js"></script>
-
-  <script type="text/javascript" src="/static/js/src/creators/NodeModel.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/Creator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/WorkplaneView.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/WorkplaneEditor.js"></script>
-
-  <script type="text/javascript" src="/static/js/src/creators/DimensionArrowsView.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/CuboidCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/SphereCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/CylinderCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/ConeCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/WedgeCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/TorusCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/Ellipse2DCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/Rectangle2DCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/Triangle2DCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/Text2DCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/PrismCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/RevolveCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/BezierCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/Ellipse1DCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/PolylineCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/FilletCreator.js"></script>
-
-
-  <script type="text/javascript" src="/static/js/src/creators/Transformer.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/TranslateTransformer.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/ScaleTransformer.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/RotateTransformer.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/AxisMirrorTransformCreator.js"></script>
-  <script type="text/javascript" src="/static/js/src/creators/PlaneMirrorTransformCreator.js"></script>
-
-  <script type="text/javascript" src="/static/js/src/TransformerManager.js"></script> 
-  <script type="text/javascript" src="/static/js/src/utils.js"></script>  
-  <script type="text/javascript" src="/static/js/src/csgutils.js"></script>
-
-  <script type="text/javascript">
-
-    if(!Detector.webgl){
-      Detector.addGetWebGLMessage({id: 'webgl-detector'});
-    } else {
-      var container = document.getElementById('scene');
-      SS.sceneView = new SS.SceneView(container);
-      SS.sceneView.animate();
-    }
-
-  </script>
-  
-  <script type="text/javascript" src="/static/js/src/SelectionManager.js"></script>
-  <script type="text/javascript" src="/static/js/src/toolbars.js"></script>
-  <script type="text/javascript" src="/static/js/src/RestAPI.js"></script>
-  <script type="text/javascript" src="/static/js/src/main.js"></script>
-
   <script type="text/javascript">
 
     var _gaq = _gaq || [];

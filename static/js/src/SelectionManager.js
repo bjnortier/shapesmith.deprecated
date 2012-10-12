@@ -1,4 +1,6 @@
-function SelectionManager() {
+var SS = SS || {};
+
+SS.SelectionManager = function() {
 
     _.extend(this, Backbone.Events);
 

@@ -1,6 +1,6 @@
 var SS = SS || {};
 
-SS.WorkplaneEditorModel = SS.NodeEditorModel.extend({
+SS.WorkplaneEditorModel = Backbone.Model.extend({
 
     initialize: function(attributes) {
         this.node = attributes.editingNode;

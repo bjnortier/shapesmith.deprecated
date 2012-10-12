@@ -39,8 +39,8 @@ SS.TransformerManager = function() {
     }
 
     this.selected = function(selected) {
-        if (selectionManager.size() === 1) {
-            node = geom_doc.findById(selectionManager.getSelected()[0]);
+        if (SS.selectionManager.size() === 1) {
+            node = geom_doc.findById(SS.selectionManager.getSelected()[0]);
             if (!node.isEditingOrTransformEditing() 
                 &&
                 !SS.geomNodeRenderingManager.isHiddenByUser(node)) {
@@ -60,8 +60,8 @@ SS.TransformerManager = function() {
         state = STATES.UNDEFINED;
     }
 
-    selectionManager.on('selected', this.selected, this);
-    selectionManager.on('deselected', this.deselected, this);  
+    SS.selectionManager.on('selected', this.selected, this);
+    SS.selectionManager.on('deselected', this.deselected, this);  
 
-    command_stack.on('beforePop', this.clear, this);
+    SS.commandStack.on('beforePop', this.clear, this);
 }

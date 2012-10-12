@@ -11,12 +11,12 @@ SS.TransformerInitiator = Backbone.Model.extend({
 
         this.views = [];
 
-        selectionManager.on('deselected', this.deselected, this);
-        selectionManager.on('selected', this.selected, this);
+        SS.selectionManager.on('deselected', this.deselected, this);
+        SS.selectionManager.on('selected', this.selected, this);
     },
 
     selected: function(selected) {
-        if (selectionManager.size() !== 1) {
+        if (SS.selectionManager.size() !== 1) {
             this.destroy();
         }
     },
@@ -29,8 +29,8 @@ SS.TransformerInitiator = Backbone.Model.extend({
     },
 
     destroy: function(event) {
-        selectionManager.off('deselected', this.deselected);
-        selectionManager.off('selected', this.selected);
+        SS.selectionManager.off('deselected', this.deselected);
+        SS.selectionManager.off('selected', this.selected);
         this.views.map(function(view) {
             view.remove();
         });
@@ -59,7 +59,7 @@ SS.Transformer = SS.NodeModel.extend({
         ];
 
         geom_doc.on('replace', this.geomDocReplace, this);
-        command_stack.on('beforePop', this.cancel, this);
+        SS.commandStack.on('beforePop', this.cancel, this);
     },
 
     destroy: function() {
@@ -67,7 +67,7 @@ SS.Transformer = SS.NodeModel.extend({
             view.remove();
         });
         geom_doc.off('replace', this.geomDocReplace);
-        command_stack.off('beforePop', this.cancel, this);
+        SS.commandStack.off('beforePop', this.cancel, this);
     },
 
     getBoundingBox: function() {
@@ -78,7 +78,7 @@ SS.Transformer = SS.NodeModel.extend({
         var cmd =  update_geom_command(this.originalNode, 
                                        this.editingNode, 
                                        this.editingNode); 
-        command_stack.execute(cmd);
+        SS.commandStack.execute(cmd);
     },
 
     cancel: function() {
