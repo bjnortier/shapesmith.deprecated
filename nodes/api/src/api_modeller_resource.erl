@@ -117,6 +117,7 @@ appscripts(_) ->
         [{file, "src/creators/RotateTransformer.js"}],
         [{file, "src/creators/AxisMirrorTransformCreator.js"}],
         [{file, "src/creators/PlaneMirrorTransformCreator.js"}],
+        [{file, "src/geomNode/GeomNodeMV.js"}],
         [{file, "src/TransformerManager.js"}],
         [{file, "src/utils.js"}],
         [{file, "src/csgutils.js"}],

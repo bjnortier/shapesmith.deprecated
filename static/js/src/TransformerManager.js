@@ -60,8 +60,8 @@ SS.TransformerManager = function() {
         state = STATES.UNDEFINED;
     }
 
-    SS.selectionManager.on('selected', this.selected, this);
-    SS.selectionManager.on('deselected', this.deselected, this);  
+    // SS.selectionManager.on('selected', this.selected, this);
+    // SS.selectionManager.on('deselected', this.deselected, this);  
 
     SS.commandStack.on('beforePop', this.clear, this);
 }

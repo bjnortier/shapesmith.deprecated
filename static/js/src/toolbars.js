@@ -9,9 +9,9 @@ function Action(label, iconPath, fn) {
         toolbar.append(image);
 
         image.click(function(event) {
-	    var selected = SS.selectionManager.getSelected();
-	    SS.sceneView.popupMenu.disposeIfShowing();
-	    fn(selected);
+            var selected = SS.selectionManager.getSelected();
+            SS.sceneView.popupMenu.disposeIfShowing();
+            fn(selected);
             event.stopPropagation();
         });
 
@@ -24,31 +24,31 @@ function delete_geom(selected) {
         return;
     }
     var nodes = selected.map(function(id) {
-	return SS.geomDoc.findById(id);
+        return SS.geomDoc.findById(id);
     });
     delete_geom_nodes(nodes);
 }
 
 function delete_geom_nodes(nodes) {
     var doFn = function() {
-	for (var i in nodes) {
+        for (var i in nodes) {
             SS.geomDoc.remove(nodes[i]);
-	}
-	SS.commandStack.commit();
+        }
+        SS.commandStack.commit();
     }
 
     var undoFn = function() {
-	for (var i in nodes) {
+        for (var i in nodes) {
             SS.geomDoc.add(nodes[i]);
-	}
-	SS.commandStack.success();
+        }
+        SS.commandStack.success();
     }
 
     var redoFn = function() {
-	for (var i in nodes) {
+        for (var i in nodes) {
             SS.geomDoc.remove(nodes[i]);
-	}
-	SS.commandStack.success();
+        }
+        SS.commandStack.success();
     }
 
     var cmd = new Command(doFn, undoFn, redoFn);
@@ -190,59 +190,59 @@ $(document).ready(function() {
     // Edit
     var deleteAction = new Action('Delete', '/static/images/trash.png', 
                                   function(selected) { 
-		                      delete_geom(selected); 
-	                          });
+                                      delete_geom(selected); 
+                                  });
     deleteAction.render($('#edit'));
     deleteAction.render($('#boolean'));
     new Action('Copy', '/static/images/copy.png', 
                function(selected) { 
-		   copy(selected)
-	       }).render($('#edit'));
+                   copy(selected)
+               }).render($('#edit'));
 
     //
     // Primitives
     //
     new Action('Cuboid', '/static/images/cuboid.png', 
                function() { 
-		   create_primitive('cuboid');
-	       }).render($('#3Dprimitives'));
+                   create_primitive('cuboid');
+               }).render($('#3Dprimitives'));
     new Action('Sphere', '/static/images/sphere.png', 
                function() { 
                    create_primitive('sphere');
-	       }).render($('#3Dprimitives'));
+               }).render($('#3Dprimitives'));
     new Action('Cylinder', '/static/images/cylinder.png', 
                function() { 
-		   create_primitive('cylinder'); 
-	       }).render($('#3Dprimitives'));
+                   create_primitive('cylinder'); 
+               }).render($('#3Dprimitives'));
     new Action('Cone', '/static/images/cone.png', 
                function() { 
-		   create_primitive('cone');
-	       }).render($('#3Dprimitives'));
+                   create_primitive('cone');
+               }).render($('#3Dprimitives'));
     new Action('Wedge', '/static/images/wedge.png', 
                function() { 
-		   create_primitive('wedge');
-	       }).render($('#3Dprimitives'));
+                   create_primitive('wedge');
+               }).render($('#3Dprimitives'));
     new Action('Torus', '/static/images/torus.png', 
                function() { 
-		   create_primitive('torus');
-	       }).render($('#3Dprimitives'));
+                   create_primitive('torus');
+               }).render($('#3Dprimitives'));
 
     new Action('Ellipse 2D', '/static/images/ellipse2d.png', 
                function() { 
                    create_primitive('ellipse2d');
-	       }).render($('#2Dprimitives'));
+               }).render($('#2Dprimitives'));
     new Action('Rectangle 2D', '/static/images/rectangle2d.png', 
                function() { 
                    create_primitive('rectangle2d');
-	       }).render($('#2Dprimitives'));
+               }).render($('#2Dprimitives'));
     new Action('Triangle 2D', '/static/images/triangle2d.png', 
                function() { 
                    create_primitive('triangle2d');
-	       }).render($('#2Dprimitives'));
+               }).render($('#2Dprimitives'));
     new Action('Text 2D', '/static/images/text2d.png', 
                function() { 
                    create_primitive('text2d');
-	       }).render($('#2Dprimitives'));
+               }).render($('#2Dprimitives'));
 
     new Action('Ellipse 1D', '/static/images/ellipse1d.png',
                function() {
@@ -307,13 +307,13 @@ $(document).ready(function() {
     new Action('AxisMirror', '/static/images/axis_mirror.png', 
                function(selected) { 
                    var originalReplacementAndTransform = create_transform(selected, 'axis_mirror');
-		   new SS.AxisMirrorTransformCreator(originalReplacementAndTransform);
-	       }).render($('#transforms'));
+                   new SS.AxisMirrorTransformCreator(originalReplacementAndTransform);
+               }).render($('#transforms'));
     new Action('PlaneMirror', '/static/images/plane_mirror.png', 
                function(selected) { 
                    var originalReplacementAndTransform = create_transform(selected, 'plane_mirror');
-		   new SS.PlaneMirrorTransformCreator(originalReplacementAndTransform);
-	       }).render($('#transforms'));
+                   new SS.PlaneMirrorTransformCreator(originalReplacementAndTransform);
+               }).render($('#transforms'));
     
 });
 
@@ -394,19 +394,19 @@ $('#thingiverse-export input.ok').click(function() {
     $.ajax({
         type: 'POST',
         url: '/' + SS.session.username + '/' + SS.session.design + '/stl/publish/' + SS.session.commit, 
-	data: JSON.stringify({}),
-	success: function(design) { 
-	    var publicSTLUrl = SS.session.host + '/' + SS.session.username + '/' + SS.session.design + '/stl/' + SS.session.commit + '.stl';
-	    $('#public_stl_location_b64').val(window.btoa(publicSTLUrl));
-	    $('#thingiyverse-export-form').submit();
-	    $('#black-overlay').hide();
-	    $('#thingiverse-export').hide();
-	    $('#thingiverse-export input.ok').removeAttr('disabled');
-	},
-	error: function(jqXHR, textStatus, errorThrown) {
-	    alert(jqXHR.responseText);
-	    $('#thingiverse-export input.ok').removeAttr('disabled');
-	}
+        data: JSON.stringify({}),
+        success: function(design) { 
+            var publicSTLUrl = SS.session.host + '/' + SS.session.username + '/' + SS.session.design + '/stl/' + SS.session.commit + '.stl';
+            $('#public_stl_location_b64').val(window.btoa(publicSTLUrl));
+            $('#thingiyverse-export-form').submit();
+            $('#black-overlay').hide();
+            $('#thingiverse-export').hide();
+            $('#thingiverse-export input.ok').removeAttr('disabled');
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            alert(jqXHR.responseText);
+            $('#thingiverse-export input.ok').removeAttr('disabled');
+        }
     });
     return false;
 });

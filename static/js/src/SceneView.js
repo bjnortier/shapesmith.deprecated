@@ -288,18 +288,11 @@ SS.SceneView = function(container) {
 
     function onMouseUp(event) {
 
+        popupMenu.onMouseUp(event);
         that.triggerMouseUpOnSceneObjectViews(event);
 
         targetOnDown.azimuth = target.azimuth;
         targetOnDown.elevation = target.elevation;
-
-        if (SS.UI_MOUSE_STATE.isFree() && 
-            !SS.UI_EDITING_STATE.isEditing() && 
-            (event.button == 0)) {
-            selectObject(event);
-        }
-
-        popupMenu.onMouseUp(event);
 
         mouseOnDown = null;
         container.removeEventListener('mouseup', onMouseUp, false);
@@ -444,7 +437,7 @@ SS.SceneView = function(container) {
 
     var findSceneObjectViewsForEvent = function(event) {
         
-        var found = SS.selectNonGeomNodesInScene(scene.children, camera, event);
+        var found = SS.selectObjectsInScene(scene.children, camera, event);
         var objects = _.pluck(found, 'object');
 
         // Select the hightest-level THREE.Object3D objects in the scene
@@ -468,7 +461,6 @@ SS.SceneView = function(container) {
         return foundSceneObjectViews.sort(sortByPriority);
  
     }
-
 
 
     if (SS.UI_MOUSE_STATE.isFree()) {
@@ -511,9 +503,33 @@ SS.SceneView = function(container) {
     }
 
     this.triggerMouseUpOnSceneObjectViews = function(event) {
-        mouseDownSceneObjectViews.map(function(obj) {
-            obj.trigger('mouseUp', event);
-        });
+        var SelectionDetector = function() {
+            this.changed = false;
+            var detect = function() {
+                this.changed = true;
+            }
+            this.init = function() {
+                SS.selectionManager.on('selected', detect, this);
+                SS.selectionManager.on('deselected', detect, this);
+                return this;
+            }
+            this.destroy = function() {
+                SS.selectionManager.off('selected', detect, this);
+                SS.selectionManager.off('deselected', detect, this);
+                return this;
+            }
+        }
+
+        if ((event.button === 0) && SS.UI_MOUSE_STATE.isFree()) {
+            var selectionDetector = new SelectionDetector().init();
+            mouseDownSceneObjectViews.map(function(obj) {
+                obj.trigger('mouseUp', event);
+            });
+            if (!selectionDetector.changed) {
+                SS.selectionManager.deselectAll();
+            }
+            selectionDetector.destroy();
+        }
         mouseDownSceneObjectViews = [];
     }
 

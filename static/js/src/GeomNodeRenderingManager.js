@@ -3,10 +3,12 @@ var SS = SS || {};
 SS.GeomNodeRenderingManager = function() {
 
     var hiddenByUser = [];
+    var models = {};
 
     this.geomDocAdd = function(geomNode) {
         if (SS.geomDoc.isRoot(geomNode)) {
-            SS.renderGeometry(geomNode);
+            var model = new SS.GeomNodeModel({geomNode: geomNode});
+            models[geomNode.id] = model;
         }
         if (geomNode.isEditingOrTransformEditing()) {
             setOtherNonHiddenNodesTransparent(geomNode);
@@ -18,11 +20,11 @@ SS.GeomNodeRenderingManager = function() {
     }
 
     this.geomDocRemove = function(geomNode) {
-        SS.hideGeometry(geomNode);
+        models[geomNode.id].destroy();
 
-        if (geomNode.isEditingOrTransformEditing()) {
-            restoreOpacityOfNonHiddenNodes();
-        }
+        // if (geomNode.isEditingOrTransformEditing()) {
+        //     restoreOpacityOfNonHiddenNodes();
+        // }
 
         if (hiddenByUser.indexOf(geomNode.id) !== -1) {
             hiddenByUser.splice(hiddenByUser.indexOf(geomNode.id),1);
@@ -84,21 +86,23 @@ SS.GeomNodeRenderingManager = function() {
     this.deselected = function(deselected) {
         for (var i in deselected) {
             var id = deselected[i];
-            if (hiddenByUser.indexOf(id) === -1) {
-                SS.unhighlightGeometry(SS.geomDoc.findById(id))
-            }
+            models[id].deselect();
+            // if (hiddenByUser.indexOf(id) === -1) {
+            //     SS.unhighlightGeometry(SS.geomDoc.findById(id))
+            // }
         }
     }
 
     this.selected = function(selected) {
         for (var i in selected) {
             var id = selected[i];
-            var geomNode = SS.geomDoc.findById(id);
-            if (hiddenByUser.indexOf(id) === -1) {
-                SS.highlightGeometry(geomNode);
-            }
-            setOtherNonHiddenNodesTransparent(geomNode);
+            models[id].select();
         }
+        //     if (hiddenByUser.indexOf(id) === -1) {
+        //         SS.highlightGeometry(geomNode);
+        //     }
+        //     setOtherNonHiddenNodesTransparent(geomNode);
+        // }
     }
 
     this.clear = function() {

@@ -26,6 +26,7 @@ src/popupmenu.js \
 src/SceneSelector.js \
 src/SceneView.js \
 src/GeomNodeRenderingManager.js \
+src/geomNode/GeomNodeMV.js \
 src/creators/NodeModel.js \
 src/creators/Creator.js \
 src/creators/WorkplaneView.js \

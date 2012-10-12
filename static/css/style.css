@@ -264,6 +264,7 @@ img.action:hover {
 .toolbar img {
     background: transparent;
     opacity: 1.0;
+    z-index: 1;
 }
 
 #black-overlay {

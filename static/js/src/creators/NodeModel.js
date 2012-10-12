@@ -220,10 +220,11 @@ SS.InteractiveSceneView = SS.SceneObjectView.extend({
 
     initialize: function() {
         SS.SceneObjectView.prototype.initialize.call(this);
-        this.on('mouseEnter', this.enterHighlight);
-        this.on('mouseLeave', this.leaveHighlight);
-        this.on('mouseDown', this.downHighlight);
-        this.on('mouseUp', this.upHighlight);
+        this.highlightable = true;
+        this.on('mouseEnter', this.mouseEnter);
+        this.on('mouseLeave', this.mouseLeave);
+        this.on('mouseDown', this.mouseDown);
+        this.on('mouseUp', this.mouseUp);
 
         this.updateCameraScale();
         SS.sceneView.on('cameraChange', this.cameraChange, this);
@@ -232,10 +233,10 @@ SS.InteractiveSceneView = SS.SceneObjectView.extend({
     remove: function() {
         SS.SceneObjectView.prototype.remove.call(this);
         SS.sceneView.off('cameraChange', this.cameraChange, this);
-        this.off('mouseEnter', this.enterHighlight);
-        this.off('mouseLeave', this.leaveHighlight);
-        this.off('mouseDown', this.downHighlight);
-        this.off('mouseUp', this.upHighlight);
+        this.off('mouseEnter', this.mouseEnter);
+        this.off('mouseLeave', this.mouseLeave);
+        this.off('mouseDown', this.mouseDown);
+        this.off('mouseUp', this.mouseUp);
     },
 
     priority: 1,
@@ -258,31 +259,39 @@ SS.InteractiveSceneView = SS.SceneObjectView.extend({
     mouseIsDown: false,
     opacity: 0.5,
 
-    enterHighlight: function() {
-        if (this.active) {
+    mouseEnter: function() {
+        this.highlight();
+    },
+
+    mouseLeave: function() {
+        if (!this.mouseIsDown) {
+            this.unhighlight();
+        }
+    },
+
+    mouseDown: function() {
+        this.mouseIsDown = true;
+    },
+
+    mouseUp:function() {
+        this.unhighlight();
+        this.mouseIsDown = false;
+    },
+
+    highlight: function() {
+        if (this.active && this.highlightable) {
             this.recursiveHighlightFn(this.sceneObject, 1.0);
             this.highlighted = true;
             this.opacity = 1.0;
         }
     },
 
-    leaveHighlight: function() {
-        if (!this.mouseIsDown) {
-            this.upHighlight();
-        }
-    },
-
-    downHighlight: function() {
-        this.mouseIsDown = true;
-    },
-
-    upHighlight:function() {
+    unhighlight: function() {
         if (this.highlighted) {
             this.recursiveHighlightFn(this.sceneObject, 0.5);
             this.highlighted = false;
             this.opacity = 0.5;
         }
-        this.mouseIsDown = false;
     },
 
     updateCameraScale: function() {

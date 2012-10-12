@@ -5,9 +5,7 @@ if(!Detector.webgl){
     throw('no WebGL');
 }
 
-
 $(document).ready(function() {
-
     SS.geomDoc = new SS.GeomDocument();
     SS.UI_MOUSE_STATE = new SS.UIMouseState();
     SS.UI_EDITING_STATE = new SS.UIEditingState();
