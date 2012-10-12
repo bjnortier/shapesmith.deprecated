@@ -203,7 +203,7 @@ function explode(selected, type) {
 
 
 
-function boolean(selected, type) {
+function bool(selected, type) {
     var sha;
     var boolNode;
     var childNodes;

@@ -262,16 +262,16 @@ $(document).ready(function() {
     // Booleans
     //
     new Action('Union', '/static/images/union.png', 
-               function(selected) { boolean(selected, 'union'); }).render($('#boolean'));
+               function(selected) { bool(selected, 'union'); }).render($('#boolean'));
     new Action('Subtract', '/static/images/diff.png', 
-               function(selected) { boolean(selected, 'subtract'); }).render($('#boolean'));
+               function(selected) { bool(selected, 'subtract'); }).render($('#boolean'));
     new Action('Intersect', '/static/images/intersect.png', 
-               function(selected) { boolean(selected, 'intersect'); }).render($('#boolean'));
+               function(selected) { bool(selected, 'intersect'); }).render($('#boolean'));
     new Action('Explode', '/static/images/explode.png', 
            function(selected) { explode(selected, 'intersect'); }).render($('#edit'));
     new Action('Loft', '/static/images/loft.png', 
                function(selected) { 
-                   boolean(selected, 'loft'); 
+                   bool(selected, 'loft'); 
                }).render($('#boolean'));
     //
     // Modifiers
@@ -290,11 +290,11 @@ $(document).ready(function() {
                }).render($('#modifiers'));
     var createFaceAction = new Action('Create Face', '/static/images/make_face.png', 
                                       function(selected) { 
-                                          boolean(selected, 'make_face'); 
+                                          bool(selected, 'make_face'); 
                                       });
     var createSolidAction = new Action('Create Solid', '/static/images/make_solid.png', 
                                        function(selected) { 
-                                          boolean(selected, 'make_solid'); 
+                                          bool(selected, 'make_solid'); 
                                        });
     createFaceAction.render($('#modifiers'));
     createFaceAction.render($('#boolean'));

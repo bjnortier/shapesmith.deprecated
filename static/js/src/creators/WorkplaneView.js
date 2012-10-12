@@ -177,7 +177,7 @@ SS.WorkplaneDisplayModel = Backbone.Model.extend({
                 model.trigger('change');
                 if (model.domView) {
                     model.domView.remove();
-                }2
+                }
                 model.domView = new SS.WorkplaneDisplayDOMView({model: model});
                 SS.UI_EDITING_STATE.editing = false;
                 SS.commandStack.commit()
