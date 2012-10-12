@@ -41,6 +41,7 @@
                                                    ]}
                              ]}
                  ]},
+         {js_scripts_environment, development},
          {db_module, api_disk_db},
          {disk_db_dir, "db"},
          {auth_module, api_local_auth},

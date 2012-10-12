@@ -454,12 +454,6 @@ SS.commit = function() {
     });
 }
 
-/*
- * This is a pain. Chrome and Firefox have differrent behaviour for window.onpopstate().
- * Firefox will NOT generate the event when there is no session state available (e.g.
- * on a new page load). Chrome will generate and event, but Firefox will not. Hence
- * the need to $(document).ready() and the workaround variable.
- */
 
 SS.loadCommitFromStateOrParam = function(state) {
     var commit = (state && state.commit) || $.getQueryParam("commit");
@@ -473,7 +467,6 @@ SS.loadCommitFromStateOrParam = function(state) {
 window.onpopstate = function(event) { 
     SS.loadCommitFromStateOrParam(event.state);
 };
-
 
 
 SS.load_commit = function(commit) {

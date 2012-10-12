@@ -48,10 +48,12 @@ provide_content(ReqData, Context) ->
     Design = wrq:path_info(design, ReqData),
     Commit = wrq:get_qs_value("commit", ReqData),
     {ok, Host} = application:get_env(api, host),
+    {ok, ScriptsEnv} = application:get_env(api, js_scripts_environment),
     WalrusContext =  [{username, User},
 		      {design, Design},
 		      {commit, Commit},
-		      {host, Host}
+		      {host, Host},
+              {appscripts, appscripts(ScriptsEnv)}
 		     ],
 
     {ok, AuthModule} = application:get_env(api, auth_module),
@@ -59,4 +61,67 @@ provide_content(ReqData, Context) ->
 
     Rendered = api_walrus:render_template(api_views_modeller, WalrusContext1),
     {Rendered, api_resource:prevent_caching(ReqData), Context}.
+
+appscripts(production) ->
+    [
+        [{file, "shapesmith.js"}]
+    ];
+appscripts(_) ->
+    [
+        [{file, "src/geometry/PlaneGeometry2.js"}],
+        [{file, "src/geometry/WedgeGeometry.js"}],
+        [{file, "src/geometry/EllipseGeometry.js"}],
+        [{file, "src/geometry/PipeGeometry.js"}],
+        [{file, "src/Spinner.js"}],
+        [{file, "src/Messages.js"}],
+        [{file, "src/Stack.js"}],
+        [{file, "src/Command.js"}],
+        [{file, "src/GeomNode.js"}],
+        [{file, "src/WorkplaneNode.js"}],
+        [{file, "src/GeomDocument.js"}],
+        [{file, "src/schemas.js"}],
+        [{file, "src/materials.js"}],
+        [{file, "src/geomnode_rendering.js"}],
+        [{file, "src/dom_rendering.js"}],
+        [{file, "src/UIState.js"}],
+        [{file, "src/TreeView.js"}],
+        [{file, "src/workplane.js"}],
+        [{file, "src/popupmenu.js"}],
+        [{file, "src/SceneSelector.js"}],
+        [{file, "src/SceneView.js"}],
+        [{file, "src/GeomNodeRenderingManager.js"}],
+        [{file, "src/creators/NodeModel.js"}],
+        [{file, "src/creators/Creator.js"}],
+        [{file, "src/creators/WorkplaneView.js"}],
+        [{file, "src/creators/WorkplaneEditor.js"}],
+        [{file, "src/creators/DimensionArrowsView.js"}],
+        [{file, "src/creators/Transformer.js"}],
+        [{file, "src/creators/CuboidCreator.js"}],
+        [{file, "src/creators/SphereCreator.js"}],
+        [{file, "src/creators/CylinderCreator.js"}],
+        [{file, "src/creators/ConeCreator.js"}],
+        [{file, "src/creators/WedgeCreator.js"}],
+        [{file, "src/creators/TorusCreator.js"}],
+        [{file, "src/creators/Ellipse2DCreator.js"}],
+        [{file, "src/creators/Rectangle2DCreator.js"}],
+        [{file, "src/creators/Triangle2DCreator.js"}],
+        [{file, "src/creators/Text2DCreator.js"}],
+        [{file, "src/creators/PrismCreator.js"}],
+        [{file, "src/creators/RevolveCreator.js"}],
+        [{file, "src/creators/BezierCreator.js"}],
+        [{file, "src/creators/Ellipse1DCreator.js"}],
+        [{file, "src/creators/PolylineCreator.js"}],
+        [{file, "src/creators/FilletCreator.js"}],
+        [{file, "src/creators/TranslateTransformer.js"}],
+        [{file, "src/creators/ScaleTransformer.js"}],
+        [{file, "src/creators/RotateTransformer.js"}],
+        [{file, "src/creators/AxisMirrorTransformCreator.js"}],
+        [{file, "src/creators/PlaneMirrorTransformCreator.js"}],
+        [{file, "src/TransformerManager.js"}],
+        [{file, "src/utils.js"}],
+        [{file, "src/csgutils.js"}],
+        [{file, "src/SelectionManager.js"}],
+        [{file, "src/toolbars.js"}],
+        [{file, "src/RestAPI.js"}]
+    ].
 

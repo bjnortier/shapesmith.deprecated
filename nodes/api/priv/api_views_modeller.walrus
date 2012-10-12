@@ -22,8 +22,6 @@
     <script type="text/javascript" src="/static/js/lib/fonts/inconsolata_medium.typeface.js"></script>
     <script type="text/javascript" src="/static/js/lib/fonts/open_sans_regular.typeface.js"></script>
 
-    <script data-main="/static/js/main.js" src="/static/js/lib/require.js"></script> 
-
     <script type="text/javascript">
         var SS = SS || {};
         SS.session = {
@@ -32,6 +30,12 @@
             host:     '{{host}}'
         }
     </script>
+
+    {{#appscripts}}
+    <script src="/static/js/{{file}}"></script>
+    {{/appscripts}}
+    <script src="/static/js/main.js"></script> 
+
   
   </head>
 <body oncontextmenu="return false;">
