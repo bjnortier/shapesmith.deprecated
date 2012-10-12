@@ -324,7 +324,7 @@ SS.setTransparent = function(geomNode) {
 }
 
 SS.restoreOpacity = function() {
-    geom_doc.rootNodes.map(function(geomNode) {
+    SS.geomDoc.rootNodes.map(function(geomNode) {
         if (geomNode.sceneObjects) {
             for (key in geomNode.sceneObjects) {
                 geomNode.sceneObjects[key].children.map(function(child) {

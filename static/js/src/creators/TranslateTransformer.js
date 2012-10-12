@@ -30,7 +30,7 @@ SS.TranslateTransformerInitiator = SS.TransformerInitiator.extend({
         geomNode.originalSceneObjects = geomNode.sceneObjects;
 
         SS.selectionManager.deselectID(geomNode.id);
-        geom_doc.replace(geomNode, editingNode);
+        SS.geomDoc.replace(geomNode, editingNode);
 
         new SS.TranslateTransformer({originalNode: geomNode,
                                      editingNode: editingNode, 

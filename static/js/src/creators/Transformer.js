@@ -58,7 +58,7 @@ SS.Transformer = SS.NodeModel.extend({
             new SS.OkCancelView({model: this}),
         ];
 
-        geom_doc.on('replace', this.geomDocReplace, this);
+        SS.geomDoc.on('replace', this.geomDocReplace, this);
         SS.commandStack.on('beforePop', this.cancel, this);
     },
 
@@ -66,7 +66,7 @@ SS.Transformer = SS.NodeModel.extend({
         this.views.map(function(view) {
             view.remove();
         });
-        geom_doc.off('replace', this.geomDocReplace);
+        SS.geomDoc.off('replace', this.geomDocReplace);
         SS.commandStack.off('beforePop', this.cancel, this);
     },
 
@@ -83,7 +83,7 @@ SS.Transformer = SS.NodeModel.extend({
 
     cancel: function() {
         this.destroy();
-        geom_doc.replace(this.editingNode, 
+        SS.geomDoc.replace(this.editingNode, 
                          this.originalNode);
     },
 

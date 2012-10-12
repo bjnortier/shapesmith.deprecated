@@ -128,7 +128,7 @@ function renderNode(geomNode) {
     
     var childTemplate = '{{#editing}}<div id="{{id}}"><div id="editing-area"></div></div>{{/editing}}{{^editing}}<table id="{{id}}" class="geomnode-table"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img><span class="{{clazz}}">{{type}}</span><span class="node-actions">{{{copyHtml}}}}{{{deleteGeomHtml}}}{{{eyeHtml}}</span></td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>{{/editing}}';
 
-    var clazz = geom_doc.isRoot(geomNode) ? 
+    var clazz = SS.geomDoc.isRoot(geomNode) ? 
         'select-geom target-' + geomNode.id : 
         'target-' + geomNode.id;
 
@@ -137,14 +137,14 @@ function renderNode(geomNode) {
 
     var eyeTemplate = '{{#isRoot}}<img class="toggle-geom-visibility {{clazz}} opaque" src="/static/images/eye.png"/> {{/isRoot}}';
     var eyeView = {
-        isRoot: geom_doc.isRoot(geomNode),
+        isRoot: SS.geomDoc.isRoot(geomNode),
         clazz:  'target-' + geomNode.id
     };
     var eyeHtml = $.mustache(eyeTemplate, eyeView);
 
     var deleteGeomTemplate = '{{#isRoot}}<img class="delete-geom {{delete-clazz}}" src="/static/images/delete_button_gray_10.png" alt="delete"/>{{/isRoot}}';
     var deleteGeomHtml = $.mustache(deleteGeomTemplate, 
-                                    {isRoot: geom_doc.isRoot(geomNode),
+                                    {isRoot: SS.geomDoc.isRoot(geomNode),
                                      'delete-clazz': 'target-' + geomNode.id,
                                     });
 
@@ -264,9 +264,9 @@ SS.TreeView = function() {
 
             var cancelFunction = function() {
                 if (precursor) {
-                    geom_doc.replace(geomNode, precursor);
+                    SS.geomDoc.replace(geomNode, precursor);
                 } else {
-                    geom_doc.remove(geomNode);
+                    SS.geomDoc.remove(geomNode);
                 }
             }
 
@@ -346,7 +346,7 @@ SS.TreeView = function() {
             if (!id) {
                 throw Error('id for editing could not be determined');
             }
-            var geomNode = geom_doc.findById(id);
+            var geomNode = SS.geomDoc.findById(id);
             copyNode(geomNode);
         });
         
@@ -365,10 +365,10 @@ SS.TreeView = function() {
                     transformIndex = match[2];
                 }
             }
-            var geomNode = geom_doc.findById(id);
+            var geomNode = SS.geomDoc.findById(id);
             var editingNode = geomNode.editableCopy();
             editingNode.transforms[transformIndex].editing = true;
-            geom_doc.replace(geomNode, editingNode);
+            SS.geomDoc.replace(geomNode, editingNode);
 
             var transform = editingNode.transforms[transformIndex];
 
@@ -390,7 +390,7 @@ SS.TreeView = function() {
                     id = match[1];
                 }
             }
-            var geomNode = geom_doc.findById(id);
+            var geomNode = SS.geomDoc.findById(id);
             delete_geom_nodes([geomNode]);
         });
 
@@ -407,7 +407,7 @@ SS.TreeView = function() {
                     transformIndex = match[2];
                 }
             }
-            var geomNode = geom_doc.findById(id);
+            var geomNode = SS.geomDoc.findById(id);
             var editingNode = geomNode.editableCopy();
             editingNode.transforms.splice(transformIndex, 1);
             var cmd = update_geom_command(geomNode, geomNode, editingNode);
@@ -469,12 +469,12 @@ SS.TreeView = function() {
     }
 
     this.edit = function(id) {
-        var geomNode = geom_doc.findById(id);
+        var geomNode = SS.geomDoc.findById(id);
         if (SS.creators[geomNode.type]) {
             var editingNode = geomNode.editableCopy();
             editingNode.editing = true;
             SS.selectionManager.deselectAll();
-            geom_doc.replace(geomNode, editingNode);
+            SS.geomDoc.replace(geomNode, editingNode);
             new SS.creators[geomNode.type]({editingNode: editingNode, originalNode: geomNode});
         }
     }
@@ -537,9 +537,9 @@ SS.TreeView = function() {
         
     });
 
-    geom_doc.on('add', this.geomDocAdd, this);
-    geom_doc.on('remove', this.geomDocRemove, this);
-    geom_doc.on('replace', this.geomDocReplace, this);
+    SS.geomDoc.on('add', this.geomDocAdd, this);
+    SS.geomDoc.on('remove', this.geomDocRemove, this);
+    SS.geomDoc.on('replace', this.geomDocReplace, this);
 
     SS.selectionManager.on('selected', this.selected, this);
     SS.selectionManager.on('deselected', this.deselected, this);

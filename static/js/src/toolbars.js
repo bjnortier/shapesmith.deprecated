@@ -24,7 +24,7 @@ function delete_geom(selected) {
         return;
     }
     var nodes = selected.map(function(id) {
-	return geom_doc.findById(id);
+	return SS.geomDoc.findById(id);
     });
     delete_geom_nodes(nodes);
 }
@@ -32,21 +32,21 @@ function delete_geom(selected) {
 function delete_geom_nodes(nodes) {
     var doFn = function() {
 	for (var i in nodes) {
-            geom_doc.remove(nodes[i]);
+            SS.geomDoc.remove(nodes[i]);
 	}
 	SS.commandStack.commit();
     }
 
     var undoFn = function() {
 	for (var i in nodes) {
-            geom_doc.add(nodes[i]);
+            SS.geomDoc.add(nodes[i]);
 	}
 	SS.commandStack.success();
     }
 
     var redoFn = function() {
 	for (var i in nodes) {
-            geom_doc.remove(nodes[i]);
+            SS.geomDoc.remove(nodes[i]);
 	}
 	SS.commandStack.success();
     }
@@ -116,7 +116,7 @@ function create_primitive(type) {
         workplane: SS.workplaneModel.node.editableCopy(),
         parameters: geometryParams
     });
-    geom_doc.add(geomNode);
+    SS.geomDoc.add(geomNode);
     
     new SS.creators[type]({editingNode: geomNode}); 
 }
@@ -127,7 +127,7 @@ function create_modifier(selected, type) {
         return;
     }
     var id = selected[0];
-    var original = geom_doc.findById(id);
+    var original = SS.geomDoc.findById(id);
 
     var jsonSchema = SS.schemas[type];
 
@@ -143,7 +143,7 @@ function create_modifier(selected, type) {
         workplane: SS.workplaneModel.node.editableCopy(),
     }, [original]);
                                 
-    geom_doc.replace(original, parentNode);
+    SS.geomDoc.replace(original, parentNode);
 
     return {childNode: original, editingNode: parentNode};
 }
@@ -162,7 +162,7 @@ function create_transform(selected, type) {
     
     var id = selected[0];
     
-    var original = geom_doc.findById(id);
+    var original = SS.geomDoc.findById(id);
     var replacement = original.editableCopy();
     var origin = {x: 0, y: 0, z: 0};
     if (((type === 'translate') || (type === 'scale')) && (original.origin)) {
@@ -179,7 +179,7 @@ function create_transform(selected, type) {
     });
     replacement.transforms.push(transform);
     original.originalSceneObjects = original.sceneObjects;
-    geom_doc.replace(original, replacement);
+    SS.geomDoc.replace(original, replacement);
     return {originalNode: original, editingNode: replacement, transform: transform};
 }
 

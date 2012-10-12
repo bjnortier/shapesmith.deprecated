@@ -39,10 +39,10 @@ SS.WorkplaneDisplayModel = Backbone.Model.extend({
 
         SS.selectionManager.on('selected', this.selectionChanged, this);
         SS.selectionManager.on('deselected', this.selectionChanged, this);
-        geom_doc.on('add', this.updateExtents, this);
-        geom_doc.on('remove', this.updateExtents, this);
-        geom_doc.on('replace', this.updateExtents, this);
-        geom_doc.on('replace', this.geomDocReplace, this);
+        SS.geomDoc.on('add', this.updateExtents, this);
+        SS.geomDoc.on('remove', this.updateExtents, this);
+        SS.geomDoc.on('replace', this.updateExtents, this);
+        SS.geomDoc.on('replace', this.geomDocReplace, this);
     },
 
     destroy: function() {
@@ -56,10 +56,10 @@ SS.WorkplaneDisplayModel = Backbone.Model.extend({
 
         SS.selectionManager.off('selected', this.selectionChanged, this);
         SS.selectionManager.off('deselected', this.selectionChanged, this);
-        geom_doc.off('add', this.updateExtents, this);
-        geom_doc.off('remove', this.updateExtents, this);
-        geom_doc.off('replace', this.updateExtents, this);
-        geom_doc.off('replace', this.geomDocReplace, this);
+        SS.geomDoc.off('add', this.updateExtents, this);
+        SS.geomDoc.off('remove', this.updateExtents, this);
+        SS.geomDoc.off('replace', this.updateExtents, this);
+        SS.geomDoc.off('replace', this.geomDocReplace, this);
     },
 
     addRulers: function() {
@@ -107,7 +107,7 @@ SS.WorkplaneDisplayModel = Backbone.Model.extend({
         }
         var selected = SS.selectionManager.getSelected();
         if (selected.length == 1) {
-            this.pushNode(geom_doc.findById(selected[0]));
+            this.pushNode(SS.geomDoc.findById(selected[0]));
         } 
     },
 
@@ -121,7 +121,7 @@ SS.WorkplaneDisplayModel = Backbone.Model.extend({
 
     updateExtents: function() {
         var boundingBox = {min: new THREE.Vector3(), max: new THREE.Vector3()};
-        geom_doc.rootNodes.map(function(rootNode) {
+        SS.geomDoc.rootNodes.map(function(rootNode) {
             var box = SS.normalizedBoundingBoxForGeomNode(rootNode);
                 if (box) {
                 boundingBox.min = new THREE.Vector3(

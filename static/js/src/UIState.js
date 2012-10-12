@@ -59,12 +59,9 @@ SS.UIEditingState = function() {
         }
     }
 
-    geom_doc.on('add', this.geomDocAdd, this);
-    geom_doc.on('remove', this.geomDocRemove, this);
-    geom_doc.on('replace', this.geomDocReplace, this);
+    SS.geomDoc.on('add', this.geomDocAdd, this);
+    SS.geomDoc.on('remove', this.geomDocRemove, this);
+    SS.geomDoc.on('replace', this.geomDocReplace, this);
     
 }
 
-var geom_doc = new GeomDocument();
-SS.UI_MOUSE_STATE = new SS.UIMouseState();
-SS.UI_EDITING_STATE = new SS.UIEditingState();

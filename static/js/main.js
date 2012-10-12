@@ -7,6 +7,11 @@ if(!Detector.webgl){
 
 
 $(document).ready(function() {
+
+    SS.geomDoc = new SS.GeomDocument();
+    SS.UI_MOUSE_STATE = new SS.UIMouseState();
+    SS.UI_EDITING_STATE = new SS.UIEditingState();
+
     var container = document.getElementById('scene');
     SS.sceneView = new SS.SceneView(container);
     SS.sceneView.animate();
@@ -23,9 +28,9 @@ $(document).ready(function() {
         var setUpdateScene = function() {
             SS.sceneView.updateScene = true;
         };
-        geom_doc.on('add', setUpdateScene);
-        geom_doc.on('remove', setUpdateScene);
-        geom_doc.on('replace', setUpdateScene);
+        SS.geomDoc.on('add', setUpdateScene);
+        SS.geomDoc.on('remove', setUpdateScene);
+        SS.geomDoc.on('replace', setUpdateScene);
     })();
 
     SS.workplaneModel = new SS.WorkplaneDisplayModel();

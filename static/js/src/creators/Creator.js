@@ -14,8 +14,8 @@ SS.Creator = SS.NodeModel.extend({
             this.views.push(new SS.OriginDimensionText({model: this}));
         }
         
-        geom_doc.on('replace', this.geomDocReplace, this);
-        geom_doc.on('remove', this.geomDocRemove, this);
+        SS.geomDoc.on('replace', this.geomDocReplace, this);
+        SS.geomDoc.on('remove', this.geomDocRemove, this);
     },
 
     destroy: function() {
@@ -25,8 +25,8 @@ SS.Creator = SS.NodeModel.extend({
         this.views.map(function(view) {
             view.remove();
         });
-        geom_doc.off('replace', this.geomDocReplace);
-        geom_doc.off('remove', this.geomDocRemove);
+        SS.geomDoc.off('replace', this.geomDocReplace);
+        SS.geomDoc.off('remove', this.geomDocRemove);
     },
 
     updateFromDOMView: function() {
@@ -96,9 +96,9 @@ SS.PrimitiveCreator = SS.Creator.extend({
     cancel: function() {
         this.destroy();
         if (this.originalNode) {
-            geom_doc.replace(this.editingNode, this.originalNode);
+            SS.geomDoc.replace(this.editingNode, this.originalNode);
         } else {
-            geom_doc.remove(this.editingNode); 
+            SS.geomDoc.remove(this.editingNode); 
         }
     },
 
@@ -131,9 +131,9 @@ SS.ParentCreator = SS.Creator.extend({
     cancel: function() {
         this.destroy();
         if (this.originalNode) {
-            geom_doc.replace(this.editingNode, this.originalNode);
+            SS.geomDoc.replace(this.editingNode, this.originalNode);
         } else {
-            geom_doc.replace(this.editingNode, this.childNode); 
+            SS.geomDoc.replace(this.editingNode, this.childNode); 
         }
     },
 });
@@ -156,7 +156,7 @@ SS.TransformCreator = SS.Creator.extend({
 
     cancel: function() {
         this.destroy();
-        geom_doc.replace(this.editingNode, this.originalNode); 
+        SS.geomDoc.replace(this.editingNode, this.originalNode); 
     },
 });
 

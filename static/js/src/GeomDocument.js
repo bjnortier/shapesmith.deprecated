@@ -1,5 +1,6 @@
+var SS = SS || {};
 
-function GeomDocument() {
+SS.GeomDocument = function() {
 
     _.extend(this, Backbone.Events);
 

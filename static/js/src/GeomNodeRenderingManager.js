@@ -5,7 +5,7 @@ SS.GeomNodeRenderingManager = function() {
     var hiddenByUser = [];
 
     this.geomDocAdd = function(geomNode) {
-        if (geom_doc.isRoot(geomNode)) {
+        if (SS.geomDoc.isRoot(geomNode)) {
             SS.renderGeometry(geomNode);
         }
         if (geomNode.isEditingOrTransformEditing()) {
@@ -48,7 +48,7 @@ SS.GeomNodeRenderingManager = function() {
     }
 
     var restoreOpacityOfNonHiddenNodes = function() {
-        geom_doc.rootNodes.map(function(geomNode) {
+        SS.geomDoc.rootNodes.map(function(geomNode) {
             if (hiddenByUser.indexOf(geomNode.id) === -1) {
                 SS.restoreOpacity(geomNode);
             }
@@ -56,7 +56,7 @@ SS.GeomNodeRenderingManager = function() {
     }
 
     var setOtherNonHiddenNodesTransparent = function(geomNode) {
-        geom_doc.rootNodes.map(function(rootNode) {
+        SS.geomDoc.rootNodes.map(function(rootNode) {
             if (geomNode) {
                 if ((geomNode.id !== rootNode.id)
                     && (hiddenByUser.indexOf(geomNode.id) === -1)) {
@@ -85,7 +85,7 @@ SS.GeomNodeRenderingManager = function() {
         for (var i in deselected) {
             var id = deselected[i];
             if (hiddenByUser.indexOf(id) === -1) {
-                SS.unhighlightGeometry(geom_doc.findById(id))
+                SS.unhighlightGeometry(SS.geomDoc.findById(id))
             }
         }
     }
@@ -93,7 +93,7 @@ SS.GeomNodeRenderingManager = function() {
     this.selected = function(selected) {
         for (var i in selected) {
             var id = selected[i];
-            var geomNode = geom_doc.findById(id);
+            var geomNode = SS.geomDoc.findById(id);
             if (hiddenByUser.indexOf(id) === -1) {
                 SS.highlightGeometry(geomNode);
             }
@@ -107,19 +107,19 @@ SS.GeomNodeRenderingManager = function() {
 
     this.setOpaque = function(id) {
         hiddenByUser.splice(hiddenByUser.indexOf(id), 1);
-        SS.renderGeometry(geom_doc.findById(id));
+        SS.renderGeometry(SS.geomDoc.findById(id));
     }
 
     this.setHidden = function(id) {
         hiddenByUser.push(id);
-        SS.hideGeometry(geom_doc.findById(id));
+        SS.hideGeometry(SS.geomDoc.findById(id));
     }
     
-    geom_doc.on('add', this.geomDocAdd, this);
-    geom_doc.on('beforeRemove', this.geomDocBeforeRemove, this);
-    geom_doc.on('remove', this.geomDocRemove, this);
-    geom_doc.on('beforeReplace', this.geomDocBeforeReplace, this);  
-    geom_doc.on('replace', this.geomDocReplace, this);  
+    SS.geomDoc.on('add', this.geomDocAdd, this);
+    SS.geomDoc.on('beforeRemove', this.geomDocBeforeRemove, this);
+    SS.geomDoc.on('remove', this.geomDocRemove, this);
+    SS.geomDoc.on('beforeReplace', this.geomDocBeforeReplace, this);  
+    SS.geomDoc.on('replace', this.geomDocReplace, this);  
 
     SS.UI_EDITING_STATE.on('change', uiStateChanged, this);
 

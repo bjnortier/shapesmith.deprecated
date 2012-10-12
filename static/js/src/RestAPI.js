@@ -53,9 +53,9 @@ function update_geom_command(originalNode, nodeInDoc, replacement) {
                         // was edited, that one is to be replaced, not the original
                         // node
                         if (index == 0) {
-                            geom_doc.replace(nodeInDoc, nextTo);
+                            SS.geomDoc.replace(nodeInDoc, nextTo);
                         } else {
-                            geom_doc.replace(nextFrom, nextTo);
+                            SS.geomDoc.replace(nextFrom, nextTo);
                         }
                         SS.commandStack.commit();
                     }
@@ -68,7 +68,7 @@ function update_geom_command(originalNode, nodeInDoc, replacement) {
     }
 
     // toNode is the preview node so will be in the geom doc
-    var fromAncestors = geom_doc.ancestors(nodeInDoc);
+    var fromAncestors = SS.geomDoc.ancestors(nodeInDoc);
     var toAncestors = fromAncestors.map(function(ancestor) {
         return ancestor.editableCopy();
     });
@@ -80,11 +80,11 @@ function update_geom_command(originalNode, nodeInDoc, replacement) {
         chainedPostFn(0, fromChain, toChain);
     };
     var undoFn = function() {
-        geom_doc.replace(toChain[toChain.length - 1], fromChain[fromChain.length - 1]);
+        SS.geomDoc.replace(toChain[toChain.length - 1], fromChain[fromChain.length - 1]);
         SS.commandStack.success();
     };
     var redoFn = function() {
-        geom_doc.replace(fromChain[toChain.length - 1], toChain[fromChain.length - 1]);
+        SS.geomDoc.replace(fromChain[toChain.length - 1], toChain[fromChain.length - 1]);
         SS.commandStack.success();
     }
 
@@ -107,9 +107,9 @@ function create_geom_command(prototype, geometry) {
                 geomNode.mesh = result.mesh;
 
                 if (prototype) {
-                    geom_doc.replace(prototype, geomNode);
+                    SS.geomDoc.replace(prototype, geomNode);
                 } else {
-                    geom_doc.add(geomNode);
+                    SS.geomDoc.add(geomNode);
                 }
                 SS.commandStack.commit();
             },
@@ -119,11 +119,11 @@ function create_geom_command(prototype, geometry) {
         });
     };
     var undoFn = function() {
-        geom_doc.remove(geomNode);
+        SS.geomDoc.remove(geomNode);
         SS.commandStack.success();
     }
     var redoFn = function() {
-        geom_doc.add(geomNode);
+        SS.geomDoc.add(geomNode);
         SS.commandStack.success();
     }
     return new Command(doFn, undoFn, redoFn);
@@ -135,7 +135,7 @@ function explode(selected, type) {
         return;
     }
 
-    var boolNode = geom_doc.findById(selected[0]);
+    var boolNode = SS.geomDoc.findById(selected[0]);
     var childNodes = boolNode.children;
 
 
@@ -150,9 +150,9 @@ function explode(selected, type) {
         });
 
         var replaceInGeomDoc = function() {
-            geom_doc.remove(boolNode);
+            SS.geomDoc.remove(boolNode);
             childNodes.map(function(childNode) {
-                geom_doc.add(childNode);
+                SS.geomDoc.add(childNode);
             });
             SS.commandStack.commit();
         };
@@ -183,16 +183,16 @@ function explode(selected, type) {
 
     var undoFn = function() {
         childNodes.map(function(child) {
-            geom_doc.remove(child);
+            SS.geomDoc.remove(child);
         });
-        geom_doc.add(boolNode);
+        SS.geomDoc.add(boolNode);
         SS.commandStack.success();
     }
 
     var redoFn = function() {
-        geom_doc.remove(boolNode);
+        SS.geomDoc.remove(boolNode);
         childNodes.reverse().map(function(child) {
-            geom_doc.add(child);
+            SS.geomDoc.add(child);
         });
         SS.commandStack.success();
     }
@@ -228,15 +228,15 @@ function bool(selected, type) {
                     geometry.sha = sha;
 
                     childNodes = selected.map(function(id) {
-                        var node = geom_doc.findById(id);
-                        geom_doc.remove(node);
+                        var node = SS.geomDoc.findById(id);
+                        SS.geomDoc.remove(node);
                         return node;
                     });
 
                     boolNode = new GeomNode(geometry, childNodes);
                     boolNode.mesh = result.mesh;
 
-                    geom_doc.add(boolNode);
+                    SS.geomDoc.add(boolNode);
                     SS.commandStack.commit();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
@@ -246,18 +246,18 @@ function bool(selected, type) {
         };
 
     var undoFn = function() {
-        geom_doc.remove(boolNode);
+        SS.geomDoc.remove(boolNode);
         childNodes.reverse().map(function(child) {
-            geom_doc.add(child);
+            SS.geomDoc.add(child);
         });
         SS.commandStack.success();
     }
 
     var redoFn = function() {
         childNodes.map(function(child) {
-            geom_doc.remove(child);
+            SS.geomDoc.remove(child);
         });
-        geom_doc.add(boolNode);
+        SS.geomDoc.add(boolNode);
         SS.commandStack.success();
     }
 
@@ -271,7 +271,7 @@ function copy(selected) {
         return;
     }
     var id = selected[0];
-    var node = geom_doc.findById(id);
+    var node = SS.geomDoc.findById(id);
     copyNode(node);
 }
 
@@ -328,7 +328,7 @@ function importJSON(json) {
             geometries.map(function(sha) {
                 var geomNode = geomNodes[sha];
                 rootNodes.push(geomNode);
-                geom_doc.add(geomNode);
+                SS.geomDoc.add(geomNode);
             });
             SS.commandStack.commit();
         }
@@ -342,13 +342,13 @@ function importJSON(json) {
 
     var undoFn = function() {
         rootNodes.map(function(node) {
-            geom_doc.remove(node);
+            SS.geomDoc.remove(node);
         });
         SS.commandStack.success();
     };
     var redoFn = function() {
         rootNodes.map(function(node) {
-            geom_doc.add(node);
+            SS.geomDoc.add(node);
         });
         SS.commandStack.success();
     }
@@ -372,7 +372,7 @@ function copyNode(node) {
         newNode = copyWithChildren(node);
 
         if (newNode.mesh) {
-            geom_doc.add(newNode);
+            SS.geomDoc.add(newNode);
             SS.commandStack.commit();
         } else {
             $.ajax({
@@ -380,7 +380,7 @@ function copyNode(node) {
                 url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + newNode.sha,
                 success: function(mesh) {
                     newNode.mesh = mesh;
-                    geom_doc.add(newNode);
+                    SS.geomDoc.add(newNode);
                     SS.commandStack.commit();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
@@ -391,11 +391,11 @@ function copyNode(node) {
 
     };
     var undoFn = function() {
-        geom_doc.remove(newNode);
+        SS.geomDoc.remove(newNode);
         SS.commandStack.success();
     }
     var redoFn = function() {
-        geom_doc.add(newNode);
+        SS.geomDoc.add(newNode);
         SS.commandStack.success();
     }
 
@@ -426,7 +426,7 @@ SS.save = function() {
 }
 
 SS.commit = function() {
-    var rootSHAs = geom_doc.rootNodes.filter(function(x) {
+    var rootSHAs = SS.geomDoc.rootNodes.filter(function(x) {
         return !x.editing;
     }).map(function(x) {
         return x.sha;
@@ -470,7 +470,7 @@ window.onpopstate = function(event) {
 
 
 SS.load_commit = function(commit) {
-    geom_doc.removeAll();
+    SS.geomDoc.removeAll();
     SS.session.commit = commit;
     console.log('Load commit: ' + commit);
     SS.spinner.show();
@@ -516,7 +516,7 @@ SS.load_geom = function(sha) {
                 url: '/' + SS.session.username + '/' + SS.session.design + '/mesh/' + sha,
                 success: function(mesh) {
                     newNode.mesh = mesh;
-                    geom_doc.add(newNode);
+                    SS.geomDoc.add(newNode);
                     SS.spinner.hide();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
