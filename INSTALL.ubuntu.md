@@ -18,3 +18,25 @@ For older version, you can install JSON Spirit from source:
     $ cmake ..
     $ make
     $ sudo make install
+
+## Ubuntu 12.x specific notes
+
+The google test libraries, 'gtest', no longer install the binaries by default.
+
+So, if you receive the following error when building, then you need to compile the gtest libraries locally.
+
+    CMake Error at
+    /usr/share/cmake-2.8/Modules/FindPackageHandleStandardArgs.cmake:91
+    (MESSAGE):
+        Could NOT find GTest (missing: GTEST_LIBRARY GTEST_MAIN_LIBRARY) 
+
+This thread describes the issue: 
+
+    http://askubuntu.com/questions/145887/why-no-library-files-installed-for-google-test-on-12-04
+
+gtest build instructions:
+
+    cd /usr/src/gtest
+    sudo cmake .
+    sudo make
+    sudo mv libg* /usr/lib/
