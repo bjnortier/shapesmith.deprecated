@@ -92,7 +92,7 @@ SS.SceneView = function(container) {
 
         document.addEventListener('mouseup', onMouseUp, false);
 
-        SS.UI_MOUSE_STATE.free();
+        SS.mouseState.free();
 
         var mouseOverActiveObjects = mouseOverSceneObjectViews.filter(function(object) {
             return object.active;
@@ -119,7 +119,7 @@ SS.SceneView = function(container) {
             var panRotateThreshold = 10;
             var transformerThreshold = 5;
             
-            if (SS.UI_MOUSE_STATE.isFree() && (!mouseDownOnActiveSceneObject)) {
+            if (SS.mouseState.isFree() && (!mouseDownOnActiveSceneObject)) {
                 
                 var overPanRotateThreshold = ((Math.abs(event.clientX - mouseOnDown.x) > panRotateThreshold)
                                               ||
@@ -131,17 +131,17 @@ SS.SceneView = function(container) {
                         (mouseDownButton === 0) &&
                         !mouseDownOnActiveSceneObject) {
                         
-                        SS.UI_MOUSE_STATE.rotating = true;
+                        SS.mouseState.rotating = true;
                     } 
                     if (((event.button === 1) && (mouseDownButton === 1)) 
                         || 
                         ((event.button === 0) && (mouseDownButton === 0) && (event.shiftKey)))  {
-                        SS.UI_MOUSE_STATE.panning = true;
+                        SS.mouseState.panning = true;
                     }
                 }
             }
 
-            if (SS.UI_MOUSE_STATE.rotating) {
+            if (SS.mouseState.rotating) {
                 
                 var zoomDamp = Math.sqrt(distance)/10;
 
@@ -151,7 +151,7 @@ SS.SceneView = function(container) {
                 target.elevation = target.elevation > Math.PI ? Math.PI : target.elevation;
                 target.elevation = target.elevation < 0 ? 0 : target.elevation;
 
-            } else if (SS.UI_MOUSE_STATE.panning) {
+            } else if (SS.mouseState.panning) {
                 
                 var dMouse = {x: mouse.x - lastMousePos.x,
                               y: mouse.y - lastMousePos.y};
@@ -267,27 +267,7 @@ SS.SceneView = function(container) {
 
     }
 
-    function selectObject(event) {
-
-        
-        var found = SS.selectGeomNodesInScene(scene.children.concat(selectionOnlyMeshes), camera, event);
-        var foundGeomNodes = found.filter(function(obj) {
-            return obj.object.name.geomNodeId;
-        });
-
-        if (foundGeomNodes.length > 0) {
-            if (event.ctrlKey || event.metaKey) {
-                SS.selectionManager.shiftPick(foundGeomNodes[0].object.name.geomNodeId);
-            } else if (!event.shiftKey) {
-                SS.selectionManager.pick(foundGeomNodes[0].object.name.geomNodeId);
-            }
-        } else {
-            SS.selectionManager.deselectAll();
-        }
-    }
-
     function onMouseUp(event) {
-
         popupMenu.onMouseUp(event);
         that.triggerMouseUpOnSceneObjectViews(event);
 
@@ -436,21 +416,30 @@ SS.SceneView = function(container) {
     }
 
     var findSceneObjectViewsForEvent = function(event) {
-        
-        var found = SS.selectObjectsInScene(scene.children, camera, event);
+        var visibleSceneObjects = _.pluck(sceneObjectViews, 'sceneObject')
+        var hiddenSceneObjects = _.pluck(sceneObjectViews, 'hiddenSceneObject')
+        var found = SS.selectObjectsInScene(visibleSceneObjects.concat(hiddenSceneObjects), camera, event);
         var objects = _.pluck(found, 'object');
 
         // Select the hightest-level THREE.Object3D objects in the scene
+        // Visible objects will have the scene as parent, hidden selection meshes
+        // will terminate in an undefined parent
         var getRoot = function(object) {
-            return object.parent.constructor === THREE.Scene ? 
-                object : 
-                getRoot(object.parent);
+            if (object.parent) {
+                return object.parent.constructor === THREE.Scene ? 
+                    object : 
+                    getRoot(object.parent);
+            } else {
+                return object;
+            }
         }
 
         var foundSceneObjectViews = [];
         objects.map(getRoot).map(function(object) {
             sceneObjectViews.map(function(sceneObjectView) {
-                if (getRoot(object) === sceneObjectView.sceneObject) {
+                var root = getRoot(object);
+                if ((root === sceneObjectView.sceneObject) ||
+                    (root === sceneObjectView.hiddenSceneObject)) {
                     if (foundSceneObjectViews.indexOf(sceneObjectView) === -1) {
                         foundSceneObjectViews.push(sceneObjectView);
                     }
@@ -463,7 +452,7 @@ SS.SceneView = function(container) {
     }
 
 
-    if (SS.UI_MOUSE_STATE.isFree()) {
+    if (SS.mouseState.isFree()) {
         this.triggerMouseOverSceneObjectViews = function(event) {
             var previousOverObjects = mouseOverSceneObjectViews.slice(0);
             var leaveObjects = mouseOverSceneObjectViews.slice(0);
@@ -520,7 +509,7 @@ SS.SceneView = function(container) {
             }
         }
 
-        if ((event.button === 0) && SS.UI_MOUSE_STATE.isFree()) {
+        if ((event.button === 0) && SS.mouseState.isFree()) {
             var selectionDetector = new SelectionDetector().init();
             mouseDownSceneObjectViews.map(function(obj) {
                 obj.trigger('mouseUp', event);

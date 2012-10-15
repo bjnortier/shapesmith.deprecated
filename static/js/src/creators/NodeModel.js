@@ -169,6 +169,7 @@ SS.SceneObjectView = Backbone.View.extend({
     clear: function() {
         SS.sceneView.scene.remove(this.sceneObject);
         this.sceneObject = new THREE.Object3D(); 
+        this.hiddenSceneObject = new THREE.Object3D(); 
     },
 
     postRender: function() {
@@ -221,6 +222,10 @@ SS.InteractiveSceneView = SS.SceneObjectView.extend({
     initialize: function() {
         SS.SceneObjectView.prototype.initialize.call(this);
         this.highlightable = true;
+        this.active = true;
+        this.priority = 1;
+        this.cameraScale = 1;
+
         this.on('mouseEnter', this.mouseEnter);
         this.on('mouseLeave', this.mouseLeave);
         this.on('mouseDown', this.mouseDown);
@@ -238,10 +243,6 @@ SS.InteractiveSceneView = SS.SceneObjectView.extend({
         this.off('mouseDown', this.mouseDown);
         this.off('mouseUp', this.mouseUp);
     },
-
-    priority: 1,
-    active: true,
-    cameraScale: 1,
 
     recursiveHighlightFn:  function(object, opacity) {
         var functor = function(object) {

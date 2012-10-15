@@ -24,12 +24,12 @@ SS.popupMenu = function() {
 
     var show = function() {
         $('#toolWheel').show();
-        SS.UI_MOUSE_STATE.popupShowing = true;
+        SS.mouseState.popupShowing = true;
     }
     
     var showIfFree = function(event) {
-        if (SS.UI_MOUSE_STATE.isFree() &&
-            !SS.UI_EDITING_STATE.isEditing()) {
+        if (SS.mouseState.isFree() &&
+            !SS.editingState.isEditing()) {
             updateToolWheelPosition(event);
             addActions();
             show();
@@ -37,12 +37,12 @@ SS.popupMenu = function() {
     }
 
     that.disposeIfShowing = function() {
-        if (SS.UI_MOUSE_STATE.popupShowing) {
+        if (SS.mouseState.popupShowing) {
             $('#toolWheel').hide();
             var toolbars = $('#toolWheel').children().detach();
             $('#toolbarStaging').append(toolbars);
         }
-        SS.UI_MOUSE_STATE.popupShowing = false;
+        SS.mouseState.popupShowing = false;
     }
 
     that.onMouseUp = function(event) {
@@ -50,9 +50,7 @@ SS.popupMenu = function() {
             ||
             ((event.button == 0) && event.shiftKey)) {
             showIfFree(event);
-        } else {
-            SS.UI_MOUSE_STATE.free();
-        }
+        } 
     }
 
     that.onMouseDown = function(event) {

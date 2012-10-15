@@ -30,7 +30,7 @@ SS.workplane.pointer = function(spec) {
     var pointer;
     
     that.update = function(position) {	
-        if (!SS.UI_EDITING_STATE.isEditing()) {
+        if (!SS.editingState.isEditing()) {
             if (!pointer) {
                 pointer = new THREE.Mesh(pointerGeometry, pointerMaterial); 
             }

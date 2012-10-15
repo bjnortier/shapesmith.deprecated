@@ -162,7 +162,7 @@ SS.WorkplaneDisplayModel = Backbone.Model.extend({
 
     cancelEditing: function() {
         this.domView = new SS.WorkplaneDisplayDOMView({model: this});
-        SS.UI_EDITING_STATE.editing = false;
+        SS.editingState.editing = false;
     },
 
     setNewNode: function(newNode) {
@@ -179,7 +179,7 @@ SS.WorkplaneDisplayModel = Backbone.Model.extend({
                     model.domView.remove();
                 }
                 model.domView = new SS.WorkplaneDisplayDOMView({model: model});
-                SS.UI_EDITING_STATE.editing = false;
+                SS.editingState.editing = false;
                 SS.commandStack.commit()
             }
 
@@ -222,8 +222,8 @@ SS.WorkplaneDisplayDOMView = SS.NodeDisplayDOMView.extend({
     },
 
     edit: function() {
-        if (!SS.UI_EDITING_STATE.isEditing()) {
-            SS.UI_EDITING_STATE.editing = true;
+        if (!SS.editingState.isEditing()) {
+            SS.editingState.editing = true;
             this.model.setEditing();
         }
     },
@@ -327,7 +327,7 @@ SS.WorkplanePointerView = SS.WorkplaneDisplaySceneView.extend({
 
     render: function() {
         this.clear();
-        if (!SS.UI_EDITING_STATE.isEditing()) {
+        if (!SS.editingState.isEditing()) {
             var pointerMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00, opacity: 0.7, wireframe: false } );
             var pointerGeometry = new THREE.CubeGeometry(0.5, 0.5, 0.5);
             this.pointer = new THREE.Mesh(pointerGeometry, pointerMaterial); 
@@ -348,18 +348,18 @@ SS.WorkplanePointerDimensionText = SS.DimensionText.extend({
     initialize: function() {
         SS.DimensionText.prototype.initialize.call(this);
         this.model.on('pointerUpdated', this.render, this);
-        SS.UI_EDITING_STATE.on('change', this.render, this);
+        SS.editingState.on('change', this.render, this);
     },
 
     remove: function() {
         SS.DimensionText.prototype.remove.call(this);
         this.model.on('pointerUpdated', this.render, this);
-        SS.UI_EDITING_STATE.off('change', this.render, this);
+        SS.editingState.off('change', this.render, this);
     },
 
     render: function() {
         this.clear();
-        if (this.model.pointerPosition && !SS.UI_EDITING_STATE.isEditing()) {
+        if (this.model.pointerPosition && !SS.editingState.isEditing()) {
             var origin = this.model.pointerPosition;
 
             if (origin.x || origin.y) {
@@ -392,7 +392,7 @@ SS.WorkplanePointerDimensionText = SS.DimensionText.extend({
                     -30,
                     10);
             } 
-            if (!this.model.pointerPosition || SS.UI_EDITING_STATE.isEditing()) {
+            if (!this.model.pointerPosition || SS.editingState.isEditing()) {
                 this.$xyz.hide();
             } 
         } 

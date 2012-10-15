@@ -7,15 +7,15 @@ if(!Detector.webgl){
 
 $(document).ready(function() {
     SS.geomDoc = new SS.GeomDocument();
-    SS.UI_MOUSE_STATE = new SS.UIMouseState();
-    SS.UI_EDITING_STATE = new SS.UIEditingState();
+    SS.mouseState = new SS.MouseState();
+    SS.editingState = new SS.EditingState();
 
     var container = document.getElementById('scene');
     SS.sceneView = new SS.SceneView(container);
     SS.sceneView.animate();
 
-    SS.selectionManager = new SS.SelectionManager();
     SS.commandStack = new SS.CommandStack();
+    SS.selectionManager = new SS.SelectionManager();
 
     SS.treeView = new SS.TreeView();
 

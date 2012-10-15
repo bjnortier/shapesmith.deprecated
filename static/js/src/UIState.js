@@ -1,6 +1,6 @@
 var SS = SS || {};
 
-SS.UIMouseState = function() {
+SS.MouseState = function() {
 
     this.rotating = false;
     this.panning = false;
@@ -17,7 +17,7 @@ SS.UIMouseState = function() {
 
 }
 
-SS.UIEditingState = function() {
+SS.EditingState = function() {
 
     _.extend(this, Backbone.Events);
 

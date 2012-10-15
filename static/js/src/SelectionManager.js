@@ -72,6 +72,7 @@ SS.SelectionManager = function() {
         }
     }
 
+    SS.commandStack.on('beforePop', this.deselectAll, this);
     
 }
 
