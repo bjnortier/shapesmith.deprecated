@@ -47,14 +47,16 @@ describe('Run Selenium tests', function() {
     });
 
     it('can sign up a user', function(done) {
+        this.timeout(5000);
+        var username = 'test_' + Math.random().toString(36);
         client.url('http://session.shapesmith.net:8002/ui/signup', function() {
             client
                 .hasText('body', 'Create an account in one easy step.')  
-                .setValue('#username', 'somedude')
+                .setValue('#username', username)
                 .setValue('#password1', '123')
                 .setValue('#password2', '123')
                 .click('#signup-button', function() {
-                    client.at('http://session.shapesmith.net:8002/somedude/designs', done);
+                    client.at('http://session.shapesmith.net:8002/' + username + '/designs', done);
                 });
         });
     });
