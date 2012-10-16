@@ -1,12 +1,10 @@
 erl_crash.dump
 ebin/*.beam
 ebin/*.app
-db/*
 deps/
 priv/log/
-log/
 logs/
-test_db/
-test/*.beam
+test/node_modules
+test/selenium-server-standalone-2.25.0.jar
 .eunit/
 

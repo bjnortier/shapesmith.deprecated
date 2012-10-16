@@ -18,7 +18,7 @@
 -module(ui_home_redirect_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([init/1, 
-	 to_html/2]).
+         to_html/2]).
 -include_lib("webmachine/include/webmachine.hrl").
 
 init([]) -> {ok, undefined}.
@@ -26,10 +26,10 @@ init([]) -> {ok, undefined}.
 to_html(ReqData, Context) ->
     {ok, AuthModule} = application:get_env(api, auth_module),
     case AuthModule:session_username(ReqData) of
-	undefined ->
-	    {ok, Host} = application:get_env(api, host),
-	    Location = Host ++ "/ui/signin",
-	    {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context};
-	_Username ->
-	    api_resource:redirect_to_designs_if_username_known(ReqData, Context)
+        undefined ->
+            {ok, Host} = application:get_env(api, host),
+            Location = Host ++ "/ui/signin",
+            {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context};
+        _Username ->
+            ui_resource:redirect_to_designs_if_username_known(ReqData, Context)
     end.
