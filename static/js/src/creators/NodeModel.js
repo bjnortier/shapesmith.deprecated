@@ -156,6 +156,7 @@ SS.SceneObjectView = Backbone.View.extend({
     
     initialize: function() {
         this.sceneObject = new THREE.Object3D(); 
+        this.hiddenSceneObject = new THREE.Object3D();
         SS.sceneView.registerSceneObjectView(this);
         this.model.on('change', this.render, this);
     },
@@ -220,11 +221,11 @@ SS.SceneObjectView = Backbone.View.extend({
 SS.InteractiveSceneView = SS.SceneObjectView.extend({
 
     initialize: function() {
-        SS.SceneObjectView.prototype.initialize.call(this);
         this.highlightable = true;
         this.active = true;
         this.priority = 1;
         this.cameraScale = 1;
+        SS.SceneObjectView.prototype.initialize.call(this);
 
         this.on('mouseEnter', this.mouseEnter);
         this.on('mouseLeave', this.mouseLeave);

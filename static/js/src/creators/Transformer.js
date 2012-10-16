@@ -1,44 +1,6 @@
 var SS = SS || {};
 
 
-SS.TransformerInitiator = Backbone.Model.extend({
-    
-    initialize: function(attributes) {
-        this.originalNode = attributes.geomNode;
-        this.normalizedBoundingBox = SS.normalizedBoundingBoxForGeomNode(this.originalNode);
-        this.normalizedCenter = SS.centerOfGeom(this.normalizedBoundingBox);
-        this.normalizedBoundingRadius = SS.normalizedBoundingRadius(this.normalizedBoundingBox);
-
-        this.views = [];
-
-        SS.selectionManager.on('deselected', this.deselected, this);
-        SS.selectionManager.on('selected', this.selected, this);
-    },
-
-    selected: function(selected) {
-        if (SS.selectionManager.size() !== 1) {
-            this.destroy();
-        }
-    },
-
-    deselected: function(deselected) {
-        if ((deselected.length === 1) &&
-            (deselected[0] === this.originalNode.id)) {
-            this.destroy();
-        }
-    },
-
-    destroy: function(event) {
-        SS.selectionManager.off('deselected', this.deselected);
-        SS.selectionManager.off('selected', this.selected);
-        this.views.map(function(view) {
-            view.remove();
-        });
-    },
-
-});
-
-
 SS.Transformer = SS.NodeModel.extend({
 
     initialize: function(attributes) {
@@ -48,9 +10,11 @@ SS.Transformer = SS.NodeModel.extend({
 
         if (!attributes.editingExisting) {
             this.boundingBox = SS.boundingBoxForGeomNode(this.editingNode);
-            this.normalizedBoundingBox = SS.normalizedBoundingBoxForGeomNode(this.editingNode);
-            this.normalizedCenter = SS.centerOfGeom(this.normalizedBoundingBox);
-            this.normalizedBoundingRadius = SS.normalizedBoundingRadius(this.normalizedBoundingBox);
+
+            this.normalizedBoundingBox = this.attributes.sourceModel.normalizedBoundingBox;
+            this.normalizedCenter = this.attributes.sourceModel.normalizedCenter;
+            this.normalizedBoundingRadius = this.attributes.sourceModel.normalizedBoundingRadius;
+
         }
 
         this.views = [

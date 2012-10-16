@@ -1,50 +1,50 @@
 var SS = SS || {};
 
-SS.ScaleTransformerInitiator = SS.TransformerInitiator.extend({
+// SS.ScaleTransformerInitiator = SS.TransformerInitiator.extend({
 
-    initialize: function(attributes) { 
-        SS.TransformerInitiator.prototype.initialize.call(this, attributes);
+//     initialize: function(attributes) { 
+//         SS.TransformerInitiator.prototype.initialize.call(this, attributes);
 
-        this.arrowViews = [
-        new SS.ScaleArrowViewMaxXMaxY({model: this}),
-            new SS.ScaleArrowViewMaxXMinY({model: this}),
-            new SS.ScaleArrowViewMinXMinY({model: this}),
-            new SS.ScaleArrowViewMinXMaxY({model: this}),
-        ];
+//         this.arrowViews = [
+//         new SS.ScaleArrowViewMaxXMaxY({model: this}),
+//             new SS.ScaleArrowViewMaxXMinY({model: this}),
+//             new SS.ScaleArrowViewMinXMinY({model: this}),
+//             new SS.ScaleArrowViewMinXMaxY({model: this}),
+//         ];
         
-        this.views = this.views.concat(this.arrowViews);
-        this.views = this.views.concat([
-            new SS.ScaleBoxView({model: this}),
-            new SS.ScaleFootprintView({model: this}),
-        ]);
-    },
+//         this.views = this.views.concat(this.arrowViews);
+//         this.views = this.views.concat([
+//             new SS.ScaleBoxView({model: this}),
+//             new SS.ScaleFootprintView({model: this}),
+//         ]);
+//     },
 
-    mouseDownOnArrow: function(arrowView) {
+//     mouseDownOnArrow: function(arrowView) {
         
-        var geomNode = this.originalNode;
-        var editingNode = geomNode.editableCopy();
-        var transform = new Transform({
-            type: 'scale',
-            editing: true,
-            origin: {x: Math.round(this.normalizedCenter.x), 
-                     y: Math.round(this.normalizedCenter.y), 
-                     z: 0},
-            parameters: {factor: 1.0}
-        });
-        editingNode.transforms.push(transform);
-        geomNode.originalSceneObjects = geomNode.sceneObjects;
+//         var geomNode = this.originalNode;
+//         var editingNode = geomNode.editableCopy();
+//         var transform = new Transform({
+//             type: 'scale',
+//             editing: true,
+//             origin: {x: Math.round(this.normalizedCenter.x), 
+//                      y: Math.round(this.normalizedCenter.y), 
+//                      z: 0},
+//             parameters: {factor: 1.0}
+//         });
+//         editingNode.transforms.push(transform);
+//         geomNode.originalSceneObjects = geomNode.sceneObjects;
 
-        SS.selectionManager.deselectID(geomNode.id);
-        SS.geomDoc.replace(geomNode, editingNode);
+//         SS.selectionManager.deselectID(geomNode.id);
+//         SS.geomDoc.replace(geomNode, editingNode);
 
-        new SS.ScaleTransformer({originalNode: geomNode,
-                                 editingNode: editingNode, 
-                                 transform: transform,
-                                 anchorFunction: arrowView.anchorFunction,
-                                 mouseDownArrowViewIndex: this.arrowViews.indexOf(arrowView)});
-    },
+//         new SS.ScaleTransformer({originalNode: geomNode,
+//                                  editingNode: editingNode, 
+//                                  transform: transform,
+//                                  anchorFunction: arrowView.anchorFunction,
+//                                  mouseDownArrowViewIndex: this.arrowViews.indexOf(arrowView)});
+//     },
 
-});
+// });
 
 SS.ScaleTransformer = SS.Transformer.extend({
 

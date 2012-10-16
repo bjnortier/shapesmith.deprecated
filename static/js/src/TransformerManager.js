@@ -28,24 +28,13 @@ SS.TransformerManager = function() {
         initiators.push(new SS.RotateTransformerInitiator({geomNode: geomNode}));
     }
     
-    var activate = function(geomNode) {
+    this.activate = function(geomNode) {
         if (state === STATES.SCALE) {
             activateRotateAndTranslate(geomNode);
             state = STATES.ROTATE;
         } else {
             activateScaleAndTranslate(geomNode);
             state = STATES.SCALE;
-        }
-    }
-
-    this.selected = function(selected) {
-        if (SS.selectionManager.size() === 1) {
-            node = SS.geomDoc.findById(SS.selectionManager.getSelected()[0]);
-            if (!node.isEditingOrTransformEditing() 
-                &&
-                !SS.geomNodeRenderingManager.isHiddenByUser(node)) {
-                activate(node);
-            }
         }
     }
 
@@ -60,8 +49,7 @@ SS.TransformerManager = function() {
         state = STATES.UNDEFINED;
     }
 
-    // SS.selectionManager.on('selected', this.selected, this);
-    // SS.selectionManager.on('deselected', this.deselected, this);  
+    SS.selectionManager.on('deselected', this.deselected, this);  
 
     SS.commandStack.on('beforePop', this.clear, this);
 }

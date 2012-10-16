@@ -1,44 +1,6 @@
 var SS = SS || {};
 
 
-SS.TranslateTransformerInitiator = SS.TransformerInitiator.extend({
-
-    initialize: function(attributes) { 
-        SS.TransformerInitiator.prototype.initialize.call(this, attributes);
-        this.geomNode = attributes.geomNode;
-        this.translateView = new SS.TranslateTransformerView({model: this});
-        this.views.push(this.translateView);
-    },
-
-    mouseDownOnTranslate: function(translateView) {
-        
-        var geomNode = this.geomNode;
-        var editingNode = geomNode.editableCopy();
-        var transform = new Transform({
-            type: 'translate',
-            editing: true,
-            origin: {x: Math.round(this.normalizedCenter.x), 
-                     y: Math.round(this.normalizedCenter.y), 
-                     z: 0},
-            parameters: {u: 0.0,
-                         v: 0.0,
-                         w: 0.0,
-                         n: 0}
-        });
-
-        editingNode.transforms.push(transform);
-        geomNode.originalSceneObjects = geomNode.sceneObjects;
-
-        SS.selectionManager.deselectID(geomNode.id);
-        SS.geomDoc.replace(geomNode, editingNode);
-
-        new SS.TranslateTransformer({originalNode: geomNode,
-                                     editingNode: editingNode, 
-                                     transform: transform});
-    },
-
-});
-
 SS.TranslateTransformer = SS.Transformer.extend({
 
     initialize: function(attributes) { 

@@ -26,7 +26,9 @@ var SS = SS || {};
         }
         searchFn({children: objects});
         var intersects = ray.intersectObjects(allMeshes);
-        intersects.reverse();
+        intersects.sort(function(a,b) {
+            return a.distance > b.distance;
+        });
         return intersects;
 
     }

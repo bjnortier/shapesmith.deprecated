@@ -254,12 +254,12 @@ SS.createGeometry = function(geomNode) {
     };
 }
 
-SS.translateGeomNodeRendering = function(originalNode, editingNode,  translation) {
-    for (key in editingNode.sceneObjects) {
-        for (var i = 0; i < editingNode.sceneObjects[key].children.length; ++i) {
+SS.translateGeomNodeRendering = function(originalGeometries, editingGeometries, translation) {
+    for (key in originalGeometries) {
+        for (var i = 0; i < originalGeometries[key].children.length; ++i) {
 
-            var originalGeometry = originalNode.originalSceneObjects[key].children[i].geometry;
-            var editingGeometry = editingNode.sceneObjects[key].children[i].geometry;
+            var originalGeometry = originalGeometries[key].children[i].geometry;
+            var editingGeometry = editingGeometries[key].children[i].geometry;
 
             var axis = SS.objToVector(originalNode.workplane.axis);
             var angle = originalNode.workplane.angle;
@@ -457,8 +457,8 @@ var computeBox = function(workplane, geomNode) {
 
     // Preview geometry have no scene objects, and hidden
     // geometry have ampty scene objects
-    geomNode.sceneObjects && geomNode.sceneObjects.edges && geomNode.sceneObjects.edges.children.map(addFunction);
-    geomNode.sceneObjects && geomNode.sceneObjects.faces && geomNode.sceneObjects.faces.children.map(addFunction);
+    geomNode.geometries && geomNode.geometries.edges && geomNode.geometries.edges.children.map(addFunction);
+    geomNode.geometries && geomNode.geometries.faces && geomNode.geometries.faces.children.map(addFunction);
 
     if (boundingBoxes.length == 0) {
         return undefined;

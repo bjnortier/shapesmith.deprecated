@@ -46,6 +46,4 @@ SS.GeomNodeRenderingManager = function() {
     SS.geomDoc.on('beforeReplace', this.geomDocBeforeReplace, this);  
     SS.geomDoc.on('replace', this.geomDocReplace, this);  
 
-    
-
 }

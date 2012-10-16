@@ -418,8 +418,7 @@ SS.SceneView = function(container) {
     var findSceneObjectViewsForEvent = function(event) {
         var visibleSceneObjects = _.pluck(sceneObjectViews, 'sceneObject')
         var hiddenSceneObjects = _.pluck(sceneObjectViews, 'hiddenSceneObject')
-        var found = SS.selectObjectsInScene(visibleSceneObjects.concat(hiddenSceneObjects), camera, event);
-        var objects = _.pluck(found, 'object');
+        var foundObjects = SS.selectObjectsInScene(visibleSceneObjects.concat(hiddenSceneObjects), camera, event);
 
         // Select the hightest-level THREE.Object3D objects in the scene
         // Visible objects will have the scene as parent, hidden selection meshes
@@ -435,19 +434,29 @@ SS.SceneView = function(container) {
         }
 
         var foundSceneObjectViews = [];
-        objects.map(getRoot).map(function(object) {
+        foundObjects.map(function(foundObject) {
             sceneObjectViews.map(function(sceneObjectView) {
-                var root = getRoot(object);
+                var root = getRoot(foundObject.object);
                 if ((root === sceneObjectView.sceneObject) ||
                     (root === sceneObjectView.hiddenSceneObject)) {
                     if (foundSceneObjectViews.indexOf(sceneObjectView) === -1) {
-                        foundSceneObjectViews.push(sceneObjectView);
+                        foundSceneObjectViews.push({
+                            foundObject: foundObject,
+                            sceneObjectView: sceneObjectView,
+                        });
                     }
                 }
             });
         });
         
-        return foundSceneObjectViews.sort(sortByPriority);
+        var sorted = foundSceneObjectViews.sort(function(a,b) {
+            if (a.sceneObjectView.priority === b.sceneObjectView.priority) {
+                return a.foundObject.distance > b.foundObject.distance;
+            } else {
+                return a.sceneObjectView.priority < b.sceneObjectView.priority;
+            }
+        });
+        return _.pluck(sorted, 'sceneObjectView');
  
     }
 
