@@ -12,7 +12,7 @@
                   folsom
                  ]},
   {mod, { ui_app, []}},
-  {env, [{js_scripts_environment, development},
+  {env, [
          {logo, "/ui/images/logo_small.png"}
         ]}
  ]}.

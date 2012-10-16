@@ -58,7 +58,6 @@ provide_content(ReqData, Context) ->
                         {design, Design},
                         {commit, Commit},
                         {host, Host},
-                        {appscripts, appscripts(ScriptsEnv)},
                         {logo, Logo}
                         ],
         
@@ -68,10 +67,4 @@ provide_content(ReqData, Context) ->
         Rendered = ui_walrus:render_template(ui_views_modeller, WalrusContext1),
         {Rendered, ui_resource:prevent_caching(ReqData), Context}.
 
-appscripts(production) ->
-        [
-                ];
-appscripts(_) ->
-        [
-                ].
 

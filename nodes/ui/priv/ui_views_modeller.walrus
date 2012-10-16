@@ -14,7 +14,6 @@
     <script type="text/javascript" src="/ui/js/lib/underscore-min.js"></script>
     <script type="text/javascript" src="/ui/js/lib/backbone-min.js"></script>
     <script type="text/javascript" src="/ui/js/lib/csg-min.js"></script>
-    <script type="text/javascript" src="/ui/js/lib/require.js"></script>
 
     <script type="text/javascript" src="/ui/js/lib/fonts/helvetiker_bold.typeface.js"></script>
     <script type="text/javascript" src="/ui/js/lib/fonts/helvetiker_regular.typeface.js"></script>
@@ -32,15 +31,11 @@
         }
     </script>
 
-    {{#appscripts}}
-    <script src="/ui/js/{{file}}"></script>
-    {{/appscripts}}
-    <script src="/ui/js/main.js"></script> 
+    <script data-main="/ui/js/main.js" src="/ui/js/lib/require.js"></script>
 
   
   </head>
 <body oncontextmenu="return false;">
-  <div id="scene"></div>
   <img id="logo" src="{{logo}}"/>
   <div id="progress-container"></div>
   <div id="messages-container"><ol></ol></div>

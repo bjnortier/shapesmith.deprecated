@@ -199,6 +199,14 @@ img#logo {
     left: -200px;
 }
 
+#scene {
+    color: #fff;
+    font: '13px/20px Arial, sans-serif';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
 .top-menu span.action:hover {
     background: none;
     border: solid thin #043c6b;

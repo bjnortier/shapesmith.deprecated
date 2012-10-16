@@ -44,10 +44,7 @@ SS.SceneView = function(container) {
 
         container.appendChild( renderer.domElement );
         
-        container.style.color = '#fff';
-        container.style.font = '13px/20px Arial, sans-serif';
-        
-        scene.add( new THREE.AmbientLight( 0x404040 ) );
+        scene.add(  );
         
         addLights();
         popupMenu = SS.popupMenu();
