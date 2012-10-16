@@ -20,7 +20,7 @@
 %% @author Justin Sheehy <justin@basho.com>
 %% @copyright 2008-2009 Basho Technologies, Inc.
 
--module(api_fs_resource).
+-module(ui_fs_resource).
 -export([init/1]).
 -export([allowed_methods/2,
          resource_exists/2,

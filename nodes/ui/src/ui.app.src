@@ -1,0 +1,16 @@
+{application, ui,
+ [
+  {description, "The browser UI"},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  mochiweb,
+                  webmachine,
+                  lager,
+                  folsom
+                 ]},
+  {mod, { ui_app, []}},
+  {env, []}
+ ]}.

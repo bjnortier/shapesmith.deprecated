@@ -30,8 +30,8 @@
      <div class="row">
        <div class="fourcol"></div>
        <div class="fourcol">
-	 Sign in to your account. Haven't created an account yet? 
-	 <a href="/signup">Create an account here</a>.
+	 Create an account in one easy step. Already have an account?
+	 <a href="/ui/signin">Sign in here</a>.
        </div>
        <div class="fourcol last"></div>
      </div>
@@ -58,19 +58,19 @@
      <div class="row">
        <div class="fourcol"></div>
        <div class="fourcol">
-	 <div id="signin-button" class="button">sign in</div>
+	 <div id="signup-button" class="button">create my account</div>
        </div>
        <div class="fourcol last">
       </div>
      </div>
-     
+
      <div class="row">
        <div class="fourcol"></div>
        <div class="fourcol">
 	 <div id="spinner-container"></div>
        </div>
        <div class="fourcol last">
-       </div>
+      </div>
      </div>
      
   </div>
@@ -78,7 +78,7 @@
  </body>
 
   <script type="text/javascript" src="/static/js/src/errors.js"></script>
-  <script type="text/javascript" src="/static/js/src/signin.js"></script>
+  <script type="text/javascript" src="/static/js/src/signup.js"></script>
   <script type="text/javascript">
 
     var _gaq = _gaq || [];

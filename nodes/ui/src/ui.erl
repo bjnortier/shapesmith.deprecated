@@ -1,7 +1,8 @@
 %% -*- mode: erlang -*-
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil -*-
 %% ex: ts=4 sw=4 et
-%% Copyright 2011 Benjamin Nortier
+%% 
+%% Copyright (c) 2010-2012 Benjamin Nortier. All rights reserved
 %%
 %%   Licensed under the Apache License, Version 2.0 (the "License");
 %%   you may not use this file except in compliance with the License.
@@ -15,8 +16,8 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(api).
--author('Benjamin Nortier <bjnortier@gmail.com>').
+-module(ui).
+-author('Benjamin Nortier <bjnortier@shapesmith.net>').
 -export([start/0]).
 
 ensure_started(App) ->
@@ -28,17 +29,11 @@ ensure_started(App) ->
     end.
 
 %% @spec start() -> ok
-%% @doc Start the api server.
+%% @doc Start the ui server.
 start() ->
-    ensure_started(inets),
-    ensure_started(crypto),
-    ensure_started(bcrypt),
     ensure_started(lager),
     ensure_started(mochiweb),
     ensure_started(folsom),
     application:set_env(webmachine, webmachine_logger_module, webmachine_logger),
     ensure_started(webmachine),
-    ensure_started(worker_master),
-    application:start(api).
-
-
+    application:start(ui).  

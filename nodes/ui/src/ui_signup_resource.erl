@@ -15,17 +15,20 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(api_designs_resource).
+-module(ui_signup_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
-	 init/1, 
+         init/1, 
          allowed_methods/2,
-	 is_authorized/2,
-	 content_types_provided/2,
-	 resource_exists/2,
-	 provide_content/2
+         is_authorized/2,
+         content_types_provided/2,
+         resource_exists/2,
+         provide_content/2
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
 
 init([]) -> 
     {ok, {}}.
@@ -34,7 +37,7 @@ allowed_methods(ReqData, Context) ->
     {['GET'], ReqData, Context}.
 
 is_authorized(ReqData, Context) ->
-    api_resource:redirect_to_signin_if_not_authorized(ReqData, Context).
+    ui_resource:redirect_to_designs_if_username_known(ReqData, Context).
 
 content_types_provided(ReqData, Context) ->
     {[{"text/html", provide_content}], ReqData, Context}.
@@ -43,21 +46,15 @@ resource_exists(ReqData, Context) ->
     {true, ReqData, Context}.
 
 provide_content(ReqData, Context) ->
-    User = wrq:path_info(user, ReqData),
-    Designs = lists:map(fun(Name) ->
-				[{name, binary_to_list(Name)},
-				 {username, User}]
-			end,
-			api_db:get_designs(User)),
+    WalrusContext = [{fields, [
+                               [{name, "username"}, {placeholder, "username"}, {type, "text"}],
+                               [{name, "emailAddress"}, {placeholder, "email address (optional)"}, {type, "email"}],
+                               [{name, "password1"}, {placeholder, "password"}, {type, "password"}],
+                               [{name, "password2"}, {placeholder, "repeat password"}, {type, "password"}]
+                              ]}],
+    Rendered = ui_walrus:render_template(ui_views_signup, WalrusContext),
+    {Rendered, ReqData, Context}.
 
-    WalrusContext =  [{username, User},
-		      {designs, Designs}],
-
-    {ok, AuthModule} = application:get_env(api, auth_module),
-    WalrusContext1 = AuthModule:add_session_walrus_ctx(User, WalrusContext),
-
-    Rendered = api_walrus:render_template(api_views_designs, WalrusContext1),
-    {Rendered, api_resource:prevent_caching(ReqData), Context}.
 
 
 

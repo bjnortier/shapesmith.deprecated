@@ -1,7 +1,7 @@
 %% -*- mode: erlang -*-
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil -*-
 %% ex: ts=4 sw=4 et
-%% Copyright 2011 Benjamin Nortier
+%% Copyright 2011-2012 Benjamin Nortier
 %%
 %%   Licensed under the Apache License, Version 2.0 (the "License");
 %%   you may not use this file except in compliance with the License.
@@ -15,15 +15,15 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(api_modeller_resource).
+-module(ui_modeller_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
-	 init/1, 
+         init/1, 
          allowed_methods/2,
-	 is_authorized/2,
-	 content_types_provided/2,
-	 resource_exists/2,
-	 provide_content/2
+         is_authorized/2,
+         content_types_provided/2,
+         resource_exists/2,
+         provide_content/2
         ]).
 
 -include_lib("webmachine/include/webmachine.hrl").
@@ -35,7 +35,7 @@ allowed_methods(ReqData, Context) ->
     {['GET'], ReqData, Context}.
 
 is_authorized(ReqData, Context) ->
-    api_resource:redirect_to_signin_if_not_authorized(ReqData, Context).
+    ui_resource:redirect_to_signin_if_not_authorized(ReqData, Context).
 
 content_types_provided(ReqData, Context) ->
     {[{"text/html", provide_content}], ReqData, Context}.
@@ -50,17 +50,17 @@ provide_content(ReqData, Context) ->
     {ok, Host} = application:get_env(api, host),
     {ok, ScriptsEnv} = application:get_env(api, js_scripts_environment),
     WalrusContext =  [{username, User},
-		      {design, Design},
-		      {commit, Commit},
-		      {host, Host},
+                      {design, Design},
+                      {commit, Commit},
+                      {host, Host},
               {appscripts, appscripts(ScriptsEnv)}
-		     ],
+                     ],
 
     {ok, AuthModule} = application:get_env(api, auth_module),
     WalrusContext1 = AuthModule:add_session_walrus_ctx(User, WalrusContext),
 
-    Rendered = api_walrus:render_template(api_views_modeller, WalrusContext1),
-    {Rendered, api_resource:prevent_caching(ReqData), Context}.
+    Rendered = ui_walrus:render_template(ui_views_modeller, WalrusContext1),
+    {Rendered, ui_resource:prevent_caching(ReqData), Context}.
 
 appscripts(production) ->
     [

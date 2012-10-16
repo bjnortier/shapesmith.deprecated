@@ -15,30 +15,21 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(api).
+-module(ui_home_redirect_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([start/0]).
+-export([init/1, 
+	 to_html/2]).
+-include_lib("webmachine/include/webmachine.hrl").
 
-ensure_started(App) ->
-    case application:start(App) of
-        ok ->
-            ok;
-        {error, {already_started, App}} ->
-            ok
+init([]) -> {ok, undefined}.
+
+to_html(ReqData, Context) ->
+    {ok, AuthModule} = application:get_env(api, auth_module),
+    case AuthModule:session_username(ReqData) of
+	undefined ->
+	    {ok, Host} = application:get_env(api, host),
+	    Location = Host ++ "/ui/signin",
+	    {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context};
+	_Username ->
+	    api_resource:redirect_to_designs_if_username_known(ReqData, Context)
     end.
-
-%% @spec start() -> ok
-%% @doc Start the api server.
-start() ->
-    ensure_started(inets),
-    ensure_started(crypto),
-    ensure_started(bcrypt),
-    ensure_started(lager),
-    ensure_started(mochiweb),
-    ensure_started(folsom),
-    application:set_env(webmachine, webmachine_logger_module, webmachine_logger),
-    ensure_started(webmachine),
-    ensure_started(worker_master),
-    application:start(api).
-
-

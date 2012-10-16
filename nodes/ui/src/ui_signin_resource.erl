@@ -15,7 +15,7 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(api_signout_resource).
+-module(ui_signin_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
          init/1, 
@@ -27,7 +27,7 @@
 -include_lib("webmachine/include/webmachine.hrl").
 
 init([]) -> 
-    {ok, []}.
+    {ok, {}}.
 
 allowed_methods(ReqData, Context) -> 
     {['GET'], ReqData, Context}.
@@ -39,12 +39,10 @@ resource_exists(ReqData, Context) ->
     {true, ReqData, Context}.
 
 provide_content(ReqData, Context) ->
-    case wrq:get_cookie_value("session", ReqData) of
-        undefined ->
-            ok;
-        SessionSHA ->
-            {ok, AuthModule} = application:get_env(api, auth_module),
-            AuthModule:delete_session(SessionSHA)
-    end,
-    {ok, Host} = application:get_env(api, host),
-    {{halt, 302}, wrq:set_resp_header("Location", Host, ReqData), Context}.
+    WalrusContext = [{fields, [
+                               [{name, "username"}, {placeholder, "username"}, {type, "text"}],
+                               [{name, "password"}, {placeholder, "password"}, {type, "password"}]
+                              ]}],
+    Rendered = ui_walrus:render_template(ui_views_signin, WalrusContext),
+    {Rendered, ReqData, Context}.
+

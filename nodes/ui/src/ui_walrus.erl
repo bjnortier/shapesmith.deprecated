@@ -1,7 +1,7 @@
 %% -*- mode: erlang -*-
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil -*-
 %% ex: ts=4 sw=4 et
-%% Copyright 2011 Benjamin Nortier
+%% Copyright 2011-2012 Benjamin Nortier
 %%
 %%   Licensed under the Apache License, Version 2.0 (the "License");
 %%   you may not use this file except in compliance with the License.
@@ -15,21 +15,13 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(api_home_redirect_resource).
--author('Benjamin Nortier <bjnortier@gmail.com>').
--export([init/1, 
-	 to_html/2]).
--include_lib("webmachine/include/webmachine.hrl").
+-module(ui_walrus).
+-export([render_template/2]).
 
-init([]) -> {ok, undefined}.
-
-to_html(ReqData, Context) ->
-    {ok, AuthModule} = application:get_env(api, auth_module),
-    case AuthModule:session_username(ReqData) of
-	undefined ->
-	    {ok, Host} = application:get_env(api, host),
-	    Location = Host ++ "/signin",
-	    {{halt, 302}, wrq:set_resp_header("Location", Location, ReqData), Context};
-	_Username ->
-	    api_resource:redirect_to_designs_if_username_known(ReqData, Context)
-    end.
+render_template(Name, Ctx) when is_atom(Name) ->
+    {ok, App} = application:get_application(?MODULE),
+    Filename = filename:join(
+                 [code:priv_dir(App),
+                  atom_to_list(Name) ++ ".walrus"]),
+    {ok, Template} = file:read_file(Filename),
+    walrus:render(Template, Ctx).

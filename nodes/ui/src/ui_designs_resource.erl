@@ -1,4 +1,4 @@
- %% -*- mode: erlang -*-
+%% -*- mode: erlang -*-
 %% -*- erlang-indent-level: 4;indent-tabs-mode: nil -*-
 %% ex: ts=4 sw=4 et
 %% Copyright 2011 Benjamin Nortier
@@ -15,11 +15,12 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(api_signout_resource).
+-module(ui_designs_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
          init/1, 
          allowed_methods/2,
+         is_authorized/2,
          content_types_provided/2,
          resource_exists/2,
          provide_content/2
@@ -27,10 +28,13 @@
 -include_lib("webmachine/include/webmachine.hrl").
 
 init([]) -> 
-    {ok, []}.
+    {ok, {}}.
 
 allowed_methods(ReqData, Context) -> 
     {['GET'], ReqData, Context}.
+
+is_authorized(ReqData, Context) ->
+    ui_resource:redirect_to_signin_if_not_authorized(ReqData, Context).
 
 content_types_provided(ReqData, Context) ->
     {[{"text/html", provide_content}], ReqData, Context}.
@@ -39,12 +43,21 @@ resource_exists(ReqData, Context) ->
     {true, ReqData, Context}.
 
 provide_content(ReqData, Context) ->
-    case wrq:get_cookie_value("session", ReqData) of
-        undefined ->
-            ok;
-        SessionSHA ->
-            {ok, AuthModule} = application:get_env(api, auth_module),
-            AuthModule:delete_session(SessionSHA)
-    end,
-    {ok, Host} = application:get_env(api, host),
-    {{halt, 302}, wrq:set_resp_header("Location", Host, ReqData), Context}.
+    User = wrq:path_info(user, ReqData),
+    Designs = lists:map(fun(Name) ->
+                                [{name, binary_to_list(Name)},
+                                 {username, User}]
+                        end,
+                        api_db:get_designs(User)),
+
+    WalrusContext =  [{username, User},
+                      {designs, Designs}],
+
+    {ok, AuthModule} = application:get_env(api, auth_module),
+    WalrusContext1 = AuthModule:add_session_walrus_ctx(User, WalrusContext),
+
+    Rendered = ui_walrus:render_template(ui_views_designs, WalrusContext1),
+    {Rendered, ui_resource:prevent_caching(ReqData), Context}.
+
+
+
