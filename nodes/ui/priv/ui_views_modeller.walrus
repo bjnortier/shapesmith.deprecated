@@ -3,25 +3,25 @@
   <head>
     <title>Shapesmith.net</title>
     
-    <link href="/static/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="/ui/css/style.css" rel="stylesheet" type="text/css"/>
     
-    <script type="text/javascript" src="/static/js/lib/jquery-1.7.1.min.js"></script>
-    <script type="text/javascript" src="/static/js/lib/jquery.mustache.js"></script>
-    <script type="text/javascript" src="/static/js/lib/jquery.getQueryParam.1.0.0.min.js"></script>
-    <script type="text/javascript" src="/static/js/lib/RequestAnimationFrame.js"></script>
-    <script type="text/javascript" src="/static/js/lib/Detector.js"></script>
-    <script type="text/javascript" src="/static/js/lib/Three.js"></script>
-    <script type="text/javascript" src="/static/js/lib/underscore-min.js"></script>
-    <script type="text/javascript" src="/static/js/lib/backbone-min.js"></script>
-    <script type="text/javascript" src="/static/js/lib/csg-min.js"></script>
-    <script type="text/javascript" src="/static/js/lib/require.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/jquery.mustache.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/jquery.getQueryParam.1.0.0.min.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/RequestAnimationFrame.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/Detector.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/Three.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/underscore-min.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/backbone-min.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/csg-min.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/require.js"></script>
 
-    <script type="text/javascript" src="/static/js/lib/fonts/helvetiker_bold.typeface.js"></script>
-    <script type="text/javascript" src="/static/js/lib/fonts/helvetiker_regular.typeface.js"></script>
-    <script type="text/javascript" src="/static/js/lib/fonts/lobster_1.4_regular.typeface.js"></script>
-    <script type="text/javascript" src="/static/js/lib/fonts/droid_serif_regular.typeface.js"></script>
-    <script type="text/javascript" src="/static/js/lib/fonts/inconsolata_medium.typeface.js"></script>
-    <script type="text/javascript" src="/static/js/lib/fonts/open_sans_regular.typeface.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/fonts/helvetiker_bold.typeface.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/fonts/helvetiker_regular.typeface.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/fonts/lobster_1.4_regular.typeface.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/fonts/droid_serif_regular.typeface.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/fonts/inconsolata_medium.typeface.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/fonts/open_sans_regular.typeface.js"></script>
 
     <script type="text/javascript">
         var SS = SS || {};
@@ -33,15 +33,15 @@
     </script>
 
     {{#appscripts}}
-    <script src="/static/js/{{file}}"></script>
+    <script src="/ui/js/{{file}}"></script>
     {{/appscripts}}
-    <script src="/static/js/main.js"></script> 
+    <script src="/ui/js/main.js"></script> 
 
   
   </head>
 <body oncontextmenu="return false;">
   <div id="scene"></div>
-  <img id="logo" src="/static/images/logo_small.png"/>
+  <img id="logo" src="{{logo}}"/>
   <div id="progress-container"></div>
   <div id="messages-container"><ol></ol></div>
   <div id="black-overlay"></div>

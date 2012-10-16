@@ -14,9 +14,9 @@ start(_StartType, _StartArgs) ->
     {ok, ExistingDispatchRules} = application:get_env(webmachine, dispatch_list),
     NewRules = [
             {[], ui_home_redirect_resource, []},
-            {["static", '*'], ui_fs_resource, [{root, "../"}]},
             {["ui", "signup"], ui_signup_resource, []},
             {["ui", "signin"], ui_signin_resource, []},
+            {["ui", '*'], ui_fs_resource, [{root, "www"}]},
             {[user, "designs"], ui_designs_resource, []},
             {[user, design, "modeller"], ui_modeller_resource, []}
             

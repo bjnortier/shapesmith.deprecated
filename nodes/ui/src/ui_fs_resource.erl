@@ -35,7 +35,10 @@
 -include_lib("webmachine/include/webmachine.hrl").
 
 init(ConfigProps) ->
-    {root, Root} = proplists:lookup(root, ConfigProps),
+    {ok, App} = application:get_application(?MODULE),
+    {root, ConfigRoot} = proplists:lookup(root, ConfigProps),
+    PrivDir = code:priv_dir(App),
+    Root = filename:join(PrivDir, ConfigRoot),
     {ok, #context{root=Root}}.
     
 allowed_methods(ReqData, Context) ->
@@ -43,19 +46,15 @@ allowed_methods(ReqData, Context) ->
 
 
 resource_exists(ReqData, Context) ->
-    Path = wrq:path(ReqData),
+    Path = wrq:disp_path(ReqData),
     case file_exists(Context, Path) of 
         {true, _} ->
             {true, ReqData, Context};
         _ ->
-            case Path of
-                "p" -> {true, ReqData, Context};
-                _ -> {false, ReqData, Context}
-            end
+            {false, ReqData, Context}
     end.
 
 maybe_fetch_object(Context, Path) ->
-    % if returns {true, NewContext} then NewContext has response_body
     case Context#context.response_body of
         undefined ->
             case file_exists(Context, Path) of 
@@ -86,9 +85,9 @@ file_path(Context, Name) ->
                   _ -> Name
               end,
     case mochiweb_util:safe_relative_path(RelName) of
-	undefined -> false;
-	RelPath ->
-	    filename:join([Context#context.root, RelPath])
+        undefined -> false;
+        RelPath ->
+            filename:join([Context#context.root, RelPath])
     end.
 
 content_types_provided(ReqData, Context) ->
@@ -107,8 +106,7 @@ provide_content(ReqData, Context) ->
     end.
 
 last_modified(ReqData, Context) ->
-    {true, FullPath} = file_exists(Context,
-                                   wrq:path(ReqData)),
+    {true, FullPath} = file_exists(Context, wrq:disp_path(ReqData)),
     LMod = filelib:last_modified(FullPath),
     {LMod, ReqData, Context#context{metadata=[{'last-modified',
                     httpd_util:rfc1123_date(LMod)}|Context#context.metadata]}}.
@@ -116,7 +114,7 @@ last_modified(ReqData, Context) ->
 hash_body(Body) -> mochihex:to_hex(binary_to_list(crypto:sha(Body))).
 
 generate_etag(ReqData, Context) ->
-    case maybe_fetch_object(Context, wrq:path(ReqData)) of
+    case maybe_fetch_object(Context, wrq:disp_path(ReqData)) of
         {true, BodyContext} ->
             ETag = hash_body(BodyContext#context.response_body),
             {ETag, ReqData,
