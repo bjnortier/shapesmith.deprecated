@@ -13,6 +13,8 @@ define(['src/trackball'], function(trackball) {
         initialize: function() {
             $('body').append(this.$el);
 
+            _.extend(this, Backbone.Events);
+
             this.width = this.$el.width();
             this.height = this.$el.height();
             this.scene = new THREE.Scene();
@@ -42,10 +44,21 @@ define(['src/trackball'], function(trackball) {
                 new THREE.MeshBasicMaterial( { color: 0xffff00, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide } )
             ];
             var object = THREE.SceneUtils.createMultiMaterialObject( new THREE.CubeGeometry(50, 50, 50, 4, 4, 4), materials );
-            this.scene.add( object );
+            this.scene.add(object);
+
+            for (var x = -10; x < 10; ++x) {
+                for (var y = -10; y < 10; ++y) {
+                    object = THREE.SceneUtils.createMultiMaterialObject(
+                        new THREE.CubeGeometry(5, 5, 5, 4, 4, 4), materials);
+                    object.position = new THREE.Vector3(x*10, y*10, 0);
+                    this.scene.add(object);
+
+                }
+            }
+
 
             this.el.appendChild(this.renderer.domElement);
-            this.trackball = new trackball.Trackball();
+            this.trackball = new trackball.Trackball(this.scene, this.camera);
             this.animate();
         },
 
@@ -59,9 +72,15 @@ define(['src/trackball'], function(trackball) {
         },
 
         render: function() {
-            this.trackball.updateCamera(this.camera);
-            this.pointLight1.position = this.camera.position;
-            this.renderer.render(this.scene, this.camera);
+            var lastCameraPosition = this.camera.position.clone();
+            this.trackball.updateCamera(this.scene);
+            var dCameraPosition = new THREE.Vector3().sub(this.camera.position, lastCameraPosition);
+            if (dCameraPosition.length() > 0.1) {
+                this.trigger('cameraChange', this.camera.position);
+                this.pointLight1.position = this.camera.position;
+                this.renderer.render(this.scene, this.camera);
+            }
+
         },
 
         id: 'scene',
