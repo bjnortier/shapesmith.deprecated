@@ -1,5 +1,5 @@
 var SS = SS || {};
-requirejs(['src/scene'], function(scene) {
+requirejs(['src/scene', 'src/geomtoolbar'], function(scene) {
 
     $(document).ready(function() {
 

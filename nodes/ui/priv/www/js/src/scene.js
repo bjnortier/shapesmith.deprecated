@@ -55,23 +55,16 @@ define(['src/trackball'], function(trackball) {
             var object = THREE.SceneUtils.createMultiMaterialObject( new THREE.CubeGeometry(50, 50, 50, 4, 4, 4), materials );
             this.scene.add(object);
 
-            for (var x = -10; x <= 10; ++x) {
-                for (var y = -10; y <= 10; ++y) {
-                    object = THREE.SceneUtils.createMultiMaterialObject(
-                        new THREE.CubeGeometry(5, 5, 5, 4, 4, 4), materials);
-                    object.position = new THREE.Vector3(x*10, y*10, 0);
-                    if (Math.random() > 0.7) {
-                        this.scene.add(object);
-                    }   
-                }
-            }
-
-            // materials = [
-            //     new THREE.MeshBasicMaterial( { color: 0x111111, wireframe: true } ),
-            // ];
-            // var planeGeometry = new THREE.PlaneGeometry(1000, 1000, 100, 100);
-            // object = THREE.SceneUtils.createMultiMaterialObject(planeGeometry, materials );
-            // this.scene.add(object);
+            // for (var x = -10; x <= 10; ++x) {
+            //     for (var y = -10; y <= 10; ++y) {
+            //         object = THREE.SceneUtils.createMultiMaterialObject(
+            //             new THREE.CubeGeometry(5, 5, 5, 4, 4, 4), materials);
+            //         object.position = new THREE.Vector3(x*10, y*10, 0);
+            //         if (Math.random() > 0.7) {
+            //             this.scene.add(object);
+            //         }   
+            //     }
+            // }
 
             var majorGridLineGeometry = new THREE.Geometry();
             var minorGridLineGeometry = new THREE.Geometry();

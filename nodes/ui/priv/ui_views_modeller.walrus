@@ -3,7 +3,7 @@
   <head>
     <title>Shapesmith.net</title>
     
-    <link href="/ui/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="/ui/css/modeller.css" rel="stylesheet" type="text/css"/>
     
     <script type="text/javascript" src="/ui/js/lib/jquery-1.7.1.min.js"></script>
     <script type="text/javascript" src="/ui/js/lib/jquery.mustache.js"></script>
