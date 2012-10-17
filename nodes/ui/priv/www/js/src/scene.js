@@ -55,15 +55,53 @@ define(['src/trackball'], function(trackball) {
             var object = THREE.SceneUtils.createMultiMaterialObject( new THREE.CubeGeometry(50, 50, 50, 4, 4, 4), materials );
             this.scene.add(object);
 
-            for (var x = -10; x < 10; ++x) {
-                for (var y = -10; y < 10; ++y) {
+            for (var x = -10; x <= 10; ++x) {
+                for (var y = -10; y <= 10; ++y) {
                     object = THREE.SceneUtils.createMultiMaterialObject(
                         new THREE.CubeGeometry(5, 5, 5, 4, 4, 4), materials);
                     object.position = new THREE.Vector3(x*10, y*10, 0);
-                    this.scene.add(object);
-
+                    if (Math.random() > 0.7) {
+                        this.scene.add(object);
+                    }   
                 }
             }
+
+            // materials = [
+            //     new THREE.MeshBasicMaterial( { color: 0x111111, wireframe: true } ),
+            // ];
+            // var planeGeometry = new THREE.PlaneGeometry(1000, 1000, 100, 100);
+            // object = THREE.SceneUtils.createMultiMaterialObject(planeGeometry, materials );
+            // this.scene.add(object);
+
+            var majorGridLineGeometry = new THREE.Geometry();
+            var minorGridLineGeometry = new THREE.Geometry();
+            var majorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.2, transparent: true });
+            var minorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.02, transparent: true });
+
+            majorGridLineGeometry.vertices.push(new THREE.Vector3(-100, 0, 0));
+            majorGridLineGeometry.vertices.push(new THREE.Vector3(100, 0, 0));
+            minorGridLineGeometry.vertices.push(new THREE.Vector3(-100, 0, 0));
+            minorGridLineGeometry.vertices.push(new THREE.Vector3(100, 0, 0));
+
+            for (var x = -100; x <= 100; ++x) {
+                var material = (x % 10 == 0) ? majorMaterialInside : minorMaterialInside;
+                var geometry = (x % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
+                var line = new THREE.Line(geometry, material);
+                line.position.x = x;
+                line.position.z = (x % 10 == 0) ? line.position.z : line.position.z - 0.1;
+                line.rotation.z = 90 * Math.PI / 180;
+                this.scene.add(line);
+            }
+
+            for (var y = -100; y <= 100; ++y) {
+                var material = (y % 10 == 0) ? majorMaterialInside : minorMaterialInside;
+                var geometry = (y % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
+                var line = new THREE.Line(geometry, material);
+                line.position.y = y;
+                line.position.z = (y % 10 == 0) ? line.position.z : line.position.z - 0.1;
+                this.scene.add(line);
+            }
+
 
 
             this.el.appendChild(this.renderer.domElement);
