@@ -5,12 +5,12 @@
 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/static/css/1140.css" type="text/css" media="screen" />
-    <link rel="stylesheet" href="/static/css/designs.css" type="text/css"  media="screen" />
+    <link rel="stylesheet" href="/ui/css/1140.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/ui/css/designs.css" type="text/css"  media="screen" />
     
     <!--css3-mediaqueries-js - http://code.google.com/p/css3-mediaqueries-js/ - Enables media queries in some unsupported browsers-->
-    <script src="/static/js/lib/css3-mediaqueries.js" type="text/javascript"></script>
-    <script type="text/javascript" src="/static/js/lib/jquery-1.7.1.min.js"></script>
+    <script src="/ui/js/lib/css3-mediaqueries.js" type="text/javascript"></script>
+    <script type="text/javascript" src="/ui/js/lib/jquery-1.7.1.min.js"></script>
   
   </head>
   <body>
@@ -20,7 +20,7 @@
      <div class="row">
        <div class="fourcol"></div>
        <div class="fourcol">
-	 <span class="logo"><a href="/"><img src="/static/images/logo_small.png"/></a></span>
+	 <span class="logo"><a href="/"><img src="/ui/images/logo_small.png"/></a></span>
        </div>
       <div class="fourcol last"></div>
      </div>
@@ -77,8 +77,8 @@
     
  </body>
 
-  <script type="text/javascript" src="/static/js/src/errors.js"></script>
-  <script type="text/javascript" src="/static/js/src/signup.js"></script>
+  <script type="text/javascript" src="/ui/js/src/errors.js"></script>
+  <script type="text/javascript" src="/ui/js/src/signup.js"></script>
   <script type="text/javascript">
 
     var _gaq = _gaq || [];

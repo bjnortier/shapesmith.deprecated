@@ -40,13 +40,14 @@ define(['src/trackball'], function(trackball) {
 
             // Lights
             this.scene.add(new THREE.AmbientLight(0x404040));
-            this.pointLight1 = new THREE.PointLight( 0x999999 );
+            this.pointLight1 = new THREE.PointLight( 0x888888 );
             this.pointLight1.position.set(1000, 1000, 1000);
             this.scene.add(this.pointLight1);
 
             var materials = [
-                new THREE.MeshLambertMaterial( { ambient: 0xbbbbbb,  side: THREE.DoubleSide } ),
-                new THREE.MeshBasicMaterial( { color: 0xffff00, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide } )
+                new THREE.MeshLambertMaterial( { ambient: 0x333333,  side: THREE.DoubleSide } ),
+                new THREE.MeshBasicMaterial( { color: 0x00bb00, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
+                new THREE.MeshBasicMaterial( { color: 0x00bb00, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
             ];
             var object = THREE.SceneUtils.createMultiMaterialObject( new THREE.CubeGeometry(50, 50, 50, 4, 4, 4), materials );
             this.scene.add(object);
@@ -85,7 +86,6 @@ define(['src/trackball'], function(trackball) {
                 this.pointLight1.position = this.camera.position;
                 this.renderer.render(this.scene, this.camera);
             }
-
         },
 
         id: 'scene',

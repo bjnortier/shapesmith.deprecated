@@ -48,7 +48,6 @@ provide_content(ReqData, Context) ->
         Design = wrq:path_info(design, ReqData),
         Commit = wrq:get_qs_value("commit", ReqData),
         {ok, Host} = application:get_env(api, host),
-        {ok, ScriptsEnv} = application:get_env(ui, js_scripts_environment),
         Logo = case application:get_env(ui, logo) of
                 {ok, Path} -> Path;
                 undefined -> undefined

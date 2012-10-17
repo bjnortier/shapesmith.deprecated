@@ -37,41 +37,7 @@
   </head>
 <body oncontextmenu="return false;">
   <img id="logo" src="{{logo}}"/>
-  <div id="progress-container"></div>
-  <div id="messages-container"><ol></ol></div>
-  <div id="toolWheel"></div>
-  <div class="top-menu" id="design-details">
-    <span id="design-name">{{design}}</span>
-    <span class="action" id="action-save">save</span>
-    <div id="imports" class="collapsible">
-      <span class="action">import&hellip;</span>
-      <div id="import-options" class="options">
-        <input type="file" class="offscreen" id="stl-file-select-input"/>
-        <input type="file" class="offscreen" id="json-file-select-input"/>
-        <span class="action" id="action-import-stl">stl</span>
-        <span class="action" id="action-import-json">json</span>
-      </div>
-    </div>
-    <div id="exports" class="collapsible">
-      <span class="action">export&hellip;</span>
-      <div id="export-options" class="options">
-	<span class="action" id="action-export-stl">stl</span>
-        <span class="action" id="action-export-json">json</span>
-	{{#session}}
-        <span class="action" id="action-export-thingiverse">thingiverse</span>
-	{{/session}}
-      </div>
-    </div>
-  </div>
-  <div class="top-menu" id="session">
-    <span class="action"><a href="https://github.com/bjnortier/shapesmith/wiki">help</a></span>
-    &nbsp;
-    <span class="action"><a href="/{{username}}/designs">my designs</a></span>
-    {{#session}}
-    <span class="action"><a href="/signout">sign out</a></span>
-    {{/session}}
-    <span id="username">{{username}}</span>
-  </div>
+
   <script type="text/javascript">
 
     var _gaq = _gaq || [];

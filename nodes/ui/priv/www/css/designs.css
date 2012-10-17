@@ -174,7 +174,7 @@ input.field {
     width: 16px;
     height: 16px;
     display: none;
-    background: no-repeat url("/static/images/delete_button_gray.png");
+    background: no-repeat url("/ui/images/delete_button_gray.png");
     
 }
 
@@ -184,7 +184,7 @@ input.field {
 
 .delete-button:hover {
     display: inline;
-    background: no-repeat url("/static/images/delete_button_red.png");
+    background: no-repeat url("/ui/images/delete_button_red.png");
 
 }
 

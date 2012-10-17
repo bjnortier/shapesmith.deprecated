@@ -148,7 +148,8 @@ body {
 img#logo {
     position: absolute;
     right: 10px;
-    bottom: 0px;
+    bottom: 10px;
+    height: 50px;
 }
 
 #design-details {

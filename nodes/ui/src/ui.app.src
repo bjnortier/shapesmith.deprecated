@@ -13,6 +13,6 @@
                  ]},
   {mod, { ui_app, []}},
   {env, [
-         {logo, "/ui/images/logo_small.png"}
+         {logo, "/ui/images/smith_only.png"}
         ]}
  ]}.
