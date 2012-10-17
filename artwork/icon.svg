@@ -14,7 +14,7 @@
    id="svg8717"
    version="1.1"
    inkscape:version="0.48.2 r9819"
-   sodipodi:docname="New document 38">
+   sodipodi:docname="icon.svg">
   <defs
      id="defs3" />
   <sodipodi:namedview
@@ -26,15 +26,15 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="2.8"
-     inkscape:cx="200.26277"
-     inkscape:cy="575.26183"
+     inkscape:cx="137.04848"
+     inkscape:cy="546.6904"
      inkscape:current-layer="layer1"
      showgrid="true"
      units="mm"
-     inkscape:window-width="822"
-     inkscape:window-height="628"
-     inkscape:window-x="0"
-     inkscape:window-y="265"
+     inkscape:window-width="1555"
+     inkscape:window-height="960"
+     inkscape:window-x="1741"
+     inkscape:window-y="42"
      inkscape:window-maximized="0">
     <inkscape:grid
        type="xygrid"
@@ -61,7 +61,7 @@
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:none;stroke:none;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:none;stroke:#ffffff;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="rect8725"
        width="60"
        height="60"
@@ -80,5 +80,41 @@
        sodipodi:rx="5"
        sodipodi:ry="5"
        d="m 205,462.36218 a 5,5 0 1 1 -10,0 5,5 0 1 1 10,0 z" />
+    <rect
+       style="fill:none;stroke:none;stroke-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect8725-6"
+       width="60"
+       height="60"
+       x="170"
+       y="512.36218"
+       ry="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/line32x32.png"
+       inkscape:export-xdpi="48"
+       inkscape:export-ydpi="48" />
+    <path
+       transform="translate(-15,95)"
+       sodipodi:type="arc"
+       style="fill:#ffffff;fill-opacity:1;stroke:#54b2ff;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="path9235-2"
+       sodipodi:cx="200"
+       sodipodi:cy="462.36218"
+       sodipodi:rx="5"
+       sodipodi:ry="5"
+       d="m 205,462.36218 a 5,5 0 1 1 -10,0 5,5 0 1 1 10,0 z" />
+    <path
+       transform="translate(15,65)"
+       sodipodi:type="arc"
+       style="fill:#ffffff;fill-opacity:1;stroke:#54b2ff;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="path9235-2-0"
+       sodipodi:cx="200"
+       sodipodi:cy="462.36218"
+       sodipodi:rx="5"
+       sodipodi:ry="5"
+       d="m 205,462.36218 a 5,5 0 1 1 -10,0 5,5 0 1 1 10,0 z" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 185,557.36218 30,-30"
+       id="path3800"
+       inkscape:connector-curvature="0" />
   </g>
 </svg>

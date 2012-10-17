@@ -1,10 +1,10 @@
-define(['src/calculations'], function(calc) {
+define(['src/calculations', 'src/interactioncoordinator'], function(calc, coordinator) {
 
     var Model = Backbone.Model.extend({
 
         initialize: function(attributes) {
             _.extend(this, Backbone.Events);
-            SS.interactionCoordinator.on('mousemove', this.mousemove, this);
+            coordinator.on('mousemove', this.mousemove, this);
             this.scene = attributes.sceneView.scene;
             this.camera = attributes.sceneView.camera;
             this.views = [
@@ -85,7 +85,7 @@ define(['src/calculations'], function(calc) {
             scene.remove(this.sceneObject);
             this.sceneObject = new THREE.Object3D();
 
-            if (this.model.lastPosition && SS.interactionCoordinator.hasActiveTool()) {
+            if (this.model.lastPosition && coordinator.hasActiveTool()) {
                 var materials = [
                     new THREE.MeshBasicMaterial( { color: 0xffff00, opacity: 0.7, wireframe: false } ),
                     // new THREE.MeshBasicMaterial( { color: 0x00bb00, wireframe: true, transparent: false, side: THREE.DoubleSide } ),

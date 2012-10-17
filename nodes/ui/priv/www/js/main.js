@@ -15,8 +15,6 @@ requirejs(
 
     $(document).ready(function() {
 
-        SS.interactionCoordinator = new interactionCoordinator.Coordinator();
-        
         SS.sceneModel = new scene.Model();
         geomtoolbar.create();
         SS.workplaneModel = new workplane.Model({sceneView: SS.sceneModel.view});

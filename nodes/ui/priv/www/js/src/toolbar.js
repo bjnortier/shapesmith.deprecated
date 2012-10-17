@@ -1,18 +1,18 @@
-define([], function() {
+define(['src/interactioncoordinator'], function(coordinator) {
 
     var ItemModel = Backbone.Model.extend({
 
         initialize: function(attributes) {
             this.active = false;
             this.view = new ItemView({model: this});
-            SS.interactionCoordinator.on('toolActivated', this.toolActivated, this);
+            coordinator.on('toolActivated', this.toolActivated, this);
         },
 
         click: function() {
             if (!this.active) {
-                SS.interactionCoordinator.activateTool(this.name);
+                coordinator.activateTool(this.name);
             } else {
-                SS.interactionCoordinator.deactivateTool(this.name);
+                coordinator.deactivateTool(this.name);
             }
         },
 

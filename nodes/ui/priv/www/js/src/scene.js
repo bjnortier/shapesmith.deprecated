@@ -1,4 +1,4 @@
-define(['src/trackball'], function(trackball) {
+define(['src/trackball', 'src/interactioncoordinator'], function(trackball, coordinator) {
 
     var Model = Backbone.Model.extend({
 
@@ -14,14 +14,15 @@ define(['src/trackball'], function(trackball) {
 
             _.extend(this, Backbone.Events);
 
+            var that = this;
             window.addEventListener('resize', function(event) {
                 that.resize(event);
             }, false);
-            SS.interactionCoordinator.on('mousemove', this.mousemove, this);
-            SS.interactionCoordinator.on('mouseup', this.mouseup, this);
-            SS.interactionCoordinator.on('mousedown', this.mousedown, this);
-            SS.interactionCoordinator.on('mousewheel', this.mousewheel, this);
-            SS.interactionCoordinator.on('keydown', this.keydown, this);
+            coordinator.on('mousemove', this.mousemove, this);
+            coordinator.on('mouseup', this.mouseup, this);
+            coordinator.on('mousedown', this.mousedown, this);
+            coordinator.on('mousewheel', this.mousewheel, this);
+            coordinator.on('keydown', this.keydown, this);
 
             var width = this.$el.width();
             var height = this.$el.height();

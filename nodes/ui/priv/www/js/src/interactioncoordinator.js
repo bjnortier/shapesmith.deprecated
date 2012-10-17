@@ -37,8 +37,7 @@ define([], function() {
         return this.activeTool !== undefined;
     }
 
-    return {
-        Coordinator: Coordinator,
-    };
+    var coordinator = new Coordinator();
+    return coordinator;
 
 });
