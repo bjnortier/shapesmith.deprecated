@@ -20,7 +20,7 @@ define(['src/trackball'], function(trackball) {
             this.scene = new THREE.Scene();
 
             // Camera
-            this.camera = new THREE.PerspectiveCamera(30, this.width/this.height, 1, 1000);
+            this.camera = new THREE.PerspectiveCamera(30, this.width/this.height, 1, 10000);
             this.camera.up = new THREE.Vector3(0,0,1);
             this.camera.position = new THREE.Vector3(0,0,1000);
             this.camera.lookAt(new THREE.Vector3(0,0,0));
@@ -86,22 +86,29 @@ define(['src/trackball'], function(trackball) {
         id: 'scene',
 
         events: {
-            'mousedown' : 'mousedown',
-            'mousemove' : 'mousemove',
-            'mouseup'   : 'mouseup',
+            'mousedown'      : 'mousedown',
+            'mousemove'      : 'mousemove',
+            'mouseup'        : 'mouseup',
+            'mousewheel'     : 'mousewheel',
+            'DOMMouseScroll' : 'mousewheel', // For Firefox
         },
 
         mouseup: function(event) {
             this.trackball.mouseup(event);
         },        
 
-        mousedown: function() {
+        mousedown: function(event) {
             this.trackball.mousedown(event);
         },        
 
-        mousemove: function() {
+        mousemove: function(event) {
             this.trackball.mousemove(event);
         },
+
+        mousewheel: function(event) {
+            this.trackball.mousewheel(event);
+        },
+
 
     });
     

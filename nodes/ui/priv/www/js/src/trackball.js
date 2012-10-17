@@ -77,6 +77,23 @@ define(function() {
         this.lastMousePosition = eventToPosition(event);
     };
 
+    Trackball.prototype.mousewheel = function(event) {
+        var factor = 0.01;
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.originalEvent.wheelDelta) {
+            this.zoom(event.originalEvent.wheelDelta * Math.sqrt(this.position.distance)*factor);
+        }
+        // For Firefox
+        if (event.originalEvent.detail) {
+            this.zoom(-event.originalEvent.detail*60 * Math.sqrt(this.position.distance)*factor);
+        }
+    };
+
+    Trackball.prototype.zoom = function(delta) {
+        this.target.distance -= delta;
+    }
+
     Trackball.prototype.updateCamera = function() {
         var damping = 0.25;
         this.position.azimuth += (this.target.azimuth - this.position.azimuth) * damping;
