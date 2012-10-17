@@ -17,7 +17,10 @@ define(['src/trackball'], function(trackball) {
 
             var that = this;
             window.addEventListener('keydown', function(event) {
-                that.keydown(event)
+                that.keydown(event);
+            }, false);
+            window.addEventListener('resize', function(event) {
+                that.resize(event);
             }, false);
 
             this.width = this.$el.width();
@@ -81,10 +84,11 @@ define(['src/trackball'], function(trackball) {
             var lastCameraPosition = this.camera.position.clone();
             this.trackball.updateCamera(this.scene);
             var dCameraPosition = new THREE.Vector3().sub(this.camera.position, lastCameraPosition);
-            if (dCameraPosition.length() > 0.1) {
+            if ((dCameraPosition.length() > 0.1) || (this.updateScene)) {
                 this.trigger('cameraChange', this.camera.position);
                 this.pointLight1.position = this.camera.position;
                 this.renderer.render(this.scene, this.camera);
+                this.updateScene = false;
             }
         },
 
@@ -118,6 +122,13 @@ define(['src/trackball'], function(trackball) {
             this.trackball.keydown(event);
         },
 
+        resize: function(event) {
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.updateProjectionMatrix();
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+            this.trigger('cameraChange', this.camera.potion);
+            this.updateScene = true;
+        },
 
     });
     
