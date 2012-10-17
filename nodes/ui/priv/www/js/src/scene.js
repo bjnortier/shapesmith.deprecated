@@ -23,12 +23,12 @@ define(['src/trackball'], function(trackball) {
                 that.resize(event);
             }, false);
 
-            this.width = this.$el.width();
-            this.height = this.$el.height();
+            var width = this.$el.width();
+            var height = this.$el.height();
             this.scene = new THREE.Scene();
 
             // Camera
-            this.camera = new THREE.PerspectiveCamera(30, this.width/this.height, 1, 10000);
+            this.camera = new THREE.PerspectiveCamera(30, width/height, 1, 10000);
             this.camera.up = new THREE.Vector3(0,0,1);
             this.camera.position = new THREE.Vector3(0,0,1000);
             this.camera.lookAt(new THREE.Vector3(0,0,0));
@@ -38,7 +38,7 @@ define(['src/trackball'], function(trackball) {
             this.renderer = new THREE.WebGLRenderer({antialias: true});
             this.renderer.autoClear = true;
             this.renderer.setClearColorHex(0x080808, 0.0);
-            this.renderer.setSize(this.width, this.height);
+            this.renderer.setSize(width, height);
             this.renderer.sortObjects = false;
 
             // Lights
