@@ -54,9 +54,21 @@ img#logo {
 }
 
 .toolbar {
+    background: rgba(51, 51, 51, 0.46);
     position: absolute;
-    left: 10px;
-    top: 10px;
+    margin-left: -37px;
+    left: 50%;
+    bottom: 16px;
+    padding: 5px;
+    padding-bottom: 10px;
+}
+
+.toolbar li {
+    list-style-type: none;
+    display: inline;    
+    padding-left: 2px;
+    padding-right: 2px;
+    margin-bottom: 10px;
 }
 
 .toolbar li:hover {

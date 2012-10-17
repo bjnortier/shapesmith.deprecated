@@ -3,13 +3,25 @@ define([], function() {
     var ItemModel = Backbone.Model.extend({
 
         initialize: function(attributes) {
+            this.active = false;
             this.view = new ItemView({model: this});
+            SS.interactionCoordinator.on('toolActivated', this.toolActivated, this);
         },
 
         click: function() {
-            this.activated = SS.interactionCoordinator.activateTool(this.name);
-            if (this.activated && !this.view.$el.hasClass('activated')) {
+            if (!this.active) {
+                SS.interactionCoordinator.activateTool(this.name);
+            } else {
+                SS.interactionCoordinator.deactivateTool(this.name);
+            }
+        },
+
+        toolActivated: function(name) {
+            this.active = (name === this.name);
+            if (this.active) {
                 this.view.$el.addClass('activated');
+            } else {
+                this.view.$el.removeClass('activated');
             }
         },
 

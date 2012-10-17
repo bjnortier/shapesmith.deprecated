@@ -2,7 +2,7 @@ define([], function() {
 
     var Coordinator = function() {
         _.extend(this, Backbone.Events);
-        this.toolState = undefined;
+        this.activeTool = undefined;
 
         var that = this;
         window.addEventListener('keydown', function(event) {
@@ -24,13 +24,17 @@ define([], function() {
     }
 
     Coordinator.prototype.activateTool = function(name) {
-        this.toolState = name;
+        this.activeTool = name;
         this.trigger('toolActivated', name);
-        return true;
+    }
+
+    Coordinator.prototype.deactivateTool = function(name) {
+        this.activeTool = undefined;
+        this.trigger('toolActivated', undefined);
     }
 
     Coordinator.prototype.hasActiveTool = function(name) {
-        return this.toolState !== undefined;
+        return this.activeTool !== undefined;
     }
 
     return {
