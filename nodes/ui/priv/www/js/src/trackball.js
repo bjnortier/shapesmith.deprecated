@@ -28,7 +28,7 @@ define(function() {
 
     Trackball.prototype.mousemove = function(event) {
 
-        if (this.mouseDownPosition) {
+        if (this.mouseDownPosition && this.lastMousePosition) {
             var eventPosition = eventToPosition(event);
             var dMouseFromDown = {
                 x: eventPosition.x - this.mouseDownPosition.x,

@@ -65,3 +65,8 @@ img#logo {
     border: solid thin #ECECEC;
     cursor: pointer;
 }
+
+.toolbar .item.activated {
+    border-radius: 3px;
+    border: solid thin #ffff00;
+}
