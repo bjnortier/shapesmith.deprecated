@@ -15,6 +15,11 @@ define(['src/trackball'], function(trackball) {
 
             _.extend(this, Backbone.Events);
 
+            var that = this;
+            window.addEventListener('keydown', function(event) {
+                that.keydown(event)
+            }, false);
+
             this.width = this.$el.width();
             this.height = this.$el.height();
             this.scene = new THREE.Scene();
@@ -107,6 +112,10 @@ define(['src/trackball'], function(trackball) {
 
         mousewheel: function(event) {
             this.trackball.mousewheel(event);
+        },
+
+        keydown: function(event) {
+            this.trackball.keydown(event);
         },
 
 

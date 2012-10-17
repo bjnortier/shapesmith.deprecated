@@ -90,6 +90,22 @@ define(function() {
         }
     };
 
+    Trackball.prototype.keydown = function(event) {
+        var factor = 10;
+        switch (event.keyCode) {
+        case 187:
+        case 107:
+            this.zoom(Math.sqrt(this.position.distance)*factor);
+            event.preventDefault();
+            break;
+        case 189:
+        case 109:
+            this.zoom(-Math.sqrt(this.position.distance)*factor);
+            event.preventDefault();
+            break;
+        }
+    }
+
     Trackball.prototype.zoom = function(delta) {
         this.target.distance -= delta;
     }
