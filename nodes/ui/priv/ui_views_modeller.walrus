@@ -8,6 +8,7 @@
     <script type="text/javascript" src="/ui/js/lib/jquery-1.7.1.min.js"></script>
     <script type="text/javascript" src="/ui/js/lib/jquery.mustache.js"></script>
     <script type="text/javascript" src="/ui/js/lib/jquery.getQueryParam.1.0.0.min.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/jquery.mousewheel.min.js"></script>
     <script type="text/javascript" src="/ui/js/lib/Detector.js"></script>
     <script type="text/javascript" src="/ui/js/lib/three.min.js"></script>
     <script type="text/javascript" src="/ui/js/lib/underscore-min.js"></script>
@@ -35,6 +36,7 @@
   
   </head>
 <body oncontextmenu="return false;">
+  <div id="scene"></div>
   <img id="logo" src="{{logo}}"/>
 
   <script type="text/javascript">

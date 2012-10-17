@@ -7,7 +7,6 @@ define([], function() {
         },
 
         click: function() {
-            console.log('click!');
             this.activated = SS.interactionCoordinator.activateTool(this.name);
             if (this.activated && !this.view.$el.hasClass('activated')) {
                 this.view.$el.addClass('activated');

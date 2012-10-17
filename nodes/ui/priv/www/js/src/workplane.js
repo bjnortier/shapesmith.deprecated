@@ -4,7 +4,7 @@ define(['src/calculations'], function(calc) {
 
         initialize: function(attributes) {
             _.extend(this, Backbone.Events);
-            attributes.sceneView.on('mousemove', this.mousemove, this);
+            SS.interactionCoordinator.on('mousemove', this.mousemove, this);
             this.scene = attributes.sceneView.scene;
             this.camera = attributes.sceneView.camera;
             this.views = [

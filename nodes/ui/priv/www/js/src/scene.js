@@ -3,7 +3,7 @@ define(['src/trackball'], function(trackball) {
     var Model = Backbone.Model.extend({
 
         initialize: function(attributes) {
-            this.view = new View({model: this});
+            this.view = new View({model: this, el: document.getElementById('scene')});
         },
 
     });
@@ -11,17 +11,17 @@ define(['src/trackball'], function(trackball) {
     var View = Backbone.View.extend({
 
         initialize: function() {
-            $('body').append(this.$el);
 
             _.extend(this, Backbone.Events);
 
-            var that = this;
-            window.addEventListener('keydown', function(event) {
-                that.keydown(event);
-            }, false);
             window.addEventListener('resize', function(event) {
                 that.resize(event);
             }, false);
+            SS.interactionCoordinator.on('mousemove', this.mousemove, this);
+            SS.interactionCoordinator.on('mouseup', this.mouseup, this);
+            SS.interactionCoordinator.on('mousedown', this.mousedown, this);
+            SS.interactionCoordinator.on('mousewheel', this.mousewheel, this);
+            SS.interactionCoordinator.on('keydown', this.keydown, this);
 
             var width = this.$el.width();
             var height = this.$el.height();
@@ -94,27 +94,16 @@ define(['src/trackball'], function(trackball) {
 
         id: 'scene',
 
-        events: {
-            'mousedown'      : 'mousedown',
-            'mousemove'      : 'mousemove',
-            'mouseup'        : 'mouseup',
-            'mousewheel'     : 'mousewheel',
-            'DOMMouseScroll' : 'mousewheel', // For Firefox
-        },
-
         mouseup: function(event) {
             this.trackball.mouseup(event);
-            this.trigger('mouseup', event);
         },        
 
         mousedown: function(event) {
             this.trackball.mousedown(event);
-            this.trigger('mousedown', event);
         },        
 
         mousemove: function(event) {
             this.trackball.mousemove(event);
-            this.trigger('mousemove', event);
         },
 
         mousewheel: function(event) {
