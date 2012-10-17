@@ -8,9 +8,8 @@
     <script type="text/javascript" src="/ui/js/lib/jquery-1.7.1.min.js"></script>
     <script type="text/javascript" src="/ui/js/lib/jquery.mustache.js"></script>
     <script type="text/javascript" src="/ui/js/lib/jquery.getQueryParam.1.0.0.min.js"></script>
-    <script type="text/javascript" src="/ui/js/lib/RequestAnimationFrame.js"></script>
     <script type="text/javascript" src="/ui/js/lib/Detector.js"></script>
-    <script type="text/javascript" src="/ui/js/lib/Three.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/three.min.js"></script>
     <script type="text/javascript" src="/ui/js/lib/underscore-min.js"></script>
     <script type="text/javascript" src="/ui/js/lib/backbone-min.js"></script>
     <script type="text/javascript" src="/ui/js/lib/csg-min.js"></script>
