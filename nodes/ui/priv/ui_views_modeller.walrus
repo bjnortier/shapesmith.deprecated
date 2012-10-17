@@ -39,30 +39,6 @@
   <img id="logo" src="{{logo}}"/>
   <div id="progress-container"></div>
   <div id="messages-container"><ol></ol></div>
-  <div id="black-overlay"></div>
-  <div id="thingiverse-export">
-    <div class="heading">Export to Thingiverse</div>
-    <div class="form">
-      <form method="POST" action="http://www.thingiverse.com/api/upload"  id="thingiyverse-export-form">
-	<input id="public_stl_location_b64" type="hidden" name="url" value=""/>
-	<input type="hidden" name="service" value="Shapesmith"/>
-	<input type="hidden" name="service_url" value="aHR0cDovL3NoYXBlc21pdGgubmV0">
-	<div class="inner1">
-	  <input type="text" placeholder="name" name="name" value="{{design}}"/><br>
-	</div>
-	<div class="inner1">
-	  <textarea placeholder="description" name="description" value=""></textarea><br>
-	</div>
-	<div class="inner2">
-	  <input class="ok" type="submit" value="export"/>
-	</div>
-	<div class="inner2">
-	  <input class="cancel" type="submit" value="cancel"/>
-	</div>
-    </form>
-    </div>
-    <div class="footer"></div>
-  </div>
   <div id="toolWheel"></div>
   <div class="top-menu" id="design-details">
     <span id="design-name">{{design}}</span>
@@ -95,29 +71,6 @@
     <span class="action"><a href="/signout">sign out</a></span>
     {{/session}}
     <span id="username">{{username}}</span>
-  </div>
-  <div id="toolbarStaging">
-    <div class="toolbar" id="edit"></div>
-    <div class="toolbar" id="3Dprimitives"></div>
-    <div class="toolbar" id="2Dprimitives"></div>
-    <div class="toolbar" id="1Dprimitives"></div>
-    <div class="toolbar" id="boolean"></div>
-    <div class="toolbar" id="transforms"></div>
-    <div class="toolbar" id="modifiers"></div>
-  </div>
-  <div id="floating-dom-view"><div class="params"></div><div  class="ok-cancel"></div></div>
-  <div id="treeview-container">
-    <div class="advanced">
-      <input type="checkbox" name="advanced" id="advanced-geometry-checkbox"/><label for="advanced-geometry-checkbox">geometry</label>
-    </div>
-    <div id="geom-model-doc"></div>
-  </div>
-
-  <div id="workplane-container">
-    <div class="advanced">
-      <input type="checkbox" name="advanced" id="advanced-workplane-checkbox"/><label for="advanced-workplane-checkbox">workplane</label>
-    </div>
-    <div id="workplane"></div>
   </div>
   <script type="text/javascript">
 
