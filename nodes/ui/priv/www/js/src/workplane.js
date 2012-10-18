@@ -42,7 +42,9 @@ define(['src/calculations', 'src/interactioncoordinator'], function(calc, coordi
             } else if (this.cursorViews.length === 0) {
                 this.cursorViews = [
                     new CursorView({model: this}),
+                    new CursorCoordinateConnectorView({model: this}),
                     new CursorCoordinateView({model: this}),
+                    new CursorCoordinateAxisProjectionView({model: this}),
                 ];
             }
         },
@@ -115,6 +117,30 @@ define(['src/calculations', 'src/interactioncoordinator'], function(calc, coordi
                 cubeCursor.position = calc.objToVector(this.model.lastPosition);
                 this.sceneObject.add(cubeCursor);
 
+                scene.add(this.sceneObject);
+            }
+        },
+    });
+
+    var CursorCoordinateConnectorView = Backbone.View.extend({
+
+        initialize: function() {
+            this.sceneObject = new THREE.Object3D();
+            this.model.on('lastPositionChanged', this.render, this);
+        },
+
+        remove: function() {
+            this.model.scene.remove(this.sceneObject);
+            this.model.off('lastPositionChanged', this.render, this);
+            this.model.sceneView.updateScene = true;
+        },
+
+        render: function() {
+            var scene = this.model.scene;
+            scene.remove(this.sceneObject);
+            this.sceneObject = new THREE.Object3D();
+
+            if (this.model.lastPosition && coordinator.hasActiveTool()) {
                 var cursorScreenCoordinates = calc.toScreenCoordinates(
                     this.model.camera, 
                     this.model.lastPosition.clone());
@@ -136,6 +162,48 @@ define(['src/calculations', 'src/interactioncoordinator'], function(calc, coordi
                 var line = new THREE.Line(lineGeometry, 
                     new THREE.LineBasicMaterial({ color: 0xffffff }));
                 this.sceneObject.add(line);
+
+                scene.add(this.sceneObject);
+            }
+        },
+    });
+
+    var CursorCoordinateAxisProjectionView = Backbone.View.extend({
+
+        initialize: function() {
+            this.sceneObject = new THREE.Object3D();
+            this.model.on('lastPositionChanged', this.render, this);
+        },
+
+        remove: function() {
+            this.model.scene.remove(this.sceneObject);
+            this.model.off('lastPositionChanged', this.render, this);
+            this.model.sceneView.updateScene = true;
+        },
+
+        render: function() {
+            var scene = this.model.scene;
+            scene.remove(this.sceneObject);
+            this.sceneObject = new THREE.Object3D();
+
+            if (this.model.lastPosition && coordinator.hasActiveTool()) {
+                var position = this.model.lastPosition;
+                var colors = {
+                    x: 0x3da033,
+                    y: 0x4394c2,
+                    z: 0xff706b,
+                }
+
+                for(key in colors) {
+                    if (position[key]) {
+                        var lineGeometry = new THREE.Geometry();
+                        lineGeometry.vertices.push(position);
+                        lineGeometry.vertices.push(position.clone()['set' + key.toUpperCase()](0));
+                        var line = new THREE.Line(lineGeometry, 
+                            new THREE.LineBasicMaterial({ color: colors[key]}));
+                        this.sceneObject.add(line);
+                    }
+                }
 
                 scene.add(this.sceneObject);
             }
@@ -170,7 +238,6 @@ define(['src/calculations', 'src/interactioncoordinator'], function(calc, coordi
             }
             return this;
         },
-
 
     });
 
