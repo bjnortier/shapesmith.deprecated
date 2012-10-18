@@ -7,7 +7,7 @@ define(['src/interactioncoordinator'], function(coordinator) {
         },
 
         click: function() {
-            coordinator.initiateTool(this.name, '/ui/images/icons/' + this.icon);
+            coordinator.initiateTool(this.name);
         },
 
     });

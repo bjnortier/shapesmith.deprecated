@@ -2,7 +2,6 @@ define(['src/geometrygraph', 'src/vertexwrapper'], function(geometrygraph, verte
 
     var Coordinator = function() {
         _.extend(this, Backbone.Events);
-        this.initiatedTool = undefined;
 
         var that = this;
         window.addEventListener('keydown', function(event) {
@@ -30,9 +29,10 @@ define(['src/geometrygraph', 'src/vertexwrapper'], function(geometrygraph, verte
         
     }
 
-    Coordinator.prototype.initiateTool = function(name, cursor) {
-        this.initiatedTool = name;
-        this.click(name);
+    Coordinator.prototype.initiateTool = function(name) {
+        if (name === 'point') {
+            geometrygraph.graph.createPoint();
+        }
     }
 
     Coordinator.prototype.vertexAdded = function(vertex) {
@@ -43,19 +43,6 @@ define(['src/geometrygraph', 'src/vertexwrapper'], function(geometrygraph, verte
     Coordinator.prototype.vertexRemoved = function(vertex) {
         this.editingModel = undefined;
         $('.toolbar').slideDown(100);
-        this.initiatedTool = undefined;
-    }
-
-    Coordinator.prototype.click = function() {
-        if (this.initiatedTool && !this.editingModel) {
-            if (this.initiatedTool === 'point') {
-                geometrygraph.graph.createPoint();
-            }
-        }
-    }
-
-    Coordinator.prototype.hasInitiatedTool = function(name) {
-        return this.initiatedTool !== undefined;
     }
 
     var coordinator = new Coordinator();
