@@ -57,12 +57,12 @@ img#logo {
 }
 
 .toolbar, .coordinate, .vertex {
-    position: absolute;
     background: rgba(51, 51, 51, 0.46);
     border-radius: 0px;
 }
 
 .toolbar {
+    position: absolute;
     margin-left: -37px;
     left: 50%;
     bottom: 16px;
@@ -78,7 +78,7 @@ img#logo {
     margin-bottom: 10px;
 }
 
-.toolbar li:hover, .okcancel div:hover {
+.toolbar li:hover, .okcancel .button:hover {
     border-bottom: solid 2px #fff;
     cursor: pointer;
 }
@@ -108,6 +108,7 @@ img#logo {
 }
 
 .vertex {
+    position: absolute;
     color: #fff;
     bottom: 16px;
     left: 50%;
@@ -124,12 +125,16 @@ img#logo {
 
 .vertex .okcancel {
     float: right;
+    padding: 5px;
 }
 
 .vertex .okcancel div {
     margin: 4px;
 }
 
+.vertex .coordinate {
+    padding: 5px;
+}
 
 
 

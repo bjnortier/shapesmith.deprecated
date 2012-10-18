@@ -48,12 +48,12 @@ define(['src/geometrygraph'], function(geometryGraph) {
 
         render: function() {
             var template = 
-                '<div class="okcancel">' + 
-                '<div class="ok"><img src="/ui/images/icons/ok24x24.png"/></div>' +
-                '<div class="cancel"><img src="/ui/images/icons/cancel24x24.png"/></div>' +
-                '</div>' + 
                 '<div class="title"><img src="/ui/images/icons/point32x32.png"/>' +
                 '<div class="name">Vertex</div>' + 
+                '<span class="okcancel">' + 
+                '<span class="ok button"><img src="/ui/images/icons/ok24x24.png"/></span>' +
+                '<span class="cancel button"><img src="/ui/images/icons/cancel24x24.png"/></span>' +
+                '</span>' + 
                 '</div>' + 
                 '<div class="coordinate">' +
                 '<span class="x">{{x}}</span><span class="y">{{y}}</span><span class="z">{{z}}</span>' +
