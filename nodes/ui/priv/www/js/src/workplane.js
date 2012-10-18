@@ -28,7 +28,7 @@ define(['src/calculations', 'src/interactioncoordinator', 'src/scene'], function
             if (!this.lastPosition || !positionOnWorkplane.equals(this.lastPosition)) {
                 this.lastPosition = positionOnWorkplane;
                 this.attributes.sceneView.updateScene = true;
-                this.trigger('lastPositionChanged', this.lastPosition);
+                this.trigger('positionChanged', this.lastPosition);
             }
 
         },
@@ -96,12 +96,12 @@ define(['src/calculations', 'src/interactioncoordinator', 'src/scene'], function
 
         initialize: function() {
             this.sceneObject = new THREE.Object3D();
-            this.model.on('lastPositionChanged', this.render, this);
+            this.model.on('positionChanged', this.render, this);
         },
 
         remove: function() {
             this.model.scene.remove(this.sceneObject);
-            this.model.off('lastPositionChanged', this.render, this);
+            this.model.off('positionChanged', this.render, this);
             this.model.sceneView.updateScene = true;
         },
 
@@ -126,12 +126,12 @@ define(['src/calculations', 'src/interactioncoordinator', 'src/scene'], function
 
         initialize: function() {
             this.sceneObject = new THREE.Object3D();
-            this.model.on('lastPositionChanged', this.render, this);
+            this.model.on('positionChanged', this.render, this);
         },
 
         remove: function() {
             this.model.scene.remove(this.sceneObject);
-            this.model.off('lastPositionChanged', this.render, this);
+            this.model.off('positionChanged', this.render, this);
             this.model.sceneView.updateScene = true;
         },
 
@@ -172,12 +172,12 @@ define(['src/calculations', 'src/interactioncoordinator', 'src/scene'], function
 
         initialize: function() {
             this.sceneObject = new THREE.Object3D();
-            this.model.on('lastPositionChanged', this.render, this);
+            this.model.on('positionChanged', this.render, this);
         },
 
         remove: function() {
             this.model.scene.remove(this.sceneObject);
-            this.model.off('lastPositionChanged', this.render, this);
+            this.model.off('positionChanged', this.render, this);
             this.model.sceneView.updateScene = true;
         },
 
@@ -217,12 +217,12 @@ define(['src/calculations', 'src/interactioncoordinator', 'src/scene'], function
         initialize: function() {
             $('body').append(this.$el);
             this.render();
-            this.model.on('lastPositionChanged', this.render, this);
+            this.model.on('positionChanged', this.render, this);
         },
 
         remove: function() {
             Backbone.View.prototype.remove.call(this);
-            this.model.off('lastPositionChanged', this.render, this);
+            this.model.off('positionChanged', this.render, this);
         },
 
         render: function() {

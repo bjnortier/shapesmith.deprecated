@@ -12,6 +12,7 @@ define([
             this.views = [
                 new DOMView({model: this})
             ];
+            workplane.on('positionChanged', this.workplanePositionChanged, this);
         },
 
         destroy: function() {
@@ -20,6 +21,13 @@ define([
             });
             this.views = [];
         },  
+
+        workplanePositionChanged: function(position) {
+            this.vertex.parameters.x = position.x;
+            this.vertex.parameters.y = position.y;
+            this.vertex.parameters.z = position.z;
+            this.trigger('parametersChanged');
+        },
 
         ok: function() {
             geometryGraph.graph.removeVertex(this.vertex);
@@ -40,10 +48,12 @@ define([
         initialize: function() {
             this.render();
             $('body').append(this.$el);
+            this.model.on('parametersChanged', this.updateParams, this);
         },
 
         remove: function() {
             Backbone.View.prototype.remove.call(this);
+            this.model.off('parametersChanged', this.updateParams, this);
         },
 
         events: {
@@ -70,6 +80,12 @@ define([
             }
             this.$el.html($.mustache(template, view));
             return this;
+        },
+
+        updateParams: function() {
+            this.$el.find('.coordinate').find('.x').text(this.model.vertex.parameters.x);
+            this.$el.find('.coordinate').find('.y').text(this.model.vertex.parameters.y);
+            this.$el.find('.coordinate').find('.z').text(this.model.vertex.parameters.z);
         },
 
         ok: function() {
