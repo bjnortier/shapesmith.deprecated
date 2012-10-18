@@ -56,9 +56,13 @@ img#logo {
     height: 50px;
 }
 
-.toolbar {
+.toolbar, .coordinate {
     background: rgba(51, 51, 51, 0.46);
     border-radius: 4px;
+
+}
+
+.toolbar {
     position: absolute;
     margin-left: -37px;
     left: 50%;
@@ -83,4 +87,28 @@ img#logo {
 .toolbar .item.activated {
     border-bottom: solid 2px #ff0;
 }
+
+.coordinate {
+    position: absolute;
+    padding: 2px;
+}
+
+.coordinate span {
+    padding: 2px;
+}
+
+.coordinate .x {
+    color: #3da033;
+}
+
+.coordinate .y {
+    color: #6dc4fe;
+}
+
+.coordinate .z {
+    color: #ff706b;
+}
+
+
+
 

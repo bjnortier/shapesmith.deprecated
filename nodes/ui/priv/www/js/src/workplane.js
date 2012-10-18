@@ -16,6 +16,10 @@ define(['src/calculations', 'src/interactioncoordinator'], function(calc, coordi
                 axis: new THREE.Vector3(0,0,1),
                 angle: 0
             }
+            this.coordinatesOffset = {
+                x: -20,
+                y: -20,
+            }
 
         },
 
@@ -38,6 +42,7 @@ define(['src/calculations', 'src/interactioncoordinator'], function(calc, coordi
             } else if (this.cursorViews.length === 0) {
                 this.cursorViews = [
                     new CursorView({model: this}),
+                    new CursorCoordinateView({model: this}),
                 ];
             }
         },
@@ -115,8 +120,8 @@ define(['src/calculations', 'src/interactioncoordinator'], function(calc, coordi
                     this.model.lastPosition.clone());
 
                 var fakeEvent = {
-                    clientX: cursorScreenCoordinates.x - 50,
-                    clientY: cursorScreenCoordinates.y - 50,
+                    clientX: cursorScreenCoordinates.x + this.model.coordinatesOffset.x,
+                    clientY: cursorScreenCoordinates.y + this.model.coordinatesOffset.y,
                 };
                 var normal = this.model.camera.position.clone().negate();
                 var endLineWorldPos = calc.positionOnPlane(
@@ -138,6 +143,34 @@ define(['src/calculations', 'src/interactioncoordinator'], function(calc, coordi
     });
 
     var CursorCoordinateView = Backbone.View.extend({
+
+        className: 'coordinate',
+
+        initialize: function() {
+            $('body').append(this.$el);
+            this.render();
+            this.model.on('lastPositionChanged', this.render, this);
+        },
+
+        remove: function() {
+            Backbone.View.prototype.remove.call(this);
+            this.model.off('lastPositionChanged', this.render, this);
+        },
+
+        render: function() {
+            if (this.model.lastPosition) {
+                var template = '<span class="x">{{x}}</span><span class="y">{{y}}</span><span class="z">{{z}}</span>';
+                this.$el.html($.mustache(template, this.model.lastPosition));
+
+                var cursorScreenCoordinates = calc.toScreenCoordinates(
+                    this.model.camera, 
+                    this.model.lastPosition.clone());
+                this.$el.css('right', (window.innerWidth - cursorScreenCoordinates.x - this.model.coordinatesOffset.x) + 'px');
+                this.$el.css('bottom', (window.innerHeight - cursorScreenCoordinates.y - this.model.coordinatesOffset.y)+ 'px');
+            }
+            return this;
+        },
+
 
     });
 
