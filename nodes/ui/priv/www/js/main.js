@@ -6,19 +6,18 @@ requirejs(
         'src/scene', 
         'src/geomtoolbar',
         'src/workplane',
+        'src/trackball',
+        'src/vertexwrapper'
     ], function(
-        interactionCoordinator,
-        scene, 
+        coordinator,
+        scene,
         geomtoolbar,
-        workplane
+        workplane,
+        trackball,
+        vertexWrapper
     ) {
 
     $(document).ready(function() {
-
-        SS.sceneModel = new scene.Model();
-        geomtoolbar.create();
-        SS.workplaneModel = new workplane.Model({sceneView: SS.sceneModel.view});
-
     });
 
 });

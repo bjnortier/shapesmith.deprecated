@@ -1,4 +1,9 @@
-define(['src/geometrygraph'], function(geometryGraph) {
+define([
+        'src/geometrygraph', 
+        'src/interactioncoordinator', 
+        'src/workplane',
+    ], 
+    function(geometryGraph, coordinator, workplane) {
 
     var Model = Backbone.Model.extend({
 
@@ -77,8 +82,13 @@ define(['src/geometrygraph'], function(geometryGraph) {
 
     });
 
-    return {
-        Model: Model
-    };
+    var editingModel = undefined;
+    geometryGraph.graph.on('vertexAdded', function(vertex) {
+        editingModel = new Model(vertex);
+    });
+    geometryGraph.graph.on('vertexRemoved', function(vertex) {
+        editingModel = undefined;
+    }, this);
+
 
 });

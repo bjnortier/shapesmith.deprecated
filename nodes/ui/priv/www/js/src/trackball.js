@@ -1,4 +1,4 @@
-define(function() {
+define(['src/scene',  'src/interactioncoordinator'], function(sceneModel, coordinator) {
 
     var Trackball = function(scene, camera) {
         this.camera = camera;
@@ -11,6 +11,12 @@ define(function() {
         this.position = { azimuth: -1.373, elevation: 1.08, distance: 1000 };
         this.target = { azimuth: -1.373, elevation: 1.08, distance: 300, scenePosition: new THREE.Vector3() };
 
+        coordinator.on('mousemove', this.mousemove, this);
+        coordinator.on('mousedown', this.mousedown, this);
+        coordinator.on('mouseup', this.mouseup, this);
+        coordinator.on('mousewheel', this.mousewheel, this);
+        coordinator.on('keydown', this.keydown, this);
+        sceneModel.view.on('prerender', this.updateCamera, this);
     };
 
     Trackball.prototype.mousedown = function(event) {
@@ -156,10 +162,7 @@ define(function() {
         };
     }
 
+    return new Trackball(sceneModel.view.scene, sceneModel.view.camera);
 
-
-    return {
-        Trackball: Trackball
-    }
 
 });

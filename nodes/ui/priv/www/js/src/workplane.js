@@ -1,4 +1,4 @@
-define(['src/calculations', 'src/interactioncoordinator'], function(calc, coordinator) {
+define(['src/calculations', 'src/interactioncoordinator', 'src/scene'], function(calc, coordinator, sceneModel) {
 
     var Model = Backbone.Model.extend({
 
@@ -241,8 +241,6 @@ define(['src/calculations', 'src/interactioncoordinator'], function(calc, coordi
 
     });
 
-    return {
-        Model: Model
-    }
+    return new Model({sceneView: sceneModel.view});
 
 });

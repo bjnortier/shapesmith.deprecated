@@ -1,4 +1,4 @@
-define(['src/geometrygraph', 'src/vertexwrapper'], function(geometrygraph, vertexWrapper) {
+ define(['src/geometrygraph'], function(geometryGraph) {
 
     var Coordinator = function() {
         _.extend(this, Backbone.Events);
@@ -19,33 +19,25 @@ define(['src/geometrygraph', 'src/vertexwrapper'], function(geometrygraph, verte
         $('#scene').mousewheel(function(event) {
             that.trigger('mousewheel', event);
         });
-        $('#scene').click(function(event) {
-            that.trigger('click', event);
-            that.click(event);
-        });
 
-        geometrygraph.graph.on('vertexAdded', this.vertexAdded, this);
-        geometrygraph.graph.on('vertexRemoved', this.vertexRemoved, this);
+        geometryGraph.graph.on('vertexAdded', this.vertexAdded, this);
+        geometryGraph.graph.on('vertexRemoved', this.vertexRemoved, this);
         
     }
 
     Coordinator.prototype.initiateTool = function(name) {
         if (name === 'point') {
-            geometrygraph.graph.createPoint();
+            geometryGraph.graph.createPoint();
         }
     }
 
     Coordinator.prototype.vertexAdded = function(vertex) {
-        this.editingModel = new vertexWrapper.Model(vertex);
         $('.toolbar').slideUp(100);
     }
 
     Coordinator.prototype.vertexRemoved = function(vertex) {
-        this.editingModel = undefined;
         $('.toolbar').slideDown(100);
-    }
+    }       
 
-    var coordinator = new Coordinator();
-    return coordinator;
-
+    return new Coordinator();
 });

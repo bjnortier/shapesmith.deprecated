@@ -12,12 +12,10 @@ define(['src/toolbar'], function(toolbar) {
     });
 
 
-    return {
-        create: function() {
-            var toolbarModel = new toolbar.Model({name: 'geometry'});
-            toolbarModel.addItem(new PointModel());
-            toolbarModel.addItem(new LineModel());
-        }
-    };
+
+    var toolbarModel = new toolbar.Model({name: 'geometry'});
+    toolbarModel.addItem(new PointModel());
+    toolbarModel.addItem(new LineModel());
+    return toolbarModel;
 
 });

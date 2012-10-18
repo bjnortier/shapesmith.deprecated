@@ -1,4 +1,4 @@
-define(['src/trackball', 'src/interactioncoordinator'], function(trackball, coordinator) {
+define(['src/interactioncoordinator'], function(coordinator) {
 
     var Model = Backbone.Model.extend({
 
@@ -11,7 +11,7 @@ define(['src/trackball', 'src/interactioncoordinator'], function(trackball, coor
     var View = Backbone.View.extend({
 
         initialize: function() {
-
+            
             _.extend(this, Backbone.Events);
 
             var that = this;
@@ -68,7 +68,7 @@ define(['src/trackball', 'src/interactioncoordinator'], function(trackball, coor
             }
 
             this.el.appendChild(this.renderer.domElement);
-            this.trackball = new trackball.Trackball(this.scene, this.camera);
+            this.updateScene = true;
             this.animate();
         },
 
@@ -82,8 +82,11 @@ define(['src/trackball', 'src/interactioncoordinator'], function(trackball, coor
         },
 
         render: function() {
+            // Pre-rendered state
             var lastCameraPosition = this.camera.position.clone();
-            this.trackball.updateCamera(this.scene);
+
+            this.trigger('prerender');
+
             var dCameraPosition = new THREE.Vector3().sub(this.camera.position, lastCameraPosition);
             if ((dCameraPosition.length() > 0.1) || (this.updateScene)) {
                 this.trigger('cameraChange', this.camera.position);
@@ -95,26 +98,6 @@ define(['src/trackball', 'src/interactioncoordinator'], function(trackball, coor
 
         id: 'scene',
 
-        mouseup: function(event) {
-            this.trackball.mouseup(event);
-        },        
-
-        mousedown: function(event) {
-            this.trackball.mousedown(event);
-        },        
-
-        mousemove: function(event) {
-            this.trackball.mousemove(event);
-        },
-
-        mousewheel: function(event) {
-            this.trackball.mousewheel(event);
-        },
-
-        keydown: function(event) {
-            this.trackball.keydown(event);
-        },
-
         resize: function(event) {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
@@ -125,8 +108,6 @@ define(['src/trackball', 'src/interactioncoordinator'], function(trackball, coor
 
     });
     
-    return {
-        Model: Model
-    };
+    return new Model();
 
 });
