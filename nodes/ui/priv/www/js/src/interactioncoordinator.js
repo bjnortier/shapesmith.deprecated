@@ -32,30 +32,33 @@ define(['src/geometrygraph', 'src/vertexwrapper'], function(geometrygraph, verte
 
     Coordinator.prototype.initiateTool = function(name, cursor) {
         this.initiatedTool = name;
-        this.trigger('toolInitiated', name);
-        $('#scene').css('cursor', 'url(' + cursor + '), crosshair');
+        this.click(name);
+        // this.trigger('toolInitiated', name);
+        // $('#scene').css('cursor', 'url(' + cursor + '), crosshair');
     }
 
     Coordinator.prototype.uninitiateTool = function() {
-        this.initiatedTool = undefined;
-        this.trigger('toolInitiated', undefined);
-        $('#scene').css('cursor', '');
+        // this.initiatedTool = undefined;
+        // this.trigger('toolInitiated', undefined);
+        // $('#scene').css('cursor', '');
     }
 
     Coordinator.prototype.vertexAdded = function(vertex) {
-        if (this.initiatedTool) {
-            this.uninitiateTool(this.initiatedTool);
-        }
-        new vertexWrapper.Model(vertex);
+        // if (this.initiatedTool) {
+        //     this.uninitiateTool(this.initiatedTool);
+        // }
+        this.editingModel = new vertexWrapper.Model(vertex);
         $('.toolbar').hide();
     }
 
     Coordinator.prototype.vertexRemoved = function(vertex) {
+        this.editingModel = undefined;
         $('.toolbar').show();
+        this.initiatedTool = undefined;
     }
 
     Coordinator.prototype.click = function() {
-        if (this.initiatedTool) {
+        if (this.initiatedTool && !this.editingModel) {
             if (this.initiatedTool === 'point') {
                 geometrygraph.graph.createPoint();
             }

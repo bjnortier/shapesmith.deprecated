@@ -17,7 +17,8 @@ define(['src/geometrygraph'], function(geometryGraph) {
         },  
 
         ok: function() {
-
+            geometryGraph.graph.removeVertex(this.vertex);
+            this.destroy();
         },
 
         cancel: function() {
