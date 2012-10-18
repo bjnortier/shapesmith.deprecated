@@ -5,7 +5,7 @@ define(['src/interactioncoordinator'], function(coordinator) {
         initialize: function(attributes) {
             this.active = false;
             this.view = new ItemView({model: this});
-            coordinator.on('toolActivated', this.toolActivated, this);
+            coordinator.on('toolInitiated', this.toolInitiated, this);
         },
 
         click: function() {
@@ -16,12 +16,12 @@ define(['src/interactioncoordinator'], function(coordinator) {
             }
         },
 
-        toolActivated: function(name) {
+        toolInitiated: function(name) {
             this.active = (name === this.name);
             if (this.active) {
-                this.view.$el.addClass('activated');
+                this.view.$el.addClass('initiated');
             } else {
-                this.view.$el.removeClass('activated');
+                this.view.$el.removeClass('initiated');
             }
         },
 

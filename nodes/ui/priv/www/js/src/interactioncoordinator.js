@@ -31,13 +31,13 @@ define(['src/geometrygraph'], function(geometrygraph) {
 
     Coordinator.prototype.activateTool = function(name, cursor) {
         this.activeTool = name;
-        this.trigger('toolActivated', name);
+        this.trigger('toolInitiated', name);
         $('#scene').css('cursor', 'url(' + cursor + '), crosshair');
     }
 
     Coordinator.prototype.deactivateTool = function(name) {
         this.activeTool = undefined;
-        this.trigger('toolActivated', undefined);
+        this.trigger('toolInitiated', undefined);
         $('#scene').css('cursor', '');
     }
 

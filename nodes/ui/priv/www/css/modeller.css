@@ -84,7 +84,7 @@ img#logo {
     cursor: pointer;
 }
 
-.toolbar .item.activated {
+.toolbar .item.initiated {
     border-bottom: solid 2px #ff0;
 }
 

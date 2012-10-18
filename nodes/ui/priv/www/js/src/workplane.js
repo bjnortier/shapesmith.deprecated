@@ -5,7 +5,7 @@ define(['src/calculations', 'src/interactioncoordinator'], function(calc, coordi
         initialize: function(attributes) {
             _.extend(this, Backbone.Events);
             coordinator.on('mousemove', this.mousemove, this);
-            coordinator.on('toolActivated', this.toolActivated, this);
+            coordinator.on('toolInitiated', this.toolInitiated, this);
             this.sceneView = attributes.sceneView;
             this.scene = attributes.sceneView.scene;
             this.camera = attributes.sceneView.camera;
@@ -33,7 +33,7 @@ define(['src/calculations', 'src/interactioncoordinator'], function(calc, coordi
 
         },
 
-        toolActivated: function(name) {
+        toolInitiated: function(name) {
             if (name === undefined) {
                 this.cursorViews.map(function(cursorView) {
                     cursorView.remove();
