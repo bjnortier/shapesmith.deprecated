@@ -33,27 +33,16 @@ define(['src/geometrygraph', 'src/vertexwrapper'], function(geometrygraph, verte
     Coordinator.prototype.initiateTool = function(name, cursor) {
         this.initiatedTool = name;
         this.click(name);
-        // this.trigger('toolInitiated', name);
-        // $('#scene').css('cursor', 'url(' + cursor + '), crosshair');
-    }
-
-    Coordinator.prototype.uninitiateTool = function() {
-        // this.initiatedTool = undefined;
-        // this.trigger('toolInitiated', undefined);
-        // $('#scene').css('cursor', '');
     }
 
     Coordinator.prototype.vertexAdded = function(vertex) {
-        // if (this.initiatedTool) {
-        //     this.uninitiateTool(this.initiatedTool);
-        // }
         this.editingModel = new vertexWrapper.Model(vertex);
-        $('.toolbar').hide();
+        $('.toolbar').slideUp(100);
     }
 
     Coordinator.prototype.vertexRemoved = function(vertex) {
         this.editingModel = undefined;
-        $('.toolbar').show();
+        $('.toolbar').slideDown(100);
         this.initiatedTool = undefined;
     }
 

@@ -33,8 +33,8 @@ define(['src/geometrygraph'], function(geometryGraph) {
         className: 'vertex',
 
         initialize: function() {
-            $('body').append(this.$el);
             this.render();
+            $('body').append(this.$el);
         },
 
         remove: function() {

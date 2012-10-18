@@ -79,7 +79,7 @@ img#logo {
 }
 
 .toolbar li:hover, .okcancel .button:hover {
-    border-bottom: solid 2px #fff;
+    border-bottom: solid 2px #ff0;
     cursor: pointer;
 }
 
