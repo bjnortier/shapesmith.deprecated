@@ -110,7 +110,7 @@ define(['src/calculations', 'src/interactioncoordinator'], function(calc, coordi
             scene.remove(this.sceneObject);
             this.sceneObject = new THREE.Object3D();
 
-            if (this.model.lastPosition && coordinator.hasActiveTool()) {
+            if (this.model.lastPosition && coordinator.hasInitiatedTool()) {
                 var cubeCursor = new THREE.Mesh(
                     new THREE.CubeGeometry(0.5, 0.5, 0.5, 1, 1, 1), 
                     new THREE.MeshBasicMaterial({color: 0xffffff}));
@@ -140,7 +140,7 @@ define(['src/calculations', 'src/interactioncoordinator'], function(calc, coordi
             scene.remove(this.sceneObject);
             this.sceneObject = new THREE.Object3D();
 
-            if (this.model.lastPosition && coordinator.hasActiveTool()) {
+            if (this.model.lastPosition && coordinator.hasInitiatedTool()) {
                 var cursorScreenCoordinates = calc.toScreenCoordinates(
                     this.model.camera, 
                     this.model.lastPosition.clone());
@@ -186,7 +186,7 @@ define(['src/calculations', 'src/interactioncoordinator'], function(calc, coordi
             scene.remove(this.sceneObject);
             this.sceneObject = new THREE.Object3D();
 
-            if (this.model.lastPosition && coordinator.hasActiveTool()) {
+            if (this.model.lastPosition && coordinator.hasInitiatedTool()) {
                 var position = this.model.lastPosition;
                 var colors = {
                     x: 0x3da033,

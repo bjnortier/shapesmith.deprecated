@@ -25,25 +25,25 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1"
-     inkscape:cx="617.21009"
-     inkscape:cy="155.24393"
+     inkscape:zoom="4"
+     inkscape:cx="594.60798"
+     inkscape:cy="60.685486"
      inkscape:current-layer="layer1"
      id="namedview3806"
      showgrid="true"
      inkscape:window-width="1316"
      inkscape:window-height="921"
-     inkscape:window-x="1884"
-     inkscape:window-y="12"
+     inkscape:window-x="1721"
+     inkscape:window-y="24"
      inkscape:window-maximized="0"
      units="mm">
     <inkscape:grid
        type="xygrid"
        id="grid4881"
        empspacing="5"
-       visible="false"
+       visible="true"
        enabled="true"
-       snapvisiblegridlinesonly="false" />
+       snapvisiblegridlinesonly="true" />
   </sodipodi:namedview>
   <metadata
      id="metadata3808">
@@ -61,6 +61,16 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
+    <rect
+       style="fill:none;fill-opacity:1;stroke:none;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect4919"
+       width="30"
+       height="30"
+       x="605"
+       y="694.09448"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/ok32x32.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
     <image
        y="7.7785835"
        x="108.08047"
@@ -3682,7 +3692,7 @@ gsQlqb6E6iXPSrLtg4AhkppGbR21ddTWUVtHbR21dUjZCgBPATdG1NDNigAAAABJRU5ErkJggg==
        width="39" />
     <text
        xml:space="preserve"
-       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#0f9e00;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#3da033;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
        x="487.08551"
        y="665.39667"
        id="text4674"
@@ -3705,7 +3715,7 @@ gsQlqb6E6iXPSrLtg4AhkppGbR21ddTWUVtHbR21dUjZCgBPATdG1NDNigAAAABJRU5ErkJggg==
          style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ff706b;fill-opacity:1;font-family:Arial;-inkscape-font-specification:Arial">3.15</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#6dc4fe;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
+       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#4e94c2;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
        x="511.19736"
        y="665.39667"
        id="text4674-5-8"
@@ -3714,7 +3724,7 @@ gsQlqb6E6iXPSrLtg4AhkppGbR21ddTWUVtHbR21dUjZCgBPATdG1NDNigAAAABJRU5ErkJggg==
          id="tspan4676-5-0"
          x="511.19736"
          y="665.39667"
-         style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#6dc4fe;fill-opacity:1;font-family:Arial;-inkscape-font-specification:Arial">-20.0</tspan></text>
+         style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#4e94c2;fill-opacity:1;font-family:Arial;-inkscape-font-specification:Arial">-20.0</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
@@ -3733,22 +3743,38 @@ gsQlqb6E6iXPSrLtg4AhkppGbR21ddTWUVtHbR21dUjZCgBPATdG1NDNigAAAABJRU5ErkJggg==
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:#3d8b3d;fill-opacity:1;stroke:#2e4b32;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 601,628.09448 5,5 11,-11 3,3 -14,14 -8,-8 z"
+       style="fill:#3ac03a;fill-opacity:1;stroke:#2b7f2b;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 612,706.59448 5,5 11,-11 3,3 -14,14 -8,-8 z"
        id="path4858"
        inkscape:connector-curvature="0"
-       sodipodi:nodetypes="ccccccc" />
-    <path
-       style="fill:#8b3d40;fill-opacity:1;stroke:#4b2e30;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 602,657.09448 6,6 6,-6 3,3 -6,6 6,6 -3,3 -6,-6 -6,6 -3,-3 6,-6 -6,-6 z"
-       id="path4858-7"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="ccccccccccccc" />
+       sodipodi:nodetypes="ccccccc"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/ok32x32.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
     <path
        style="fill:none;stroke:#c3c103;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        d="m 479,647.09448 107.88656,-0.29289"
        id="path4848-4"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
+    <rect
+       style="fill:none;fill-opacity:1;stroke:none;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect4919-6"
+       width="30"
+       height="30"
+       x="605"
+       y="729.09448"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/cancel32x32.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
+    <path
+       style="fill:#cc2d26;fill-opacity:1;stroke:#9e343b;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 614,735.09448 6,6 6,-6 3,3 -6,6 6,6 -3,3 -6,-6 -6,6 -3,-3 6,-6 -6,-6 z"
+       id="path4858-7"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccccccccccc"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/cancel32x32.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
   </g>
 </svg>

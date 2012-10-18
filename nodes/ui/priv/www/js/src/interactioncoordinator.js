@@ -1,8 +1,8 @@
-define(['src/geometrygraph'], function(geometrygraph) {
+define(['src/geometrygraph', 'src/vertexwrapper'], function(geometrygraph, vertexWrapper) {
 
     var Coordinator = function() {
         _.extend(this, Backbone.Events);
-        this.activeTool = undefined;
+        this.initiatedTool = undefined;
 
         var that = this;
         window.addEventListener('keydown', function(event) {
@@ -25,38 +25,45 @@ define(['src/geometrygraph'], function(geometrygraph) {
             that.click(event);
         });
 
-        geometrygraph.on('vertexAdded', this.vertexAdded, this);
+        geometrygraph.graph.on('vertexAdded', this.vertexAdded, this);
+        geometrygraph.graph.on('vertexRemoved', this.vertexRemoved, this);
         
     }
 
-    Coordinator.prototype.activateTool = function(name, cursor) {
-        this.activeTool = name;
+    Coordinator.prototype.initiateTool = function(name, cursor) {
+        this.initiatedTool = name;
         this.trigger('toolInitiated', name);
         $('#scene').css('cursor', 'url(' + cursor + '), crosshair');
     }
 
-    Coordinator.prototype.deactivateTool = function(name) {
-        this.activeTool = undefined;
+    Coordinator.prototype.uninitiateTool = function() {
+        this.initiatedTool = undefined;
         this.trigger('toolInitiated', undefined);
         $('#scene').css('cursor', '');
     }
 
-    Coordinator.prototype.vertexAdded = function() {
-        if (this.activeTool) {
-            this.deactivateTool(this.activeTool);
+    Coordinator.prototype.vertexAdded = function(vertex) {
+        if (this.initiatedTool) {
+            this.uninitiateTool(this.initiatedTool);
         }
+        new vertexWrapper.Model(vertex);
+        $('.toolbar').hide();
+    }
+
+    Coordinator.prototype.vertexRemoved = function(vertex) {
+        $('.toolbar').show();
     }
 
     Coordinator.prototype.click = function() {
-        if (this.activeTool) {
-            if (this.activeTool === 'point') {
-                geometrygraph.createPoint();
+        if (this.initiatedTool) {
+            if (this.initiatedTool === 'point') {
+                geometrygraph.graph.createPoint();
             }
         }
     }
 
-    Coordinator.prototype.hasActiveTool = function(name) {
-        return this.activeTool !== undefined;
+    Coordinator.prototype.hasInitiatedTool = function(name) {
+        return this.initiatedTool !== undefined;
     }
 
     var coordinator = new Coordinator();

@@ -3,22 +3,22 @@ define(['src/interactioncoordinator'], function(coordinator) {
     var ItemModel = Backbone.Model.extend({
 
         initialize: function(attributes) {
-            this.active = false;
+            this.initiated = false;
             this.view = new ItemView({model: this});
             coordinator.on('toolInitiated', this.toolInitiated, this);
         },
 
         click: function() {
-            if (!this.active) {
-                coordinator.activateTool(this.name, '/ui/images/icons/' + this.icon);
+            if (!this.initiated) {
+                coordinator.initiateTool(this.name, '/ui/images/icons/' + this.icon);
             } else {
-                coordinator.deactivateTool(this.name);
+                coordinator.uninitiateTool();
             }
         },
 
         toolInitiated: function(name) {
-            this.active = (name === this.name);
-            if (this.active) {
+            this.initiated = (name === this.name);
+            if (this.initiated) {
                 this.view.$el.addClass('initiated');
             } else {
                 this.view.$el.removeClass('initiated');

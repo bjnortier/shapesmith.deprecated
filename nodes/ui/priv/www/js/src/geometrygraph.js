@@ -23,11 +23,22 @@ define([], function() {
         this.trigger('vertexAdded', vertex);
     }
 
+    GeometryGraph.prototype.removeVertex = function(vertex) {
+        var index = this.vertices.indexOf(vertex);
+        if (index >= 0) {
+            this.vertices.splice(index, 1);
+        }
+        this.trigger('vertexRemoved', vertex);
+    }
+
     GeometryGraph.prototype.createPoint = function() {
         var vertex = new GeomNode({parameters: {x: 0, y: 0, z:0}});
         this.addVertex(vertex);
     }
 
-    return new GeometryGraph();
+    return {
+        GeomNode : GeomNode,
+        graph    : new GeometryGraph(),
+    }
 
 });
