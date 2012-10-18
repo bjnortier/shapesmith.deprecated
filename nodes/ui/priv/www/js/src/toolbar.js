@@ -10,7 +10,7 @@ define(['src/interactioncoordinator'], function(coordinator) {
 
         click: function() {
             if (!this.active) {
-                coordinator.activateTool(this.name);
+                coordinator.activateTool(this.name, '/ui/images/icons/' + this.icon);
             } else {
                 coordinator.deactivateTool(this.name);
             }

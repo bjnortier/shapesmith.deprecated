@@ -1,6 +1,6 @@
 define([], function() {
     
-    var posOnWorkplane = function(event, workplaneNode, camera) {
+    var positionOnWorkplane = function(event, workplaneNode, camera) {
 
         var origin = objToVector(workplaneNode.origin);
         var axis   = objToVector(workplaneNode.axis);   
@@ -22,11 +22,11 @@ define([], function() {
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-        var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5);
+        var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
         var projector = new THREE.Projector();
         var mouse3D = projector.unprojectVector(vector, camera);
 
-        var ray = new THREE.Ray(camera.position, null);
+        var ray = new THREE.Ray(camera.position); // To 0,0,0 is the default    
         ray.direction = mouse3D.subSelf(camera.position).normalize();
 
         // http://en.wikipedia.org/wiki/Line-plane_intersection
@@ -41,6 +41,17 @@ define([], function() {
         }
         return new THREE.Vector3().add(l0, l.clone().multiplyScalar(d));
 
+    }
+
+    var toScreenCoordinates = function(camera, worldCoordinates) {
+        var projScreenMat = new THREE.Matrix4();
+        projScreenMat.multiply(camera.projectionMatrix, 
+                               camera.matrixWorldInverse);
+        projScreenMat.multiplyVector3(worldCoordinates);
+        return {
+            x: window.innerWidth * ((worldCoordinates.x+1)/2),
+            y: window.innerHeight * ((-worldCoordinates.y+1)/2)
+        }
     }
 
     var objToVector = function(obj) {
@@ -62,8 +73,10 @@ define([], function() {
     }
 
     return {
-        posOnWorkplane : posOnWorkplane,
-        objToVector    : objToVector,
+        positionOnWorkplane : positionOnWorkplane,
+        positionOnPlane     : positionOnPlane,
+        toScreenCoordinates : toScreenCoordinates,
+        objToVector         : objToVector,
     }
 
 });

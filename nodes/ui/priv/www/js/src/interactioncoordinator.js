@@ -23,14 +23,16 @@ define([], function() {
         
     }
 
-    Coordinator.prototype.activateTool = function(name) {
+    Coordinator.prototype.activateTool = function(name, cursor) {
         this.activeTool = name;
         this.trigger('toolActivated', name);
+        $('#scene').css('cursor', 'url(' + cursor + '), crosshair');
     }
 
     Coordinator.prototype.deactivateTool = function(name) {
         this.activeTool = undefined;
         this.trigger('toolActivated', undefined);
+        $('#scene').css('cursor', '');
     }
 
     Coordinator.prototype.hasActiveTool = function(name) {

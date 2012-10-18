@@ -3,6 +3,12 @@
     padding: 0;
 }
 
+html {
+    overflow-y: scroll;
+}
+
+@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400);
+
 body {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -11,14 +17,11 @@ body {
     -ms-user-select: none;
     -o-user-select: none;
     user-select: none;
-}
 
-html {
-    overflow-y: scroll;
-}
-
-body {
-    font-family: Helvetica, Arial, sans-serif;
+    /* @import url(http://fonts.googleapis.com/css?family=Open+Sans:400,300); 
+    font-family: 'Open Sans', sans-serif;
+    */
+    font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
     font-size: 85%;
     line-height: 1em; /*color: #393939;*/
     color: #444444;
@@ -55,6 +58,7 @@ img#logo {
 
 .toolbar {
     background: rgba(51, 51, 51, 0.46);
+    border-radius: 4px;
     position: absolute;
     margin-left: -37px;
     left: 50%;
@@ -79,3 +83,4 @@ img#logo {
 .toolbar .item.activated {
     border-bottom: solid 2px #ff0;
 }
+
