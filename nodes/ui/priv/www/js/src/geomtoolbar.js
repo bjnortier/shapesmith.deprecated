@@ -1,9 +1,9 @@
 define(['src/toolbar'], function(toolbar) {
 
 
-    var VertexModel = toolbar.ItemModel.extend({
-        icon: 'vertex32x32.png',
-        name: 'vertex',
+    var PointModel = toolbar.ItemModel.extend({
+        icon: 'point32x32.png',
+        name: 'point',
     });
 
     var LineModel = toolbar.ItemModel.extend({
@@ -15,7 +15,7 @@ define(['src/toolbar'], function(toolbar) {
     return {
         create: function() {
             var toolbarModel = new toolbar.Model({name: 'geometry'});
-            toolbarModel.addItem(new VertexModel());
+            toolbarModel.addItem(new PointModel());
             toolbarModel.addItem(new LineModel());
         }
     };

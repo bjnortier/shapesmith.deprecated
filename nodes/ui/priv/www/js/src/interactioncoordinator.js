@@ -1,4 +1,4 @@
-define([], function() {
+define(['src/geometrygraph'], function(geometrygraph) {
 
     var Coordinator = function() {
         _.extend(this, Backbone.Events);
@@ -20,6 +20,12 @@ define([], function() {
         $('#scene').mousewheel(function(event) {
             that.trigger('mousewheel', event);
         });
+        $('#scene').click(function(event) {
+            that.trigger('click', event);
+            that.click(event);
+        });
+
+        geometrygraph.on('vertexAdded', this.vertexAdded, this);
         
     }
 
@@ -33,6 +39,20 @@ define([], function() {
         this.activeTool = undefined;
         this.trigger('toolActivated', undefined);
         $('#scene').css('cursor', '');
+    }
+
+    Coordinator.prototype.vertexAdded = function() {
+        if (this.activeTool) {
+            this.deactivateTool(this.activeTool);
+        }
+    }
+
+    Coordinator.prototype.click = function() {
+        if (this.activeTool) {
+            if (this.activeTool === 'point') {
+                geometrygraph.createPoint();
+            }
+        }
     }
 
     Coordinator.prototype.hasActiveTool = function(name) {
