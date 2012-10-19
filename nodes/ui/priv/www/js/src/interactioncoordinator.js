@@ -3,30 +3,60 @@
     var Coordinator = function() {
         _.extend(this, Backbone.Events);
 
+        this.dragThreshold = 10;
+        this.dragging = false;
+
         var that = this;
         window.addEventListener('keydown', function(event) {
             that.trigger('keydown', event);
         }, false);
+
         $('#scene').mousemove(function(event) {
             that.trigger('mousemove', event);
+            that.mousemove(event);
         });
         $('#scene').mouseup(function(event) {
             that.trigger('mouseup', event);
+            that.mouseup(event);
+        });
+         $('#scene').mouseleave(function(event) {
+            that.mouseleave(event);
         });
         $('#scene').mousedown(function(event) {
             that.trigger('mousedown', event);
+            that.mousedown(event);
         });
         $('#scene').mousewheel(function(event) {
             that.trigger('mousewheel', event);
         });
-        $('#scene').click(function(event) {
-            that.trigger('click', event);
-        });
 
-        geometryGraph.graph.on('vertexAdded', this.vertexAdded, this);
-        geometryGraph.graph.on('vertexRemoved', this.vertexRemoved, this);
-        
     }
+
+    Coordinator.prototype.mousemove = function(event) {
+        if (this.overThreshold(eventToPosition(event))) {
+            event.mouseDownEvent = this.mouseDownEvent;
+            this.trigger('drag', event);
+            this.dragging = true;
+        }
+    }
+
+    Coordinator.prototype.mouseup = function(event) {
+        if (!this.dragging) {
+            this.trigger('click', event);
+        }
+        this.mouseDownEvent = undefined;
+        this.dragging = false;
+    }
+
+    Coordinator.prototype.mouseleave = function(event) {
+        this.mouseDownEvent = undefined;
+        this.dragging = false;
+    }
+
+    Coordinator.prototype.mousedown = function(event) {
+        this.mouseDownEvent = event;
+    }
+
 
     Coordinator.prototype.initiateTool = function(name) {
         if (name === 'point') {
@@ -34,13 +64,22 @@
         }
     }
 
-    Coordinator.prototype.vertexAdded = function(vertex) {
-        $('.toolbar').slideUp(100);
-    }
+    Coordinator.prototype.overThreshold = function(pos2) {
+        if (!this.mouseDownEvent) {
+            return false;
+        }
+        var pos1 = eventToPosition(this.mouseDownEvent);
+        var dx = Math.abs(pos1.x - pos2.x);
+        var dy = Math.abs(pos1.y - pos2.y);
+        return Math.sqrt(dx*dx + dy*dy) > this.dragThreshold;
+    };
 
-    Coordinator.prototype.vertexRemoved = function(vertex) {
-        $('.toolbar').slideDown(100);
-    }       
+    var eventToPosition = function(event) {
+        return {
+            x: event.clientX,
+            y: event.clientY,
+        };
+    }
 
     return new Coordinator();
 });

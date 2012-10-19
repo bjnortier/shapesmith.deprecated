@@ -1,4 +1,5 @@
-define(['src/interactioncoordinator'], function(coordinator) {
+define(['src/interactioncoordinator', 'src/geometrygraph'], 
+    function(coordinator, geometryGraph) {
 
     var ItemModel = Backbone.Model.extend({
 
@@ -42,10 +43,20 @@ define(['src/interactioncoordinator'], function(coordinator) {
             this.name = attributes.name;
             this.view = new View({model: this});
             $('body').append(this.view.$el);
+            geometryGraph.graph.on('vertexAdded', this.vertexAdded, this);
+            geometryGraph.graph.on('vertexRemoved', this.vertexRemoved, this);
         },
 
         addItem: function(itemModel) {
             this.view.$el.append(itemModel.view.$el);
+        },
+
+        vertexAdded: function(vertex) {
+            this.view.$el.slideUp(100);
+        },
+
+        vertexRemoved: function(vertex) {
+            this.view.$el.slideDown(100);
         },
 
     });

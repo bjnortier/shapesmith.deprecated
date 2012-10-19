@@ -6,12 +6,12 @@ define(['src/scene',  'src/interactioncoordinator'], function(sceneModel, coordi
 
         this.minDistance = 3;
         this.maxDistance = 1000;
-        this.panOrRotateThreshold = 10;
+
 
         this.position = { azimuth: -1.373, elevation: 1.08, distance: 1000 };
         this.target = { azimuth: -1.373, elevation: 1.08, distance: 300, scenePosition: new THREE.Vector3() };
 
-        coordinator.on('mousemove', this.mousemove, this);
+        coordinator.on('drag', this.drag, this);
         coordinator.on('mousedown', this.mousedown, this);
         coordinator.on('mouseup', this.mouseup, this);
         coordinator.on('mousewheel', this.mousewheel, this);
@@ -20,7 +20,6 @@ define(['src/scene',  'src/interactioncoordinator'], function(sceneModel, coordi
     };
 
     Trackball.prototype.mousedown = function(event) {
-        this.mouseDownPosition = eventToPosition(event);
         this.targetOnDown = { 
             azimuth:  this.target.azimuth, 
             elevation: this.target.elevation,
@@ -28,32 +27,29 @@ define(['src/scene',  'src/interactioncoordinator'], function(sceneModel, coordi
     };    
 
     Trackball.prototype.mouseup = function(event) {
-        this.mouseDownPosition = undefined;
         this.state = undefined;
     };
 
-    Trackball.prototype.mousemove = function(event) {
-
-        if (this.mouseDownPosition && this.lastMousePosition) {
+    Trackball.prototype.drag = function(event) {
+        if (this.lastMousePosition) {
             var eventPosition = eventToPosition(event);
+            var mouseDownPosition = eventToPosition(event.mouseDownEvent);
+
             var dMouseFromDown = {
-                x: eventPosition.x - this.mouseDownPosition.x,
-                y: eventPosition.y - this.mouseDownPosition.y,
+                x: eventPosition.x - mouseDownPosition.x,
+                y: eventPosition.y - mouseDownPosition.y,
             }
             var dMouseFromLast = {
                 x: eventPosition.x - this.lastMousePosition.x,
                 y: eventPosition.y - this.lastMousePosition.y,
             }
 
-
             if (this.state === undefined) {
-                if (this.overThreshold(eventPosition)) {
-                    if (!event.shiftKey && (event.button === 0)) {
-                        this.state = 'rotating';
-                    } else if ((event.button === 1) ||
-                        ((event.button === 0) && event.shiftKey)) {
-                        this.state = 'panning';
-                    }
+                if (!event.shiftKey && (event.button === 0)) {
+                    this.state = 'rotating';
+                } else if ((event.button === 1) ||
+                    ((event.button === 0) && event.shiftKey)) {
+                    this.state = 'panning';
                 }
             }
 
@@ -143,16 +139,6 @@ define(['src/scene',  'src/interactioncoordinator'], function(sceneModel, coordi
         this.camera.lookAt(this.scene.position);
 
 
-    };
-
-    Trackball.prototype.overThreshold = function(pos2) {
-        if (!this.mouseDownPosition) {
-            return false;
-        }
-        var pos1 = this.mouseDownPosition;
-        var dx = Math.abs(pos1.x - pos2.x);
-        var dy = Math.abs(pos1.y - pos2.y);
-        return Math.sqrt(dx*dx + dy*dy) > this.panOrRotateThreshold;
     };
 
     var eventToPosition = function(event) {
