@@ -56,17 +56,6 @@ define(['src/interactioncoordinator'], function(coordinator) {
             var object = THREE.SceneUtils.createMultiMaterialObject( new THREE.CubeGeometry(50, 50, 50, 4, 4, 4), materials );
             this.scene.add(object);
 
-            for (var x = -10; x <= 10; ++x) {
-                for (var y = -10; y <= 10; ++y) {
-                    object = THREE.SceneUtils.createMultiMaterialObject(
-                        new THREE.SphereGeometry(0.5, 10, 10), materials);
-                    object.position = new THREE.Vector3(x*10, y*10, 0);
-                    if (Math.random() > 0.7) {
-                        this.scene.add(object);
-                    }   
-                }
-            }
-
             this.el.appendChild(this.renderer.domElement);
             this.updateScene = true;
             this.animate();

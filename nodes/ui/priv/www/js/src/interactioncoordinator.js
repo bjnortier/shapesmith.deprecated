@@ -19,6 +19,9 @@
         $('#scene').mousewheel(function(event) {
             that.trigger('mousewheel', event);
         });
+        $('#scene').click(function(event) {
+            that.trigger('click', event);
+        });
 
         geometryGraph.graph.on('vertexAdded', this.vertexAdded, this);
         geometryGraph.graph.on('vertexRemoved', this.vertexRemoved, this);
