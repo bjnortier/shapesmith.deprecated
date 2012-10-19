@@ -28,6 +28,7 @@ define(['src/scene',  'src/interactioncoordinator'], function(sceneModel, coordi
 
     Trackball.prototype.mouseup = function(event) {
         this.state = undefined;
+        this.lastMousePosition = undefined;
     };
 
     Trackball.prototype.drag = function(event) {
