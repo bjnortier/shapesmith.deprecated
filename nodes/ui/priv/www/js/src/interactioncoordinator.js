@@ -12,8 +12,10 @@
         }, false);
 
         $('#scene').mousemove(function(event) {
-            that.trigger('mousemove', event);
             that.mousemove(event);
+            if (!that.dragging) {
+                that.trigger('mousemove', event);
+            } 
         });
         $('#scene').mouseup(function(event) {
             that.trigger('mouseup', event);
@@ -35,8 +37,8 @@
     Coordinator.prototype.mousemove = function(event) {
         if (this.overThreshold(eventToPosition(event))) {
             event.mouseDownEvent = this.mouseDownEvent;
-            this.trigger('drag', event);
             this.dragging = true;
+            this.trigger('drag', event);
         }
     }
 
