@@ -48,13 +48,13 @@ define(['src/interactioncoordinator'], function(coordinator) {
             this.pointLight1.position.set(1000, 1000, 1000);
             this.scene.add(this.pointLight1);
 
-            var materials = [
-                new THREE.MeshLambertMaterial( { ambient: 0x333333,  side: THREE.DoubleSide} ),
-                new THREE.MeshBasicMaterial( { color: 0x00bb00, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
-                new THREE.MeshBasicMaterial( { color: 0x00bb00, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
-            ];
-            var object = THREE.SceneUtils.createMultiMaterialObject( new THREE.CubeGeometry(50, 50, 50, 4, 4, 4), materials );
-            this.scene.add(object);
+            // var materials = [
+            //     new THREE.MeshLambertMaterial( { ambient: 0x333333,  side: THREE.DoubleSide} ),
+            //     new THREE.MeshBasicMaterial( { color: 0x00bb00, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
+            //     new THREE.MeshBasicMaterial( { color: 0x00bb00, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
+            // ];
+            // var object = THREE.SceneUtils.createMultiMaterialObject( new THREE.CubeGeometry(50, 50, 50, 4, 4, 4), materials );
+            // this.scene.add(object);
 
             this.el.appendChild(this.renderer.domElement);
             this.updateScene = true;

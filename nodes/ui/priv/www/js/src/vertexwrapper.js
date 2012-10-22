@@ -83,10 +83,11 @@ define([
 var EditingDOMView = Backbone.View.extend({
 
         className: 'vertex editing',
+        tagName: "tr",
 
         initialize: function() {
             this.render();
-            $('body').append(this.$el);
+            $('#graph').prepend(this.$el);
             this.model.on('parametersChanged', this.updateParams, this);
         },
 
@@ -102,6 +103,7 @@ var EditingDOMView = Backbone.View.extend({
 
         render: function() {
             var template = 
+                '<td>' +
                 '<div class="title"><img src="/ui/images/icons/point32x32.png"/>' +
                 '<div class="name">Vertex</div>' + 
                 '<span class="okcancel">' + 
@@ -111,7 +113,8 @@ var EditingDOMView = Backbone.View.extend({
                 '</div>' + 
                 '<div class="coordinate">' +
                 '<span class="x">{{x}}</span><span class="y">{{y}}</span><span class="z">{{z}}</span>' +
-                '</div>';
+                '</div>' +
+                '</td>';
             var view = {
                 x: this.model.vertex.parameters.x,
                 y: this.model.vertex.parameters.y,
