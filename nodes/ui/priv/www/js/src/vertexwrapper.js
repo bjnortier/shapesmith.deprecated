@@ -186,7 +186,7 @@ define([
 
         initialize: function() {
             this.render();
-            $('#graph').append(this.$el);
+            $('#graph').prepend(this.$el);
             this.model.on('selected', this.select, this);
             this.model.on('deselected', this.deselect, this);
         },
