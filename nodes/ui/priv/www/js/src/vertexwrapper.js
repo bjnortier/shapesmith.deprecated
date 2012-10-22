@@ -44,12 +44,14 @@ define([
                 new EditingVertexSceneView({model: this}),
             ];
             workplane.on('positionChanged', this.workplanePositionChanged, this);
+            coordinator.on('keydown', this.keydown, this);
             coordinator.on('click', this.click, this);
         },
 
         destroy: function() {
             Model.prototype.destroy.call(this);
             workplane.off('positionChanged', this.workplanePositionChanged, this);
+            coordinator.off('keydown', this.keydown, this);
             coordinator.off('click', this.click, this);
         },  
 
@@ -60,6 +62,17 @@ define([
                 this.vertex.parameters.z = position.z;
                 this.trigger('parametersChanged');
             }
+        },
+
+        keydown: function(event) {
+            if ((event.keyCode === 13)  && (this.stage !== 0)) {
+                // Return when not in initial vertex placement
+                this.ok();
+            } else if (event.keyCode === 27) {
+                // Esx
+                this.cancel();
+            }
+
         },
 
         click: function() {
