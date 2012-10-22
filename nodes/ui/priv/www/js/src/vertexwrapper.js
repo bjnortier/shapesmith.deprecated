@@ -50,7 +50,7 @@ define([
         },
 
         deselect: function(ids) {
-            if (ids.indexOf(this.vertex.id) !== -13) {
+            if (ids.indexOf(this.vertex.id) !== -1) {
                 this.selected = false;
                 this.trigger('deselected');
             }
@@ -222,8 +222,12 @@ define([
             'click .vertex' : 'click'
         },
 
-        click: function() {
-            selection.selectOnly(this.model.vertex.id);
+        click: function(event) {
+            if (event.shiftKey || event.ctrlKey || event.metaKey) {
+                selection.addToSelection(this.model.vertex.id);
+            } else {
+                selection.selectOnly(this.model.vertex.id);
+            }
         },
 
         select: function() {
