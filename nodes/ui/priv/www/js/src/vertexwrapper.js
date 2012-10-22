@@ -27,6 +27,7 @@ define([
         initialize: function(vertex) {
             Model.prototype.initialize.call(this, vertex);
             this.views = [
+                new DisplayDOMView({model: this}),
                 new DisplayVertexSceneView({model: this}),
             ];
         }
@@ -78,9 +79,10 @@ define([
         },
     });
 
-    var EditingDOMView = Backbone.View.extend({
 
-        className: 'vertex',
+var EditingDOMView = Backbone.View.extend({
+
+        className: 'vertex editing',
 
         initialize: function() {
             this.render();
@@ -131,6 +133,32 @@ define([
 
         cancel: function() {
             this.model.cancel();
+        },
+
+    });
+
+    var DisplayDOMView = Backbone.View.extend({
+
+        tagName: "tr",
+
+        initialize: function() {
+            this.render();
+            $('#graph').append(this.$el);
+        },
+
+        remove: function() {
+            Backbone.View.prototype.remove.call(this);
+        },
+
+        render: function() {
+            var template = '<td class="vertex display"><img src="/ui/images/icons/point32x32.png"/></td>';
+            var view = {
+                x: this.model.vertex.parameters.x,
+                y: this.model.vertex.parameters.y,
+                z: this.model.vertex.parameters.z,
+            }
+            this.$el.html($.mustache(template, view));
+            return this;
         },
 
     });
