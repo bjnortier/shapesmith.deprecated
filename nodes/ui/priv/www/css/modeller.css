@@ -124,6 +124,10 @@ img#logo {
     padding: 5px;
 }
 
+.ok.disabled {
+    display: none;
+}
+
 .vertex .okcancel div {
     margin: 4px;
 }

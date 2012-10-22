@@ -69,7 +69,7 @@ define([
                 // Return when not in initial vertex placement
                 this.ok();
                 if (event.shiftKey && this.vertex.addAnotherFn) {
-                    geometryGraph.graph[this.vertex.addAnotherFn]();
+                    geometryGraph[this.vertex.addAnotherFn]();
                 }
             } else if (event.keyCode === 27) {
                 // Esx
@@ -80,18 +80,18 @@ define([
 
         click: function() {
             this.stage = 1;
-            this.trigger('stageChanged');
+            this.trigger('stageChanged', this.stage);
         },
 
         ok: function() {
             this.destroy();
-            geometryGraph.graph.removeVertex(this.vertex);
-            geometryGraph.graph.addVertex(this.vertex.cloneNonEditing());
+            geometryGraph.removeVertex(this.vertex);
+            geometryGraph.addVertex(this.vertex.cloneNonEditing());
         },
 
         cancel: function() {
             this.destroy();
-            geometryGraph.graph.removeVertex(this.vertex);
+            geometryGraph.removeVertex(this.vertex);
         },
     });
 
@@ -104,11 +104,13 @@ var EditingDOMView = Backbone.View.extend({
         initialize: function() {
             this.render();
             $('#graph').prepend(this.$el);
+            this.model.on('stageChanged', this.stageChanged, this);
             this.model.on('parametersChanged', this.updateParams, this);
         },
 
         remove: function() {
             Backbone.View.prototype.remove.call(this);
+            this.model.off('stageChanged', this.stageChanged, this);
             this.model.off('parametersChanged', this.updateParams, this);
         },
 
@@ -123,7 +125,7 @@ var EditingDOMView = Backbone.View.extend({
                 '<div class="title"><img src="/ui/images/icons/point32x32.png"/>' +
                 '<div class="name">Vertex</div>' + 
                 '<span class="okcancel">' + 
-                '<span class="ok button"><img src="/ui/images/icons/ok24x24.png"/></span>' +
+                '<span class="ok button disabled"><img src="/ui/images/icons/ok24x24.png"/></span>' +
                 '<span class="cancel button"><img src="/ui/images/icons/cancel24x24.png"/></span>' +
                 '</span>' + 
                 '</div>' + 
@@ -140,6 +142,12 @@ var EditingDOMView = Backbone.View.extend({
             return this;
         },
 
+        stageChanged: function(stage) {
+            if (stage === 1) {
+                this.$el.find('.ok').removeClass('disabled')
+            }
+        },
+
         updateParams: function() {
             this.$el.find('.coordinate').find('.x').text(this.model.vertex.parameters.x);
             this.$el.find('.coordinate').find('.y').text(this.model.vertex.parameters.y);
@@ -147,7 +155,9 @@ var EditingDOMView = Backbone.View.extend({
         },
 
         ok: function() {
-            this.model.ok();
+            if (this.stage === 1) {
+                this.model.ok();
+            }
         },
 
         cancel: function() {
@@ -244,14 +254,14 @@ var EditingDOMView = Backbone.View.extend({
 
     });
 
-    geometryGraph.graph.on('vertexAdded', function(vertex) {
+    geometryGraph.on('vertexAdded', function(vertex) {
         if (vertex.editing) {
             new EditingModel(vertex);
         } else {
             new DisplayModel(vertex);
         }
     });
-    geometryGraph.graph.on('vertexRemoved', function(vertex) {
+    geometryGraph.on('vertexRemoved', function(vertex) {
     }, this);
 
 });

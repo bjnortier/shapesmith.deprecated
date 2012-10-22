@@ -43,8 +43,8 @@ define(['src/interactioncoordinator', 'src/geometrygraph'],
             this.name = attributes.name;
             this.view = new View({model: this});
             $('body').append(this.view.$el);
-            geometryGraph.graph.on('vertexAdded', this.vertexAdded, this);
-            geometryGraph.graph.on('vertexRemoved', this.vertexRemoved, this);
+            geometryGraph.on('vertexAdded', this.vertexAdded, this);
+            geometryGraph.on('vertexRemoved', this.vertexRemoved, this);
         },
 
         addItem: function(itemModel) {

@@ -49,9 +49,6 @@ define([], function() {
         this.addVertex(vertex);
     }
 
-    return {
-        GeomNode : GeomNode,
-        graph    : new GeometryGraph(),
-    }
+    return new GeometryGraph();
 
 });
