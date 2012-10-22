@@ -68,10 +68,10 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
             return this.stage > 1;
         },
 
-        // ok: function() {
-        //     this.vertex.parameters.splice(this.stage, 1);
-        //     vertexWrapper.EditingModel.prototype.ok();
-        // }
+        ok: function() {
+            this.vertex.parameters.splice(this.stage, 1);
+            vertexWrapper.EditingModel.prototype.ok.call(this);
+        }
 
     });
 
