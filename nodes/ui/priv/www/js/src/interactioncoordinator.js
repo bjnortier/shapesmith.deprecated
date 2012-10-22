@@ -1,4 +1,4 @@
- define(['src/geometrygraph'], function(geometryGraph) {
+ define(['src/geometrygraph', 'src/selection'], function(geometryGraph, selection) {
 
     var Coordinator = function() {
         _.extend(this, Backbone.Events);
@@ -61,6 +61,7 @@
 
 
     Coordinator.prototype.initiateTool = function(name) {
+        selection.deselectAll();
         if (name === 'point') {
             geometryGraph.createPointPrototype();
         }

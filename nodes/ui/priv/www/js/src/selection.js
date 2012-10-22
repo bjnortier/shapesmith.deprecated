@@ -1,4 +1,4 @@
-define(['src/interactioncoordinator'], function(coordinator) {
+define([], function() {
     
     var Manager = function() {
 
