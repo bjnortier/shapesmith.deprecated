@@ -8,6 +8,8 @@ define([
     ], 
     function(calc, geometryGraph, coordinator, selection, sceneModel, workplane) {
 
+    // ---------- Common ----------
+    
     var Model = Backbone.Model.extend({
 
         initialize: function(vertex) {
@@ -22,38 +24,31 @@ define([
         },  
 
     });
+    
+    var SceneView = Backbone.View.extend({
 
-    var DisplayModel = Model.extend({
-
-        initialize: function(vertex) {
-            Model.prototype.initialize.call(this, vertex);
-            this.selected = false;
-            selection.on('selected', this.select, this);
-            selection.on('deselected', this.deselect, this);
-            this.views = [];
+        initialize: function() {
+            this.scene = sceneModel.view.scene;
+            this.sceneObject = new THREE.Object3D();
+            this.render();
         },
 
-        destroy: function() {
-            Model.prototype.destroy.call(this);
-            selection.off('selected', this.selected, this);
-            selection.off('deselected', this.deselected, this);
-        },  
-
-        select: function(ids) {
-            if (ids.indexOf(this.vertex.id) !== -1) {
-                this.selected = true;
-                this.trigger('selected');
-            }
+        remove: function() {
+            this.scene.remove(this.sceneObject);
+            sceneModel.view.updateScene = true;
         },
 
-        deselect: function(ids) {
-            if (ids.indexOf(this.vertex.id) !== -1) {
-                this.selected = false;
-                this.trigger('deselected');
-            }
+        render: function() {
+            this.scene.remove(this.sceneObject);
+            this.sceneObject = new THREE.Object3D();
+            this.scene.add(this.sceneObject);
+            sceneModel.view.updateScene = true;
         },
 
     });
+
+
+    // ---------- Editing ----------
 
     var EditingModel = Model.extend({
 
@@ -99,7 +94,6 @@ define([
         },
     });
 
-
     var EditingDOMView = Backbone.View.extend({
 
         className: 'vertex editing',
@@ -131,6 +125,57 @@ define([
 
         cancel: function() {
             this.model.cancel();
+        },
+
+    });
+
+    var EditingSceneView = SceneView.extend({
+
+        initialize: function() {
+            this.color = 0x94dcfc;
+            SceneView.prototype.initialize.call(this);
+            this.model.on('stageChanged', this.render, this);
+            this.model.on('parametersChanged', this.render, this);
+        },
+
+        remove: function() {
+            SceneView.prototype.remove.call(this);
+            this.model.off('parametersChanged', this.render, this);
+            this.model.off('stageChanged', this.render, this);
+        },
+
+    });
+
+    // ---------- Display ----------
+
+    var DisplayModel = Model.extend({
+
+        initialize: function(vertex) {
+            Model.prototype.initialize.call(this, vertex);
+            this.selected = false;
+            selection.on('selected', this.select, this);
+            selection.on('deselected', this.deselect, this);
+            this.views = [];
+        },
+
+        destroy: function() {
+            Model.prototype.destroy.call(this);
+            selection.off('selected', this.selected, this);
+            selection.off('deselected', this.deselected, this);
+        },  
+
+        select: function(ids) {
+            if (ids.indexOf(this.vertex.id) !== -1) {
+                this.selected = true;
+                this.trigger('selected');
+            }
+        },
+
+        deselect: function(ids) {
+            if (ids.indexOf(this.vertex.id) !== -1) {
+                this.selected = false;
+                this.trigger('deselected');
+            }
         },
 
     });
@@ -174,28 +219,6 @@ define([
 
     });
 
-    var SceneView = Backbone.View.extend({
-
-        initialize: function() {
-            this.scene = sceneModel.view.scene;
-            this.sceneObject = new THREE.Object3D();
-            this.render();
-        },
-
-        remove: function() {
-            this.scene.remove(this.sceneObject);
-            sceneModel.view.updateScene = true;
-        },
-
-        render: function() {
-            this.scene.remove(this.sceneObject);
-            this.sceneObject = new THREE.Object3D();
-            this.scene.add(this.sceneObject);
-            sceneModel.view.updateScene = true;
-        },
-
-    });
-
     var DisplaySceneView = SceneView.extend({
 
         unselectedColor: 0x00dd00,
@@ -223,23 +246,6 @@ define([
             this.color = 0x00dd00;
             this.ambientColor = undefined;
             this.render();
-        },
-
-    });
-
-    var EditingSceneView = SceneView.extend({
-
-        initialize: function() {
-            this.color = 0x94dcfc;
-            SceneView.prototype.initialize.call(this);
-            this.model.on('stageChanged', this.render, this);
-            this.model.on('parametersChanged', this.render, this);
-        },
-
-        remove: function() {
-            SceneView.prototype.remove.call(this);
-            this.model.off('parametersChanged', this.render, this);
-            this.model.off('stageChanged', this.render, this);
         },
 
     });

@@ -107,36 +107,7 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
 
     });
 
-    var DisplaySceneView = vertexWrapper.DisplaySceneView.extend(SceneView, {
-
-        unselectedColor: 0x00dd00,
-
-        initialize: function() {
-            this.color = this.unselectedColor;
-            SceneView.prototype.initialize.call(this);
-            this.model.on('selected', this.select, this);
-            this.model.on('deselected', this.deselect, this);
-        },
-
-        remove: function() {
-            SceneView.prototype.remove.call(this);
-            this.model.off('selected', this.select, this);
-            this.model.off('deselected', this.deselect, this);
-        },
-
-        select: function() {
-            this.color = 0xf4f653;
-            this.ambientColor = 0xffffff;
-            this.render();
-        },
-
-        deselect: function() {
-            this.color = 0x00dd00;
-            this.ambientColor = undefined;
-            this.render();
-        },
-
-    });
+    var DisplaySceneView = vertexWrapper.DisplaySceneView.extend(SceneView);
 
     var DisplayDOMView = vertexWrapper.DisplayDOMView.extend({
 
@@ -153,7 +124,6 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
 
     })
 
-    
     geometryGraph.on('vertexAdded', function(vertex) {
         if (vertex.type === 'point') {
             if (vertex.editing) {
