@@ -11,23 +11,45 @@ define([
 
         initialize: function(vertex) {
             this.vertex = vertex;
+        },
+
+        destroy: function() {
+            this.views.forEach(function(view) {
+                view.remove();
+            });
+            this.views = [];
+        },  
+
+    });
+
+    var DisplayModel = Model.extend({
+
+        initialize: function(vertex) {
+            Model.prototype.initialize.call(this, vertex);
+            this.views = [
+                new DisplayVertexSceneView({model: this}),
+            ];
+        }
+
+    });
+
+    var EditingModel = Model.extend({
+
+        initialize: function(vertex) {
+            Model.prototype.initialize.call(this, vertex);
             this.stage = 0;
             this.views = [
-                new DOMView({model: this}),
-                new VertexSceneView({model: this}),
+                new EditingDOMView({model: this}),
+                new EditingVertexSceneView({model: this}),
             ];
             workplane.on('positionChanged', this.workplanePositionChanged, this);
             coordinator.on('click', this.click, this);
         },
 
         destroy: function() {
+            Model.prototype.destroy.call(this);
             workplane.off('positionChanged', this.workplanePositionChanged, this);
             coordinator.off('click', this.click, this);
-
-            this.views.forEach(function(view) {
-                view.remove();
-            });
-            this.views = [];
         },  
 
         workplanePositionChanged: function(position) {
@@ -45,18 +67,18 @@ define([
         },
 
         ok: function() {
-            geometryGraph.graph.removeVertex(this.vertex);
             this.destroy();
+            geometryGraph.graph.removeVertex(this.vertex);
+            geometryGraph.graph.addVertex(this.vertex.cloneNonEditing());
         },
 
         cancel: function() {
-            geometryGraph.graph.removeVertex(this.vertex);
             this.destroy();
+            geometryGraph.graph.removeVertex(this.vertex);
         },
-
     });
 
-    var DOMView = Backbone.View.extend({
+    var EditingDOMView = Backbone.View.extend({
 
         className: 'vertex',
 
@@ -113,19 +135,17 @@ define([
 
     });
 
+
     var VertexSceneView = Backbone.View.extend({
 
         initialize: function() {
             this.scene = sceneModel.view.scene;
             this.sceneObject = new THREE.Object3D();
-            this.model.on('stageChanged', this.render, this);
-            this.model.on('parametersChanged', this.render, this);
+            this.render();
         },
 
         remove: function() {
             this.scene.remove(this.sceneObject);
-            this.model.off('parametersChanged', this.render, this);
-            this.model.off('stageChanged', this.render, this);
             sceneModel.view.updateScene = true;
         },
 
@@ -133,34 +153,59 @@ define([
             this.scene.remove(this.sceneObject);
             this.sceneObject = new THREE.Object3D();
 
-            if (this.model.stage === 0) {
-                var cubeCursor = new THREE.Mesh(
-                    new THREE.CubeGeometry(0.5, 0.5, 0.5, 1, 1, 1), 
-                    new THREE.MeshBasicMaterial({color: 0xffffff}));
-                cubeCursor.position = calc.objToVector(this.model.vertex.parameters);
-                this.sceneObject.add(cubeCursor);
-            } else if (this.model.stage === 1) {
-                var point = THREE.SceneUtils.createMultiMaterialObject(
-                    new THREE.SphereGeometry(0.5, 10, 10), 
-                    [
-                        new THREE.MeshLambertMaterial( { ambient: 0x333333,  side: THREE.DoubleSide} ),
-                        new THREE.MeshBasicMaterial( { color: 0x00bb00, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
-                    ]);
-                point.position = calc.objToVector(this.model.vertex.parameters);
-                this.sceneObject.add(point);
-            }
+            var color = 0x0b5fa5;
+            var point = THREE.SceneUtils.createMultiMaterialObject(
+                new THREE.SphereGeometry(0.5, 10, 10), 
+                [
+                    new THREE.MeshLambertMaterial( { ambient: 0x666666,  side: THREE.DoubleSide} ),
+                    new THREE.MeshBasicMaterial( { color: this.color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
+                ]);
+            point.position = calc.objToVector(this.model.vertex.parameters);
+            this.sceneObject.add(point);
 
             this.scene.add(this.sceneObject);
         },
     });
 
-    var editingModel = undefined;
+    var DisplayVertexSceneView = VertexSceneView.extend({
+
+        initialize: function() {
+            this.color = 0x7ced6a;
+            VertexSceneView.prototype.initialize.call(this);
+        },
+
+        remove: function() {
+            VertexSceneView.prototype.remove.call(this);
+        },
+
+    });
+
+    var EditingVertexSceneView = VertexSceneView.extend({
+
+        initialize: function() {
+            this.color = 0x94dcfc;
+            VertexSceneView.prototype.initialize.call(this);
+            this.model.on('stageChanged', this.render, this);
+            this.model.on('parametersChanged', this.render, this);
+        },
+
+        remove: function() {
+            VertexSceneView.prototype.remove.call(this);
+            this.model.off('parametersChanged', this.render, this);
+            this.model.off('stageChanged', this.render, this);
+        },
+
+    });
+
     geometryGraph.graph.on('vertexAdded', function(vertex) {
-        editingModel = new Model(vertex);
+        if (vertex.editing) {
+            new EditingModel(vertex);
+        } else {
+            new DisplayModel(vertex);
+        }
     });
     geometryGraph.graph.on('vertexRemoved', function(vertex) {
-        editingModel = undefined;
     }, this);
 
-
 });
+

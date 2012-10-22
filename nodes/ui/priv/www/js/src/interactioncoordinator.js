@@ -62,7 +62,7 @@
 
     Coordinator.prototype.initiateTool = function(name) {
         if (name === 'point') {
-            geometryGraph.graph.createPoint();
+            geometryGraph.graph.createPointPrototype();
         }
     }
 

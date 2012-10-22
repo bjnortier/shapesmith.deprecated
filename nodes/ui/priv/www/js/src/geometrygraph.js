@@ -7,9 +7,17 @@ define([], function() {
 
         this.id = ++counter; 
         this.parameters = options.parameters || {};
-        this.editing = false;
+        this.editing = options.editing || false;
 
     }
+
+    GeomNode.prototype.cloneNonEditing = function() {
+        var newNode = new GeomNode();
+        for (key in this.parameters) {
+            newNode.parameters[key] = this.parameters[key];
+        }
+        return newNode;
+    }   
 
     var GeometryGraph = function() {
 
@@ -31,8 +39,8 @@ define([], function() {
         this.trigger('vertexRemoved', vertex);
     }
 
-    GeometryGraph.prototype.createPoint = function() {
-        var vertex = new GeomNode({parameters: {x: 0, y: 0, z:0}});
+    GeometryGraph.prototype.createPointPrototype = function() {
+        var vertex = new GeomNode({parameters: {x: 0, y: 0, z:0}, editing: true});
         this.addVertex(vertex);
     }
 

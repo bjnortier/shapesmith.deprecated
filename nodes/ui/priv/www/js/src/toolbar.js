@@ -52,11 +52,15 @@ define(['src/interactioncoordinator', 'src/geometrygraph'],
         },
 
         vertexAdded: function(vertex) {
-            this.view.$el.slideUp(100);
+            if (vertex.editing) {
+                this.view.$el.slideUp(100);
+            }
         },
 
         vertexRemoved: function(vertex) {
-            this.view.$el.slideDown(100);
+            if (vertex.editing) {
+                this.view.$el.slideDown(100);
+            }
         },
 
     });
