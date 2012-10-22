@@ -68,6 +68,9 @@ define([
             if ((event.keyCode === 13)  && (this.stage !== 0)) {
                 // Return when not in initial vertex placement
                 this.ok();
+                if (event.shiftKey && this.vertex.addAnotherFn) {
+                    geometryGraph.graph[this.vertex.addAnotherFn]();
+                }
             } else if (event.keyCode === 27) {
                 // Esx
                 this.cancel();

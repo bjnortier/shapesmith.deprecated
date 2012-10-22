@@ -8,6 +8,7 @@ define([], function() {
         this.id = ++counter; 
         this.parameters = options.parameters || {};
         this.editing = options.editing || false;
+        this.addAnotherFn = options.addAnotherFn;
 
     }
 
@@ -40,7 +41,11 @@ define([], function() {
     }
 
     GeometryGraph.prototype.createPointPrototype = function() {
-        var vertex = new GeomNode({parameters: {x: 0, y: 0, z:0}, editing: true});
+        var vertex = new GeomNode({
+            parameters: {x: 0, y: 0, z:0}, 
+            editing: true,
+            addAnotherFn: 'createPointPrototype',
+        });
         this.addVertex(vertex);
     }
 
