@@ -1,24 +1,4 @@
-define([], function() {
-
-    var counter = 0;
-
-    var GeomNode = function(options) {
-        var options = options || {};
-
-        this.id = ++counter; 
-        this.parameters = options.parameters || {};
-        this.editing = options.editing || false;
-        this.addAnotherFn = options.addAnotherFn;
-
-    }
-
-    GeomNode.prototype.cloneNonEditing = function() {
-        var newNode = new GeomNode();
-        for (key in this.parameters) {
-            newNode.parameters[key] = this.parameters[key];
-        }
-        return newNode;
-    }   
+define(['src/geomnode'], function(geomNode) {
 
     var GeometryGraph = function() {
 
@@ -41,7 +21,7 @@ define([], function() {
     }
 
     GeometryGraph.prototype.createPointPrototype = function() {
-        var vertex = new GeomNode({
+        var vertex = new geomNode.Node({
             parameters: {x: 0, y: 0, z:0}, 
             editing: true,
             addAnotherFn: 'createPointPrototype',

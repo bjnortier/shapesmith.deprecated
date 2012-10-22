@@ -2,10 +2,11 @@ define([
         'src/calculations',
         'src/geometrygraph', 
         'src/interactioncoordinator', 
+        'src/selection',
         'src/scene',
         'src/workplane',
     ], 
-    function(calc, geometryGraph, coordinator, sceneModel, workplane) {
+    function(calc, geometryGraph, coordinator, selection, sceneModel, workplane) {
 
     var Model = Backbone.Model.extend({
 
@@ -26,11 +27,34 @@ define([
 
         initialize: function(vertex) {
             Model.prototype.initialize.call(this, vertex);
+            this.selected = false;
+            selection.on('selected', this.select, this);
+            selection.on('deselected', this.deselect, this);
             this.views = [
                 new DisplayDOMView({model: this}),
                 new DisplayVertexSceneView({model: this}),
             ];
-        }
+        },
+
+        destroy: function() {
+            Model.prototype.destroy.call(this);
+            selection.off('selected', this.selected, this);
+            selection.off('deselected', this.deselected, this);
+        },  
+
+        select: function(ids) {
+            if (ids.indexOf(this.vertex.id) !== -1) {
+                this.selected = true;
+                this.trigger('selected');
+            }
+        },
+
+        deselect: function(ids) {
+            if (ids.indexOf(this.vertex.id) !== -13) {
+                this.selected = false;
+                this.trigger('deselected');
+            }
+        },
 
     });
 
@@ -96,7 +120,7 @@ define([
     });
 
 
-var EditingDOMView = Backbone.View.extend({
+    var EditingDOMView = Backbone.View.extend({
 
         className: 'vertex editing',
         tagName: "tr",
@@ -155,7 +179,7 @@ var EditingDOMView = Backbone.View.extend({
         },
 
         ok: function() {
-            if (this.stage === 1) {
+            if (this.model.stage === 1) {
                 this.model.ok();
             }
         },
@@ -173,10 +197,14 @@ var EditingDOMView = Backbone.View.extend({
         initialize: function() {
             this.render();
             $('#graph').append(this.$el);
+            this.model.on('selected', this.select, this);
+            this.model.on('deselected', this.deselect, this);
         },
 
         remove: function() {
             Backbone.View.prototype.remove.call(this);
+            this.model.off('selected', this.select, this);
+            this.model.off('deselected', this.deselect, this);
         },
 
         render: function() {
@@ -188,6 +216,22 @@ var EditingDOMView = Backbone.View.extend({
             }
             this.$el.html($.mustache(template, view));
             return this;
+        },
+
+        events: {
+            'click .vertex' : 'click'
+        },
+
+        click: function() {
+            selection.selectOnly(this.model.vertex.id);
+        },
+
+        select: function() {
+            this.$el.find('.vertex').addClass('selected');
+        },
+
+        deselect: function() {
+            this.$el.find('.vertex').removeClass('selected');
         },
 
     });
@@ -214,25 +258,44 @@ var EditingDOMView = Backbone.View.extend({
             var point = THREE.SceneUtils.createMultiMaterialObject(
                 new THREE.SphereGeometry(0.5, 10, 10), 
                 [
-                    new THREE.MeshLambertMaterial( { ambient: 0x666666,  side: THREE.DoubleSide} ),
+                    new THREE.MeshLambertMaterial( { ambient: this.ambientColor || 0x333333,  side: THREE.DoubleSide} ),
                     new THREE.MeshBasicMaterial( { color: this.color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
                 ]);
             point.position = calc.objToVector(this.model.vertex.parameters);
             this.sceneObject.add(point);
 
             this.scene.add(this.sceneObject);
+            sceneModel.view.updateScene = true;
         },
     });
 
     var DisplayVertexSceneView = VertexSceneView.extend({
 
+        unselectedColor: 0x00dd00,
+
         initialize: function() {
-            this.color = 0x7ced6a;
+            this.color = this.unselectedColor;
             VertexSceneView.prototype.initialize.call(this);
+            this.model.on('selected', this.select, this);
+            this.model.on('deselected', this.deselect, this);
         },
 
         remove: function() {
             VertexSceneView.prototype.remove.call(this);
+            this.model.off('selected', this.select, this);
+            this.model.off('deselected', this.deselect, this);
+        },
+
+        select: function() {
+            this.color = 0xf4f653;
+            this.ambientColor = 0xffffff;
+            this.render();
+        },
+
+        deselect: function() {
+            this.color = 0x00dd00;
+            this.ambientColor = undefined;
+            this.render();
         },
 
     });

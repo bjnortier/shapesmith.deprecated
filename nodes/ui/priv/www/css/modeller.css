@@ -79,7 +79,7 @@ img#logo {
 }
 
 .toolbar li:hover, .okcancel .button:hover {
-    border-bottom: solid 2px #ff0;
+    border-bottom: solid 2px #fff;
     cursor: pointer;
 }
 
@@ -143,16 +143,18 @@ img#logo {
     padding: 10px;
     border-spacing: 5px;
 }
-.vertex.display img {
+.vertex.display {
     background: rgba(51, 51, 51, 0.46);
     cursor: pointer;
 }
 
-.vertex.display img:hover {
-    border-bottom: solid #FF0 2px;
+.vertex.display:hover {
+    border-bottom: solid #FFF 2px;
 }
 
-
+.vertex.selected {
+    border-bottom: solid #FF0 2px;
+}
 
 
 
