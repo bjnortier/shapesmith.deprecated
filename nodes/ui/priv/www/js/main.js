@@ -9,6 +9,7 @@ requirejs(
         'src/trackball',
         'src/vertexwrapper',
         'src/pointwrapper',
+        'src/linewrapper',
     ], function(
         coordinator,
         scene,
@@ -16,7 +17,8 @@ requirejs(
         workplane,
         trackball,
         vertexWrapper,
-        pointWrapper
+        pointWrapper,
+        lineWrapper
     ) {
 
     $(document).ready(function() {

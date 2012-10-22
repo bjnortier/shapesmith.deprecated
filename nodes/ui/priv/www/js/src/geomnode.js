@@ -15,12 +15,30 @@ define([], function() {
 
     GeomNode.prototype.cloneNonEditing = function() {
         var newNode = new GeomNode();
-        for (key in this.parameters) {
-            newNode.parameters[key] = this.parameters[key];
-        }
         newNode.type = this.type;
+        newNode.parameters = copyObj(this.parameters);
         return newNode;
     }  
+
+    var copyObj = function(value) {
+        if ((value === null) || (value === undefined)) {
+            return undefined;
+        } if (Object.prototype.toString.call( value ) === '[object Array]') {
+            return value.map(function(x) {
+                return copyObj(x);
+            });
+        } else if (typeof(value) === 'object') {
+            var returnObj = {};
+            for (var key in value) {
+                if (value.hasOwnProperty(key)) {
+                    returnObj[key] = copyObj(value[key]);
+                }
+            }
+            return returnObj;
+        } else {
+            return value;
+        }
+    }
 
     return {
         Node: GeomNode

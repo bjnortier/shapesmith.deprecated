@@ -118,7 +118,7 @@ define([
         },
 
         ok: function() {
-            if (this.model.stage === 1) {
+            if (this.model.canComplete()) {
                 this.model.ok();
             }
         },

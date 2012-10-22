@@ -112,17 +112,12 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
     var DisplayDOMView = vertexWrapper.DisplayDOMView.extend({
 
         render: function() {
-            var template = '<td class="vertex display"><img src="/ui/images/icons/point32x32.png"/></td>';
-            var view = {
-                x: this.model.vertex.parameters.x,
-                y: this.model.vertex.parameters.y,
-                z: this.model.vertex.parameters.z,
-            }
-            this.$el.html($.mustache(template, view));
-            return this;
+            this.$el.html('<td class="vertex display"><img src="/ui/images/icons/point32x32.png"/></td>');
         },
 
     })
+
+    // ---------- Init ----------
 
     geometryGraph.on('vertexAdded', function(vertex) {
         if (vertex.type === 'point') {
