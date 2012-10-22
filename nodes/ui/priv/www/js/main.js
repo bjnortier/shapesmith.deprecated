@@ -7,14 +7,16 @@ requirejs(
         'src/geomtoolbar',
         'src/workplane',
         'src/trackball',
-        'src/vertexwrapper'
+        'src/vertexwrapper',
+        'src/pointwrapper',
     ], function(
         coordinator,
         scene,
         geomtoolbar,
         workplane,
         trackball,
-        vertexWrapper
+        vertexWrapper,
+        pointWrapper
     ) {
 
     $(document).ready(function() {

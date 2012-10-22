@@ -1,5 +1,4 @@
 define([], function() {
-    
 
     var counter = 0;
 
@@ -7,6 +6,7 @@ define([], function() {
         var options = options || {};
 
         this.id = ++counter; 
+        this.type = options.type;
         this.parameters = options.parameters || {};
         this.editing = options.editing || false;
         this.addAnotherFn = options.addAnotherFn;
@@ -18,6 +18,7 @@ define([], function() {
         for (key in this.parameters) {
             newNode.parameters[key] = this.parameters[key];
         }
+        newNode.type = this.type;
         return newNode;
     }  
 

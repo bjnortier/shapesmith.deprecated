@@ -1,10 +1,8 @@
 define(['src/geomnode'], function(geomNode) {
 
     var GeometryGraph = function() {
-
         _.extend(this, Backbone.Events);
         this.vertices = [];
-
     }
 
     GeometryGraph.prototype.addVertex = function(vertex) {
@@ -22,9 +20,20 @@ define(['src/geomnode'], function(geomNode) {
 
     GeometryGraph.prototype.createPointPrototype = function() {
         var vertex = new geomNode.Node({
+            type: 'point',
             parameters: {x: 0, y: 0, z:0}, 
             editing: true,
             addAnotherFn: 'createPointPrototype',
+        });
+        this.addVertex(vertex);
+    }
+
+     GeometryGraph.prototype.createLinePrototype = function() {
+        var vertex = new geomNode.Node({
+            type: 'line',
+            parameters: [{x: 0, y: 0, z:0}], 
+            editing: true,
+            addAnotherFn: 'createLinePrototype',
         });
         this.addVertex(vertex);
     }

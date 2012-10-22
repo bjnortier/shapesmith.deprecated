@@ -65,6 +65,9 @@
         if (name === 'point') {
             geometryGraph.createPointPrototype();
         }
+        if (name === 'line') {
+            geometryGraph.createLinePrototype();
+        }
     }
 
     Coordinator.prototype.overThreshold = function(pos2) {
