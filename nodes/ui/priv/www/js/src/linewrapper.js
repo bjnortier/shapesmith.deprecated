@@ -14,14 +14,10 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
             var vertex = this.model.vertex;
             for(var i = 0; i < vertex.parameters.length; ++i) {
                 var coordinate = vertex.parameters[i];
-                if ((coordinate.x !== undefined) &&
-                    (coordinate.y !== undefined) &&
-                    (coordinate.z !== undefined)) {
-                    var point = THREE.SceneUtils.createMultiMaterialObject(
-                        new THREE.SphereGeometry(0.5, 10, 10), materials);
-                    point.position = calc.objToVector(coordinate);
-                    this.sceneObject.add(point);
-                }
+                var point = THREE.SceneUtils.createMultiMaterialObject(
+                    new THREE.SphereGeometry(0.25, 10, 10), materials);
+                point.position = calc.objToVector(coordinate);
+                this.sceneObject.add(point);
             }
             for(var i = 1; i < vertex.parameters.length; ++i) {
                 var from = calc.objToVector(vertex.parameters[i-1]);
@@ -81,7 +77,7 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
             var template = 
                 '<td>' +
                 '<div class="title"><img src="/ui/images/icons/line32x32.png"/>' +
-                '<div class="name">Line</div>' + 
+                '<div class="id">{{id}}</div>' + 
                 '<span class="okcancel">' + 
                 '<span class="ok button disabled"><img src="/ui/images/icons/ok24x24.png"/></span>' +
                 '<span class="cancel button"><img src="/ui/images/icons/cancel24x24.png"/></span>' +
@@ -92,6 +88,7 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
                 '</div>' + 
                 '</td>';
             var view = {
+                id: this.model.vertex.id,
                 renderedCoordinates: this.renderCoordinates()
             };
             this.$el.html($.mustache(template, view));

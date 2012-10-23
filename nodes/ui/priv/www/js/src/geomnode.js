@@ -1,11 +1,15 @@
 define([], function() {
 
-    var counter = 0;
+    var counters = {};
 
     var GeomNode = function(options) {
         var options = options || {};
 
-        this.id = ++counter; 
+        if (!counters[options.type]) {
+            counters[options.type] = 0;
+        }
+        this.id = options.type + counters[options.type];
+        ++counters[options.type]
         this.type = options.type;
         this.parameters = options.parameters || {};
         this.editing = options.editing || false;

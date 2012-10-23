@@ -56,7 +56,7 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
             var template = 
                 '<td>' +
                 '<div class="title"><img src="/ui/images/icons/point32x32.png"/>' +
-                '<div class="name">Vertex</div>' + 
+                '<div class="id">{{id}}</div>' + 
                 '<span class="okcancel">' + 
                 '<span class="ok button disabled"><img src="/ui/images/icons/ok24x24.png"/></span>' +
                 '<span class="cancel button"><img src="/ui/images/icons/cancel24x24.png"/></span>' +
@@ -67,6 +67,7 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
                 '</div>' +
                 '</td>';
             var view = {
+                id: this.model.vertex.id,
                 x: this.model.vertex.parameters.x,
                 y: this.model.vertex.parameters.y,
                 z: this.model.vertex.parameters.z,
