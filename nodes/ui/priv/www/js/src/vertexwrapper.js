@@ -159,7 +159,7 @@ define([
 
     // ---------- Display ----------
 
-    var DisplayModel = Model.extend({
+    var DisplayModel = Model.extend({ 
 
         initialize: function(vertex) {
             Model.prototype.initialize.call(this, vertex);
@@ -231,6 +231,8 @@ define([
     });
 
     var DisplaySceneView = SceneView.extend({
+
+        clickable: true,   
 
         initialize: function() {
             this.color = this.unselectedColor;

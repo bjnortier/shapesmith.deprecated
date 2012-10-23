@@ -14,10 +14,6 @@
 
         $('#scene').mousemove(function(event) {
             that.mousemove(event);
-            if (!that.dragging) {
-                that.trigger('mousemove', event);
-                sceneViewEventGenerator.mousemove(event);
-            } 
         });
         $('#scene').mouseup(function(event) {
             that.trigger('mouseup', event);
@@ -41,7 +37,16 @@
             event.mouseDownEvent = this.mouseDownEvent;
             this.dragging = true;
             this.trigger('drag', event);
-        }
+        } else {
+            this.trigger('mousemove', event);
+            sceneViewEventGenerator.mousemove(event);
+            if (sceneViewEventGenerator.overClickable()) {
+                $('#scene').css('cursor', 'pointer');
+            } else {
+                $('#scene').css('cursor', '');
+            }
+        } 
+
     }
 
     Coordinator.prototype.mouseup = function(event) {
