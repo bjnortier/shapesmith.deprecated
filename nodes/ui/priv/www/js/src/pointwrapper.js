@@ -41,7 +41,7 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
             }
         },
 
-        windowClick: function() {
+        sceneClick: function() {
             this.stage = 1;
             this.trigger('stageChanged', this.stage);
         },

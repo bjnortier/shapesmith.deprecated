@@ -68,7 +68,7 @@ define([
             this.stage = 0;
             workplane.on('positionChanged', this.workplanePositionChanged, this);
             coordinator.on('keydown', this.keydown, this);
-            coordinator.on('click', this.windowClick, this);
+            coordinator.on('click', this.sceneClick, this);
             this.views = [];
             },
 
@@ -76,7 +76,7 @@ define([
             Model.prototype.destroy.call(this);
             workplane.off('positionChanged', this.workplanePositionChanged, this);
             coordinator.off('keydown', this.keydown, this);
-            coordinator.off('click', this.windowClick, this);
+            coordinator.off('click', this.sceneClick, this);
         },  
 
         keydown: function(event) {
@@ -239,6 +239,7 @@ define([
             this.model.on('deselected', this.deselect, this);
             this.on('mouseEnter', this.highlight, this);
             this.on('mouseLeave', this.unhighlight, this);
+            this.on('click', this.click, this);
         },
 
         remove: function() {
@@ -247,7 +248,7 @@ define([
             this.model.off('deselected', this.deselect, this);
             this.off('mouseEnter', this.highlight, this);
             this.off('mouseLeave', this.unhighlight, this);
-
+            this.off('click', this.click, this);
         },
 
         select: function() {
@@ -270,6 +271,14 @@ define([
         unhighlight: function() {
             delete this.highlightAmbient;
             this.render();
+        },
+
+        click: function() {
+            if (event.shiftKey || event.ctrlKey || event.metaKey) {
+                selection.addToSelection(this.model.vertex.id);
+            } else {
+                selection.selectOnly(this.model.vertex.id);
+            }
         },
 
     });

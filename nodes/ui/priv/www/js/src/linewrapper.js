@@ -53,7 +53,7 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
             this.trigger('parametersChanged');
         },
 
-        windowClick: function() {
+        sceneClick: function() {
             this.stage = this.stage + 1;
             var newPointPosition = this.lastPosition || {x:0, y:0, z:0};
             this.vertex.parameters[this.stage] = newPointPosition;

@@ -1,4 +1,4 @@
-define(['src/interactioncoordinator', 'src/scene'], function(coordinator, sceneModel) {
+define(['src/scene'], function(sceneModel) {
 
 
     var EventGenerator = function() {
@@ -6,8 +6,6 @@ define(['src/interactioncoordinator', 'src/scene'], function(coordinator, sceneM
 
         this.sceneViews = [];
         this.mouseOverViews = [];
-
-        coordinator.on('mousemove', this.mousemove, this);
     }
 
     EventGenerator.prototype.register = function(sceneView) {
@@ -47,6 +45,18 @@ define(['src/interactioncoordinator', 'src/scene'], function(coordinator, sceneM
             view.trigger('mouseLeave', event);
         });
 
+    }
+
+    EventGenerator.prototype.click = function(event) {
+        // Return value is used to deselect all of no scene view
+        // click event is generated
+        if (this.mouseOverViews.length > 0) {
+            this.mouseOverViews[0].trigger('click', event);
+            this.trigger('sceneViewClick', {event: event, view: this.mouseOverViews[0]});
+            return true;
+        } else {
+            return false;
+        }
     }
 
     EventGenerator.prototype.findViewsForEvent = function(event) {

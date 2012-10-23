@@ -1,4 +1,5 @@
- define(['src/geometrygraph', 'src/selection'], function(geometryGraph, selection) {
+ define(['src/geometrygraph', 'src/selection', 'src/scenevieweventgenerator'], 
+    function(geometryGraph, selection, sceneViewEventGenerator) {
 
     var Coordinator = function() {
         _.extend(this, Backbone.Events);
@@ -15,6 +16,7 @@
             that.mousemove(event);
             if (!that.dragging) {
                 that.trigger('mousemove', event);
+                sceneViewEventGenerator.mousemove(event);
             } 
         });
         $('#scene').mouseup(function(event) {
@@ -45,6 +47,9 @@
     Coordinator.prototype.mouseup = function(event) {
         if (!this.dragging) {
             this.trigger('click', event);
+            if (!sceneViewEventGenerator.click(event)) {
+                selection.deselectAll();
+            }
         }
         this.mouseDownEvent = undefined;
         this.dragging = false;
