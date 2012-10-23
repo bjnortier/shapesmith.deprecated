@@ -6,10 +6,12 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
 
         render: function() {
             vertexWrapper.EditingSceneView.prototype.render.call(this);
-
+            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
+            var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
+            
             var materials = [
-                new THREE.MeshLambertMaterial( { ambient: this.ambientColor || 0x333333,  side: THREE.DoubleSide} ),
-                new THREE.MeshBasicMaterial( { color: this.color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
+                new THREE.MeshLambertMaterial( { ambient: ambient,  side: THREE.DoubleSide} ),
+                new THREE.MeshBasicMaterial( { color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
             ];
             var vertex = this.model.vertex;
             for(var i = 0; i < vertex.parameters.length; ++i) {
@@ -25,7 +27,7 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
                 var geometry = new THREE.Geometry();
                 geometry.vertices.push(from);
                 geometry.vertices.push(to);
-                var material = new THREE.LineBasicMaterial({ color: this.color });
+                var material = new THREE.LineBasicMaterial({ color: color });
                 var line = new THREE.Line(geometry, material);
                 this.sceneObject.add(line);
             }
