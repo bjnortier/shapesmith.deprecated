@@ -1,4 +1,4 @@
-define(['src/interactioncoordinator'], function(coordinator) {
+define([], function() {
 
     var Model = Backbone.Model.extend({
 
@@ -18,11 +18,6 @@ define(['src/interactioncoordinator'], function(coordinator) {
             window.addEventListener('resize', function(event) {
                 that.resize(event);
             }, false);
-            coordinator.on('mousemove', this.mousemove, this);
-            coordinator.on('mouseup', this.mouseup, this);
-            coordinator.on('mousedown', this.mousedown, this);
-            coordinator.on('mousewheel', this.mousewheel, this);
-            coordinator.on('keydown', this.keydown, this);
 
             var width = this.$el.width();
             var height = this.$el.height();

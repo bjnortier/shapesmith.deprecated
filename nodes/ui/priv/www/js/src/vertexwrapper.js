@@ -2,11 +2,12 @@ define([
         'src/calculations',
         'src/geometrygraph', 
         'src/interactioncoordinator', 
+        'src/scenevieweventgenerator',
         'src/selection',
         'src/scene',
         'src/workplane',
     ], 
-    function(calc, geometryGraph, coordinator, selection, sceneModel, workplane) {
+    function(calc, geometryGraph, coordinator, sceneViewEventGenerator, selection, sceneModel, workplane) {
 
     // ---------- Common ----------
     
@@ -29,19 +30,29 @@ define([
 
         initialize: function() {
             this.scene = sceneModel.view.scene;
-            this.sceneObject = new THREE.Object3D();
             this.render();
         },
 
         remove: function() {
             this.scene.remove(this.sceneObject);
+            sceneViewEventGenerator.deregister(this);
             sceneModel.view.updateScene = true;
         },
 
         render: function() {
-            this.scene.remove(this.sceneObject);
+            if (this.sceneObject) {
+                this.scene.remove(this.sceneObject);
+                sceneViewEventGenerator.deregister(this);
+            }
+            // Each scene view has two objects, the one that is part of
+            // the scene, and an object that is never added to the scene
+            // but is only used for selections. E.g. an edge has cylinders 
+            // that are used for selection
             this.sceneObject = new THREE.Object3D();
+            this.hiddenSelectionObject = new THREE.Object3D();
             this.scene.add(this.sceneObject);
+
+            sceneViewEventGenerator.register(this);
             sceneModel.view.updateScene = true;
         },
 
@@ -221,30 +232,43 @@ define([
 
     var DisplaySceneView = SceneView.extend({
 
-        unselectedColor: 0x00dd00,
-
         initialize: function() {
             this.color = this.unselectedColor;
             SceneView.prototype.initialize.call(this);
             this.model.on('selected', this.select, this);
             this.model.on('deselected', this.deselect, this);
+            this.on('mouseEnter', this.highlight, this);
+            this.on('mouseLeave', this.unhighlight, this);
         },
 
         remove: function() {
             SceneView.prototype.remove.call(this);
             this.model.off('selected', this.select, this);
             this.model.off('deselected', this.deselect, this);
+            this.off('mouseEnter', this.highlight, this);
+            this.off('mouseLeave', this.unhighlight, this);
+
         },
 
         select: function() {
-            this.color = 0xf4f653;
-            this.ambientColor = 0xffffff;
+            this.selectedColor = 0xf4f653;
+            this.selectedAmbient = 0x333333;
             this.render();
         },
 
         deselect: function() {
-            this.color = 0x00dd00;
-            this.ambientColor = undefined;
+            delete this.selectedColor;
+            delete this.selectedAmbient;
+            this.render();
+        },
+
+        highlight: function() {
+            this.highlightAmbient = 0xffffff;
+            this.render();
+        },
+
+        unhighlight: function() {
+            delete this.highlightAmbient;
             this.render();
         },
 

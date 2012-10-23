@@ -6,11 +6,13 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
 
         render: function() {
             vertexWrapper.EditingSceneView.prototype.render.call(this);
+            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
+            var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
             var point = THREE.SceneUtils.createMultiMaterialObject(
                 new THREE.SphereGeometry(0.5, 10, 10), 
                 [
-                    new THREE.MeshLambertMaterial( { ambient: this.ambientColor || 0x333333,  side: THREE.DoubleSide} ),
-                    new THREE.MeshBasicMaterial( { color: this.color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
+                    new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}),
+                    new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                 ]);
             point.position = calc.objToVector(this.model.vertex.parameters);
             this.sceneObject.add(point);

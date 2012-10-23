@@ -18,8 +18,7 @@ define([], function() {
     }
 
     GeomNode.prototype.cloneNonEditing = function() {
-        var newNode = new GeomNode();
-        newNode.type = this.type;
+        var newNode = new GeomNode({type: this.type});
         newNode.parameters = copyObj(this.parameters);
         return newNode;
     }  
