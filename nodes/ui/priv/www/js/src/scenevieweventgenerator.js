@@ -3,7 +3,9 @@ define(['src/scene'], function(sceneModel) {
     var EventGenerator = function() {
         _.extend(this, Backbone.Events);
         var sceneViews = [],
-            mouseOverViews = [];
+            mouseOverViews = [],
+            mouseDownOnDraggableViews = [],
+            mouseIsDown = false;
 
         this.register = function(sceneView) {
             var index = sceneViews.indexOf(sceneView);
@@ -19,6 +21,21 @@ define(['src/scene'], function(sceneModel) {
                 throw Error('Scene view not found in event generator');
             }
             sceneViews.splice(index, 1);
+        }
+
+        this.mousedown = function(event) {
+            mouseDownOnDraggableViews = this.findViewsForEvent(event).filter(function(view) {
+                return view.draggable;
+            });
+            mouseIsDown = true;
+        }
+
+        this.mouseup = function(event) {
+            if (mouseDownOnDraggableViews.length > 0) {
+                mouseDownOnDraggableViews[0].trigger('dragEnded', event);
+            }
+            mouseDownOnDraggableViews = [];
+            mouseIsDown = false;
         }
 
         this.mousemove = function(event) {
@@ -43,18 +60,38 @@ define(['src/scene'], function(sceneModel) {
 
         }
 
+        this.drag = function(event) {
+            if (mouseDownOnDraggableViews.length > 0) {
+                mouseDownOnDraggableViews[0].trigger('drag', event);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
         this.overClickable = function(event) {
-            return (mouseOverViews[0] !== undefined) && (mouseOverViews[0].clickable === true);
+            var clickableViews = mouseOverViews.filter(function(view) {
+                return view.clickable;
+            });
+            return clickableViews.length > 0;
+        }
+
+        this.overDraggable = function(event) {
+            var draggableViews = mouseOverViews.filter(function(view) {
+                return view.draggable;
+            });
+            return draggableViews.length > 0;
         }
 
         this.click = function(event) {
             // Return value is used to deselect all of no scene view
             // click event is generated
-            if (mouseOverViews.length > 0) {
-                if (mouseOverViews[0].clickable) {
-                    mouseOverViews[0].trigger('click', event);
-                    this.trigger('sceneViewClick', {event: event, view: mouseOverViews[0]});
-                }
+            var clickableViews = mouseOverViews.filter(function(view) {
+                return view.clickable;
+            });
+            if (clickableViews.length > 0) {
+                clickableViews[0].trigger('click', event);
+                this.trigger('sceneViewClick', {event: event, view: clickableViews[0]});
                 return true;
             } else {
                 return false;

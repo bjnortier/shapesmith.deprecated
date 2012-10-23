@@ -34,11 +34,13 @@
             if (this.overThreshold(eventToPosition(event))) {
                 event.mouseDownEvent = this.mouseDownEvent;
                 dragging = true;
-                this.trigger('drag', event);
+                if (!sceneViewEventGenerator.drag(event)) {
+                    this.trigger('drag', event);
+                }
             } else {
                 this.trigger('mousemove', event);
                 sceneViewEventGenerator.mousemove(event);
-                if (sceneViewEventGenerator.overClickable()) {
+                if (sceneViewEventGenerator.overClickable() || sceneViewEventGenerator.overDraggable()) {
                     $('#scene').css('cursor', 'pointer');
                 } else {
                     $('#scene').css('cursor', '');
@@ -56,6 +58,7 @@
                     selection.deselectAll();
                 }
             }
+            sceneViewEventGenerator.mouseup(event);
             this.mouseDownEvent = undefined;
             dragging = false;
         }
@@ -67,6 +70,7 @@
 
         this.mousedown = function(event) {
             this.mouseDownEvent = event;
+            sceneViewEventGenerator.mousedown(event);
         }
 
 

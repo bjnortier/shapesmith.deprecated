@@ -1,8 +1,9 @@
-define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(calc, geometryGraph, vertexWrapper) {
+define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper', 'src/scene', 'src/workplane'], 
+    function(calc, geometryGraph, vertexWrapper, sceneModel, workplaneModel) {
 
     // ---------- Common ----------
 
-    var SceneView = {
+    var LineSceneView = {
 
         render: function() {
             vertexWrapper.EditingSceneView.prototype.render.call(this);
@@ -21,14 +22,6 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
                 }
             });
 
-            var radius = this.model.vertex.editing ? 0.5: 0.25;
-            for(var i = 0; i < coordinates.length; ++i) {
-                var coordinate = coordinates[i];
-                var point = THREE.SceneUtils.createMultiMaterialObject(
-                    new THREE.SphereGeometry(radius, 10, 10), materials);
-                point.position = calc.objToVector(coordinate);
-                this.sceneObject.add(point);
-            }
             for(var i = 1; i < coordinates.length; ++i) {
                 var from = calc.objToVector(coordinates[i-1]);
                 var to = calc.objToVector(coordinates[i]);
@@ -52,12 +45,13 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
             this.inClickAddsPointPhase = true;
             this.views = this.views.concat([
                 new EditingDOMView({model: this}),
-                new EditingSceneView({model: this}),
+                new EditingLineSceneView({model: this}),
+                new EditingPointAnchorSceneView({model: this, index: 0}),
             ]);
         },
 
         workplanePositionChanged: function(position) {
-            if (this.stage !== undefined) {
+            if ((this.stage !== undefined) && (this.inClickAddsPointPhase)) {
                 this.lastPosition = position;
                 this.vertex.parameters[this.stage] = {
                     x: position.x,
@@ -70,16 +64,14 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
 
         sceneViewClick: function(viewAndEvent) {
             if (this.stage !== undefined) {
-                this.vertex.parameters[this.stage] = {
-                    point: viewAndEvent.view.model.vertex.id
-                };
+                if (viewAndEvent.view.model.vertex.type === 'point') {
+                    this.vertex.parameters[this.stage] = {
+                        point: viewAndEvent.view.model.vertex.id
+                    }
+                }
                 if (this.inClickAddsPointPhase) {
                     this.stage = this.stage + 1;
-                    this.vertex.parameters[this.stage] = {
-                        x : this.lastPosition.x,
-                        y : this.lastPosition.y,
-                        z : this.lastPosition.z,
-                    }
+                    this.addCoordinate(this.lastPosition);
                 } else {
                     this.stage = undefined;
                 }
@@ -96,11 +88,7 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
                 }
                 if (this.inClickAddsPointPhase) {
                     this.stage = this.stage + 1;
-                    this.vertex.parameters[this.stage] = {
-                        x : position.x,
-                        y : position.y,
-                        z : position.z,
-                    }
+                    this.addCoordinate(position);
                 } else {
                     this.stage = undefined;
                 }
@@ -112,6 +100,8 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
             if (event.keyCode === 13) {
                 if (this.inClickAddsPointPhase) {
                     this.vertex.parameters.splice(this.stage, 1);
+                    this.views[this.views.length - 1].remove();
+                    this.views.splice(this.views.length - 1, 1);
                     this.stage = undefined;
                     this.inClickAddsPointPhase = false;
                     this.trigger('stageChanged', this.stage);
@@ -133,7 +123,16 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
                 this.vertex.parameters.splice(this.stage, 1);
             }
             vertexWrapper.EditingModel.prototype.ok.call(this);
-        }
+        },
+
+        addCoordinate: function(position) {
+            this.vertex.parameters[this.stage] = {
+                x : position.x,
+                y : position.y,
+                z : position.z,
+            }
+            this.views.push(new EditingPointAnchorSceneView({model: this, index: this.stage}));
+        },
 
     });
 
@@ -209,7 +208,60 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
         },
     }); 
 
-    var EditingSceneView = vertexWrapper.EditingSceneView.extend(SceneView, {
+    var EditingLineSceneView = vertexWrapper.EditingSceneView.extend(LineSceneView, {});
+
+    var EditingPointAnchorSceneView = vertexWrapper.EditingSceneView.extend({
+
+        initialize: function(options) {
+            this.index = options.index;
+            this.draggable = !this.model.vertex.parameters[this.index].hasOwnProperty('point');
+            vertexWrapper.EditingSceneView.prototype.initialize.call(this);
+            this.on('drag', this.drag, this);
+            this.on('dragEnded', this.dragEnded, this);
+        },
+
+        remove: function() {
+            vertexWrapper.EditingSceneView.prototype.remove.call(this);
+            this.off('drag', this.drag, this);
+            this.off('dragEnded', this.dragEnded, this);
+        },
+
+        render: function() {
+            vertexWrapper.EditingSceneView.prototype.render.call(this);
+            if (this.model.vertex.parameters[this.index].point) {
+                return;
+            }
+            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
+            var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
+            var point = THREE.SceneUtils.createMultiMaterialObject(
+                new THREE.CubeGeometry(1, 1, 1, 1, 1, 1), 
+                [
+                    new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
+                    new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
+                ]);
+            point.position = calc.objToVector(this.model.vertex.parameters[this.index]);
+            this.sceneObject.add(point);
+        },
+
+        drag: function(event) {
+            this.dragging = true;
+            this.model.stage = this.index;
+            var positionOnWorkplane = calc.positionOnWorkplane(
+                event, workplaneModel.node, sceneModel.view.camera);
+            this.model.vertex.parameters[this.index] = {
+                x: positionOnWorkplane.x,
+                y: positionOnWorkplane.y,
+                z: positionOnWorkplane.z,
+            }
+            this.model.trigger('parametersChanged');
+        },
+
+        dragEnded: function() {
+            if (this.dragging) {
+                this.model.stage = undefined;
+                this.dragging = false;
+            }
+        },
 
     });
 
@@ -220,14 +272,14 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
         initialize: function(vertex) {
             vertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
             this.views = this.views.concat([
-                new DisplaySceneView({model: this}),
+                new DisplayLineSceneView({model: this}),
                 new DisplayDOMView({model: this}),
             ]);
         },
 
     });
 
-    var DisplaySceneView = vertexWrapper.DisplaySceneView.extend(SceneView);
+    var DisplayLineSceneView = vertexWrapper.DisplaySceneView.extend(LineSceneView);
 
     var DisplayDOMView = vertexWrapper.DisplayDOMView.extend({
 
