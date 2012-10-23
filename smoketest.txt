@@ -1,0 +1,8 @@
+resize
+zoom with mousewheel 
+zoom with keyboard
+rotate & pan
+
+create vertex
+create line
+

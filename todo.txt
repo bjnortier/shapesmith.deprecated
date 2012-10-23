@@ -1,0 +1,12 @@
+tabs -> spaces
+update bcrypt readme
+camerachange
+mousewheel on other elements
++/- on other elements
+point inside a cube
+vertical scrolling of graph 
+vertex id when saving/loading/importing
+selection cylinder for edges
+
+fn tests:
+redirect when goping to signup but logged in
