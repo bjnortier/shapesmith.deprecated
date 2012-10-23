@@ -48,6 +48,7 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
 
         initialize: function(vertex) {
             vertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
+            this.inClickAddsPointPhase = true;
             this.views = this.views.concat([
                 new EditingDOMView({model: this}),
                 new EditingSceneView({model: this}),
@@ -55,43 +56,52 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
         },
 
         workplanePositionChanged: function(position) {
-            this.lastPosition = position;
-            this.vertex.parameters[this.stage] = {
-                x: position.x,
-                y: position.y,
-                z: position.z,
+            if (this.stage !== undefined) {
+                this.lastPosition = position;
+                this.vertex.parameters[this.stage] = {
+                    x: position.x,
+                    y: position.y,
+                    z: position.z,
+                }
+                this.trigger('parametersChanged');
             }
-
-            this.trigger('parametersChanged');
         },
 
         sceneViewClick: function(viewAndEvent) {
-            if (this.stage !== -1) {
+            if (this.stage !== undefined) {
                 this.vertex.parameters[this.stage] = {
                     point: viewAndEvent.view.model.vertex.id
                 };
-                this.stage = this.stage + 1;
-                this.vertex.parameters[this.stage] = {
-                    x : this.lastPosition.x,
-                    y : this.lastPosition.y,
-                    z : this.lastPosition.z,
+                if (this.inClickAddsPointPhase) {
+                    this.stage = this.stage + 1;
+                    this.vertex.parameters[this.stage] = {
+                        x : this.lastPosition.x,
+                        y : this.lastPosition.y,
+                        z : this.lastPosition.z,
+                    }
+                } else {
+                    this.stage = undefined;
                 }
                 this.trigger('stageChanged', this.stage);
             }
         },
 
         workplaneClick: function(position) {
-            if (this.stage !== -1) {
+            if (this.stage !== undefined) {
                 this.vertex.parameters[this.stage] = {
                     x : position.x,
                     y : position.y,
                     z : position.z,
                 }
-                this.stage = this.stage + 1;
-                this.vertex.parameters[this.stage] = {
-                    x : position.x,
-                    y : position.y,
-                    z : position.z,
+                if (this.inClickAddsPointPhase) {
+                    this.stage = this.stage + 1;
+                    this.vertex.parameters[this.stage] = {
+                        x : position.x,
+                        y : position.y,
+                        z : position.z,
+                    }
+                } else {
+                    this.stage = undefined;
                 }
                 this.trigger('stageChanged', this.stage);
             }
@@ -99,9 +109,10 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
 
         keydown: function(event) {
             if (event.keyCode === 13) {
-                if (this.stage !== -1) {
+                if (this.inClickAddsPointPhase) {
                     this.vertex.parameters.splice(this.stage, 1);
-                    this.stage = -1;
+                    this.stage = undefined;
+                    this.inClickAddsPointPhase = false;
                     this.trigger('stageChanged', this.stage);
                 } else {
                     this.ok();
@@ -113,11 +124,11 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
         },
 
         canComplete: function() {
-            return this.stage > 1;
+            return this.vertex.parameters.length > 1;
         },
 
         ok: function() {
-            if (this.stage !== -1) {
+            if (this.stage !== undefined) {
                 this.vertex.parameters.splice(this.stage, 1);
             }
             vertexWrapper.EditingModel.prototype.ok.call(this);
@@ -153,22 +164,26 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
             var template = 
                 '{{#coordinates}}' +
                 '{{#id}}<div class="point">{{id}}</div>{{/id}}' + 
-                '{{^id}}<div class="coordinate {{i}}">' +
+                '{{^id}}<div class="coordinate {{i}} {{#editing}}editing{{/editing}}">' +
                 '<span class="x">{{x}}</span><span class="y">{{y}}</span><span class="z">{{z}}</span>' +
                 '</div>{{/id}}' +
                 '{{/coordinates}}';
+            var that = this;
             var coordinates = this.model.vertex.parameters.map(function(parameter, i) {
+                var common = {
+                    editing: that.model.stage === i
+                }
                 if (parameter.hasOwnProperty('point')) {
-                    return {
+                    return _.extend({
                         id: parameter.point
-                    } 
+                    }, common);
                 } else {
-                    return {
+                    return _.extend({
                         x: parameter.x, 
                         y: parameter.y, 
                         z: parameter.z, 
                         i: i,
-                    }
+                    }, common);
                 }
             });
             var view = {

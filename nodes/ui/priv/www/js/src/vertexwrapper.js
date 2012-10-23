@@ -111,9 +111,11 @@ define([
             this.model.off('parametersChanged', this.updateParams, this);
         },
 
-        events: {
-            'click .okcancel .ok' : 'ok',
-            'click .okcancel .cancel' : 'cancel',
+        events: function() {
+            return {
+                'click .okcancel .ok' : 'ok',
+                'click .okcancel .cancel' : 'cancel',
+            }
         },
 
         ok: function() {
