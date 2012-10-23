@@ -5,6 +5,7 @@ define(['src/calculations', 'src/interactioncoordinator', 'src/scene'], function
         initialize: function(attributes) {
             _.extend(this, Backbone.Events);
             coordinator.on('mousemove', this.mousemove, this);
+            coordinator.on('sceneClick', this.workplaneClick, this);
             coordinator.on('toolInitiated', this.toolInitiated, this);
             this.sceneView = attributes.sceneView;
             this.scene = attributes.sceneView.scene;
@@ -21,6 +22,10 @@ define(['src/calculations', 'src/interactioncoordinator', 'src/scene'], function
                 y: -20,
             }
 
+        },
+
+        workplaneClick: function(event) {
+            this.trigger('click', this.lastPosition);
         },
 
         mousemove: function(event) {

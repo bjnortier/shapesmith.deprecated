@@ -68,7 +68,8 @@ define([
             this.stage = 0;
             workplane.on('positionChanged', this.workplanePositionChanged, this);
             coordinator.on('keydown', this.keydown, this);
-            coordinator.on('click', this.sceneClick, this);
+            workplane.on('click', this.workplaneClick, this);
+            sceneViewEventGenerator.on('sceneViewClick', this.sceneViewClick, this);
             this.views = [];
             },
 
@@ -76,7 +77,8 @@ define([
             Model.prototype.destroy.call(this);
             workplane.off('positionChanged', this.workplanePositionChanged, this);
             coordinator.off('keydown', this.keydown, this);
-            coordinator.off('click', this.sceneClick, this);
+            workplane.off('click', this.workplaneClick, this);
+            sceneViewEventGenerator.off('sceneViewClick', this.sceneViewClick, this);
         },  
 
         keydown: function(event) {

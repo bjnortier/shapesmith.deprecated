@@ -49,8 +49,10 @@
 
         this.mouseup = function(event) {
             if (!dragging) {
-                this.trigger('click', event);
-                if (!sceneViewEventGenerator.click(event)) {
+                if (sceneViewEventGenerator.overClickable()) {
+                    sceneViewEventGenerator.click(event);
+                } else {
+                    this.trigger('sceneClick', event);
                     selection.deselectAll();
                 }
             }
