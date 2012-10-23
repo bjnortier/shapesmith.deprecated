@@ -81,20 +81,6 @@ define([
             sceneViewEventGenerator.off('sceneViewClick', this.sceneViewClick, this);
         },  
 
-        keydown: function(event) {
-            if ((event.keyCode === 13)  && this.canComplete()) {
-                // Return when not in initial vertex placement
-                this.ok();
-                if (event.shiftKey && this.vertex.addAnotherFn) {
-                    geometryGraph[this.vertex.addAnotherFn]();
-                }
-            } else if (event.keyCode === 27) {
-                // Esc
-                this.cancel();
-            }
-
-        },
-
         ok: function() {
             this.destroy();
             geometryGraph.removeVertex(this.vertex);

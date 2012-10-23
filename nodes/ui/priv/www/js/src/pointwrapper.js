@@ -46,6 +46,19 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
             this.trigger('stageChanged', this.stage);
         },
 
+        keydown: function(event) {
+            if ((event.keyCode === 13)  && this.canComplete()) {
+                // Return when not in initial vertex placement
+                this.ok();
+                if (event.shiftKey && this.vertex.addAnotherFn) {
+                    geometryGraph[this.vertex.addAnotherFn]();
+                }
+            } else if (event.keyCode === 27) {
+                // Esc
+                this.cancel();
+            }
+        },
+
         canComplete: function() {
             return this.stage !== 0;
         },

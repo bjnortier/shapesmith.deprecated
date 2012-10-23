@@ -66,31 +66,50 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
         },
 
         sceneViewClick: function(viewAndEvent) {
-            this.vertex.parameters[this.stage] = {
-                point: viewAndEvent.view.model.vertex.id
-            };
-            this.stage = this.stage + 1;
-            this.vertex.parameters[this.stage] = {
-                x : this.lastPosition.x,
-                y : this.lastPosition.y,
-                z : this.lastPosition.z,
+            if (this.stage !== -1) {
+                this.vertex.parameters[this.stage] = {
+                    point: viewAndEvent.view.model.vertex.id
+                };
+                this.stage = this.stage + 1;
+                this.vertex.parameters[this.stage] = {
+                    x : this.lastPosition.x,
+                    y : this.lastPosition.y,
+                    z : this.lastPosition.z,
+                }
+                this.trigger('stageChanged', this.stage);
             }
-            this.trigger('stageChanged', this.stage);
         },
 
         workplaneClick: function(position) {
-            this.vertex.parameters[this.stage] = {
-                x : position.x,
-                y : position.y,
-                z : position.z,
+            if (this.stage !== -1) {
+                this.vertex.parameters[this.stage] = {
+                    x : position.x,
+                    y : position.y,
+                    z : position.z,
+                }
+                this.stage = this.stage + 1;
+                this.vertex.parameters[this.stage] = {
+                    x : position.x,
+                    y : position.y,
+                    z : position.z,
+                }
+                this.trigger('stageChanged', this.stage);
             }
-            this.stage = this.stage + 1;
-            this.vertex.parameters[this.stage] = {
-                x : position.x,
-                y : position.y,
-                z : position.z,
+        },
+
+        keydown: function(event) {
+            if (event.keyCode === 13) {
+                if (this.stage !== -1) {
+                    this.vertex.parameters.splice(this.stage, 1);
+                    this.stage = -1;
+                    this.trigger('stageChanged', this.stage);
+                } else {
+                    this.ok();
+                }
+            } else if (event.keyCode === 27) {
+                // Esc
+                this.cancel();
             }
-            this.trigger('stageChanged', this.stage);
         },
 
         canComplete: function() {
@@ -98,7 +117,9 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
         },
 
         ok: function() {
-            this.vertex.parameters.splice(this.stage, 1);
+            if (this.stage !== -1) {
+                this.vertex.parameters.splice(this.stage, 1);
+            }
             vertexWrapper.EditingModel.prototype.ok.call(this);
         }
 
