@@ -1,15 +1,136 @@
 define(['src/scene',  'src/interactioncoordinator'], function(sceneModel, coordinator) {
 
     var Trackball = function(scene, camera) {
-        this.camera = camera;
-        this.scene  = scene;
 
-        this.minDistance = 3;
-        this.maxDistance = 1000;
+        var minDistance = 3;
+        var maxDistance = 1000;
+        var position = { azimuth: -1.373, elevation: 1.08, distance: 1000 };
+        var target = { azimuth: -1.373, elevation: 1.08, distance: 300, scenePosition: new THREE.Vector3() };
+        var lastMousePosition = undefined;
+        var targetOnDown = undefined;
+        var state = undefined;
 
+        this.mousedown = function(event) {
+            targetOnDown = { 
+                azimuth:  target.azimuth, 
+                elevation: target.elevation,
+            };
+        };    
 
-        this.position = { azimuth: -1.373, elevation: 1.08, distance: 1000 };
-        this.target = { azimuth: -1.373, elevation: 1.08, distance: 300, scenePosition: new THREE.Vector3() };
+        this.mouseup = function(event) {
+            state = undefined;
+            lastMousePosition = undefined;
+        };
+
+        this.drag = function(event) {
+            if (lastMousePosition) {
+                var eventPosition = eventToPosition(event);
+                var mouseDownPosition = eventToPosition(event.mouseDownEvent);
+
+                var dMouseFromDown = {
+                    x: eventPosition.x - mouseDownPosition.x,
+                    y: eventPosition.y - mouseDownPosition.y,
+                }
+                var dMouseFromLast = {
+                    x: eventPosition.x - lastMousePosition.x,
+                    y: eventPosition.y - lastMousePosition.y,
+                }
+
+                if (state === undefined) {
+                    if (!event.shiftKey && (event.button === 0)) {
+                        state = 'rotating';
+                    } else if ((event.button === 1) ||
+                        ((event.button === 0) && event.shiftKey)) {
+                        state = 'panning';
+                    }
+                }
+
+                if (state === 'rotating') {
+                    var zoomDamp = 0.0005 * Math.sqrt(position.distance);
+                    target.azimuth = targetOnDown.azimuth - dMouseFromDown.x * zoomDamp;
+                    target.elevation = targetOnDown.elevation - dMouseFromDown.y * zoomDamp;
+                    target.elevation = target.elevation > Math.PI ? Math.PI : target.elevation;
+                    target.elevation = target.elevation < 0 ? 0 : target.elevation;
+                }
+
+                if (state === 'panning') {
+
+                    var camVec = camera.position.clone().negate().normalize();
+                    var upVec = new THREE.Vector3(0,0,1);
+                    var mouseLeftVec = new THREE.Vector3().cross(upVec, camVec);
+                    var mouseUpVec = new THREE.Vector3().cross(camVec, mouseLeftVec);
+                    
+                    var dPos = mouseLeftVec.clone().multiplyScalar(dMouseFromLast.x).addSelf(
+                        mouseUpVec.clone().multiplyScalar(dMouseFromLast.y));
+                    dPos.multiplyScalar(Math.sqrt(position.distance)/50);
+
+                    target.scenePosition.addSelf(dPos);   
+                }
+
+            }
+            lastMousePosition = eventToPosition(event);
+        };
+
+        this.mousewheel = function(event) {
+            var factor = 0.01;
+            event.preventDefault();
+            event.stopPropagation();
+            if (event.originalEvent.wheelDelta) {
+                this.zoom(event.originalEvent.wheelDelta * Math.sqrt(position.distance)*factor);
+            }
+            // For Firefox
+            if (event.originalEvent.detail) {
+                this.zoom(-event.originalEvent.detail*60 * Math.sqrt(position.distance)*factor);
+            }
+        };
+
+        this.keydown = function(event) {
+            var factor = 10;
+            switch (event.keyCode) {
+            case 187:
+            case 107:
+                this.zoom(Math.sqrt(position.distance)*factor);
+                event.preventDefault();
+                break;
+            case 189:
+            case 109:
+                this.zoom(-Math.sqrt(position.distance)*factor);
+                event.preventDefault();
+                break;
+            }
+        }
+
+        this.zoom = function(delta) {
+            target.distance -= delta;
+        }
+
+        this.updateCamera = function() {
+            var damping = 0.25;
+            position.azimuth += (target.azimuth - position.azimuth) * damping;
+            position.elevation += (target.elevation - position.elevation) * damping;
+
+            var dDistance = (target.distance - position.distance) * damping;
+            var newDistance = position.distance + dDistance;
+            if (newDistance > maxDistance) {
+                target.distance = maxDistance;
+                position.distance = maxDistance;
+            } else if (newDistance < minDistance) {
+                target.distance = minDistance;
+                position.distance = minDistance;
+            } else {
+                position.distance = newDistance;
+            }
+
+            camera.position.x = position.distance * Math.sin(position.elevation) * Math.cos(position.azimuth);
+            camera.position.y = position.distance * Math.sin(position.elevation) * Math.sin(position.azimuth);
+            camera.position.z = position.distance * Math.cos(position.elevation);
+            camera.position.addSelf(scene.position);
+
+            var dScenePosition = new THREE.Vector3().sub(target.scenePosition, scene.position).multiplyScalar(0.2);
+            scene.position.addSelf(dScenePosition);
+            camera.lookAt(scene.position);
+
+        }
 
         coordinator.on('drag', this.drag, this);
         coordinator.on('mousedown', this.mousedown, this);
@@ -17,130 +138,8 @@ define(['src/scene',  'src/interactioncoordinator'], function(sceneModel, coordi
         coordinator.on('mousewheel', this.mousewheel, this);
         coordinator.on('keydown', this.keydown, this);
         sceneModel.view.on('prerender', this.updateCamera, this);
-    };
 
-    Trackball.prototype.mousedown = function(event) {
-        this.targetOnDown = { 
-            azimuth:  this.target.azimuth, 
-            elevation: this.target.elevation,
-        };
-    };    
-
-    Trackball.prototype.mouseup = function(event) {
-        this.state = undefined;
-        this.lastMousePosition = undefined;
-    };
-
-    Trackball.prototype.drag = function(event) {
-        if (this.lastMousePosition) {
-            var eventPosition = eventToPosition(event);
-            var mouseDownPosition = eventToPosition(event.mouseDownEvent);
-
-            var dMouseFromDown = {
-                x: eventPosition.x - mouseDownPosition.x,
-                y: eventPosition.y - mouseDownPosition.y,
-            }
-            var dMouseFromLast = {
-                x: eventPosition.x - this.lastMousePosition.x,
-                y: eventPosition.y - this.lastMousePosition.y,
-            }
-
-            if (this.state === undefined) {
-                if (!event.shiftKey && (event.button === 0)) {
-                    this.state = 'rotating';
-                } else if ((event.button === 1) ||
-                    ((event.button === 0) && event.shiftKey)) {
-                    this.state = 'panning';
-                }
-            }
-
-            if (this.state === 'rotating') {
-                var zoomDamp = 0.0005 * Math.sqrt(this.position.distance);
-                this.target.azimuth = this.targetOnDown.azimuth - dMouseFromDown.x * zoomDamp;
-                this.target.elevation = this.targetOnDown.elevation - dMouseFromDown.y * zoomDamp;
-                this.target.elevation = this.target.elevation > Math.PI ? Math.PI : this.target.elevation;
-                this.target.elevation = this.target.elevation < 0 ? 0 : this.target.elevation;
-            }
-
-            if (this.state === 'panning') {
-
-                var camVec = this.camera.position.clone().negate().normalize();
-                var upVec = new THREE.Vector3(0,0,1);
-                var mouseLeftVec = new THREE.Vector3().cross(upVec, camVec);
-                var mouseUpVec = new THREE.Vector3().cross(camVec, mouseLeftVec);
-                
-                var dPos = mouseLeftVec.clone().multiplyScalar(dMouseFromLast.x).addSelf(
-                    mouseUpVec.clone().multiplyScalar(dMouseFromLast.y));
-                dPos.multiplyScalar(Math.sqrt(this.position.distance)/50);
-
-                this.target.scenePosition.addSelf(dPos);   
-            }
-
-        }
-        this.lastMousePosition = eventToPosition(event);
-    };
-
-    Trackball.prototype.mousewheel = function(event) {
-        var factor = 0.01;
-        event.preventDefault();
-        event.stopPropagation();
-        if (event.originalEvent.wheelDelta) {
-            this.zoom(event.originalEvent.wheelDelta * Math.sqrt(this.position.distance)*factor);
-        }
-        // For Firefox
-        if (event.originalEvent.detail) {
-            this.zoom(-event.originalEvent.detail*60 * Math.sqrt(this.position.distance)*factor);
-        }
-    };
-
-    Trackball.prototype.keydown = function(event) {
-        var factor = 10;
-        switch (event.keyCode) {
-        case 187:
-        case 107:
-            this.zoom(Math.sqrt(this.position.distance)*factor);
-            event.preventDefault();
-            break;
-        case 189:
-        case 109:
-            this.zoom(-Math.sqrt(this.position.distance)*factor);
-            event.preventDefault();
-            break;
-        }
-    }
-
-    Trackball.prototype.zoom = function(delta) {
-        this.target.distance -= delta;
-    }
-
-    Trackball.prototype.updateCamera = function() {
-        var damping = 0.25;
-        this.position.azimuth += (this.target.azimuth - this.position.azimuth) * damping;
-        this.position.elevation += (this.target.elevation - this.position.elevation) * damping;
-
-        var dDistance = (this.target.distance - this.position.distance) * damping;
-        var newDistance = this.position.distance + dDistance;
-        if (newDistance > this.maxDistance) {
-            this.target.distance = this.maxDistance;
-            this.position.distance = this.maxDistance;
-        } else if (newDistance < this.minDistance) {
-            this.target.distance = this.minDistance;
-            this.position.distance = this.minDistance;
-        } else {
-            this.position.distance = newDistance;
-        }
-
-        this.camera.position.x = this.position.distance * Math.sin(this.position.elevation) * Math.cos(this.position.azimuth);
-        this.camera.position.y = this.position.distance * Math.sin(this.position.elevation) * Math.sin(this.position.azimuth);
-        this.camera.position.z = this.position.distance * Math.cos(this.position.elevation);
-        this.camera.position.addSelf(this.scene.position);
-
-        var dScenePosition = new THREE.Vector3().sub(this.target.scenePosition, this.scene.position).multiplyScalar(0.2);
-        this.scene.position.addSelf(dScenePosition);
-        this.camera.lookAt(this.scene.position);
-
-
-    };
+    } 
 
     var eventToPosition = function(event) {
         return {

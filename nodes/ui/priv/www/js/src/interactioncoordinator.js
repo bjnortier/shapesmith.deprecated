@@ -4,8 +4,8 @@
     var Coordinator = function() {
         _.extend(this, Backbone.Events);
 
-        this.dragThreshold = 10;
-        this.dragging = false;
+        var dragThreshold = 10;
+        var dragging = false;
 
         var that = this;
         window.addEventListener('keydown', function(event) {
@@ -30,65 +30,64 @@
             that.trigger('mousewheel', event);
         });
 
-    }
-
-    Coordinator.prototype.mousemove = function(event) {
-        if (this.overThreshold(eventToPosition(event))) {
-            event.mouseDownEvent = this.mouseDownEvent;
-            this.dragging = true;
-            this.trigger('drag', event);
-        } else {
-            this.trigger('mousemove', event);
-            sceneViewEventGenerator.mousemove(event);
-            if (sceneViewEventGenerator.overClickable()) {
-                $('#scene').css('cursor', 'pointer');
+        this.mousemove = function(event) {
+            if (this.overThreshold(eventToPosition(event))) {
+                event.mouseDownEvent = this.mouseDownEvent;
+                dragging = true;
+                this.trigger('drag', event);
             } else {
-                $('#scene').css('cursor', '');
+                this.trigger('mousemove', event);
+                sceneViewEventGenerator.mousemove(event);
+                if (sceneViewEventGenerator.overClickable()) {
+                    $('#scene').css('cursor', 'pointer');
+                } else {
+                    $('#scene').css('cursor', '');
+                }
+            } 
+
+        }
+
+        this.mouseup = function(event) {
+            if (!dragging) {
+                this.trigger('click', event);
+                if (!sceneViewEventGenerator.click(event)) {
+                    selection.deselectAll();
+                }
             }
-        } 
+            this.mouseDownEvent = undefined;
+            dragging = false;
+        }
 
-    }
+        this.mouseleave = function(event) {
+            this.mouseDownEvent = undefined;
+            dragging = false;
+        }
 
-    Coordinator.prototype.mouseup = function(event) {
-        if (!this.dragging) {
-            this.trigger('click', event);
-            if (!sceneViewEventGenerator.click(event)) {
-                selection.deselectAll();
+        this.mousedown = function(event) {
+            this.mouseDownEvent = event;
+        }
+
+
+        this.initiateTool = function(name) {
+            selection.deselectAll();
+            if (name === 'point') {
+                geometryGraph.createPointPrototype();
+            }
+            if (name === 'line') {
+                geometryGraph.createLinePrototype();
             }
         }
-        this.mouseDownEvent = undefined;
-        this.dragging = false;
+
+        this.overThreshold = function(pos2) {
+            if (!this.mouseDownEvent) {
+                return false;
+            }
+            var pos1 = eventToPosition(this.mouseDownEvent);
+            var dx = Math.abs(pos1.x - pos2.x);
+            var dy = Math.abs(pos1.y - pos2.y);
+            return Math.sqrt(dx*dx + dy*dy) > dragThreshold;
+        };
     }
-
-    Coordinator.prototype.mouseleave = function(event) {
-        this.mouseDownEvent = undefined;
-        this.dragging = false;
-    }
-
-    Coordinator.prototype.mousedown = function(event) {
-        this.mouseDownEvent = event;
-    }
-
-
-    Coordinator.prototype.initiateTool = function(name) {
-        selection.deselectAll();
-        if (name === 'point') {
-            geometryGraph.createPointPrototype();
-        }
-        if (name === 'line') {
-            geometryGraph.createLinePrototype();
-        }
-    }
-
-    Coordinator.prototype.overThreshold = function(pos2) {
-        if (!this.mouseDownEvent) {
-            return false;
-        }
-        var pos1 = eventToPosition(this.mouseDownEvent);
-        var dx = Math.abs(pos1.x - pos2.x);
-        var dy = Math.abs(pos1.y - pos2.y);
-        return Math.sqrt(dx*dx + dy*dy) > this.dragThreshold;
-    };
 
     var eventToPosition = function(event) {
         return {

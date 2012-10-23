@@ -1,81 +1,79 @@
 define(['src/scene'], function(sceneModel) {
 
-    var sceneViews = [],
-        mouseOverViews = [];
-
-
     var EventGenerator = function() {
         _.extend(this, Backbone.Events);
-    }
+        var sceneViews = [],
+            mouseOverViews = [];
 
-    EventGenerator.prototype.register = function(sceneView) {
-        var index = sceneViews.indexOf(sceneView);
-        if (index !== -1) {
-            throw Error('Scene view already in event generator');
-        }
-        sceneViews.push(sceneView);
-    }
-
-    EventGenerator.prototype.deregister= function(sceneView) {
-        var index = sceneViews.indexOf(sceneView);
-        if (index === -1) {
-            throw Error('Scene view not found in event generator');
-        }
-        sceneViews.splice(index, 1);
-    }
-
-    EventGenerator.prototype.mousemove = function(event) {
-
-        var previousOverObjects = mouseOverViews.slice(0);
-        var leaveObjects = mouseOverViews.slice(0);
-
-        mouseOverViews = [];
-        this.findViewsForEvent(event).map(function(view) {
-            if (previousOverObjects.indexOf(view) === -1) {
-                view.trigger('mouseEnter', event);
-            }
-            mouseOverViews.push(view);
-            var index = leaveObjects.indexOf(view);
+        this.register = function(sceneView) {
+            var index = sceneViews.indexOf(sceneView);
             if (index !== -1) {
-                leaveObjects.splice(index, 1);
+                throw Error('Scene view already in event generator');
             }
-        });
-        leaveObjects.map(function(view) {
-            view.trigger('mouseLeave', event);
-        });
-
-    }
-
-    EventGenerator.prototype.overClickable = function(event) {
-        return (mouseOverViews[0] !== undefined) && (mouseOverViews[0].clickable === true);
-    }
-
-    EventGenerator.prototype.click = function(event) {
-        // Return value is used to deselect all of no scene view
-        // click event is generated
-        if (mouseOverViews.length > 0) {
-            mouseOverViews[0].trigger('click', event);
-            this.trigger('sceneViewClick', {event: event, view: mouseOverViews[0]});
-            return true;
-        } else {
-            return false;
+            sceneViews.push(sceneView);
         }
-    }
 
-    EventGenerator.prototype.findViewsForEvent = function(event) {
-        var selector = createSelector(sceneModel.view.camera, event);
-        var foundObjects = sceneViews.reduce(function(acc, view) {
-            var distance = selector([view.sceneObject, view.hiddenSelectionObject]);
-            if (distance !== undefined) {
-                acc.push({view: view, distance: distance});
+        this.deregister= function(sceneView) {
+            var index = sceneViews.indexOf(sceneView);
+            if (index === -1) {
+                throw Error('Scene view not found in event generator');
             }
-            return acc;
-        }, []);
+            sceneViews.splice(index, 1);
+        }
 
-        foundObjects.sort(function(a,b) {
-            return a.distance > b.distance;
-        });
-        return _.pluck(foundObjects, 'view');
+        this.mousemove = function(event) {
+
+            var previousOverObjects = mouseOverViews.slice(0);
+            var leaveObjects = mouseOverViews.slice(0);
+
+            mouseOverViews = [];
+            this.findViewsForEvent(event).map(function(view) {
+                if (previousOverObjects.indexOf(view) === -1) {
+                    view.trigger('mouseEnter', event);
+                }
+                mouseOverViews.push(view);
+                var index = leaveObjects.indexOf(view);
+                if (index !== -1) {
+                    leaveObjects.splice(index, 1);
+                }
+            });
+            leaveObjects.map(function(view) {
+                view.trigger('mouseLeave', event);
+            });
+
+        }
+
+        this.overClickable = function(event) {
+            return (mouseOverViews[0] !== undefined) && (mouseOverViews[0].clickable === true);
+        }
+
+        this.click = function(event) {
+            // Return value is used to deselect all of no scene view
+            // click event is generated
+            if (mouseOverViews.length > 0) {
+                mouseOverViews[0].trigger('click', event);
+                this.trigger('sceneViewClick', {event: event, view: mouseOverViews[0]});
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        this.findViewsForEvent = function(event) {
+            var selector = createSelector(sceneModel.view.camera, event);
+            var foundObjects = sceneViews.reduce(function(acc, view) {
+                var distance = selector([view.sceneObject, view.hiddenSelectionObject]);
+                if (distance !== undefined) {
+                    acc.push({view: view, distance: distance});
+                }
+                return acc;
+            }, []);
+
+            foundObjects.sort(function(a,b) {
+                return a.distance > b.distance;
+            });
+            return _.pluck(foundObjects, 'view');
+        }
     }
 
     var createSelector = function(camera, event) {
