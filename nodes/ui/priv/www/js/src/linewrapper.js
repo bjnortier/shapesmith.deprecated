@@ -21,10 +21,11 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
                 }
             });
 
+            var radius = this.model.vertex.editing ? 0.5: 0.25;
             for(var i = 0; i < coordinates.length; ++i) {
                 var coordinate = coordinates[i];
                 var point = THREE.SceneUtils.createMultiMaterialObject(
-                    new THREE.SphereGeometry(0.25, 10, 10), materials);
+                    new THREE.SphereGeometry(radius, 10, 10), materials);
                 point.position = calc.objToVector(coordinate);
                 this.sceneObject.add(point);
             }
