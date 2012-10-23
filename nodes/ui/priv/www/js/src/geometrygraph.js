@@ -40,6 +40,18 @@ define(['src/geomnode'], function(geomNode) {
         this.isEditing = function() {
             return _.contains(_.pluck(vertices, 'editing'), true);
         }
+
+        this.getPointCoordinates = function(id) {
+            var vertex = _.find(vertices, function(vertex) { return vertex.id === id });
+            if (!vertex) {
+                throw Error('not vertex for id: ' + id);
+            }
+            return {
+                x: vertex.parameters.x,
+                y: vertex.parameters.y,
+                z: vertex.parameters.z,
+            }
+        }
     }
 
     return new GeometryGraph();

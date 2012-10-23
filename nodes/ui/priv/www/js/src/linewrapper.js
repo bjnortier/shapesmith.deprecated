@@ -13,17 +13,24 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
                 new THREE.MeshLambertMaterial( { ambient: ambient,  side: THREE.DoubleSide} ),
                 new THREE.MeshBasicMaterial( { color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
             ];
-            var vertex = this.model.vertex;
-            for(var i = 0; i < vertex.parameters.length; ++i) {
-                var coordinate = vertex.parameters[i];
+            var coordinates = this.model.vertex.parameters.map(function(parameter) {
+                if (parameter.hasOwnProperty('point')) {
+                    return geometryGraph.getPointCoordinates(parameter.point);
+                } else {
+                    return parameter;
+                }
+            });
+
+            for(var i = 0; i < coordinates.length; ++i) {
+                var coordinate = coordinates[i];
                 var point = THREE.SceneUtils.createMultiMaterialObject(
                     new THREE.SphereGeometry(0.25, 10, 10), materials);
                 point.position = calc.objToVector(coordinate);
                 this.sceneObject.add(point);
             }
-            for(var i = 1; i < vertex.parameters.length; ++i) {
-                var from = calc.objToVector(vertex.parameters[i-1]);
-                var to = calc.objToVector(vertex.parameters[i]);
+            for(var i = 1; i < coordinates.length; ++i) {
+                var from = calc.objToVector(coordinates[i-1]);
+                var to = calc.objToVector(coordinates[i]);
                 var geometry = new THREE.Geometry();
                 geometry.vertices.push(from);
                 geometry.vertices.push(to);
@@ -49,21 +56,40 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
 
         workplanePositionChanged: function(position) {
             this.lastPosition = position;
-            this.vertex.parameters[this.stage].x = position.x;
-            this.vertex.parameters[this.stage].y = position.y;
-            this.vertex.parameters[this.stage].z = position.z;
+            this.vertex.parameters[this.stage] = {
+                x: position.x,
+                y: position.y,
+                z: position.z,
+            }
+
             this.trigger('parametersChanged');
         },
 
-        sceneViewClick: function() {
-            console.log('sceneViewClick');
+        sceneViewClick: function(viewAndEvent) {
+            this.vertex.parameters[this.stage] = {
+                point: viewAndEvent.view.model.vertex.id
+            };
+            this.stage = this.stage + 1;
+            this.vertex.parameters[this.stage] = {
+                x : this.lastPosition.x,
+                y : this.lastPosition.y,
+                z : this.lastPosition.z,
+            }
+            this.trigger('stageChanged', this.stage);
         },
 
-        workplaneClick: function() {
-            console.log('workplaneClick');
+        workplaneClick: function(position) {
+            this.vertex.parameters[this.stage] = {
+                x : position.x,
+                y : position.y,
+                z : position.z,
+            }
             this.stage = this.stage + 1;
-            var newPointPosition = this.lastPosition || {x:0, y:0, z:0};
-            this.vertex.parameters[this.stage] = newPointPosition;
+            this.vertex.parameters[this.stage] = {
+                x : position.x,
+                y : position.y,
+                z : position.z,
+            }
             this.trigger('stageChanged', this.stage);
         },
 
@@ -105,18 +131,25 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
         renderCoordinates: function() {
             var template = 
                 '{{#coordinates}}' +
-                '<div class="coordinate {{i}}">' +
+                '{{#id}}<div class="point">{{id}}</div>{{/id}}' + 
+                '{{^id}}<div class="coordinate {{i}}">' +
                 '<span class="x">{{x}}</span><span class="y">{{y}}</span><span class="z">{{z}}</span>' +
-                '</div>' +
+                '</div>{{/id}}' +
                 '{{/coordinates}}';
             var coordinates = this.model.vertex.parameters.map(function(parameter, i) {
+                if (parameter.hasOwnProperty('point')) {
+                    return {
+                        id: parameter.point
+                    } 
+                } else {
                     return {
                         x: parameter.x, 
                         y: parameter.y, 
                         z: parameter.z, 
-                        i: i
+                        i: i,
                     }
-                });
+                }
+            });
             var view = {
                 coordinates: coordinates
             }

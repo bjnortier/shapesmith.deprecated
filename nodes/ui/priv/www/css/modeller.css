@@ -56,7 +56,7 @@ img#logo {
     height: 50px;
 }
 
-.toolbar, .coordinate, .vertex.editing {
+.toolbar, .coordinates .coordinate, .point, .vertex.editing {
     background: rgba(51, 51, 51, 0.46);
     border-radius: 0px;
 }
@@ -87,8 +87,8 @@ img#logo {
     border-bottom: solid 2px #ff0;
 }
 
-.coordinate {
-    padding: 2px;
+.coordinate, .point {
+    padding: 5px;
 }
 
 .coordinate span {
@@ -130,10 +130,6 @@ img#logo {
 
 .vertex .okcancel div {
     margin: 4px;
-}
-
-.vertex .coordinate {
-    padding: 5px;
 }
 
 #graph {
