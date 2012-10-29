@@ -11,14 +11,21 @@ define(['lib/underscore-require'], function(_) {
         }
         this.type = options.type;
         
-        if (!counters[options.type]) {
-            counters[options.type] = 0;
-        }
-        
-        this.id = options.type + counters[options.type];
-        ++counters[options.type]
+        if (options.id) {
+            this.id = options.id;
+        } else {
+            if (!counters[options.type]) {
+                counters[options.type] = 0;
+            }
+            this.id = options.type + counters[options.type];
+            ++counters[options.type]
+        } 
 
-        this.name = options.name;
+        if (options.name) {
+            this.name = options.name;
+        } else if (options.nameFromId === true) {
+            this.name = this.id;
+        }
 
         this.parameters = options.parameters || {};
         this.editing = options.editing || false;
@@ -27,7 +34,11 @@ define(['lib/underscore-require'], function(_) {
     }
 
     GeomNode.prototype.cloneNonEditing = function() {
-        var newNode = new this.constructor({type: this.type});
+        var newNode = new this.constructor({
+            type : this.type, 
+            id   : this.id,
+            name : this.name,
+        });
         newNode.parameters = copyObj(this.parameters);
         return newNode;
     }  

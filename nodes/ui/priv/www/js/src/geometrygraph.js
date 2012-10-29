@@ -22,6 +22,7 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
         this.createPointPrototype = function() {
             var pointVertex = new geomNode.Point({
                 editing: true,
+                nameFromId: true,
                 addAnotherFn: 'createPointPrototype',
             });
             graph.addVertex(pointVertex);
@@ -33,6 +34,7 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
             var pointVertex = new geomNode.Point({});
             var polylineVertex = new geomNode.Polyline({
                 editing: true,
+                nameFromId: true,
                 addAnotherFn: 'createPolylinePrototype',
             });
 

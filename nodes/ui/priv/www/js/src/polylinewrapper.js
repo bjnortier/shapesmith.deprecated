@@ -141,7 +141,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             var template = 
                 '<td>' +
                 '<div class="title"><img src="/ui/images/icons/line32x32.png"/>' +
-                '<div class="id">{{id}}</div>' + 
+                '<div class="name">{{name}}</div>' + 
                 '<span class="okcancel">' + 
                 '<span class="ok button disabled"><img src="/ui/images/icons/ok24x24.png"/></span>' +
                 '<span class="cancel button"><img src="/ui/images/icons/cancel24x24.png"/></span>' +
@@ -152,7 +152,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 '</div>' + 
                 '</td>';
             var view = {
-                id: this.model.vertex.id,
+                name: this.model.vertex.name,
                 renderedCoordinates: this.renderCoordinates()
             };
             this.$el.html($.mustache(template, view));
@@ -162,10 +162,10 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         renderCoordinates: function() {
             var template = 
                 '{{#coordinates}}' +
-                '{{#id}}<div class="point">{{id}}</div>{{/id}}' + 
-                '{{#id}}<div class="coordinate {{i}} {{#editing}}editing{{/editing}}">' +
+                '{{#name}}<div class="point">{{id}}</div>{{/name}}' + 
+                '{{^name}}<div class="coordinate {{i}} {{#editing}}editing{{/editing}}">' +
                 '<span class="x">{{x}}</span><span class="y">{{y}}</span><span class="z">{{z}}</span>' +
-                '</div>{{/id}}' +
+                '</div>{{/name}}' +
                 '{{/coordinates}}';
             var that = this;
 
@@ -174,6 +174,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 return {
                     editing: that.model.stage === i,
                     id: pointChild.id,
+                    name: pointChild.name,
                     x: pointChild.parameters.coordinate.x, 
                     y: pointChild.parameters.coordinate.y, 
                     z: pointChild.parameters.coordinate.z, 
@@ -211,7 +212,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             this.index = options.index;
             this.point = geometryGraph.childrenOf(this.model.vertex)[this.index];
 
-            this.draggable = false; 
+            this.draggable = this.point.name === undefined; 
             vertexWrapper.EditingSceneView.prototype.initialize.call(this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);

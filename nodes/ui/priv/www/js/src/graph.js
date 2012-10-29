@@ -35,12 +35,17 @@ define([], function() {
         }
 
         this.replaceVertex = function(oldVertex, newVertex) {
-            this.addVertex(newVertex);
+            if (oldVertex.id === newVertex.id) {
+                vertices[newVertex.id] = newVertex;
+                return;
+            }
+
             if (!vertices[oldVertex.id]) {
                 throw Error('Cannot remove non-existant vertex: ' + oldVertex.id);
             }
             delete vertices[oldVertex.id];
             --size;
+            this.addVertex(newVertex);
 
             var outgoingEdgesCopy = outgoingEdges[oldVertex.id].slice(0);
             var incomingEdgesCopy = incomingEdges[oldVertex.id].slice(0);

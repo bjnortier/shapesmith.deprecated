@@ -1,5 +1,8 @@
-var assert = require('chai').assert,
+var chai = require('chai'),
+    assert = chai.assert,
     requirejs = require('requirejs');
+
+chai.Assertion.includeStack = true;
 
 requirejs.config({
     //Pass the top-level main.js/index.js require
@@ -25,6 +28,15 @@ describe('Point', function() {
         assert.deepEqual(point.parameters, {coordinate: {x:0, y:0, z:0}});
     });
 
+    it('can be named', function() {
+        var point = new geomNode.Point({nameFromId: true});
+        assert.equal(point.id, point.name);
+
+        var cloned = point.cloneNonEditing();
+        assert.equal(point.id, cloned.id);
+        assert.equal(cloned.id, cloned.name);
+    });
+
     it('has mutable parameters', function() {
 
         var point = new geomNode.Point({parameters: {coordinate: {
@@ -39,13 +51,17 @@ describe('Point', function() {
 
     it('clones nonEditing correctly', function() {
 
-        var point = new geomNode.Point({parameters: {coordinate: {
-            x: 1, y: 2, z:3,
-        }}});
+        var point = new geomNode.Point({
+            parameters: {
+                coordinate: {
+                    x: 1, y: 2, z:3,
+                }
+            }
+        });
 
         var nonEditing = point.cloneNonEditing();
 
-        assert.notEqual(point.id, nonEditing.id);
+        assert.equal(point.id, nonEditing.id);
         assert.equal(point.name, nonEditing.name);
         assert.deepEqual(point.parameters, nonEditing.parameters);
         assert.isFalse(nonEditing.editing);
@@ -134,10 +150,7 @@ describe('Graph', function() {
         assert.deepEqual(graph.incomingEdgesOf(c), ['a', 'b']);
 
         var d = {id:'d'};
-        console.log(graph.stringify());
         graph.replaceVertex(b, d);
-
-        console.log(graph.stringify());
 
         assert.deepEqual(graph.outgoingEdgesOf(a), ['d', 'c']);
         assert.deepEqual(graph.outgoingEdgesOf(d), ['c']);
@@ -145,6 +158,36 @@ describe('Graph', function() {
         assert.deepEqual(graph.incomingEdgesOf(a), []);
         assert.deepEqual(graph.incomingEdgesOf(d), ['a']);
         assert.deepEqual(graph.incomingEdgesOf(c), ['a', 'd']);
+
+    });
+
+    it('can replace vertices with the same id', function() {
+
+        var a = {id:'a'}, b1 = {id:'b'}, b2 = {id: 'b'}, c = {id:'c'};
+        var graph = new graphLib.Graph();
+
+        graph.addVertex(a);        
+        graph.addVertex(b1); 
+        graph.addVertex(c); 
+        graph.addEdge(a,b1);
+        graph.addEdge(a,c);
+        graph.addEdge(b1,c);
+
+        assert.deepEqual(graph.outgoingEdgesOf(a), ['b', 'c']);
+        assert.deepEqual(graph.outgoingEdgesOf(b1), ['c']);
+        assert.deepEqual(graph.outgoingEdgesOf(c), []);
+        assert.deepEqual(graph.incomingEdgesOf(a), []);
+        assert.deepEqual(graph.incomingEdgesOf(b1), ['a']);
+        assert.deepEqual(graph.incomingEdgesOf(c), ['a', 'b']);
+
+        graph.replaceVertex(b1, b2);
+
+        assert.deepEqual(graph.outgoingEdgesOf(a), ['b', 'c']);
+        assert.deepEqual(graph.outgoingEdgesOf(b2), ['c']);
+        assert.deepEqual(graph.outgoingEdgesOf(c), []);
+        assert.deepEqual(graph.incomingEdgesOf(a), []);
+        assert.deepEqual(graph.incomingEdgesOf(b2), ['a']);
+        assert.deepEqual(graph.incomingEdgesOf(c), ['a', 'b']);
 
     });
 

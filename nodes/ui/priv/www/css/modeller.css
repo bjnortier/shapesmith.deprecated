@@ -111,7 +111,7 @@ img#logo {
     width: 200px; 
 }
 
-.vertex .id {
+.vertex .name {
     height: 32px;
     display: inline-block;
     vertical-align: middle;

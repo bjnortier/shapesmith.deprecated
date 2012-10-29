@@ -72,7 +72,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper'],
             var template = 
                 '<td>' +
                 '<div class="title"><img src="/ui/images/icons/point32x32.png"/>' +
-                '<div class="id">{{id}}</div>' + 
+                '<div class="name">{{name}}</div>' + 
                 '<span class="okcancel">' + 
                 '<span class="ok button disabled"><img src="/ui/images/icons/ok24x24.png"/></span>' +
                 '<span class="cancel button"><img src="/ui/images/icons/cancel24x24.png"/></span>' +
@@ -84,6 +84,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper'],
                 '</td>';
             var view = {
                 id: this.model.vertex.id,
+                name: this.model.vertex.name,
                 x: this.model.vertex.parameters.coordinate.x,
                 y: this.model.vertex.parameters.coordinate.y,
                 z: this.model.vertex.parameters.coordinate.z,
