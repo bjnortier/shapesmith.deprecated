@@ -76,7 +76,7 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
         }
 
         this.isEditing = function() {
-            return _.contains(_.pluck(graph.vertices, 'editing'), true);
+            return _.contains(_.pluck(_.values(graph.vertices), 'editing'), true);
         }
 
         this.getPointCoordinates = function(id) {
