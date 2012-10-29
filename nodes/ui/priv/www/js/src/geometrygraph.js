@@ -1,4 +1,4 @@
-define(['src/geomnode'], function(geomNode) {
+define(['lib/underscore-require', 'lib/backbone-require', 'src/geomnode'], function(_, Backbone, geomNode) {
 
     var GeometryGraph = function() {
         _.extend(this, Backbone.Events);

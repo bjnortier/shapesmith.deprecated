@@ -1,4 +1,4 @@
-define([], function() {
+define(['lib/backbone-require'], function(Backbone) {
 
     var Model = Backbone.Model.extend({
 

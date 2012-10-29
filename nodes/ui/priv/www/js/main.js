@@ -10,16 +10,7 @@ requirejs(
         'src/vertexwrapper',
         'src/pointwrapper',
         'src/linewrapper',
-    ], function(
-        coordinator,
-        scene,
-        geomtoolbar,
-        workplane,
-        trackball,
-        vertexWrapper,
-        pointWrapper,
-        lineWrapper
-    ) {
+    ], function() {
 
     $(document).ready(function() {
     });

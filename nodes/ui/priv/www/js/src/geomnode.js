@@ -1,7 +1,6 @@
 
 define(['lib/underscore-require'], function(_) {
 
-
     var counters = {};
 
     var GeomNode = function(options) {
@@ -56,6 +55,7 @@ define(['lib/underscore-require'], function(_) {
     var Point = function(options) {
         var options = options || {};
         options.type = 'point';
+        options.parameters = options.parameters || {coordinate: {x: 0, y:0, z:0}};
         GeomNode.prototype.constructor.call(this, options);
     }
 

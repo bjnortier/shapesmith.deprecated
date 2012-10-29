@@ -5,14 +5,22 @@
     
     <link href="/ui/css/modeller.css" rel="stylesheet" type="text/css"/>
     
-    <script type="text/javascript" src="/ui/js/lib/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript">
+        var SS = SS || {};
+        SS.session = {
+            username: '{{username}}',
+            design:   '{{design}}',
+            host:     '{{host}}'
+        }
+    </script>
+    <script data-main="/ui/js/main.js" src="/ui/js/lib/require-jquery.js"></script>
+
     <script type="text/javascript" src="/ui/js/lib/jquery.mustache.js"></script>
     <script type="text/javascript" src="/ui/js/lib/jquery.getQueryParam.1.0.0.min.js"></script>
     <script type="text/javascript" src="/ui/js/lib/jquery.mousewheel.min.js"></script>
+    
     <script type="text/javascript" src="/ui/js/lib/Detector.js"></script>
     <script type="text/javascript" src="/ui/js/lib/three.min.js"></script>
-    <script type="text/javascript" src="/ui/js/lib/underscore-min.js"></script>
-    <script type="text/javascript" src="/ui/js/lib/backbone-min.js"></script>
     <script type="text/javascript" src="/ui/js/lib/csg-min.js"></script>
 
     <script type="text/javascript" src="/ui/js/lib/fonts/helvetiker_bold.typeface.js"></script>
@@ -22,18 +30,6 @@
     <script type="text/javascript" src="/ui/js/lib/fonts/inconsolata_medium.typeface.js"></script>
     <script type="text/javascript" src="/ui/js/lib/fonts/open_sans_regular.typeface.js"></script>
 
-    <script type="text/javascript">
-        var SS = SS || {};
-        SS.session = {
-            username: '{{username}}',
-            design:   '{{design}}',
-            host:     '{{host}}'
-        }
-    </script>
-
-    <script data-main="/ui/js/main.js" src="/ui/js/lib/require.js"></script>
-
-  
   </head>
 <body oncontextmenu="return false;">
   <table id="graph"></table>
