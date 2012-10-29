@@ -1,4 +1,4 @@
-define(['src/interactioncoordinator', 'src/geometrygraph'], 
+define(['src/interactioncoordinator', 'src/geometrygraphsingleton'], 
     function(coordinator, geometryGraph) {
 
     var ItemModel = Backbone.Model.extend({

@@ -1,6 +1,6 @@
 define([
         'src/calculations',
-        'src/geometrygraph', 
+        'src/geometrygraphsingleton', 
         'src/interactioncoordinator', 
         'src/scenevieweventgenerator',
         'src/selection',
@@ -83,13 +83,12 @@ define([
 
         ok: function() {
             this.destroy();
-            geometryGraph.removeVertex(this.vertex);
-            geometryGraph.addVertex(this.vertex.cloneNonEditing());
+            geometryGraph.commit(this.vertex);
         },
 
         cancel: function() {
             this.destroy();
-            geometryGraph.removeVertex(this.vertex);
+            geometryGraph.cancelPrototype(this.vertex);
         },
     });
 

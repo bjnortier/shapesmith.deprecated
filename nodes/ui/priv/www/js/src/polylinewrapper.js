@@ -1,4 +1,4 @@
-define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper', 'src/scene', 'src/workplane'], 
+define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', 'src/scene', 'src/workplane'], 
     function(calc, geometryGraph, vertexWrapper, sceneModel, workplaneModel) {
 
     // ---------- Common ----------
@@ -14,12 +14,9 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper', 'src/scene
                 new THREE.MeshLambertMaterial( { ambient: ambient,  side: THREE.DoubleSide} ),
                 new THREE.MeshBasicMaterial( { color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
             ];
-            var coordinates = this.model.vertex.parameters.map(function(parameter) {
-                if (parameter.hasOwnProperty('point')) {
-                    return geometryGraph.getPointCoordinates(parameter.point);
-                } else {
-                    return parameter;
-                }
+            var pointChildren = geometryGraph.childrenOf(this.model.vertex);
+            var coordinates = pointChildren.map(function(point) {
+                return point.parameters.coordinate;
             });
 
             for(var i = 1; i < coordinates.length; ++i) {
@@ -53,7 +50,8 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper', 'src/scene
         workplanePositionChanged: function(position) {
             if ((this.stage !== undefined) && (this.inClickAddsPointPhase)) {
                 this.lastPosition = position;
-                this.vertex.parameters[this.stage] = {
+                var point = geometryGraph.childrenOf(this.vertex)[this.stage];
+                point.parameters.coordinate = {
                     x: position.x,
                     y: position.y,
                     z: position.z,
@@ -81,7 +79,8 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper', 'src/scene
 
         workplaneClick: function(position) {
             if (this.stage !== undefined) {
-                this.vertex.parameters[this.stage] = {
+                var point1 = geometryGraph.childrenOf(this.vertex)[this.stage];
+                point1.parameters.coordinate = {
                     x : position.x,
                     y : position.y,
                     z : position.z,
@@ -99,7 +98,7 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper', 'src/scene
         keydown: function(event) {
             if (event.keyCode === 13) {
                 if (this.inClickAddsPointPhase) {
-                    this.vertex.parameters.splice(this.stage, 1);
+                    geometryGraph.removeLastPointFromPolyline(this.vertex);
                     this.views[this.views.length - 1].remove();
                     this.views.splice(this.views.length - 1, 1);
                     this.stage = undefined;
@@ -115,18 +114,19 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper', 'src/scene
         },
 
         canComplete: function() {
-            return this.vertex.parameters.length > 1;
+            return geometryGraph.childrenOf(this.vertex).length > 1;
         },
 
         ok: function() {
             if (this.stage !== undefined) {
-                this.vertex.parameters.splice(this.stage, 1);
+                geometryGraph.removeLastPointFromPolyline(this.vertex);
             }
             vertexWrapper.EditingModel.prototype.ok.call(this);
         },
 
         addCoordinate: function(position) {
-            this.vertex.parameters[this.stage] = {
+            var point = geometryGraph.addPointToPolyline(this.vertex);
+            point.parameters.coordinate = {
                 x : position.x,
                 y : position.y,
                 z : position.z,
@@ -164,26 +164,21 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper', 'src/scene
             var template = 
                 '{{#coordinates}}' +
                 '{{#id}}<div class="point">{{id}}</div>{{/id}}' + 
-                '{{^id}}<div class="coordinate {{i}} {{#editing}}editing{{/editing}}">' +
+                '{{#id}}<div class="coordinate {{i}} {{#editing}}editing{{/editing}}">' +
                 '<span class="x">{{x}}</span><span class="y">{{y}}</span><span class="z">{{z}}</span>' +
                 '</div>{{/id}}' +
                 '{{/coordinates}}';
             var that = this;
-            var coordinates = this.model.vertex.parameters.map(function(parameter, i) {
-                var common = {
-                    editing: that.model.stage === i
-                }
-                if (parameter.hasOwnProperty('point')) {
-                    return _.extend({
-                        id: parameter.point
-                    }, common);
-                } else {
-                    return _.extend({
-                        x: parameter.x, 
-                        y: parameter.y, 
-                        z: parameter.z, 
-                        i: i,
-                    }, common);
+
+            var pointChildren = geometryGraph.childrenOf(this.model.vertex);
+            var coordinates = pointChildren.map(function(pointChild, i) {
+                return {
+                    editing: that.model.stage === i,
+                    id: pointChild.id,
+                    x: pointChild.parameters.coordinate.x, 
+                    y: pointChild.parameters.coordinate.y, 
+                    z: pointChild.parameters.coordinate.z, 
+                    i: i,
                 }
             });
             var view = {
@@ -201,9 +196,10 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper', 'src/scene
 
         updateParams: function() {
             var index = this.model.stage, that = this;
+            var point = geometryGraph.childrenOf(this.model.vertex)[index];
             ['x', 'y', 'z'].forEach(function(dim) {
                 that.$el.find('.coordinate.' + index).find('.' + dim).text(
-                    that.model.vertex.parameters[index][dim]);
+                    point.parameters.coordinate[dim]);
             });
         },
     }); 
@@ -214,7 +210,9 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper', 'src/scene
 
         initialize: function(options) {
             this.index = options.index;
-            this.draggable = !this.model.vertex.parameters[this.index].hasOwnProperty('point');
+            this.point = geometryGraph.childrenOf(this.model.vertex)[this.index];
+
+            this.draggable = false; 
             vertexWrapper.EditingSceneView.prototype.initialize.call(this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);
@@ -228,9 +226,7 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper', 'src/scene
 
         render: function() {
             vertexWrapper.EditingSceneView.prototype.render.call(this);
-            if (this.model.vertex.parameters[this.index].point) {
-                return;
-            }
+
             var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
             var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
             var point = THREE.SceneUtils.createMultiMaterialObject(
@@ -239,7 +235,7 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper', 'src/scene
                     new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                     new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                 ]);
-            point.position = calc.objToVector(this.model.vertex.parameters[this.index]);
+            point.position = calc.objToVector(this.point.parameters.coordinate);
             this.sceneObject.add(point);
         },
 
@@ -248,7 +244,7 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper', 'src/scene
             this.model.stage = this.index;
             var positionOnWorkplane = calc.positionOnWorkplane(
                 event, workplaneModel.node, sceneModel.view.camera);
-            this.model.vertex.parameters[this.index] = {
+            this.point.parameters.coordinate = {
                 x: positionOnWorkplane.x,
                 y: positionOnWorkplane.y,
                 z: positionOnWorkplane.z,
@@ -292,11 +288,13 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper', 'src/scene
     // ---------- Init ----------
 
     geometryGraph.on('vertexAdded', function(vertex) {
-        if (vertex.type === 'line') {
-            if (vertex.editing) {
-                new EditingModel(vertex);
-            } else {
-                new DisplayModel(vertex);
+        if (vertex.type === 'polyline') {
+            if (geometryGraph.parentsOf(vertex).length === 0) {
+                if (vertex.editing) {
+                    new EditingModel(vertex);
+                } else {
+                    new DisplayModel(vertex);
+                }
             }
         }
     });

@@ -35,7 +35,7 @@ define(['lib/underscore-require'], function(_) {
     var copyObj = function(value) {
         if ((value === null) || (value === undefined)) {
             return undefined;
-        } if (Object.prototype.toString.call( value ) === '[object Array]') {
+        } if (Object.prototype.toString.call(value) === '[object Array]') {
             return value.map(function(x) {
                 return copyObj(x);
             });
@@ -68,7 +68,7 @@ define(['lib/underscore-require'], function(_) {
         GeomNode.prototype.constructor.call(this, options);
     }
 
-    _.extend(Point.prototype, GeomNode.prototype);
+    _.extend(Polyline.prototype, GeomNode.prototype);
 
 
     return {

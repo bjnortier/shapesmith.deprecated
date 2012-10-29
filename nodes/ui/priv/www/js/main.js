@@ -6,7 +6,7 @@ requirejs(
         'src/trackball',
         'src/vertexwrapper',
         'src/pointwrapper',
-        'src/linewrapper',
+        'src/polylinewrapper',
     ], function() {
 
     $(document).ready(function() {

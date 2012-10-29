@@ -4,17 +4,19 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
     var GeometryGraph = function() {
 
         _.extend(this, Backbone.Events);
-        var that = this;
         var graph = new graphLib.Graph();
 
-        var addVertex = function(vertex) {
-            graph.addVertex(vertex);
-            that.trigger('vertexAdded', vertex);
+        this.commit = function(vertex) {
+            var nonEditingReplacement = vertex.cloneNonEditing();
+            graph.replaceVertex(vertex, nonEditingReplacement);
+
+            this.trigger('vertexRemoved', vertex);
+            this.trigger('vertexAdded', nonEditingReplacement);
         }
 
-        var removeVertex = function(vertex) {
+        this.cancelPrototype = function(vertex) {
             graph.removeVertex(vertex);
-            that.trigger('vertexRemoved', vertex);
+            this.trigger('vertexRemoved', vertex);
         }
        
         this.createPointPrototype = function() {
@@ -22,7 +24,8 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
                 editing: true,
                 addAnotherFn: 'createPointPrototype',
             });
-            addVertex(pointVertex);
+            graph.addVertex(pointVertex);
+            this.trigger('vertexAdded', pointVertex);
             return pointVertex;
         }
 
@@ -32,20 +35,42 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
                 editing: true,
                 addAnotherFn: 'createPolylinePrototype',
             });
-            addVertex(pointVertex);
-            addVertex(polylineVertex);
+
+            graph.addVertex(pointVertex);
+            graph.addVertex(polylineVertex);
             graph.addEdge(polylineVertex, pointVertex);
+            this.trigger('vertexAdded', pointVertex);
+            this.trigger('vertexAdded', polylineVertex);
+
             return polylineVertex;
         }
 
         this.addPointToPolyline = function(polyline) {
             var pointVertex = new geomNode.Point({});
-            addVertex(pointVertex);
+            graph.addVertex(pointVertex);
             graph.addEdge(polyline, pointVertex);
+            this.trigger('vertexAdded', pointVertex);
+            return pointVertex;
+        }
+
+        this.removeLastPointFromPolyline = function(polyline) {
+            var children = this.childrenOf(polyline);
+            if (children.length === 0) {
+                throw Error('Cannot remove last point from empty polyline');
+            }
+            var vertex = children[children.length - 1];
+            graph.removeVertex(vertex);
+            this.trigger('vertexRemoved', vertex);
         }
 
         this.childrenOf = function(vertex) {
             return graph.outgoingEdgesOf(vertex).map(function(id) {
+                return graph.vertexById(id);
+            });
+        }
+
+        this.parentsOf = function(vertex) {
+            return graph.incomingEdgesOf(vertex).map(function(id) {
                 return graph.vertexById(id);
             });
         }

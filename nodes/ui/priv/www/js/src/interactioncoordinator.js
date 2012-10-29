@@ -1,4 +1,4 @@
- define(['src/geometrygraph', 'src/selection', 'src/scenevieweventgenerator'], 
+ define(['src/geometrygraphsingleton', 'src/selection', 'src/scenevieweventgenerator'], 
     function(geometryGraph, selection, sceneViewEventGenerator) {
 
     var Coordinator = function() {
@@ -80,7 +80,7 @@
                 geometryGraph.createPointPrototype();
             }
             if (name === 'line') {
-                geometryGraph.createLinePrototype();
+                geometryGraph.createPolylinePrototype();
             }
         }
 

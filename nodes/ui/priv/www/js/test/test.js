@@ -114,6 +114,40 @@ describe('Graph', function() {
 
     });
 
+    it('can replace vertices and maintain the edges', function() {
+
+        var a = {id:'a'}, b = {id:'b'}, c = {id:'c'};
+        var graph = new graphLib.Graph();
+
+        graph.addVertex(a);        
+        graph.addVertex(b); 
+        graph.addVertex(c); 
+        graph.addEdge(a,b);
+        graph.addEdge(a,c);
+        graph.addEdge(b,c);
+
+        assert.deepEqual(graph.outgoingEdgesOf(a), ['b', 'c']);
+        assert.deepEqual(graph.outgoingEdgesOf(b), ['c']);
+        assert.deepEqual(graph.outgoingEdgesOf(c), []);
+        assert.deepEqual(graph.incomingEdgesOf(a), []);
+        assert.deepEqual(graph.incomingEdgesOf(b), ['a']);
+        assert.deepEqual(graph.incomingEdgesOf(c), ['a', 'b']);
+
+        var d = {id:'d'};
+        console.log(graph.stringify());
+        graph.replaceVertex(b, d);
+
+        console.log(graph.stringify());
+
+        assert.deepEqual(graph.outgoingEdgesOf(a), ['d', 'c']);
+        assert.deepEqual(graph.outgoingEdgesOf(d), ['c']);
+        assert.deepEqual(graph.outgoingEdgesOf(c), []);
+        assert.deepEqual(graph.incomingEdgesOf(a), []);
+        assert.deepEqual(graph.incomingEdgesOf(d), ['a']);
+        assert.deepEqual(graph.incomingEdgesOf(c), ['a', 'd']);
+
+    });
+
 });
 
 describe('GeometryGraph', function() {

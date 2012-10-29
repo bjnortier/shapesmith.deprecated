@@ -34,6 +34,33 @@ define([], function() {
             --size;
         }
 
+        this.replaceVertex = function(oldVertex, newVertex) {
+            this.addVertex(newVertex);
+            if (!vertices[oldVertex.id]) {
+                throw Error('Cannot remove non-existant vertex: ' + oldVertex.id);
+            }
+            delete vertices[oldVertex.id];
+            --size;
+
+            var outgoingEdgesCopy = outgoingEdges[oldVertex.id].slice(0);
+            var incomingEdgesCopy = incomingEdges[oldVertex.id].slice(0);
+
+            outgoingEdgesCopy.forEach(function(toId) {
+                var index = incomingEdges[toId].indexOf(oldVertex.id);
+                incomingEdges[toId].splice(index, 1, newVertex.id);
+            });
+
+            incomingEdgesCopy.forEach(function(fromId) {
+                var index = outgoingEdges[fromId].indexOf(oldVertex.id);
+                outgoingEdges[fromId].splice(index, 1, newVertex.id);
+            });
+
+            outgoingEdges[newVertex.id] = outgoingEdgesCopy;
+            incomingEdges[newVertex.id] = incomingEdgesCopy;
+
+
+        }
+
         this.vertexById = function(id) {
             return vertices[id];
         }
@@ -57,6 +84,28 @@ define([], function() {
 
         this.incomingEdgesOf = function(to) {
             return incomingEdges[to.id] ? incomingEdges[to.id] : [];
+        }
+
+        this.stringify = function() {
+            var str = '\n';
+            var toString = function(obj) {
+                if (Object.prototype.toString.call(obj) === '[object Array]') {
+                    if (obj.length === 0) {
+                        return '[]';
+                    }
+                }
+                return obj.toString();
+            }
+            for (var key in vertices) {
+                str += key + ':' + vertices[key] + '\n'; 
+            }
+            for (var key in outgoingEdges) {
+                str += key + ' → ' + toString(outgoingEdges[key]) + '\n';
+            }
+            for (var key in incomingEdges) {
+                str += key + ' ← ' + toString(incomingEdges[key]) + '\n';
+            }
+            return str;
         }
 
     }

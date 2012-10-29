@@ -1,4 +1,5 @@
-define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(calc, geometryGraph, vertexWrapper) {
+define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper'], 
+    function(calc, geometryGraph, vertexWrapper) {
 
     // ---------- Common ----------
 
@@ -137,10 +138,12 @@ define(['src/calculations', 'src/geometrygraph', 'src/vertexwrapper'], function(
 
     geometryGraph.on('vertexAdded', function(vertex) {
         if (vertex.type === 'point') {
-            if (vertex.editing) {
-                new EditingModel(vertex);
-            } else {
-                new DisplayModel(vertex);
+            if (geometryGraph.parentsOf(vertex).length === 0) {
+                if (vertex.editing) {
+                    new EditingModel(vertex);
+                } else {
+                    new DisplayModel(vertex);
+                }
             }
         }
     });
