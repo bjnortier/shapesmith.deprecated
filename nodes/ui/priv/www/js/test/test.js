@@ -70,27 +70,70 @@ describe('GeometryGraph', function() {
         assert.equal(graph.vertexCount(), 0);
     });
 
+    it('manages incoming and outoing vertices', function() {
+
+        var a = {id:'a'}, b = {id:'b'}, c = {id:'c'};
+        var graph = new geometryGraph.Graph();
+        assert.equal(graph.vertexCount(), 0);
+
+        graph.addVertex(a);        
+        graph.addVertex(b); 
+        graph.addVertex(c); 
+        graph.addEdge(a,b);
+        graph.addEdge(a,c);
+        graph.addEdge(b,c);
+
+        assert.equal(graph.vertexCount(), 3);
+        assert.deepEqual(graph.outgoingEdgesOf(a), ['b', 'c']);
+        assert.deepEqual(graph.outgoingEdgesOf(b), ['c']);
+        assert.deepEqual(graph.outgoingEdgesOf(c), []);
+        assert.deepEqual(graph.incomingEdgesOf(a), []);
+        assert.deepEqual(graph.incomingEdgesOf(b), ['a']);
+        assert.deepEqual(graph.incomingEdgesOf(c), ['a', 'b']);
+
+        graph.removeVertex(b);
+
+        assert.equal(graph.vertexCount(), 2);
+        assert.deepEqual(graph.outgoingEdgesOf(a), ['c']);
+        assert.deepEqual(graph.outgoingEdgesOf(b), []);
+        assert.deepEqual(graph.outgoingEdgesOf(c), []);
+        assert.deepEqual(graph.incomingEdgesOf(a), []);
+        assert.deepEqual(graph.incomingEdgesOf(b), []);
+        assert.deepEqual(graph.incomingEdgesOf(c), ['a']);
+
+        graph.removeVertex(a);
+
+        assert.equal(graph.vertexCount(), 1);
+        assert.deepEqual(graph.outgoingEdgesOf(a), []);
+        assert.deepEqual(graph.outgoingEdgesOf(b), []);
+        assert.deepEqual(graph.outgoingEdgesOf(c), []);
+        assert.deepEqual(graph.incomingEdgesOf(a), []);
+        assert.deepEqual(graph.incomingEdgesOf(b), []);
+        assert.deepEqual(graph.incomingEdgesOf(c), []);
+
+    });
+
     it('support a graph with one Point vertex', function() {
         var graph = new geometryGraph.Graph();
 
         var point = graph.createPointPrototype();
 
         assert.equal(graph.vertexCount(), 1);
-        assert.equal(graph.getOutgoingEdgesOf(point).length, 0);        
+        assert.equal(graph.outgoingEdgesOf(point).length, 0);        
     });
 
     it('can support a polyline with point children', function() {
         var graph = new geometryGraph.Graph();
         var polyline = graph.createPolylinePrototype();
-        assert.equal(graph.getOutgoingEdgesOf(polyline).length, 1); 
+        assert.equal(graph.outgoingEdgesOf(polyline).length, 1); 
 
         assert.equal(graph.vertexCount(), 2);
-        assert.equal(graph.getOutgoingEdgesOf(polyline).length, 1); 
+        assert.equal(graph.outgoingEdgesOf(polyline).length, 1); 
 
         graph.addPointToPolyline(polyline);
 
         assert.equal(graph.vertexCount(), 3);
-        assert.equal(graph.getOutgoingEdgesOf(polyline).length, 2); 
+        assert.equal(graph.outgoingEdgesOf(polyline).length, 2); 
 
     });
 })

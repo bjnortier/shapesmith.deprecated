@@ -2,35 +2,52 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/geomnode'], funct
 
     var GeometryGraph = function() {
         _.extend(this, Backbone.Events);
-        var vertices = [], edges = {};
+        var vertices = [], outgoingEdges = {}, incomingEdges = {};
 
         this.addVertex = function(vertex) {
             vertices.push(vertex);
+            outgoingEdges[vertex.id] = [];
+            incomingEdges[vertex.id] = [];
             this.trigger('vertexAdded', vertex);
         }
 
         this.removeVertex = function(vertex) {
             var index = vertices.indexOf(vertex);
-            if (index >= 0) {
-                vertices.splice(index, 1);
+            if (index === -1) {
+                throw Error('Cannot remove non-existant vertex: ' + vertex.id);
             }
+            vertices.splice(index, 1);
+
+            outgoingEdges[vertex.id].forEach(function(toId) {
+                index = incomingEdges[toId].indexOf(vertex.id);
+                incomingEdges[toId].splice(index, 1);
+            });
+            outgoingEdges[vertex.id] = [];
+
+            incomingEdges[vertex.id].forEach(function(fromId) {
+                index = outgoingEdges[fromId].indexOf(vertex.id);
+                outgoingEdges[fromId].splice(index, 1);
+            });
+            incomingEdges[vertex.id] = [];
+
             this.trigger('vertexRemoved', vertex);
         }
 
-        var addEdge = function(from, to) {
-            if (edges[from.id]) {
-                edges[from.id].push(to.id);
-            } else {
-                edges[from.id] = [to.id];
-            }
+        this.addEdge = function(from, to) {
+            outgoingEdges[from.id].push(to.id);
+            incomingEdges[to.id].push(from.id);
         }
 
         this.vertexCount = function() {
             return vertices.length;
         }
 
-        this.getOutgoingEdgesOf = function(from) {
-            return edges[from.id] ? edges[from.id] : [];
+        this.outgoingEdgesOf = function(from) {
+            return outgoingEdges[from.id] ? outgoingEdges[from.id] : [];
+        }
+
+        this.incomingEdgesOf = function(to) {
+            return incomingEdges[to.id] ? incomingEdges[to.id] : [];
         }
 
         this.createPointPrototype = function() {
@@ -50,7 +67,7 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/geomnode'], funct
             });
             this.addVertex(pointVertex);
             this.addVertex(polylineVertex);
-            addEdge(polylineVertex, pointVertex);
+            this.addEdge(polylineVertex, pointVertex);
             return polylineVertex;
         }
 
@@ -58,7 +75,7 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/geomnode'], funct
             var pointVertex = new geomNode.Point({});
             this.addVertex(pointVertex);
 
-            addEdge(polyline, pointVertex);
+            this.addEdge(polyline, pointVertex);
         }
 
         this.isEditing = function() {
