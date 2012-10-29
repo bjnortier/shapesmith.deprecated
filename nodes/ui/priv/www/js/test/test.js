@@ -5,11 +5,11 @@ requirejs.config({
     //Pass the top-level main.js/index.js require
     //function to requirejs so that node modules
     //are loaded relative to the top-level JS file.
-    baseUrl: '.',
+    baseUrl: '..',
     nodeRequire: require
 });
 
-var geomNode = requirejs('src/geomNode');
+var geomNode = requirejs('src/geomnode');
 var geometryGraph = requirejs('src/geometrygraph');
 
 describe('Point', function() {
@@ -64,7 +64,33 @@ describe('Polyline', function() {
 
 describe('GeometryGraph', function() {
 
+    it('can be empty', function() {
+        var graph = new geometryGraph.Graph();
+
+        assert.equal(graph.vertexCount(), 0);
+    });
+
+    it('support a graph with one Point vertex', function() {
+        var graph = new geometryGraph.Graph();
+
+        var point = graph.createPointPrototype();
+
+        assert.equal(graph.vertexCount(), 1);
+        assert.equal(graph.getOutgoingEdgesOf(point).length, 0);        
+    });
+
     it('can support a polyline with point children', function() {
+        var graph = new geometryGraph.Graph();
+        var polyline = graph.createPolylinePrototype();
+        assert.equal(graph.getOutgoingEdgesOf(polyline).length, 1); 
+
+        assert.equal(graph.vertexCount(), 2);
+        assert.equal(graph.getOutgoingEdgesOf(polyline).length, 1); 
+
+        graph.addPointToPolyline(polyline);
+
+        assert.equal(graph.vertexCount(), 3);
+        assert.equal(graph.getOutgoingEdgesOf(polyline).length, 2); 
 
     });
 })

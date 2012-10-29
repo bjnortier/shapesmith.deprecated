@@ -2,7 +2,7 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/geomnode'], funct
 
     var GeometryGraph = function() {
         _.extend(this, Backbone.Events);
-        var vertices = [];
+        var vertices = [], edges = {};
 
         this.addVertex = function(vertex) {
             vertices.push(vertex);
@@ -17,24 +17,48 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/geomnode'], funct
             this.trigger('vertexRemoved', vertex);
         }
 
+        var addEdge = function(from, to) {
+            if (edges[from.id]) {
+                edges[from.id].push(to.id);
+            } else {
+                edges[from.id] = [to.id];
+            }
+        }
+
+        this.vertexCount = function() {
+            return vertices.length;
+        }
+
+        this.getOutgoingEdgesOf = function(from) {
+            return edges[from.id] ? edges[from.id] : [];
+        }
+
         this.createPointPrototype = function() {
-            var vertex = new geomNode.Point({
-                type: 'point',
-                parameters: {x: 0, y: 0, z:0}, 
+            var pointVertex = new geomNode.Point({
                 editing: true,
                 addAnotherFn: 'createPointPrototype',
             });
-            this.addVertex(vertex);
+            this.addVertex(pointVertex);
+            return pointVertex;
         }
 
-        this.createLinePrototype = function() {
-            var vertex = new geomNode.Node({
-                type: 'line',
-                parameters: [{x: 0, y: 0, z:0}], 
+        this.createPolylinePrototype = function() {
+            var pointVertex = new geomNode.Point({});
+            var polylineVertex = new geomNode.Polyline({
                 editing: true,
-                addAnotherFn: 'createLinePrototype',
+                addAnotherFn: 'createPolylinePrototype',
             });
-            this.addVertex(vertex);
+            this.addVertex(pointVertex);
+            this.addVertex(polylineVertex);
+            addEdge(polylineVertex, pointVertex);
+            return polylineVertex;
+        }
+
+        this.addPointToPolyline = function(polyline) {
+            var pointVertex = new geomNode.Point({});
+            this.addVertex(pointVertex);
+
+            addEdge(polyline, pointVertex);
         }
 
         this.isEditing = function() {
@@ -54,6 +78,8 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/geomnode'], funct
         }
     }
 
-    return new GeometryGraph();
+    return {
+        Graph: GeometryGraph
+    }
 
 });

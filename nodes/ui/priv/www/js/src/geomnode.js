@@ -72,7 +72,6 @@ define(['lib/underscore-require'], function(_) {
 
 
     return {
-        Node     : GeomNode,
         Point    : Point,
         Polyline : Polyline,
     }
