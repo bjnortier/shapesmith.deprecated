@@ -1,4 +1,5 @@
 // Modified from https://github.com/amdjs/backbone/blob/0.9.2/backbone.js
+// to use undxerscore-require
 
 //     Backbone.js 0.9.2
 

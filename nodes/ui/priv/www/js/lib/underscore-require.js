@@ -1,4 +1,6 @@
 // Modified from https://github.com/amdjs/underscore/tree/1.4.1
+// For some readson the define() syntax used was not working with 
+// requirejs
 
 //     Underscore.js 1.4.1
 //     http://underscorejs.org
