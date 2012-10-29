@@ -15,7 +15,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper'],
                     new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}),
                     new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                 ]);
-            point.position = calc.objToVector(this.model.vertex.parameters);
+            point.position = calc.objToVector(this.model.vertex.parameters.coordinate);
             this.sceneObject.add(point);
         },
 
@@ -35,9 +35,9 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper'],
 
         workplanePositionChanged: function(position) {
             if (this.stage === 0) {
-                this.vertex.parameters.x = position.x;
-                this.vertex.parameters.y = position.y;
-                this.vertex.parameters.z = position.z;
+                this.vertex.parameters.coordinate.x = position.x;
+                this.vertex.parameters.coordinate.y = position.y;
+                this.vertex.parameters.coordinate.z = position.z;
                 this.trigger('parametersChanged');
             }
         },
@@ -84,9 +84,9 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper'],
                 '</td>';
             var view = {
                 id: this.model.vertex.id,
-                x: this.model.vertex.parameters.x,
-                y: this.model.vertex.parameters.y,
-                z: this.model.vertex.parameters.z,
+                x: this.model.vertex.parameters.coordinate.x,
+                y: this.model.vertex.parameters.coordinate.y,
+                z: this.model.vertex.parameters.coordinate.z,
             }
             this.$el.html($.mustache(template, view));
             return this;
@@ -99,9 +99,9 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper'],
         },
 
         updateParams: function() {
-            this.$el.find('.coordinate').find('.x').text(this.model.vertex.parameters.x);
-            this.$el.find('.coordinate').find('.y').text(this.model.vertex.parameters.y);
-            this.$el.find('.coordinate').find('.z').text(this.model.vertex.parameters.z);
+            this.$el.find('.coordinate').find('.x').text(this.model.vertex.parameters.coordinate.x);
+            this.$el.find('.coordinate').find('.y').text(this.model.vertex.parameters.coordinate.y);
+            this.$el.find('.coordinate').find('.z').text(this.model.vertex.parameters.coordinate.z);
         },
     });
 

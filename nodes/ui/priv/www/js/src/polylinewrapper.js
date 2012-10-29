@@ -63,9 +63,8 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         sceneViewClick: function(viewAndEvent) {
             if (this.stage !== undefined) {
                 if (viewAndEvent.view.model.vertex.type === 'point') {
-                    this.vertex.parameters[this.stage] = {
-                        point: viewAndEvent.view.model.vertex.id
-                    }
+                    geometryGraph.removeLastPointFromPolyline(this.vertex);
+                    geometryGraph.addPointToPolyline(this.vertex, viewAndEvent.view.model.vertex);
                 }
                 if (this.inClickAddsPointPhase) {
                     this.stage = this.stage + 1;

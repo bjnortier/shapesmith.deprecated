@@ -45,11 +45,15 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
             return polylineVertex;
         }
 
-        this.addPointToPolyline = function(polyline) {
-            var pointVertex = new geomNode.Point({});
-            graph.addVertex(pointVertex);
-            graph.addEdge(polyline, pointVertex);
-            this.trigger('vertexAdded', pointVertex);
+        this.addPointToPolyline = function(polyline, point) {
+            if (point === undefined) {
+                var pointVertex = new geomNode.Point({});
+                graph.addVertex(pointVertex);
+                graph.addEdge(polyline, pointVertex);
+                this.trigger('vertexAdded', pointVertex);
+            } else {
+                graph.addEdge(polyline, point);
+            }
             return pointVertex;
         }
 
