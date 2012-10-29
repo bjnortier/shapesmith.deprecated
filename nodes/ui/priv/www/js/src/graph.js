@@ -42,7 +42,6 @@ define([], function() {
             return size;
         }
 
-
         this.addEdge = function(from, to) {
             outgoingEdges[from.id].push(to.id);
             incomingEdges[to.id].push(from.id);
