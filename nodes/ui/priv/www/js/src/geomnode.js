@@ -1,10 +1,6 @@
-if (typeof define !== 'function') {
-    var define = require('amdefine')(module);
-}
 
+define(['lib/underscore-require'], function(_) {
 
-define(function(require) {
-    var _und = require('underscore');
 
     var counters = {};
 
@@ -63,7 +59,7 @@ define(function(require) {
         GeomNode.prototype.constructor.call(this, options);
     }
 
-    _und.extend(Point.prototype, GeomNode.prototype);
+    _.extend(Point.prototype, GeomNode.prototype);
 
     var Polyline = function(options) {
         var options = options || {};
@@ -72,7 +68,7 @@ define(function(require) {
         GeomNode.prototype.constructor.call(this, options);
     }
 
-    _und.extend(Point.prototype, GeomNode.prototype);
+    _.extend(Point.prototype, GeomNode.prototype);
 
 
     return {
