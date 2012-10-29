@@ -1,4 +1,5 @@
-define(['src/geometrygraph'], function(geometryGraph) {
+define(['lib/underscore-require', 'lib/backbone-require', 'src/geometrygraph'], 
+    function(_, Backbone, geometryGraph) {
     
     var Manager = function() {
 

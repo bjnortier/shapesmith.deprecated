@@ -10,6 +10,7 @@ requirejs.config({
 });
 
 var geomNode = requirejs('src/geomnode');
+var graphLib = requirejs('src/graph');
 var geometryGraph = requirejs('src/geometrygraph');
 
 describe('Point', function() {
@@ -62,19 +63,19 @@ describe('Polyline', function() {
 
 });
 
-describe('GeometryGraph', function() {
+describe('Graph', function() {
 
     it('can be empty', function() {
-        var graph = new geometryGraph.Graph();
+        var graph = new graphLib.Graph();
 
-        assert.equal(graph.vertexCount(), 0);
+        assert.equal(graph.size(), 0);
     });
 
     it('manages incoming and outoing vertices', function() {
 
         var a = {id:'a'}, b = {id:'b'}, c = {id:'c'};
-        var graph = new geometryGraph.Graph();
-        assert.equal(graph.vertexCount(), 0);
+        var graph = new graphLib.Graph();
+        assert.equal(graph.size(), 0);
 
         graph.addVertex(a);        
         graph.addVertex(b); 
@@ -83,7 +84,7 @@ describe('GeometryGraph', function() {
         graph.addEdge(a,c);
         graph.addEdge(b,c);
 
-        assert.equal(graph.vertexCount(), 3);
+        assert.equal(graph.size(), 3);
         assert.deepEqual(graph.outgoingEdgesOf(a), ['b', 'c']);
         assert.deepEqual(graph.outgoingEdgesOf(b), ['c']);
         assert.deepEqual(graph.outgoingEdgesOf(c), []);
@@ -93,7 +94,7 @@ describe('GeometryGraph', function() {
 
         graph.removeVertex(b);
 
-        assert.equal(graph.vertexCount(), 2);
+        assert.equal(graph.size(), 2);
         assert.deepEqual(graph.outgoingEdgesOf(a), ['c']);
         assert.deepEqual(graph.outgoingEdgesOf(b), []);
         assert.deepEqual(graph.outgoingEdgesOf(c), []);
@@ -103,7 +104,7 @@ describe('GeometryGraph', function() {
 
         graph.removeVertex(a);
 
-        assert.equal(graph.vertexCount(), 1);
+        assert.equal(graph.size(), 1);
         assert.deepEqual(graph.outgoingEdgesOf(a), []);
         assert.deepEqual(graph.outgoingEdgesOf(b), []);
         assert.deepEqual(graph.outgoingEdgesOf(c), []);
@@ -113,27 +114,24 @@ describe('GeometryGraph', function() {
 
     });
 
+});
+
+describe('GeometryGraph', function() {
+
     it('support a graph with one Point vertex', function() {
         var graph = new geometryGraph.Graph();
-
         var point = graph.createPointPrototype();
 
-        assert.equal(graph.vertexCount(), 1);
-        assert.equal(graph.outgoingEdgesOf(point).length, 0);        
+        assert.equal(graph.childrenOf(point).length, 0);        
     });
 
     it('can support a polyline with point children', function() {
         var graph = new geometryGraph.Graph();
         var polyline = graph.createPolylinePrototype();
-        assert.equal(graph.outgoingEdgesOf(polyline).length, 1); 
-
-        assert.equal(graph.vertexCount(), 2);
-        assert.equal(graph.outgoingEdgesOf(polyline).length, 1); 
+        assert.equal(graph.childrenOf(polyline).length, 1); 
 
         graph.addPointToPolyline(polyline);
-
-        assert.equal(graph.vertexCount(), 3);
-        assert.equal(graph.outgoingEdgesOf(polyline).length, 2); 
+        assert.equal(graph.childrenOf(polyline).length, 2); 
 
     });
 })
