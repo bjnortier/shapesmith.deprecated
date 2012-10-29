@@ -1,16 +1,30 @@
-define([], function() {
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+}
+
+
+define(function(require) {
+    var _und = require('underscore');
 
     var counters = {};
 
     var GeomNode = function(options) {
         var options = options || {};
 
+        if (!options.hasOwnProperty('type')) {
+            throw Error('No type');
+        }
+        this.type = options.type;
+        
         if (!counters[options.type]) {
             counters[options.type] = 0;
         }
+        
         this.id = options.type + counters[options.type];
         ++counters[options.type]
-        this.type = options.type;
+
+        this.name = options.name;
+
         this.parameters = options.parameters || {};
         this.editing = options.editing || false;
         this.addAnotherFn = options.addAnotherFn;
@@ -18,7 +32,7 @@ define([], function() {
     }
 
     GeomNode.prototype.cloneNonEditing = function() {
-        var newNode = new GeomNode({type: this.type});
+        var newNode = new this.constructor({type: this.type});
         newNode.parameters = copyObj(this.parameters);
         return newNode;
     }  
@@ -43,8 +57,28 @@ define([], function() {
         }
     }
 
+    var Point = function(options) {
+        var options = options || {};
+        options.type = 'point';
+        GeomNode.prototype.constructor.call(this, options);
+    }
+
+    _und.extend(Point.prototype, GeomNode.prototype);
+
+    var Polyline = function(options) {
+        var options = options || {};
+        options.type = 'polyline';
+        options.parameters = options.parameters || {coordinates: [{x: 0, y:0, z:0}]};
+        GeomNode.prototype.constructor.call(this, options);
+    }
+
+    _und.extend(Point.prototype, GeomNode.prototype);
+
+
     return {
-        Node: GeomNode
+        Node     : GeomNode,
+        Point    : Point,
+        Polyline : Polyline,
     }
 
 });

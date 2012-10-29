@@ -18,7 +18,7 @@ define(['src/geomnode'], function(geomNode) {
         }
 
         this.createPointPrototype = function() {
-            var vertex = new geomNode.Node({
+            var vertex = new geomNode.Point({
                 type: 'point',
                 parameters: {x: 0, y: 0, z:0}, 
                 editing: true,
@@ -27,7 +27,7 @@ define(['src/geomnode'], function(geomNode) {
             this.addVertex(vertex);
         }
 
-         this.createLinePrototype = function() {
+        this.createLinePrototype = function() {
             var vertex = new geomNode.Node({
                 type: 'line',
                 parameters: [{x: 0, y: 0, z:0}], 

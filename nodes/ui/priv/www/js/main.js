@@ -1,5 +1,7 @@
 var SS = SS || {};
 
+_und = _;
+
 requirejs(
     [
         'src/interactioncoordinator',
