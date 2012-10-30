@@ -85,7 +85,6 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
         initialize: function(options) {
             this.point = this.model.vertex;
-            this.draggable = true; 
             vertexWrapper.EditingSceneView.prototype.initialize.call(this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);
@@ -109,6 +108,10 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 ]);
             point.position = calc.objToVector(this.point.parameters.coordinate);
             this.sceneObject.add(point);
+        },
+
+        isDraggable: function() {
+            return this.model.stage === undefined;
         },
 
         drag: function(event) {
@@ -151,18 +154,67 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
     var DisplaySceneView = vertexWrapper.DisplaySceneView.extend({
 
+        initialize: function(vertex) {
+            vertexWrapper.DisplaySceneView.prototype.initialize.call(this, vertex);
+            this.on('drag', this.drag, this);
+            this.on('dragEnded', this.dragEnded, this);
+        },
+
+        remove: function() {
+            vertexWrapper.DisplaySceneView.prototype.remove.call(this);
+            this.off('drag', this.drag, this);
+            this.off('dragEnded', this.dragEnded, this);
+        },
+
         render: function() {
             vertexWrapper.EditingSceneView.prototype.render.call(this);
-            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
-            var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
-            var point = THREE.SceneUtils.createMultiMaterialObject(
-                new THREE.SphereGeometry(0.5, 10, 10), 
-                [
-                    new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}),
-                    new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
-                ]);
-            point.position = calc.objToVector(this.model.vertex.parameters.coordinate);
-            this.sceneObject.add(point);
+            if (!this.model.editingVertex) {
+                var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
+                var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
+                var point = THREE.SceneUtils.createMultiMaterialObject(
+                    new THREE.SphereGeometry(0.5, 10, 10), 
+                    [
+                        new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}),
+                        new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
+                    ]);
+                point.position = calc.objToVector(this.model.vertex.parameters.coordinate);
+                this.sceneObject.add(point);
+            } else {
+                var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
+                var color = this.highlightColor || this.selectedColor || 0x94dcfc;
+                var point = THREE.SceneUtils.createMultiMaterialObject(
+                    new THREE.CubeGeometry(1, 1, 1, 1, 1, 1), 
+                    [
+                        new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
+                        new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
+                    ]);
+                point.position = calc.objToVector(this.model.editingVertex.parameters.coordinate);
+                this.sceneObject.add(point);
+            }
+        },
+
+        isDraggable: function() {
+            return !geometryGraph.isEditing();
+        },
+
+        drag: function(event) {
+            this.dragging = true;
+            this.model.editingVertex = this.model.vertex.cloneEditing();
+            var positionOnWorkplane = calc.positionOnWorkplane(
+                event, workplaneModel.node, sceneModel.view.camera);
+            this.model.editingVertex.parameters.coordinate = {
+                x: positionOnWorkplane.x,
+                y: positionOnWorkplane.y,
+                z: positionOnWorkplane.z,
+            }
+            this.render();
+        },
+
+        dragEnded: function(event) {
+            var replacement = this.model.editingVertex.cloneNonEditing();
+            geometryGraph.edit(this.model.vertex);
+            geometryGraph.commit(replacement);
+            this.model.editingVertex = undefined;
         },
 
     });

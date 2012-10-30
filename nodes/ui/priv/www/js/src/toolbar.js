@@ -52,13 +52,13 @@ define(['src/interactioncoordinator', 'src/geometrygraphsingleton'],
         },
 
         vertexAdded: function(vertex) {
-            if (vertex.editing) {
+            if (geometryGraph.isEditing()) {
                 this.view.$el.slideUp(100);
             }
         },
 
         vertexRemoved: function(vertex) {
-            if (vertex.editing) {
+            if (!geometryGraph.isEditing()) {
                 this.view.$el.slideDown(100);
             }
         },

@@ -5,7 +5,8 @@ define(['src/scene'], function(sceneModel) {
         var sceneViews = [],
             mouseOverViews = [],
             mouseDownOnDraggableViews = [],
-            mouseIsDown = false;
+            mouseIsDown = false,
+            dragging = false;
 
         this.register = function(sceneView) {
             var index = sceneViews.indexOf(sceneView);
@@ -25,17 +26,18 @@ define(['src/scene'], function(sceneModel) {
 
         this.mousedown = function(event) {
             mouseDownOnDraggableViews = this.findViewsForEvent(event).filter(function(view) {
-                return view.draggable;
+                return view.isDraggable();
             });
             mouseIsDown = true;
         }
 
         this.mouseup = function(event) {
-            if (mouseDownOnDraggableViews.length > 0) {
+            if ((mouseDownOnDraggableViews.length > 0) && (dragging)) {
                 mouseDownOnDraggableViews[0].trigger('dragEnded', event);
             }
             mouseDownOnDraggableViews = [];
             mouseIsDown = false;
+            dragging = false;
         }
 
         this.mousemove = function(event) {
@@ -63,6 +65,7 @@ define(['src/scene'], function(sceneModel) {
         this.drag = function(event) {
             if (mouseDownOnDraggableViews.length > 0) {
                 mouseDownOnDraggableViews[0].trigger('drag', event);
+                dragging = true;
                 return true;
             } else {
                 return false;
@@ -78,7 +81,7 @@ define(['src/scene'], function(sceneModel) {
 
         this.overDraggable = function(event) {
             var draggableViews = mouseOverViews.filter(function(view) {
-                return view.draggable;
+                return view.isDraggable();
             });
             return draggableViews.length > 0;
         }

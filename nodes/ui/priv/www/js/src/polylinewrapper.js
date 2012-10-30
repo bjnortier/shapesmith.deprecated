@@ -227,8 +227,6 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         initialize: function(options) {
             this.index = options.index;
             this.point = geometryGraph.childrenOf(this.model.vertex)[this.index];
-
-            this.draggable = !this.point.isNamed(); 
             vertexWrapper.EditingSceneView.prototype.initialize.call(this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);
@@ -254,6 +252,10 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 point.position = calc.objToVector(this.point.parameters.coordinate);
                 this.sceneObject.add(point);
             }
+        },
+
+        isDraggable: function() {
+            return !this.point.isNamed() && (this.model.stage === undefined);
         },
 
         drag: function(event) {
