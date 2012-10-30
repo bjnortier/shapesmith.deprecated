@@ -66,6 +66,8 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                     // Remove last point and it's anchor view
                     geometryGraph.removeLastPointFromPolyline(this.vertex);
                     this.views[this.views.length - 1].remove();
+                    this.views.splice(this.views.length - 1, 1);
+
                     // Add the named point and a new anchor view
                     geometryGraph.addPointToPolyline(this.vertex, viewAndEvent.view.model.vertex);
                     this.views.push(new EditingPointAnchorSceneView({
