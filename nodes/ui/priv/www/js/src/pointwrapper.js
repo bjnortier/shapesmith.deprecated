@@ -14,7 +14,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         workplanePositionChanged: function(position) {
-            if (this.stage === 0) {
+            if (this.get('stage') === 0) {
                 this.vertex.parameters.coordinate.x = position.x;
                 this.vertex.parameters.coordinate.y = position.y;
                 this.vertex.parameters.coordinate.z = position.z;
@@ -23,8 +23,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         workplaneClick: function() {
-            this.stage = undefined;
-            this.trigger('stageChanged', this.stage);
+            this.set('stage', undefined);
         },
 
         keydown: function(event) {
@@ -41,7 +40,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         canComplete: function() {
-            return this.stage === undefined;
+            return this.get('stage') === undefined;
         },
 
     });
@@ -111,12 +110,12 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         isDraggable: function() {
-            return this.model.stage === undefined;
+            return this.model.get('stage') === undefined;
         },
 
         drag: function(event) {
             this.dragging = true;
-            this.model.stage = 0;
+            this.model.set('stage', 0);
             var positionOnWorkplane = calc.positionOnWorkplane(
                 event, workplaneModel.node, sceneModel.view.camera);
             this.point.parameters.coordinate = {
@@ -129,9 +128,8 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
         dragEnded: function() {
             if (this.dragging) {
-                this.model.stage = undefined;
+                this.model.set('stage', undefined);
                 this.dragging = false;
-                this.model.trigger('stageChanged', this.model.stage);
             }
         },
 

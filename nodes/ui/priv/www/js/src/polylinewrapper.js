@@ -53,9 +53,9 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         workplanePositionChanged: function(position) {
-            if ((this.stage !== undefined) && (this.inClickAddsPointPhase)) {
+            if ((this.get('stage') !== undefined) && (this.inClickAddsPointPhase)) {
                 this.lastPosition = position;
-                var point = geometryGraph.childrenOf(this.vertex)[this.stage];
+                var point = geometryGraph.childrenOf(this.vertex)[this.get('stage')];
                 point.parameters.coordinate = {
                     x: position.x,
                     y: position.y,
@@ -66,7 +66,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         sceneViewClick: function(viewAndEvent) {
-            if (this.stage !== undefined) {
+            if (this.get('stage') !== undefined) {
                 if (viewAndEvent.view.model.vertex.type === 'point') {
                     // Remove last point and it's anchor view
                     geometryGraph.removeLastPointFromPolyline(this.vertex);
@@ -76,46 +76,43 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                     // Add the named point and a new anchor view
                     geometryGraph.addPointToPolyline(this.vertex, viewAndEvent.view.model.vertex);
                     this.views.push(new EditingPointAnchorSceneView({
-                        model: this, index: this.stage
+                        model: this, index: this.get('stage')
                     }));
                 }
                 if (this.inClickAddsPointPhase) {
-                    this.stage = this.stage + 1;
+                    this.set('stage',  this.get('stage') + 1);
                     this.addCoordinate(this.lastPosition);
                 } else {
-                    this.stage = undefined;
+                    this.set('stage', undefined);
                 }
-                this.trigger('stageChanged', this.stage);
             }
         },
 
         workplaneClick: function(position) {
-            if (this.stage !== undefined) {
-                var point1 = geometryGraph.childrenOf(this.vertex)[this.stage];
+            if (this.get('stage') !== undefined) {
+                var point1 = geometryGraph.childrenOf(this.vertex)[this.get('stage')];
                 point1.parameters.coordinate = {
                     x : position.x,
                     y : position.y,
                     z : position.z,
                 }
                 if (this.inClickAddsPointPhase) {
-                    this.stage = this.stage + 1;
+                    this.set('stage', this.get('stage') + 1);
                     this.addCoordinate(position);
                 } else {
-                    this.stage = undefined;
+                    this.set('stage', undefined);
                 }
-                this.trigger('stageChanged', this.stage);
             }
         },
 
         keydown: function(event) {
             if (event.keyCode === 13) {
-                if ((this.inClickAddsPointPhase) && (this.stage > 1)) {
+                if ((this.inClickAddsPointPhase) && (this.get('stage') > 1)) {
                     geometryGraph.removeLastPointFromPolyline(this.vertex);
                     this.views[this.views.length - 1].remove();
                     this.views.splice(this.views.length - 1, 1);
-                    this.stage = undefined;
+                    this.set('stage', undefined);
                     this.inClickAddsPointPhase = false;
-                    this.trigger('stageChanged', this.stage);
                 } else {
                     this.ok();
                 }
@@ -129,13 +126,13 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             // For prototype polylines, when the stage is active, the length must be > 2
             // as the last point will be removed
             var numChildren = geometryGraph.childrenOf(this.vertex).length;
-            return (((numChildren > 1) && (this.stage === undefined))
+            return (((numChildren > 1) && (this.get('stage') === undefined))
                     ||
                     (numChildren > 2));
         },
 
         ok: function() {
-            if (this.stage !== undefined) {
+            if (this.get('stage') !== undefined) {
                 geometryGraph.removeLastPointFromPolyline(this.vertex);
             }
             vertexWrapper.EditingModel.prototype.ok.call(this);
@@ -148,7 +145,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 y : position.y,
                 z : position.z,
             }
-            this.views.push(new EditingPointAnchorSceneView({model: this, index: this.stage}));
+            this.views.push(new EditingPointAnchorSceneView({model: this, index: this.get('stage')}));
         },
 
     });
@@ -190,7 +187,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             var pointChildren = geometryGraph.childrenOf(this.model.vertex);
             var coordinates = pointChildren.map(function(pointChild, i) {
                 return {
-                    editing: that.model.stage === i,
+                    editing: that.model.get('stage') === i,
                     id: pointChild.id,
                     name: pointChild.name,
                     x: pointChild.parameters.coordinate.x, 
@@ -211,7 +208,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         updateParams: function() {
-            var index = this.model.stage, that = this;
+            var index = this.model.get('stage'), that = this;
             var point = geometryGraph.childrenOf(this.model.vertex)[index];
             ['x', 'y', 'z'].forEach(function(dim) {
                 that.$el.find('.coordinate.' + index).find('.' + dim).text(
@@ -255,12 +252,12 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         isDraggable: function() {
-            return !this.point.isNamed() && (this.model.stage === undefined);
+            return !this.point.isNamed() && (this.model.get('stage') === undefined);
         },
 
         drag: function(event) {
             this.dragging = true;
-            this.model.stage = this.index;
+            this.model.set('stage', this.index);
             var positionOnWorkplane = calc.positionOnWorkplane(
                 event, workplaneModel.node, sceneModel.view.camera);
             this.point.parameters.coordinate = {
@@ -268,15 +265,13 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 y: positionOnWorkplane.y,
                 z: positionOnWorkplane.z,
             }
-            this.model.trigger('stageChanged', this.stage);
             this.model.trigger('parametersChanged');
         },
 
         dragEnded: function() {
             if (this.dragging) {
-                this.model.stage = undefined;
+                this.model.set('stage', undefined);
                 this.dragging = false;
-                this.model.trigger('stageChanged', this.stage);
             }
         },
 

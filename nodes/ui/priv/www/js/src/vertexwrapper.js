@@ -65,13 +65,13 @@ define([
 
         initialize: function(vertex) {
             Model.prototype.initialize.call(this, vertex);
-            this.stage = vertex.proto ? 0 : undefined;
+            this.set('stage', vertex.proto ? 0 : undefined);
             workplane.on('positionChanged', this.workplanePositionChanged, this);
             coordinator.on('keydown', this.keydown, this);
             workplane.on('click', this.workplaneClick, this);
             sceneViewEventGenerator.on('sceneViewClick', this.sceneViewClick, this);
             this.views = [];
-            },
+        },
 
         destroy: function() {
             Model.prototype.destroy.call(this);
@@ -99,13 +99,13 @@ define([
         initialize: function() {
             this.render();
             $('#graph').prepend(this.$el);
-            this.model.on('stageChanged', this.stageChanged, this);
+            this.model.on('change:stage', this.stageChanged, this);
             this.model.on('parametersChanged', this.updateParams, this);
         },
 
         remove: function() {
             Backbone.View.prototype.remove.call(this);
-            this.model.off('stageChanged', this.stageChanged, this);
+            this.model.off('change:stage', this.stageChanged, this);
             this.model.off('parametersChanged', this.updateParams, this);
         },
 
@@ -141,14 +141,14 @@ define([
         initialize: function() {
             this.color = 0x94dcfc;
             SceneView.prototype.initialize.call(this);
-            this.model.on('stageChanged', this.render, this);
+            this.model.on('change:stage', this.render, this);
             this.model.on('parametersChanged', this.render, this);
         },
 
         remove: function() {
             SceneView.prototype.remove.call(this);
             this.model.off('parametersChanged', this.render, this);
-            this.model.off('stageChanged', this.render, this);
+            this.model.off('change:stage', this.render, this);
         },
 
     });
