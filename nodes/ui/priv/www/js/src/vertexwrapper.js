@@ -202,10 +202,12 @@ define([
         },
 
         click: function(event) {
-            if (event.shiftKey || event.ctrlKey || event.metaKey) {
-                selection.addToSelection(this.model.vertex.id);
-            } else {
-                selection.selectOnly(this.model.vertex.id);
+            if (!geometryGraph.isEditing()) {
+                if (event.shiftKey || event.ctrlKey || event.metaKey) {
+                    selection.addToSelection(this.model.vertex.id);
+                } else {
+                    selection.selectOnly(this.model.vertex.id);
+                }
             }
         },
 

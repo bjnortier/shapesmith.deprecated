@@ -87,6 +87,19 @@ describe('Graph', function() {
         assert.equal(graph.size(), 0);
     });
 
+    it('has vertices', function() {
+        var graph = new graphLib.Graph();
+        assert.equal(graph.size(), 0);
+
+        var a = {id:'a'}, b = {id:'b'};
+        graph.addVertex(a);
+        graph.addVertex(b);
+
+        assert.equal(graph.size(), 2);
+        assert.deepEqual(graph.vertices(), [a, b]);
+
+    });
+
     it('manages incoming and outoing vertices', function() {
 
         var a = {id:'a'}, b = {id:'b'}, c = {id:'c'};

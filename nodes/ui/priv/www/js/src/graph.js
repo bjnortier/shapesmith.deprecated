@@ -1,4 +1,4 @@
-define([], function() {
+define(['lib/underscore-require'], function(_) {
     
     var Graph = function() {
         
@@ -68,6 +68,10 @@ define([], function() {
 
         this.vertexById = function(id) {
             return vertices[id];
+        }
+
+        this.vertices = function() {
+            return _.values(vertices);
         }
 
         this.size = function() {

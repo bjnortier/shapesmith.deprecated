@@ -63,8 +63,14 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         sceneViewClick: function(viewAndEvent) {
             if (this.stage !== undefined) {
                 if (viewAndEvent.view.model.vertex.type === 'point') {
+                    // Remove last point and it's anchor view
                     geometryGraph.removeLastPointFromPolyline(this.vertex);
+                    this.views[this.views.length - 1].remove();
+                    // Add the named point and a new anchor view
                     geometryGraph.addPointToPolyline(this.vertex, viewAndEvent.view.model.vertex);
+                    this.views.push(new EditingPointAnchorSceneView({
+                        model: this, index: this.stage
+                    }));
                 }
                 if (this.inClickAddsPointPhase) {
                     this.stage = this.stage + 1;
@@ -212,7 +218,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             this.index = options.index;
             this.point = geometryGraph.childrenOf(this.model.vertex)[this.index];
 
-            this.draggable = this.point.name === undefined; 
+            this.draggable = !this.point.isNamed(); 
             vertexWrapper.EditingSceneView.prototype.initialize.call(this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);
@@ -226,17 +232,18 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
         render: function() {
             vertexWrapper.EditingSceneView.prototype.render.call(this);
-
-            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
-            var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
-            var point = THREE.SceneUtils.createMultiMaterialObject(
-                new THREE.CubeGeometry(1, 1, 1, 1, 1, 1), 
-                [
-                    new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
-                    new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
-                ]);
-            point.position = calc.objToVector(this.point.parameters.coordinate);
-            this.sceneObject.add(point);
+            if (!this.point.isNamed()) {
+                var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
+                var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
+                var point = THREE.SceneUtils.createMultiMaterialObject(
+                    new THREE.CubeGeometry(1, 1, 1, 1, 1, 1), 
+                    [
+                        new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
+                        new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
+                    ]);
+                point.position = calc.objToVector(this.point.parameters.coordinate);
+                this.sceneObject.add(point);
+            }
         },
 
         drag: function(event) {

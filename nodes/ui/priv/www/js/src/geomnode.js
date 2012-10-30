@@ -43,6 +43,10 @@ define(['lib/underscore-require'], function(_) {
         return newNode;
     }  
 
+    GeomNode.prototype.isNamed = function() {
+        return this.name !== undefined;
+    }  
+
     var copyObj = function(value) {
         if ((value === null) || (value === undefined)) {
             return undefined;
