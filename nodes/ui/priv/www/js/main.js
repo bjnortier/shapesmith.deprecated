@@ -4,9 +4,7 @@ requirejs(
         'src/geomtoolbar',
         'src/workplane',
         'src/trackball',
-        'src/vertexwrapper',
-        'src/pointwrapper',
-        'src/polylinewrapper',
+        'src/vertexmodelmanager',
     ], function() {
 
     $(document).ready(function() {

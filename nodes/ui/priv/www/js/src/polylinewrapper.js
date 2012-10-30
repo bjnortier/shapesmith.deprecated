@@ -294,19 +294,11 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
     })
 
-    // ---------- Init ----------
+    return {
+        DisplayModel: DisplayModel,
+        EditingModel: EditingModel,
+    }
 
-    geometryGraph.on('vertexAdded', function(vertex) {
-        if (vertex.type === 'polyline') {
-            if (geometryGraph.parentsOf(vertex).length === 0) {
-                if (vertex.editing) {
-                    new EditingModel(vertex);
-                } else {
-                    new DisplayModel(vertex);
-                }
-            }
-        }
-    });
 
 });
 

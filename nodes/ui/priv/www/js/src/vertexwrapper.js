@@ -82,12 +82,10 @@ define([
         },  
 
         ok: function() {
-            this.destroy();
             geometryGraph.commit(this.vertex);
         },
 
         cancel: function() {
-            this.destroy();
             geometryGraph.cancelPrototype(this.vertex);
         },
     });

@@ -135,18 +135,9 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper'],
 
     })
 
-    // ---------- Init ----------
-
-    geometryGraph.on('vertexAdded', function(vertex) {
-        if (vertex.type === 'point') {
-            if (geometryGraph.parentsOf(vertex).length === 0) {
-                if (vertex.editing) {
-                    new EditingModel(vertex);
-                } else {
-                    new DisplayModel(vertex);
-                }
-            }
-        }
-    });
+    return {
+        DisplayModel: DisplayModel,
+        EditingModel: EditingModel,
+    }
 
 });
