@@ -8,12 +8,21 @@ define(['src/geometrygraphsingleton', 'src/pointwrapper', 'src/polylinewrapper']
     }
 
     geometryGraph.on('vertexAdded', function(vertex) {
-        if (geometryGraph.parentsOf(vertex).length === 0) {
-            if (vertex.editing) {
-                models[vertex.id] = new wrappers[vertex.type].EditingModel(vertex);
-            } else {
-                models[vertex.id] = new wrappers[vertex.type].DisplayModel(vertex);
+        if (vertex.editing) {
+            models[vertex.id] = new wrappers[vertex.type].EditingModel(vertex);
+        } else if (vertex.isNamed()) {
+            models[vertex.id] = new wrappers[vertex.type].DisplayModel(vertex);
+
+            var updateAncestors = function(v) {
+                geometryGraph.parentsOf(v).map(function(parent) {
+                    if (models[parent.id]) {
+                        models[parent.id].destroy();
+                        models[parent.id] = new wrappers[parent.type].DisplayModel(parent); 
+                    }
+                    updateAncestors(parent);
+                });
             }
+            updateAncestors(vertex);
         }
     });
 
