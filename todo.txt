@@ -10,3 +10,11 @@ selection cylinder for edges
 
 fn tests:
 redirect when goping to signup but logged in
+
+questions:
+- Should points remain in the graph view when they have been used in a polyline?
+  Are points special? What about lines that are shared between extrusions?
+  Perhaps they should be in the scene and clickable and not in the graph?
+  ...?
+
+  

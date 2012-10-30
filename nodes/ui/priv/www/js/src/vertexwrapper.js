@@ -65,7 +65,7 @@ define([
 
         initialize: function(vertex) {
             Model.prototype.initialize.call(this, vertex);
-            this.stage = 0;
+            this.stage = vertex.proto ? 0 : undefined;
             workplane.on('positionChanged', this.workplanePositionChanged, this);
             coordinator.on('keydown', this.keydown, this);
             workplane.on('click', this.workplaneClick, this);
@@ -86,8 +86,9 @@ define([
         },
 
         cancel: function() {
-            geometryGraph.cancelPrototype(this.vertex);
+            geometryGraph.cancel(this.vertex);
         },
+
     });
 
     var EditingDOMView = Backbone.View.extend({
@@ -112,6 +113,14 @@ define([
             return {
                 'click .okcancel .ok' : 'ok',
                 'click .okcancel .cancel' : 'cancel',
+            }
+        },
+
+        stageChanged: function(stage) {
+            if (this.model.canComplete()) {
+                this.$el.find('.ok').removeClass('disabled');
+            } else {
+                this.$el.find('.ok').addClass('disabled');
             }
         },
 
@@ -176,6 +185,14 @@ define([
             }
         },
 
+        editIfOnlySelection: function() {
+            if ((selection.selected.length === 1) 
+                &&
+                (selection.selected[0] === this.vertex.id)) {
+                geometryGraph.edit(this.vertex);
+            }
+        },
+
     });
 
     var DisplayDOMView = Backbone.View.extend({
@@ -196,7 +213,8 @@ define([
         },
 
         events: {
-            'click .vertex' : 'click'
+            'click .vertex'    : 'click',
+            'dblclick .vertex' : 'dblclick',
         },
 
         click: function(event) {
@@ -207,6 +225,10 @@ define([
                     selection.selectOnly(this.model.vertex.id);
                 }
             }
+        },
+
+        dblclick: function(event) {
+            this.model.editIfOnlySelection();
         },
 
         select: function() {
@@ -231,6 +253,7 @@ define([
             this.on('mouseEnter', this.highlight, this);
             this.on('mouseLeave', this.unhighlight, this);
             this.on('click', this.click, this);
+            this.on('dblclick', this.dblclick, this);
         },
 
         remove: function() {
@@ -240,6 +263,7 @@ define([
             this.off('mouseEnter', this.highlight, this);
             this.off('mouseLeave', this.unhighlight, this);
             this.off('click', this.click, this);
+            this.off('dblclick', this.dblclick, this);
         },
 
         select: function() {
@@ -270,6 +294,10 @@ define([
             } else {
                 selection.selectOnly(this.model.vertex.id);
             }
+        },
+
+        dblclick: function() {
+            this.model.editIfOnlySelection();
         },
 
     });

@@ -29,6 +29,7 @@ define(['lib/underscore-require'], function(_) {
 
         this.parameters = options.parameters || {};
         this.editing = options.editing || false;
+        this.proto = options.proto || false;
         this.addAnotherFn = options.addAnotherFn;
 
     }
@@ -42,6 +43,12 @@ define(['lib/underscore-require'], function(_) {
         newNode.parameters = copyObj(this.parameters);
         return newNode;
     }  
+
+    GeomNode.prototype.cloneEditing = function() {
+        var newNode = this.cloneNonEditing();
+        newNode.editing = true;
+        return newNode;
+    }
 
     GeomNode.prototype.isNamed = function() {
         return this.name !== undefined;

@@ -9,21 +9,52 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
         this.commit = function(vertex) {
             var nonEditingReplacement = vertex.cloneNonEditing();
             graph.replaceVertex(vertex, nonEditingReplacement);
-
             this.trigger('vertexRemoved', vertex);
             this.trigger('vertexAdded', nonEditingReplacement);
         }
 
-        this.cancelPrototype = function(vertex) {
-            graph.removeVertex(vertex);
+        // When editing, the original vertex is kept 
+        // for the cancel operation
+        var originals = {};
+
+        this.edit = function(vertex) {
+            var editingReplacement = vertex.cloneEditing();
+            graph.replaceVertex(vertex, editingReplacement);
+            originals[vertex.id] = vertex;
             this.trigger('vertexRemoved', vertex);
+            this.trigger('vertexAdded', editingReplacement);
         }
+
+        this.cancel = function(vertex) {
+            if (vertex.proto) {
+                // Initial creation, not editing an existing vertex
+                if (originals[vertex.id]) {
+                    throw Error('Vertex is prototype but original replacement found');
+                }
+                graph.removeVertex(vertex);
+                this.trigger('vertexRemoved', vertex);
+
+            } else {    
+                // Editing an existing node
+                if (!originals[vertex.id]) {
+                    throw Error('No original vertex found');
+                }
+                graph.replaceVertex(vertex, originals[vertex.id]);
+                this.trigger('vertexRemoved', vertex);
+                this.trigger('vertexAdded', originals[vertex.id]);
+
+                delete originals[vertex.id];
+            }
+        }
+
+        // ---------- Prototypes ----------
        
         this.createPointPrototype = function() {
             var pointVertex = new geomNode.Point({
-                editing: true,
-                nameFromId: true,
-                addAnotherFn: 'createPointPrototype',
+                editing      : true,
+                proto        : true,
+                nameFromId   : true,
+                addAnotherFn : 'createPointPrototype',
             });
             graph.addVertex(pointVertex);
             this.trigger('vertexAdded', pointVertex);
@@ -33,9 +64,10 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
         this.createPolylinePrototype = function() {
             var pointVertex = new geomNode.Point({});
             var polylineVertex = new geomNode.Polyline({
-                editing: true,
-                nameFromId: true,
-                addAnotherFn: 'createPolylinePrototype',
+                editing      : true,
+                proto        : true,
+                nameFromId   : true,
+                addAnotherFn : 'createPolylinePrototype',
             });
 
             graph.addVertex(pointVertex);
@@ -46,6 +78,8 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
 
             return polylineVertex;
         }
+
+        // ---------- Mutations ----------
 
         this.addPointToPolyline = function(polyline, point) {
             if (point === undefined) {
@@ -69,6 +103,8 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
             this.trigger('vertexRemoved', vertex);
         }
 
+        // ---------- Graph functions ----------
+
         this.childrenOf = function(vertex) {
             return graph.outgoingEdgesOf(vertex).map(function(id) {
                 return graph.vertexById(id);
@@ -83,20 +119,6 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
 
         this.isEditing = function() {
             return _.contains(_.pluck(graph.vertices(), 'editing'), true);
-        }
-
-        this.getPointCoordinates = function(id) {
-            var vertex = _.find(graph.vertices, function(vertex) { 
-                return vertex.id === id 
-            });
-            if (!vertex) {
-                throw Error('not vertex for id: ' + id);
-            }
-            return {
-                x: vertex.parameters.x,
-                y: vertex.parameters.y,
-                z: vertex.parameters.z,
-            }
         }
     }
 

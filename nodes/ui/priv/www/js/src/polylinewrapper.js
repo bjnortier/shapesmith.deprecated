@@ -43,8 +43,13 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             this.views = this.views.concat([
                 new EditingDOMView({model: this}),
                 new EditingLineSceneView({model: this}),
-                new EditingPointAnchorSceneView({model: this, index: 0}),
             ]);
+            for (var i = 0; i < geometryGraph.childrenOf(this.vertex).length; ++i) {
+                this.views.push(
+                    new EditingPointAnchorSceneView({model: this, index: i}));
+
+            }
+
         },
 
         workplanePositionChanged: function(position) {
@@ -104,7 +109,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
         keydown: function(event) {
             if (event.keyCode === 13) {
-                if (this.inClickAddsPointPhase) {
+                if ((this.inClickAddsPointPhase) && (this.stage > 1)) {
                     geometryGraph.removeLastPointFromPolyline(this.vertex);
                     this.views[this.views.length - 1].remove();
                     this.views.splice(this.views.length - 1, 1);
@@ -121,7 +126,12 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         canComplete: function() {
-            return geometryGraph.childrenOf(this.vertex).length > 1;
+            // For polylines, when the stage is active, the length must be > 2
+            // as the last point will be removed
+            var numChildren = geometryGraph.childrenOf(this.vertex).length;
+            return (((numChildren > 1) && (this.stage === undefined))
+                    ||
+                    (numChildren > 2));
         },
 
         ok: function() {
@@ -196,9 +206,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         stageChanged: function(stage) {
-            if (stage > 1) {
-                this.$el.find('.ok').removeClass('disabled')
-            }
+            vertexWrapper.EditingDOMView.prototype.stageChanged.call(this, stage);
             this.$el.find('.coordinates').html(this.renderCoordinates());
         },
 

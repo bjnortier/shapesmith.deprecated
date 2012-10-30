@@ -98,6 +98,15 @@ define(['src/scene'], function(sceneModel) {
             }
         }
 
+        this.dblclick = function(event) {
+            var clickableViews = mouseOverViews.filter(function(view) {
+                return view.clickable;
+            });
+            if (clickableViews.length > 0) {
+                clickableViews[0].trigger('dblclick', event);
+            }
+        }
+
         this.findViewsForEvent = function(event) {
             var selector = createSelector(sceneModel.view.camera, event);
             var foundObjects = sceneViews.reduce(function(acc, view) {

@@ -19,7 +19,10 @@
             that.trigger('mouseup', event);
             that.mouseup(event);
         });
-         $('#scene').mouseleave(function(event) {
+        $('#scene').dblclick(function(event) {
+            that.dblclick(event);
+        });
+        $('#scene').mouseleave(function(event) {
             that.mouseleave(event);
         });
         $('#scene').mousedown(function(event) {
@@ -46,7 +49,6 @@
                     $('#scene').css('cursor', '');
                 }
             } 
-
         }
 
         this.mouseup = function(event) {
@@ -61,6 +63,12 @@
             sceneViewEventGenerator.mouseup(event);
             this.mouseDownEvent = undefined;
             dragging = false;
+        }
+
+        this.dblclick = function(event) {
+            if (sceneViewEventGenerator.overClickable()) {
+                sceneViewEventGenerator.dblclick(event);
+            } 
         }
 
         this.mouseleave = function(event) {

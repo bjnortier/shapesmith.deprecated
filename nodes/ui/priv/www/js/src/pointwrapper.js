@@ -1,25 +1,5 @@
-define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper'], 
-    function(calc, geometryGraph, vertexWrapper) {
-
-    // ---------- Common ----------
-
-    var SceneView = {
-
-        render: function() {
-            vertexWrapper.EditingSceneView.prototype.render.call(this);
-            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
-            var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
-            var point = THREE.SceneUtils.createMultiMaterialObject(
-                new THREE.SphereGeometry(0.5, 10, 10), 
-                [
-                    new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}),
-                    new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
-                ]);
-            point.position = calc.objToVector(this.model.vertex.parameters.coordinate);
-            this.sceneObject.add(point);
-        },
-
-    };
+define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', 'src/scene', 'src/workplane'], 
+    function(calc, geometryGraph, vertexWrapper, sceneModel, workplaneModel) {
 
     // ---------- Editing ----------
 
@@ -43,7 +23,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper'],
         },
 
         workplaneClick: function() {
-            this.stage = 1;
+            this.stage = undefined;
             this.trigger('stageChanged', this.stage);
         },
 
@@ -61,7 +41,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper'],
         },
 
         canComplete: function() {
-            return this.stage !== 0;
+            return this.stage === undefined;
         },
 
     });
@@ -93,20 +73,64 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper'],
             return this;
         },
 
-        stageChanged: function(stage) {
-            if (stage === 1) {
-                this.$el.find('.ok').removeClass('disabled')
-            }
-        },
-
         updateParams: function() {
-            this.$el.find('.coordinate').find('.x').text(this.model.vertex.parameters.coordinate.x);
-            this.$el.find('.coordinate').find('.y').text(this.model.vertex.parameters.coordinate.y);
-            this.$el.find('.coordinate').find('.z').text(this.model.vertex.parameters.coordinate.z);
+            var that = this;
+            ['x', 'y', 'z'].forEach(function(key) {
+                that.$el.find('.coordinate').find('.' + key).text(that.model.vertex.parameters.coordinate[key]);
+            });
         },
     });
 
-    var EditingSceneView = vertexWrapper.EditingSceneView.extend(SceneView, {
+    var EditingSceneView = vertexWrapper.EditingSceneView.extend({
+
+        initialize: function(options) {
+            this.point = this.model.vertex;
+            this.draggable = true; 
+            vertexWrapper.EditingSceneView.prototype.initialize.call(this);
+            this.on('drag', this.drag, this);
+            this.on('dragEnded', this.dragEnded, this);
+        },
+
+        remove: function() {
+            vertexWrapper.EditingSceneView.prototype.remove.call(this);
+            this.off('drag', this.drag, this);
+            this.off('dragEnded', this.dragEnded, this);
+        },
+
+        render: function() {
+            vertexWrapper.EditingSceneView.prototype.render.call(this);
+            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
+            var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
+            var point = THREE.SceneUtils.createMultiMaterialObject(
+                new THREE.CubeGeometry(1, 1, 1, 1, 1, 1), 
+                [
+                    new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
+                    new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
+                ]);
+            point.position = calc.objToVector(this.point.parameters.coordinate);
+            this.sceneObject.add(point);
+        },
+
+        drag: function(event) {
+            this.dragging = true;
+            this.model.stage = 0;
+            var positionOnWorkplane = calc.positionOnWorkplane(
+                event, workplaneModel.node, sceneModel.view.camera);
+            this.point.parameters.coordinate = {
+                x: positionOnWorkplane.x,
+                y: positionOnWorkplane.y,
+                z: positionOnWorkplane.z,
+            }
+            this.model.trigger('parametersChanged');
+        },
+
+        dragEnded: function() {
+            if (this.dragging) {
+                this.model.stage = undefined;
+                this.dragging = false;
+                this.model.trigger('stageChanged', this.model.stage);
+            }
+        },
 
     });
 
@@ -125,7 +149,23 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper'],
 
     });
 
-    var DisplaySceneView = vertexWrapper.DisplaySceneView.extend(SceneView);
+    var DisplaySceneView = vertexWrapper.DisplaySceneView.extend({
+
+        render: function() {
+            vertexWrapper.EditingSceneView.prototype.render.call(this);
+            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
+            var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
+            var point = THREE.SceneUtils.createMultiMaterialObject(
+                new THREE.SphereGeometry(0.5, 10, 10), 
+                [
+                    new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}),
+                    new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
+                ]);
+            point.position = calc.objToVector(this.model.vertex.parameters.coordinate);
+            this.sceneObject.add(point);
+        },
+
+    });
 
     var DisplayDOMView = vertexWrapper.DisplayDOMView.extend({
 
