@@ -125,8 +125,8 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             }
         },
 
-        canComplete: function() {
-            // For polylines, when the stage is active, the length must be > 2
+        canComplete: function() {   
+            // For prototype polylines, when the stage is active, the length must be > 2
             // as the last point will be removed
             var numChildren = geometryGraph.childrenOf(this.vertex).length;
             return (((numChildren > 1) && (this.stage === undefined))
@@ -268,6 +268,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 y: positionOnWorkplane.y,
                 z: positionOnWorkplane.z,
             }
+            this.model.trigger('stageChanged', this.stage);
             this.model.trigger('parametersChanged');
         },
 
@@ -275,6 +276,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             if (this.dragging) {
                 this.model.stage = undefined;
                 this.dragging = false;
+                this.model.trigger('stageChanged', this.stage);
             }
         },
 
