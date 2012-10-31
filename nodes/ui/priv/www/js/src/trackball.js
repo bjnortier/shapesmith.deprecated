@@ -9,6 +9,7 @@ define(['src/scene',  'src/interactioncoordinator'], function(sceneModel, coordi
         var lastMousePosition = undefined;
         var targetOnDown = undefined;
         var state = undefined;
+        var damping = 0.25;
 
         this.mousedown = function(event) {
             targetOnDown = { 
@@ -104,8 +105,12 @@ define(['src/scene',  'src/interactioncoordinator'], function(sceneModel, coordi
             target.distance -= delta;
         }
 
+        this.dontDamp = function() {
+            damping = 1.0;
+        }
+
         this.updateCamera = function() {
-            var damping = 0.25;
+
             position.azimuth += (target.azimuth - position.azimuth) * damping;
             position.elevation += (target.elevation - position.elevation) * damping;
 

@@ -3,7 +3,7 @@ var expect = require('chai').expect,
     client = webdriverjs.remote({
         logLevel: 'silent',
         desiredCapabilities:{
-            browserName:"chrome"
+            browserName:"chrome",
         }
     });
 

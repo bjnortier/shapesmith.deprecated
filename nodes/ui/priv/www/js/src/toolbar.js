@@ -20,6 +20,7 @@ define(['src/interactioncoordinator', 'src/geometrygraphsingleton'],
 
         initialize: function() {
             this.render();
+            this.$el.addClass(this.model.name);
         },
 
         render: function() {
