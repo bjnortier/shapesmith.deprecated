@@ -7,5 +7,6 @@ priv/www/js/node_modules/
 logs/
 test/node_modules
 test/selenium-server-standalone-2.25.0.jar
+test/chromedriver.log
 .eunit/
 
