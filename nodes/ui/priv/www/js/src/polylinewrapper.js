@@ -300,7 +300,12 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
     var DisplayDOMView = vertexWrapper.DisplayDOMView.extend({
 
         render: function() {
-            this.$el.html('<td class="vertex display"><img src="/ui/images/icons/line32x32.png"/></td>');            return this;
+            var view = {
+                name: this.model.vertex.name,
+            }
+            var template = '<td class="vertex {{name}} display"><img src="/ui/images/icons/line32x32.png"/></td>';
+            this.$el.html($.mustache(template, view));
+            return this;
         },
 
     })

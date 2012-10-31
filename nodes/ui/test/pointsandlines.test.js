@@ -61,13 +61,22 @@ describe('Modelling User Interface', function() {
         client.waitFor('.toolbar', 2000, function() {
             client
                 .click('.toolbar .point')
-                .moveToWorld(20,10,0, function() {
-                    client
-                        .assertTextEqual('.vertex.editing .coordinate .x', '20')
-                        .assertTextEqual('.vertex.editing .coordinate .y', '10')
-                        .assertTextEqual('.vertex.editing .coordinate .z', '0')
-                        .click('.okcancel .ok')
-                        .pause(1000, done);
+                .getText('.vertex.editing .title .name', function(result) {
+                    var name = result.value;
+                    client.clickOnWorld(20,10,0, function() {
+                        client
+                            .assertTextEqual('.vertex.editing .coordinate .x', '20')
+                            .assertTextEqual('.vertex.editing .coordinate .y', '10')
+                            .assertTextEqual('.vertex.editing .coordinate .z', '0')
+                            .click('.okcancel .ok', function(result) {
+                                client
+                                    .pause(1000)
+                                    .isVisible('.vertex.display.'+name, function(result) {
+                                        assert.isTrue(result);
+                                        done();
+                                    });
+                            });
+                    });
                 });
         });
     }); 
@@ -109,6 +118,81 @@ describe('Modelling User Interface', function() {
                     client.getText('.point._1', function(result) {
                         done();
                     });
+                });
+        });
+    }); 
+
+    it('can select a point', function() {
+        this.timeout(20000);
+        client.waitFor('.toolbar', 2000, function() {
+            client
+                .click('.toolbar .point')
+                .getText('.vertex.editing .title .name', function(result) {
+                    var name = result.value;
+                    client
+                        .clickOnWorld(0,0,0)
+                        .click('.okcancel .ok')
+                        .click('.vertex.display.' + name, function(result) {
+                            console.log(result);
+                            done();
+                        });
+                });
+        });
+    });
+
+
+    it('can select a point in the graph', function(done) {
+        this.timeout(20000);
+        client.waitFor('.toolbar', 2000, function() {
+            client
+                .click('.toolbar .point')
+                .getText('.vertex.editing .title .name', function(result) {
+                    var name = result.value;
+                    var vertexGraphElementCSS = '.vertex.display.' + name;
+                    client
+                        .clickOnWorld(20,10,0)
+                        .click('.okcancel .ok')
+                        .click(vertexGraphElementCSS, function() {
+                            client.getAttribute(vertexGraphElementCSS, 'class', function(result) {
+                                assert.include(result, 'selected');
+                                client
+                                    .clickOnWorld(0,0,0)
+                                    .getAttribute(vertexGraphElementCSS, 'class', function(result) {
+                                        assert.equal(-1, result.indexOf('selected'));
+                                        done();
+                                    });
+
+                            });
+                        });
+
+                });
+        });
+    }); 
+
+    it('can select a point in the scene', function(done) {
+        this.timeout(20000);
+        client.waitFor('.toolbar', 2000, function() {
+            client
+                .click('.toolbar .point')
+                .getText('.vertex.editing .title .name', function(result) {
+                    var name = result.value;
+                    var vertexGraphElementCSS = '.vertex.display.' + name;
+                    client
+                        .clickOnWorld(20,10,0)
+                        .click('.okcancel .ok')
+                        .clickOnWorld(20,10,0, function() {
+                            client.getAttribute(vertexGraphElementCSS, 'class', function(result) {
+                                assert.include(result, 'selected');
+                                client
+                                    .clickOnWorld(0,0,0)
+                                    .getAttribute(vertexGraphElementCSS, 'class', function(result) {
+                                        assert.equal(-1, result.indexOf('selected'));
+                                        done();
+                                    });
+
+                            });
+                        });
+
                 });
         });
     }); 
