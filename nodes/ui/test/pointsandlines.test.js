@@ -66,7 +66,6 @@ describe('Modelling User Interface', function() {
                         .assertTextEqual('.vertex.editing .coordinate .x', '20')
                         .assertTextEqual('.vertex.editing .coordinate .y', '10')
                         .assertTextEqual('.vertex.editing .coordinate .z', '0')
-                        
                         .click('.okcancel .ok')
                         .pause(1000, done);
                 });
@@ -83,11 +82,33 @@ describe('Modelling User Interface', function() {
                 .clickOnWorld(10,10,0)
                 .clickOnWorld(0,10,0)
                 .clickOnWorld(0,0,0, function() {
-                    client.assertCoordinateEqual('.coordinate._0', 0, 0, 0)
-                    client.assertCoordinateEqual('.coordinate._1', 10, 0, 0)
-                    client.assertCoordinateEqual('.coordinate._2', 10, 10, 0)
-                    client.assertCoordinateEqual('.coordinate._3', 0, 10, 0)
-                    client.assertCoordinateEqual('.coordinate._4', 0, 0, 0, done);
+                    client.assertCoordinateEqual('.point._0', 0, 0, 0)
+                    client.assertCoordinateEqual('.point._1', 10, 0, 0)
+                    client.assertCoordinateEqual('.point._2', 10, 10, 0)
+                    client.assertCoordinateEqual('.point._3', 0, 10, 0)
+                    client.assertCoordinateEqual('.point._4', 0, 0, 0, done);
+                });
+        });
+    }); 
+
+    it('can create a polyline that uses a predefined point', function(done) {
+        this.timeout(20000);
+        client.waitFor('.toolbar', 2000, function() {
+            client
+                .click('.toolbar .point')
+                .clickOnWorld(5,5,0)
+                .click('.okcancel .ok')
+                .click('.toolbar .polyline')
+                .clickOnWorld(0,0,0)
+                .clickOnWorld(5,5,0)
+                .clickOnWorld(5,0,0)
+                .clickOnWorld(0,0,0,function() {
+                    client.assertCoordinateEqual('.point._0', 0, 0, 0)
+                    client.assertCoordinateEqual('.point._2', 5, 0, 0)
+                    client.assertCoordinateEqual('.point._3', 0, 0, 0)
+                    client.getText('.point._1', function(result) {
+                        done();
+                    });
                 });
         });
     }); 

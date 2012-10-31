@@ -162,7 +162,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 '<span class="cancel button"><img src="/ui/images/icons/cancel24x24.png"/></span>' +
                 '</span>' + 
                 '</div>' + 
-                '<div class="coordinates">' + 
+                '<div class="points">' + 
                 '{{{renderedCoordinates}}}' +
                 '</div>' + 
                 '</td>';
@@ -178,16 +178,18 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             // Note the coordinate class that has a number - valid class names
             // cannot start with a number, so prefix an underscore
             var template = 
-                '{{#coordinates}}' +
-                '{{#name}}<div class="point">{{id}}</div>{{/name}}' + 
-                '{{^name}}<div class="coordinate _{{i}}{{#editing}} editing{{/editing}}">' +
+                '{{#points}}' +
+                '<div class="point _{{i}}">' +
+                '{{#name}}<div class="named">{{id}}</div>{{/name}}' + 
+                '{{^name}}<div class="coordinate{{#editing}} editing{{/editing}}">' +
                 '<span class="x">{{x}}</span><span class="y">{{y}}</span><span class="z">{{z}}</span>' +
                 '</div>{{/name}}' +
-                '{{/coordinates}}';
+                '</div>' +
+                '{{/points}}';
             var that = this;
 
             var pointChildren = geometryGraph.childrenOf(this.model.vertex);
-            var coordinates = pointChildren.map(function(pointChild, i) {
+            var points = pointChildren.map(function(pointChild, i) {
                 return {
                     editing: that.model.get('stage') === i,
                     id: pointChild.id,
@@ -199,21 +201,21 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 }
             });
             var view = {
-                coordinates: coordinates
+                points: points
             }
             return $.mustache(template, view);
         },
 
         stageChanged: function(stage) {
             vertexWrapper.EditingDOMView.prototype.stageChanged.call(this, stage);
-            this.$el.find('.coordinates').html(this.renderCoordinates());
+            this.$el.find('.points').html(this.renderCoordinates());
         },
 
         updateParams: function() {
             var index = this.model.get('stage'), that = this;
             var point = geometryGraph.childrenOf(this.model.vertex)[index];
             ['x', 'y', 'z'].forEach(function(dim) {
-                that.$el.find('.coordinate.' + index).find('.' + dim).text(
+                that.$el.find('.point._' + index).find('.' + dim).text(
                     point.parameters.coordinate[dim]);
             });
         },

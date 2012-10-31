@@ -86,7 +86,7 @@ img#logo {
     border-bottom: solid 2px #ff0;
 }
 
-.coordinate, .point {
+.coordinate, .named {
     padding: 5px;
 }
 
