@@ -175,10 +175,12 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         renderCoordinates: function() {
+            // Note the coordinate class that has a number - valid class names
+            // cannot start with a number, so prefix an underscore
             var template = 
                 '{{#coordinates}}' +
                 '{{#name}}<div class="point">{{id}}</div>{{/name}}' + 
-                '{{^name}}<div class="coordinate {{i}} {{#editing}}editing{{/editing}}">' +
+                '{{^name}}<div class="coordinate _{{i}}{{#editing}} editing{{/editing}}">' +
                 '<span class="x">{{x}}</span><span class="y">{{y}}</span><span class="z">{{z}}</span>' +
                 '</div>{{/name}}' +
                 '{{/coordinates}}';

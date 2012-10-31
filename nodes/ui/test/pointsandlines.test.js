@@ -2,7 +2,7 @@ var chai = require('chai'),
     assert = chai.assert,
     webdriverjs = require("webdriverjs"),
     client = webdriverjs.remote({
-        // logLevel: 'silent',
+        logLevel: 'silent',
         desiredCapabilities:{
             browserName:"chrome",
         }
@@ -14,31 +14,41 @@ describe('Modelling User Interface', function() {
     before(function(done) {
         client.addCommand('assertTextEqual', function(selector, text, callback) {
             this.getText(selector, function(result) {
-                assert.equal(text, result.value);
+                assert.equal(text, result.value, selector);
                 callback();
             });
         });
+        client.addCommand('assertCoordinateEqual', function(selector, x, y, z, callback) {
+            this.assertTextEqual(selector + ' .x', x);
+            this.assertTextEqual(selector + ' .y', y);
+            this.assertTextEqual(selector + ' .z', z);
+            client.pause(0, callback);
+        });
         client.addCommand('moveToWorld', function(x,y,z, callback) {
             this.execute('return SS.toScreenCoordinates('+x+','+y+','+z+')', function(result) {
-                console.log(result);
                 var xOffset = Math.round(result.value.x);
                 var yOffset = Math.round(result.value.y);
                 client.element('css selector', '#scene', function(result) {
-                    console.log(result);
                     var element = result.value.ELEMENT;
                     client
-                        .moveTo(element, xOffset, yOffset)
-                        .pause(500, callback)
+                        .moveTo(element, xOffset, yOffset, callback)
                 });
             });
         });
-        done();
+        client.addCommand('clickOnWorld', function(x,y,z, callback) {
+            this
+                .moveToWorld(x,y,z)
+                .buttonDown()
+                .buttonUp(callback);
+        });
+        client.init(function() {
+            done();
+        });
     });
 
     beforeEach(function(done) {
         this.timeout(5000);
         client
-            .init()
             .url('http://localhost.shapesmith.net:8000/local/testdesign/modeller')
             .execute('SS.dontDampTrackball(); SS.zoomIn(); ', function() {
                 done();
@@ -55,12 +65,34 @@ describe('Modelling User Interface', function() {
                     client
                         .assertTextEqual('.vertex.editing .coordinate .x', '20')
                         .assertTextEqual('.vertex.editing .coordinate .y', '10')
-                        .assertTextEqual('.vertex.editing .coordinate .z', '0', done);
+                        .assertTextEqual('.vertex.editing .coordinate .z', '0')
+                        
+                        .click('.okcancel .ok')
+                        .pause(1000, done);
                 });
         });
     }); 
 
-    afterEach(function(done) {
+    it('can create a polyline with the mouse', function(done) {
+        this.timeout(20000);
+        client.waitFor('.toolbar', 2000, function() {
+            client
+                .click('.toolbar .polyline')
+                .clickOnWorld(0,0,0)
+                .clickOnWorld(10,0,0)
+                .clickOnWorld(10,10,0)
+                .clickOnWorld(0,10,0)
+                .clickOnWorld(0,0,0, function() {
+                    client.assertCoordinateEqual('.coordinate._0', 0, 0, 0)
+                    client.assertCoordinateEqual('.coordinate._1', 10, 0, 0)
+                    client.assertCoordinateEqual('.coordinate._2', 10, 10, 0)
+                    client.assertCoordinateEqual('.coordinate._3', 0, 10, 0)
+                    client.assertCoordinateEqual('.coordinate._4', 0, 0, 0, done);
+                });
+        });
+    }); 
+
+    after(function(done) {
         client.end(done);
     });
 

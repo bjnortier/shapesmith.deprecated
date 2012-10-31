@@ -87,7 +87,7 @@
             if (name === 'point') {
                 geometryGraph.createPointPrototype();
             }
-            if (name === 'line') {
+            if (name === 'polyline') {
                 geometryGraph.createPolylinePrototype();
             }
         }

@@ -8,7 +8,7 @@ define(['src/toolbar'], function(toolbar) {
 
     var LineModel = toolbar.ItemModel.extend({
         icon: 'line32x32.png',
-        name: 'line',
+        name: 'polyline',
     });
 
 
