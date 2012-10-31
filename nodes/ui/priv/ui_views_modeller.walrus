@@ -21,6 +21,7 @@
     
     <script type="text/javascript" src="/ui/js/lib/Detector.js"></script>
     <script type="text/javascript" src="/ui/js/lib/three.min.js"></script>
+    <script type="text/javascript" src="/ui/js/src/PipeGeometry.js"></script>
     <script type="text/javascript" src="/ui/js/lib/csg-min.js"></script>
 
     <script type="text/javascript" src="/ui/js/lib/fonts/helvetiker_bold.typeface.js"></script>

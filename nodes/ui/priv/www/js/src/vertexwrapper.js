@@ -56,6 +56,10 @@ define([
             sceneModel.view.updateScene = true;
         },
 
+        isDraggable: function() {
+            return false;
+        },
+
     });
 
 

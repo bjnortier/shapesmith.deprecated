@@ -10,14 +10,12 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
             var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
             
-            var materials = [
-                new THREE.MeshLambertMaterial( { ambient: ambient,  side: THREE.DoubleSide} ),
-                new THREE.MeshBasicMaterial( { color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
-            ];
             var pointChildren = geometryGraph.childrenOf(this.model.vertex);
             var coordinates = pointChildren.map(function(point) {
                 return point.parameters.coordinate;
             });
+
+            var positions = [calc.objToVector(coordinates[0])];
 
             for(var i = 1; i < coordinates.length; ++i) {
                 var from = calc.objToVector(coordinates[i-1]);
@@ -28,7 +26,17 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 var material = new THREE.LineBasicMaterial({ color: color });
                 var line = new THREE.Line(geometry, material);
                 this.sceneObject.add(line);
+
+                positions.push(to);
             }
+
+            var pipe = THREE.SceneUtils.createMultiMaterialObject(
+                new THREE.PipeGeometry(3, positions),
+                [
+                    new THREE.MeshLambertMaterial( { ambient: ambient,  side: THREE.DoubleSide} ),
+                    new THREE.MeshBasicMaterial( { color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
+                ]);
+            this.hiddenSelectionObject.add(pipe);
         },
 
     };
