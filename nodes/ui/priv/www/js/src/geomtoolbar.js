@@ -45,14 +45,13 @@ define(['src/toolbar', 'src/geometrygraphsingleton', 'src/interactioncoordinator
         },
 
         launchTool: function(item) {
-            if (item.name === 'select') {
-                geometryGraph.cancelIfEditing();
-            }
+            this.toolVertexId = undefined;
+            geometryGraph.cancelIfEditing();
             if (item.name === 'point') {
-                geometryGraph.createPointPrototype();
+                this.toolVertexId = geometryGraph.createPointPrototype().id;
             }
             if (item.name === 'polyline') {
-                geometryGraph.createPolylinePrototype();
+                this.toolVertexId = geometryGraph.createPolylinePrototype().id;
             }
         },
 
@@ -60,6 +59,7 @@ define(['src/toolbar', 'src/geometrygraphsingleton', 'src/interactioncoordinator
             if (event.keyCode === 13) {
                 // ???
             } else if (event.keyCode === 27) {
+                // Activate the select tool
                 this.activate(this.items[0]);
             }
         },
@@ -68,8 +68,13 @@ define(['src/toolbar', 'src/geometrygraphsingleton', 'src/interactioncoordinator
             this.activate(item);
         },
 
-        geometryCommitted: function() {
-            this.launchTool(this.activeItem);
+        // If the vertex committed is the tool vertex, create another
+        // of the same type. Child vertices (e.g. points of polylines)
+        // can be committed, so only create another for the top-level tools 
+        geometryCommitted: function(vertex) {
+            if (vertex.id === this.toolVertexId) {
+                this.launchTool(this.activeItem);
+            }
         },
 
     });

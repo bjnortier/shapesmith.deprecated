@@ -47,114 +47,65 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
         initialize: function(vertex) {
             vertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
-            this.inClickAddsPointPhase = true;
             this.views = this.views.concat([
                 new EditingDOMView({model: this}),
                 new EditingLineSceneView({model: this}),
             ]);
-            for (var i = 0; i < geometryGraph.childrenOf(this.vertex).length; ++i) {
-                this.views.push(
-                    new EditingPointAnchorSceneView({model: this, index: i}));
-
-            }
-
+            geometryGraph.on('vertexReplaced', this.vertexReplaced, this);
+            this.vertex.on('descendantChanged', this.descendantChanged, this);
         },
 
-        workplanePositionChanged: function(position) {
-            if ((this.get('stage') !== undefined) && (this.inClickAddsPointPhase)) {
-                this.lastPosition = position;
-                var point = geometryGraph.childrenOf(this.vertex)[this.get('stage')];
-                point.parameters.coordinate = {
-                    x: position.x,
-                    y: position.y,
-                    z: position.z,
-                }
-                this.trigger('parametersChanged');
+        destroy: function() {
+            vertexWrapper.EditingModel.prototype.destroy.call(this);
+            geometryGraph.off('vertexReplaced', this.vertexReplaced, this);
+            this.vertex.off('descendantChanged', this.descendantChanged, this);
+        },
+
+        // If the replaced vertex is the last point
+        // in the polyline, add another point
+        vertexReplaced: function(original, replacement) {
+            if (_.last(geometryGraph.childrenOf(this.vertex)) === replacement) {
+                geometryGraph.addPointToPolyline(this.vertex);
             }
+        },
+
+        // Trigger a 'change' event if any of the child polylines changed
+        descendantChanged: function(descendant) {
+            this.vertex.trigger('change', this.vertex);
+        },
+
+        workplaneDblClick: function(event) {
+            var children = geometryGraph.childrenOf(this.vertex);
+            if (children.length > 3) {
+                geometryGraph.remove(children[children.length-1]);
+                geometryGraph.remove(children[children.length-2]);
+                this.ok();
+            } 
         },
 
         sceneViewClick: function(viewAndEvent) {
-            if (this.get('stage') !== undefined) {
-                if (viewAndEvent.view.model.vertex.type === 'point') {
-                    // Remove last point and it's anchor view
-                    geometryGraph.removeLastPointFromPolyline(this.vertex);
-                    this.views[this.views.length - 1].remove();
-                    this.views.splice(this.views.length - 1, 1);
+            // if (this.get('stage') !== undefined) {
+            //     if (viewAndEvent.view.model.vertex.type === 'point') {
+            //         // Remove last point and it's anchor view
+            //         geometryGraph.removeLastPointFromPolyline(this.vertex);
+            //         this.views[this.views.length - 1].remove();
+            //         this.views.splice(this.views.length - 1, 1);
 
-                    // Add the named point and a new anchor view
-                    geometryGraph.addPointToPolyline(this.vertex, viewAndEvent.view.model.vertex);
-                    this.views.push(new EditingPointAnchorSceneView({
-                        model: this, index: this.get('stage')
-                    }));
-                }
-                if (this.inClickAddsPointPhase) {
-                    this.set('stage',  this.get('stage') + 1);
-                    this.addCoordinate(this.lastPosition);
-                } else {
-                    this.set('stage', undefined);
-                }
-            }
+            //         // Add the named point and a new anchor view
+            //         geometryGraph.addPointToPolyline(this.vertex, viewAndEvent.view.model.vertex);
+            //         this.views.push(new EditingPointAnchorSceneView({
+            //             model: this, index: this.get('stage')
+            //         }));
+            //     }
+            //     if (this.inClickAddsPointPhase) {
+            //         this.set('stage',  this.get('stage') + 1);
+            //         this.addCoordinate(this.lastPosition);
+            //     } else {
+            //         this.set('stage', undefined);
+            //     }
+            // }
         },
 
-        workplaneClick: function(position) {
-            if (this.get('stage') !== undefined) {
-                var point1 = geometryGraph.childrenOf(this.vertex)[this.get('stage')];
-                point1.parameters.coordinate = {
-                    x : position.x,
-                    y : position.y,
-                    z : position.z,
-                }
-                if (this.inClickAddsPointPhase) {
-                    this.set('stage', this.get('stage') + 1);
-                    this.addCoordinate(position);
-                } else {
-                    this.set('stage', undefined);
-                }
-            }
-        },
-
-        keydown: function(event) {
-            if (event.keyCode === 13) {
-                if ((this.inClickAddsPointPhase) && (this.get('stage') > 1)) {
-                    geometryGraph.removeLastPointFromPolyline(this.vertex);
-                    this.views[this.views.length - 1].remove();
-                    this.views.splice(this.views.length - 1, 1);
-                    this.set('stage', undefined);
-                    this.inClickAddsPointPhase = false;
-                } else {
-                    this.ok();
-                }
-            } else if (event.keyCode === 27) {
-                // Esc
-                this.cancel();
-            }
-        },
-
-        canComplete: function() {   
-            // For prototype polylines, when the stage is active, the length must be > 2
-            // as the last point will be removed
-            var numChildren = geometryGraph.childrenOf(this.vertex).length;
-            return (((numChildren > 1) && (this.get('stage') === undefined))
-                    ||
-                    (numChildren > 2));
-        },
-
-        ok: function() {
-            if (this.get('stage') !== undefined) {
-                geometryGraph.removeLastPointFromPolyline(this.vertex);
-            }
-            vertexWrapper.EditingModel.prototype.ok.call(this);
-        },
-
-        addCoordinate: function(position) {
-            var point = geometryGraph.addPointToPolyline(this.vertex);
-            point.parameters.coordinate = {
-                x : position.x,
-                y : position.y,
-                z : position.z,
-            }
-            this.views.push(new EditingPointAnchorSceneView({model: this, index: this.get('stage')}));
-        },
 
     });
 
@@ -165,10 +116,6 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 '<td>' +
                 '<div class="title"><img src="/ui/images/icons/line32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
-                '<span class="okcancel">' + 
-                '<span class="ok button disabled"><img src="/ui/images/icons/ok24x24.png"/></span>' +
-                '<span class="cancel button"><img src="/ui/images/icons/cancel24x24.png"/></span>' +
-                '</span>' + 
                 '</div>' + 
                 '<div class="points">' + 
                 '{{{renderedCoordinates}}}' +
@@ -214,80 +161,10 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             return $.mustache(template, view);
         },
 
-        stageChanged: function(stage) {
-            vertexWrapper.EditingDOMView.prototype.stageChanged.call(this, stage);
-            this.$el.find('.points').html(this.renderCoordinates());
-        },
-
-        updateParams: function() {
-            var index = this.model.get('stage'), that = this;
-            var point = geometryGraph.childrenOf(this.model.vertex)[index];
-            ['x', 'y', 'z'].forEach(function(dim) {
-                that.$el.find('.point._' + index).find('.' + dim).text(
-                    point.parameters.coordinate[dim]);
-            });
-        },
     }); 
 
     var EditingLineSceneView = vertexWrapper.EditingSceneView.extend(LineSceneView, {});
 
-    var EditingPointAnchorSceneView = vertexWrapper.EditingSceneView.extend({
-
-        initialize: function(options) {
-            this.index = options.index;
-            this.point = geometryGraph.childrenOf(this.model.vertex)[this.index];
-            vertexWrapper.EditingSceneView.prototype.initialize.call(this);
-            this.on('drag', this.drag, this);
-            this.on('dragEnded', this.dragEnded, this);
-        },
-
-        remove: function() {
-            vertexWrapper.EditingSceneView.prototype.remove.call(this);
-            this.off('drag', this.drag, this);
-            this.off('dragEnded', this.dragEnded, this);
-        },
-
-        render: function() {
-            vertexWrapper.EditingSceneView.prototype.render.call(this);
-            if (!this.point.isNamed()) {
-                var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
-                var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
-                var point = THREE.SceneUtils.createMultiMaterialObject(
-                    new THREE.CubeGeometry(1, 1, 1, 1, 1, 1), 
-                    [
-                        new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
-                        new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
-                    ]);
-                point.position = calc.objToVector(this.point.parameters.coordinate);
-                this.sceneObject.add(point);
-            }
-        },
-
-        isDraggable: function() {
-            return !this.point.isNamed() && (this.model.get('stage') === undefined);
-        },
-
-        drag: function(event) {
-            this.dragging = true;
-            this.model.set('stage', this.index);
-            var positionOnWorkplane = calc.positionOnWorkplane(
-                event, workplaneModel.node, sceneModel.view.camera);
-            this.point.parameters.coordinate = {
-                x: positionOnWorkplane.x,
-                y: positionOnWorkplane.y,
-                z: positionOnWorkplane.z,
-            }
-            this.model.trigger('parametersChanged');
-        },
-
-        dragEnded: function() {
-            if (this.dragging) {
-                this.model.set('stage', undefined);
-                this.dragging = false;
-            }
-        },
-
-    });
 
     // ---------- Display ----------
 
@@ -299,6 +176,17 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 new DisplayLineSceneView({model: this}),
                 new DisplayDOMView({model: this}),
             ]);
+            this.vertex.on('descendantChanged', this.descendantChanged, this);
+        },
+
+        destroy: function() {
+            vertexWrapper.DisplayModel.prototype.destroy.call(this);
+            this.vertex.off('descendantChanged', this.descendantChanged, this);
+        },
+
+        // Trigger a 'change' event if any of the child polylines changed
+        descendantChanged: function(descendant) {
+            this.vertex.trigger('change', this.vertex);
         },
 
     });
@@ -311,7 +199,11 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             var view = {
                 name: this.model.vertex.name,
             }
-            var template = '<td class="vertex {{name}} display"><img src="/ui/images/icons/line32x32.png"/></td>';
+            var template = 
+                '<td class="vertex {{name}} display">' +
+                '<img src="/ui/images/icons/line32x32.png"/>' +
+                '<div class="name">{{name}}</div>' + 
+                '</td>';
             this.$el.html($.mustache(template, view));
             return this;
         },

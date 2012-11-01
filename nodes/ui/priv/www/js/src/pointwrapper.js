@@ -20,7 +20,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             this.vertex.parameters.coordinate.x = position.x;
             this.vertex.parameters.coordinate.y = position.y;
             this.vertex.parameters.coordinate.z = position.z;
-            this.trigger('parametersChanged');
+            this.vertex.trigger('change', this.vertex);            
         },
 
         workplaneClick: function() {
@@ -53,7 +53,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             return this;
         },
 
-        updateParams: function() {
+        update: function() {
             var that = this;
             ['x', 'y', 'z'].forEach(function(key) {
                 that.$el.find('.coordinate').find('.' + key).text(that.model.vertex.parameters.coordinate[key]);
@@ -105,7 +105,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 y: positionOnWorkplane.y,
                 z: positionOnWorkplane.z,
             }
-            this.model.trigger('parametersChanged');
+            this.model.vertex.trigger('change', this.model.vertex);
         },
 
         dragEnded: function() {
@@ -125,8 +125,10 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             vertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
             this.views = this.views.concat([
                 new DisplaySceneView({model: this}),
-                new DisplayDOMView({model: this}),
             ]);
+            if (!vertex.implicit) {
+                this.views.push(new DisplayDOMView({model: this}));
+            }
         },
 
     });

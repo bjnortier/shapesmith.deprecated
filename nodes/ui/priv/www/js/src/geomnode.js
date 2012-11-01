@@ -1,9 +1,9 @@
-
-define(['lib/underscore-require'], function(_) {
+define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone) {
 
     var counters = {};
 
     var GeomNode = function(options) {
+        _.extend(this, Backbone.Events);
         var options = options || {};
 
         if (!options.hasOwnProperty('type')) {
@@ -27,18 +27,17 @@ define(['lib/underscore-require'], function(_) {
             this.name = this.id;
         }
 
+        this.implicit = options.implicit || false;
         this.parameters = options.parameters || {};
         this.editing = options.editing || false;
-        this.proto = options.proto || false;
-        this.addAnotherFn = options.addAnotherFn;
-
     }
 
     GeomNode.prototype.cloneNonEditing = function() {
         var newNode = new this.constructor({
-            type : this.type, 
-            id   : this.id,
-            name : this.name,
+            type     : this.type, 
+            id       : this.id,
+            name     : this.name,
+            implicit : this.implicit,
         });
         newNode.parameters = copyObj(this.parameters);
         return newNode;

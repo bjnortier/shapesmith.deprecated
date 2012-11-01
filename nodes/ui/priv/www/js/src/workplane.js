@@ -6,6 +6,7 @@ define(['src/calculations', 'src/interactioncoordinator', 'src/scene'], function
             _.extend(this, Backbone.Events);
             coordinator.on('mousemove', this.mousemove, this);
             coordinator.on('sceneClick', this.workplaneClick, this);
+            coordinator.on('sceneDblClick', this.workplaneDblClick, this);
             coordinator.on('toolInitiated', this.toolInitiated, this);
             this.sceneView = attributes.sceneView;
             this.scene = attributes.sceneView.scene;
@@ -26,6 +27,10 @@ define(['src/calculations', 'src/interactioncoordinator', 'src/scene'], function
 
         workplaneClick: function(event) {
             this.trigger('click', this.lastPosition);
+        },
+
+        workplaneDblClick: function(event) {
+            this.trigger('dblclick', this.lastPosition);
         },
 
         mousemove: function(event) {

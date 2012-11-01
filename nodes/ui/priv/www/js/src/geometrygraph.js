@@ -8,9 +8,8 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
 
         this.commit = function(vertex) {
             var nonEditingReplacement = vertex.cloneNonEditing();
-            graph.replaceVertex(vertex, nonEditingReplacement);
-            this.trigger('vertexReplaced', vertex, nonEditingReplacement);
-            this.trigger('committed');
+            this.replace(vertex, nonEditingReplacement);
+            this.trigger('committed', nonEditingReplacement);
         }
 
         // When editing, the original vertex is kept 
@@ -19,68 +18,62 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
 
         this.edit = function(vertex) {
             var editingReplacement = vertex.cloneEditing();
-            graph.replaceVertex(vertex, editingReplacement);
+            this.replace(vertex, editingReplacement);
             originals[vertex.id] = vertex;
-            this.trigger('vertexReplaced', vertex, editingReplacement);
         }
 
         this.cancel = function(vertex) {
-            if (vertex.proto) {
-                // Initial creation, not editing an existing vertex
-                if (originals[vertex.id]) {
-                    throw Error('Vertex is prototype but original replacement found');
-                }
-                graph.removeVertex(vertex);
-                this.trigger('vertexRemoved', vertex);
-
-            } else {    
-                // Editing an existing node
-                if (!originals[vertex.id]) {
-                    throw Error('No original vertex found');
-                }
-                graph.replaceVertex(vertex, originals[vertex.id]);
-                this.trigger('vertexReplaced', vertex, originals[vertex.id]);
-
+            // Vertices being edited will have originals, new vertices
+            // will not have originals
+            if (originals[vertex.id]) {
+                this.replace(vertex, originals[vertex.id]);
                 delete originals[vertex.id];
+            } else {
+
+                // Remove implicit children that are not editing
+                var that = this;
+                this.childrenOf(vertex).map(function(child) {
+                    if (child.implicit && !child.editing) {
+                        that.remove(child);
+                    }
+                });
+
+                this.remove(vertex);
             }
         }
 
         this.cancelIfEditing = function() {
-            var editingVertex = this.getEditingVertex();
-            if (editingVertex) {
-                this.cancel(editingVertex);
-            }
+            var that = this;
+            this.getEditingVertices().map(function(vertex) {
+                that.cancel(vertex);
+            });
         }
 
         // ---------- Prototypes ----------
        
-        this.createPointPrototype = function() {
-            var pointVertex = new geomNode.Point({
+        this.createPointPrototype = function(options) {
+            var options = _.extend(options || {}, {
                 editing      : true,
                 proto        : true,
                 nameFromId   : true,
-                addAnotherFn : 'createPointPrototype',
             });
-            graph.addVertex(pointVertex);
-            this.trigger('vertexAdded', pointVertex);
+            var pointVertex = new geomNode.Point(options);
+            this.add(pointVertex);
             return pointVertex;
         }
 
-        this.createPolylinePrototype = function() {
-            var pointVertex = new geomNode.Point({});
+        this.createPolylinePrototype = function(pointOptions) {
+            var pointOptions = pointOptions || {};
+            var pointVertex = this.createPointPrototype({implicit: true});
             var polylineVertex = new geomNode.Polyline({
                 editing      : true,
                 proto        : true,
                 nameFromId   : true,
-                addAnotherFn : 'createPolylinePrototype',
             });
-
-            graph.addVertex(pointVertex);
-            graph.addVertex(polylineVertex);
-            graph.addEdge(polylineVertex, pointVertex);
-            this.trigger('vertexAdded', pointVertex);
-            this.trigger('vertexAdded', polylineVertex);
-
+            // Add the vertex but add the edge as well before triggering notifications 
+            this.add(polylineVertex, function() {
+                graph.addEdge(polylineVertex, pointVertex);
+            });
             return polylineVertex;
         }
 
@@ -88,14 +81,10 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
 
         this.addPointToPolyline = function(polyline, point) {
             if (point === undefined) {
-                var pointVertex = new geomNode.Point({});
-                graph.addVertex(pointVertex);
-                graph.addEdge(polyline, pointVertex);
-                this.trigger('vertexAdded', pointVertex);
-            } else {
-                graph.addEdge(polyline, point);
-            }
-            return pointVertex;
+                point = this.createPointPrototype({implicit: true});
+            } 
+            graph.addEdge(polyline, point);
+            return point;
         }
 
         this.removeLastPointFromPolyline = function(polyline) {
@@ -110,6 +99,39 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
 
         // ---------- Graph functions ----------
 
+        this.add = function(vertex, beforeNotifyFn) {
+            graph.addVertex(vertex);
+            if (beforeNotifyFn) {
+                beforeNotifyFn();
+            }
+            vertex.on('change', this.vertexChanged, this);
+            this.trigger('vertexAdded', vertex);
+        }
+
+        this.remove = function(vertex) {
+            graph.removeVertex(vertex);
+            vertex.off('change', this.vertexChanged, this);
+            this.trigger('vertexRemoved', vertex);
+        }
+
+        this.replace = function(original, replacement) {
+            graph.replaceVertex(original, replacement);
+            original.off('change', this.vertexChanged, this);
+            replacement.on('change', this.vertexChanged, this);
+            this.trigger('vertexReplaced', original, replacement);
+        }
+
+        this.vertexChanged = function(vertex) {
+            var that = this;
+            var notifyAncestors = function(v) {
+                that.parentsOf(v).map(function(parent) {
+                    parent.trigger('descendantChanged', vertex);
+                    notifyAncestors(parent);
+                });
+            }
+            notifyAncestors(vertex);
+        }
+
         this.childrenOf = function(vertex) {
             return graph.outgoingEdgesOf(vertex).map(function(id) {
                 return graph.vertexById(id);
@@ -123,20 +145,13 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
         }
 
         this.isEditing = function() {
-            return this.getEditingVertex() !== undefined;
+            return this.getEditingVertices().length > 0;
         }
 
-        this.getEditingVertex = function() {
-            editingVertices = _.reject(graph.vertices(), function(vertex) { 
+        this.getEditingVertices = function() {
+            return _.reject(graph.vertices(), function(vertex) { 
                 return !vertex.editing;
             });
-            if (editingVertices.length === 0) {
-                return undefined;
-            } else if (editingVertices.length > 1) {
-                throw Error('More than one editing vertex in graph');
-            } else {
-                return editingVertices[0];
-            }
         }
     }
 

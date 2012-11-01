@@ -69,9 +69,9 @@ define([
 
         initialize: function(vertex) {
             Model.prototype.initialize.call(this, vertex);
-            this.set('stage', vertex.proto ? 0 : undefined);
             workplane.on('positionChanged', this.workplanePositionChanged, this);
             workplane.on('click', this.workplaneClick, this);
+            workplane.on('dblclick', this.workplaneDblClick, this);
             sceneViewEventGenerator.on('sceneViewClick', this.sceneViewClick, this);
             this.views = [];
         },
@@ -80,6 +80,7 @@ define([
             Model.prototype.destroy.call(this);
             workplane.off('positionChanged', this.workplanePositionChanged, this);
             workplane.off('click', this.workplaneClick, this);
+            workplane.off('dblclick', this.workplaneDblClick, this);
             sceneViewEventGenerator.off('sceneViewClick', this.sceneViewClick, this);
         },  
 
@@ -101,40 +102,13 @@ define([
         initialize: function() {
             this.render();
             $('#graph').prepend(this.$el);
-            this.model.on('change:stage', this.stageChanged, this);
-            this.model.on('parametersChanged', this.updateParams, this);
+            this.model.vertex.on('change', this.update, this);
         },
 
         remove: function() {
             Backbone.View.prototype.remove.call(this);
-            this.model.off('change:stage', this.stageChanged, this);
-            this.model.off('parametersChanged', this.updateParams, this);
+            this.model.vertex.off('change', this.update, this);
         },
-
-        // events: function() {
-        //     return {
-        //         'click .okcancel .ok' : 'ok',
-        //         'click .okcancel .cancel' : 'cancel',
-        //     }
-        // },
-
-        stageChanged: function(stage) {
-            // if (this.model.canComplete()) {
-            //     this.$el.find('.ok').removeClass('disabled');
-            // } else {
-            //     this.$el.find('.ok').addClass('disabled');
-            // }
-        },
-
-        // ok: function() {
-        //     if (this.model.canComplete()) {
-        //         this.model.ok();
-        //     }
-        // },
-
-        // cancel: function() {
-        //     this.model.cancel();
-        // },
 
     });
 
@@ -143,14 +117,12 @@ define([
         initialize: function() {
             this.color = 0x94dcfc;
             SceneView.prototype.initialize.call(this);
-            this.model.on('change:stage', this.render, this);
-            this.model.on('parametersChanged', this.render, this);
+            this.model.vertex.on('change', this.render, this);
         },
 
         remove: function() {
             SceneView.prototype.remove.call(this);
-            this.model.off('parametersChanged', this.render, this);
-            this.model.off('change:stage', this.render, this);
+            this.model.vertex.off('change', this.render, this);
         },
 
     });
@@ -206,12 +178,14 @@ define([
             $('#graph').prepend(this.$el);
             this.model.on('selected', this.select, this);
             this.model.on('deselected', this.deselect, this);
+            this.model.vertex.on('change', this.update, this);
         },
 
         remove: function() {
             Backbone.View.prototype.remove.call(this);
             this.model.off('selected', this.select, this);
             this.model.off('deselected', this.deselect, this);
+            this.model.vertex.off('change', this.update, this);
         },
 
         events: {
@@ -256,6 +230,7 @@ define([
             this.on('mouseLeave', this.unhighlight, this);
             this.on('click', this.click, this);
             this.on('dblclick', this.dblclick, this);
+            this.model.vertex.on('change', this.render, this);
         },
 
         remove: function() {
@@ -266,6 +241,7 @@ define([
             this.off('mouseLeave', this.unhighlight, this);
             this.off('click', this.click, this);
             this.off('dblclick', this.dblclick, this);
+            this.model.vertex.off('change', this.render, this);
         },
 
         select: function() {

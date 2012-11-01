@@ -23,19 +23,8 @@ define(['src/geometrygraphsingleton', 'src/pointwrapper', 'src/polylinewrapper']
     var addVertex = function(vertex) {
         if (vertex.editing) {
             models[vertex.id] = new wrappers[vertex.type].EditingModel(vertex);
-        } else if (vertex.isNamed()) {
+        } else {
             models[vertex.id] = new wrappers[vertex.type].DisplayModel(vertex);
-
-            var updateAncestors = function(v) {
-                geometryGraph.parentsOf(v).map(function(parent) {
-                    if (models[parent.id]) {
-                        models[parent.id].destroy();
-                        models[parent.id] = new wrappers[parent.type].DisplayModel(parent); 
-                    }
-                    updateAncestors(parent);
-                });
-            }
-            updateAncestors(vertex);
         }
     }
 
