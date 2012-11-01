@@ -1,9 +1,9 @@
-define(['src/geometrygraphsingleton', 'src/pointwrapper', 'src/pointwrapper2', 'src/polylinewrapper'], 
-    function(geometryGraph, point, point2, polyline) {
+define(['src/geometrygraphsingleton', 'src/pointwrapper', 'src/polylinewrapper'], 
+    function(geometryGraph, point, polyline) {
     
     var models = {};
     var wrappers = {
-        'point'    : point2,
+        'point'    : point,
         'polyline' : polyline,
     }
 

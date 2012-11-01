@@ -7,6 +7,9 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
         initialize: function(vertex) {
             vertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
+            if (workplaneModel.lastPosition) {
+                this.workplanePositionChanged(workplaneModel.lastPosition);
+            }
             this.views = this.views.concat([
                 new EditingDOMView({model: this}),
                 new EditingSceneView({model: this}),
@@ -14,33 +17,14 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         workplanePositionChanged: function(position) {
-            if (this.get('stage') === 0) {
-                this.vertex.parameters.coordinate.x = position.x;
-                this.vertex.parameters.coordinate.y = position.y;
-                this.vertex.parameters.coordinate.z = position.z;
-                this.trigger('parametersChanged');
-            }
+            this.vertex.parameters.coordinate.x = position.x;
+            this.vertex.parameters.coordinate.y = position.y;
+            this.vertex.parameters.coordinate.z = position.z;
+            this.trigger('parametersChanged');
         },
 
         workplaneClick: function() {
-            this.set('stage', undefined);
-        },
-
-        keydown: function(event) {
-            if ((event.keyCode === 13)  && this.canComplete()) {
-                // Return when not in initial vertex placement
-                this.ok();
-                if (event.shiftKey && this.vertex.addAnotherFn) {
-                    geometryGraph[this.vertex.addAnotherFn]();
-                }
-            } else if (event.keyCode === 27) {
-                // Esc
-                this.cancel();
-            }
-        },
-
-        canComplete: function() {
-            return this.get('stage') === undefined;
+            this.ok();
         },
 
     });
@@ -52,10 +36,6 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 '<td>' +
                 '<div class="title"><img src="/ui/images/icons/point32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
-                '<span class="okcancel">' + 
-                '<span class="ok button disabled"><img src="/ui/images/icons/ok24x24.png"/></span>' +
-                '<span class="cancel button"><img src="/ui/images/icons/cancel24x24.png"/></span>' +
-                '</span>' + 
                 '</div>' + 
                 '<div class="coordinate">' +
                 '<span class="x">{{x}}</span><span class="y">{{y}}</span><span class="z">{{z}}</span>' +
@@ -64,10 +44,11 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             var view = {
                 id: this.model.vertex.id,
                 name: this.model.vertex.name,
-                x: this.model.vertex.parameters.coordinate.x,
-                y: this.model.vertex.parameters.coordinate.y,
-                z: this.model.vertex.parameters.coordinate.z,
-            }
+            };
+            var that = this;
+            ['x', 'y', 'z'].forEach(function(key) {
+                view[key] = that.model.vertex.parameters.coordinate[key];
+            });
             this.$el.html($.mustache(template, view));
             return this;
         },
@@ -109,13 +90,14 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             this.sceneObject.add(point);
         },
 
+        // This view is not draggable, but the display scene view can transfer 
+        // the dragging to this view (e.g. when a point is dragged)
         isDraggable: function() {
-            return this.model.get('stage') === undefined;
+            return false;
         },
 
         drag: function(event) {
             this.dragging = true;
-            this.model.set('stage', 0);
             var positionOnWorkplane = calc.positionOnWorkplane(
                 event, workplaneModel.node, sceneModel.view.camera);
             this.point.parameters.coordinate = {
@@ -128,13 +110,12 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
         dragEnded: function() {
             if (this.dragging) {
-                this.model.set('stage', undefined);
+                this.model.ok();
                 this.dragging = false;
             }
         },
 
     });
-
 
     // ---------- Display ----------
 
@@ -154,65 +135,39 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
         initialize: function(vertex) {
             vertexWrapper.DisplaySceneView.prototype.initialize.call(this, vertex);
+            this.on('dragStarted', this.dragStarted, this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);
         },
 
         remove: function() {
             vertexWrapper.DisplaySceneView.prototype.remove.call(this);
+            this.off('dragStarted', this.dragStarted, this);
             this.off('drag', this.drag, this);
             this.off('dragEnded', this.dragEnded, this);
         },
 
         render: function() {
             vertexWrapper.EditingSceneView.prototype.render.call(this);
-            if (!this.model.editingVertex) {
-                var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
-                var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
-                var point = THREE.SceneUtils.createMultiMaterialObject(
-                    new THREE.SphereGeometry(0.5, 10, 10), 
-                    [
-                        new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}),
-                        new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
-                    ]);
-                point.position = calc.objToVector(this.model.vertex.parameters.coordinate);
-                this.sceneObject.add(point);
-            } else {
-                var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
-                var color = this.highlightColor || this.selectedColor || 0x94dcfc;
-                var point = THREE.SceneUtils.createMultiMaterialObject(
-                    new THREE.CubeGeometry(1, 1, 1, 1, 1, 1), 
-                    [
-                        new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
-                        new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
-                    ]);
-                point.position = calc.objToVector(this.model.editingVertex.parameters.coordinate);
-                this.sceneObject.add(point);
-            }
+            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
+            var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
+            var point = THREE.SceneUtils.createMultiMaterialObject(
+                new THREE.SphereGeometry(0.5, 10, 10), 
+                [
+                    new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}),
+                    new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
+                ]);
+            point.position = calc.objToVector(this.model.vertex.parameters.coordinate);
+            this.sceneObject.add(point);
         },
 
         isDraggable: function() {
             return !geometryGraph.isEditing();
         },
 
-        drag: function(event) {
+        dragStarted: function(event) {
             this.dragging = true;
-            this.model.editingVertex = this.model.vertex.cloneEditing();
-            var positionOnWorkplane = calc.positionOnWorkplane(
-                event, workplaneModel.node, sceneModel.view.camera);
-            this.model.editingVertex.parameters.coordinate = {
-                x: positionOnWorkplane.x,
-                y: positionOnWorkplane.y,
-                z: positionOnWorkplane.z,
-            }
-            this.render();
-        },
-
-        dragEnded: function(event) {
-            var replacement = this.model.editingVertex.cloneNonEditing();
             geometryGraph.edit(this.model.vertex);
-            geometryGraph.commit(replacement);
-            this.model.editingVertex = undefined;
         },
 
     });
@@ -223,16 +178,22 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             var view = {
                 name: this.model.vertex.name,
             }
-            var template = '<td class="vertex {{name}} display"><img src="/ui/images/icons/point32x32.png"/></td>';
+            var template = 
+                '<td class="vertex {{name}} display">' + 
+                '<img src="/ui/images/icons/point32x32.png"/>' + 
+                '<div class="name">{{name}}</div>' + 
+                '</td>';
             this.$el.html($.mustache(template, view));
             return this;
         },
 
     })
 
+
     return {
         DisplayModel: DisplayModel,
         EditingModel: EditingModel,
     }
+
 
 });
