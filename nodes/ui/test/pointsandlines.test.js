@@ -56,31 +56,6 @@ describe('Modelling User Interface', function() {
 
     });
 
-    it('can create a point with the mouse', function(done) {
-        this.timeout(20000);
-        client.waitFor('.toolbar', 2000, function() {
-            client
-                .click('.toolbar .point')
-                .getText('.vertex.editing .title .name', function(result) {
-                    var name = result.value;
-                    client.clickOnWorld(20,10,0, function() {
-                        client
-                            .assertTextEqual('.vertex.editing .coordinate .x', '20')
-                            .assertTextEqual('.vertex.editing .coordinate .y', '10')
-                            .assertTextEqual('.vertex.editing .coordinate .z', '0')
-                            .click('.okcancel .ok', function(result) {
-                                client
-                                    .pause(1000)
-                                    .isVisible('.vertex.display.'+name, function(result) {
-                                        assert.isTrue(result);
-                                        done();
-                                    });
-                            });
-                    });
-                });
-        });
-    }); 
-
     it('can create a polyline with the mouse', function(done) {
         this.timeout(20000);
         client.waitFor('.toolbar', 2000, function() {

@@ -12,7 +12,6 @@ describe('Points', function() {
     });
 
     beforeEach(function(done) {
-        this.timeout(5000);
         client
             .url('http://localhost.shapesmith.net:8000/local/testdesign/modeller')
             .execute('SS.dontDampTrackball(); SS.zoomIn(); ', function() {
@@ -50,7 +49,20 @@ describe('Points', function() {
 
                     });
             });
+    });
 
+    it('can be edited with dragging', function(done) {
+        this.timeout(10000);
+        client
+            .click('.toolbar .point')
+            .clickOnWorld(5,5,0)
+            .click('.toolbar .select')
+            .moveToWorld(5,5,0)
+            .buttonDown()
+            .moveToWorld(15,15,0)
+            .moveToWorld(15,15,0)
+            .assertCoordinateEqual('.vertex.editing .coordinate', 15, 15, 0)
+            .buttonUp(done);
     });
 
 
