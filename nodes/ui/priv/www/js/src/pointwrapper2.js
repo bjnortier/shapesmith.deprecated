@@ -203,7 +203,11 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             var view = {
                 name: this.model.vertex.name,
             }
-            var template = '<td class="vertex {{name}} display"><img src="/ui/images/icons/point32x32.png"/></td>';
+            var template = 
+                '<td class="vertex {{name}} display">' + 
+                '<img src="/ui/images/icons/point32x32.png"/>' + 
+                '<div class="name">{{name}}</div>' + 
+                '</td>';
             this.$el.html($.mustache(template, view));
             return this;
         },

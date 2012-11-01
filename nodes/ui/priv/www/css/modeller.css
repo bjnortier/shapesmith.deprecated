@@ -106,8 +106,11 @@ img#logo {
     color: #ff706b;
 }
 
-.vertex.editing {
+.vertex {
     color: #fff;
+}
+
+.vertex.editing {
     width: 200px; 
 }
 
@@ -116,6 +119,7 @@ img#logo {
     display: inline-block;
     vertical-align: middle;
     margin-top: -5px;
+    padding-right: 10px;
 }
 
 .vertex .okcancel {
