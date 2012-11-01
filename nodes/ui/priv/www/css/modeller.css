@@ -115,10 +115,9 @@ img#logo {
 }
 
 .vertex .name {
-    height: 32px;
     display: inline-block;
     vertical-align: middle;
-    margin-top: -5px;
+    margin-top: -26px;
     padding-right: 10px;
 }
 

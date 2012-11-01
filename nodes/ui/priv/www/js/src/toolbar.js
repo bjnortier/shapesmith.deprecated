@@ -63,8 +63,6 @@ define(['src/interactioncoordinator', 'src/geometrygraphsingleton'],
             this.view = new View({model: this});
             this.items = [];
             $('body').append(this.view.$el);
-            geometryGraph.on('vertexAdded', this.vertexAdded, this);
-            geometryGraph.on('vertexRemoved', this.vertexRemoved, this);
         },
 
         addItem: function(itemModel) {

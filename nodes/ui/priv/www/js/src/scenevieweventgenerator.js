@@ -14,6 +14,22 @@ define(['src/scene'], function(sceneModel) {
                 throw Error('Scene view already in event generator');
             }
             sceneViews.push(sceneView);
+
+            // If a new scene view replaces an existing view 
+            // for the save vertex (and the mouse is over the replacement),
+            // replace it in the draggable mouse views. This is used e.g. when
+            // dragging a point and the display scene view "becomes" an editing scene
+            // view
+            if ((mouseDownOnDraggableViews[0])
+                &&
+                (mouseDownOnDraggableViews[0].model.vertex)
+                && 
+                sceneView.model.vertex
+                && 
+                sceneView.model.vertex.id === mouseDownOnDraggableViews[0].model.vertex.id) {
+
+                mouseDownOnDraggableViews[0] = sceneView;
+            }
         }
 
         this.deregister= function(sceneView) {
@@ -64,8 +80,12 @@ define(['src/scene'], function(sceneModel) {
 
         this.drag = function(event) {
             if (mouseDownOnDraggableViews.length > 0) {
-                mouseDownOnDraggableViews[0].trigger('drag', event);
-                dragging = true;
+                if (!dragging) {
+                    mouseDownOnDraggableViews[0].trigger('dragStarted', event);
+                    dragging = true;
+                } else {
+                    mouseDownOnDraggableViews[0].trigger('drag', event);
+                }
                 return true;
             } else {
                 return false;

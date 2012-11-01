@@ -9,8 +9,7 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
         this.commit = function(vertex) {
             var nonEditingReplacement = vertex.cloneNonEditing();
             graph.replaceVertex(vertex, nonEditingReplacement);
-            this.trigger('vertexRemoved', vertex);
-            this.trigger('vertexAdded', nonEditingReplacement);
+            this.trigger('vertexReplaced', vertex, nonEditingReplacement);
             this.trigger('committed');
         }
 
@@ -22,8 +21,7 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
             var editingReplacement = vertex.cloneEditing();
             graph.replaceVertex(vertex, editingReplacement);
             originals[vertex.id] = vertex;
-            this.trigger('vertexRemoved', vertex);
-            this.trigger('vertexAdded', editingReplacement);
+            this.trigger('vertexReplaced', vertex, editingReplacement);
         }
 
         this.cancel = function(vertex) {
@@ -41,8 +39,7 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
                     throw Error('No original vertex found');
                 }
                 graph.replaceVertex(vertex, originals[vertex.id]);
-                this.trigger('vertexRemoved', vertex);
-                this.trigger('vertexAdded', originals[vertex.id]);
+                this.trigger('vertexReplaced', vertex, originals[vertex.id]);
 
                 delete originals[vertex.id];
             }
