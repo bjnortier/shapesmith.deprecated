@@ -71,7 +71,6 @@ define([
             Model.prototype.initialize.call(this, vertex);
             this.set('stage', vertex.proto ? 0 : undefined);
             workplane.on('positionChanged', this.workplanePositionChanged, this);
-            coordinator.on('keydown', this.keydown, this);
             workplane.on('click', this.workplaneClick, this);
             sceneViewEventGenerator.on('sceneViewClick', this.sceneViewClick, this);
             this.views = [];
@@ -80,7 +79,6 @@ define([
         destroy: function() {
             Model.prototype.destroy.call(this);
             workplane.off('positionChanged', this.workplanePositionChanged, this);
-            coordinator.off('keydown', this.keydown, this);
             workplane.off('click', this.workplaneClick, this);
             sceneViewEventGenerator.off('sceneViewClick', this.sceneViewClick, this);
         },  
@@ -113,30 +111,30 @@ define([
             this.model.off('parametersChanged', this.updateParams, this);
         },
 
-        events: function() {
-            return {
-                'click .okcancel .ok' : 'ok',
-                'click .okcancel .cancel' : 'cancel',
-            }
-        },
+        // events: function() {
+        //     return {
+        //         'click .okcancel .ok' : 'ok',
+        //         'click .okcancel .cancel' : 'cancel',
+        //     }
+        // },
 
         stageChanged: function(stage) {
-            if (this.model.canComplete()) {
-                this.$el.find('.ok').removeClass('disabled');
-            } else {
-                this.$el.find('.ok').addClass('disabled');
-            }
+            // if (this.model.canComplete()) {
+            //     this.$el.find('.ok').removeClass('disabled');
+            // } else {
+            //     this.$el.find('.ok').addClass('disabled');
+            // }
         },
 
-        ok: function() {
-            if (this.model.canComplete()) {
-                this.model.ok();
-            }
-        },
+        // ok: function() {
+        //     if (this.model.canComplete()) {
+        //         this.model.ok();
+        //     }
+        // },
 
-        cancel: function() {
-            this.model.cancel();
-        },
+        // cancel: function() {
+        //     this.model.cancel();
+        // },
 
     });
 

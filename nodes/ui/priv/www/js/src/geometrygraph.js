@@ -11,6 +11,7 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
             graph.replaceVertex(vertex, nonEditingReplacement);
             this.trigger('vertexRemoved', vertex);
             this.trigger('vertexAdded', nonEditingReplacement);
+            this.trigger('committed');
         }
 
         // When editing, the original vertex is kept 
@@ -44,6 +45,13 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
                 this.trigger('vertexAdded', originals[vertex.id]);
 
                 delete originals[vertex.id];
+            }
+        }
+
+        this.cancelIfEditing = function() {
+            var editingVertex = this.getEditingVertex();
+            if (editingVertex) {
+                this.cancel(editingVertex);
             }
         }
 
@@ -118,7 +126,20 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
         }
 
         this.isEditing = function() {
-            return _.contains(_.pluck(graph.vertices(), 'editing'), true);
+            return this.getEditingVertex() !== undefined;
+        }
+
+        this.getEditingVertex = function() {
+            editingVertices = _.reject(graph.vertices(), function(vertex) { 
+                return !vertex.editing;
+            });
+            if (editingVertices.length === 0) {
+                return undefined;
+            } else if (editingVertices.length > 1) {
+                throw Error('More than one editing vertex in graph');
+            } else {
+                return editingVertices[0];
+            }
         }
     }
 

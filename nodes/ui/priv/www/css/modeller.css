@@ -82,7 +82,7 @@ img#logo {
     cursor: pointer;
 }
 
-.toolbar .item.initiated {
+.toolbar .item.active {
     border-bottom: solid 2px #ff0;
 }
 

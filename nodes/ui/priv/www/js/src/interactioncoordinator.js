@@ -81,17 +81,6 @@
             sceneViewEventGenerator.mousedown(event);
         }
 
-
-        this.initiateTool = function(name) {
-            selection.deselectAll();
-            if (name === 'point') {
-                geometryGraph.createPointPrototype();
-            }
-            if (name === 'polyline') {
-                geometryGraph.createPolylinePrototype();
-            }
-        }
-
         this.overThreshold = function(pos2) {
             if (!this.mouseDownEvent) {
                 return false;

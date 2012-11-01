@@ -5,10 +5,19 @@ define(['src/interactioncoordinator', 'src/geometrygraphsingleton'],
 
         initialize: function(attributes) {
             this.view = new ItemView({model: this});
+            this.toolbarModel = attributes.toolbarModel;
         },
 
         click: function() {
-            coordinator.initiateTool(this.name);
+            this.toolbarModel.itemClicked(this);
+        },
+
+        activate: function() {
+            this.set('active', true);
+        },
+
+        deactivate: function() {
+            this.set('active', false);
         },
 
     });
@@ -21,6 +30,7 @@ define(['src/interactioncoordinator', 'src/geometrygraphsingleton'],
         initialize: function() {
             this.render();
             this.$el.addClass(this.model.name);
+            this.model.on('change:active', this.updateActive, this);
         },
 
         render: function() {
@@ -36,6 +46,14 @@ define(['src/interactioncoordinator', 'src/geometrygraphsingleton'],
             this.model.click();
         },
 
+        updateActive: function() {
+            if (this.model.get('active')) {
+                this.$el.addClass('active');
+            } else {
+                this.$el.removeClass('active');
+                }
+        },
+
     });
 
     var Model = Backbone.Model.extend({
@@ -43,25 +61,15 @@ define(['src/interactioncoordinator', 'src/geometrygraphsingleton'],
         initialize: function(attributes) {
             this.name = attributes.name;
             this.view = new View({model: this});
+            this.items = [];
             $('body').append(this.view.$el);
             geometryGraph.on('vertexAdded', this.vertexAdded, this);
             geometryGraph.on('vertexRemoved', this.vertexRemoved, this);
         },
 
         addItem: function(itemModel) {
+            this.items.push(itemModel);
             this.view.$el.append(itemModel.view.$el);
-        },
-
-        vertexAdded: function(vertex) {
-            if (geometryGraph.isEditing()) {
-                this.view.$el.slideUp(100);
-            }
-        },
-
-        vertexRemoved: function(vertex) {
-            if (!geometryGraph.isEditing()) {
-                this.view.$el.slideDown(100);
-            }
         },
 
     });
