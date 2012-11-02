@@ -43,10 +43,16 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
 
                 // Remove implicit children that are not editing
                 // for prototype objects, but only remove them once
+                // and only if they are not shared with other parents
                 var that = this;
                 var removed = [];
-                this.childrenOf(vertex).map(function(child) {
-                    if (child.implicit && !child.editing) {
+                var children = this.childrenOf(vertex);
+                children.map(function(child) {
+                    var parents = that.parentsOf(child);
+                    var hasOtherParent = _.any(parents, function(parent) {
+                        parent.id !== vertex.id;
+                    });
+                    if (child.implicit && !child.editing && !hasOtherParent) {
                         if(removed.indexOf(child) === -1) {
                             that.remove(child);
                             removed.push(child);
@@ -155,13 +161,13 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
         }
 
         this.childrenOf = function(vertex) {
-            return graph.outgoingEdgesOf(vertex).map(function(id) {
+            return graph.outgoingVerticesOf(vertex).map(function(id) {
                 return graph.vertexById(id);
             });
         }
 
         this.parentsOf = function(vertex) {
-            return graph.incomingEdgesOf(vertex).map(function(id) {
+            return graph.incomingVerticesOf(vertex).map(function(id) {
                 return graph.vertexById(id);
             });
         }

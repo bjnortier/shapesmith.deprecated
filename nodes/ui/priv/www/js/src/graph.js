@@ -2,15 +2,15 @@ define(['lib/underscore-require'], function(_) {
     
     var Graph = function() {
         
-        var vertices = {}, outgoingEdges = {}, incomingEdges = {}, size = 0;
+        var vertices = {}, outgoingVertices = {}, incomingVertices = {}, size = 0;
 
         this.addVertex = function(vertex) {
             if (vertices[vertex.id]) {
                 throw Error('Vertex ' + vertex.id + ' already in graph');
             }
             vertices[vertex.id] = vertex;
-            outgoingEdges[vertex.id] = [];
-            incomingEdges[vertex.id] = [];
+            outgoingVertices[vertex.id] = [];
+            incomingVertices[vertex.id] = [];
             ++size;
         }
 
@@ -20,17 +20,17 @@ define(['lib/underscore-require'], function(_) {
             }
             delete vertices[vertex.id];
 
-            outgoingEdges[vertex.id].forEach(function(toId) {
-                var index = incomingEdges[toId].indexOf(vertex.id);
-                incomingEdges[toId].splice(index, 1);
+            outgoingVertices[vertex.id].forEach(function(toId) {
+                var index = incomingVertices[toId].indexOf(vertex.id);
+                incomingVertices[toId].splice(index, 1);
             });
-            outgoingEdges[vertex.id] = [];
+            outgoingVertices[vertex.id] = [];
 
-            incomingEdges[vertex.id].forEach(function(fromId) {
-                var index = outgoingEdges[fromId].indexOf(vertex.id);
-                outgoingEdges[fromId].splice(index, 1);
+            incomingVertices[vertex.id].forEach(function(fromId) {
+                var index = outgoingVertices[fromId].indexOf(vertex.id);
+                outgoingVertices[fromId].splice(index, 1);
             });
-            incomingEdges[vertex.id] = [];
+            incomingVertices[vertex.id] = [];
             --size;
         }
 
@@ -47,21 +47,21 @@ define(['lib/underscore-require'], function(_) {
             --size;
             this.addVertex(newVertex);
 
-            var outgoingEdgesCopy = outgoingEdges[oldVertex.id].slice(0);
-            var incomingEdgesCopy = incomingEdges[oldVertex.id].slice(0);
+            var outgoingVerticesCopy = outgoingVertices[oldVertex.id].slice(0);
+            var incomingVerticesCopy = incomingVertices[oldVertex.id].slice(0);
 
-            outgoingEdgesCopy.forEach(function(toId) {
-                var index = incomingEdges[toId].indexOf(oldVertex.id);
-                incomingEdges[toId].splice(index, 1, newVertex.id);
+            outgoingVerticesCopy.forEach(function(toId) {
+                var index = incomingVertices[toId].indexOf(oldVertex.id);
+                incomingVertices[toId].splice(index, 1, newVertex.id);
             });
 
-            incomingEdgesCopy.forEach(function(fromId) {
-                var index = outgoingEdges[fromId].indexOf(oldVertex.id);
-                outgoingEdges[fromId].splice(index, 1, newVertex.id);
+            incomingVerticesCopy.forEach(function(fromId) {
+                var index = outgoingVertices[fromId].indexOf(oldVertex.id);
+                outgoingVertices[fromId].splice(index, 1, newVertex.id);
             });
 
-            outgoingEdges[newVertex.id] = outgoingEdgesCopy;
-            incomingEdges[newVertex.id] = incomingEdgesCopy;
+            outgoingVertices[newVertex.id] = outgoingVerticesCopy;
+            incomingVertices[newVertex.id] = incomingVerticesCopy;
 
 
         }
@@ -79,20 +79,20 @@ define(['lib/underscore-require'], function(_) {
         }
 
         this.addEdge = function(from, to) {
-            outgoingEdges[from.id].push(to.id);
-            incomingEdges[to.id].push(from.id);
+            outgoingVertices[from.id].push(to.id);
+            incomingVertices[to.id].push(from.id);
         }
 
         this.vertexCount = function() {
             return vertices.length;
         }
 
-        this.outgoingEdgesOf = function(from) {
-            return outgoingEdges[from.id] ? outgoingEdges[from.id] : [];
+        this.outgoingVerticesOf = function(from) {
+            return outgoingVertices[from.id] ? outgoingVertices[from.id] : [];
         }
 
-        this.incomingEdgesOf = function(to) {
-            return incomingEdges[to.id] ? incomingEdges[to.id] : [];
+        this.incomingVerticesOf = function(to) {
+            return incomingVertices[to.id] ? incomingVertices[to.id] : [];
         }
 
         this.stringify = function() {
@@ -108,11 +108,11 @@ define(['lib/underscore-require'], function(_) {
             for (var key in vertices) {
                 str += key + ':' + vertices[key] + '\n'; 
             }
-            for (var key in outgoingEdges) {
-                str += key + ' → ' + toString(outgoingEdges[key]) + '\n';
+            for (var key in outgoingVertices) {
+                str += key + ' → ' + toString(outgoingVertices[key]) + '\n';
             }
-            for (var key in incomingEdges) {
-                str += key + ' ← ' + toString(incomingEdges[key]) + '\n';
+            for (var key in incomingVertices) {
+                str += key + ' ← ' + toString(incomingVertices[key]) + '\n';
             }
             return str;
         }

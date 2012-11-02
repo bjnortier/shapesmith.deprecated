@@ -100,7 +100,7 @@ describe('Graph', function() {
 
     });
 
-    it('manages incoming and outoing vertices', function() {
+    it('manages incoming and outgoing vertices', function() {
 
         var a = {id:'a'}, b = {id:'b'}, c = {id:'c'};
         var graph = new graphLib.Graph();
@@ -114,32 +114,32 @@ describe('Graph', function() {
         graph.addEdge(b,c);
 
         assert.equal(graph.size(), 3);
-        assert.deepEqual(graph.outgoingEdgesOf(a), ['b', 'c']);
-        assert.deepEqual(graph.outgoingEdgesOf(b), ['c']);
-        assert.deepEqual(graph.outgoingEdgesOf(c), []);
-        assert.deepEqual(graph.incomingEdgesOf(a), []);
-        assert.deepEqual(graph.incomingEdgesOf(b), ['a']);
-        assert.deepEqual(graph.incomingEdgesOf(c), ['a', 'b']);
+        assert.deepEqual(graph.outgoingVerticesOf(a), ['b', 'c']);
+        assert.deepEqual(graph.outgoingVerticesOf(b), ['c']);
+        assert.deepEqual(graph.outgoingVerticesOf(c), []);
+        assert.deepEqual(graph.incomingVerticesOf(a), []);
+        assert.deepEqual(graph.incomingVerticesOf(b), ['a']);
+        assert.deepEqual(graph.incomingVerticesOf(c), ['a', 'b']);
 
         graph.removeVertex(b);
 
         assert.equal(graph.size(), 2);
-        assert.deepEqual(graph.outgoingEdgesOf(a), ['c']);
-        assert.deepEqual(graph.outgoingEdgesOf(b), []);
-        assert.deepEqual(graph.outgoingEdgesOf(c), []);
-        assert.deepEqual(graph.incomingEdgesOf(a), []);
-        assert.deepEqual(graph.incomingEdgesOf(b), []);
-        assert.deepEqual(graph.incomingEdgesOf(c), ['a']);
+        assert.deepEqual(graph.outgoingVerticesOf(a), ['c']);
+        assert.deepEqual(graph.outgoingVerticesOf(b), []);
+        assert.deepEqual(graph.outgoingVerticesOf(c), []);  
+        assert.deepEqual(graph.incomingVerticesOf(a), []);
+        assert.deepEqual(graph.incomingVerticesOf(b), []);
+        assert.deepEqual(graph.incomingVerticesOf(c), ['a']);
 
         graph.removeVertex(a);
 
         assert.equal(graph.size(), 1);
-        assert.deepEqual(graph.outgoingEdgesOf(a), []);
-        assert.deepEqual(graph.outgoingEdgesOf(b), []);
-        assert.deepEqual(graph.outgoingEdgesOf(c), []);
-        assert.deepEqual(graph.incomingEdgesOf(a), []);
-        assert.deepEqual(graph.incomingEdgesOf(b), []);
-        assert.deepEqual(graph.incomingEdgesOf(c), []);
+        assert.deepEqual(graph.outgoingVerticesOf(a), []);
+        assert.deepEqual(graph.outgoingVerticesOf(b), []);
+        assert.deepEqual(graph.outgoingVerticesOf(c), []);
+        assert.deepEqual(graph.incomingVerticesOf(a), []);
+        assert.deepEqual(graph.incomingVerticesOf(b), []);
+        assert.deepEqual(graph.incomingVerticesOf(c), []);
 
     });
 
@@ -155,22 +155,22 @@ describe('Graph', function() {
         graph.addEdge(a,c);
         graph.addEdge(b,c);
 
-        assert.deepEqual(graph.outgoingEdgesOf(a), ['b', 'c']);
-        assert.deepEqual(graph.outgoingEdgesOf(b), ['c']);
-        assert.deepEqual(graph.outgoingEdgesOf(c), []);
-        assert.deepEqual(graph.incomingEdgesOf(a), []);
-        assert.deepEqual(graph.incomingEdgesOf(b), ['a']);
-        assert.deepEqual(graph.incomingEdgesOf(c), ['a', 'b']);
+        assert.deepEqual(graph.outgoingVerticesOf(a), ['b', 'c']);
+        assert.deepEqual(graph.outgoingVerticesOf(b), ['c']);
+        assert.deepEqual(graph.outgoingVerticesOf(c), []);
+        assert.deepEqual(graph.incomingVerticesOf(a), []);
+        assert.deepEqual(graph.incomingVerticesOf(b), ['a']);
+        assert.deepEqual(graph.incomingVerticesOf(c), ['a', 'b']);
 
         var d = {id:'d'};
         graph.replaceVertex(b, d);
 
-        assert.deepEqual(graph.outgoingEdgesOf(a), ['d', 'c']);
-        assert.deepEqual(graph.outgoingEdgesOf(d), ['c']);
-        assert.deepEqual(graph.outgoingEdgesOf(c), []);
-        assert.deepEqual(graph.incomingEdgesOf(a), []);
-        assert.deepEqual(graph.incomingEdgesOf(d), ['a']);
-        assert.deepEqual(graph.incomingEdgesOf(c), ['a', 'd']);
+        assert.deepEqual(graph.outgoingVerticesOf(a), ['d', 'c']);
+        assert.deepEqual(graph.outgoingVerticesOf(d), ['c']);
+        assert.deepEqual(graph.outgoingVerticesOf(c), []);
+        assert.deepEqual(graph.incomingVerticesOf(a), []);
+        assert.deepEqual(graph.incomingVerticesOf(d), ['a']);
+        assert.deepEqual(graph.incomingVerticesOf(c), ['a', 'd']);
 
     });
 
@@ -186,21 +186,21 @@ describe('Graph', function() {
         graph.addEdge(a,c);
         graph.addEdge(b1,c);
 
-        assert.deepEqual(graph.outgoingEdgesOf(a), ['b', 'c']);
-        assert.deepEqual(graph.outgoingEdgesOf(b1), ['c']);
-        assert.deepEqual(graph.outgoingEdgesOf(c), []);
-        assert.deepEqual(graph.incomingEdgesOf(a), []);
-        assert.deepEqual(graph.incomingEdgesOf(b1), ['a']);
-        assert.deepEqual(graph.incomingEdgesOf(c), ['a', 'b']);
+        assert.deepEqual(graph.outgoingVerticesOf(a), ['b', 'c']);
+        assert.deepEqual(graph.outgoingVerticesOf(b1), ['c']);
+        assert.deepEqual(graph.outgoingVerticesOf(c), []);
+        assert.deepEqual(graph.incomingVerticesOf(a), []);
+        assert.deepEqual(graph.incomingVerticesOf(b1), ['a']);
+        assert.deepEqual(graph.incomingVerticesOf(c), ['a', 'b']);
 
         graph.replaceVertex(b1, b2);
 
-        assert.deepEqual(graph.outgoingEdgesOf(a), ['b', 'c']);
-        assert.deepEqual(graph.outgoingEdgesOf(b2), ['c']);
-        assert.deepEqual(graph.outgoingEdgesOf(c), []);
-        assert.deepEqual(graph.incomingEdgesOf(a), []);
-        assert.deepEqual(graph.incomingEdgesOf(b2), ['a']);
-        assert.deepEqual(graph.incomingEdgesOf(c), ['a', 'b']);
+        assert.deepEqual(graph.outgoingVerticesOf(a), ['b', 'c']);
+        assert.deepEqual(graph.outgoingVerticesOf(b2), ['c']);
+        assert.deepEqual(graph.outgoingVerticesOf(c), []);
+        assert.deepEqual(graph.incomingVerticesOf(a), []);
+        assert.deepEqual(graph.incomingVerticesOf(b2), ['a']);
+        assert.deepEqual(graph.incomingVerticesOf(c), ['a', 'b']);
 
     });
 
@@ -223,6 +223,11 @@ describe('GeometryGraph', function() {
         graph.addPointToPolyline(polyline);
         assert.equal(graph.childrenOf(polyline).length, 2); 
 
+    });
+
+    it('can tell you the parents and children of a vertex', function() {
+
+        var graph = new geometryGraph.Graph();
     });
 })
 
