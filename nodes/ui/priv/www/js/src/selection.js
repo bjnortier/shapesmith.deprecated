@@ -1,13 +1,23 @@
-define(['lib/underscore-require', 'lib/backbone-require', 'src/geometrygraphsingleton'], 
-    function(_, Backbone, geometryGraph) {
+define([
+    'lib/underscore-require', 
+    'lib/backbone-require', 
+    'src/geometrygraphsingleton', 
+    'src/interactioncoordinator',
+    'src/geomtoolbar'], 
+    function(_, Backbone, geometryGraph, coordinator, geomToolbarModel) {
     
     var Manager = function() {
 
         _.extend(this, Backbone.Events);
         this.selected = [];
 
+        var that = this;
+        coordinator.on('sceneClick', function() {
+            that.deselectAll();
+        });
+
         this.selectOnly = function(id) {
-            if (geometryGraph.isEditing()) {
+            if (!geomToolbarModel.isSelectActive()) {
                 return
             }
 
@@ -23,14 +33,14 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/geometrygraphsing
             this.selected = [id];
             
             if (deselected.length > 0) {
-                this.trigger('deselected', deselected, this.selected);
+                this.trigger('deselected', deselected, []);
             }
             this.trigger('selected', [id], this.selected);
 
         }
 
         this.addToSelection = function(id) {
-            if (geometryGraph.isEditing()) {
+            if (!geomToolbarModel.isSelectActive()) {
                 return
             }
             

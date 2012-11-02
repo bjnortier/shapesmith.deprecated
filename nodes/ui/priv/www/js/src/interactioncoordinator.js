@@ -1,5 +1,5 @@
- define(['src/geometrygraphsingleton', 'src/selection', 'src/scenevieweventgenerator'], 
-    function(geometryGraph, selection, sceneViewEventGenerator) {
+ define(['src/geometrygraphsingleton', 'src/scenevieweventgenerator'], 
+    function(geometryGraph, sceneViewEventGenerator) {
 
     var Coordinator = function() {
         _.extend(this, Backbone.Events);
@@ -57,7 +57,6 @@
                     sceneViewEventGenerator.click(event);
                 } else {
                     this.trigger('sceneClick', event);
-                    selection.deselectAll();
                 }
             }
             sceneViewEventGenerator.mouseup(event);

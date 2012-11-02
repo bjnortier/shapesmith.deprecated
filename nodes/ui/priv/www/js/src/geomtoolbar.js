@@ -77,13 +77,21 @@ define(['src/toolbar', 'src/geometrygraphsingleton', 'src/interactioncoordinator
             }
         },
 
+        setToSelect: function() {
+            this.activate(this.items[0]);
+        },
+
+        isSelectActive: function() {
+            return this.activeItem === this.items[0];
+        },
+
     });
 
     var toolbarModel = new GeomToolbarModel({name: 'geometry'});
     toolbarModel.addItem(new SelectItemModel({toolbarModel: toolbarModel}));
     toolbarModel.addItem(new PointItemModel({toolbarModel: toolbarModel}));
     toolbarModel.addItem(new LineItemModel({toolbarModel: toolbarModel}));
-    toolbarModel.activate(toolbarModel.items[0]);
+    toolbarModel.setToSelect();
     return toolbarModel;
 
 });

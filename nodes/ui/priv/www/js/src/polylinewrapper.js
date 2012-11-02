@@ -31,7 +31,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             }
 
             var pipe = new THREE.Mesh(
-                new THREE.PipeGeometry(0.25, positions),
+                new THREE.PipeGeometry(0.4, positions),
                 new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide }));
             this.hiddenSelectionObject.add(pipe);
         },
