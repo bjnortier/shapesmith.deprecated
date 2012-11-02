@@ -139,6 +139,44 @@ describe('Polylines', function() {
             .assertNumberOfDisplayNodes(1, done)
     });
 
+    it('can be edited by selected another one', function(done) {
+    this.timeout(5000);
+        client
+            .click('.toolbar .polyline')
+            .clickOnWorld(0,0,0)
+            .clickOnWorld(10,10,0)
+            .clickOnWorld(0,10,0)
+            .dblClickOnWorld(0,0,0)
+            .clickOnWorld(50,0,0)
+            .clickOnWorld(50,50,0)
+            .clickOnWorld(0,50,0)
+            .dblClickOnWorld(50,0,0)
+            .click('.toolbar .select')
+            .clickOnWorld(10,10,0)
+            .assertNumberOfEditingNodes(4)
+            .assertNumberOfDisplayNodes(1)
+            .assertTextEqual('.vertex.editing.polyline0 .point._0', 'point0')
+            .assertTextEqual('.vertex.editing.polyline0 .point._1', 'point1')
+            .assertTextEqual('.vertex.editing.polyline0 .point._2', 'point2')
+            .assertTextEqual('.vertex.editing.polyline0 .point._0', 'point0')
+            .assertTextEqual('.vertex.editing.point0 .coordinate', '000')
+            .assertTextEqual('.vertex.editing.point1 .coordinate', '10100')
+            .assertTextEqual('.vertex.editing.point2 .coordinate', '0100')
+            .clickOnWorld(50,50,0)
+            .assertNumberOfEditingNodes(4)
+            .assertNumberOfDisplayNodes(1)
+            .assertTextEqual('.vertex.editing.polyline1 .point._0', 'point5')
+            .assertTextEqual('.vertex.editing.polyline1 .point._1', 'point6')
+            .assertTextEqual('.vertex.editing.polyline1 .point._2', 'point7')
+            .assertTextEqual('.vertex.editing.polyline1 .point._0', 'point5')
+            .assertTextEqual('.vertex.editing.point5 .coordinate', '5000')
+            .assertTextEqual('.vertex.editing.point6 .coordinate', '50500')
+            .assertTextEqual('.vertex.editing.point7 .coordinate', '0500')
+            .clickOnWorld(30,30,0)
+            .assertNumberOfEditingNodes(0)
+            .assertNumberOfDisplayNodes(2, done)
+    });
+
 
 });
 
