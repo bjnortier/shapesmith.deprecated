@@ -33,7 +33,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
         render: function() {
             var template = 
-                '<td>' +
+                '<td class="vertex {{name}} editing">' + 
                 '<div class="title"><img src="/ui/images/icons/point32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
                 '</div>' + 

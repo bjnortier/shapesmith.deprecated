@@ -73,6 +73,7 @@ define([
             workplane.on('click', this.workplaneClick, this);
             workplane.on('dblclick', this.workplaneDblClick, this);
             sceneViewEventGenerator.on('sceneViewClick', this.sceneViewClick, this);
+            sceneViewEventGenerator.on('sceneViewDblClick', this.sceneViewDblClick, this);
             this.views = [];
         },
 
@@ -82,6 +83,7 @@ define([
             workplane.off('click', this.workplaneClick, this);
             workplane.off('dblclick', this.workplaneDblClick, this);
             sceneViewEventGenerator.off('sceneViewClick', this.sceneViewClick, this);
+            sceneViewEventGenerator.off('sceneViewDblClick', this.sceneViewDblClick, this);
         },  
 
         ok: function() {
@@ -96,7 +98,6 @@ define([
 
     var EditingDOMView = Backbone.View.extend({
 
-        className: 'vertex editing',
         tagName: "tr",
 
         initialize: function() {

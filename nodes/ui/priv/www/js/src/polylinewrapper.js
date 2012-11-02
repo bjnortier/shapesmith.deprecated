@@ -61,8 +61,8 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             this.vertex.off('descendantChanged', this.descendantChanged, this);
         },
 
-        // If the replaced vertex is the last point
-        // in the polyline, add another point
+        // If the replaced vertex is the last point in the polyline,
+        // this means the point has be committed, so add another point
         vertexReplaced: function(original, replacement) {
             if (_.last(geometryGraph.childrenOf(this.vertex)) === replacement) {
                 geometryGraph.addPointToPolyline(this.vertex);
@@ -77,35 +77,32 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         workplaneDblClick: function(event) {
             var children = geometryGraph.childrenOf(this.vertex);
             if (children.length > 3) {
-                geometryGraph.remove(children[children.length-1]);
-                geometryGraph.remove(children[children.length-2]);
+                geometryGraph.removeLastPointFromPolyline(this.vertex);
+                geometryGraph.removeLastPointFromPolyline(this.vertex);
                 this.ok();
             } 
         },
 
         sceneViewClick: function(viewAndEvent) {
-            // if (this.get('stage') !== undefined) {
-            //     if (viewAndEvent.view.model.vertex.type === 'point') {
-            //         // Remove last point and it's anchor view
-            //         geometryGraph.removeLastPointFromPolyline(this.vertex);
-            //         this.views[this.views.length - 1].remove();
-            //         this.views.splice(this.views.length - 1, 1);
+            var timeStamp = new Date().getTime();
+            var isDoubleCLick = this.lastClickTimestamp 
+                                && 
+                                (timeStamp - this.lastClickTimestamp < 500);
 
-            //         // Add the named point and a new anchor view
-            //         geometryGraph.addPointToPolyline(this.vertex, viewAndEvent.view.model.vertex);
-            //         this.views.push(new EditingPointAnchorSceneView({
-            //             model: this, index: this.get('stage')
-            //         }));
-            //     }
-            //     if (this.inClickAddsPointPhase) {
-            //         this.set('stage',  this.get('stage') + 1);
-            //         this.addCoordinate(this.lastPosition);
-            //     } else {
-            //         this.set('stage', undefined);
-            //     }
-            // }
+            if (!isDoubleCLick) {
+                var children = geometryGraph.childrenOf(this.vertex);
+                if (viewAndEvent.view.model.vertex.type === 'point') {
+                    geometryGraph.removeLastPointFromPolyline(this.vertex);
+                    geometryGraph.addPointToPolyline(this.vertex, viewAndEvent.view.model.vertex);
+                    geometryGraph.addPointToPolyline(this.vertex);
+                    this.vertex.trigger('change', this.vertex);
+                }
+            } else {
+                geometryGraph.removeLastPointFromPolyline(this.vertex);
+                this.ok();
+            }
+            this.lastClickTimestamp = timeStamp
         },
-
 
     });
 
@@ -113,7 +110,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
         render: function() {
             var template = 
-                '<td>' +
+                '<td class="vertex {{name}} editing">' + 
                 '<div class="title"><img src="/ui/images/icons/line32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
                 '</div>' + 
@@ -135,10 +132,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             var template = 
                 '{{#points}}' +
                 '<div class="point _{{i}}">' +
-                '{{#name}}<div class="named">{{id}}</div>{{/name}}' + 
-                '{{^name}}<div class="coordinate{{#editing}} editing{{/editing}}">' +
-                '<span class="x">{{x}}</span><span class="y">{{y}}</span><span class="z">{{z}}</span>' +
-                '</div>{{/name}}' +
+                '<div class="named">{{id}}</div>' + 
                 '</div>' +
                 '{{/points}}';
             var that = this;
@@ -149,16 +143,18 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                     editing: that.model.get('stage') === i,
                     id: pointChild.id,
                     name: pointChild.name,
-                    x: pointChild.parameters.coordinate.x, 
-                    y: pointChild.parameters.coordinate.y, 
-                    z: pointChild.parameters.coordinate.z, 
-                    i: i,
+                    i: i
                 }
             });
             var view = {
                 points: points
             }
             return $.mustache(template, view);
+        },
+
+        update: function() {
+            var coordinates = this.renderCoordinates();
+            this.$el.find('.points').html(coordinates);
         },
 
     }); 

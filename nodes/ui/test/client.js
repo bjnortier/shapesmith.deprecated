@@ -11,7 +11,7 @@ var client = remote({
 
 client.addCommand('assertTextEqual', function(selector, text, callback) {
     this.getText(selector, function(result) {
-        assert.equal(text, result.value, selector);
+        assert.equal(result.value, text, selector);
         callback();
     });
 });
@@ -47,6 +47,12 @@ client.addCommand('clickOnWorld', function(x,y,z, callback) {
         .moveToWorld(x,y,z)
         .buttonDown()
         .buttonUp(callback);
+});
+
+client.addCommand('dblClickOnWorld', function(x,y,z, callback) {
+    this
+        .moveToWorld(x,y,z)
+        .doDoubleClick(callback)
 });
 
 client.addCommand('assertCoordinateEqual', function(selector, x, y, z, callback) {

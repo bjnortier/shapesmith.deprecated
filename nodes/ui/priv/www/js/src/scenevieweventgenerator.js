@@ -127,6 +127,7 @@ define(['src/scene'], function(sceneModel) {
             });
             if (clickableViews.length > 0) {
                 clickableViews[0].trigger('dblclick', event);
+                this.trigger('sceneViewDblClick', {event: event, view: clickableViews[0]});
             }
         }
 

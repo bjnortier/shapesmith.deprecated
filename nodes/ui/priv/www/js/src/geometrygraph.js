@@ -92,9 +92,7 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
             if (children.length === 0) {
                 throw Error('Cannot remove last point from empty polyline');
             }
-            var vertex = children[children.length - 1];
-            graph.removeVertex(vertex);
-            this.trigger('vertexRemoved', vertex);
+            this.remove(children[children.length - 1]);
         }
 
         // ---------- Graph functions ----------

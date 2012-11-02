@@ -66,7 +66,11 @@
         }
 
         this.dblclick = function(event) {
-            this.trigger('sceneDblClick', event);
+            if (sceneViewEventGenerator.overClickable()) {
+                sceneViewEventGenerator.dblclick(event);
+            } else {
+                this.trigger('sceneDblClick', event);
+            }
         }
 
         this.mouseleave = function(event) {
