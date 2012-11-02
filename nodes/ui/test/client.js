@@ -42,6 +42,15 @@ client.addCommand('moveToWorld', function(x,y,z, callback) {
     });
 });
 
+// Double the moveTo since our drag requires two moves to initiate
+client.addCommand('dragToWorld', function(x,y,z, callback) {
+    this
+        .buttonDown()
+        .moveToWorld(x,y,z)
+        .moveToWorld(x,y,z)
+        .buttonUp(callback)
+});
+
 client.addCommand('clickOnWorld', function(x,y,z, callback) {
     this
         .moveToWorld(x,y,z)
@@ -56,15 +65,29 @@ client.addCommand('dblClickOnWorld', function(x,y,z, callback) {
 });
 
 client.addCommand('assertCoordinateEqual', function(selector, x, y, z, callback) {
-    this.assertTextEqual(selector + ' .x', x);
-    this.assertTextEqual(selector + ' .y', y);
-    this.assertTextEqual(selector + ' .z', z);
-    client.pause(0, callback);
+    this
+        .assertTextEqual(selector + ' .x', x)
+        .assertTextEqual(selector + ' .y', y)
+        .assertTextEqual(selector + ' .z', z, callback);
 });
 
 client.addCommand('getEditingVertexName', function(callback) {
     this.getText('.vertex.editing .title .name', function(result) {
         callback(result.value);
+    });
+});
+
+client.addCommand('assertNumberOfEditingNodes', function(expectedLength, callback) {
+    this.elements('css selector', '.vertex.editing', function(result) {
+        assert.equal(result.value.length, expectedLength);
+        callback();
+    });
+});
+
+client.addCommand('assertNumberOfDisplayNodes', function(expectedLength, callback) {
+    this.elements('css selector', '.vertex.display', function(result) {
+        assert.equal(result.value.length, expectedLength);
+        callback();
     });
 });
 

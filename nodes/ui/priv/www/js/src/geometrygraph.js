@@ -42,11 +42,15 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
             } else {
 
                 // Remove implicit children that are not editing
-                // for prototype objects
+                // for prototype objects, but only remove them once
                 var that = this;
+                var removed = [];
                 this.childrenOf(vertex).map(function(child) {
                     if (child.implicit && !child.editing) {
-                        that.remove(child);
+                        if(removed.indexOf(child) === -1) {
+                            that.remove(child);
+                            removed.push(child);
+                        }
                     }
                 });
 

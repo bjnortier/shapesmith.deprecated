@@ -4,8 +4,8 @@ define(['src/scene',  'src/interactioncoordinator'], function(sceneModel, coordi
 
         var minDistance = 3;
         var maxDistance = 1000;
-        var position = { azimuth: -1.373, elevation: 1.08, distance: 1000 };
-        var target = { azimuth: -1.373, elevation: 1.08, distance: 300, scenePosition: new THREE.Vector3() };
+        var position = { azimuth: 0.373, elevation: 1.08, distance: 1000 };
+        var target = { azimuth: 0.373, elevation: 1.08, distance: 300, scenePosition: new THREE.Vector3() };
         var lastMousePosition = undefined;
         var targetOnDown = undefined;
         var state = undefined;

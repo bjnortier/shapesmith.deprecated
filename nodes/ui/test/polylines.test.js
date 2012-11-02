@@ -28,7 +28,6 @@ describe('Polylines', function() {
 
     // ---------- Cases ----------
 
-
     it('can be created on the workplane', function(done) {
         this.timeout(5000);
         client
@@ -111,7 +110,33 @@ describe('Polylines', function() {
             .clickOnWorld(0,10,0)
             .clickOnWorld(0,0,0)
             .click('.toolbar .select')
-            .pause(2000, done)
+            .assertNumberOfEditingNodes(0)
+            .assertNumberOfDisplayNodes(0, done);
+    });
+
+    it('can be edited', function(done) {
+        this.timeout(5000);
+        client
+            .click('.toolbar .polyline')
+            .clickOnWorld(0,0,0)
+            .clickOnWorld(10,10,0)
+            .clickOnWorld(0,10,0)
+            .dblClickOnWorld(0,0,0)
+            .click('.toolbar .select')
+            .clickOnWorld(10,10,0)
+            .assertTextEqual('.vertex.editing.polyline0 .point._0', 'point0')
+            .assertTextEqual('.vertex.editing.polyline0 .point._1', 'point1')
+            .assertTextEqual('.vertex.editing.polyline0 .point._2', 'point2')
+            .assertTextEqual('.vertex.editing.polyline0 .point._0', 'point0')
+            .assertTextEqual('.vertex.editing.point0 .coordinate', '000')
+            .assertTextEqual('.vertex.editing.point1 .coordinate', '10100')
+            .assertTextEqual('.vertex.editing.point2 .coordinate', '0100')
+            .moveToWorld(10,10,0)
+            .dragToWorld(20,20,0)
+            .assertTextEqual('.vertex.editing.point1 .coordinate', '20200')
+            .clickOnWorld(30,30,0)
+            .assertNumberOfEditingNodes(0)
+            .assertNumberOfDisplayNodes(1, done)
     });
 
 
