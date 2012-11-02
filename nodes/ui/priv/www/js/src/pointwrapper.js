@@ -1,5 +1,12 @@
-define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', 'src/scene', 'src/workplane'], 
-    function(calc, geometryGraph, vertexWrapper, sceneModel, workplaneModel) {
+define([
+        'src/calculations', 
+        'src/geometrygraphsingleton', 
+        'src/vertexwrapper', 
+        'src/scene', 
+        'src/scenevieweventgenerator',
+        'src/workplane'
+    ], 
+    function(calc, geometryGraph, vertexWrapper, sceneModel, sceneViewEventGenerator, workplaneModel) {
 
     // ---------- Editing ----------
 
@@ -17,10 +24,12 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         workplanePositionChanged: function(position) {
-            this.vertex.parameters.coordinate.x = position.x;
-            this.vertex.parameters.coordinate.y = position.y;
-            this.vertex.parameters.coordinate.z = position.z;
-            this.vertex.trigger('change', this.vertex);            
+            if (this.vertex.proto) {
+                this.vertex.parameters.coordinate.x = position.x;
+                this.vertex.parameters.coordinate.y = position.y;
+                this.vertex.parameters.coordinate.z = position.z;
+                this.vertex.trigger('change', this.vertex);            
+            }
         },
 
         workplaneClick: function() {
@@ -66,12 +75,14 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         initialize: function(options) {
             this.point = this.model.vertex;
             vertexWrapper.EditingSceneView.prototype.initialize.call(this);
+            this.on('dragStarted', this.dragStarted, this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);
         },
 
         remove: function() {
             vertexWrapper.EditingSceneView.prototype.remove.call(this);
+            this.off('dragStarted', this.dragStarted, this);
             this.off('drag', this.drag, this);
             this.off('dragEnded', this.dragEnded, this);
         },
@@ -93,7 +104,11 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         // This view is not draggable, but the display scene view can transfer 
         // the dragging to this view (e.g. when a point is dragged)
         isDraggable: function() {
-            return false;
+            return true;
+        },
+
+        dragStarted: function() {
+            this.dragStartedWhilstEditing = true;
         },
 
         drag: function(event) {
@@ -109,7 +124,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         dragEnded: function() {
-            if (this.dragging) {
+            if (this.dragging && !this.dragStartedWhilstEditing) {
                 this.model.ok();
                 this.dragging = false;
             }
@@ -129,6 +144,14 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             if (!vertex.implicit) {
                 this.views.push(new DisplayDOMView({model: this}));
             }
+        },
+
+        canSelect: function() {
+            return !this.vertex.implicit;
+        },
+
+        selectParentOnClick: function() {
+            return this.vertex.implicit;
         },
 
     });
@@ -153,14 +176,25 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             vertexWrapper.EditingSceneView.prototype.render.call(this);
             var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
             var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
+            var radius = this.model.vertex.implicit ? 0.35 : 0.5;
             var point = THREE.SceneUtils.createMultiMaterialObject(
-                new THREE.SphereGeometry(0.5, 10, 10), 
+                new THREE.SphereGeometry(radius, 10, 10), 
                 [
                     new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}),
                     new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                 ]);
             point.position = calc.objToVector(this.model.vertex.parameters.coordinate);
             this.sceneObject.add(point);
+
+            if (this.model.vertex.implicit) {
+                var selectionPoint = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.5, 10, 10), 
+                    new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0, side: THREE.DoubleSide }));
+                selectionPoint.position = calc.objToVector(this.model.vertex.parameters.coordinate);
+                // For some reason selection & highlighting doesn't work with a hidden 
+                // scene object... 
+                this.sceneObject.add(selectionPoint);
+            }
         },
 
         isDraggable: function() {
@@ -170,6 +204,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         dragStarted: function(event) {
             this.dragging = true;
             geometryGraph.edit(this.model.vertex);
+            sceneViewEventGenerator.replaceInDraggable(this, this.model.vertex.id);
         },
 
     });

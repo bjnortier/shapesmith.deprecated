@@ -30,6 +30,7 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
         this.implicit = options.implicit || false;
         this.parameters = options.parameters || {};
         this.editing = options.editing || false;
+        this.proto = options.proto || false;
     }
 
     GeomNode.prototype.cloneNonEditing = function() {

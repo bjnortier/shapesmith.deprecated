@@ -20,6 +20,17 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
             var editingReplacement = vertex.cloneEditing();
             this.replace(vertex, editingReplacement);
             originals[vertex.id] = vertex;
+
+            var that = this;
+            if (vertex.type === 'polyline') {
+                this.childrenOf(vertex).forEach(function(point) {
+                    that.edit(point);
+                });
+            }
+        }
+
+        this.editById = function(id) {
+            this.edit(graph.vertexById(id));
         }
 
         this.cancel = function(vertex) {
@@ -31,6 +42,7 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
             } else {
 
                 // Remove implicit children that are not editing
+                // for prototype objects
                 var that = this;
                 this.childrenOf(vertex).map(function(child) {
                     if (child.implicit && !child.editing) {
@@ -46,6 +58,13 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
             var that = this;
             this.getEditingVertices().map(function(vertex) {
                 that.cancel(vertex);
+            });
+        }
+
+        this.commitIfEditing = function() {
+            var that = this;
+            this.getEditingVertices().map(function(vertex) {
+                that.commit(vertex);
             });
         }
 
@@ -116,6 +135,7 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
             graph.replaceVertex(original, replacement);
             original.off('change', this.vertexChanged, this);
             replacement.on('change', this.vertexChanged, this);
+            replacement.trigger('change', replacement);
             this.trigger('vertexReplaced', original, replacement);
         }
 

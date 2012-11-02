@@ -146,6 +146,14 @@ define([
             selection.off('deselected', this.deselected, this);
         },  
 
+        canSelect: function() {
+            return true;
+        },
+
+        selectParentOnClick: function() {
+            return false;
+        },
+
         select: function(ids) {
             if (ids.indexOf(this.vertex.id) !== -1) {
                 this.selected = true;
@@ -196,10 +204,12 @@ define([
 
         click: function(event) {
             if (!geometryGraph.isEditing()) {
-                if (event.shiftKey || event.ctrlKey || event.metaKey) {
-                    selection.addToSelection(this.model.vertex.id);
-                } else {
-                    selection.selectOnly(this.model.vertex.id);
+                if (this.model.canSelect()) {
+                    if (event.shiftKey || event.ctrlKey || event.metaKey) {
+                        selection.addToSelection(this.model.vertex.id);
+                    } else {
+                        selection.selectOnly(this.model.vertex.id);
+                    }
                 }
             }
         },
@@ -268,10 +278,22 @@ define([
         },
 
         click: function() {
-            if (event.shiftKey || event.ctrlKey || event.metaKey) {
-                selection.addToSelection(this.model.vertex.id);
-            } else {
-                selection.selectOnly(this.model.vertex.id);
+            var vertexToSelect, parents;
+            if (this.model.canSelect()) {
+                vertexToSelect = this.model.vertex;
+            } else if (this.model.selectParentOnClick()) {
+                parents = geometryGraph.parentsOf(this.model.vertex);
+                if (parents.length === 1) {
+                    vertexToSelect = parents[0];
+                }
+            }
+            if (vertexToSelect) {
+                if (event.shiftKey || event.ctrlKey || event.metaKey) {
+                    selection.addToSelection(vertexToSelect.id);
+                } else {
+                    selection.selectOnly(vertexToSelect.id);
+                }
+
             }
         },
 

@@ -1,5 +1,5 @@
-define(['src/geometrygraphsingleton', 'src/pointwrapper', 'src/polylinewrapper'], 
-    function(geometryGraph, point, polyline) {
+define(['src/geometrygraphsingleton', 'src/selection', 'src/pointwrapper', 'src/polylinewrapper'], 
+    function(geometryGraph, selection, point, polyline) {
     
     var models = {};
     var wrappers = {
@@ -20,6 +20,22 @@ define(['src/geometrygraphsingleton', 'src/pointwrapper', 'src/polylinewrapper']
         addVertex(replacement);
     });
 
+    selection.on('selected', function(ids, selection) {
+        updateEditingForSelected(selection);
+    });
+
+    selection.on('deselected', function(ids, selection) {
+        updateEditingForSelected(selection);
+    });
+
+    var updateEditingForSelected = function(selection) {
+        if (selection.length === 1) {
+            geometryGraph.editById(selection[0]);
+        } else {
+            geometryGraph.commitIfEditing();
+        }
+    }
+
     var addVertex = function(vertex) {
         if (vertex.editing) {
             models[vertex.id] = new wrappers[vertex.type].EditingModel(vertex);
@@ -27,7 +43,6 @@ define(['src/geometrygraphsingleton', 'src/pointwrapper', 'src/polylinewrapper']
             models[vertex.id] = new wrappers[vertex.type].DisplayModel(vertex);
         }
     }
-
 
     var removeVertex = function(vertex) {
         if (models[vertex.id]) {

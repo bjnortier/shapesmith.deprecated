@@ -23,9 +23,9 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/geometrygraphsing
             this.selected = [id];
             
             if (deselected.length > 0) {
-                this.trigger('deselected', deselected);
+                this.trigger('deselected', deselected, this.selected);
             }
-            this.trigger('selected', [id]);
+            this.trigger('selected', [id], this.selected);
 
         }
 
@@ -45,19 +45,19 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/geometrygraphsing
                 var index = this.selected.indexOf(id);
                 if (index !== -1) {
                     this.selected.splice(this.selected.indexOf(id), 1);
-                    this.trigger('deselected', [id]);
+                    this.trigger('deselected', [id], this.selected);
                 }
             } else  {
                 this.selected.push(id);
-                this.trigger('selected', [id]);
+                this.trigger('selected', [id], this.selected);
             }
         }
 
         this.deselectAll = function() {
             if (this.selected.length > 0) {
                 var deselected = this.selected;
-                selected = [];
-                this.trigger('deselected', deselected);
+                this.selected = [];
+                this.trigger('deselected', deselected, this.selected);
             }
         }
     }

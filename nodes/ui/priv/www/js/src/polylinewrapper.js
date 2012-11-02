@@ -30,12 +30,9 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 positions.push(to);
             }
 
-            var pipe = THREE.SceneUtils.createMultiMaterialObject(
-                new THREE.PipeGeometry(3, positions),
-                [
-                    new THREE.MeshLambertMaterial( { ambient: ambient,  side: THREE.DoubleSide} ),
-                    new THREE.MeshBasicMaterial( { color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
-                ]);
+            var pipe = new THREE.Mesh(
+                new THREE.PipeGeometry(0.5, positions),
+                new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide }));
             this.hiddenSelectionObject.add(pipe);
         },
 
@@ -64,8 +61,10 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         // If the replaced vertex is the last point in the polyline,
         // this means the point has be committed, so add another point
         vertexReplaced: function(original, replacement) {
-            if (_.last(geometryGraph.childrenOf(this.vertex)) === replacement) {
-                geometryGraph.addPointToPolyline(this.vertex);
+            if (this.vertex.proto) {
+                if (_.last(geometryGraph.childrenOf(this.vertex)) === replacement) {
+                    geometryGraph.addPointToPolyline(this.vertex);
+                }
             }
         },
 
@@ -84,24 +83,26 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         sceneViewClick: function(viewAndEvent) {
-            var timeStamp = new Date().getTime();
-            var isDoubleCLick = this.lastClickTimestamp 
-                                && 
-                                (timeStamp - this.lastClickTimestamp < 500);
+            if (this.vertex.proto) {
+                var timeStamp = new Date().getTime();
+                var isDoubleCLick = this.lastClickTimestamp 
+                                    && 
+                                    (timeStamp - this.lastClickTimestamp < 500);
 
-            if (!isDoubleCLick) {
-                var children = geometryGraph.childrenOf(this.vertex);
-                if (viewAndEvent.view.model.vertex.type === 'point') {
+                if (!isDoubleCLick) {
+                    var children = geometryGraph.childrenOf(this.vertex);
+                    if (viewAndEvent.view.model.vertex.type === 'point') {
+                        geometryGraph.removeLastPointFromPolyline(this.vertex);
+                        geometryGraph.addPointToPolyline(this.vertex, viewAndEvent.view.model.vertex);
+                        geometryGraph.addPointToPolyline(this.vertex);
+                        this.vertex.trigger('change', this.vertex);
+                    }
+                } else {
                     geometryGraph.removeLastPointFromPolyline(this.vertex);
-                    geometryGraph.addPointToPolyline(this.vertex, viewAndEvent.view.model.vertex);
-                    geometryGraph.addPointToPolyline(this.vertex);
-                    this.vertex.trigger('change', this.vertex);
+                    this.ok();
                 }
-            } else {
-                geometryGraph.removeLastPointFromPolyline(this.vertex);
-                this.ok();
+                this.lastClickTimestamp = timeStamp
             }
-            this.lastClickTimestamp = timeStamp
         },
 
     });
