@@ -102,6 +102,18 @@ describe('Polylines', function() {
             .buttonUp(done)
     });
 
+    it('can be cancelled when an implicit point is shared', function(done) {
+        this.timeout(5000);
+        client
+            .click('.toolbar .polyline')
+            .clickOnWorld(0,0,0)
+            .clickOnWorld(10,10,0)
+            .clickOnWorld(0,10,0)
+            .clickOnWorld(0,0,0)
+            .click('.toolbar .select')
+            .pause(2000, done)
+    });
+
 
 });
 
