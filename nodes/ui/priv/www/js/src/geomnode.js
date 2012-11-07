@@ -23,7 +23,7 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
 
         if (options.name) {
             this.name = options.name;
-        } else if (options.nameFromId === true) {
+        } else {
             this.name = this.id;
         }
 
@@ -49,10 +49,6 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
         newNode.editing = true;
         return newNode;
     }
-
-    GeomNode.prototype.isNamed = function() {
-        return this.name !== undefined;
-    }  
 
     var copyObj = function(value) {
         if ((value === null) || (value === undefined)) {

@@ -23,13 +23,12 @@ describe('Point', function() {
 
         assert.equal(point.type, 'point');
         assert.equal(point.id.indexOf('point'), 0);
-        assert.isUndefined(point.name);
         assert.isFalse(point.editing);
         assert.deepEqual(point.parameters, {coordinate: {x:0, y:0, z:0}});
     });
 
     it('can be named', function() {
-        var point = new geomNode.Point({nameFromId: true});
+        var point = new geomNode.Point();
         assert.equal(point.id, point.name);
 
         var cloned = point.cloneNonEditing();
