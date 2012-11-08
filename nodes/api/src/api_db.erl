@@ -190,6 +190,8 @@ put_brep(SHA, BRep) when is_list(SHA) ->
 
 key(vertex, SHA) ->
     list_to_binary("vertex/" ++ SHA);
+key(graph, SHA) ->
+    list_to_binary("graph/" ++ SHA);
 key(geom, SHA) ->
     list_to_binary("geom/" ++ SHA);
 key(commit, SHA) ->
