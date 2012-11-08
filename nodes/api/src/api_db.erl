@@ -188,6 +188,8 @@ put_brep(SHA, BRep) when is_list(SHA) ->
 %%%                              Private API                                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
+key(vertex, SHA) ->
+    list_to_binary("vertex/" ++ SHA);
 key(geom, SHA) ->
     list_to_binary("geom/" ++ SHA);
 key(commit, SHA) ->

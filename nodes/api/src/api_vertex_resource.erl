@@ -22,22 +22,30 @@
          content_types_accepted/2,
          post_is_create/2,
          create_path/2,
-         accept_content/2
+         accept_content/2,
+         content_types_provided/2,
+         resource_exists/2,
+         provide_content/2
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
--record(context, {method, json}).
+-record(context, {method, user, design, json}).
 
 
 init([]) -> 
     {ok, #context{}}.
 
 allowed_methods(ReqData, Context) -> 
-    Context1 = Context#context{ method=wrq:method(ReqData) },
-    {['POST'], ReqData, Context1}.
+    Context1 = Context#context{ 
+        method=wrq:method(ReqData),
+        user=wrq:path_info(user, ReqData),
+        design=wrq:path_info(design, ReqData) 
+    },
+    {['POST', 'GET'], ReqData, Context1}.
 
 content_types_accepted(ReqData, Context) ->
     {[{"application/json", accept_content}], ReqData, Context}.
 
+         
 post_is_create(ReqData, Context) ->
     {true, ReqData, Context}. 
 
@@ -52,16 +60,31 @@ create_path(ReqData, Context0) ->
             {{halt, 400}, ReqData, Context0}
     end.
 
-accept_content(ReqData0, Context) ->
-    try 
-        JSON = api_resource:parse_json(ReqData0),
-        ReqData1 = api_resource:json_response(JSON, ReqData0),
-        {true, ReqData1, Context}
-    catch 
-        
-        Err:Reason ->
-            {{halt, 400}, ReqData0, Context}
+accept_content(ReqData0, Context = #context{ user = User, 
+                                             design = Design }) ->
+    JSON = api_resource:parse_json(ReqData0),
+    ReqData1 = api_resource:json_response(JSON, ReqData0),
+    api_db:create(User, Design, vertex, JSON),
+    {true, ReqData1, Context}.
+
+content_types_provided(ReqData, Context) ->
+    {[{"application/json", provide_content}], ReqData, Context}.
+
+resource_exists(ReqData, Context = #context{ method=Method,
+                                             user=User, 
+                                             design=Design }) ->
+    case {Method, wrq:path_info(sha, ReqData)} of 
+        {'POST', undefined} ->
+            {true, ReqData, Context};
+        {'GET', undefined} ->
+            {false, ReqData, Context};
+        {_, SHA} ->
+            {api_db:exists(User, Design, vertex, SHA), ReqData, Context}
     end.
 
-
+provide_content(ReqData, Context = #context{ user=User, 
+                                             design=Design }) ->
+    SHA = wrq:path_info(sha, ReqData),
+    JSON = api_db:get(User, Design, vertex, SHA),
+    {jiffy:encode(JSON), ReqData, Context}.
 

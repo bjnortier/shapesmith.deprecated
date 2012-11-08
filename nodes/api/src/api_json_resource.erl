@@ -18,19 +18,19 @@
 -module(api_json_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
 -export([
-	 init/1, 
+         init/1, 
          allowed_methods/2,
-	 is_authorized/2,
-	 post_is_create/2,
-	 allow_missing_post/2,
+         is_authorized/2,
+         post_is_create/2,
+         allow_missing_post/2,
          content_types_accepted/2,
-	 content_types_provided/2,
-	 resource_exists/2,
+         content_types_provided/2,
+         resource_exists/2,
          malformed_request/2,
-	 process_post/2,
+         process_post/2,
          accept_content/2,
-	 provide_content/2,
-	 delete_resource/2
+         provide_content/2,
+         delete_resource/2
         ]).
 -include_lib("webmachine/include/webmachine.hrl").
 -record(context, {method, adapter, user, design, existing, request_json}).
@@ -40,8 +40,8 @@ init([{adapter_mod, Adapter}]) ->
 
 allowed_methods(ReqData, Context = #context{ adapter=Adapter}) -> 
     Context1 = Context#context{ method=wrq:method(ReqData),
-				user=wrq:path_info(user, ReqData),
-				design=wrq:path_info(design, ReqData) },
+                                user=wrq:path_info(user, ReqData),
+                                design=wrq:path_info(design, ReqData) },
     {Adapter:methods(ReqData), ReqData, Context1}.
 
 is_authorized(ReqData, Context) ->
@@ -64,68 +64,68 @@ malformed_request(ReqData, Context = #context{ method='DELETE'}) ->
 malformed_request(ReqData, Context = #context{ method='GET'}) ->
     {false, ReqData, Context};
 malformed_request(ReqData, Context = #context{ adapter=Adapter, 
-					       user=User, 
-					       design=Design }) ->
+                                               user=User, 
+                                               design=Design }) ->
     Body = wrq:req_body(ReqData),
     try
-	RequestJSON = jiffy:decode(Body),
-	case Adapter:validate(ReqData, User, Design, RequestJSON) of
-	    ok ->
-		{false, ReqData, Context#context{ request_json = RequestJSON }};
-	    {error, ResponseJSON} ->
-		{true, api_resource:json_response(ResponseJSON, ReqData), Context};
-	    {error, Code, ResponseJSON} ->
-		{{halt, Code}, api_resource:json_response(ResponseJSON, ReqData), Context}
-	end
+        RequestJSON = jiffy:decode(Body),
+        case Adapter:validate(ReqData, User, Design, RequestJSON) of
+            ok ->
+                {false, ReqData, Context#context{ request_json = RequestJSON }};
+            {error, ResponseJSON} ->
+                {true, api_resource:json_response(ResponseJSON, ReqData), Context};
+            {error, Code, ResponseJSON} ->
+                {{halt, Code}, api_resource:json_response(ResponseJSON, ReqData), Context}
+        end
 
     catch
-	throw:{error,{Pos,invalid_json}} ->
+        throw:{error,{Pos,invalid_json}} ->
             lager:warning("invalid JSON: ~p", [Body]),
-	    {true, api_resource:json_response({[{<<"invalid JSON">>, Body},
-						 {<<"position">>, Pos}]}, ReqData), Context};
-	Err:Reason ->
-	    lager:warning("Unexpected exception during validate: ~p:~p", [Err, Reason]),
-	    {true,  api_resource:json_response(<<"internal error">>, ReqData), Context}
+            {true, api_resource:json_response({[{<<"invalid JSON">>, Body},
+                                                 {<<"position">>, Pos}]}, ReqData), Context};
+        Err:Reason ->
+            lager:warning("Unexpected exception during validate: ~p:~p", [Err, Reason]),
+            {true,  api_resource:json_response(<<"internal error">>, ReqData), Context}
     end.
 
 
 resource_exists(ReqData, Context = #context{ adapter=Adapter, 
-					     method=Method,
-					     user=User, 
-					     design=Design }) ->
+                                             method=Method,
+                                             user=User, 
+                                             design=Design }) ->
 
     Existing = Adapter:get(ReqData, User, Design),
     Context1 = Context#context{ existing = Existing },
     case {Method, Existing} of
-	{_, {error, ErrorJSON}} ->
-	    {halt, api_resource:json_response(ErrorJSON, ReqData), Context};
-	{_, {error, Code, ErrorJSON}} ->
-	    {halt, Code, api_resource:json_response(ErrorJSON, ReqData), Context};
-	{'GET', undefined} ->
-	    {false, api_resource:json_response(<<"not found">>, ReqData), Context1};
-	_ ->
-	    {Existing =/= undefined, ReqData, Context1}
+        {_, {error, ErrorJSON}} ->
+            {halt, api_resource:json_response(ErrorJSON, ReqData), Context};
+        {_, {error, Code, ErrorJSON}} ->
+            {halt, Code, api_resource:json_response(ErrorJSON, ReqData), Context};
+        {'GET', undefined} ->
+            {false, api_resource:json_response(<<"not found">>, ReqData), Context1};
+        _ ->
+            {Existing =/= undefined, ReqData, Context1}
     end.
 
 process_post(ReqData, Context = #context{ method='POST',
-					  adapter=Adapter, 
-					  user=User, 
-					  design=Design,
-					  request_json=RequestJSON }) ->
+                                          adapter=Adapter, 
+                                          user=User, 
+                                          design=Design,
+                                          request_json=RequestJSON }) ->
     create_or_update_response(Adapter:create(ReqData, User, Design, RequestJSON),
-			      ReqData,
-			      Context).
+                              ReqData,
+                              Context).
 
 
 accept_content(ReqData, Context = #context{ method='PUT',
-					    adapter=Adapter, 
-					    user=User, 
-					    design=Design,
-					    request_json=RequestJSON }) ->
+                                            adapter=Adapter, 
+                                            user=User, 
+                                            design=Design,
+                                            request_json=RequestJSON }) ->
     
     create_or_update_response(Adapter:update(ReqData, User, Design, RequestJSON),
-			      ReqData,
-			      Context).
+                              ReqData,
+                              Context).
 
 create_or_update_response({ok, ResponseJSON}, ReqData, Context) ->
     {true, api_resource:json_response(ResponseJSON, ReqData), Context};
@@ -147,7 +147,7 @@ provide_content(ReqData, Context = #context{ adapter=Adapter,
     {jiffy:encode(Existing), ReqData1, Context}.
 
 delete_resource(ReqData, Context = #context{adapter=Adapter, 
-					    user=User, 
-					    design=Design}) ->
+                                            user=User, 
+                                            design=Design}) ->
     ok = Adapter:delete(ReqData, User, Design),
     {true, api_resource:json_response(<<"deleted">>, ReqData), Context}.
