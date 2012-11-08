@@ -17,10 +17,18 @@
 
 -module(api_resource).
 -author('Benjamin Nortier <bjnortier@gmail.com>').
--export([json_response/2, 
+-export([json_response/2, parse_json/1,
          create_session/2,
          forbidden_if_not_authorized/2]).
 -include_lib("webmachine/include/webmachine.hrl").
+
+parse_json(ReqData) ->
+    try 
+        jiffy:decode(wrq:req_body(ReqData))
+    catch
+        _:_ ->
+            throw(invalid_json)
+    end.
 
 json_response(JSON, ReqData) ->
     wrq:set_resp_header("Content-type", "application/json", 

@@ -33,6 +33,10 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
         this.proto = options.proto || false;
     }
 
+    var resetIDCounters = function() {
+        counters = {};
+    }
+
     GeomNode.prototype.cloneNonEditing = function() {
         var newNode = new this.constructor({
             type     : this.type, 
@@ -48,6 +52,15 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
         var newNode = this.cloneNonEditing();
         newNode.editing = true;
         return newNode;
+    }
+
+    GeomNode.prototype.toJSON = function() {
+        return JSON.stringify({
+            type: this.type, 
+            name: this.name,
+            implicit: this.implicit,
+            parameters: this.parameters,
+        })
     }
 
     var copyObj = function(value) {
@@ -90,6 +103,7 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
 
 
     return {
+        resetIDCounters : resetIDCounters,
         Point    : Point,
         Polyline : Polyline,
     }

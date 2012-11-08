@@ -15,9 +15,10 @@
 %%   See the License for the specific language governing permissions and
 %%   limitations under the License.
 
--module(api_deps).
+-module(api_ct_common).
 -export([start_with_api/0, start_with_api/1, start_without_api/0]).
 -export([stop_with_api/0, stop_without_api/0]).
+-export([check_json_content_type/1]).
 
 -define(APPS, [inets, crypto, bcrypt, lager, mochiweb, webmachine, folsom]).
 
@@ -58,3 +59,7 @@ stop_without_api() ->
     AllOk = lists:duplicate(length(?APPS), ok),
     AllOk = lists:map(fun application:stop/1, lists:reverse(?APPS)),
     ok.
+
+check_json_content_type(Headers) ->
+    {Headers, {_, "application/json"}} = {Headers, lists:keyfind("content-type", 1, Headers)}.
+

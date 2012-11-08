@@ -1,5 +1,5 @@
-define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geomnode'], 
-    function(_, Backbone, graphLib, geomNode) {
+define(['lib/underscore-require', 'lib/backbone-require', 'lib/sha1', 'src/graph', 'src/geomnode'], 
+    function(_, Backbone, crypto, graphLib, geomNode) {
 
     var GeometryGraph = function() {
 
@@ -124,6 +124,12 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
             this.remove(children[children.length - 1]);
         }
 
+        this.addChildTo = function(parent, child) {
+            this.add(child, function() {
+                graph.addEdge(parent, child);
+            });
+        }
+
         // ---------- Graph functions ----------
 
         this.add = function(vertex, beforeNotifyFn) {
@@ -180,6 +186,28 @@ define(['lib/underscore-require', 'lib/backbone-require', 'src/graph', 'src/geom
             return _.reject(graph.vertices(), function(vertex) { 
                 return !vertex.editing;
             });
+        }
+
+        // this.SHA = function() {
+
+        //     console.log(JSON.stringify(vertex))
+        //     .toString(crypto.enc.Hex);
+        // }
+
+        this.shaOfVertexWithId = function(id) {
+            var vertex = graph.vertexById(id);
+            var stringToHash = JSON.stringify(vertex);
+            if (vertex === undefined) {
+                throw Error('No vertex with id:' + id);
+            }
+            
+            var children = this.childrenOf(vertex);
+            var that = this;
+            stringToHash = children.reduce(function(acc, child) {
+                return acc += that.shaOfVertexWithId(child.id);
+            }, stringToHash);
+
+            return crypto.SHA1(stringToHash).toString(crypto.enc.Hex)
         }
     }
 
