@@ -126,7 +126,8 @@ define([
 
         dragEnded: function() {
             if (this.dragging && !this.dragStartedWhilstEditing) {
-                this.model.ok();
+                var ignoreImplicit = true;
+                this.model.ok(ignoreImplicit);
                 this.dragging = false;
             }
         },

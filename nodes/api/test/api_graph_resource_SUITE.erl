@@ -28,7 +28,7 @@ end_per_testcase(_Testcase, _Config) ->
 
 create(_Config) ->
     GraphJSON = {[
-        {<<"edges">>, []}
+        {<<"edges">>, {[]}}
     ]},
 
     {ok,{{"HTTP/1.1",404,_}, _, _}} = 

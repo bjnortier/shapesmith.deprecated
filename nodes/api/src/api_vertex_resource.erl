@@ -45,7 +45,6 @@ allowed_methods(ReqData, Context) ->
 content_types_accepted(ReqData, Context) ->
     {[{"application/json", accept_content}], ReqData, Context}.
 
-         
 post_is_create(ReqData, Context) ->
     {true, ReqData, Context}. 
 

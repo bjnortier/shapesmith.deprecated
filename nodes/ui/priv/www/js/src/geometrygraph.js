@@ -40,7 +40,7 @@ define([
             post(url, JSON.stringify(that.serialize()), callback);
         }
 
-        this.commit = function(editingVertex) {
+        this.commit = function(editingVertex, ignoreImplicit) {
             var vertex = editingVertex.cloneNonEditing();
             var that = this;
             var children = this.childrenOf(vertex);
@@ -50,7 +50,7 @@ define([
                 captureVertex(vertex, function(sha) {
                     if (graph.vertexById(vertex.id) !== undefined) {
                         that.replace(editingVertex, vertex);
-                        if (!vertex.implicit) {
+                        if (!vertex.implicit || ignoreImplicit) {
                             captureGraph(commandSuccessFn);
                             that.trigger('committed', vertex);
                         }
