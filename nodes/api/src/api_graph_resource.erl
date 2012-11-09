@@ -62,9 +62,8 @@ create_path(ReqData, Context0) ->
 accept_content(ReqData0, Context = #context{ user = User, 
                                              design = Design }) ->
     JSON = api_resource:parse_json(ReqData0),
-    ReqData1 = api_resource:json_response(JSON, ReqData0),
-         
-    api_db:create(User, Design, graph, JSON),
+    {ok, SHA} = api_db:create(User, Design, graph, JSON),
+    ReqData1 = api_resource:json_response(list_to_binary(SHA), ReqData0),
     {true, ReqData1, Context}.
 
 content_types_provided(ReqData, Context) ->

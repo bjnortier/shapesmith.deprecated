@@ -87,4 +87,28 @@ describe('GeometryGraph', function() {
         assert.equal(graph.shaOfVertexWithId(d.id), '4a8b1c910faa03578e58975824ee38fddfddab1a');
 
     });
+
+    it.only('can be serialized', function() {
+        var a = new geomNode.Point();
+        var b = new geomNode.Point();
+        var c = new geomNode.Polyline();
+        var graph = new geometryGraph.Graph();
+
+        graph.add(c);
+        graph.addChildTo(c,a);
+        graph.addChildTo(c,b);
+
+        a.sha = 'aa';
+        b.sha = 'bb';
+        c.sha = 'cc';
+
+        console.log(graph.serialize());
+        assert.deepEqual(graph.serialize(), {
+            edges: {
+                'cc': ['aa', 'bb'],
+                'bb': [],
+                'aa': [],
+            }
+        });
+    });
 })

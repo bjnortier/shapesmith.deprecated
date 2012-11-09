@@ -34,16 +34,18 @@ create(_Config) ->
     {ok,{{"HTTP/1.1",404,_}, _, _}} = 
         httpc:request(get, {?URL ++ "ab123", []}, [], []),
 
-    {ok,{{"HTTP/1.1",201,_}, ReponseHeaders0, _}} = 
+    {ok,{{"HTTP/1.1",201,_}, ReponseHeaders0, ResponseBody0}} = 
         httpc:request(post, {?URL, [], "application/json", jiffy:encode(GraphJSON)}, [], []),
 
     api_ct_common:check_json_content_type(ReponseHeaders0),
     {_, Location} = lists:keyfind("location", 1, ReponseHeaders0),
     {match,[_,{Start,Len}]} = re:run(Location, "^http://localhost:8001/local/mydesign/graph/([a-f0-9]+)$"),
-    
     SHA = string:substr(Location, Start+1, Len),
 
-    {ok,{{"HTTP/1.1",200,_}, ReponseHeaders1, ResponseBody}} = 
+    %% Sha in location matches response bidy
+    SHA  = binary_to_list(jiffy:decode(ResponseBody0)),
+
+    {ok,{{"HTTP/1.1",200,_}, _, ResponseBody}} = 
         httpc:request(get, {?URL ++ SHA, []}, [], []),
 
     GraphJSON = jiffy:decode(ResponseBody),

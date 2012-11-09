@@ -1,5 +1,12 @@
-define(['lib/underscore-require', 'lib/backbone-require', 'lib/sha1', 'src/graph', 'src/geomnode'], 
-    function(_, Backbone, crypto, graphLib, geomNode) {
+define([
+    'lib/underscore-require',
+    'lib/backbone-require',
+    'lib/sha1',
+    'src/graph',
+    'src/geomnode',
+    'src/commandstack',
+    ], 
+    function(_, Backbone, crypto, graphLib, geomNode, commandStack) {
 
     var GeometryGraph = function() {
 
@@ -8,8 +15,41 @@ define(['lib/underscore-require', 'lib/backbone-require', 'lib/sha1', 'src/graph
 
         this.commit = function(vertex) {
             var nonEditingReplacement = vertex.cloneNonEditing();
-            this.replace(vertex, nonEditingReplacement);
-            this.trigger('committed', nonEditingReplacement);
+
+            var url = '/' + SS.session.username + '/' + SS.session.design + '/vertex/';
+            var that = this;
+            $.ajax({
+                type: 'POST',
+                url: url,
+                contentType: 'application/json',
+                data: nonEditingReplacement.toJSON(),
+                dataType: 'json',
+                success: function(sha) {
+                    
+                    nonEditingReplacement.sha = sha;
+                    that.replace(vertex, nonEditingReplacement);
+
+                    url = '/' + SS.session.username + '/' + SS.session.design + '/graph/';
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        contentType: 'application/json',
+                        data: JSON.stringify(that.serialize()),
+                        dataType: 'json',
+                        success: function(sha) {
+                            that.trigger('committed', nonEditingReplacement);
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            commandStack.error(jqXHR.responseText);
+                        },
+
+                    })
+
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    commandStack.error(jqXHR.responseText);
+                }
+            });
         }
 
         // When editing, the original vertex is kept 
@@ -188,26 +228,16 @@ define(['lib/underscore-require', 'lib/backbone-require', 'lib/sha1', 'src/graph
             });
         }
 
-        // this.SHA = function() {
-
-        //     console.log(JSON.stringify(vertex))
-        //     .toString(crypto.enc.Hex);
-        // }
-
-        this.shaOfVertexWithId = function(id) {
-            var vertex = graph.vertexById(id);
-            var stringToHash = JSON.stringify(vertex);
-            if (vertex === undefined) {
-                throw Error('No vertex with id:' + id);
-            }
-            
-            var children = this.childrenOf(vertex);
+        this.serialize = function() {
+            var vertices = graph.vertices();
+            var result = {edges:{}};
             var that = this;
-            stringToHash = children.reduce(function(acc, child) {
-                return acc += that.shaOfVertexWithId(child.id);
-            }, stringToHash);
-
-            return crypto.SHA1(stringToHash).toString(crypto.enc.Hex)
+            vertices.forEach(function(vertex) {
+                result.edges[vertex.sha] = that.childrenOf(vertex).map(function(child) {
+                    return child.sha;
+                });
+            });
+            return result;
         }
     }
 

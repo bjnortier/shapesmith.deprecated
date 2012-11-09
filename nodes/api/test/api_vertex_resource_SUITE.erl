@@ -37,17 +37,19 @@ create(_Config) ->
     {ok,{{"HTTP/1.1",404,_}, _, _}} = 
         httpc:request(get, {?URL ++ "ab123", []}, [], []),
 
-    {ok,{{"HTTP/1.1",201,_}, ReponseHeaders0, _}} = 
+    {ok,{{"HTTP/1.1",201,_}, ReponseHeaders0, ResponseBody0}} = 
         httpc:request(post, {?URL, [], "application/json", jiffy:encode(VertexJSON)}, [], []),
 
     api_ct_common:check_json_content_type(ReponseHeaders0),
     {_, Location} = lists:keyfind("location", 1, ReponseHeaders0),
     {match,[_,{Start,Len}]} = re:run(Location, "^http://localhost:8001/local/mydesign/vertex/([a-f0-9]+)$"),
-    
     SHA = string:substr(Location, Start+1, Len),
 
-    {ok,{{"HTTP/1.1",200,_}, ReponseHeaders1, ResponseBody}} = 
-        httpc:request(get, {?URL ++ SHA, []}, [], []),
+    %% Sha in location matches response bidy
+    SHA  = binary_to_list(jiffy:decode(ResponseBody0)),
 
-    VertexJSON = jiffy:decode(ResponseBody),
+    %% Get the vertex again
+    {ok,{{"HTTP/1.1",200,_}, ReponseHeaders1, ResponseBody1}} = 
+        httpc:request(get, {?URL ++ SHA, []}, [], []),
+    VertexJSON = jiffy:decode(ResponseBody1),
     ok.
