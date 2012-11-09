@@ -20,10 +20,10 @@ define([
                 undoStack.push(command);
 
             };
-            var erroFn = function(msg) {
-
+            var errorFn = function(msg) {
+                console.error(msg);
             }
-            command.do(successFn, erroFn);
+            command.do(successFn, errorFn);
 
         }
 
@@ -68,13 +68,6 @@ define([
             }
         }            
 
-        this.success = function(sha) {
-            
-        }
-
-        this.error = function(msg) {
-            console.error(msg);
-        }
     }
 
     var commandStack = new CommandStack();
