@@ -25,44 +25,54 @@ define([
 
         _.extend(this, Backbone.Events);
         var graph = new graphLib.Graph();
+        var that = this;
 
-        this.commit = function(vertex) {
-            var nonEditingReplacement = vertex.cloneNonEditing();
+        var captureVertex = function(vertex, callback) {
+            var url = '/' + SS.session.username + '/' + SS.session.design + '/vertex/';
+            post(url, vertex.toJSON(), function(sha) {
+                vertex.sha = sha;
+                callback(sha);
+            });
+        }
+
+        var captureGraph = function(callback) {
+            var url = '/' + SS.session.username + '/' + SS.session.design + '/graph/';
+            post(url, JSON.stringify(that.serialize()), callback);
+        }
+
+        this.commit = function(editingVertex) {
+            var vertex = editingVertex.cloneNonEditing();
             var that = this;
+            var children = this.childrenOf(vertex);
 
             var doFn = function(commandSuccessFn, commandErrorFn) {
-                var url = '/' + SS.session.username + '/' + SS.session.design + '/vertex/';
-                post(
-                    url, 
-                    nonEditingReplacement.toJSON(),
-                    function(sha) {
-                        
-                        nonEditingReplacement.sha = sha;
-                        that.replace(vertex, nonEditingReplacement);
-
-                        url = '/' + SS.session.username + '/' + SS.session.design + '/graph/';
-                        post(
-                            url,
-                            JSON.stringify(that.serialize()),
-                            function(sha) {
-                                commandSuccessFn(sha);
-                                that.trigger('committed', nonEditingReplacement);
-                            },
-                            function(jqXHR, textStatus, errorThrown) {
-                                commandErrorFn(jqXHR.responseText);
-                            });
-
-                    },
-                    function(jqXHR, textStatus, errorThrown) {
-                        commandErrorFn(jqXHR.responseText);
-                    });
+                
+                captureVertex(vertex, function(sha) {
+                    if (graph.vertexById(vertex.id) !== undefined) {
+                        that.replace(editingVertex, vertex);
+                        if (!vertex.implicit) {
+                            captureGraph(commandSuccessFn);
+                            that.trigger('committed', vertex);
+                        }
+                    }
+                });
             }
 
             var undoFn = function() {
-                that.remove(nonEditingReplacement);
+                that.remove(vertex);
+                children.forEach(function(child) {
+                    that.remove(child);
+                })
             }
             var redoFn = function() {
-                that.add(nonEditingReplacement);
+                children.forEach(function(child) {
+                    that.add(child);
+                })
+                that.add(vertex, function() {
+                    children.forEach(function(child) {
+                        graph.addEdge(vertex, child);
+                    });
+                });
             }
 
             var command = new Command(doFn, undoFn, redoFn);

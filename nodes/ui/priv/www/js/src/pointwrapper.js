@@ -102,9 +102,10 @@ define([
         },
 
         // This view is not draggable, but the display scene view can transfer 
-        // the dragging to this view (e.g. when a point is dragged)
+        // the dragging to this view (e.g. when a point is dragged), but only for
+        // points that are not prototypes any more
         isDraggable: function() {
-            return true;
+            return !this.model.vertex.proto;
         },
 
         dragStarted: function() {

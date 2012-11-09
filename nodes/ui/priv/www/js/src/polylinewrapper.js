@@ -75,8 +75,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
         workplaneDblClick: function(event) {
             var children = geometryGraph.childrenOf(this.vertex);
-            if (children.length > 3) {
-                geometryGraph.removeLastPointFromPolyline(this.vertex);
+            if (children.length > 2) {
                 geometryGraph.removeLastPointFromPolyline(this.vertex);
                 this.ok();
             } 
