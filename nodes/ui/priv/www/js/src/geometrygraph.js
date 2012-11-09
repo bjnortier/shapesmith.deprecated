@@ -4,9 +4,22 @@ define([
     'lib/sha1',
     'src/graph',
     'src/geomnode',
+    'src/command',
     'src/commandstack',
     ], 
-    function(_, Backbone, crypto, graphLib, geomNode, commandStack) {
+    function(_, Backbone, crypto, graphLib, geomNode, Command, commandStack) {
+
+    var post = function(url, data, successFn, errorFn) {
+        $.ajax({
+            type: 'POST',
+            url: url,
+            contentType: 'application/json',
+            data: data,
+            dataType: 'json',
+            success: successFn,
+            error: errorFn,
+        });
+    }
 
     var GeometryGraph = function() {
 
@@ -15,41 +28,45 @@ define([
 
         this.commit = function(vertex) {
             var nonEditingReplacement = vertex.cloneNonEditing();
-
-            var url = '/' + SS.session.username + '/' + SS.session.design + '/vertex/';
             var that = this;
-            $.ajax({
-                type: 'POST',
-                url: url,
-                contentType: 'application/json',
-                data: nonEditingReplacement.toJSON(),
-                dataType: 'json',
-                success: function(sha) {
-                    
-                    nonEditingReplacement.sha = sha;
-                    that.replace(vertex, nonEditingReplacement);
 
-                    url = '/' + SS.session.username + '/' + SS.session.design + '/graph/';
-                    $.ajax({
-                        type: 'POST',
-                        url: url,
-                        contentType: 'application/json',
-                        data: JSON.stringify(that.serialize()),
-                        dataType: 'json',
-                        success: function(sha) {
-                            that.trigger('committed', nonEditingReplacement);
-                        },
-                        error: function(jqXHR, textStatus, errorThrown) {
-                            commandStack.error(jqXHR.responseText);
-                        },
+            var doFn = function(commandSuccessFn, commandErrorFn) {
+                var url = '/' + SS.session.username + '/' + SS.session.design + '/vertex/';
+                post(
+                    url, 
+                    nonEditingReplacement.toJSON(),
+                    function(sha) {
+                        
+                        nonEditingReplacement.sha = sha;
+                        that.replace(vertex, nonEditingReplacement);
 
-                    })
+                        url = '/' + SS.session.username + '/' + SS.session.design + '/graph/';
+                        post(
+                            url,
+                            JSON.stringify(that.serialize()),
+                            function(sha) {
+                                commandSuccessFn(sha);
+                                that.trigger('committed', nonEditingReplacement);
+                            },
+                            function(jqXHR, textStatus, errorThrown) {
+                                commandErrorFn(jqXHR.responseText);
+                            });
 
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    commandStack.error(jqXHR.responseText);
-                }
-            });
+                    },
+                    function(jqXHR, textStatus, errorThrown) {
+                        commandErrorFn(jqXHR.responseText);
+                    });
+            }
+
+            var undoFn = function() {
+                that.remove(nonEditingReplacement);
+            }
+            var redoFn = function() {
+                that.add(nonEditingReplacement);
+            }
+
+            var command = new Command(doFn, undoFn, redoFn);
+            commandStack.do(command);
         }
 
         // When editing, the original vertex is kept 

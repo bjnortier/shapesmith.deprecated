@@ -1,5 +1,5 @@
-define(['src/toolbar', 'src/geometrygraphsingleton', 'src/interactioncoordinator'], 
-    function(toolbar, geometryGraph, coordinator) {
+define(['src/toolbar', 'src/geometrygraphsingleton', 'src/commandstack', 'src/interactioncoordinator'], 
+    function(toolbar, geometryGraph, commandStack, coordinator) {
 
     var SelectItemModel = toolbar.ItemModel.extend({
         icon: 'mouse32x32.png',
@@ -22,6 +22,7 @@ define(['src/toolbar', 'src/geometrygraphsingleton', 'src/interactioncoordinator
         initialize: function(attributes) {
             toolbar.Model.prototype.initialize.call(this, attributes);
             geometryGraph.on('committed', this.geometryCommitted, this);
+            commandStack.on('beforePop', this.beforePop, this);
             coordinator.on('keydown', this.keydown, this);
         },
 
@@ -75,6 +76,11 @@ define(['src/toolbar', 'src/geometrygraphsingleton', 'src/interactioncoordinator
             if (vertex.id === this.toolVertexId) {
                 this.launchTool(this.activeItem);
             }
+        },
+
+        // Cancel any active tools when geometry is popped
+        beforePop: function() {
+            this.setToSelect();
         },
 
         setToSelect: function() {
