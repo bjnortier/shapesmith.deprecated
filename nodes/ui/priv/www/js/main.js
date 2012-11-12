@@ -8,7 +8,13 @@ requirejs(
         'src/geometrygraphsingleton',
         'src/vertexmodelmanager',
         'src/webdriverutils',
-    ], function(coordinator, geomToolbar, workplane, trackBall, commandStack, geometryGraph) {
+    ], function(
+        coordinator,
+        geomToolbar,
+        workplane,
+        trackBall,
+        commandStack,
+        geometryGraph) {
 
     // *Sometimes* chrome will not generate a postate event on initial load
     // and Firefox doesn't popstate() on initial load. So for initial load we 

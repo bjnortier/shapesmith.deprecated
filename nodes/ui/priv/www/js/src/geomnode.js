@@ -53,14 +53,18 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
         newNode.editing = true;
         return newNode;
     }
-
-    GeomNode.prototype.toJSON = function() {
-        return JSON.stringify({
+    
+    GeomNode.prototype.toJSONSubset = function() {
+        return {
             type: this.type, 
             name: this.name,
             implicit: this.implicit,
             parameters: this.parameters,
-        })
+        }
+    }
+
+    GeomNode.prototype.toJSON = function() {
+        return JSON.stringify(this.toJSONSubset())
     }
 
     GeomNode.prototype.hasSameJSON = function(other) {
