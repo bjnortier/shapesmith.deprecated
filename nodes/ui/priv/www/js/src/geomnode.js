@@ -111,6 +111,10 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
         Node     : GeomNode,
         Point    : Point,
         Polyline : Polyline,
+        constructors: {
+            'point'    : Point,
+            'polyline' : Polyline,
+        }
     }
 
 });

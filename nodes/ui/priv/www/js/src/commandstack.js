@@ -70,18 +70,6 @@ define([
 
     }
 
-    var commandStack = new CommandStack();
-
-    if (this.toString() === "[object Window]") {
-        window.onpopstate = function(event) { 
-            var commit = (event.state && event.state.commit) || $.getQueryParam("commit");
-            if (!commandStack.pop(commit)) {
-                // No command stack available - load from disk
-                console.error('load from disk');
-            }
-        };
-    }
-
-    return commandStack;
+    return new CommandStack();;
 
 });

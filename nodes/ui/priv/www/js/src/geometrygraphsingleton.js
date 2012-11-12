@@ -1,5 +1,5 @@
-define(['src/geometrygraph'], function(geometryGraph) {
-    
+define(['src/commandstack', 'src/geometrygraph'], function(commandStack, geometryGraph) {
+
     return new geometryGraph.Graph();
 
 });

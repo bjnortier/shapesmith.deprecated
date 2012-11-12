@@ -41,7 +41,8 @@ validate(_ReqData, _User, Design, RequestJSON) ->
 create(_ReqData, User, Design, {[]}) ->
     case api_db:get_root(User, Design) of
 	undefined ->
-	    {ok, CommitSHA} = api_db:create(User, Design, commit, {[{<<"geoms">>, []}]}),
+	    {ok, CommitSHA} = api_db:create(User, Design, graph, {[{<<"edges">>, []}]}),
+        io:format("~p~n", [CommitSHA]),
 	    Root = {[{<<"refs">>, 
 		      {[{<<"heads">>, 
 			 {[{<<"master">>, list_to_binary(CommitSHA)}]} 

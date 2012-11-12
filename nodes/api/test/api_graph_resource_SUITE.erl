@@ -44,6 +44,7 @@ create(_Config) ->
 
     %% Sha in location matches response bidy
     SHA  = binary_to_list(jiffy:decode(ResponseBody0)),
+    io:format("~p~n", [SHA]),
 
     {ok,{{"HTTP/1.1",200,_}, _, ResponseBody}} = 
         httpc:request(get, {?URL ++ SHA, []}, [], []),

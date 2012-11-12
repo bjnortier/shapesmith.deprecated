@@ -49,15 +49,15 @@ post_is_create(ReqData, Context) ->
     {true, ReqData, Context}. 
 
 create_path(ReqData, Context0) ->
-    try 
+    % try 
         JSON = api_resource:parse_json(ReqData),
         Context1 = Context0#context{json=JSON},
         SHA = api_hash:hash_json(JSON),
-        {SHA, ReqData, Context1}
-    catch 
-        invalid_json ->
-            {{halt, 400}, ReqData, Context0}
-    end.
+        {SHA, ReqData, Context1}.
+    % catch 
+    %     invalid_json ->
+    %         {{halt, 400}, ReqData, Context0}
+    % end.
 
 accept_content(ReqData0, Context = #context{ user = User, 
                                              design = Design }) ->

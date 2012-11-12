@@ -21,6 +21,16 @@ define([
         });
     }
 
+    var get = function(url, successFn, errorFn) {
+        $.ajax({
+            type: 'GET',
+            url: url,
+            dataType: 'json',
+            success: successFn,
+            error: errorFn,
+        });
+    }
+
     var GeometryGraph = function() {
 
         _.extend(this, Backbone.Events);
@@ -37,7 +47,6 @@ define([
                 post(url, v.toJSON(), function(sha) {
                     v.sha = sha;
                     shas[i] = sha;
-                    console.log(i);
                     var someRemaining = _.any(shas, function(sha) {
                         return sha === undefined;
                     });
@@ -132,6 +141,60 @@ define([
             var command = new Command(doFn, undoFn, redoFn);
             commandStack.do(command);
         }
+
+        this.removeAll = function() {
+            graph.vertices().forEach(function(vertex) {
+                that.remove(vertex);
+            });
+        }
+
+        this.createGraph = function(deserializedGraph, shasToVertices) {
+            var handledSHAs = [];
+            while(_.keys(deserializedGraph.edges).length > 0) {
+                for(parentSHA in deserializedGraph.edges) {
+                    var childrenSHAs = deserializedGraph.edges[parentSHA];
+                    var canHandle = _.intersection(childrenSHAs, handledSHAs).length == childrenSHAs.length;
+                    if (canHandle) {
+
+                        var parentVertex = shasToVertices[parentSHA];
+                        var childVertices = childrenSHAs.map(function(childSHA) {
+                            return shasToVertices[childSHA];
+                        });
+                        that.add(parentVertex, function() {
+                            childVertices.map(function(childvertex) {
+                                graph.addEdge(parentVertex, childvertex);
+                            });
+                        });
+                        handledSHAs.push(parentSHA);
+                        delete deserializedGraph.edges[parentSHA];
+                    }
+                }
+            }
+        }
+
+
+        this.loadFromCommit = function(commit) {
+            var url = '/' + SS.session.username + '/' + SS.session.design + '/graph/' + commit;
+            this.removeAll();
+            get(url, function(graph) {
+                var vertexSHAsToLoad = _.keys(graph.edges);
+                var remaining = vertexSHAsToLoad.length;
+                shasToVertices = {};
+                vertexSHAsToLoad.forEach(function(sha) {
+                    get('/' + SS.session.username + '/' + SS.session.design + '/vertex/' + sha,
+                        function(data) {
+                            var vertex = new geomNode.constructors[data.type](data);
+                            shasToVertices[sha] = vertex;
+                            --remaining;
+                            if (remaining == 0) {
+                                that.createGraph(graph, shasToVertices);
+                            }
+                        });
+                });
+
+            });
+        }
+
 
         // When editing, the original vertex is kept 
         // for the cancel operation
