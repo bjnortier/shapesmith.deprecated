@@ -108,6 +108,7 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
 
     return {
         resetIDCounters : resetIDCounters,
+        Node     : GeomNode,
         Point    : Point,
         Polyline : Polyline,
     }

@@ -55,7 +55,7 @@ create_path(ReqData, Context0 = #context{ user = User,
         {_, OriginalVertexSHA} = lists:keyfind(<<"original">>, 1, JSONProps),
         {_, ReplacementVertexSHA} = lists:keyfind(<<"replacement">>, 1, JSONProps),
         MutateResult = mutate_graph(OriginalVertexSHA, ReplacementVertexSHA, Graph0),
-        {NewGraph, NotifyParents} = MutateResult,
+        {NewGraph, _NotifyParents} = MutateResult,
         {ok, NewGraphSHA} = api_db:create(User, Design, graph, NewGraph),
         Context1 = Context0#context{ mutate_result = MutateResult, new_graph_SHA = NewGraphSHA },
         {NewGraphSHA, ReqData, Context1}
