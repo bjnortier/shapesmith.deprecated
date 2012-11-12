@@ -27,12 +27,26 @@ define([
         var graph = new graphLib.Graph();
         var that = this;
 
-        var captureVertex = function(vertex, callback) {
+        var captureVertices = function(vertices, callback) {
             var url = '/' + SS.session.username + '/' + SS.session.design + '/vertex/';
-            post(url, vertex.toJSON(), function(sha) {
-                vertex.sha = sha;
-                callback(sha);
+
+            var shas = vertices.map(function() {
+                return undefined;
+            })
+            vertices.forEach(function(v, i) {
+                post(url, v.toJSON(), function(sha) {
+                    v.sha = sha;
+                    shas[i] = sha;
+                    console.log(i);
+                    var someRemaining = _.any(shas, function(sha) {
+                        return sha === undefined;
+                    });
+                    if (!someRemaining) {
+                        callback();
+                    }
+                });
             });
+
         }
 
         var captureGraph = function(callback) {
@@ -40,20 +54,18 @@ define([
             post(url, JSON.stringify(that.serialize()), callback);
         }
 
-        this.commit = function(editingVertex, ignoreImplicit) {
+        this.commitCreate = function(editingVertex) {
             var vertex = editingVertex.cloneNonEditing();
             var that = this;
             var children = this.childrenOf(vertex);
 
             var doFn = function(commandSuccessFn, commandErrorFn) {
                 
-                captureVertex(vertex, function(sha) {
-                    if (graph.vertexById(vertex.id) !== undefined) {
-                        that.replace(editingVertex, vertex);
-                        if (!vertex.implicit || ignoreImplicit) {
-                            captureGraph(commandSuccessFn);
-                            that.trigger('committed', vertex);
-                        }
+                captureVertices([vertex], function() {
+                    that.replace(editingVertex, vertex);
+                    if (!vertex.implicit) {
+                        captureGraph(commandSuccessFn);
+                        that.trigger('committed', [vertex]);
                     }
                 });
             }
@@ -72,6 +84,42 @@ define([
                     children.forEach(function(child) {
                         graph.addEdge(vertex, child);
                     });
+                });
+            }
+
+            var command = new Command(doFn, undoFn, redoFn);
+            commandStack.do(command);
+        }
+
+        this.commitEdit = function(editingVertex) {
+            var editingVertices = this.getEditingVertices();
+            var nonEditingVertices = editingVertices.map(function(v) {
+                return v.cloneNonEditing();
+            })
+            var originalVertices = nonEditingVertices.map(function(v) {
+                return originals[v.id];
+            }); 
+
+            var doFn = function(commandSuccessFn, commandErrorFn) {
+
+                captureVertices(nonEditingVertices, function() {
+                    for (var i = 0; i < editingVertices.length; ++i) {
+                        that.replace(editingVertices[i], nonEditingVertices[i]);
+                    }
+                    captureGraph(commandSuccessFn);
+                    that.trigger('committed', nonEditingVertices);
+                });
+            }
+
+            var undoFn = function() {
+                originalVertices.map(function(originalVertex, i) {
+                    that.replace(nonEditingVertices[i], originalVertex);
+                });
+            }
+
+            var redoFn = function() {
+                originalVertices.map(function(originalVertex, i) {
+                    that.replace(originalVertex, nonEditingVertices[i]);
                 });
             }
 
@@ -139,10 +187,9 @@ define([
         }
 
         this.commitIfEditing = function() {
-            var that = this;
-            this.getEditingVertices().map(function(vertex) {
-                that.commit(vertex);
-            });
+            if (this.getEditingVertices().length > 0) {
+                this.commitEdit();
+            }
         }
 
         // ---------- Prototypes ----------

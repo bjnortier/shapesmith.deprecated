@@ -33,7 +33,9 @@ define([
         },
 
         workplaneClick: function() {
-            this.ok();
+            if (this.vertex.proto) {
+                this.okCreate();
+            }
         },
 
     });
@@ -126,8 +128,7 @@ define([
 
         dragEnded: function() {
             if (this.dragging && !this.dragStartedWhilstEditing) {
-                var ignoreImplicit = true;
-                this.model.ok(ignoreImplicit);
+                this.model.okEdit();
                 this.dragging = false;
             }
         },

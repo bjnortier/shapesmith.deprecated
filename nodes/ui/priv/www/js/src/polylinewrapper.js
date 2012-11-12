@@ -77,7 +77,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
             var children = geometryGraph.childrenOf(this.vertex);
             if (children.length > 2) {
                 geometryGraph.removeLastPointFromPolyline(this.vertex);
-                this.ok();
+                this.okCreate();
             } 
         },
 

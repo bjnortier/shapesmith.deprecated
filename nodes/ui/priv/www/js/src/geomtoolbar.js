@@ -72,8 +72,8 @@ define(['src/toolbar', 'src/geometrygraphsingleton', 'src/commandstack', 'src/in
         // If the vertex committed is the tool vertex, create another
         // of the same type. Child vertices (e.g. points of polylines)
         // can be committed, so only create another for the top-level tools 
-        geometryCommitted: function(vertex) {
-            if (vertex.id === this.toolVertexId) {
+        geometryCommitted: function(vertices) {
+            if ((vertices.length === 1) && (vertices[0].id === this.toolVertexId)) {
                 this.launchTool(this.activeItem);
             }
         },
