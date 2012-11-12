@@ -21,7 +21,7 @@ requirejs(
                 geometryGraph.loadFromCommit(commit);
             }
         }
-    }, 1000);
+    }, 500);
 
     $(document).ready(function() {
         geometryGraph.loadFromCommit($.getQueryParam("commit"));   
