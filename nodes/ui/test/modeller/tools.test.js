@@ -6,18 +6,14 @@ chai.Assertion.includeStack = true;
 describe('Geometry toolbar', function() {
 
     before(function(done) {
-        client.init(function() {
-            done();
-        });
+        this.timeout(5000);
+        client.initDesign(done);
+            
     });
 
     beforeEach(function(done) {
         this.timeout(5000);
-        client
-            .url('http://localhost.shapesmith.net:8000/local/testdesign/modeller')
-            .execute('SS.dontDampTrackball(); SS.zoomIn(); ', function() {
-                done();
-            })
+        client.freshDesign(done);
 
     });
 

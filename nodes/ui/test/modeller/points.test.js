@@ -6,17 +6,14 @@ chai.Assertion.includeStack = true;
 describe('Points', function() {
 
     before(function(done) {
-        client.init(function() {
-            done();
-        });
+        this.timeout(5000);
+        client.initDesign(done);
+            
     });
 
     beforeEach(function(done) {
-        client
-            .url('http://localhost.shapesmith.net:8000/local/testdesign/modeller')
-            .execute('SS.dontDampTrackball(); SS.zoomIn(); ', function() {
-                done();
-            })
+        this.timeout(5000);
+        client.freshDesign(done);
 
     });
 

@@ -7,18 +7,13 @@ describe('Polylines', function() {
 
     before(function(done) {
         this.timeout(5000);
-        client.init(function() {
-            done();
-        });
+        client.initDesign(done);
+            
     });
 
     beforeEach(function(done) {
-        this.timeout(2000);
-        client
-            .url('http://localhost.shapesmith.net:8000/local/testdesign/modeller')
-            .execute('SS.dontDampTrackball(); SS.zoomIn(); ', function() {
-                done();
-            })
+        this.timeout(5000);
+        client.freshDesign(done);
 
     });
 

@@ -9,6 +9,24 @@ var client = remote({
     }
 });
 
+client.addCommand('initDesign', function(callback) {
+    this
+        .init()
+        .url('http://localhost.shapesmith.net:8000/')
+        .setValue('#newDesignName', '__test__')
+        .click('#create-design-button', function() {
+            callback()
+        });
+});
+
+client.addCommand('freshDesign', function(callback) {
+    this    
+        .url('http://localhost.shapesmith.net:8000/local/__test__/modeller?commit=fa9d5982d4cec7987eb46383ab6452afcefe85c1')
+        .execute('SS.dontDampTrackball(); SS.zoomIn(); ', function() {
+            callback();
+        });
+});
+
 client.addCommand('assertTextEqual', function(selector, text, callback) {
     this.getText(selector, function(result) {
         assert.equal(result.value, text, selector);

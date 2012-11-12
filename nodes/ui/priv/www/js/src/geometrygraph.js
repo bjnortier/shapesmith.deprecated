@@ -184,6 +184,7 @@ define([
                     get('/' + SS.session.username + '/' + SS.session.design + '/vertex/' + sha,
                         function(data) {
                             var vertex = new geomNode.constructors[data.type](data);
+                            vertex.sha = sha;
                             shasToVertices[sha] = vertex;
                             --remaining;
                             if (remaining == 0) {
