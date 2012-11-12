@@ -62,10 +62,16 @@ define([
             var doFn = function(commandSuccessFn, commandErrorFn) {
                 
                 captureVertices([vertex], function() {
-                    that.replace(editingVertex, vertex);
-                    if (!vertex.implicit) {
-                        captureGraph(commandSuccessFn);
-                        that.trigger('committed', [vertex]);
+                    // When a polyline is ended with
+                    // a double-click, the vertex is captured async, and is removed
+                    // synchronously from the graph. So if it's no longer in the graph,
+                    // don't do the replacement
+                    if (graph.vertexById(vertex.id) !== undefined) {
+                        that.replace(editingVertex, vertex);
+                        if (!vertex.implicit) {
+                            captureGraph(commandSuccessFn);
+                            that.trigger('committed', [vertex]);
+                        }
                     }
                 });
             }

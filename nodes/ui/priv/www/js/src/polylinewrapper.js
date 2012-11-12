@@ -98,7 +98,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                     }
                 } else {
                     geometryGraph.removeLastPointFromPolyline(this.vertex);
-                    this.ok();
+                    this.okCreate();
                 }
                 this.lastClickTimestamp = timeStamp
             }

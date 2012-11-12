@@ -140,7 +140,7 @@ describe('Polylines', function() {
     });
 
     it('can be edited by selected another one', function(done) {
-    this.timeout(5000);
+        this.timeout(5000);
         client
             .click('.toolbar .polyline')
             .clickOnWorld(0,0,0)
@@ -177,6 +177,28 @@ describe('Polylines', function() {
             .assertNumberOfDisplayNodes(2, done)
     });
 
+    it("doesn't create extra points on double-click ending", function(done) {
+        this.timeout(5000);
+        client
+            .click('.toolbar .polyline')
+            .clickOnWorld(0,0,0)
+            .clickOnWorld(10,10,0)
+            .dblClickOnWorld(20,20,0)
+            .click('.toolbar .select')
+            .moveToWorld(20,20,0)
+            .buttonDown()
+            .moveToWorld(30,30,0)
+            .moveToWorld(30,30,0)
+            .assertNumberOfEditingNodes(1)
+            .assertNumberOfDisplayNodes(1)
+            .buttonUp()
+            .moveToWorld(20,20,0)
+            .buttonDown()
+            .moveToWorld(30,30,0)
+            .moveToWorld(30,30,0)
+            .assertNumberOfEditingNodes(0)
+            .assertNumberOfDisplayNodes(1, done)
+    });
 
 });
 
