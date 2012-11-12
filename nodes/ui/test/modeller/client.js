@@ -27,6 +27,29 @@ client.addCommand('freshDesign', function(callback) {
         });
 });
 
+client.addCommand('waitForUrlChange', function(callback) {
+    client.url(function(result) {
+        var from = result.value;
+        var waitForUrlChange = function() {
+            var current = client.url(function(result) {
+                if (result.value === from) {
+                    setTimeout(waitForUrlChange, 100);
+                } else {
+                    callback();
+                }
+            })
+        }
+        waitForUrlChange();
+    });
+});
+
+client.addCommand('loadCommit', function(callback) {
+    this    
+        .refresh()
+        .execute('SS.dontDampTrackball(); SS.zoomIn(); ')
+        .pause(1000, callback);
+});
+
 client.addCommand('assertTextEqual', function(selector, text, callback) {
     this.getText(selector, function(result) {
         assert.equal(result.value, text, selector);
