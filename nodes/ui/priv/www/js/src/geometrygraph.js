@@ -42,7 +42,7 @@ define([
                         return sha === undefined;
                     });
                     if (!someRemaining) {
-                        callback();
+                        callback(shas);
                     }
                 });
             });
@@ -97,7 +97,7 @@ define([
             commandStack.do(command);
         }
 
-        this.commitEdit = function(editingVertex) {
+        this.commitEdit = function() {
             var editingVertices = this.getEditingVertices();
             var nonEditingVertices = editingVertices.map(function(v) {
                 return v.cloneNonEditing();
@@ -108,7 +108,7 @@ define([
 
             var doFn = function(commandSuccessFn, commandErrorFn) {
 
-                captureVertices(nonEditingVertices, function() {
+                captureVertices(nonEditingVertices, function(shas) {
                     for (var i = 0; i < editingVertices.length; ++i) {
                         that.replace(editingVertices[i], nonEditingVertices[i]);
                     }
@@ -193,7 +193,20 @@ define([
         }
 
         this.commitIfEditing = function() {
-            if (this.getEditingVertices().length > 0) {
+            var editingVertices = this.getEditingVertices();
+            var allAreSame = true;
+            for (var i = 0; i < editingVertices.length; ++i) {
+                if (!originals[editingVertices[i].id].hasSameJSON(editingVertices[i])) {
+                    allAreSame = false;
+                    break;
+                }
+            }
+
+            if (allAreSame) {
+                editingVertices.map(function(editingVertex, i) {
+                    that.replace(editingVertex, originals[editingVertex.id]);
+                });
+            } else {
                 this.commitEdit();
             }
         }

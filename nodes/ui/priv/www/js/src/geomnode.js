@@ -63,6 +63,10 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
         })
     }
 
+    GeomNode.prototype.hasSameJSON = function(other) {
+        return this.toJSON() === other.toJSON();
+    }
+
     var copyObj = function(value) {
         if ((value === null) || (value === undefined)) {
             return undefined;
