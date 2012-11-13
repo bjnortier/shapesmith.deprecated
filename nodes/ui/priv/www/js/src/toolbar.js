@@ -77,6 +77,10 @@ define(['src/interactioncoordinator', 'src/geometrygraphsingleton'],
         tagName: "ol",
         className: "toolbar",
 
+        initialize: function() {
+            this.$el.addClass(this.model.name);
+        },
+
     });
 
     return  {

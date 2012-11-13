@@ -25,23 +25,25 @@
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8"
-     inkscape:cx="137.04848"
-     inkscape:cy="546.6904"
+     inkscape:zoom="5.6"
+     inkscape:cx="327.65811"
+     inkscape:cy="564.98592"
      inkscape:current-layer="layer1"
      showgrid="true"
      units="mm"
      inkscape:window-width="1555"
      inkscape:window-height="960"
-     inkscape:window-x="1741"
-     inkscape:window-y="42"
-     inkscape:window-maximized="0">
+     inkscape:window-x="1712"
+     inkscape:window-y="17"
+     inkscape:window-maximized="0"
+     showguides="true"
+     inkscape:guide-bbox="true">
     <inkscape:grid
        type="xygrid"
        id="grid8723"
        empspacing="5"
        visible="false"
-       enabled="true"
+       enabled="false"
        snapvisiblegridlinesonly="true" />
   </sodipodi:namedview>
   <metadata
@@ -60,6 +62,17 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
+    <rect
+       style="fill:#5b5b5b;fill-opacity:0.14932127;stroke:#9b8e8e;stroke-width:0.50000000000000000;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect3998"
+       width="50.760166"
+       height="50.633896"
+       x="249.25514"
+       y="436.92676"
+       ry="2.3991129"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/save32x32.png"
+       inkscape:export-xdpi="48"
+       inkscape:export-ydpi="48" />
     <rect
        style="fill:none;stroke:#ffffff;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="rect8725"
@@ -116,5 +129,72 @@
        d="m 185,557.36218 30,-30"
        id="path3800"
        inkscape:connector-curvature="0" />
+    <rect
+       style="fill:none;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect8725-4"
+       width="60"
+       height="60"
+       x="245"
+       y="432.36218"
+       ry="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/save32x32.png"
+       inkscape:export-xdpi="48"
+       inkscape:export-ydpi="48" />
+    <path
+       style="fill:#87c5ff;fill-opacity:1;stroke:none"
+       d="m 261.75857,436.92052 0,17.9375 27.64007,0 0,-17.9375 z m 15.01507,2.53125 6.1875,0 0,12.625 -6.1875,0 z"
+       id="rect3973"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccccc"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/save32x32.png"
+       inkscape:export-xdpi="48"
+       inkscape:export-ydpi="48" />
+    <rect
+       style="fill:none;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect8725-1"
+       width="60"
+       height="60"
+       x="325"
+       y="432.36218"
+       ry="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/exit32x32.png"
+       inkscape:export-xdpi="48"
+       inkscape:export-ydpi="48" />
+    <g
+       id="g4089"
+       transform="matrix(1.3979317,0,0,1.3979317,-142.45157,-180.49373)"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/exit32x32.png"
+       inkscape:export-xdpi="48"
+       inkscape:export-ydpi="48">
+      <path
+         inkscape:export-ydpi="48"
+         inkscape:export-xdpi="48"
+         inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/exit32x32.png"
+         inkscape:connector-curvature="0"
+         id="path4083"
+         d="m 356.83639,462.68563 0,2.33598 11.74302,0 0,2.58852 4.54569,-3.4724 -4.60882,-4.04061 0,2.52538 z"
+         style="fill:#86d4ff;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         inkscape:export-ydpi="48"
+         inkscape:export-xdpi="48"
+         inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/exit32x32.png"
+         d="m 353.125,448.21039 c 0,1.13415 -0.99937,2.05357 -2.23215,2.05357 -1.23278,0 -2.23214,-0.91942 -2.23214,-2.05357 0,-1.13416 0.99936,-2.05357 2.23214,-2.05357 1.23278,0 2.23215,0.91941 2.23215,2.05357 z"
+         sodipodi:ry="2.0535715"
+         sodipodi:rx="2.2321429"
+         sodipodi:cy="448.21039"
+         sodipodi:cx="350.89285"
+         id="path4085"
+         style="fill:#86d4ff;fill-opacity:1;stroke:none"
+         sodipodi:type="arc" />
+      <path
+         inkscape:export-ydpi="48"
+         inkscape:export-xdpi="48"
+         inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/exit32x32.png"
+         sodipodi:nodetypes="ccccccccccccccccccccc"
+         inkscape:connector-curvature="0"
+         id="path4087"
+         d="m 340,458.38897 1.83036,0.66964 1.76722,-4.20184 2.25063,-0.48566 c -2.24932,4.84807 -3.17282,7.89681 -4.22258,12.17667 l -3.0542,5.45726 2.09821,1.16071 6.02679,-10.43335 3.39286,3.78157 0.3125,7.05357 2.36607,0 0,-8.25893 -3.21429,-4.46429 1.19229,-4.89539 2.022,1.63647 4.86607,1.60714 0.71428,-1.51786 -5.22321,-2.45536 c -1.47092,-4.72464 -3.13124,-4.9983 -6.875,-4.41964 l -4.59821,2.54464 z"
+         style="fill:#86d4ff;fill-opacity:1;stroke:none" />
+    </g>
   </g>
 </svg>

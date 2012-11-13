@@ -58,14 +58,22 @@ img#logo {
 
 .toolbar {
     background: rgba(51, 51, 51, 0.46);
+    padding: 5px;
 }
 
-.toolbar {
+.toolbar.geometry {
     position: absolute;
     margin-left: -37px;
     left: 50%;
-    bottom: 16px;
-    padding: 5px;
+    bottom: 0px;
+    padding-bottom: 10px;
+}
+
+.toolbar.main {
+    position: absolute;
+    margin-left: -37px;
+    left: 50%;
+    top: 0px;
     padding-bottom: 10px;
 }
 
