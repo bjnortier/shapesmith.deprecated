@@ -2,14 +2,14 @@ define([
     'lib/underscore-require', 
     'lib/backbone-require', 
     'src/geometrygraphsingleton', 
-    'src/interactioncoordinator',
-    'src/geomtoolbar'], 
+    'src/interactioncoordinator'], 
     function(_, Backbone, geometryGraph, coordinator, geomToolbarModel) {
     
     var Manager = function() {
 
         _.extend(this, Backbone.Events);
         this.selected = [];
+        this.canSelect = false;
 
         var that = this;
         coordinator.on('sceneClick', function() {
@@ -17,8 +17,8 @@ define([
         });
 
         this.selectOnly = function(id) {
-            if (!geomToolbarModel.isSelectActive()) {
-                return
+            if (!this.canSelect) {
+                return;
             }
 
             var deselected = [];
@@ -40,7 +40,7 @@ define([
         }
 
         this.addToSelection = function(id) {
-            if (!geomToolbarModel.isSelectActive()) {
+            if (!this.canSelect) {
                 return
             }
             

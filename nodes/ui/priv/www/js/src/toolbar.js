@@ -6,6 +6,7 @@ define(['src/interactioncoordinator', 'src/geometrygraphsingleton'],
         initialize: function(attributes) {
             this.view = new ItemView({model: this});
             this.toolbarModel = attributes.toolbarModel;
+            this.set('enabled', true);
         },
 
         click: function() {
@@ -31,10 +32,13 @@ define(['src/interactioncoordinator', 'src/geometrygraphsingleton'],
             this.render();
             this.$el.addClass(this.model.name);
             this.model.on('change:active', this.updateActive, this);
+            this.model.on('change:enabled', this.updateEnabled, this);
+            this.updateActive();
+            this.updateEnabled();
         },
 
         render: function() {
-            $(this.el).html('<img src=/ui/images/icons/' + this.model.icon + '/>');
+            $(this.el).html('<div class="icon"></div>');
             return this;
         },
 
@@ -51,7 +55,15 @@ define(['src/interactioncoordinator', 'src/geometrygraphsingleton'],
                 this.$el.addClass('active');
             } else {
                 this.$el.removeClass('active');
-                }
+            }
+        },
+
+        updateEnabled: function() {
+            if(!this.model.get('enabled')) {
+                this.$el.addClass('disabled');
+            } else {
+                this.$el.removeClass('disabled');
+            }
         },
 
     });

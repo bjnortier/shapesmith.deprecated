@@ -33,7 +33,13 @@ define([
         },
 
         workplaneClick: function() {
+            var that = this;
             if (this.vertex.proto) {
+                if (this.vertex.implicit) {
+                    geometryGraph.parentsOf(this.vertex).map(function(parent) {
+                        parent.trigger('beforeImplicitChildCommit', that.vertex);
+                    });
+                }
                 this.okCreate();
             }
         },

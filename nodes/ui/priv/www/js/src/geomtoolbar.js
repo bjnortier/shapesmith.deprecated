@@ -1,19 +1,68 @@
-define(['src/toolbar', 'src/geometrygraphsingleton', 'src/commandstack', 'src/interactioncoordinator'], 
-    function(toolbar, geometryGraph, commandStack, coordinator) {
+define([
+    'src/toolbar', 
+    'src/geometrygraphsingleton', 
+    'src/commandstack', 
+    'src/interactioncoordinator',
+    'src/selection'
+    ], 
+    function(
+        toolbar, 
+        geometryGraph, 
+        commandStack, 
+        coordinator, 
+        selectionManager) {
 
     var SelectItemModel = toolbar.ItemModel.extend({
-        icon: 'mouse32x32.png',
+        
         name: 'select',
+
+        activate: function() {
+            toolbar.ItemModel.prototype.activate.call(this);
+            selectionManager.canSelect = true;
+        },
+
+        deactivate: function() {
+            toolbar.ItemModel.prototype.deactivate.call(this);
+            selectionManager.canSelect = false;
+            selectionManager.deselectAll();
+        },
+
     });
 
     var PointItemModel = toolbar.ItemModel.extend({
-        icon: 'point32x32.png',
         name: 'point',
     });
 
-    var LineItemModel = toolbar.ItemModel.extend({
-        icon: 'line32x32.png',
+    var Polyline = toolbar.ItemModel.extend({
         name: 'polyline',
+    });
+
+    var Extrude = toolbar.ItemModel.extend({
+        name: 'extrude',
+
+        initialize: function(attributes) {
+            toolbar.ItemModel.prototype.initialize.call(this, attributes);
+            this.set('enabled', false);
+            selectionManager.on('selected', this.selectionChanged, this);
+            selectionManager.on('deselected', this.selectionChanged, this);
+        },
+
+        selectionChanged: function(_, selection) {
+            var polyline;
+            if (selection.length === 1) {
+                var vertex = geometryGraph.vertexById(selection[0]);
+                if (vertex.type === 'polyline') {
+                    polyline = vertex;
+                }
+            }
+            if (polyline) {
+                this.set('enabled', true);
+            } else {
+                this.set('enabled', false);
+            }
+        },
+
+
     });
 
 
@@ -96,7 +145,8 @@ define(['src/toolbar', 'src/geometrygraphsingleton', 'src/commandstack', 'src/in
     var toolbarModel = new GeomToolbarModel({name: 'geometry'});
     toolbarModel.addItem(new SelectItemModel({toolbarModel: toolbarModel}));
     toolbarModel.addItem(new PointItemModel({toolbarModel: toolbarModel}));
-    toolbarModel.addItem(new LineItemModel({toolbarModel: toolbarModel}));
+    toolbarModel.addItem(new Polyline({toolbarModel: toolbarModel}));
+    toolbarModel.addItem(new Extrude({toolbarModel: toolbarModel}));
     toolbarModel.setToSelect();
     return toolbarModel;
 

@@ -13,7 +13,6 @@ define(['src/toolbar',
             bsqToolbarItemModel) {
 
     var SaveItemModel = toolbar.ItemModel.extend({
-        icon: 'save32x32.png',
         name: 'save',
 
         click: function() {
@@ -35,7 +34,6 @@ define(['src/toolbar',
     });
 
     var ExitItemModel = toolbar.ItemModel.extend({
-        icon: 'exit32x32.png',
         name: 'exit',
 
         click: function() {

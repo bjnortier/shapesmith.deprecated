@@ -60,6 +60,7 @@ define([
 
         var captureGraph = function(callback) {
             var url = '/' + SS.session.username + '/' + SS.session.design + '/graph/';
+            console.log(that.serialize());
             post(url, JSON.stringify(that.serialize()), callback);
         }
 
@@ -363,6 +364,10 @@ define([
             notifyAncestors(vertex);
         }
 
+        this.vertexById = function(id) {
+            return graph.vertexById(id);
+        }
+
         this.childrenOf = function(vertex) {
             return graph.outgoingVerticesOf(vertex).map(function(id) {
                 return graph.vertexById(id);
@@ -390,9 +395,12 @@ define([
             var result = {edges:{}};
             var that = this;
             vertices.forEach(function(vertex) {
-                result.edges[vertex.sha] = that.childrenOf(vertex).map(function(child) {
-                    return child.sha;
-                });
+                // Ignore the prototype vertices when the serialization happens
+                if (vertex.sha) {
+                    result.edges[vertex.sha] = that.childrenOf(vertex).map(function(child) {
+                        return child.sha;
+                    });
+                }
             });
             return result;
         }

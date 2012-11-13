@@ -86,7 +86,7 @@ define([
             sceneViewEventGenerator.off('sceneViewDblClick', this.sceneViewDblClick, this);
         },  
 
-        okCreate: function(ignoreImplicit) {
+        okCreate: function() {
             geometryGraph.commitCreate(this.vertex);
         },
 

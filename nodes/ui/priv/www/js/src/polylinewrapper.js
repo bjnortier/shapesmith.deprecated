@@ -48,21 +48,19 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 new EditingDOMView({model: this}),
                 new EditingLineSceneView({model: this}),
             ]);
-            geometryGraph.on('vertexReplaced', this.vertexReplaced, this);
             this.vertex.on('descendantChanged', this.descendantChanged, this);
+            this.vertex.on('beforeImplicitChildCommit', this.beforeImplicitChildCommit, this);
         },
 
         destroy: function() {
             vertexWrapper.EditingModel.prototype.destroy.call(this);
-            geometryGraph.off('vertexReplaced', this.vertexReplaced, this);
             this.vertex.off('descendantChanged', this.descendantChanged, this);
+            this.vertex.off('beforeImplicitChildCommit', this.beforeImplicitChildCommit, this);
         },
 
-        // If the replaced vertex is the last point in the polyline,
-        // this means the point has be committed, so add another point
-        vertexReplaced: function(original, replacement) {
+        beforeImplicitChildCommit: function(childVertex) {
             if (this.vertex.proto) {
-                if (_.last(geometryGraph.childrenOf(this.vertex)) === replacement) {
+                if (_.last(geometryGraph.childrenOf(this.vertex)) === childVertex) {
                     geometryGraph.addPointToPolyline(this.vertex);
                 }
             }
@@ -74,8 +72,11 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         workplaneDblClick: function(event) {
+            this.finished = true;
             var children = geometryGraph.childrenOf(this.vertex);
             if (children.length > 2) {
+                // Remove the extra point added
+                geometryGraph.removeLastPointFromPolyline(this.vertex);
                 this.okCreate();
             } 
         },

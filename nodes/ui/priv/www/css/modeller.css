@@ -63,7 +63,7 @@ img#logo {
 
 .toolbar.geometry {
     position: absolute;
-    margin-left: -37px;
+    margin-left: -67px; /* 2x 32 + 5/2 */
     left: 50%;
     bottom: 0px;
     padding-bottom: 10px;
@@ -170,7 +170,43 @@ img#logo {
     background: rgba(91, 91, 91, 0.46);
 }
 
+.toolbar .item .icon {
+    width: 32px;
+    min-height: 32px;
+    display: inline-block;
+}
 
+.toolbar .item .icon {
+    background-position: top; left;
+}
+
+.toolbar.main .save .icon {
+    background-image: url('/ui/images/icons/save32x32.png');
+}
+
+.toolbar.main .exit .icon {
+    background-image: url('/ui/images/icons/exit32x32.png');
+}
+
+.toolbar.geometry .select .icon {
+    background-image: url('/ui/images/icons/mouse32x32.png');
+}
+
+.toolbar.geometry .point .icon {
+    background-image: url('/ui/images/icons/point32x32.png');
+}
+
+.toolbar.geometry .polyline .icon {
+    background-image: url('/ui/images/icons/line32x32.png');
+}
+
+.toolbar.geometry .extrude .icon {
+    background-image: url('/ui/images/icons/extrude32x32.png');
+}
+
+.toolbar.geometry .extrude.disabled .icon {
+    background-image: url('/ui/images/icons/extrude32x32.disabled.png');
+}
 
 
 

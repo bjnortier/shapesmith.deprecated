@@ -23,17 +23,17 @@
      pagecolor="#000000"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="0"
+     inkscape:pageopacity="1"
      inkscape:pageshadow="2"
-     inkscape:zoom="5.6"
-     inkscape:cx="327.65811"
-     inkscape:cy="564.98592"
+     inkscape:zoom="2.8"
+     inkscape:cx="291.55146"
+     inkscape:cy="522.12878"
      inkscape:current-layer="layer1"
      showgrid="true"
      units="mm"
      inkscape:window-width="1555"
      inkscape:window-height="960"
-     inkscape:window-x="1712"
+     inkscape:window-x="1708"
      inkscape:window-y="17"
      inkscape:window-maximized="0"
      showguides="true"
@@ -54,7 +54,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -62,6 +62,12 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
+    <path
+       style="fill:#86d4ff;fill-opacity:0.48953977;stroke:none"
+       d="m 255,514.14789 50,0.89286 0,47.32143 -50,-5 z"
+       id="rect3131"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
     <rect
        style="fill:#5b5b5b;fill-opacity:0.14932127;stroke:#9b8e8e;stroke-width:0.50000000000000000;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="rect3998"
@@ -196,5 +202,34 @@
          d="m 340,458.38897 1.83036,0.66964 1.76722,-4.20184 2.25063,-0.48566 c -2.24932,4.84807 -3.17282,7.89681 -4.22258,12.17667 l -3.0542,5.45726 2.09821,1.16071 6.02679,-10.43335 3.39286,3.78157 0.3125,7.05357 2.36607,0 0,-8.25893 -3.21429,-4.46429 1.19229,-4.89539 2.022,1.63647 4.86607,1.60714 0.71428,-1.51786 -5.22321,-2.45536 c -1.47092,-4.72464 -3.13124,-4.9983 -6.875,-4.41964 l -4.59821,2.54464 z"
          style="fill:#86d4ff;fill-opacity:1;stroke:none" />
     </g>
+    <rect
+       style="fill:none;stroke:#ffffff;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect8725-8"
+       width="60"
+       height="60"
+       x="250"
+       y="507.36218"
+       ry="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/vertex32x32.png"
+       inkscape:export-xdpi="48"
+       inkscape:export-ydpi="48" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 255,557.36218 50,5"
+       id="path3800-5"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:1.99842525;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 280,559.50504 0,-37.67857"
+       id="path3800-5-4"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:none"
+       d="m 279.91071,515.66575 -3.21428,8.03572 6.60714,0.80357 z"
+       id="path3920"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc" />
   </g>
 </svg>
