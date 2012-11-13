@@ -107,11 +107,14 @@ define(['src/scene'], function(sceneModel) {
         }
 
         this.click = function(event) {
-            // Return value is used to deselect all of no scene view
-            // click event is generated
+
+
             var clickableViews = mouseOverViews.filter(function(view) {
                 return view.clickable;
             });
+
+            // Return value is used to deselect all of no scene view
+            // click event is generated
             if (clickableViews.length > 0) {
                 clickableViews[0].trigger('click', event);
                 this.trigger('sceneViewClick', {event: event, view: clickableViews[0]});

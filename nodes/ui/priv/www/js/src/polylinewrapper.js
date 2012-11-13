@@ -61,7 +61,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         // If the replaced vertex is the last point in the polyline,
         // this means the point has be committed, so add another point
         vertexReplaced: function(original, replacement) {
-            if (!this.finishing && this.vertex.proto) {
+            if (this.vertex.proto) {
                 if (_.last(geometryGraph.childrenOf(this.vertex)) === replacement) {
                     geometryGraph.addPointToPolyline(this.vertex);
                 }
@@ -74,34 +74,28 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         workplaneDblClick: function(event) {
-            this.finishing = true;
             var children = geometryGraph.childrenOf(this.vertex);
             if (children.length > 2) {
-                geometryGraph.removeLastPointFromPolyline(this.vertex);
                 this.okCreate();
             } 
         },
 
         sceneViewClick: function(viewAndEvent) {
             if (this.vertex.proto) {
-                var timeStamp = new Date().getTime();
-                var isDoubleCLick = this.lastClickTimestamp 
-                                    && 
-                                    (timeStamp - this.lastClickTimestamp < 500);
-
-                if (!isDoubleCLick) {
-                    var children = geometryGraph.childrenOf(this.vertex);
-                    if (viewAndEvent.view.model.vertex.type === 'point') {
-                        geometryGraph.removeLastPointFromPolyline(this.vertex);
-                        geometryGraph.addPointToPolyline(this.vertex, viewAndEvent.view.model.vertex);
-                        geometryGraph.addPointToPolyline(this.vertex);
-                        this.vertex.trigger('change', this.vertex);
-                    }
-                } else {
+                var children = geometryGraph.childrenOf(this.vertex);
+                if (viewAndEvent.view.model.vertex.type === 'point') {
                     geometryGraph.removeLastPointFromPolyline(this.vertex);
-                    this.okCreate();
-                }
-                this.lastClickTimestamp = timeStamp
+                    geometryGraph.addPointToPolyline(this.vertex, viewAndEvent.view.model.vertex);
+                    geometryGraph.addPointToPolyline(this.vertex);
+                    this.vertex.trigger('change', this.vertex);
+                } 
+            }
+        },
+
+        sceneViewDblClick: function(viewAndEvent) {
+            if (viewAndEvent.view.model.vertex.type === 'point') {
+                geometryGraph.removeLastPointFromPolyline(this.vertex);
+                this.okCreate();
             }
         },
 
