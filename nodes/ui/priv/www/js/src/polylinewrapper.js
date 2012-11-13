@@ -61,7 +61,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         // If the replaced vertex is the last point in the polyline,
         // this means the point has be committed, so add another point
         vertexReplaced: function(original, replacement) {
-            if (this.vertex.proto) {
+            if (!this.finishing && this.vertex.proto) {
                 if (_.last(geometryGraph.childrenOf(this.vertex)) === replacement) {
                     geometryGraph.addPointToPolyline(this.vertex);
                 }
@@ -74,6 +74,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         workplaneDblClick: function(event) {
+            this.finishing = true;
             var children = geometryGraph.childrenOf(this.vertex);
             if (children.length > 2) {
                 geometryGraph.removeLastPointFromPolyline(this.vertex);
