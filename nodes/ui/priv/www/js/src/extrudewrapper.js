@@ -76,10 +76,8 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         workplaneClick: function() {
             if (this.vertex.proto) {
                 this.okCreate();
-                
-            } else {
-                this.okEdit();
-            }
+            } 
+            // Edit is handled by listening to selection
         },
 
     });
