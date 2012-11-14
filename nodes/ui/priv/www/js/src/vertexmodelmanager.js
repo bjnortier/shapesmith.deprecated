@@ -1,10 +1,22 @@
-define(['src/geometrygraphsingleton', 'src/selection', 'src/pointwrapper', 'src/polylinewrapper'], 
-    function(geometryGraph, selection, point, polyline) {
+define([
+        'src/geometrygraphsingleton', 
+        'src/selection', 
+        'src/pointwrapper', 
+        'src/polylinewrapper',
+        'src/extrudewrapper',
+    ], 
+    function(
+        geometryGraph, 
+        selectionManager, 
+        Point, 
+        Polyline,
+        Extrude) {
     
     var models = {};
     var wrappers = {
-        'point'    : point,
-        'polyline' : polyline,
+        'point'    : Point,
+        'polyline' : Polyline,
+        'extrude'  : Extrude,
     }
 
     geometryGraph.on('vertexAdded', function(vertex) {
@@ -20,17 +32,17 @@ define(['src/geometrygraphsingleton', 'src/selection', 'src/pointwrapper', 'src/
         addVertex(replacement);
     });
 
-    selection.on('selected', function(ids, selection) {
-        updateEditingForSelected(selection);
+    selectionManager.on('selected', function(ids, selectionManager) {
+        updateEditingForSelected(selectionManager);
     });
 
-    selection.on('deselected', function(ids, selection) {
-        updateEditingForSelected(selection);
+    selectionManager.on('deselected', function(ids, selectionManager) {
+        updateEditingForSelected(selectionManager);
     });
 
-    var updateEditingForSelected = function(selection) {
-        if (selection.length === 1) {
-            geometryGraph.editById(selection[0]);
+    var updateEditingForSelected = function(selectionManager) {
+        if (selectionManager.length === 1) {
+            geometryGraph.editById(selectionManager[0]);
         } else {
             geometryGraph.commitIfEditing();
         }

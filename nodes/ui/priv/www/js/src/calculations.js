@@ -43,6 +43,36 @@ define([], function() {
 
     }
 
+    var positionOnRay = function(event, ray, camera) {
+        var mouse = {};
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+        var vector = new THREE.Vector3( mouse.x, mouse.y, 0.5 );
+        var projector = new THREE.Projector();
+        var mouse3D = projector.unprojectVector(vector, camera);
+        var mouseRay = new THREE.Ray(camera.position, null);
+        mouseRay.direction = mouse3D.subSelf(camera.position).normalize();
+
+        mouseRay.origin = positionOnPlane(event, new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,1), camera);
+        if (mouseRay.origin === undefined) {
+            return;
+        }
+
+        // http://softsurfer.com/Archive/algorithm_0106/algorithm_0106.htm
+        var u = ray.direction.clone().normalize();
+        var v = mouseRay.direction.clone().normalize();
+
+        var w0 = new THREE.Vector3().sub(ray.origin.clone(), mouseRay.origin.clone());
+
+        var a = u.dot(u), b = u.dot(v), c = v.dot(v), d = u.dot(w0), e = v.dot(w0);
+        
+        var sc = (b*e - c*d)/(a*c - b*b);
+        var tc = (a*e - b*d)/(a*c - b*b);
+        
+        return  new THREE.Vector3().add(ray.origin, u.clone().multiplyScalar(sc));
+    }
+
     var toScreenCoordinates = function(camera, worldCoordinates) {
         var projScreenMat = new THREE.Matrix4();
         projScreenMat.multiply(camera.projectionMatrix, 
@@ -75,6 +105,7 @@ define([], function() {
     return {
         positionOnWorkplane : positionOnWorkplane,
         positionOnPlane     : positionOnPlane,
+        positionOnRay       : positionOnRay,
         toScreenCoordinates : toScreenCoordinates,
         objToVector         : objToVector,
     }

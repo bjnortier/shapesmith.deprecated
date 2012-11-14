@@ -282,7 +282,6 @@ define([
             var options = _.extend(options || {}, {
                 editing      : true,
                 proto        : true,
-                nameFromId   : true,
             });
             var pointVertex = new geomNode.Point(options);
             this.add(pointVertex);
@@ -295,13 +294,24 @@ define([
             var polylineVertex = new geomNode.Polyline({
                 editing      : true,
                 proto        : true,
-                nameFromId   : true,
             });
             // Add the vertex but add the edge as well before triggering notifications 
             this.add(polylineVertex, function() {
                 graph.addEdge(polylineVertex, pointVertex);
             });
             return polylineVertex;
+        }
+
+        this.createExtrudePrototype = function(childVertexId) {
+            var child = this.vertexById(childVertexId);
+            var extrudeVertex = new geomNode.Extrude({
+                editing      : true,
+                proto        : true,
+            });
+            this.add(extrudeVertex, function() {
+                graph.addEdge(extrudeVertex, child);
+            });
+            return extrudeVertex;
         }
 
         // ---------- Mutations ----------

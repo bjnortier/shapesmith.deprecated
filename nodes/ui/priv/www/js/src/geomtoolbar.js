@@ -62,6 +62,12 @@ define([
             }
         },
 
+        click: function() {
+            var selectedId = selectionManager.selected[0];
+            toolbar.ItemModel.prototype.click.call(this);
+            geometryGraph.createExtrudePrototype(selectedId);
+        },
+
 
     });
 
@@ -95,13 +101,13 @@ define([
         },
 
         launchTool: function(item) {
-            this.toolVertexId = undefined;
+            this.toolRelaunchVertexId = undefined;
             geometryGraph.cancelIfEditing();
             if (item.name === 'point') {
-                this.toolVertexId = geometryGraph.createPointPrototype().id;
+                this.toolRelaunchVertexId = geometryGraph.createPointPrototype().id;
             }
             if (item.name === 'polyline') {
-                this.toolVertexId = geometryGraph.createPolylinePrototype().id;
+                this.toolRelaunchVertexId = geometryGraph.createPolylinePrototype().id;
             }
         },
 
@@ -122,7 +128,7 @@ define([
         // of the same type. Child vertices (e.g. points of polylines)
         // can be committed, so only create another for the top-level tools 
         geometryCommitted: function(vertices) {
-            if ((vertices.length === 1) && (vertices[0].id === this.toolVertexId)) {
+            if ((vertices.length === 1) && (vertices[0].id === this.toolRelaunchVertexId)) {
                 this.launchTool(this.activeItem);
             }
         },

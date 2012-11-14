@@ -109,15 +109,26 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
 
     _.extend(Polyline.prototype, GeomNode.prototype);
 
+    var Extrude = function(options) {
+        var options = options || {};
+        options.type = 'extrude';
+        options.parameters = options.parameters || {vector: {u: 0, v:0, n:1}, h: 1};
+        GeomNode.prototype.constructor.call(this, options);
+    }
+
+    _.extend(Extrude.prototype, GeomNode.prototype);
+
 
     return {
         resetIDCounters : resetIDCounters,
         Node     : GeomNode,
         Point    : Point,
         Polyline : Polyline,
+        Extrude  : Extrude,
         constructors: {
             'point'    : Point,
             'polyline' : Polyline,
+            'extrude'  : Extrude,
         }
     }
 

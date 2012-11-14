@@ -163,7 +163,7 @@ img#logo {
 }
 
 .vertex.editing {
-    background: rgba(51, 51, 51, 0.46);
+    background: rgba(136, 170, 201, 0.46);
 }
 
 .vertex.editing .coordinate.editing {
@@ -208,5 +208,8 @@ img#logo {
     background-image: url('/ui/images/icons/extrude32x32.disabled.png');
 }
 
+.toolbar.geometry .extrude.active .icon {
+    background-image: url('/ui/images/icons/extrude32x32.png');
+}
 
 

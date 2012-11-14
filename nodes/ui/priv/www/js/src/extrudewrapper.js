@@ -1,0 +1,223 @@
+define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', 'src/scene', 'src/workplane'], 
+    function(calc, geometryGraph, vertexWrapper, sceneModel, workplaneModel) {
+
+    // ---------- Common ----------
+
+    var RenderExtrudeFacesMixin = {
+
+        render: function() {
+            vertexWrapper.EditingSceneView.prototype.render.call(this);
+            var polyline = _.first(geometryGraph.childrenOf(this.model.vertex));
+            var points = geometryGraph.childrenOf(polyline);
+            for (var i = 1; i < points.length; ++i) {
+                this.renderPlaneForPoints(points[i], points[i-1]);
+            }
+        },
+
+        renderPlaneForPoints: function(pointA, pointB) {
+            var geometry = new THREE.Geometry();
+            var h = this.model.vertex.parameters.h;
+            var a  = calc.objToVector(pointA.parameters.coordinate);
+            var ah = a.clone().setZ(h);
+            var b  = calc.objToVector(pointB.parameters.coordinate);
+            var bh = b.clone().setZ(h);
+
+            geometry.vertices.push(a);
+            geometry.vertices.push(b);
+            geometry.vertices.push(bh);
+            geometry.vertices.push(ah);
+
+            geometry.faces.push(new THREE.Face4(0,1,2,3));
+            geometry.computeCentroids();
+            geometry.computeFaceNormals();
+
+            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
+            var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
+            var face = THREE.SceneUtils.createMultiMaterialObject(
+                geometry,
+                [
+                    new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}),
+                    new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
+                    // new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
+                    // new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
+                ]);
+            this.sceneObject.add(face);
+        },
+    }
+
+    // ---------- Editing ----------
+
+    var EditingModel = vertexWrapper.EditingModel.extend({
+
+        initialize: function(vertex) {
+            vertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
+            this.views = this.views.concat([
+                new EditingDOMView({model: this}),
+                new EditingFacesSceneView({model: this}),
+            ]);
+            var polyline = _.first(geometryGraph.childrenOf(this.vertex));
+            var points = geometryGraph.childrenOf(polyline);
+            for (var i = 0; i < points.length; ++i) {
+                this.views.push(new EditingHeightAnchor({model: this, pointVertex: points[i]}));
+            }
+            this.vertex.on('descendantChanged', this.descendantChanged, this);
+        },
+
+        destroy: function() {
+            vertexWrapper.EditingModel.prototype.destroy.call(this);
+            this.vertex.off('descendantChanged', this.descendantChanged, this);
+        },
+
+        // Trigger a 'change' event if any of the child polylines changed
+        descendantChanged: function(descendant) {
+            this.vertex.trigger('change', this.vertex);
+        },
+
+        workplaneClick: function() {
+            if (this.vertex.proto) {
+                this.okCreate();
+            } else {
+                this.okEdit();
+            }
+        },
+
+    });
+
+    var EditingDOMView = vertexWrapper.EditingDOMView.extend({
+
+        render: function() {
+            var template = 
+                '<td class="vertex {{name}} editing">' + 
+                '<div class="title"><img src="/ui/images/icons/line32x32.png"/>' +
+                '<div class="name">{{name}}</div>' + 
+                '</div>' + 
+                '<div class="coordinate">h<span class="z">{{h}}</div>'
+                '</td>';
+            var view = {
+                name: this.model.vertex.name,
+                h   : this.model.vertex.parameters.h,
+            };
+            this.$el.html($.mustache(template, view));
+            return this;
+        },
+
+        update: function() {
+            this.$el.find('.coordinate').find('.z').text(
+                this.model.vertex.parameters.h);
+        },
+
+    }); 
+
+    var EditingHeightAnchor = vertexWrapper.EditingSceneView.extend({
+
+        initialize: function(options) {
+            this.pointVertex = options.pointVertex;
+            vertexWrapper.EditingSceneView.prototype.initialize.call(this);
+            this.on('dragStarted', this.dragStarted, this);
+            this.on('drag', this.drag, this);
+            this.on('dragEnded', this.dragEnded, this);
+        },
+
+        remove: function() {
+            vertexWrapper.EditingSceneView.prototype.remove.call(this);
+            this.off('dragStarted', this.dragStarted, this);
+            this.off('drag', this.drag, this);
+            this.off('dragEnded', this.dragEnded, this);
+        },
+
+        render: function() {
+            vertexWrapper.EditingSceneView.prototype.render.call(this);
+            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
+            var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
+
+            var pointSceneObject = THREE.SceneUtils.createMultiMaterialObject(
+                new THREE.CubeGeometry(1, 1, 1, 1, 1, 1), 
+                [
+                    new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
+                    new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
+                ]);
+            var pointPosition = calc.objToVector(this.pointVertex.parameters.coordinate);
+            pointSceneObject.position = pointPosition;
+            pointSceneObject.position.z = this.model.vertex.parameters.h;
+            this.sceneObject.add(pointSceneObject);
+
+            if (this.showHeightLine) {
+                var lineGeometry = new THREE.Geometry();
+                lineGeometry.vertices.push(pointPosition.clone().setZ(-1000));
+                lineGeometry.vertices.push(pointPosition.clone().setZ(1000));
+                var line = new THREE.Line(lineGeometry, new THREE.LineBasicMaterial({color: 0xff6666}));
+                this.sceneObject.add(line);
+            }
+
+        },
+
+        isDraggable: function() {
+            return true;
+        },
+
+        dragStarted: function() {
+            this.showHeightLine = true;
+        },
+
+        dragEnded: function() {
+            this.showHeightLine = false;
+            this.model.vertex.trigger('change', this.model.vertex);
+        },
+
+        drag: function(event) {
+            this.dragging = true;
+
+            var rayOrigin = calc.objToVector(this.pointVertex.parameters.coordinate);
+            var rayDirection = new THREE.Vector3(0,0,1);
+            var ray = new THREE.Ray(rayOrigin, rayDirection);
+
+            var positionOnNormal = calc.positionOnRay(event, ray, sceneModel.view.camera);
+            this.model.vertex.parameters.h = parseFloat(positionOnNormal.z.toFixed(0));
+            this.model.vertex.trigger('change', this.model.vertex);
+        },
+
+    });
+
+    var EditingFacesSceneView = vertexWrapper.EditingSceneView.extend(RenderExtrudeFacesMixin);
+
+    // ---------- Display ----------
+
+    var DisplayModel = vertexWrapper.DisplayModel.extend({
+
+        initialize: function(vertex) {
+            vertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
+            this.views = this.views.concat([
+                new DisplayFacesSceneView({model: this}),
+                new DisplayDOMView({model: this}),
+            ]);
+
+        },
+
+    });
+
+    var DisplayDOMView = vertexWrapper.DisplayDOMView.extend({
+
+        render: function() {
+            var view = {
+                name: this.model.vertex.name,
+            }
+            var template = 
+                '<td class="vertex {{name}} display">' + 
+                '<img src="/ui/images/icons/extrude32x32.png"/>' + 
+                '<div class="name">{{name}}</div>' + 
+                '</td>';
+            this.$el.html($.mustache(template, view));
+            return this;
+        },
+
+    })
+
+    var DisplayFacesSceneView = vertexWrapper.DisplaySceneView.extend(RenderExtrudeFacesMixin);
+
+
+    return {
+        EditingModel: EditingModel,
+        DisplayModel: DisplayModel,
+    }
+
+});

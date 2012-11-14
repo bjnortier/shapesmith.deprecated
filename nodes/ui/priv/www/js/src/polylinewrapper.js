@@ -48,13 +48,11 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 new EditingDOMView({model: this}),
                 new EditingLineSceneView({model: this}),
             ]);
-            this.vertex.on('descendantChanged', this.descendantChanged, this);
             this.vertex.on('beforeImplicitChildCommit', this.beforeImplicitChildCommit, this);
         },
 
         destroy: function() {
             vertexWrapper.EditingModel.prototype.destroy.call(this);
-            this.vertex.off('descendantChanged', this.descendantChanged, this);
             this.vertex.off('beforeImplicitChildCommit', this.beforeImplicitChildCommit, this);
         },
 
@@ -64,11 +62,6 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                     geometryGraph.addPointToPolyline(this.vertex);
                 }
             }
-        },
-
-        // Trigger a 'change' event if any of the child polylines changed
-        descendantChanged: function(descendant) {
-            this.vertex.trigger('change', this.vertex);
         },
 
         workplaneDblClick: function(event) {
@@ -168,17 +161,10 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 new DisplayLineSceneView({model: this}),
                 new DisplayDOMView({model: this}),
             ]);
-            this.vertex.on('descendantChanged', this.descendantChanged, this);
         },
 
         destroy: function() {
             vertexWrapper.DisplayModel.prototype.destroy.call(this);
-            this.vertex.off('descendantChanged', this.descendantChanged, this);
-        },
-
-        // Trigger a 'change' event if any of the child polylines changed
-        descendantChanged: function(descendant) {
-            this.vertex.trigger('change', this.vertex);
         },
 
     });

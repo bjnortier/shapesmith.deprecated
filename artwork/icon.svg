@@ -20,21 +20,21 @@
   <sodipodi:namedview
      inkscape:document-units="mm"
      id="base"
-     pagecolor="#000000"
+     pagecolor="#018fbc"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="1"
+     inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8"
-     inkscape:cx="291.55146"
-     inkscape:cy="522.12878"
+     inkscape:zoom="3.959798"
+     inkscape:cx="235.21481"
+     inkscape:cy="461.51962"
      inkscape:current-layer="layer1"
      showgrid="true"
      units="mm"
      inkscape:window-width="1555"
      inkscape:window-height="960"
-     inkscape:window-x="1708"
-     inkscape:window-y="17"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="0"
      showguides="true"
      inkscape:guide-bbox="true">
@@ -54,7 +54,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -62,12 +62,6 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
-    <path
-       style="fill:#86d4ff;fill-opacity:0.48953977;stroke:none"
-       d="m 255,514.14789 50,0.89286 0,47.32143 -50,-5 z"
-       id="rect3131"
-       inkscape:connector-curvature="0"
-       sodipodi:nodetypes="ccccc" />
     <rect
        style="fill:#5b5b5b;fill-opacity:0.14932127;stroke:#9b8e8e;stroke-width:0.50000000000000000;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="rect3998"
@@ -203,16 +197,22 @@
          style="fill:#86d4ff;fill-opacity:1;stroke:none" />
     </g>
     <rect
-       style="fill:none;stroke:#ffffff;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:none;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="rect8725-8"
        width="60"
        height="60"
        x="250"
        y="507.36218"
        ry="0"
-       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/vertex32x32.png"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/extrude32x32.png"
        inkscape:export-xdpi="48"
        inkscape:export-ydpi="48" />
+    <path
+       style="fill:#86d4ff;fill-opacity:0.48953977;stroke:none"
+       d="m 255,514.14789 50,0.89286 0,47.32143 -50,-5 z"
+       id="rect3131"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
     <path
        style="fill:none;stroke:#ffffff;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        d="m 255,557.36218 50,5"
@@ -231,5 +231,63 @@
        id="path3920"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cccc" />
+    <rect
+       style="fill:none;stroke:none"
+       id="rect8725-8-0"
+       width="60"
+       height="60"
+       x="249.30717"
+       y="573.60193"
+       ry="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/extrude32x32.disabled.png"
+       inkscape:export-xdpi="48"
+       inkscape:export-ydpi="48" />
+    <path
+       style="fill:#999999;fill-opacity:0.48953977;stroke:none"
+       d="m 254.30718,580.38762 50,0.89286 0,47.32143 -50,-5 z"
+       id="rect3131-5"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/extrude32x32.disabled.png"
+       inkscape:export-xdpi="48"
+       inkscape:export-ydpi="48" />
+    <path
+       style="fill:none;stroke:#e3e3e3;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 254.30718,623.60191 50,5"
+       id="path3800-5-7"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/extrude32x32.disabled.png"
+       inkscape:export-xdpi="48"
+       inkscape:export-ydpi="48" />
+    <path
+       style="fill:none;stroke:#e3e3e3;stroke-width:1.99842524999999993;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 279.30718,625.74477 0,-37.67857"
+       id="path3800-5-4-2"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/extrude32x32.disabled.png"
+       inkscape:export-xdpi="48"
+       inkscape:export-ydpi="48" />
+    <path
+       style="fill:#e3e3e3;fill-opacity:1;stroke:none"
+       d="m 279.21789,581.90548 -3.21428,8.03572 6.60714,0.80357 z"
+       id="path3920-9"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/extrude32x32.disabled.png"
+       inkscape:export-xdpi="48"
+       inkscape:export-ydpi="48" />
+    <rect
+       style="fill:none;stroke:none"
+       id="rect8725-8-0-9"
+       width="60"
+       height="60"
+       x="132.63455"
+       y="584.2085"
+       ry="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/extrude32x32.disabled.png"
+       inkscape:export-xdpi="48"
+       inkscape:export-ydpi="48" />
   </g>
 </svg>
