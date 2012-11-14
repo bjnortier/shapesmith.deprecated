@@ -63,9 +63,11 @@ define([
         },
 
         click: function() {
-            var selectedId = selectionManager.selected[0];
-            toolbar.ItemModel.prototype.click.call(this);
-            geometryGraph.createExtrudePrototype(selectedId);
+            if (this.get('enabled')) {
+                var selectedId = selectionManager.selected[0];
+                toolbar.ItemModel.prototype.click.call(this);
+                geometryGraph.createExtrudePrototype(selectedId);
+            }
         },
 
 
@@ -130,6 +132,8 @@ define([
         geometryCommitted: function(vertices) {
             if ((vertices.length === 1) && (vertices[0].id === this.toolRelaunchVertexId)) {
                 this.launchTool(this.activeItem);
+            } else {
+                this.setToSelect();
             }
         },
 

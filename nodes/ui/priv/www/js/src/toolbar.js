@@ -10,7 +10,9 @@ define(['src/interactioncoordinator', 'src/geometrygraphsingleton'],
         },
 
         click: function() {
-            this.toolbarModel.itemClicked(this);
+            if (this.get('enabled')) {
+                this.toolbarModel.itemClicked(this);
+            }   
         },
 
         activate: function() {
