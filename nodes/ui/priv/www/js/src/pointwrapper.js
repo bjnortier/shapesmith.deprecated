@@ -200,9 +200,7 @@ define([
                     new THREE.SphereGeometry(0.5, 10, 10), 
                     new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0, side: THREE.DoubleSide }));
                 selectionPoint.position = calc.objToVector(this.model.vertex.parameters.coordinate);
-                // For some reason selection & highlighting doesn't work with a hidden 
-                // scene object... 
-                this.sceneObject.add(selectionPoint);
+                this.hiddenSelectionObject.add(selectionPoint);
             }
         },
 

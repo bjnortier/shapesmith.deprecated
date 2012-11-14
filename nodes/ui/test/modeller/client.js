@@ -21,10 +21,8 @@ client.addCommand('initDesign', function(callback) {
 
 client.addCommand('freshDesign', function(callback) {
     this    
-        .url('http://localhost.shapesmith.net:8000/local/__test__/modeller?commit=fa9d5982d4cec7987eb46383ab6452afcefe85c1')
-        .execute('SS.dontDampTrackball(); SS.zoomIn(); ', function() {
-            callback();
-        });
+        .url('http://localhost.shapesmith.net:8000/local/__test__/modeller?commit=fa9d5982d4cec7987eb46383ab6452afcefe85c1&noFadein=true')
+        .pause(200, callback)
 });
 
 client.addCommand('waitForUrlChange', function(callback) {
@@ -45,9 +43,12 @@ client.addCommand('waitForUrlChange', function(callback) {
 
 client.addCommand('loadCommit', function(callback) {
     this    
-        .refresh()
-        .execute('SS.dontDampTrackball(); SS.zoomIn(); ')
-        .pause(1000, callback);
+        .url(function(result) {
+            this
+                .url(result.value + '&noFadein=true')
+                .pause(1000, callback);
+
+        });
 });
 
 client.addCommand('assertTextEqual', function(selector, text, callback) {

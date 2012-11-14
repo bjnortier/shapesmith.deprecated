@@ -83,6 +83,19 @@ define(['lib/underscore-require'], function(_) {
             incomingVertices[to.id].push(from.id);
         }
 
+        this.removeEdge = function(from, to) {
+            var outgoing = outgoingVertices[from.id];
+            var index = outgoing.indexOf(to.id);
+            if (index === -1) {
+                throw Error('no edge from ' + from.id + ' to ' + to.id);
+            }
+            outgoing.splice(index, 1);
+
+            var incoming = incomingVertices[to.id];
+            index = incoming.indexOf(from.id);
+            incoming.splice(index, 1);
+        }
+
         this.vertexCount = function() {
             return vertices.length;
         }

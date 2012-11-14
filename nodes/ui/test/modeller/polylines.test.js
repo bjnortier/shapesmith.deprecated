@@ -179,6 +179,7 @@ describe('Polylines', function() {
             .clickOnWorld(0,0,0)
             .clickOnWorld(10,10,0)
             .dblClickOnWorld(20,20,0)
+            .waitForUrlChange()
             .click('.toolbar .select')
             .moveToWorld(20,20,0)
             .buttonDown()

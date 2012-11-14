@@ -88,12 +88,16 @@ define([
             var undoFn = function() {
                 that.remove(vertex);
                 children.forEach(function(child) {
-                    that.remove(child);
+                    if (child.implicit) {
+                        that.remove(child);
+                    } 
                 })
             }
             var redoFn = function() {
                 children.forEach(function(child) {
-                    that.add(child);
+                    if (child.implicit) {
+                        that.add(child);
+                    }
                 })
                 that.add(vertex, function() {
                     children.forEach(function(child) {

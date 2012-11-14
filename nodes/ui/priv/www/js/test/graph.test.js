@@ -136,4 +136,33 @@ describe('Graph', function() {
 
     });
 
+    it('can add and remove edges', function() {
+
+        var a = {id:'a'}, b1 = {id:'b1'}, b2 = {id: 'b2'};
+        var graph = new graphLib.Graph();
+
+        graph.addVertex(a);        
+        graph.addVertex(b1); 
+        graph.addVertex(b2); 
+        graph.addEdge(a,b1);
+        graph.addEdge(a,b2);
+
+        assert.deepEqual(graph.outgoingVerticesOf(a), ['b1', 'b2']);
+        assert.deepEqual(graph.outgoingVerticesOf(b1), []);
+        assert.deepEqual(graph.outgoingVerticesOf(b2), []);
+
+        graph.removeEdge(a, b1);
+
+        assert.deepEqual(graph.outgoingVerticesOf(a), ['b2']);
+        assert.deepEqual(graph.outgoingVerticesOf(b1), []);
+        assert.deepEqual(graph.outgoingVerticesOf(b2), []);
+        assert.deepEqual(graph.incomingVerticesOf(b1), []);
+        assert.deepEqual(graph.incomingVerticesOf(b2), ['a']);
+
+        assert.throws(function() {
+            graph.removeEdge(a, b1);
+        }, Error);
+
+    });
+
 });

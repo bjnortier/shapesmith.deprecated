@@ -11,6 +11,11 @@ define(['src/scene',  'src/interactioncoordinator'], function(sceneModel, coordi
         var state = undefined;
         var damping = 0.25;
 
+        if ($.getQueryParam("noFadein")) {
+            damping = 1.0;
+            target.distance = 200;
+        }
+
         this.mousedown = function(event) {
             targetOnDown = { 
                 azimuth:  target.azimuth, 
@@ -103,10 +108,6 @@ define(['src/scene',  'src/interactioncoordinator'], function(sceneModel, coordi
 
         this.zoom = function(delta) {
             target.distance -= delta;
-        }
-
-        this.dontDamp = function() {
-            damping = 1.0;
         }
 
         this.updateCamera = function() {
