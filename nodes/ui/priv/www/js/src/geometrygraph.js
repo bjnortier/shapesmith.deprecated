@@ -60,7 +60,6 @@ define([
 
         var captureGraph = function(callback) {
             var url = '/' + SS.session.username + '/' + SS.session.design + '/graph/';
-            console.log(that.serialize());
             post(url, JSON.stringify(that.serialize()), callback);
         }
 
