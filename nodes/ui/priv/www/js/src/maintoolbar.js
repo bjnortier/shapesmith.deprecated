@@ -47,7 +47,6 @@ define(['src/toolbar',
         initialize: function(attributes) {
             toolbar.Model.prototype.initialize.call(this, attributes);
             geometryGraph.on('committed', this.geometryCommitted, this);
-            coordinator.on('keydown', this.keydown, this);
         },
 
         activate: function(item) {

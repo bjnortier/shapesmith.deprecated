@@ -114,9 +114,7 @@ define([
         },
 
         keydown: function() {
-            if (event.keyCode === 13) {
-                // ???
-            } else if (event.keyCode === 27) {
+            if (event.keyCode === 27) {
                 // Activate the select tool
                 this.activate(this.items[0]);
             }

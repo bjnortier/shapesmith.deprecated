@@ -32,7 +32,7 @@
     <script type="text/javascript" src="/ui/js/lib/fonts/open_sans_regular.typeface.js"></script>
 
   </head>
-<body oncontextmenu="return false;">
+<body>
   <table id="graph"></table>
   <div id="scene"></div>
   <img id="logo" src="{{logo}}"/>
