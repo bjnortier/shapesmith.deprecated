@@ -1,19 +1,19 @@
 define([
         'src/calculations', 
         'src/geometrygraphsingleton', 
-        'src/vertexwrapper', 
+        'src/geomvertexwrapper', 
         'src/scene', 
         'src/scenevieweventgenerator',
         'src/workplane'
     ], 
-    function(calc, geometryGraph, vertexWrapper, sceneModel, sceneViewEventGenerator, workplaneModel) {
+    function(calc, geometryGraph, geomVertexWrapper, sceneModel, sceneViewEventGenerator, workplaneModel) {
 
     // ---------- Editing ----------
 
-    var EditingModel = vertexWrapper.EditingModel.extend({
+    var EditingModel = geomVertexWrapper.EditingModel.extend({
 
         initialize: function(vertex) {
-            vertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
+            geomVertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
             if (workplaneModel.lastPosition) {
                 this.workplanePositionChanged(workplaneModel.lastPosition);
             }
@@ -46,7 +46,7 @@ define([
 
     });
 
-    var EditingDOMView = vertexWrapper.EditingDOMView.extend({
+    var EditingDOMView = geomVertexWrapper.EditingDOMView.extend({
 
         render: function() {
             var template = 
@@ -90,25 +90,25 @@ define([
         }
     });
 
-    var EditingSceneView = vertexWrapper.EditingSceneView.extend({
+    var EditingSceneView = geomVertexWrapper.EditingSceneView.extend({
 
         initialize: function(options) {
             this.point = this.model.vertex;
-            vertexWrapper.EditingSceneView.prototype.initialize.call(this);
+            geomVertexWrapper.EditingSceneView.prototype.initialize.call(this);
             this.on('dragStarted', this.dragStarted, this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);
         },
 
         remove: function() {
-            vertexWrapper.EditingSceneView.prototype.remove.call(this);
+            geomVertexWrapper.EditingSceneView.prototype.remove.call(this);
             this.off('dragStarted', this.dragStarted, this);
             this.off('drag', this.drag, this);
             this.off('dragEnded', this.dragEnded, this);
         },
 
         render: function() {
-            vertexWrapper.EditingSceneView.prototype.render.call(this);
+            geomVertexWrapper.EditingSceneView.prototype.render.call(this);
             var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
             var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
             var point = THREE.SceneUtils.createMultiMaterialObject(
@@ -155,10 +155,10 @@ define([
 
     // ---------- Display ----------
 
-    var DisplayModel = vertexWrapper.DisplayModel.extend({
+    var DisplayModel = geomVertexWrapper.DisplayModel.extend({
 
         initialize: function(vertex) {
-            vertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
+            geomVertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
             this.views = this.views.concat([
                 new DisplaySceneView({model: this}),
             ]);
@@ -177,24 +177,24 @@ define([
 
     });
 
-    var DisplaySceneView = vertexWrapper.DisplaySceneView.extend({
+    var DisplaySceneView = geomVertexWrapper.DisplaySceneView.extend({
 
         initialize: function(vertex) {
-            vertexWrapper.DisplaySceneView.prototype.initialize.call(this, vertex);
+            geomVertexWrapper.DisplaySceneView.prototype.initialize.call(this, vertex);
             this.on('dragStarted', this.dragStarted, this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);
         },
 
         remove: function() {
-            vertexWrapper.DisplaySceneView.prototype.remove.call(this);
+            geomVertexWrapper.DisplaySceneView.prototype.remove.call(this);
             this.off('dragStarted', this.dragStarted, this);
             this.off('drag', this.drag, this);
             this.off('dragEnded', this.dragEnded, this);
         },
 
         render: function() {
-            vertexWrapper.EditingSceneView.prototype.render.call(this);
+            geomVertexWrapper.EditingSceneView.prototype.render.call(this);
             var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
             var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
             var radius = this.model.vertex.implicit ? 0.35 : 0.5;
@@ -232,7 +232,7 @@ define([
 
     });
 
-    var DisplayDOMView = vertexWrapper.DisplayDOMView.extend({
+    var DisplayDOMView = geomVertexWrapper.DisplayDOMView.extend({
 
         render: function() {
             var view = {

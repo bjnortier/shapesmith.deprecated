@@ -34,7 +34,10 @@
 
   </head>
 <body>
-  <table id="graph"></table>
+  <div id="graphs">
+    <table id="variables"></table>
+    <table id="geometry"></table>
+  </div>
   <div id="scene"></div>
   <img id="logo" src="{{logo}}"/>
 
