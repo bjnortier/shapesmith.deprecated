@@ -3,7 +3,7 @@ var chai = require('chai'),
     client = require('./client').client;
 chai.Assertion.includeStack = true;
 
-describe('Extrutions', function() {
+describe('Extrusions', function() {
 
     before(function(done) {
         this.timeout(5000);
