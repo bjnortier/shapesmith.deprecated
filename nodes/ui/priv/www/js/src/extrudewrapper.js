@@ -16,10 +16,10 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
         renderPlaneForPoints: function(pointA, pointB) {
             var geometry = new THREE.Geometry();
-            var h = this.model.vertex.parameters.h;
-            var a  = calc.objToVector(pointA.parameters.coordinate);
+            var h = geometryGraph.evaluate(this.model.vertex.parameters.h);
+            var a  = calc.objToVector(pointA.parameters.coordinate, geometryGraph);
             var ah = a.clone().setZ(h);
-            var b  = calc.objToVector(pointB.parameters.coordinate);
+            var b  = calc.objToVector(pointB.parameters.coordinate, geometryGraph);
             var bh = b.clone().setZ(h);
 
             geometry.vertices.push(a);
@@ -97,6 +97,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 h   : this.model.vertex.parameters.h,
             };
             this.$el.html($.mustache(template, view));
+            this.update();
             return this;
         },
 
@@ -106,8 +107,8 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         updateFromDOM: function() {
-            this.model.vertex.parameters.h = 
-                parseFloat(this.$el.find('.field.h').val());
+            var expression = this.$el.find('.field.h').val();
+            this.model.vertex.parameters.h = expression;
         }
 
     }); 
@@ -140,9 +141,9 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                     new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                     new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                 ]);
-            var pointPosition = calc.objToVector(this.pointVertex.parameters.coordinate);
+            var pointPosition = calc.objToVector(this.pointVertex.parameters.coordinate, geometryGraph);
             pointSceneObject.position = pointPosition;
-            pointSceneObject.position.z = this.model.vertex.parameters.h;
+            pointSceneObject.position.z = geometryGraph.evaluate(this.model.vertex.parameters.h);
             this.sceneObject.add(pointSceneObject);
 
             if (this.showHeightLine) {
@@ -171,12 +172,12 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         drag: function(event) {
             this.dragging = true;
 
-            var rayOrigin = calc.objToVector(this.pointVertex.parameters.coordinate);
+            var rayOrigin = calc.objToVector(this.pointVertex.parameters.coordinate, geometryGraph);
             var rayDirection = new THREE.Vector3(0,0,1);
             var ray = new THREE.Ray(rayOrigin, rayDirection);
 
             var positionOnNormal = calc.positionOnRay(event, ray, sceneModel.view.camera);
-            this.model.vertex.parameters.h = parseFloat(positionOnNormal.z.toFixed(0));
+            this.model.vertex.parameters.h = parseFloat(positionOnNormal.z.toFixed(0))
             this.model.vertex.trigger('change', this.model.vertex);
         },
 

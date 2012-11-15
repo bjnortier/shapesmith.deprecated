@@ -4,10 +4,11 @@ define([
     'lib/sha1',
     'src/graph',
     'src/geomnode',
+    'src/variablegraph',
     'src/command',
     'src/commandstack',
     ], 
-    function(_, Backbone, crypto, graphLib, geomNode, Command, commandStack) {
+    function(_, Backbone, crypto, graphLib, geomNode, variableGraph, Command, commandStack) {
 
     var post = function(url, data, successFn, errorFn) {
         $.ajax({
@@ -35,6 +36,7 @@ define([
 
         _.extend(this, Backbone.Events);
         var graph = new graphLib.Graph();
+        var varGraph = new variableGraph.Graph(graph);
         var that = this;
 
         var captureVertices = function(vertices, callback) {
@@ -351,6 +353,12 @@ define([
             this.add(child, function() {
                 graph.addEdge(parent, child);
             });
+        }
+
+        // ---------- Variable functions ----------
+
+        this.evaluate = function(expression) {
+            return varGraph.evaluate(expression);
         }
 
         // ---------- Graph functions ----------

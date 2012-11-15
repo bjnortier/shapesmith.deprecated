@@ -64,26 +64,28 @@ define([
                 id: this.model.vertex.id,
                 name: this.model.vertex.name,
             };
-            var that = this;
-            ['x', 'y', 'z'].forEach(function(key) {
-                view[key] = that.model.vertex.parameters.coordinate[key];
-            });
             this.$el.html($.mustache(template, view));
+            this.update();
             return this;
         },
 
         update: function() {
             var that = this;
             ['x', 'y', 'z'].forEach(function(key) {
-                that.$el.find('.coordinate').find('.' + key).val(that.model.vertex.parameters.coordinate[key]);
+                that.$el.find('.coordinate').find('.' + key).val(
+                    that.model.vertex.parameters.coordinate[key]);
             });
         },
 
         updateFromDOM: function() {
             var that = this;
             ['x', 'y', 'z'].forEach(function(key) {
-                that.model.vertex.parameters.coordinate[key] = 
-                    parseFloat(that.$el.find('.field.' + key).val());
+                try {
+                    var expression = that.$el.find('.field.' + key).val();
+                    that.model.vertex.parameters.coordinate[key] = expression;
+                } catch(e) {
+                    console.log(e);
+                }
             });
         }
     });
@@ -115,7 +117,7 @@ define([
                     new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                     new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                 ]);
-            point.position = calc.objToVector(this.point.parameters.coordinate);
+            point.position = calc.objToVector(this.point.parameters.coordinate, geometryGraph);
             this.sceneObject.add(point);
         },
 
@@ -202,14 +204,18 @@ define([
                     new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}),
                     new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                 ]);
-            point.position = calc.objToVector(this.model.vertex.parameters.coordinate);
+            point.position = calc.objToVector(
+                this.model.vertex.parameters.coordinate,
+                geometryGraph);
             this.sceneObject.add(point);
 
             if (this.model.vertex.implicit) {
                 var selectionPoint = new THREE.Mesh(
                     new THREE.SphereGeometry(0.5, 10, 10), 
                     new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0, side: THREE.DoubleSide }));
-                selectionPoint.position = calc.objToVector(this.model.vertex.parameters.coordinate);
+                selectionPoint.position = calc.objToVector(
+                    this.model.vertex.parameters.coordinate,
+                    geometryGraph);
                 this.hiddenSelectionObject.add(selectionPoint);
             }
         },

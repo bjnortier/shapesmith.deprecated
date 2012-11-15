@@ -109,7 +109,7 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
     var Point = function(options) {
         var options = options || {};
         options.type = 'point';
-        options.parameters = options.parameters || {coordinate: {x: 0, y:0, z:0}};
+        options.parameters = options.parameters || {coordinate: {x: '0', y:'0', z:'0'}};
         GeomNode.prototype.constructor.call(this, options);
     }
 
@@ -118,7 +118,7 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
     var Polyline = function(options) {
         var options = options || {};
         options.type = 'polyline';
-        options.parameters = options.parameters || {coordinates: [{x: 0, y:0, z:0}]};
+        options.parameters = options.parameters || {coordinates: [{x: '0', y:'0', z:'0'}]};
         GeomNode.prototype.constructor.call(this, options);
     }
 
@@ -127,7 +127,7 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
     var Extrude = function(options) {
         var options = options || {};
         options.type = 'extrude';
-        options.parameters = options.parameters || {vector: {u: 0, v:0, n:1}, h: 1};
+        options.parameters = options.parameters || {vector: {u: '0', v:'0', n:'1'}, h: '1'  };
         GeomNode.prototype.constructor.call(this, options);
     }
 

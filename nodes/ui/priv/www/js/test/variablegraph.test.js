@@ -26,9 +26,19 @@ describe('Expressions', function() {
 
     it('can evaluate expressions without variables', function() {
 
+        assert.equal(graph.evaluate(55), 55);
         assert.equal(graph.evaluate('1 + 2'), 3);
         assert.equal(graph.evaluate('1/2'), 0.5);
         assert.equal(graph.evaluate('PI').toFixed(5), '3.14159');
+
+        assert.throws(function() {
+            graph.evaluate('$%^&*(');
+        }, variableGraph.ParseError);
+
+        assert.throws(function() {
+            graph.evaluate('');
+        }, variableGraph.ParseError);
+
 
     });
 
@@ -64,7 +74,7 @@ describe('Expressions', function() {
 
     it('rejects invalid variables', function() {
 
-        var added = graph.addVariable('a', 'ahksjdhk');
+        var added = graph.addVariable('a', '$^%&*');
         assert.isFalse(added);
 
     });

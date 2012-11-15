@@ -12,14 +12,18 @@ define([
 
         var parseExpressionWithVariables = function(expression, variables) {
             try {
-                return parser.parse(expression).evaluate(variables);
+                if (typeof(expression) === 'number') {
+                    return expression;
+                } else {
+                    return parser.parse(expression).evaluate(variables);
+                }
             } catch(e) {
                 var re = new RegExp('undefined variable: (.*)+');
                 var result = re.exec(e.message);
                 if (result) {
                     throw new UnknownVariableError(result[1]);
                 } else {
-                    throw e;
+                    throw new ParseError();
                 }
             }
         }
@@ -63,8 +67,17 @@ define([
     UnknownVariableError.prototype.constructor = UnknownVariableError;
     UnknownVariableError.prototype.name = 'UnknownVariableError';
 
+    function ParseError() {
+        Error.apply(this, arguments);
+    }
+
+    ParseError.prototype = new Error();
+    ParseError.prototype.constructor = ParseError;
+    ParseError.prototype.name = 'ParseError';
+
     return {
         UnknownVariableError: UnknownVariableError,
+        ParseError: ParseError,
         Graph: VariableGraph,
     }
 
