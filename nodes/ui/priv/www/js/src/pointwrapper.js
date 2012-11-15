@@ -83,7 +83,7 @@ define([
             var that = this;
             ['x', 'y', 'z'].forEach(function(key) {
                 that.model.vertex.parameters.coordinate[key] = 
-                    that.$el.find('.coordinate').find('.' + key).val();
+                    parseFloat(that.$el.find('.field.' + key).val());
             });
         }
     });

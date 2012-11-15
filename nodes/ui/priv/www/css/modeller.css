@@ -98,22 +98,6 @@ img#logo {
     padding: 5px;
 }
 
-.coordinate span {
-    padding: 2px;
-}
-
-.coordinate .x {
-    color: #3da033;
-}
-
-.coordinate .y {
-    color: #4394c2;
-}
-
-.coordinate .z {
-    color: #ff706b;
-}
-
 .vertex {
     color: #fff;
 }
@@ -212,11 +196,31 @@ img#logo {
     background-image: url('/ui/images/icons/extrude32x32.png');
 }
 
-#graph input[type="text"] {
+
+.coordinate span {
+    padding: 2px;
+}
+
+.vertex .field {
     width: 20px;
     border: none;
     background: none; 
     padding: 2px;
+    color: white;
 }
+
+.field.x {
+    color: #3da033;
+}
+
+.field.y {
+    color: #4394c2;
+}
+
+.field.z, .field.h {
+    color: #ff706b;
+}
+
+
 
 

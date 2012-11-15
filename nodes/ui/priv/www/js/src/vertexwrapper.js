@@ -128,7 +128,7 @@ define([
             'focusin .field'  : 'fieldFocusIn',
             'focusout .field' : 'fieldFocusOut',
             'change .field'   : 'fieldChange',
-            'keyup .field'    : 'fieldChange',
+            // 'keyup .field'    : 'fieldChange',
         },
 
         fieldFocusIn: function(event) {

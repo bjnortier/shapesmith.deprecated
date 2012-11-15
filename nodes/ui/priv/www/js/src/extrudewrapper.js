@@ -38,8 +38,6 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 [
                     new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}),
                     new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
-                    // new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
-                    // new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                 ]);
             this.sceneObject.add(face);
         },
@@ -90,7 +88,9 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 '<div class="title"><img src="/ui/images/icons/line32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
                 '</div>' + 
-                '<div class="coordinate">h<span class="z">{{h}}</div>'
+                '<div class="coordinate">' + 
+                'h <input class="field h" type="text" value="{{h}}"></input>' +
+                '</div>' +
                 '</td>';
             var view = {
                 name: this.model.vertex.name,
@@ -101,9 +101,14 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         update: function() {
-            this.$el.find('.coordinate').find('.z').text(
+            this.$el.find('.field.h').val(    
                 this.model.vertex.parameters.h);
         },
+
+        updateFromDOM: function() {
+            this.model.vertex.parameters.h = 
+                parseFloat(this.$el.find('.field.h').val());
+        }
 
     }); 
 
