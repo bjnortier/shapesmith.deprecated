@@ -22,12 +22,14 @@ client.addCommand('initDesign', function(callback) {
 client.addCommand('freshDesign', function(callback) {
     this    
         .url('http://localhost.shapesmith.net:8000/local/__test__/modeller?commit=fa9d5982d4cec7987eb46383ab6452afcefe85c1&noFadein=true')
-        .pause(200, callback)
+        .waitForMainDone(callback);
 });
 
-client.addCommand('waitForUrlChange', function(callback) {
+client.addCommand('waitForUrlChange', function(commitFn, callback) {
     client.url(function(result) {
         var from = result.value;
+        commitFn();
+
         var waitForUrlChange = function() {
             var current = client.url(function(result) {
                 if (result.value === from) {
@@ -41,12 +43,25 @@ client.addCommand('waitForUrlChange', function(callback) {
     });
 });
 
-client.addCommand('loadCommit', function(callback) {
+client.addCommand('waitForMainDone', function(callback) {
+    var waitForDoneFn = function() {
+        client.execute('return SS.loadDone', function(result) {
+            if (result.value) {
+                callback();
+            } else {
+                setTimeout(waitForDoneFn, 100);
+            }
+        });
+    }
+    waitForDoneFn();
+});
+
+client.addCommand('reloadCommit', function(callback) {
     this    
         .url(function(result) {
             this
                 .url(result.value + '&noFadein=true')
-                .pause(1000, callback);
+                .waitForMainDone(callback)
 
         });
 });

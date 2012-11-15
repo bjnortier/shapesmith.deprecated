@@ -176,6 +176,13 @@ define([
             }
         }
 
+        // This is for webdriver to determine when things have loaded
+        var loadFinished = function() {
+            if (!SS.loadDone) {
+                SS.loadDone = true;
+            }
+        }
+
 
         this.loadFromCommit = function(commit) {
             var url = '/' + SS.session.username + '/' + SS.session.design + '/graph/' + commit;
@@ -184,18 +191,23 @@ define([
                 var vertexSHAsToLoad = _.keys(graph.edges);
                 var remaining = vertexSHAsToLoad.length;
                 shasToVertices = {};
-                vertexSHAsToLoad.forEach(function(sha) {
-                    get('/' + SS.session.username + '/' + SS.session.design + '/vertex/' + sha,
-                        function(data) {
-                            var vertex = new geomNode.constructors[data.type](data);
-                            vertex.sha = sha;
-                            shasToVertices[sha] = vertex;
-                            --remaining;
-                            if (remaining == 0) {
-                                that.createGraph(graph, shasToVertices);
-                            }
-                        });
-                });
+                if (vertexSHAsToLoad.length > 0) {
+                    vertexSHAsToLoad.forEach(function(sha) {
+                        get('/' + SS.session.username + '/' + SS.session.design + '/vertex/' + sha,
+                            function(data) {
+                                var vertex = new geomNode.constructors[data.type](data);
+                                vertex.sha = sha;
+                                shasToVertices[sha] = vertex;
+                                --remaining;
+                                if (remaining == 0) {
+                                    that.createGraph(graph, shasToVertices);
+                                    loadFinished();
+                                }
+                            });
+                    });
+                } else {
+                    loadFinished();
+                }
 
             });
         }

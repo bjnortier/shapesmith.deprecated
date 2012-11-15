@@ -28,20 +28,26 @@ describe('Extrutions', function() {
         client
             .click('.toolbar .polyline')
             .clickOnWorld(0,0,0)
-            .dblClickOnWorld(10,10,0)
-            .waitForUrlChange()
-            .click('.toolbar .select')
-            .clickOnWorld(0,0,0)
-            .click('.toolbar .extrude')
-            .assertNumberOfDisplayNodes(1)
-            .assertNumberOfEditingNodes(1)
-            .moveToWorld(0,0,1)
-            .dragToWorld(0,0,10)
-            .assertTextEqual('.vertex.editing.extrude0 .z', '10')
-            .clickOnWorld(10,0,0)
-            .waitForUrlChange()
-            .assertNumberOfDisplayNodes(2)
-            .assertNumberOfEditingNodes(0, done)
+            .waitForUrlChange(
+                function() { client.dblClickOnWorld(0,10,0); },
+                function() {
+                    client
+                        .click('.toolbar .select')
+                        .clickOnWorld(0,0,0)
+                        .click('.toolbar .extrude')
+                        .assertNumberOfDisplayNodes(1)
+                        .assertNumberOfEditingNodes(1)
+                        .moveToWorld(0,0,1)
+                        .dragToWorld(0,0,10)
+                        .assertTextEqual('.vertex.editing.extrude0 .z', '10')
+                        .waitForUrlChange(
+                            function() { client.clickOnWorld(0,-10,0); },
+                            function() {
+                                client
+                                    .assertNumberOfDisplayNodes(2)
+                                    .assertNumberOfEditingNodes(0, done);
+                            });
+                });
 
     });
 
@@ -50,24 +56,35 @@ describe('Extrutions', function() {
         client
             .click('.toolbar .polyline')
             .clickOnWorld(0,0,0)
-            .dblClickOnWorld(10,10,0)
-            .waitForUrlChange()
-            .click('.toolbar .select')
-            .clickOnWorld(0,0,0)
-            .click('.toolbar .extrude')
-            .moveToWorld(0,0,1)
-            .dragToWorld(0,0,10)
-            .clickOnWorld(10,0,0)
-            .waitForUrlChange() 
-            .moveToWorld(0,0,0)
-            .dragToWorld(-10,-10,0)
-            .waitForUrlChange()
-            // Now the extrution should be at -10,-10,10
-            .clickOnWorld(-9,-9,9)
-            .assertNumberOfEditingNodes(1)
-            .moveToWorld(-10,-10,10)
-            .dragToWorld(-10,-10,20)
-            .assertTextEqual('.vertex.editing.extrude0 .z', '20', done)
+            .waitForUrlChange(
+                function() { client.dblClickOnWorld(0,10,0); },
+                function() {
+                    client
+                        .click('.toolbar .select')
+                        .clickOnWorld(0,0,0)
+                        .click('.toolbar .extrude')
+                        .moveToWorld(0,0,1)
+                        .dragToWorld(0,0,10)
+                        .waitForUrlChange(
+                            function() { client.clickOnWorld(0,-10,0); },
+                            function() {
+                                // Drag the polyline corner
+                                client
+                                    .moveToWorld(0,0,0)
+                                    .waitForUrlChange(
+                                        function() { client.dragToWorld(0,-10,0); },
+                                        function() {
+                                            // Now the extrution should be at 0,-10,10
+                                            client
+                                                .clickOnWorld(0,-9,9)
+                                                .assertNumberOfEditingNodes(1)
+                                                .moveToWorld(0,-10,10)
+                                                .dragToWorld(0,-10,20)
+                                                .assertTextEqual(
+                                                    '.vertex.editing.extrude0 .z', '20', done)
+                                        });
+                            });
+                });
     });
 
 });
