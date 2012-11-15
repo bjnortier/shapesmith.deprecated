@@ -55,7 +55,9 @@ define([
                 '<div class="name">{{name}}</div>' + 
                 '</div>' + 
                 '<div class="coordinate">' +
-                '<span class="x">{{x}}</span><span class="y">{{y}}</span><span class="z">{{z}}</span>' +
+                '<input class="field x" type="text" value="{{x}}"></input>' +
+                '<input class="field y" type="text" value="{{y}}"></input>' +
+                '<input class="field z" type="text" value="{{z}}"></input>' +
                 '</div>' +
                 '</td>';
             var view = {
@@ -73,9 +75,17 @@ define([
         update: function() {
             var that = this;
             ['x', 'y', 'z'].forEach(function(key) {
-                that.$el.find('.coordinate').find('.' + key).text(that.model.vertex.parameters.coordinate[key]);
+                that.$el.find('.coordinate').find('.' + key).val(that.model.vertex.parameters.coordinate[key]);
             });
         },
+
+        updateFromDOM: function() {
+            var that = this;
+            ['x', 'y', 'z'].forEach(function(key) {
+                that.model.vertex.parameters.coordinate[key] = 
+                    that.$el.find('.coordinate').find('.' + key).val();
+            });
+        }
     });
 
     var EditingSceneView = vertexWrapper.EditingSceneView.extend({

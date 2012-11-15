@@ -52,34 +52,36 @@
         }
 
         this.mouseup = function(event) {
-            if (!dragging) {
+            if (!this.ignoreNextMouseUp) {
+                if (!dragging) {
 
-                // Prevent multiple click event on double click
-                var now = new Date().getTime();
-                var eventPosition = eventToPosition(event);
+                    // Prevent multiple click event on double click
+                    var now = new Date().getTime();
+                    var eventPosition = eventToPosition(event);
 
-                var isSecondClickOfDoubleClick = false;
-                if (this.lastClickTimestamp) {
-                    var within300ms = (now - this.lastClickTimestamp < 300);
-                    var dx = Math.abs(eventPosition.x - this.lastClickPosition .x);
-                    var dy = Math.abs(eventPosition.y - this.lastClickPosition .y);
-                    var isWithinThreshold = Math.sqrt(dx*dx + dy*dy) < dragThreshold;
-                    isSecondClickOfDoubleClick = within300ms && isWithinThreshold;
-                }
-                    
-                this.lastClickTimestamp = now;
-                this.lastClickPosition = eventPosition;
+                    var isSecondClickOfDoubleClick = false;
+                    if (this.lastClickTimestamp) {
+                        var within300ms = (now - this.lastClickTimestamp < 300);
+                        var dx = Math.abs(eventPosition.x - this.lastClickPosition .x);
+                        var dy = Math.abs(eventPosition.y - this.lastClickPosition .y);
+                        var isWithinThreshold = Math.sqrt(dx*dx + dy*dy) < dragThreshold;
+                        isSecondClickOfDoubleClick = within300ms && isWithinThreshold;
+                    }
+                        
+                    this.lastClickTimestamp = now;
+                    this.lastClickPosition = eventPosition;
 
-                if (!isSecondClickOfDoubleClick) {
-                    if (sceneViewEventGenerator.overClickable()) {
-                        sceneViewEventGenerator.click(event);
-                    } else {
-                        this.trigger('sceneClick', event);
+                    if (!isSecondClickOfDoubleClick) {
+                        if (sceneViewEventGenerator.overClickable()) {
+                            sceneViewEventGenerator.click(event);
+                        } else {
+                            this.trigger('sceneClick', event);
+                        }
                     }
                 }
+                sceneViewEventGenerator.mouseup(event);
             }
-
-            sceneViewEventGenerator.mouseup(event);
+            this.ignoreNextMouseUp = false;
             this.mouseDownEvent = undefined;
             dragging = false;
         }
@@ -98,6 +100,9 @@
         }
 
         this.mousedown = function(event) {
+            if (this.fieldHasFocus) {
+                this.ignoreNextMouseUp = true;
+            }
             this.mouseDownEvent = event;
             sceneViewEventGenerator.mousedown(event);
         }
@@ -111,6 +116,13 @@
             var dy = Math.abs(pos1.y - pos2.y);
             return Math.sqrt(dx*dx + dy*dy) > dragThreshold;
         };
+
+        // When a field input has focus, we want to prevent a 'click out'
+        // on the scene to unselect the editing vertex, or any other scene 
+        // click for that matter
+        this.setFieldFocus = function(val) {
+            this.fieldHasFocus = val;
+        }
     }
 
     var eventToPosition = function(event) {

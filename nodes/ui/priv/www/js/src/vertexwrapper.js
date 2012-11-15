@@ -116,11 +116,32 @@ define([
             this.render();
             $('#graph').prepend(this.$el);
             this.model.vertex.on('change', this.update, this);
+            $('.field').autoGrowInput();
         },
 
         remove: function() {
             Backbone.View.prototype.remove.call(this);
             this.model.vertex.off('change', this.update, this);
+        },
+
+        events: {
+            'focusin .field'  : 'fieldFocusIn',
+            'focusout .field' : 'fieldFocusOut',
+            'change .field'   : 'fieldChange',
+            'keyup .field'    : 'fieldChange',
+        },
+
+        fieldFocusIn: function(event) {
+            coordinator.setFieldFocus(true);
+        },
+
+        fieldFocusOut: function(event) {
+            coordinator.setFieldFocus(false);
+        },
+
+        fieldChange: function(event) {
+            this.updateFromDOM();
+            this.model.vertex.trigger('change', this.model.vertex);
         },
 
     });
@@ -215,13 +236,11 @@ define([
         },
 
         click: function(event) {
-            if (!geometryGraph.isEditing()) {
-                if (this.model.canSelect()) {
-                    if (event.shiftKey || event.ctrlKey || event.metaKey) {
-                        selection.addToSelection(this.model.vertex.id);
-                    } else {
-                        selection.selectOnly(this.model.vertex.id);
-                    }
+            if (this.model.canSelect()) {
+                if (event.shiftKey || event.ctrlKey || event.metaKey) {
+                    selection.addToSelection(this.model.vertex.id);
+                } else {
+                    selection.selectOnly(this.model.vertex.id);
                 }
             }
         },

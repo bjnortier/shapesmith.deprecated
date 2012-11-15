@@ -18,6 +18,7 @@
     <script type="text/javascript" src="/ui/js/lib/jquery.mustache.js"></script>
     <script type="text/javascript" src="/ui/js/lib/jquery.getQueryParam.1.0.0.min.js"></script>
     <script type="text/javascript" src="/ui/js/lib/jquery.mousewheel.min.js"></script>
+    <script type="text/javascript" src="/ui/js/lib/jquery.autoGrowInput.js"></script>
     
     <script type="text/javascript" src="/ui/js/lib/Detector.js"></script>
     <script type="text/javascript" src="/ui/js/lib/three.min.js"></script>

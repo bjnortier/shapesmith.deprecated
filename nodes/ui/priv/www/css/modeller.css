@@ -118,10 +118,6 @@ img#logo {
     color: #fff;
 }
 
-.vertex.editing {
-    width: 200px; 
-}
-
 .vertex .name {
     display: inline-block;
     vertical-align: middle;
@@ -163,6 +159,10 @@ img#logo {
 }
 
 .vertex.editing {
+    background: rgba(51, 51, 51, 0.46);
+}
+
+.vertex.editing .title {
     background: rgba(136, 170, 201, 0.46);
 }
 
@@ -210,6 +210,13 @@ img#logo {
 
 .toolbar.geometry .extrude.active .icon {
     background-image: url('/ui/images/icons/extrude32x32.png');
+}
+
+#graph input[type="text"] {
+    width: 20px;
+    border: none;
+    background: none; 
+    padding: 2px;
 }
 
 

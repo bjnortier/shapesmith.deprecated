@@ -91,18 +91,20 @@ define(['src/scene',  'src/interactioncoordinator'], function(sceneModel, coordi
         };
 
         this.keydown = function(event) {
-            var factor = 10;
-            switch (event.keyCode) {
-            case 187:
-            case 107:
-                this.zoom(Math.sqrt(position.distance)*factor);
-                event.preventDefault();
-                break;
-            case 189:
-            case 109:
-                this.zoom(-Math.sqrt(position.distance)*factor);
-                event.preventDefault();
-                break;
+            if (!coordinator.fieldHasFocus) {
+                var factor = 10;
+                switch (event.keyCode) {
+                case 187:
+                case 107:
+                    this.zoom(Math.sqrt(position.distance)*factor);
+                    event.preventDefault();
+                    break;
+                case 189:
+                case 109:
+                    this.zoom(-Math.sqrt(position.distance)*factor);
+                    event.preventDefault();
+                    break;
+                }
             }
         }
 
