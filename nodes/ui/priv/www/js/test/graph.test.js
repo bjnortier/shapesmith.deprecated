@@ -165,4 +165,28 @@ describe('Graph', function() {
 
     });
 
+    it.only('can do a leaf-first search of all vertices', function() {
+
+        var a = {id:'a'}, b1 = {id:'b1'}, b2 = {id: 'b2'}, c = {id:'c'}, d = {id:'d'};
+        var graph = new graphLib.Graph();
+
+        graph.addVertex(a);        
+        graph.addVertex(b1); 
+        graph.addVertex(b2); 
+        graph.addEdge(a,b1);
+        graph.addEdge(a,b2)
+        graph.addVertex(c);
+        graph.addVertex(d);
+        graph.addEdge(c,d);
+
+        var sequence = [];
+        var listener = function(vertex) {
+            sequence.push(vertex.id);
+        }
+
+        graph.leafFirstSearch(listener);
+
+        assert.deepEqual(sequence, ['b1','b2','a','d','c']);
+    });
+
 });

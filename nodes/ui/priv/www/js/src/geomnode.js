@@ -91,6 +91,21 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
         }
     }
 
+    // ---------- Types ----------
+
+    var Variable = function(options) {
+        if (!options.hasOwnProperty('name')) {
+            throw Error('No variable name');
+        }
+        if (!options.parameters.hasOwnProperty('expression')) {
+            throw Error('No expression');
+        }
+        options.type = 'variable';
+        GeomNode.prototype.constructor.call(this, options);
+    }
+
+    _.extend(Variable.prototype, GeomNode.prototype);
+
     var Point = function(options) {
         var options = options || {};
         options.type = 'point';
@@ -122,6 +137,7 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
     return {
         resetIDCounters : resetIDCounters,
         Node     : GeomNode,
+        Variable : Variable,
         Point    : Point,
         Polyline : Polyline,
         Extrude  : Extrude,
