@@ -24,9 +24,9 @@ define([
             var geometry = new THREE.Geometry();
             var h = geometryGraph.evaluate(this.model.vertex.parameters.h);
             var a  = calc.objToVector(pointA.parameters.coordinate, geometryGraph);
-            var ah = a.clone().setZ(h);
+            var ah = a.clone().setZ(h + a.z);
             var b  = calc.objToVector(pointB.parameters.coordinate, geometryGraph);
-            var bh = b.clone().setZ(h);
+            var bh = b.clone().setZ(h + b.z);
 
             geometry.vertices.push(a);
             geometry.vertices.push(b);
@@ -149,7 +149,7 @@ define([
                 ]);
             var pointPosition = calc.objToVector(this.pointVertex.parameters.coordinate, geometryGraph);
             pointSceneObject.position = pointPosition;
-            pointSceneObject.position.z = geometryGraph.evaluate(this.model.vertex.parameters.h);
+            pointSceneObject.position.z = geometryGraph.evaluate(this.model.vertex.parameters.h) + pointPosition.z;
             this.sceneObject.add(pointSceneObject);
 
             if (this.showHeightLine) {
@@ -183,7 +183,11 @@ define([
             var ray = new THREE.Ray(rayOrigin, rayDirection);
 
             var positionOnNormal = calc.positionOnRay(event, ray, sceneModel.view.camera);
-            this.model.vertex.parameters.h = parseFloat(positionOnNormal.z.toFixed(0))
+            var pointPosition = calc.objToVector(this.pointVertex.parameters.coordinate, geometryGraph);
+            this.model.vertex.parameters.h = 
+                parseFloat(positionOnNormal.z.toFixed(0)) - 
+                pointPosition.z;
+
             this.model.vertex.trigger('change', this.model.vertex);
         },
 

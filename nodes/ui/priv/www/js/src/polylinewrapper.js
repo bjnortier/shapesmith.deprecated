@@ -20,11 +20,11 @@ define([
                 return point.parameters.coordinate;
             });
 
-            var positions = [calc.objToVector(coordinates[0])];
+            var positions = [calc.objToVector(coordinates[0], geometryGraph)];
 
             for(var i = 1; i < coordinates.length; ++i) {
-                var from = calc.objToVector(coordinates[i-1]);
-                var to = calc.objToVector(coordinates[i]);
+                var from = calc.objToVector(coordinates[i-1], geometryGraph);
+                var to = calc.objToVector(coordinates[i], geometryGraph);
                 var geometry = new THREE.Geometry();
                 geometry.vertices.push(from);
                 geometry.vertices.push(to);
