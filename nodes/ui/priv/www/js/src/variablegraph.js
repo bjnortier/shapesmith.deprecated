@@ -4,7 +4,7 @@ define([
     'src/geomnode',
     ], function(Parser, graphLib, geomNode) {
 
-    var VariableGraph = function() {
+    var VariableGraph = function(graph) {
 
         var graph = graph || new graphLib.Graph();
         var that = this;
@@ -47,7 +47,6 @@ define([
             }
         }
 
-
         this.replaceVariable = function(name, expression) {
             var original = graph.vertexById(name);
             try {
@@ -84,10 +83,12 @@ define([
         var gatherVariables = function() {
             var vars = {};
             var listener = function(vertex) {
-                var variable = vertex.id;
-                var expression = vertex.parameters.expression;
-                var value = parseExpressionWithVariables(expression, vars);
-                vars[variable] = value;
+                if (vertex.type === 'variable') {
+                    var variable = vertex.id;
+                    var expression = vertex.parameters.expression;
+                    var value = parseExpressionWithVariables(expression, vars);
+                    vars[variable] = value;
+                }
             }
             graph.leafFirstSearch(listener);
             return vars;

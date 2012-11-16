@@ -25,11 +25,7 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
             ++counters[options.type]
         } 
 
-        if (options.name) {
-            this.name = options.name;
-        } else {
-            this.name = this.id;
-        }
+        this.name = this.id;
 
         this.implicit = options.implicit || false;
         this.parameters = options.parameters || {};
@@ -47,8 +43,8 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
             id       : this.id,
             name     : this.name,
             implicit : this.implicit,
+            parameters : copyObj(this.parameters)
         });
-        newNode.parameters = copyObj(this.parameters);
         return newNode;
     }  
 
@@ -61,7 +57,7 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
     GeomNode.prototype.toJSONSubset = function() {
         return {
             type: this.type, 
-            name: this.name,
+            id: this.id,
             implicit: this.implicit,
             parameters: this.parameters,
         }
@@ -146,6 +142,7 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
         Polyline : Polyline,
         Extrude  : Extrude,
         constructors: {
+            'variable' : Variable,
             'point'    : Point,
             'polyline' : Polyline,
             'extrude'  : Extrude,

@@ -15,6 +15,26 @@ requirejs.config({
 var geomNode = requirejs('src/geomnode');
 var graphLib = requirejs('src/graph');
 
+describe('Variable', function() {
+    
+    it('clones nonEditing correctly', function() {
+
+        var a = new geomNode.Variable({
+            id: 'a',
+            parameters: {expression: '1'}
+        });
+
+        var nonEditing = a.cloneNonEditing();
+
+        assert.equal(a.id, nonEditing.id);
+        assert.equal(a.name, nonEditing.name);
+        assert.deepEqual(a.parameters, nonEditing.parameters);
+        assert.isFalse(nonEditing.editing);
+
+    });
+
+});
+
 describe('Point', function() {
 
     it('constructs correctly', function() {

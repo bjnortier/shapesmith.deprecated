@@ -66,7 +66,9 @@ define([
         addVariable: function() {
             var name = this.$el.find('.var').val();
             var expr = this.$el.find('.expr').val();
-            if (geometryGraph.addVariable(name, expr)) {
+            var vertex = geometryGraph.addVariable(name, expr);
+            if (vertex) {
+                geometryGraph.commitCreate(vertex);
                 this.$el.find('.var').val('');
                 this.$el.find('.expr').val('');
                 this.$el.removeClass('error');

@@ -225,11 +225,11 @@ define([
             originals[vertex.id] = vertex;
 
             var that = this;
-            if (vertex.type === 'polyline') {
-                this.childrenOf(vertex).forEach(function(point) {
-                    that.edit(point);
-                });
-            }
+            this.childrenOf(vertex).forEach(function(child) {
+                if (child.implicit) {
+                    that.edit(child);
+                }
+            });
         }
 
         this.editById = function(id) {
@@ -366,9 +366,9 @@ define([
             if (vertex) {
                 vertex.on('change', this.vertexChanged, this);
                 this.trigger('vertexAdded', vertex);
-                return true;
+                return vertex;
             } else {
-                return false;
+                return undefined;
             }
         }
 
@@ -376,9 +376,9 @@ define([
             var result = varGraph.updateVariable(oldName, newName, expression);
             if (result) {
                 this.setupEventsForReplacement(result.original, result.replacement);
-                return true;
+                return result.replacement;
             } else {
-                return false;
+                return undefined;
             }
         }
 

@@ -51,8 +51,11 @@ define([
             var oldName = this.model.vertex.id;
             var newName = this.$el.find('.var').val();
             var expr = this.$el.find('.expr').val();
-            if (geometryGraph.updateVariable(oldName, newName, expr)) {
+            var vertex = geometryGraph.updateVariable(oldName, newName, expr);
+            if (vertex) {
                 this.$el.removeClass('error');
+                this.model.vertex.editing = true;
+                geometryGraph.commitEditWithReplacement(this.model.vertex, vertex);
             } else {
                 this.$el.addClass('error');
             }

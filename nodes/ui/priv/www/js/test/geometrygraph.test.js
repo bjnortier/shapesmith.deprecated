@@ -68,10 +68,11 @@ describe('GeometryGraph', function() {
 
         var graph = new geometryGraph.Graph();
         var a = graph.addVariable('a', '1');
+        assert.equal(a.id, 'a');    
 
-        assert.isFalse(graph.updateVariable('a', 'b', ''));
-        assert.isTrue(graph.updateVariable('a', 'b', '2'));
-        assert.isTrue(graph.updateVariable('a', 'a', '2'));
+        assert.isUndefined(graph.updateVariable('a', 'b', ''));
+        assert.isObject(graph.updateVariable('a', 'b', '2'));
+        assert.isObject(graph.updateVariable('a', 'a', '2'));
     })
 
 })

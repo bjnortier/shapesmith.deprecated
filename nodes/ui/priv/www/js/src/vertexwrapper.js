@@ -36,7 +36,7 @@ define([
         },
 
         okEdit: function() {
-            geometryGraph.commitEdit(this.vertex);
+            geometryGraph.commitEdit();
         },
 
         cancel: function() {
