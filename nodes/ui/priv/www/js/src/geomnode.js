@@ -11,7 +11,11 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
         }
         this.type = options.type;
         
-        if (options.id) {
+        if (options.hasOwnProperty('id')) {
+            var re = new RegExp('[a-zA-Z][a-zA-Z0-9_]*');
+            if (!re.exec(options.id)) {
+                throw new Error('invalid id. Must match [a-zA-Z][a-zA-Z0-9_]+')
+            }
             this.id = options.id;
         } else {
             if (!counters[options.type]) {
@@ -94,10 +98,10 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
     // ---------- Types ----------
 
     var Variable = function(options) {
-        if (!options.hasOwnProperty('name')) {
-            throw Error('No variable name');
-        }
-        if (!options.parameters.hasOwnProperty('expression')) {
+        if (!options.hasOwnProperty('id')) {
+            throw Error('No name');
+        }        
+        if (!options.hasOwnProperty('parameters') || !options.parameters.hasOwnProperty('expression')) {
             throw Error('No expression');
         }
         options.type = 'variable';

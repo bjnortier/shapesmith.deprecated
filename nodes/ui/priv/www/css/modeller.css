@@ -236,7 +236,7 @@ img#logo {
     color: #ff706b;
 }
 
-.new-variable.error .field {
+.error .field {
     background: url(/ui/images/textfielderror.png) transparent bottom repeat-x;
 }
 

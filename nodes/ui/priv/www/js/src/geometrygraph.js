@@ -372,6 +372,16 @@ define([
             }
         }
 
+        this.updateVariable = function(oldName, newName, expression) {
+            var result = varGraph.updateVariable(oldName, newName, expression);
+            if (result) {
+                this.setupEventsForReplacement(result.original, result.replacement);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
         // ---------- Graph functions ----------
 
         this.add = function(vertex, beforeNotifyFn) {
@@ -391,6 +401,10 @@ define([
 
         this.replace = function(original, replacement) {
             graph.replaceVertex(original, replacement);
+            this.setupEventsForReplacement(original, replacement);
+        }
+
+        this.setupEventsForReplacement = function(original, replacement) {
             original.off('change', this.vertexChanged, this);
             replacement.on('change', this.vertexChanged, this);
             replacement.trigger('change', replacement);

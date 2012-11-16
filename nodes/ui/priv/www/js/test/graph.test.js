@@ -30,6 +30,12 @@ describe('Graph', function() {
         assert.equal(graph.size(), 2);
         assert.deepEqual(graph.vertices(), [a, b]);
 
+        assert.deepEqual(graph.vertexById('a'), a);
+
+        assert.throws(function() {
+            graph.addVertex(a);
+        }, Error);
+
     });
 
     it('manages incoming and outgoing vertices', function() {
@@ -165,7 +171,7 @@ describe('Graph', function() {
 
     });
 
-    it.only('can do a leaf-first search of all vertices', function() {
+    it('can do a leaf-first search of all vertices', function() {
 
         var a = {id:'a'}, b1 = {id:'b1'}, b2 = {id: 'b2'}, c = {id:'c'}, d = {id:'d'};
         var graph = new graphLib.Graph();

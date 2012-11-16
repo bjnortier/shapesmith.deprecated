@@ -34,14 +34,6 @@ define([
             return this;
         },
 
-        // events: {
-        //     'click .add' : 'addVariable',
-        // },
-
-        // addVariable: function() {
-        //     geometryGraph.addVariable('', '');
-        // },
-
     });
 
     var NewVarView = Backbone.View.extend({
@@ -68,7 +60,7 @@ define([
         },
 
         events: {
-            'focusout .expr' : 'addVariable',
+            'focusout .field' : 'addVariable',
         },
 
         addVariable: function() {
@@ -79,7 +71,11 @@ define([
                 this.$el.find('.expr').val('');
                 this.$el.removeClass('error');
             } else {
-                this.$el.addClass('error');
+                if ((name !== '') || (expr !== '')) {
+                    this.$el.addClass('error');
+                } else {
+                    this.$el.removeClass('error');
+                }
             }
 
         },

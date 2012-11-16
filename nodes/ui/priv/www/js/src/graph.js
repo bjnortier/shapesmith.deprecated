@@ -70,6 +70,10 @@ define(['lib/underscore-require'], function(_) {
             return vertices[id];
         }
 
+        this.vertexByName = function(name) {
+            
+        }
+
         this.vertices = function() {
             return _.values(vertices);
         }

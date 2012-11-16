@@ -63,4 +63,15 @@ describe('GeometryGraph', function() {
             }
         });
     });
+
+    it('can add and update variables', function() {
+
+        var graph = new geometryGraph.Graph();
+        var a = graph.addVariable('a', '1');
+
+        assert.isFalse(graph.updateVariable('a', 'b', ''));
+        assert.isTrue(graph.updateVariable('a', 'b', '2'));
+        assert.isTrue(graph.updateVariable('a', 'a', '2'));
+    })
+
 })

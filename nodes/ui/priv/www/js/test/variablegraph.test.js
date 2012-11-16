@@ -75,9 +75,42 @@ describe('Expressions', function() {
     it('rejects invalid variables', function() {
 
         var added = graph.addVariable('a', '$^%&*');
-        assert.isFalse(added);
+        assert.isUndefined(added);
+
+        graph.addVariable('a', '1');
+        assert.isUndefined(graph.addVariable('a', '1'))
 
     });
+
+    it('can update a variable with a new name', function() {
+        var vertex = graph.addVariable('a', '1');
+
+        var newVertex = graph.updateVariable('a', 'b', '2');
+        assert.isObject(newVertex);
+
+    });
+
+    it('can update a variable with the same name', function() {
+        var vertex = graph.addVariable('a', '1');
+
+        var newVertex = graph.updateVariable('a', 'a', '2');
+        assert.isObject(newVertex);
+    });
+
+    it('rejects invalid updates', function() {
+
+        var vertex = graph.addVariable('a', '1');
+
+        assert.throws(function() {
+            graph.updateVariable('x', 'b', '1');
+        }, variableGraph.UnknownVariableError);
+
+        assert.isUndefined(graph.updateVariable('a', 'b', ''));
+        assert.isUndefined(graph.updateVariable('a', 'a', ''));
+
+    });
+
+    it('rejects variable name change when it has parents in graph');
 
     it('returns the child variable');
 

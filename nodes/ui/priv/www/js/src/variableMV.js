@@ -1,22 +1,24 @@
 define([
     'src/vertexwrapper',
-    ], function(vertexWrapper) {
+    'src/geometrygraphsingleton', 
+    ], function(vertexWrapper, geometryGraph) {
 
-    var EditingModel = vertexWrapper.EditingModel.extend({
+    var DisplayModel = vertexWrapper.Model.extend({
 
         initialize: function(vertex) {
-            vertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
-            this.view = new EditingDOMView({model: this});
+            vertexWrapper.Model.prototype.initialize.call(this, vertex);
+            this.views = [
+                new DisplayDOMView({model: this})
+            ]
         },
 
         destroy: function() {
-            vertexWrapper.EditingModel.prototype.initialize.call(this);
-            this.view.remove();
+            vertexWrapper.Model.prototype.destroy.call(this);
         },
 
     });
 
-    var EditingDOMView = vertexWrapper.EditingDOMView.extend({
+    var DisplayDOMView = vertexWrapper.EditingDOMView.extend({
 
         initialize: function() {
             vertexWrapper.EditingDOMView.prototype.initialize.call(this);
@@ -27,10 +29,10 @@ define([
         render: function() {
             var template = 
                 '<td class="name">' +  
-                '<input class="field" placeholder="var" type="text" value="{{name}}"></input>' +
+                '<input class="field var" placeholder="var" type="text" value="{{name}}"></input>' +
                 '</td>' +
                 '<td class="expression">' +  
-                '<input class="field" placeholder="expr" type="text" value="{{expression}}"></input>' +
+                '<input class="field expr" placeholder="expr" type="text" value="{{expression}}"></input>' +
                 '</td>';
             var view = {
                 id: this.model.vertex.id,   
@@ -38,23 +40,29 @@ define([
                 expression: this.model.vertex.parameters.expression,
             }
             this.$el.html($.mustache(template, view));
-            this.update();
             return this;
         },
 
-        update: function() {
-
+        events: {
+            'focusout .field' : 'updateFromDOM',
         },
 
         updateFromDOM: function() {
-
+            var oldName = this.model.vertex.id;
+            var newName = this.$el.find('.var').val();
+            var expr = this.$el.find('.expr').val();
+            if (geometryGraph.updateVariable(oldName, newName, expr)) {
+                this.$el.removeClass('error');
+            } else {
+                this.$el.addClass('error');
+            }
         },
 
     });
 
 
     return {
-        DisplayModel: EditingModel,
+        DisplayModel: DisplayModel,
     }
 
 });
