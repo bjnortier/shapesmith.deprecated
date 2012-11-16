@@ -71,7 +71,7 @@ define(['lib/underscore-require'], function(_) {
         }
 
         this.vertexByName = function(name) {
-            
+            return _.find(_.values(vertices), function(v) { return (v.name === name); });
         }
 
         this.vertices = function() {
@@ -83,7 +83,7 @@ define(['lib/underscore-require'], function(_) {
         }
 
         this.nameIsTaken = function(name) {
-            return _.find(_.values(vertices), function(v) { return (v.name === name); }) !== undefined;
+            return this.vertexByName(name) !== undefined;
         }
 
         this.addEdge = function(from, to) {

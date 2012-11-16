@@ -72,34 +72,6 @@ describe('Expressions', function() {
 
     });
 
-    // it('can update a variable with a new name', function() {
-    //     var vertex = graph.add(variableGraph.createVertex('a', '1'));
-
-    //     var newVertex = graph.updateVariable('a', 'b', '2');
-    //     assert.isObject(newVertex);
-
-    // });
-
-    // it('can update a variable with the same name', function() {
-    //     var vertex = graph.addVariable('a', '1');
-
-    //     var newVertex = graph.updateVariable('a', 'a', '2');
-    //     assert.isObject(newVertex);
-    // });
-
-    // it('rejects invalid updates', function() {
-
-    //     var vertex = graph.addVariable('a', '1');
-
-    //     assert.throws(function() {
-    //         graph.updateVariable('x', 'b', '1');
-    //     }, variableGraph.UnknownVariableError);
-
-    //     assert.isUndefined(graph.updateVariable('a', 'b', ''));
-    //     assert.isUndefined(graph.updateVariable('a', 'a', ''));
-
-    // });
-
     it('can determine if a potential new variable is valid', function() {
 
         var a = variableGraph.createVertex('a', '1');
@@ -123,7 +95,20 @@ describe('Expressions', function() {
 
     it('rejects variable name change when it has parents in graph');
 
-    it('returns the child variable');
+    it('can determine the children of an expression', function() {
+
+        var a = variableGraph.createVertex('a', '1');
+        var b = variableGraph.createVertex('b', '2');
+        
+        graph.add(a);
+        graph.add(b);
+
+        assert.deepEqual(graph.getExpressionChildren('1'), []);
+        assert.deepEqual(graph.getExpressionChildren('a'), [a]);
+        assert.deepEqual(graph.getExpressionChildren('a+b'), [a, b]);
+        assert.deepEqual(graph.getExpressionChildren(2), []);
+
+    });
 
 
 });

@@ -102,6 +102,9 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
 
     // ---------- Types ----------
 
+    // ---------- Variable ----------
+
+
     var Variable = function(options) {
         if (!options.hasOwnProperty('name')) {
             throw Error('No name');
@@ -113,7 +116,15 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
         GeomNode.prototype.constructor.call(this, options);
     }
 
+    Variable.prototype.getExpressions = function() {
+        return [
+            this.parameters.expression,
+        ];
+    }
+
     _.extend(Variable.prototype, GeomNode.prototype);
+
+    // ---------- Point ----------
 
     var Point = function(options) {
         var options = options || {};
@@ -122,13 +133,27 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
         GeomNode.prototype.constructor.call(this, options);
     }
 
+    Point.prototype.getExpressions = function() {
+        return [
+            this.parameters.coordinate.x, 
+            this.parameters.coordinate.y, 
+            this.parameters.coordinate.z,
+        ];
+    }
+
     _.extend(Point.prototype, GeomNode.prototype);
+
+    // ---------- Polyline ----------
 
     var Polyline = function(options) {
         var options = options || {};
         options.type = 'polyline';
-        options.parameters = options.parameters || {coordinates: [{x: '0', y:'0', z:'0'}]};
+        options.parameters = options.parameters || {};
         GeomNode.prototype.constructor.call(this, options);
+    }
+
+    Polyline.prototype.getExpressions = function() {
+        return [];
     }
 
     _.extend(Polyline.prototype, GeomNode.prototype);
@@ -136,8 +161,17 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
     var Extrude = function(options) {
         var options = options || {};
         options.type = 'extrude';
-        options.parameters = options.parameters || {vector: {u: '0', v:'0', n:'1'}, h: '1'  };
+        options.parameters = options.parameters || {vector: {u: '0', v:'0', n:'1'}, h: '1'};
         GeomNode.prototype.constructor.call(this, options);
+    }
+
+    Extrude.prototype.getExpressions = function() {
+        return [
+            this.parameters.vector.u, 
+            this.parameters.vector.v, 
+            this.parameters.vector.n,
+            this.parameters.h,
+        ];
     }
 
     _.extend(Extrude.prototype, GeomNode.prototype);

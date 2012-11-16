@@ -33,6 +33,16 @@ define([
             return parseExpressionWithVariables(expression, variables);
         }
 
+        this.getExpressionChildren = function(expression) {
+            if (typeof(expression) === 'number') {
+                return [];
+            } 
+            var childVarNames = parser.parse(expression).variables();
+            return childVarNames.map(function(name) {
+                return graph.vertexByName(name);
+            });
+        }
+
         this.canAdd = function(vertex) {
             var name = vertex.name;
             var expression = vertex.parameters.expression;
@@ -76,38 +86,38 @@ define([
         //     }
         // }
 
-        this.replaceVariable = function(name, expression) {
-            var original = graph.vertexById(name);
-            try {
-                var replacement = new geomNode.Variable({id: name, parameters: {expression: expression}});
-                graph.replaceVertex(original, replacement);
-                gatherVariables();
-                return replacement;
-            } catch (e) {
-                var vertexInGraph = graph.vertexById(name);
-                if (vertexInGraph) {
-                    graph.replaceVertex(vertexInGraph, original);
-                } else {
-                    graph.add(original);
-                }
-                return undefined;
-            }
-        }
+        // this.replaceVariable = function(name, expression) {
+        //     var original = graph.vertexById(name);
+        //     try {
+        //         var replacement = new geomNode.Variable({id: name, parameters: {expression: expression}});
+        //         graph.replaceVertex(original, replacement);
+        //         gatherVariables();
+        //         return replacement;
+        //     } catch (e) {
+        //         var vertexInGraph = graph.vertexById(name);
+        //         if (vertexInGraph) {
+        //             graph.replaceVertex(vertexInGraph, original);
+        //         } else {
+        //             graph.add(original);
+        //         }
+        //         return undefined;
+        //     }
+        // }
 
-        this.updateVariable = function(oldName, newName, newExpression) {
-            var oldVertex = graph.vertexById(oldName);
-            if (!oldVertex) {
-                throw new UnknownVariableError(oldName);
-            }
-            var newVertex = oldName === newName ? 
-                this.replaceVariable(newName, newExpression) :
-                this.addVariable(newName, newExpression);
-            if (newVertex) {
-                return {original: oldVertex, replacement: newVertex};
-            } else {
-                return undefined;
-            }
-        }
+        // this.updateVariable = function(oldName, newName, newExpression) {
+        //     var oldVertex = graph.vertexById(oldName);
+        //     if (!oldVertex) {
+        //         throw new UnknownVariableError(oldName);
+        //     }
+        //     var newVertex = oldName === newName ? 
+        //         this.replaceVariable(newName, newExpression) :
+        //         this.addVariable(newName, newExpression);
+        //     if (newVertex) {
+        //         return {original: oldVertex, replacement: newVertex};
+        //     } else {
+        //         return undefined;
+        //     }
+        // }
 
         var gatherVariables = function() {
             var vars = {};

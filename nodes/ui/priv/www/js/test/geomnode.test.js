@@ -114,7 +114,7 @@ describe('Polyline', function() {
 
     it('constructs properly', function() {
         var polyline = new geomNode.Polyline();
-        assert.deepEqual(polyline.parameters, {coordinates: [{x:'0', y:'0', z:'0'}]});
+        assert.deepEqual(polyline.parameters, {});
     });
 
 });

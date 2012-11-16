@@ -424,11 +424,33 @@ define([
 
         // ---------- Graph functions ----------
 
+        this.updateVariableEdges = function(vertex) {
+            if (!vertex.editing) {
+                var variableChildren = this.childrenOf(vertex).filter(function(v) {
+                    return v.type === 'variable';
+                });
+                variableChildren.map(function(child) {
+                    console.log('removing edge', vertex.id, child.id);
+                    graph.removeEdge(vertex, child);
+                });
+                var expressions = vertex.getExpressions();
+                var newVariableChildren = [];
+                expressions.forEach(function(expr) {
+                    newVariableChildren = newVariableChildren.concat(varGraph.getExpressionChildren(expr));
+                })
+                console.log('newVariableChildren', newVariableChildren);
+                newVariableChildren.forEach(function(child) {
+                    graph.addEdge(vertex, child);
+                });
+            }
+        }
+
         this.add = function(vertex, beforeNotifyFn) {
             graph.addVertex(vertex);
             if (beforeNotifyFn) {
                 beforeNotifyFn();
             }
+            this.updateVariableEdges(vertex);
             vertex.on('change', this.vertexChanged, this);
             this.trigger('vertexAdded', vertex);
         }
@@ -441,6 +463,7 @@ define([
 
         this.replace = function(original, replacement) {
             graph.replaceVertex(original, replacement);
+            this.updateVariableEdges(replacement);
             this.setupEventsForReplacement(original, replacement);
         }
 

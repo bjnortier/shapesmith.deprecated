@@ -49,6 +49,18 @@ describe('Graph', function() {
 
     });
 
+    it('can fetch by name for name', function() {
+        var graph = new graphLib.Graph();
+        var a = {id:'a', name: 'aa'}, b = {id:'b', name: 'bb'};
+        graph.addVertex(a);
+        graph.addVertex(b);
+
+        assert.deepEqual(graph.vertexByName('aa'), a);
+        assert.deepEqual(graph.vertexByName('bb'), b);
+        assert.isUndefined(graph.vertexByName('e'))
+
+    });
+
     it('manages incoming and outgoing vertices', function() {
 
         var a = {id:'a'}, b = {id:'b'}, c = {id:'c'};
