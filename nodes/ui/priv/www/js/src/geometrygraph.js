@@ -162,6 +162,53 @@ define([
             commandStack.do(command);
         }
 
+        this.commitDelete = function(vertex) {
+
+            var that = this;
+            var children = this.childrenOf(vertex);
+            var parents =  this.parentsOf(vertex);
+
+            if (parents.length > 0) {
+                vertex.errors = {delete: 'cannot delete veretx with parents'};
+                return;
+            }
+
+            var doFn = function(commandSuccessFn, commandErrorFn) {
+                that.remove(vertex);
+                children.forEach(function(child) {
+                    if (child.implicit) {
+                        that.remove(child);
+                    } 
+                })
+                captureGraph(commandSuccessFn);
+            }
+
+            var undoFn = function() {
+                children.forEach(function(child) {
+                    if (child.implicit) {
+                        that.add(child);
+                    }
+                })
+                that.add(vertex, function() {
+                    children.forEach(function(child) {
+                        graph.addEdge(vertex, child);
+                    });
+                });
+            }
+
+            var redoFn = function() {
+                that.remove(vertex);
+                children.forEach(function(child) {
+                    if (child.implicit) {
+                        that.remove(child);
+                    } 
+                })
+            }
+
+            var command = new Command(doFn, undoFn, redoFn);
+            commandStack.do(command);
+        }
+
 
         this.createGraph = function(deserializedGraph, shasToVertices) {
             var handledSHAs = [];

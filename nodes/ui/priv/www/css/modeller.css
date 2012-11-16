@@ -224,7 +224,7 @@ img#logo {
 }
 
 .toolbar.geometry .polyline .icon {
-    background-image: url('/ui/images/icons/line32x32.png');
+    background-image: url('/ui/images/icons/polyline32x32.png');
 }
 
 .toolbar.geometry .extrude .icon {
@@ -256,7 +256,7 @@ img#logo {
     padding: 5px;
 }
 
-#variables .field {
+.field {
     background: rgba(136, 170, 201, 0.46);
 }
 
@@ -276,7 +276,7 @@ img#logo {
     color: #ff706b;
 }
 
-#variables .field, #variables .name, #variable .expression {
+.field, #variables .name, #variable .expression {
     padding: 5px;
 }
 

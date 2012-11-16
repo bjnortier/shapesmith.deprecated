@@ -105,7 +105,7 @@ define([
         render: function() {
             var template = 
                 '<td colspan="2">' + 
-                '<div class="title"><img src="/ui/images/icons/line32x32.png"/>' +
+                '<div class="title"><img src="/ui/images/icons/polyline32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
                 '</div>' + 
                 '<div class="points">' + 
@@ -164,7 +164,7 @@ define([
             geomVertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
             this.views = this.views.concat([
                 new DisplayLineSceneView({model: this}),
-                new DisplayDOMView({model: this}),
+                new geomVertexWrapper.DisplayDOMView({model: this}),
             ]);
         },
 
@@ -174,24 +174,7 @@ define([
 
     });
 
-    var DisplayLineSceneView = geomVertexWrapper.DisplaySceneView.extend(LineSceneView);
-
-    var DisplayDOMView = geomVertexWrapper.DisplayDOMView.extend({
-
-        render: function() {
-            var view = {
-                name: this.model.vertex.name,
-            }
-            var template = 
-                '<td>' +
-                '<img src="/ui/images/icons/line32x32.png"/>' +
-                '<div class="name">{{name}}</div>' + 
-                '</td>';
-            this.$el.html($.mustache(template, view));
-            return this;
-        },
-
-    })
+    var DisplayLineSceneView = geomVertexWrapper.DisplaySceneView.extend(LineSceneView);    
 
     return {
         DisplayModel: DisplayModel,

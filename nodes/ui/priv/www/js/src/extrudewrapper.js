@@ -90,8 +90,8 @@ define([
 
         render: function() {
             var template = 
-                '<td>' + 
-                '<div class="title"><img src="/ui/images/icons/line32x32.png"/>' +
+                '<td colspan="2">' + 
+                '<div class="title"><img src="/ui/images/icons/extrude32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
                 '</div>' + 
                 '<div class="coordinate">' + 
@@ -199,29 +199,12 @@ define([
             geomVertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
             this.views = this.views.concat([
                 new DisplayFacesSceneView({model: this}),
-                new DisplayDOMView({model: this}),
+                new geomVertexWrapper.DisplayDOMView({model: this}),
             ]);
 
         },
 
     });
-
-    var DisplayDOMView = geomVertexWrapper.DisplayDOMView.extend({
-
-        render: function() {
-            var view = {
-                name: this.model.vertex.name,
-            }
-            var template = 
-                '<td>' + 
-                '<img src="/ui/images/icons/extrude32x32.png"/>' + 
-                '<div class="name">{{name}}</div>' + 
-                '</td>';
-            this.$el.html($.mustache(template, view));
-            return this;
-        },
-
-    })
 
     var DisplayFacesSceneView = geomVertexWrapper.DisplaySceneView.extend(RenderExtrudeFacesMixin);
 

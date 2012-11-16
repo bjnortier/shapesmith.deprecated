@@ -84,7 +84,7 @@ define([
                     var expression = that.$el.find('.field.' + key).val();
                     that.model.vertex.parameters.coordinate[key] = expression;
                 } catch(e) {
-                    console.log(e);
+                    console.error(e);
                 }
             });
         }
@@ -163,7 +163,7 @@ define([
                 new DisplaySceneView({model: this}),
             ]);
             if (!vertex.implicit) {
-                this.views.push(new DisplayDOMView({model: this}));
+                this.views.push(new geomVertexWrapper.DisplayDOMView({model: this}));
             }
         },
 
@@ -231,23 +231,6 @@ define([
         },
 
     });
-
-    var DisplayDOMView = geomVertexWrapper.DisplayDOMView.extend({
-
-        render: function() {
-            var view = {
-                name: this.model.vertex.name,
-            }
-            var template = 
-                '<td>' + 
-                '<img src="/ui/images/icons/point32x32.png"/>' + 
-                '<div class="name">{{name}}</div>' + 
-                '</td>';
-            this.$el.html($.mustache(template, view));
-            return this;
-        },
-
-    })
 
 
     return {

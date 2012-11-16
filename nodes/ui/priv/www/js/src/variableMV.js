@@ -72,7 +72,7 @@ define([
         delete: function() {
             if (this.model.vertex.proto) {
                 this.model.cancel();
-            }
+            } 
         },
 
         sceneClick: function() {
@@ -130,10 +130,16 @@ define([
         },
 
         events: {
-            'click' : 'click',
+            'click .name' : 'click',
+            'click .expression' : 'click',
+            'click .delete' : 'delete',
         },
 
-        click: function(event) {
+        delete: function() {
+            geometryGraph.commitDelete(this.model.vertex);
+        },
+
+        click: function() {
             geometryGraph.edit(this.model.vertex);
         },
 

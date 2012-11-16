@@ -157,11 +157,26 @@ define([
             this.$el.addClass(this.model.vertex.name);  
         },
 
+        render: function() {
+            var view = {
+                name: this.model.vertex.name,
+                type: this.model.vertex.type,
+            }
+            var template = 
+                '<td class="title">' + 
+                '<img src="/ui/images/icons/{{type}}32x32.png"/>' + 
+                '<div class="name">{{name}}</div>' + 
+                '</td>';
+            this.$el.html($.mustache(template, view));
+            return this;
+        },        
+
         events: {
-            'click' : 'click',
+            'click .title' : 'clickTitle',
+            'click .delete' : 'delete',
         },
 
-        click: function(event) {
+        clickTitle: function(event) {
             if (this.model.canSelect()) {
                 if (event.shiftKey || event.ctrlKey || event.metaKey) {
                     selection.addToSelection(this.model.vertex.id);
@@ -169,6 +184,10 @@ define([
                     selection.selectOnly(this.model.vertex.id);
                 }
             }
+        },
+
+        delete: function() {
+            geometryGraph.commitDelete(this.model.vertex);
         },
 
         select: function() {
