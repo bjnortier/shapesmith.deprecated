@@ -361,6 +361,15 @@ define([
             return varGraph.evaluate(expression);
         }
 
+        this.addVariable = function() {
+            var vertex = new geomNode.Variable({
+                name: '_', parameters: {expression: ''},
+                editing      : true,
+                proto        : true,
+            });
+            this.add(vertex);
+        }
+
         // ---------- Graph functions ----------
 
         this.add = function(vertex, beforeNotifyFn) {

@@ -78,40 +78,13 @@ define([
 
     });
 
-    var EditingDOMView = Backbone.View.extend({
+    var EditingDOMView = vertexWrapper.EditingDOMView.extend({
 
-        tagName: "tr",
 
         initialize: function() {
-            this.render();
-            $('#geometry').prepend(this.$el);
-            this.model.vertex.on('change', this.update, this);
+            vertexWrapper.EditingDOMView.prototype.initialize.call(this);
+            $('#geometry').append(this.$el);
             $('.field').autoGrowInput();
-        },
-
-        remove: function() {
-            Backbone.View.prototype.remove.call(this);
-            this.model.vertex.off('change', this.update, this);
-        },
-
-        events: {
-            'focusin .field'  : 'fieldFocusIn',
-            'focusout .field' : 'fieldFocusOut',
-            'change .field'   : 'fieldChange',
-            // 'keyup .field'    : 'fieldChange',
-        },
-
-        fieldFocusIn: function(event) {
-            coordinator.setFieldFocus(true);
-        },
-
-        fieldFocusOut: function(event) {
-            coordinator.setFieldFocus(false);
-        },
-
-        fieldChange: function(event) {
-            this.updateFromDOM();
-            this.model.vertex.trigger('change', this.model.vertex);
         },
 
     });
@@ -171,23 +144,17 @@ define([
             }
         },
 
-        editIfOnlySelection: function() {
-            if ((selection.selected.length === 1) 
-                &&
-                (selection.selected[0] === this.vertex.id)) {
-                geometryGraph.edit(this.vertex);
-            }
-        },
-
     });
 
     var DisplayDOMView = Backbone.View.extend({
 
         tagName: "tr",
+        className: 'vertex display',
 
         initialize: function() {
             this.render();
-            $('#geometry').prepend(this.$el);
+            $('#geometry').append(this.$el);
+            this.$el.addClass(this.model.vertex.name);  
             this.model.on('selected', this.select, this);
             this.model.on('deselected', this.deselect, this);
             this.model.vertex.on('change', this.update, this);
@@ -201,8 +168,7 @@ define([
         },
 
         events: {
-            'click .vertex'    : 'click',
-            'dblclick .vertex' : 'dblclick',
+            'click .vertex' : 'click',
         },
 
         click: function(event) {
@@ -213,10 +179,6 @@ define([
                     selection.selectOnly(this.model.vertex.id);
                 }
             }
-        },
-
-        dblclick: function(event) {
-            this.model.editIfOnlySelection();
         },
 
         select: function() {
@@ -296,10 +258,6 @@ define([
                 }
 
             }
-        },
-
-        dblclick: function() {
-            this.model.editIfOnlySelection();
         },
 
     });

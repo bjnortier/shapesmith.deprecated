@@ -1,6 +1,7 @@
 define([
         'src/geometrygraphsingleton', 
         'src/selection', 
+        'src/variableMV',
         'src/pointwrapper', 
         'src/polylinewrapper',
         'src/extrudewrapper',
@@ -8,12 +9,14 @@ define([
     function(
         geometryGraph, 
         selectionManager, 
+        Variable,
         Point, 
         Polyline,
         Extrude) {
     
     var models = {};
     var wrappers = {
+        'variable' : Variable,
         'point'    : Point,
         'polyline' : Polyline,
         'extrude'  : Extrude,

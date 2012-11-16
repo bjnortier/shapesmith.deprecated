@@ -79,5 +79,7 @@ describe('Expressions', function() {
 
     });
 
+    it('returns the child variable');
+
 
 });

@@ -6,6 +6,7 @@ requirejs(
         'src/trackball',
         'src/commandstack',
         'src/geometrygraphsingleton',
+        'src/variablemanager',
         'src/vertexmodelmanager',
         'src/webdriverutils',
         'src/maintoolbar',
@@ -16,6 +17,7 @@ requirejs(
         trackBall,
         commandStack,
         geometryGraph,
+        variableManager,
         vertexModelManager,
         wdutils,
         mainToolbar) {

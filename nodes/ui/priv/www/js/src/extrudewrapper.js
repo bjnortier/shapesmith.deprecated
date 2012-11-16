@@ -90,7 +90,7 @@ define([
 
         render: function() {
             var template = 
-                '<td class="vertex {{name}} editing">' + 
+                '<td>' + 
                 '<div class="title"><img src="/ui/images/icons/line32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
                 '</div>' + 
@@ -213,7 +213,7 @@ define([
                 name: this.model.vertex.name,
             }
             var template = 
-                '<td class="vertex {{name}} display">' + 
+                '<td>' + 
                 '<img src="/ui/images/icons/extrude32x32.png"/>' + 
                 '<div class="name">{{name}}</div>' + 
                 '</td>';

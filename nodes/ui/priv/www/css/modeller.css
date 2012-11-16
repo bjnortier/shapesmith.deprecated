@@ -24,7 +24,7 @@ body {
     font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
     font-size: 85%;
     line-height: 1em; /*color: #393939;*/
-    color: #444444;
+    color: #fff;
     background-color: #020202;
 }
 
@@ -98,15 +98,25 @@ img#logo {
     padding: 5px;
 }
 
-.vertex {
-    color: #fff;
-}
-
-.vertex .name {
+#geometry .vertex .name {
     display: inline-block;
     vertical-align: middle;
     margin-top: -26px;
     padding-right: 10px;
+    color: #fff;
+}
+
+#variable-manager .name {
+    padding: 12px;
+}
+
+#variable-manager .add {
+    font-size: 1.5em;
+}
+
+#variable-manager .add:hover {
+    border-bottom: solid 2px #fff;
+    cursor: pointer;
 }
 
 .vertex .okcancel {
@@ -129,16 +139,21 @@ img#logo {
     padding: 10px;
     border-spacing: 5px;
 }
-.vertex.display {
+
+
+.vertex.display, #variables {
     background: rgba(51, 51, 51, 0.46);
-    cursor: pointer;
 }
 
-.vertex.display:hover {
+.vertex.display {
+    cursor: pointer;    
+}
+
+#geometry .vertex:hover td {
     border-bottom: solid #FFF 2px;
 }
 
-.vertex.selected {
+.vertex.selected td {
     border-bottom: solid #FF0 2px;
 }
 
@@ -201,7 +216,7 @@ img#logo {
     padding: 2px;
 }
 
-.vertex .field {
+.field {
     width: 20px;
     border: none;
     background: none; 
@@ -210,7 +225,7 @@ img#logo {
 }
 
 .field.x {
-    color: #3da033;
+    color: #3da033; 
 }
 
 .field.y {
