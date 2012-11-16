@@ -248,7 +248,6 @@ img#logo {
     width: 30px;
     border: none;
     background: none; 
-    padding: 2px;
     color: white;
 }
 
@@ -260,7 +259,9 @@ img#logo {
     background: rgba(136, 170, 201, 0.46);
 }
 
-#variables .editing .field, #variables .name input, #variables .expression input {
+#variables .editing .field, 
+#variables .name, 
+#variables .expression {
     width: 50px;
 }
 
@@ -276,9 +277,21 @@ img#logo {
     color: #ff706b;
 }
 
-.field, #variables .name, #variable .expression {
+#geometry .field {
+    margin: 5px;
     padding: 5px;
 }
+
+#variables .name, 
+#variable .expression,
+#variables .field {
+    padding: 5px;
+}
+
+#variables .field {
+    margin-right: 5px;
+} 
+
 
 
 .error .field {

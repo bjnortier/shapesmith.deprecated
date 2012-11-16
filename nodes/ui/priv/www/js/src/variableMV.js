@@ -47,7 +47,7 @@ define([
                 '<td class="expression">' +  
                 '<input class="field expr" placeholder="expr" type="text" value="{{expression}}"></input>' +
                 '</td>' +
-                '<td><div class="delete"></div></td>';
+                '<td>{{^name}}<div class="delete"></div>{{/name}}</td>';
             var view = {};
             if (!this.model.vertex.proto) {
                 view.name = this.model.vertex.name;
@@ -76,7 +76,6 @@ define([
         },
 
         sceneClick: function() {
-            console.log(event.originalEvent);
             var name = this.$el.find('.var').val();
             var expr = this.$el.find('.expr').val();
             this.model.vertex.name = name;

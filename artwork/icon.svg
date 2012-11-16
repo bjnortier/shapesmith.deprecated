@@ -23,11 +23,11 @@
      pagecolor="#000000"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="1"
+     inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="3.959798"
      inkscape:cx="323.82355"
-     inkscape:cy="461.51962"
+     inkscape:cy="562.53487"
      inkscape:current-layer="layer1"
      showgrid="true"
      units="mm"
@@ -314,5 +314,16 @@
          id="tspan3036"
          x="335.98044"
          y="540.64465">x=a*2</tspan></text>
+    <rect
+       style="fill:none;stroke:none;stroke-width:0.99921260000000001;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect8725-80"
+       width="60"
+       height="60"
+       x="400.57751"
+       y="432.43311"
+       ry="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/blank16x16.png"
+       inkscape:export-xdpi="23.610001"
+       inkscape:export-ydpi="23.610001" />
   </g>
 </svg>
