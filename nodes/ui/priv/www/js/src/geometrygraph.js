@@ -361,13 +361,15 @@ define([
             return varGraph.evaluate(expression);
         }
 
-        this.addVariable = function() {
-            var vertex = new geomNode.Variable({
-                name: '_', parameters: {expression: ''},
-                editing      : true,
-                proto        : true,
-            });
-            this.add(vertex);
+        this.addVariable = function(name, expression) {
+            var vertex = varGraph.addVariable(name, expression);
+            if (vertex) {
+                vertex.on('change', this.vertexChanged, this);
+                this.trigger('vertexAdded', vertex);
+                return true;
+            } else {
+                return false;
+            }
         }
 
         // ---------- Graph functions ----------

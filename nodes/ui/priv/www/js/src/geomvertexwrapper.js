@@ -168,7 +168,7 @@ define([
         },
 
         events: {
-            'click .vertex' : 'click',
+            'click' : 'click',
         },
 
         click: function(event) {

@@ -20,9 +20,8 @@ define([
 
         initialize: function() {
             vertexWrapper.EditingDOMView.prototype.initialize.call(this);
-            $('#variables').append(this.$el);
+            $('#variables .new-variable').before(this.$el);
             $('.field').autoGrowInput();
-
         },
 
         render: function() {
@@ -33,10 +32,9 @@ define([
                 '<td class="expression">' +  
                 '<input class="field" placeholder="expr" type="text" value="{{expression}}"></input>' +
                 '</td>';
-            var name = this.model.vertex.name;
             var view = {
-                id: this.model.vertex.id,
-                name: name === '_' ? '' : name,
+                id: this.model.vertex.id,   
+                name:  this.model.vertex.name,
                 expression: this.model.vertex.parameters.expression,
             }
             this.$el.html($.mustache(template, view));
@@ -56,8 +54,7 @@ define([
 
 
     return {
-        EditingModel: EditingModel,
+        DisplayModel: EditingModel,
     }
-
 
 });

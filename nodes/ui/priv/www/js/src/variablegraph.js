@@ -38,9 +38,10 @@ define([
             graph.addVertex(vertex);
             try {
                 gatherVariables();
-                return true;
+                return vertex;
             } catch (e) {
-                return false;
+                graph.removeVertex(vertex);
+                return undefined;
             }
         }
 

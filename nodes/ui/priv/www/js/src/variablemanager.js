@@ -6,38 +6,84 @@ define([
     var Model = Backbone.Model.extend({
 
         initialize: function(vertex) {
-            this.view = new DOMView({model: this});
+            this.views = [
+                new TitleView({model: this}),
+                new NewVarView({model: this}),
+            ];
         },
 
     });
 
-    var DOMView = Backbone.View.extend({
+    var TitleView = Backbone.View.extend({
 
         id: 'variable-manager',
-        tagName: "tr",
+        tagName: 'tr',
 
         initialize: function() {
             this.render();
-            $('#variables').prepend(this.$el);
+            $('#variables').append(this.$el);
         },
 
         render: function() {
             var template = 
                 '<td colspan="2" class="title">' +
-                '<div class="name">Variables <span class="add">+</span></div>' + 
+                '<div class="name">Variables</div>' + 
                 '</td>'; 
             var view = {};
             this.$el.html($.mustache(template, view));
             return this;
         },
 
+        // events: {
+        //     'click .add' : 'addVariable',
+        // },
+
+        // addVariable: function() {
+        //     geometryGraph.addVariable('', '');
+        // },
+
+    });
+
+    var NewVarView = Backbone.View.extend({
+
+        tagName: 'tr',
+        className: 'new-variable',
+
+        initialize: function() {
+            this.render();
+            $('#variables').append(this.$el);
+        },
+
+        render: function() {
+            var template = 
+                '<td class="name">' +  
+                '<input class="field var" placeholder="var" type="text" value="{{name}}"></input>' +
+                '</td>' +
+                '<td class="expression">' +  
+                '<input class="field expr" placeholder="expr" type="text" value="{{expression}}"></input>' +
+                '</td>';
+            var view = {};
+            this.$el.html($.mustache(template, view));
+            return this;
+        },
+
         events: {
-            'click .add' : 'addVariable',
+            'focusout .expr' : 'addVariable',
         },
 
         addVariable: function() {
-            geometryGraph.addVariable('', '');
+            var name = this.$el.find('.var').val();
+            var expr = this.$el.find('.expr').val();
+            if (geometryGraph.addVariable(name, expr)) {
+                this.$el.find('.var').val('');
+                this.$el.find('.expr').val('');
+                this.$el.removeClass('error');
+            } else {
+                this.$el.addClass('error');
+            }
+
         },
+
 
     });
 
