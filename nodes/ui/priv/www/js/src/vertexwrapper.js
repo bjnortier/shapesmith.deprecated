@@ -94,6 +94,7 @@ define([
 
         initialize: function() {
             this.render();
+            this.$el.append('<td><div class="delete"></div></td>');
             this.$el.addClass(this.model.vertex.name);  
             this.model.on('selected', this.select, this);
             this.model.on('deselected', this.deselect, this);

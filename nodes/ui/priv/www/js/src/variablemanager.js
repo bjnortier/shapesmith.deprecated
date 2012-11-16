@@ -25,8 +25,8 @@ define([
 
         render: function() {
             var template = 
-                '<td colspan="2" class="title">' +
-                '<div class="name">Variables <span class="add">+</span></div>' + 
+                '<td colspan="3" class="title">' +
+                '<div class="TitleView">Variables <span class="add">+</span></div>' + 
                 '</td>'; 
             var view = {};
             this.$el.html($.mustache(template, view));

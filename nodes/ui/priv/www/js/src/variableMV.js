@@ -1,7 +1,8 @@
 define([
     'src/vertexwrapper',
     'src/geometrygraphsingleton', 
-    ], function(vertexWrapper, geometryGraph) {
+    'src/interactioncoordinator',
+    ], function(vertexWrapper, geometryGraph, coordinator) {
 
     // ---------- Editing ----------
 
@@ -30,7 +31,12 @@ define([
             this.$el.addClass('variable');
             $('#variables').append(this.$el);
             $('.field').autoGrowInput();
-            // this.$el.find('.var').focus();
+            coordinator.on('sceneClick', this.sceneClick, this);
+        },
+
+        remove: function() {
+            vertexWrapper.EditingDOMView.prototype.remove.call(this);
+            coordinator.off('sceneClick', this.sceneClick, this);
         },
 
         render: function() {
@@ -40,7 +46,8 @@ define([
                 '</td>' +
                 '<td class="expression">' +  
                 '<input class="field expr" placeholder="expr" type="text" value="{{expression}}"></input>' +
-                '</td>';
+                '</td>' +
+                '<td><div class="delete"></div></td>';
             var view = {};
             if (!this.model.vertex.proto) {
                 view.name = this.model.vertex.name;
@@ -51,7 +58,7 @@ define([
         },
 
         events: {
-            'focusout .field' : 'tryAddVariable',
+            'click .delete'  : 'delete',
         },
 
         update: function() {
@@ -62,7 +69,14 @@ define([
             }
         },
 
-        tryAddVariable: function() {
+        delete: function() {
+            if (this.model.vertex.proto) {
+                this.model.cancel();
+            }
+        },
+
+        sceneClick: function() {
+            console.log(event.originalEvent);
             var name = this.$el.find('.var').val();
             var expr = this.$el.find('.expr').val();
             this.model.vertex.name = name;
@@ -72,20 +86,6 @@ define([
             } else {
                 this.model.okEdit();
             }
-
-        //     var vertex = geometryGraph.addVariable(name, expr);
-        //     if (vertex) {
-        //         geometryGraph.commitCreate(vertex);
-        //         this.$el.find('.var').val('');
-        //         this.$el.find('.expr').val('');
-        //         this.$el.removeClass('error');
-        //     } else {
-        //         if ((name !== '') || (expr !== '')) {
-        //             this.$el.addClass('error');
-        //         } else {
-        //             this.$el.removeClass('error');
-        //         }
-        //     }
 
         },
 

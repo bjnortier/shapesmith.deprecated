@@ -94,7 +94,7 @@ img#logo {
     border-bottom: solid 2px #ff0;
 }
 
-.coordinate, .named {
+.coordinate, .named  {
     padding: 5px;
 }
 
@@ -141,7 +141,7 @@ img#logo {
     border-spacing: 5px;
 }
 
-
+    
 .vertex.display, #variables, #geometry {
     background: rgba(51, 51, 51, 0.46);
 }
@@ -150,8 +150,31 @@ img#logo {
     margin-top: 5px;
 }
 
+#variables, #geometry {
+    border-collapse: collapse;
+    padding: 5px;
+}   
+
 .vertex.display {
     cursor: pointer;    
+}
+
+.vertex .delete {   
+    width: 16px;
+    height: 16px;   
+    background-image: none;
+    margin-right: 5px; 
+    margin-left: 5px;
+}
+
+.vertex:hover .delete, .vertex.variable:hover .delete {
+    background-image: url('/ui/images/icons/delete16x16.disabled.png');
+    background-repeat: no-repeat;
+}
+
+.delete:hover {
+    background-image: url('/ui/images/icons/delete16x16.png') !important;
+    cursor: pointer;
 }
 
 #geometry .vertex:hover td {
@@ -229,8 +252,16 @@ img#logo {
     color: white;
 }
 
-.vertex.editing.variable {
+#variables .title {
+    padding: 5px;
+}
+
+#variables .field {
     background: rgba(136, 170, 201, 0.46);
+}
+
+#variables .editing .field, #variables .name input, #variables .expression input {
+    width: 50px;
 }
 
 .field.x {
@@ -244,6 +275,11 @@ img#logo {
 .field.z, .field.h {
     color: #ff706b;
 }
+
+#variables .field, #variables .name, #variable .expression {
+    padding: 5px;
+}
+
 
 .error .field {
     background: url(/ui/images/textfielderror.png) transparent bottom repeat-x;

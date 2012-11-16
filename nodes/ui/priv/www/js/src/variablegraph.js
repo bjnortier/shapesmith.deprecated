@@ -72,53 +72,6 @@ define([
             }
         }
 
-        // this.addVariable = function(name, expression) {
-        //     try {
-        //         var vertex = new geomNode.Variable({id: name, parameters: {expression: expression}});
-        //         graph.addVertex(vertex);
-        //         gatherVariables();
-        //         return vertex;
-        //     } catch (e) {
-        //         if (graph.vertexById(name)) {
-        //             graph.removeVertex(vertex);
-        //         }
-        //         return undefined;
-        //     }
-        // }
-
-        // this.replaceVariable = function(name, expression) {
-        //     var original = graph.vertexById(name);
-        //     try {
-        //         var replacement = new geomNode.Variable({id: name, parameters: {expression: expression}});
-        //         graph.replaceVertex(original, replacement);
-        //         gatherVariables();
-        //         return replacement;
-        //     } catch (e) {
-        //         var vertexInGraph = graph.vertexById(name);
-        //         if (vertexInGraph) {
-        //             graph.replaceVertex(vertexInGraph, original);
-        //         } else {
-        //             graph.add(original);
-        //         }
-        //         return undefined;
-        //     }
-        // }
-
-        // this.updateVariable = function(oldName, newName, newExpression) {
-        //     var oldVertex = graph.vertexById(oldName);
-        //     if (!oldVertex) {
-        //         throw new UnknownVariableError(oldName);
-        //     }
-        //     var newVertex = oldName === newName ? 
-        //         this.replaceVariable(newName, newExpression) :
-        //         this.addVariable(newName, newExpression);
-        //     if (newVertex) {
-        //         return {original: oldVertex, replacement: newVertex};
-        //     } else {
-        //         return undefined;
-        //     }
-        // }
-
         var gatherVariables = function() {
             var vars = {};
             var listener = function(vertex) {

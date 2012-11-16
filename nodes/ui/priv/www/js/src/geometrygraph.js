@@ -401,27 +401,6 @@ define([
             return varGraph.evaluate(expression);
         }
 
-        // this.addVariable = function(name, expression) {
-        //     var vertex = varGraph.addVariable(name, expression);
-        //     if (vertex) {
-        //         vertex.on('change', this.vertexChanged, this);
-        //         this.trigger('vertexAdded', vertex);
-        //         return vertex;
-        //     } else {
-        //         return undefined;
-        //     }
-        // }
-
-        // this.updateVariable = function(oldName, newName, expression) {
-        //     var result = varGraph.updateVariable(oldName, newName, expression);
-        //     if (result) {
-        //         this.setupEventsForReplacement(result.original, result.replacement);
-        //         return result.replacement;
-        //     } else {
-        //         return undefined;
-        //     }
-        // }
-
         // ---------- Graph functions ----------
 
         this.updateVariableEdges = function(vertex) {
@@ -430,7 +409,6 @@ define([
                     return v.type === 'variable';
                 });
                 variableChildren.map(function(child) {
-                    console.log('removing edge', vertex.id, child.id);
                     graph.removeEdge(vertex, child);
                 });
                 var expressions = vertex.getExpressions();
@@ -438,7 +416,6 @@ define([
                 expressions.forEach(function(expr) {
                     newVariableChildren = newVariableChildren.concat(varGraph.getExpressionChildren(expr));
                 })
-                console.log('newVariableChildren', newVariableChildren);
                 newVariableChildren.forEach(function(child) {
                     graph.addEdge(vertex, child);
                 });

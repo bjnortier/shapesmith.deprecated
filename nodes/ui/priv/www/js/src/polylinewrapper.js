@@ -104,7 +104,7 @@ define([
 
         render: function() {
             var template = 
-                '<td>' + 
+                '<td colspan="2">' + 
                 '<div class="title"><img src="/ui/images/icons/line32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
                 '</div>' + 
