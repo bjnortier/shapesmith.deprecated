@@ -142,8 +142,12 @@ img#logo {
 }
 
 
-.vertex.display, #variables {
+.vertex.display, #variables, #geometry {
     background: rgba(51, 51, 51, 0.46);
+}
+
+#geometry {
+    margin-top: 5px;
 }
 
 .vertex.display {
