@@ -118,6 +118,16 @@ define([
 
         this.commitEdit = function() {
             var editingVertices = this.getEditingVertices();
+            var allOk = true;
+            editingVertices.forEach(function(v) {
+                if(!that.validate(v)) {
+                    allOk = false;
+                }
+            })
+            if (!allOk) {
+                return;
+            }
+
             var nonEditingVertices = editingVertices.map(function(v) {
                 return v.cloneNonEditing();
             })
