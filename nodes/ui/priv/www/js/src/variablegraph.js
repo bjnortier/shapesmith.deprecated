@@ -33,19 +33,48 @@ define([
             return parseExpressionWithVariables(expression, variables);
         }
 
-        this.addVariable = function(name, expression) {
+        this.canAdd = function(vertex) {
+            var name = vertex.name;
+            var expression = vertex.parameters.expression;
             try {
-                var vertex = new geomNode.Variable({id: name, parameters: {expression: expression}});
-                graph.addVertex(vertex);
-                gatherVariables();
-                return vertex;
+                var variables = gatherVariables();
+                parseExpressionWithVariables(expression, variables);
+                var parsedWithoutErrors = true;
+                // var nameIsTaken = graph.nameIsTaken(name);
+                var nameConforms = /^[a-zA-Z][a-zA-Z0-9_]*$/.exec(name) !== null;
+                return parsedWithoutErrors && nameConforms;
             } catch (e) {
-                if (graph.vertexById(name)) {
-                    graph.removeVertex(vertex);
+                if (e instanceof UnknownVariableError) {
+                    return false;
+                } else if (e instanceof ParseError) {
+                    return false;
                 }
-                return undefined;
+                throw e;
             }
         }
+
+        this.add = function(vertex) {
+            if (this.canAdd(vertex)) {
+                graph.addVertex(vertex);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        // this.addVariable = function(name, expression) {
+        //     try {
+        //         var vertex = new geomNode.Variable({id: name, parameters: {expression: expression}});
+        //         graph.addVertex(vertex);
+        //         gatherVariables();
+        //         return vertex;
+        //     } catch (e) {
+        //         if (graph.vertexById(name)) {
+        //             graph.removeVertex(vertex);
+        //         }
+        //         return undefined;
+        //     }
+        // }
 
         this.replaceVariable = function(name, expression) {
             var original = graph.vertexById(name);
@@ -84,7 +113,7 @@ define([
             var vars = {};
             var listener = function(vertex) {
                 if (vertex.type === 'variable') {
-                    var variable = vertex.id;
+                    var variable = vertex.name;
                     var expression = vertex.parameters.expression;
                     var value = parseExpressionWithVariables(expression, vars);
                     vars[variable] = value;
@@ -94,6 +123,10 @@ define([
             return vars;
         }
 
+    }
+
+    var createVertex = function(name, expression) {
+        return new geomNode.Variable({name: name, parameters: {expression: expression}});
     }
 
     function UnknownVariableError(variable) {
@@ -117,6 +150,7 @@ define([
         UnknownVariableError: UnknownVariableError,
         ParseError: ParseError,
         Graph: VariableGraph,
+        createVertex: createVertex,
     }
 
 });

@@ -2,6 +2,13 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
 
     var counters = {};
 
+    var validateIdOrName = function(idOrName) {
+        var re = /^[a-zA-Z][a-zA-Z0-9_]*$/;
+        if (!re.exec(idOrName)) {
+            throw new Error('invalid id or name: ' + idOrName + '. Must match ^[a-zA-Z][a-zA-Z0-9_]+$')
+        }
+    }
+
     var GeomNode = function(options) {
         _.extend(this, Backbone.Events);
         var options = options || {};
@@ -12,10 +19,7 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
         this.type = options.type;
         
         if (options.hasOwnProperty('id')) {
-            var re = new RegExp('[a-zA-Z][a-zA-Z0-9_]*');
-            if (!re.exec(options.id)) {
-                throw new Error('invalid id. Must match [a-zA-Z][a-zA-Z0-9_]+')
-            }
+            validateIdOrName(options.id);
             this.id = options.id;
         } else {
             if (!counters[options.type]) {
@@ -25,7 +29,12 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
             ++counters[options.type]
         } 
 
-        this.name = this.id;
+        if (options.hasOwnProperty('name')) {
+            validateIdOrName(options.name);
+            this.name = options.name;
+        } else {
+            this.name = this.id;
+        }
 
         this.implicit = options.implicit || false;
         this.parameters = options.parameters || {};
@@ -57,7 +66,7 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
     GeomNode.prototype.toJSONSubset = function() {
         return {
             type: this.type, 
-            id: this.id,
+            name: this.name,
             implicit: this.implicit,
             parameters: this.parameters,
         }
@@ -94,7 +103,7 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
     // ---------- Types ----------
 
     var Variable = function(options) {
-        if (!options.hasOwnProperty('id')) {
+        if (!options.hasOwnProperty('name')) {
             throw Error('No name');
         }        
         if (!options.hasOwnProperty('parameters') || !options.parameters.hasOwnProperty('expression')) {

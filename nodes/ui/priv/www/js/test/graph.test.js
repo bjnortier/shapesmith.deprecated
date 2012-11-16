@@ -38,6 +38,17 @@ describe('Graph', function() {
 
     });
 
+    it('can check for name uniqueness', function() {
+        var graph = new graphLib.Graph();
+        var a = {id:'a', name: 'aa'}, b = {id:'b', name: 'bb'};
+        graph.addVertex(a);
+        graph.addVertex(b);
+
+        assert.isTrue(graph.nameIsTaken('aa'))
+        assert.isFalse(graph.nameIsTaken('cc'))
+
+    });
+
     it('manages incoming and outgoing vertices', function() {
 
         var a = {id:'a'}, b = {id:'b'}, c = {id:'c'};

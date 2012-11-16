@@ -20,7 +20,7 @@ describe('Variable', function() {
     it('clones nonEditing correctly', function() {
 
         var a = new geomNode.Variable({
-            id: 'a',
+            name: 'a',
             parameters: {expression: '1'}
         });
 
@@ -52,7 +52,7 @@ describe('Point', function() {
 
         var cloned = point.cloneNonEditing();
         assert.equal(point.id, cloned.id);
-        assert.equal(cloned.id, cloned.name);
+            assert.equal(cloned.id, cloned.name);
     });
 
     it('has a proper id', function() {
@@ -66,10 +66,13 @@ describe('Point', function() {
             new geomNode.Node({type: 'foo', id: ''});
         }, Error);
         assert.throws(function() {
-            new geomNode.Node({type: 'foo', id: '_'})
+            new geomNode.Node({type: 'foo', id: '*&^*&'})
         }, Error);
-              assert.throws(function() {
+        assert.throws(function() {
             new geomNode.Node({type: 'foo', id: '1'})
+        }, Error);
+        assert.throws(function() {
+            new geomNode.Node({type: 'foo', id: '__proto__'})
         }, Error);
 
     });

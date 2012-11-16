@@ -112,6 +112,7 @@ img#logo {
 
 #variable-manager .add {
     font-size: 1.5em;
+    cursor: pointer;
 }
 
 #variable-manager .add:hover {
@@ -217,11 +218,15 @@ img#logo {
 }
 
 .field {
-    width: 20px;
+    width: 30px;
     border: none;
     background: none; 
     padding: 2px;
     color: white;
+}
+
+.vertex.editing.variable {
+    background: rgba(136, 170, 201, 0.46);
 }
 
 .field.x {

@@ -82,6 +82,10 @@ define(['lib/underscore-require'], function(_) {
             return size;
         }
 
+        this.nameIsTaken = function(name) {
+            return _.find(_.values(vertices), function(v) { return (v.name === name); }) !== undefined;
+        }
+
         this.addEdge = function(from, to) {
             outgoingVertices[from.id].push(to.id);
             incomingVertices[to.id].push(from.id);

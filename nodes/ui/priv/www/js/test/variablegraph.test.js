@@ -55,16 +55,16 @@ describe('Expressions', function() {
 
     it('can evaluate a defined variable', function() {
 
-        graph.addVariable('a', '1');
+        graph.add(variableGraph.createVertex('a', '1'));
         assert.equal(graph.evaluate('a'), 1);
 
     });
 
     it('can evaluate a graph of variables', function() {
 
-        graph.addVariable('a', '1');
-        graph.addVariable('b', 'a + 1');
-        graph.addVariable('c', 'b/4');
+        graph.add(variableGraph.createVertex('a', '1'));
+        graph.add(variableGraph.createVertex('b', 'a + 1'));
+        graph.add(variableGraph.createVertex('c', 'b/4'));
 
         assert.equal(graph.evaluate('a'), 1);
         assert.equal(graph.evaluate('b'), 2);
@@ -72,41 +72,52 @@ describe('Expressions', function() {
 
     });
 
-    it('rejects invalid variables', function() {
+    // it('can update a variable with a new name', function() {
+    //     var vertex = graph.add(variableGraph.createVertex('a', '1'));
 
-        var added = graph.addVariable('a', '$^%&*');
-        assert.isUndefined(added);
+    //     var newVertex = graph.updateVariable('a', 'b', '2');
+    //     assert.isObject(newVertex);
 
-        graph.addVariable('a', '1');
-        assert.isUndefined(graph.addVariable('a', '1'))
+    // });
 
-    });
+    // it('can update a variable with the same name', function() {
+    //     var vertex = graph.addVariable('a', '1');
 
-    it('can update a variable with a new name', function() {
-        var vertex = graph.addVariable('a', '1');
+    //     var newVertex = graph.updateVariable('a', 'a', '2');
+    //     assert.isObject(newVertex);
+    // });
 
-        var newVertex = graph.updateVariable('a', 'b', '2');
-        assert.isObject(newVertex);
+    // it('rejects invalid updates', function() {
 
-    });
+    //     var vertex = graph.addVariable('a', '1');
 
-    it('can update a variable with the same name', function() {
-        var vertex = graph.addVariable('a', '1');
+    //     assert.throws(function() {
+    //         graph.updateVariable('x', 'b', '1');
+    //     }, variableGraph.UnknownVariableError);
 
-        var newVertex = graph.updateVariable('a', 'a', '2');
-        assert.isObject(newVertex);
-    });
+    //     assert.isUndefined(graph.updateVariable('a', 'b', ''));
+    //     assert.isUndefined(graph.updateVariable('a', 'a', ''));
 
-    it('rejects invalid updates', function() {
+    // });
 
-        var vertex = graph.addVariable('a', '1');
+    it('can determine if a potential new variable is valid', function() {
 
-        assert.throws(function() {
-            graph.updateVariable('x', 'b', '1');
-        }, variableGraph.UnknownVariableError);
+        var a = variableGraph.createVertex('a', '1');
+        var b = variableGraph.createVertex('b', '1*5');
+        
+        assert.isTrue(graph.canAdd(a));
+        assert.isTrue(graph.canAdd(b));
 
-        assert.isUndefined(graph.updateVariable('a', 'b', ''));
-        assert.isUndefined(graph.updateVariable('a', 'a', ''));
+        graph.add(a);
+        var a2 = variableGraph.createVertex('a', '15*5')
+        assert.isTrue(graph.canAdd(a2)); // Replace editing with non-editing
+
+        assert.isFalse(graph.canAdd(variableGraph.createVertex('c', 'r*5')));
+        assert.isFalse(graph.canAdd(variableGraph.createVertex('a', '')));
+
+        var e = variableGraph.createVertex('e', '24332');
+        e.name = '';
+        assert.isFalse(graph.canAdd(e));
 
     });
 

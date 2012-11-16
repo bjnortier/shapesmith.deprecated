@@ -8,7 +8,7 @@ define([
     'src/command',
     'src/commandstack',
     ], 
-    function(_, Backbone, crypto, graphLib, geomNode, variableGraph, Command, commandStack) {
+    function(_, Backbone, crypto, graphLib, geomNode, variableGraphLib, Command, commandStack) {
 
     var post = function(url, data, successFn, errorFn) {
         $.ajax({
@@ -36,7 +36,7 @@ define([
 
         _.extend(this, Backbone.Events);
         var graph = new graphLib.Graph();
-        var varGraph = new variableGraph.Graph(graph);
+        var varGraph = new variableGraphLib.Graph(graph);
         var that = this;
 
         var captureVertices = function(vertices, callback) {
@@ -66,6 +66,10 @@ define([
         }
 
         this.commitCreate = function(editingVertex) {
+            if (!this.validate(editingVertex)) {
+                return;
+            }
+
             var vertex = editingVertex.cloneNonEditing();
             var that = this;
             var children = this.childrenOf(vertex);
@@ -148,11 +152,6 @@ define([
             commandStack.do(command);
         }
 
-        this.removeAll = function() {
-            graph.vertices().forEach(function(vertex) {
-                that.remove(vertex);
-            });
-        }
 
         this.createGraph = function(deserializedGraph, shasToVertices) {
             var handledSHAs = [];
@@ -214,6 +213,11 @@ define([
             });
         }
 
+        this.removeAll = function() {
+            graph.vertices().forEach(function(vertex) {
+                that.remove(vertex);
+            });
+        }
 
         // When editing, the original vertex is kept 
         // for the cancel operation
@@ -293,6 +297,23 @@ define([
             }
         }
 
+        // ---------- Validation ----------
+
+        this.validate = function(vertex) {
+            if (vertex.type === 'variable') {
+                if (varGraph.canAdd(vertex)) {
+                    return true;
+                } else {
+                    vertex.errors = {name: 'invalid', expression: 'invalid'};
+                    vertex.trigger('change', vertex);
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+
+
         // ---------- Prototypes ----------
        
         this.createPointPrototype = function(options) {
@@ -331,6 +352,15 @@ define([
             return extrudeVertex;
         }
 
+        this.createVariablePrototype = function() {
+            var vertex = new geomNode.Variable({
+                name: 'placeholder', 
+                editing      : true,
+                proto        : true,
+                parameters: {expression: ''}});
+            this.add(vertex);
+        }
+
         // ---------- Mutations ----------
 
         this.addPointToPolyline = function(polyline, point) {
@@ -361,26 +391,26 @@ define([
             return varGraph.evaluate(expression);
         }
 
-        this.addVariable = function(name, expression) {
-            var vertex = varGraph.addVariable(name, expression);
-            if (vertex) {
-                vertex.on('change', this.vertexChanged, this);
-                this.trigger('vertexAdded', vertex);
-                return vertex;
-            } else {
-                return undefined;
-            }
-        }
+        // this.addVariable = function(name, expression) {
+        //     var vertex = varGraph.addVariable(name, expression);
+        //     if (vertex) {
+        //         vertex.on('change', this.vertexChanged, this);
+        //         this.trigger('vertexAdded', vertex);
+        //         return vertex;
+        //     } else {
+        //         return undefined;
+        //     }
+        // }
 
-        this.updateVariable = function(oldName, newName, expression) {
-            var result = varGraph.updateVariable(oldName, newName, expression);
-            if (result) {
-                this.setupEventsForReplacement(result.original, result.replacement);
-                return result.replacement;
-            } else {
-                return undefined;
-            }
-        }
+        // this.updateVariable = function(oldName, newName, expression) {
+        //     var result = varGraph.updateVariable(oldName, newName, expression);
+        //     if (result) {
+        //         this.setupEventsForReplacement(result.original, result.replacement);
+        //         return result.replacement;
+        //     } else {
+        //         return undefined;
+        //     }
+        // }
 
         // ---------- Graph functions ----------
 

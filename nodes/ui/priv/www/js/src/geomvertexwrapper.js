@@ -146,25 +146,15 @@ define([
 
     });
 
-    var DisplayDOMView = Backbone.View.extend({
+    var DisplayDOMView = vertexWrapper.DisplayDOMView.extend({
 
         tagName: "tr",
         className: 'vertex display',
 
         initialize: function() {
-            this.render();
+            vertexWrapper.DisplayDOMView.prototype.initialize.call(this);
             $('#geometry').append(this.$el);
             this.$el.addClass(this.model.vertex.name);  
-            this.model.on('selected', this.select, this);
-            this.model.on('deselected', this.deselect, this);
-            this.model.vertex.on('change', this.update, this);
-        },
-
-        remove: function() {
-            Backbone.View.prototype.remove.call(this);
-            this.model.off('selected', this.select, this);
-            this.model.off('deselected', this.deselect, this);
-            this.model.vertex.off('change', this.update, this);
         },
 
         events: {
