@@ -46,14 +46,50 @@ describe('Polylines', function() {
             .clickOnWorld(0,0,0)
             .clickOnWorld(10,10,0)
             .clickOnWorld(0,10,0)
-            .clickOnWorld(0,0,0)
+            .clickOnWorld(20,0,0)
+            .clickOnWorld(10,10,0)
             .assertTextEqual('.vertex.editing.polyline0 .point._0', 'point0')
             .assertTextEqual('.vertex.editing.polyline0 .point._1', 'point1')
             .assertTextEqual('.vertex.editing.polyline0 .point._2', 'point2')
-            .assertTextEqual('.vertex.editing.polyline0 .point._3', 'point0')
-            .assertTextEqual('.vertex.editing.polyline0 .point._4', 'point4', done)
+            .assertTextEqual('.vertex.editing.polyline0 .point._3', 'point3')
+            .assertTextEqual('.vertex.editing.polyline0 .point._4', 'point1')
+            .assertTextEqual('.vertex.editing.polyline0 .point._5', 'point5', done)
     });
 
+
+    it('ends the polyline when the first coordinate is clicked', function(done) {
+        this.timeout(5000);
+        client
+            .click('.toolbar .polyline')
+            .clickOnWorld(0,0,0)
+            .clickOnWorld(10,10,0)
+            .clickOnWorld(0,10,0)
+            .waitForUrlChange(
+                function() { client.clickOnWorld(0,0,0); },
+                function() {
+                    client
+                        .click('.toolbar .select')
+                        .assertNumberOfDisplayNodes(1)
+                        .assertNumberOfEditingNodes(0, done);
+                });
+    });
+
+    it('ends the polyline when the first coordinate is double-clicked', function(done) {
+        this.timeout(5000);
+        client
+            .click('.toolbar .polyline')
+            .clickOnWorld(0,0,0)
+            .clickOnWorld(10,10,0)
+            .clickOnWorld(0,10,0)
+            .waitForUrlChange(
+                function() { client.dblClickOnWorld(0,0,0); },
+                function() {
+                    client
+                        .click('.toolbar .select')
+                        .assertNumberOfDisplayNodes(1)
+                        .assertNumberOfEditingNodes(0, done);
+                });
+    })
 
     it('can finish on an existing point', function(done) {
         this.timeout(5000);
@@ -68,7 +104,7 @@ describe('Polylines', function() {
                         .clickOnWorld(10,10,0)
                         .clickOnWorld(0,10,0)
                         .waitForUrlChange(
-                            function() { client.dblClickOnWorld(0,0,0); },
+                            function() { client.dblClickOnWorld(10,10,0); },
                             function() {
                                 client
                                     .click('.toolbar .select')
@@ -106,8 +142,8 @@ describe('Polylines', function() {
             .click('.toolbar .polyline')
             .clickOnWorld(0,0,0)
             .clickOnWorld(10,10,0)
-            .clickOnWorld(0,10,0)
-            .clickOnWorld(0,0,0)
+            .clickOnWorld(20,10,0)
+            .clickOnWorld(10,10,0)
             .click('.toolbar .select')
             .assertNumberOfEditingNodes(0)
             .assertNumberOfDisplayNodes(0, done);
@@ -130,12 +166,12 @@ describe('Polylines', function() {
                         .assertTextEqual('.vertex.editing.polyline0 .point._1', 'point1')
                         .assertTextEqual('.vertex.editing.polyline0 .point._2', 'point2')
                         .assertTextEqual('.vertex.editing.polyline0 .point._0', 'point0')
-                        .assertTextEqual('.vertex.editing.point0 .coordinate', '000')
-                        .assertTextEqual('.vertex.editing.point1 .coordinate', '10100')
-                        .assertTextEqual('.vertex.editing.point2 .coordinate', '0100')
+                        .assertCoordinateEqual('.vertex.editing.point0 .coordinate', 0,0,0)
+                        .assertCoordinateEqual('.vertex.editing.point1 .coordinate', 10,10,0)
+                        .assertCoordinateEqual('.vertex.editing.point2 .coordinate', 0,10,0)
                         .moveToWorld(10,10,0)
                         .dragToWorld(20,20,0)
-                        .assertTextEqual('.vertex.editing.point1 .coordinate', '20200')
+                        .assertCoordinateEqual('.vertex.editing.point1 .coordinate', 20,20,0)
                         .waitForUrlChange(
                             function() { client.clickOnWorld(30,30,0); },
                             function() {
@@ -154,14 +190,14 @@ describe('Polylines', function() {
             .clickOnWorld(10,10,0)
             .clickOnWorld(0,10,0)
             .waitForUrlChange(
-                function() { client.dblClickOnWorld(0,0,0); },
+                function() { client.clickOnWorld(0,0,0); },
                 function() {
                     client
                         .clickOnWorld(50,0,0)
                         .clickOnWorld(50,50,0)
                         .clickOnWorld(0,50,0)
                         .waitForUrlChange(
-                            function() { client.dblClickOnWorld(50,0,0); },
+                            function() { client.clickOnWorld(50,0,0); },
                             function() {
                                 client
                                 .click('.toolbar .select')
@@ -172,19 +208,19 @@ describe('Polylines', function() {
                                     .assertTextEqual('.vertex.editing.polyline0 .point._1', 'point1')
                                     .assertTextEqual('.vertex.editing.polyline0 .point._2', 'point2')
                                     .assertTextEqual('.vertex.editing.polyline0 .point._0', 'point0')
-                                    .assertTextEqual('.vertex.editing.point0 .coordinate', '000')
-                                    .assertTextEqual('.vertex.editing.point1 .coordinate', '10100')
-                                    .assertTextEqual('.vertex.editing.point2 .coordinate', '0100')
+                                    .assertCoordinateEqual('.vertex.editing.point0 .coordinate', 0,0,0)
+                                    .assertCoordinateEqual('.vertex.editing.point1 .coordinate', 10,10,0)
+                                    .assertCoordinateEqual('.vertex.editing.point2 .coordinate', 0,10,0)
                                     .clickOnWorld(50,50,0)
                                     .assertNumberOfEditingNodes(4)
                                     .assertNumberOfDisplayNodes(1)
-                                    .assertTextEqual('.vertex.editing.polyline1 .point._0', 'point5')
-                                    .assertTextEqual('.vertex.editing.polyline1 .point._1', 'point6')
-                                    .assertTextEqual('.vertex.editing.polyline1 .point._2', 'point7')
-                                    .assertTextEqual('.vertex.editing.polyline1 .point._0', 'point5')
-                                    .assertTextEqual('.vertex.editing.point5 .coordinate', '5000')
-                                    .assertTextEqual('.vertex.editing.point6 .coordinate', '50500')
-                                    .assertTextEqual('.vertex.editing.point7 .coordinate', '0500')
+                                    .assertTextEqual('.vertex.editing.polyline1 .point._0', 'point4')
+                                    .assertTextEqual('.vertex.editing.polyline1 .point._1', 'point5')
+                                    .assertTextEqual('.vertex.editing.polyline1 .point._2', 'point6')
+                                    .assertTextEqual('.vertex.editing.polyline1 .point._0', 'point4')
+                                    .assertCoordinateEqual('.vertex.editing.point4 .coordinate', 50,0,0)
+                                    .assertCoordinateEqual('.vertex.editing.point5 .coordinate', 50,50,0)
+                                    .assertCoordinateEqual('.vertex.editing.point6 .coordinate', 0,50,0)
                                     .clickOnWorld(30,30,0)
                                     .assertNumberOfEditingNodes(0)
                                     .assertNumberOfDisplayNodes(2, done)
@@ -210,7 +246,7 @@ describe('Polylines', function() {
                         .assertNumberOfEditingNodes(1)
                         .assertNumberOfDisplayNodes(1)
                         .buttonUp()
-                        .moveToWorld(20,20,0) // There is no point here so thos should'nt edit
+                        .moveToWorld(20,20,0) // There is no point here so this shouldn't edit
                         .buttonDown()
                         .moveToWorld(30,30,0)
                         .moveToWorld(30,30,0)
@@ -218,6 +254,7 @@ describe('Polylines', function() {
                         .assertNumberOfDisplayNodes(1, done);
                 });
     });
+
 
 });
 

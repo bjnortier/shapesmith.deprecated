@@ -73,6 +73,13 @@ client.addCommand('assertTextEqual', function(selector, text, callback) {
     });
 });
 
+client.addCommand('assertValueEqual', function(selector, text, callback) {
+    this.getValue(selector, function(result) {
+        assert.equal(result, text, selector);
+        callback();
+    });
+});
+
 client.addCommand('hasClass', function(selector, clazz, callback) {
     this.getAttribute(selector, 'class', function(result) {
         assert.include(result, clazz);
@@ -123,9 +130,9 @@ client.addCommand('dblClickOnWorld', function(x,y,z, callback) {
 
 client.addCommand('assertCoordinateEqual', function(selector, x, y, z, callback) {
     this
-        .assertTextEqual(selector + ' .x', x)
-        .assertTextEqual(selector + ' .y', y)
-        .assertTextEqual(selector + ' .z', z, callback);
+        .assertValueEqual(selector + ' .x', x)
+        .assertValueEqual(selector + ' .y', y)
+        .assertValueEqual(selector + ' .z', z, callback);
 });
 
 client.addCommand('getEditingVertexName', function(callback) {

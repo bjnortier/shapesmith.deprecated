@@ -123,7 +123,12 @@ define(['lib/underscore-require'], function(_) {
 
             // For each vertex in the graph, check if all the children
             // have been visited. If yes, then visit it.
-            while(remainingIds.length > 0) {
+            var sanity = remainingIds.length + 1;
+            while ((remainingIds.length > 0) && (sanity > 0)) {
+                --sanity;
+                if (sanity === 0) {
+                    throw Error('leaf first search infinite loop');
+                }
                 for (var i in remainingIds) {
                     var vertex = this.vertexById(remainingIds[i]);
                     var outgoingVertexIds = outgoingVertices[vertex.id];

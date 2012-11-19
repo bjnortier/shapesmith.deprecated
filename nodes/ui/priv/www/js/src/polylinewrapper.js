@@ -83,16 +83,27 @@ define([
             if (this.vertex.proto) {
                 var children = geometryGraph.childrenOf(this.vertex);
                 if (viewAndEvent.view.model.vertex.type === 'point') {
+
                     geometryGraph.removeLastPointFromPolyline(this.vertex);
-                    geometryGraph.addPointToPolyline(this.vertex, viewAndEvent.view.model.vertex);
-                    geometryGraph.addPointToPolyline(this.vertex);
-                    this.vertex.trigger('change', this.vertex);
+                    
+                    // Finish on the first point
+                    var clickedPoint = viewAndEvent.view.model.vertex;
+                    geometryGraph.addPointToPolyline(this.vertex, clickedPoint);
+                    if (clickedPoint === _.first(children)) {
+                        this.okCreate();
+                        this.creating = true; // Prevent doube create on double click
+                    } else {
+                        geometryGraph.addPointToPolyline(this.vertex);
+                        this.vertex.trigger('change', this.vertex);
+                    }
                 } 
             }
         },
 
         sceneViewDblClick: function(viewAndEvent) {
-            if (viewAndEvent.view.model.vertex.type === 'point') {
+            // Double-click on a point and the first click hasn't already 
+            // created
+            if (!this.creating && (viewAndEvent.view.model.vertex.type === 'point')) {
                 geometryGraph.removeLastPointFromPolyline(this.vertex);
                 this.okCreate();
             }

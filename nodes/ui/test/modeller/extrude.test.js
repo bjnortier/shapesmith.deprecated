@@ -39,7 +39,7 @@ describe('Extrusions', function() {
                         .assertNumberOfEditingNodes(1)
                         .moveToWorld(0,0,1)
                         .dragToWorld(0,0,10)
-                        .assertTextEqual('.vertex.editing.extrude0 .z', '10')
+                        .assertValueEqual('.vertex.editing.extrude0 .h', '10')
                         .waitForUrlChange(
                             function() { client.clickOnWorld(0,-10,0); },
                             function() {
@@ -80,8 +80,8 @@ describe('Extrusions', function() {
                                                 .assertNumberOfEditingNodes(1)
                                                 .moveToWorld(0,-10,10)
                                                 .dragToWorld(0,-10,20)
-                                                .assertTextEqual(
-                                                    '.vertex.editing.extrude0 .z', '20', done)
+                                                .assertValueEqual(
+                                                    '.vertex.editing.extrude0 .h', '20', done)
                                         });
                             });
                 });

@@ -76,10 +76,10 @@ describe('Save/Load', function() {
                                                 .assertNumberOfDisplayNodes(1)
                                                 .clickOnWorld(-10,-10,0)
                                                 .assertNumberOfEditingNodes(3)
-                                                .assertTextEqual(
-                                                    '.vertex.editing.point0 .coordinate', '-10-100')
-                                                .assertTextEqual(
-                                                    '.vertex.editing.point1 .coordinate', '20200', done)
+                                                .assertCoordinateEqual(
+                                                    '.vertex.editing.point0 .coordinate', -10,-10,0)
+                                                .assertCoordinateEqual(
+                                                    '.vertex.editing.point1 .coordinate', 20,20,0, done)
                                         });
                                     });
                             });

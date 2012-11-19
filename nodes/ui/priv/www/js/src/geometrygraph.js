@@ -210,12 +210,13 @@ define([
         }
 
 
-        this.createGraph = function(deserializedGraph, shasToVertices) {
+        this.createGraph = function(shaGraph, shasToVertices) {
             var handledSHAs = [];
-            while(_.keys(deserializedGraph.edges).length > 0) {
-                for(parentSHA in deserializedGraph.edges) {
-                    var childrenSHAs = deserializedGraph.edges[parentSHA];
-                    var canHandle = _.intersection(childrenSHAs, handledSHAs).length == childrenSHAs.length;
+            while(_.keys(shaGraph.edges).length > 0) {
+                for(parentSHA in shaGraph.edges) {
+                    var childrenSHAs = shaGraph.edges[parentSHA];
+                    var uniqueChildrenSHAs = _.uniq(childrenSHAs);
+                    var canHandle = _.intersection(uniqueChildrenSHAs, handledSHAs).length == uniqueChildrenSHAs.length;
                     if (canHandle) {
 
                         var parentVertex = shasToVertices[parentSHA];
@@ -228,7 +229,7 @@ define([
                             });
                         });
                         handledSHAs.push(parentSHA);
-                        delete deserializedGraph.edges[parentSHA];
+                        delete shaGraph.edges[parentSHA];
                     }
                 }
             }
