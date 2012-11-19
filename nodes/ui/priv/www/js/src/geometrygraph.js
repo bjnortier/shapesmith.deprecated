@@ -94,14 +94,15 @@ define([
             var undoFn = function() {
                 that.remove(vertex);
                 children.forEach(function(child) {
-                    if (child.implicit) {
+                    // Implicit children can be shared
+                    if (child.implicit && that.vertexById(child.id)) {
                         that.remove(child);
                     } 
                 })
             }
             var redoFn = function() {
                 children.forEach(function(child) {
-                    if (child.implicit) {
+                    if (child.implicit && !that.vertexById(child.id)) {
                         that.add(child);
                     }
                 })
@@ -185,7 +186,7 @@ define([
 
             var undoFn = function() {
                 children.forEach(function(child) {
-                    if (child.implicit) {
+                    if (child.implicit && !that.vertexById(child.id)) {
                         that.add(child);
                     }
                 })
@@ -199,7 +200,7 @@ define([
             var redoFn = function() {
                 that.remove(vertex);
                 children.forEach(function(child) {
-                    if (child.implicit) {
+                    if (child.implicit && that.vertexById(child.id)) {
                         that.remove(child);
                     } 
                 })

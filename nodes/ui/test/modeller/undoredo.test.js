@@ -49,6 +49,26 @@ describe('Undo/Redo', function() {
                 });
     }); 
 
+    it('can undo/redo polyline creation', function(done) {
+        this.timeout(5000);
+        client
+            .click('.toolbar .polyline')
+            .clickOnWorld(0,0,0) 
+            .clickOnWorld(10,10,0) 
+            .clickOnWorld(0,10,0) 
+            .waitForUrlChange(
+                function() { client.clickOnWorld(0,0,0) }, 
+                function() {
+                    client
+                        .click('.toolbar .select')
+                        .assertNumberOfDisplayNodes(1)
+                        .back()
+                        .assertNumberOfDisplayNodes(0)
+                        .forward()
+                        .assertNumberOfDisplayNodes(1, done);
+                });
+    }); 
+
     it("doesn't create a command when the SHA is unchanged", function(done) {
         this.timeout(5000);
         client
