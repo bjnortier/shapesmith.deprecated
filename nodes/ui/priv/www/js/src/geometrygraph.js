@@ -4,10 +4,11 @@ define([
     'lib/sha1',
     'src/graph',
     'src/geomnode',
+    'src/variablegraph',
     'src/command',
     'src/commandstack',
     ], 
-    function(_, Backbone, crypto, graphLib, geomNode, Command, commandStack) {
+    function(_, Backbone, crypto, graphLib, geomNode, variableGraphLib, Command, commandStack) {
 
     var post = function(url, data, successFn, errorFn) {
         $.ajax({
@@ -35,6 +36,7 @@ define([
 
         _.extend(this, Backbone.Events);
         var graph = new graphLib.Graph();
+        var varGraph = new variableGraphLib.Graph(graph);
         var that = this;
 
         var captureVertices = function(vertices, callback) {
@@ -64,6 +66,10 @@ define([
         }
 
         this.commitCreate = function(editingVertex) {
+            if (!this.validate(editingVertex)) {
+                return;
+            }
+
             var vertex = editingVertex.cloneNonEditing();
             var that = this;
             var children = this.childrenOf(vertex);
@@ -112,6 +118,16 @@ define([
 
         this.commitEdit = function() {
             var editingVertices = this.getEditingVertices();
+            var allOk = true;
+            editingVertices.forEach(function(v) {
+                if(!that.validate(v)) {
+                    allOk = false;
+                }
+            })
+            if (!allOk) {
+                return;
+            }
+
             var nonEditingVertices = editingVertices.map(function(v) {
                 return v.cloneNonEditing();
             })
@@ -146,11 +162,53 @@ define([
             commandStack.do(command);
         }
 
-        this.removeAll = function() {
-            graph.vertices().forEach(function(vertex) {
+        this.commitDelete = function(vertex) {
+
+            var that = this;
+            var children = this.childrenOf(vertex);
+            var parents =  this.parentsOf(vertex);
+
+            if (parents.length > 0) {
+                vertex.errors = {delete: 'cannot delete veretx with parents'};
+                return;
+            }
+
+            var doFn = function(commandSuccessFn, commandErrorFn) {
                 that.remove(vertex);
-            });
+                children.forEach(function(child) {
+                    if (child.implicit) {
+                        that.remove(child);
+                    } 
+                })
+                captureGraph(commandSuccessFn);
+            }
+
+            var undoFn = function() {
+                children.forEach(function(child) {
+                    if (child.implicit) {
+                        that.add(child);
+                    }
+                })
+                that.add(vertex, function() {
+                    children.forEach(function(child) {
+                        graph.addEdge(vertex, child);
+                    });
+                });
+            }
+
+            var redoFn = function() {
+                that.remove(vertex);
+                children.forEach(function(child) {
+                    if (child.implicit) {
+                        that.remove(child);
+                    } 
+                })
+            }
+
+            var command = new Command(doFn, undoFn, redoFn);
+            commandStack.do(command);
         }
+
 
         this.createGraph = function(deserializedGraph, shasToVertices) {
             var handledSHAs = [];
@@ -212,6 +270,11 @@ define([
             });
         }
 
+        this.removeAll = function() {
+            graph.vertices().forEach(function(vertex) {
+                that.remove(vertex);
+            });
+        }
 
         // When editing, the original vertex is kept 
         // for the cancel operation
@@ -223,11 +286,11 @@ define([
             originals[vertex.id] = vertex;
 
             var that = this;
-            if (vertex.type === 'polyline') {
-                this.childrenOf(vertex).forEach(function(point) {
-                    that.edit(point);
-                });
-            }
+            this.childrenOf(vertex).forEach(function(child) {
+                if (child.implicit) {
+                    that.edit(child);
+                }
+            });
         }
 
         this.editById = function(id) {
@@ -291,6 +354,23 @@ define([
             }
         }
 
+        // ---------- Validation ----------
+
+        this.validate = function(vertex) {
+            if (vertex.type === 'variable') {
+                if (varGraph.canAdd(vertex)) {
+                    return true;
+                } else {
+                    vertex.errors = {name: 'invalid', expression: 'invalid'};
+                    vertex.trigger('change', vertex);
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+
+
         // ---------- Prototypes ----------
        
         this.createPointPrototype = function(options) {
@@ -329,6 +409,15 @@ define([
             return extrudeVertex;
         }
 
+        this.createVariablePrototype = function() {
+            var vertex = new geomNode.Variable({
+                name: 'placeholder', 
+                editing      : true,
+                proto        : true,
+                parameters: {expression: ''}});
+            this.add(vertex);
+        }
+
         // ---------- Mutations ----------
 
         this.addPointToPolyline = function(polyline, point) {
@@ -353,13 +442,39 @@ define([
             });
         }
 
+        // ---------- Variable functions ----------
+
+        this.evaluate = function(expression) {
+            return varGraph.evaluate(expression);
+        }
+
         // ---------- Graph functions ----------
+
+        this.updateVariableEdges = function(vertex) {
+            if (!vertex.editing) {
+                var variableChildren = this.childrenOf(vertex).filter(function(v) {
+                    return v.type === 'variable';
+                });
+                variableChildren.map(function(child) {
+                    graph.removeEdge(vertex, child);
+                });
+                var expressions = vertex.getExpressions();
+                var newVariableChildren = [];
+                expressions.forEach(function(expr) {
+                    newVariableChildren = newVariableChildren.concat(varGraph.getExpressionChildren(expr));
+                })
+                newVariableChildren.forEach(function(child) {
+                    graph.addEdge(vertex, child);
+                });
+            }
+        }
 
         this.add = function(vertex, beforeNotifyFn) {
             graph.addVertex(vertex);
             if (beforeNotifyFn) {
                 beforeNotifyFn();
             }
+            this.updateVariableEdges(vertex);
             vertex.on('change', this.vertexChanged, this);
             this.trigger('vertexAdded', vertex);
         }
@@ -372,6 +487,11 @@ define([
 
         this.replace = function(original, replacement) {
             graph.replaceVertex(original, replacement);
+            this.updateVariableEdges(replacement);
+            this.setupEventsForReplacement(original, replacement);
+        }
+
+        this.setupEventsForReplacement = function(original, replacement) {
             original.off('change', this.vertexChanged, this);
             replacement.on('change', this.vertexChanged, this);
             replacement.trigger('change', replacement);

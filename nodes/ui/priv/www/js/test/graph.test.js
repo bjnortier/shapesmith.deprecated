@@ -30,6 +30,35 @@ describe('Graph', function() {
         assert.equal(graph.size(), 2);
         assert.deepEqual(graph.vertices(), [a, b]);
 
+        assert.deepEqual(graph.vertexById('a'), a);
+
+        assert.throws(function() {
+            graph.addVertex(a);
+        }, Error);
+
+    });
+
+    it('can check for name uniqueness', function() {
+        var graph = new graphLib.Graph();
+        var a = {id:'a', name: 'aa'}, b = {id:'b', name: 'bb'};
+        graph.addVertex(a);
+        graph.addVertex(b);
+
+        assert.isTrue(graph.nameIsTaken('aa'))
+        assert.isFalse(graph.nameIsTaken('cc'))
+
+    });
+
+    it('can fetch by name for name', function() {
+        var graph = new graphLib.Graph();
+        var a = {id:'a', name: 'aa'}, b = {id:'b', name: 'bb'};
+        graph.addVertex(a);
+        graph.addVertex(b);
+
+        assert.deepEqual(graph.vertexByName('aa'), a);
+        assert.deepEqual(graph.vertexByName('bb'), b);
+        assert.isUndefined(graph.vertexByName('e'))
+
     });
 
     it('manages incoming and outgoing vertices', function() {
@@ -164,5 +193,56 @@ describe('Graph', function() {
         }, Error);
 
     });
+
+    it('can do a leaf-first search of all vertices', function() {
+
+        var a = {id:'a'}, b1 = {id:'b1'}, b2 = {id: 'b2'}, c = {id:'c'}, d = {id:'d'};
+        var graph = new graphLib.Graph();
+
+        graph.addVertex(a);        
+        graph.addVertex(b1); 
+        graph.addVertex(b2); 
+        graph.addEdge(a,b1);
+        graph.addEdge(a,b2)
+        graph.addVertex(c);
+        graph.addVertex(d);
+        graph.addEdge(c,d);
+
+        var sequence = [];
+        var listener = function(vertex) {
+            sequence.push(vertex.id);
+        }
+
+        graph.leafFirstSearch(listener);
+
+        assert.deepEqual(sequence, ['b1','b2','a','d','c']);
+    });
+
+    it('can do a leaf-first search when a child occurs multiple times', function() {
+        
+        // This is a test for an infinite loop bug
+
+        var a = {id:'a'}, b1 = {id:'b1'}, b2 = {id: 'b2'};
+        var graph = new graphLib.Graph();
+
+        graph.addVertex(a);        
+        graph.addVertex(b1); 
+        graph.addVertex(b2); 
+        graph.addEdge(a,b1);
+        graph.addEdge(a,b2)
+        graph.addEdge(a,b1)
+
+        var sequence = [];
+        var listener = function(vertex) {
+            sequence.push(vertex.id);
+        }
+
+        graph.leafFirstSearch(listener);
+
+        assert.deepEqual(sequence, ['b1','b2','a']);
+
+    });
+
+
 
 });

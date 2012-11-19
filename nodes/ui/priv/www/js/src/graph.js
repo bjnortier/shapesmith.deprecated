@@ -70,12 +70,20 @@ define(['lib/underscore-require'], function(_) {
             return vertices[id];
         }
 
+        this.vertexByName = function(name) {
+            return _.find(_.values(vertices), function(v) { return (v.name === name); });
+        }
+
         this.vertices = function() {
             return _.values(vertices);
         }
 
         this.size = function() {
             return size;
+        }
+
+        this.nameIsTaken = function(name) {
+            return this.vertexByName(name) !== undefined;
         }
 
         this.addEdge = function(from, to) {
@@ -108,28 +116,33 @@ define(['lib/underscore-require'], function(_) {
             return incomingVertices[to.id] ? incomingVertices[to.id] : [];
         }
 
-        this.stringify = function() {
-            var str = '\n';
-            var toString = function(obj) {
-                if (Object.prototype.toString.call(obj) === '[object Array]') {
-                    if (obj.length === 0) {
-                        return '[]';
+        this.leafFirstSearch = function(listener) {
+
+            var remainingIds = _.pluck(vertices, 'id');
+            var visitedIds   = [];
+
+            // For each vertex in the graph, check if all the children
+            // have been visited. If yes, then visit it.
+            while(remainingIds.length > 0) {
+                for (var i in remainingIds) {
+                    var vertex = this.vertexById(remainingIds[i]);
+                    var outgoingVertexIds = outgoingVertices[vertex.id];
+
+                    // Use uniqe ids since a vertex can be in the outgoing
+                    // array multiple times
+                    var uniqueOutgoingVertexIds = _.uniq(outgoingVertexIds);
+                    if (_.intersection(uniqueOutgoingVertexIds, visitedIds).length == uniqueOutgoingVertexIds.length) {
+                        listener(vertex);
+                        visitedIds.push(vertex.id);
+                        remainingIds.splice(remainingIds.indexOf(vertex.id), 1)
+                        break;
                     }
                 }
-                return obj.toString();
             }
-            for (var key in vertices) {
-                str += key + ':' + vertices[key] + '\n'; 
-            }
-            for (var key in outgoingVertices) {
-                str += key + ' → ' + toString(outgoingVertices[key]) + '\n';
-            }
-            for (var key in incomingVertices) {
-                str += key + ' ← ' + toString(incomingVertices[key]) + '\n';
-            }
-            return str;
+
         }
 
+       
     }
 
     return {

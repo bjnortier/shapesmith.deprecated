@@ -20,14 +20,14 @@
   <sodipodi:namedview
      inkscape:document-units="mm"
      id="base"
-     pagecolor="#018fbc"
+     pagecolor="#000000"
      bordercolor="#666666"
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="3.959798"
-     inkscape:cx="235.21481"
-     inkscape:cy="461.51962"
+     inkscape:cx="323.82355"
+     inkscape:cy="562.53487"
      inkscape:current-layer="layer1"
      showgrid="true"
      units="mm"
@@ -289,5 +289,41 @@
        inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/extrude32x32.disabled.png"
        inkscape:export-xdpi="48"
        inkscape:export-ydpi="48" />
+    <rect
+       style="fill:none;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect8725-62"
+       width="60"
+       height="60"
+       x="329.61432"
+       y="503.3963"
+       ry="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/variable32x32.png"
+       inkscape:export-xdpi="48"
+       inkscape:export-ydpi="48" />
+    <text
+       xml:space="preserve"
+       style="font-size:20.70963097px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Source Sans Pro;-inkscape-font-specification:Source Sans Pro"
+       x="335.98044"
+       y="540.64465"
+       id="text3034"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/variable32x32.png"
+       inkscape:export-xdpi="48"
+       inkscape:export-ydpi="48"><tspan
+         sodipodi:role="line"
+         id="tspan3036"
+         x="335.98044"
+         y="540.64465">x=a*2</tspan></text>
+    <rect
+       style="fill:none;stroke:none;stroke-width:0.99921260000000001;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="rect8725-80"
+       width="60"
+       height="60"
+       x="400.57751"
+       y="432.43311"
+       ry="0"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/blank16x16.png"
+       inkscape:export-xdpi="23.610001"
+       inkscape:export-ydpi="23.610001" />
   </g>
 </svg>

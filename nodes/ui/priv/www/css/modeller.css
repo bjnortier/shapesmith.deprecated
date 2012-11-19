@@ -24,7 +24,7 @@ body {
     font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
     font-size: 85%;
     line-height: 1em; /*color: #393939;*/
-    color: #444444;
+    color: #fff;
     background-color: #020202;
 }
 
@@ -94,19 +94,30 @@ img#logo {
     border-bottom: solid 2px #ff0;
 }
 
-.coordinate, .named {
+.coordinate, .named  {
     padding: 5px;
 }
 
-.vertex {
-    color: #fff;
-}
-
-.vertex .name {
+#geometry .vertex .name {
     display: inline-block;
     vertical-align: middle;
     margin-top: -26px;
     padding-right: 10px;
+    color: #fff;
+}
+
+#variable-manager .name {
+    padding: 12px;
+}
+
+#variable-manager .add {
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+#variable-manager .add:hover {
+    border-bottom: solid 2px #fff;
+    cursor: pointer;
 }
 
 .vertex .okcancel {
@@ -122,23 +133,55 @@ img#logo {
     margin: 4px;
 }
 
-#graph {
+#graphs {
     position: absolute;
     left: 0px;
     top: 0px;
     padding: 10px;
     border-spacing: 5px;
 }
-.vertex.display {
+
+    
+.vertex.display, #variables, #geometry {
     background: rgba(51, 51, 51, 0.46);
+}
+
+#geometry {
+    margin-top: 5px;
+}
+
+#variables, #geometry {
+    border-collapse: collapse;
+    padding: 5px;
+}   
+
+.vertex.display {
+    cursor: pointer;    
+}
+
+.vertex .delete {   
+    width: 16px;
+    height: 16px;   
+    background-image: none;
+    margin-right: 5px; 
+    margin-left: 5px;
+}
+
+.vertex:hover .delete, .vertex.variable:hover .delete {
+    background-image: url('/ui/images/icons/delete16x16.disabled.png');
+    background-repeat: no-repeat;
+}
+
+.delete:hover {
+    background-image: url('/ui/images/icons/delete16x16.png') !important;
     cursor: pointer;
 }
 
-.vertex.display:hover {
+#geometry .vertex:hover td {
     border-bottom: solid #FFF 2px;
 }
 
-.vertex.selected {
+.vertex.selected td {
     border-bottom: solid #FF0 2px;
 }
 
@@ -181,7 +224,7 @@ img#logo {
 }
 
 .toolbar.geometry .polyline .icon {
-    background-image: url('/ui/images/icons/line32x32.png');
+    background-image: url('/ui/images/icons/polyline32x32.png');
 }
 
 .toolbar.geometry .extrude .icon {
@@ -201,16 +244,29 @@ img#logo {
     padding: 2px;
 }
 
-.vertex .field {
-    width: 20px;
+.field {
+    width: 30px;
     border: none;
     background: none; 
-    padding: 2px;
     color: white;
 }
 
+#variables .title {
+    padding: 5px;
+}
+
+.field {
+    background: rgba(136, 170, 201, 0.46);
+}
+
+#variables .editing .field, 
+#variables .name, 
+#variables .expression {
+    width: 50px;
+}
+
 .field.x {
-    color: #3da033;
+    color: #3da033; 
 }
 
 .field.y {
@@ -220,6 +276,29 @@ img#logo {
 .field.z, .field.h {
     color: #ff706b;
 }
+
+#geometry .field {
+    margin: 5px;
+    padding: 5px;
+}
+
+#variables .name, 
+#variable .expression,
+#variables .field {
+    padding: 5px;
+}
+
+#variables .field {
+    margin-right: 5px;
+} 
+
+
+
+.error .field {
+    background: url(/ui/images/textfielderror.png) transparent bottom repeat-x;
+}
+
+
 
 
 

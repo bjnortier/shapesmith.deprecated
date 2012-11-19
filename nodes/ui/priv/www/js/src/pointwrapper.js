@@ -1,19 +1,19 @@
 define([
         'src/calculations', 
         'src/geometrygraphsingleton', 
-        'src/vertexwrapper', 
+        'src/geomvertexwrapper', 
         'src/scene', 
         'src/scenevieweventgenerator',
         'src/workplane'
     ], 
-    function(calc, geometryGraph, vertexWrapper, sceneModel, sceneViewEventGenerator, workplaneModel) {
+    function(calc, geometryGraph, geomVertexWrapper, sceneModel, sceneViewEventGenerator, workplaneModel) {
 
     // ---------- Editing ----------
 
-    var EditingModel = vertexWrapper.EditingModel.extend({
+    var EditingModel = geomVertexWrapper.EditingModel.extend({
 
         initialize: function(vertex) {
-            vertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
+            geomVertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
             if (workplaneModel.lastPosition) {
                 this.workplanePositionChanged(workplaneModel.lastPosition);
             }
@@ -46,11 +46,11 @@ define([
 
     });
 
-    var EditingDOMView = vertexWrapper.EditingDOMView.extend({
+    var EditingDOMView = geomVertexWrapper.EditingDOMView.extend({
 
         render: function() {
             var template = 
-                '<td class="vertex {{name}} editing">' + 
+                '<td colspan="2">' + 
                 '<div class="title"><img src="/ui/images/icons/point32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
                 '</div>' + 
@@ -64,49 +64,51 @@ define([
                 id: this.model.vertex.id,
                 name: this.model.vertex.name,
             };
-            var that = this;
-            ['x', 'y', 'z'].forEach(function(key) {
-                view[key] = that.model.vertex.parameters.coordinate[key];
-            });
             this.$el.html($.mustache(template, view));
+            this.update();
             return this;
         },
 
         update: function() {
             var that = this;
             ['x', 'y', 'z'].forEach(function(key) {
-                that.$el.find('.coordinate').find('.' + key).val(that.model.vertex.parameters.coordinate[key]);
+                that.$el.find('.coordinate').find('.' + key).val(
+                    that.model.vertex.parameters.coordinate[key]);
             });
         },
 
         updateFromDOM: function() {
             var that = this;
             ['x', 'y', 'z'].forEach(function(key) {
-                that.model.vertex.parameters.coordinate[key] = 
-                    parseFloat(that.$el.find('.field.' + key).val());
+                try {
+                    var expression = that.$el.find('.field.' + key).val();
+                    that.model.vertex.parameters.coordinate[key] = expression;
+                } catch(e) {
+                    console.error(e);
+                }
             });
         }
     });
 
-    var EditingSceneView = vertexWrapper.EditingSceneView.extend({
+    var EditingSceneView = geomVertexWrapper.EditingSceneView.extend({
 
         initialize: function(options) {
             this.point = this.model.vertex;
-            vertexWrapper.EditingSceneView.prototype.initialize.call(this);
+            geomVertexWrapper.EditingSceneView.prototype.initialize.call(this);
             this.on('dragStarted', this.dragStarted, this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);
         },
 
         remove: function() {
-            vertexWrapper.EditingSceneView.prototype.remove.call(this);
+            geomVertexWrapper.EditingSceneView.prototype.remove.call(this);
             this.off('dragStarted', this.dragStarted, this);
             this.off('drag', this.drag, this);
             this.off('dragEnded', this.dragEnded, this);
         },
 
         render: function() {
-            vertexWrapper.EditingSceneView.prototype.render.call(this);
+            geomVertexWrapper.EditingSceneView.prototype.render.call(this);
             var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
             var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
             var point = THREE.SceneUtils.createMultiMaterialObject(
@@ -115,7 +117,7 @@ define([
                     new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                     new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                 ]);
-            point.position = calc.objToVector(this.point.parameters.coordinate);
+            point.position = calc.objToVector(this.point.parameters.coordinate, geometryGraph);
             this.sceneObject.add(point);
         },
 
@@ -153,15 +155,15 @@ define([
 
     // ---------- Display ----------
 
-    var DisplayModel = vertexWrapper.DisplayModel.extend({
+    var DisplayModel = geomVertexWrapper.DisplayModel.extend({
 
         initialize: function(vertex) {
-            vertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
+            geomVertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
             this.views = this.views.concat([
                 new DisplaySceneView({model: this}),
             ]);
             if (!vertex.implicit) {
-                this.views.push(new DisplayDOMView({model: this}));
+                this.views.push(new geomVertexWrapper.DisplayDOMView({model: this}));
             }
         },
 
@@ -175,24 +177,24 @@ define([
 
     });
 
-    var DisplaySceneView = vertexWrapper.DisplaySceneView.extend({
+    var DisplaySceneView = geomVertexWrapper.DisplaySceneView.extend({
 
         initialize: function(vertex) {
-            vertexWrapper.DisplaySceneView.prototype.initialize.call(this, vertex);
+            geomVertexWrapper.DisplaySceneView.prototype.initialize.call(this, vertex);
             this.on('dragStarted', this.dragStarted, this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);
         },
 
         remove: function() {
-            vertexWrapper.DisplaySceneView.prototype.remove.call(this);
+            geomVertexWrapper.DisplaySceneView.prototype.remove.call(this);
             this.off('dragStarted', this.dragStarted, this);
             this.off('drag', this.drag, this);
             this.off('dragEnded', this.dragEnded, this);
         },
 
         render: function() {
-            vertexWrapper.EditingSceneView.prototype.render.call(this);
+            geomVertexWrapper.EditingSceneView.prototype.render.call(this);
             var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
             var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
             var radius = this.model.vertex.implicit ? 0.35 : 0.5;
@@ -202,14 +204,18 @@ define([
                     new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}),
                     new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                 ]);
-            point.position = calc.objToVector(this.model.vertex.parameters.coordinate);
+            point.position = calc.objToVector(
+                this.model.vertex.parameters.coordinate,
+                geometryGraph);
             this.sceneObject.add(point);
 
             if (this.model.vertex.implicit) {
                 var selectionPoint = new THREE.Mesh(
                     new THREE.SphereGeometry(0.5, 10, 10), 
                     new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0, side: THREE.DoubleSide }));
-                selectionPoint.position = calc.objToVector(this.model.vertex.parameters.coordinate);
+                selectionPoint.position = calc.objToVector(
+                    this.model.vertex.parameters.coordinate,
+                    geometryGraph);
                 this.hiddenSelectionObject.add(selectionPoint);
             }
         },
@@ -225,23 +231,6 @@ define([
         },
 
     });
-
-    var DisplayDOMView = vertexWrapper.DisplayDOMView.extend({
-
-        render: function() {
-            var view = {
-                name: this.model.vertex.name,
-            }
-            var template = 
-                '<td class="vertex {{name}} display">' + 
-                '<img src="/ui/images/icons/point32x32.png"/>' + 
-                '<div class="name">{{name}}</div>' + 
-                '</td>';
-            this.$el.html($.mustache(template, view));
-            return this;
-        },
-
-    })
 
 
     return {

@@ -1,12 +1,18 @@
-define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', 'src/scene', 'src/workplane'], 
-    function(calc, geometryGraph, vertexWrapper, sceneModel, workplaneModel) {
+define([
+        'src/calculations',
+        'src/geometrygraphsingleton',
+        'src/geomvertexwrapper',
+        'src/scene',
+        'src/workplane'
+    ], 
+    function(calc, geometryGraph, geomVertexWrapper, sceneModel, workplaneModel) {
 
     // ---------- Common ----------
 
     var RenderExtrudeFacesMixin = {
 
         render: function() {
-            vertexWrapper.EditingSceneView.prototype.render.call(this);
+            geomVertexWrapper.EditingSceneView.prototype.render.call(this);
             var polyline = _.first(geometryGraph.childrenOf(this.model.vertex));
             var points = geometryGraph.childrenOf(polyline);
             for (var i = 1; i < points.length; ++i) {
@@ -16,11 +22,11 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
         renderPlaneForPoints: function(pointA, pointB) {
             var geometry = new THREE.Geometry();
-            var h = this.model.vertex.parameters.h;
-            var a  = calc.objToVector(pointA.parameters.coordinate);
-            var ah = a.clone().setZ(h);
-            var b  = calc.objToVector(pointB.parameters.coordinate);
-            var bh = b.clone().setZ(h);
+            var h = geometryGraph.evaluate(this.model.vertex.parameters.h);
+            var a  = calc.objToVector(pointA.parameters.coordinate, geometryGraph);
+            var ah = a.clone().setZ(h + a.z);
+            var b  = calc.objToVector(pointB.parameters.coordinate, geometryGraph);
+            var bh = b.clone().setZ(h + b.z);
 
             geometry.vertices.push(a);
             geometry.vertices.push(b);
@@ -45,10 +51,10 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
     // ---------- Editing ----------
 
-    var EditingModel = vertexWrapper.EditingModel.extend({
+    var EditingModel = geomVertexWrapper.EditingModel.extend({
 
         initialize: function(vertex) {
-            vertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
+            geomVertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
             this.views = this.views.concat([
                 new EditingDOMView({model: this}),
                 new EditingFacesSceneView({model: this}),
@@ -62,7 +68,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         destroy: function() {
-            vertexWrapper.EditingModel.prototype.destroy.call(this);
+            geomVertexWrapper.EditingModel.prototype.destroy.call(this);
             this.vertex.off('descendantChanged', this.descendantChanged, this);
         },
 
@@ -80,12 +86,12 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
     });
 
-    var EditingDOMView = vertexWrapper.EditingDOMView.extend({
+    var EditingDOMView = geomVertexWrapper.EditingDOMView.extend({
 
         render: function() {
             var template = 
-                '<td class="vertex {{name}} editing">' + 
-                '<div class="title"><img src="/ui/images/icons/line32x32.png"/>' +
+                '<td colspan="2">' + 
+                '<div class="title"><img src="/ui/images/icons/extrude32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
                 '</div>' + 
                 '<div class="coordinate">' + 
@@ -97,6 +103,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 h   : this.model.vertex.parameters.h,
             };
             this.$el.html($.mustache(template, view));
+            this.update();
             return this;
         },
 
@@ -106,31 +113,31 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         updateFromDOM: function() {
-            this.model.vertex.parameters.h = 
-                parseFloat(this.$el.find('.field.h').val());
+            var expression = this.$el.find('.field.h').val();
+            this.model.vertex.parameters.h = expression;
         }
 
     }); 
 
-    var EditingHeightAnchor = vertexWrapper.EditingSceneView.extend({
+    var EditingHeightAnchor = geomVertexWrapper.EditingSceneView.extend({
 
         initialize: function(options) {
             this.pointVertex = options.pointVertex;
-            vertexWrapper.EditingSceneView.prototype.initialize.call(this);
+            geomVertexWrapper.EditingSceneView.prototype.initialize.call(this);
             this.on('dragStarted', this.dragStarted, this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);
         },
 
         remove: function() {
-            vertexWrapper.EditingSceneView.prototype.remove.call(this);
+            geomVertexWrapper.EditingSceneView.prototype.remove.call(this);
             this.off('dragStarted', this.dragStarted, this);
             this.off('drag', this.drag, this);
             this.off('dragEnded', this.dragEnded, this);
         },
 
         render: function() {
-            vertexWrapper.EditingSceneView.prototype.render.call(this);
+            geomVertexWrapper.EditingSceneView.prototype.render.call(this);
             var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
             var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
 
@@ -140,9 +147,9 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                     new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                     new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                 ]);
-            var pointPosition = calc.objToVector(this.pointVertex.parameters.coordinate);
+            var pointPosition = calc.objToVector(this.pointVertex.parameters.coordinate, geometryGraph);
             pointSceneObject.position = pointPosition;
-            pointSceneObject.position.z = this.model.vertex.parameters.h;
+            pointSceneObject.position.z = geometryGraph.evaluate(this.model.vertex.parameters.h) + pointPosition.z;
             this.sceneObject.add(pointSceneObject);
 
             if (this.showHeightLine) {
@@ -171,52 +178,39 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         drag: function(event) {
             this.dragging = true;
 
-            var rayOrigin = calc.objToVector(this.pointVertex.parameters.coordinate);
+            var rayOrigin = calc.objToVector(this.pointVertex.parameters.coordinate, geometryGraph);
             var rayDirection = new THREE.Vector3(0,0,1);
             var ray = new THREE.Ray(rayOrigin, rayDirection);
 
             var positionOnNormal = calc.positionOnRay(event, ray, sceneModel.view.camera);
-            this.model.vertex.parameters.h = parseFloat(positionOnNormal.z.toFixed(0));
+            var pointPosition = calc.objToVector(this.pointVertex.parameters.coordinate, geometryGraph);
+            this.model.vertex.parameters.h = 
+                parseFloat(positionOnNormal.z.toFixed(0)) - 
+                pointPosition.z;
+
             this.model.vertex.trigger('change', this.model.vertex);
         },
 
     });
 
-    var EditingFacesSceneView = vertexWrapper.EditingSceneView.extend(RenderExtrudeFacesMixin);
+    var EditingFacesSceneView = geomVertexWrapper.EditingSceneView.extend(RenderExtrudeFacesMixin);
 
     // ---------- Display ----------
 
-    var DisplayModel = vertexWrapper.DisplayModel.extend({
+    var DisplayModel = geomVertexWrapper.DisplayModel.extend({
 
         initialize: function(vertex) {
-            vertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
+            geomVertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
             this.views = this.views.concat([
                 new DisplayFacesSceneView({model: this}),
-                new DisplayDOMView({model: this}),
+                new geomVertexWrapper.DisplayDOMView({model: this}),
             ]);
 
         },
 
     });
 
-    var DisplayDOMView = vertexWrapper.DisplayDOMView.extend({
-
-        render: function() {
-            var view = {
-                name: this.model.vertex.name,
-            }
-            var template = 
-                '<td class="vertex {{name}} display">' + 
-                '<img src="/ui/images/icons/extrude32x32.png"/>' + 
-                '<div class="name">{{name}}</div>' + 
-                '</td>';
-            this.$el.html($.mustache(template, view));
-            return this;
-        },
-
-    })
-
-    var DisplayFacesSceneView = vertexWrapper.DisplaySceneView.extend(RenderExtrudeFacesMixin);
+    var DisplayFacesSceneView = geomVertexWrapper.DisplaySceneView.extend(RenderExtrudeFacesMixin);
 
 
     return {

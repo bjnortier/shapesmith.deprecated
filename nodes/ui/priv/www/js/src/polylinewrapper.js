@@ -1,12 +1,17 @@
-define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', 'src/scene', 'src/workplane'], 
-    function(calc, geometryGraph, vertexWrapper, sceneModel, workplaneModel) {
+define([
+    'src/calculations',
+    'src/geometrygraphsingleton',
+    'src/geomvertexwrapper',
+    'src/scene',
+    'src/workplane'], 
+    function(calc, geometryGraph, geomVertexWrapper, sceneModel, workplaneModel) {
 
     // ---------- Common ----------
 
     var LineSceneView = {
 
         render: function() {
-            vertexWrapper.EditingSceneView.prototype.render.call(this);
+            geomVertexWrapper.EditingSceneView.prototype.render.call(this);
             var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
             var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
             
@@ -15,11 +20,11 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
                 return point.parameters.coordinate;
             });
 
-            var positions = [calc.objToVector(coordinates[0])];
+            var positions = [calc.objToVector(coordinates[0], geometryGraph)];
 
             for(var i = 1; i < coordinates.length; ++i) {
-                var from = calc.objToVector(coordinates[i-1]);
-                var to = calc.objToVector(coordinates[i]);
+                var from = calc.objToVector(coordinates[i-1], geometryGraph);
+                var to = calc.objToVector(coordinates[i], geometryGraph);
                 var geometry = new THREE.Geometry();
                 geometry.vertices.push(from);
                 geometry.vertices.push(to);
@@ -40,10 +45,10 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
     // ---------- Editing ----------
 
-    var EditingModel = vertexWrapper.EditingModel.extend({
+    var EditingModel = geomVertexWrapper.EditingModel.extend({
 
         initialize: function(vertex) {
-            vertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
+            geomVertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
             this.views = this.views.concat([
                 new EditingDOMView({model: this}),
                 new EditingLineSceneView({model: this}),
@@ -52,7 +57,7 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
         },
 
         destroy: function() {
-            vertexWrapper.EditingModel.prototype.destroy.call(this);
+            geomVertexWrapper.EditingModel.prototype.destroy.call(this);
             this.vertex.off('beforeImplicitChildCommit', this.beforeImplicitChildCommit, this);
         },
 
@@ -95,12 +100,12 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
     });
 
-    var EditingDOMView = vertexWrapper.EditingDOMView.extend({
+    var EditingDOMView = geomVertexWrapper.EditingDOMView.extend({
 
         render: function() {
             var template = 
-                '<td class="vertex {{name}} editing">' + 
-                '<div class="title"><img src="/ui/images/icons/line32x32.png"/>' +
+                '<td colspan="2">' + 
+                '<div class="title"><img src="/ui/images/icons/polyline32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
                 '</div>' + 
                 '<div class="points">' + 
@@ -148,45 +153,28 @@ define(['src/calculations', 'src/geometrygraphsingleton', 'src/vertexwrapper', '
 
     }); 
 
-    var EditingLineSceneView = vertexWrapper.EditingSceneView.extend(LineSceneView, {});
+    var EditingLineSceneView = geomVertexWrapper.EditingSceneView.extend(LineSceneView, {});
 
 
     // ---------- Display ----------
 
-    var DisplayModel = vertexWrapper.DisplayModel.extend({
+    var DisplayModel = geomVertexWrapper.DisplayModel.extend({
 
         initialize: function(vertex) {
-            vertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
+            geomVertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
             this.views = this.views.concat([
                 new DisplayLineSceneView({model: this}),
-                new DisplayDOMView({model: this}),
+                new geomVertexWrapper.DisplayDOMView({model: this}),
             ]);
         },
 
         destroy: function() {
-            vertexWrapper.DisplayModel.prototype.destroy.call(this);
+            geomVertexWrapper.DisplayModel.prototype.destroy.call(this);
         },
 
     });
 
-    var DisplayLineSceneView = vertexWrapper.DisplaySceneView.extend(LineSceneView);
-
-    var DisplayDOMView = vertexWrapper.DisplayDOMView.extend({
-
-        render: function() {
-            var view = {
-                name: this.model.vertex.name,
-            }
-            var template = 
-                '<td class="vertex {{name}} display">' +
-                '<img src="/ui/images/icons/line32x32.png"/>' +
-                '<div class="name">{{name}}</div>' + 
-                '</td>';
-            this.$el.html($.mustache(template, view));
-            return this;
-        },
-
-    })
+    var DisplayLineSceneView = geomVertexWrapper.DisplaySceneView.extend(LineSceneView);    
 
     return {
         DisplayModel: DisplayModel,

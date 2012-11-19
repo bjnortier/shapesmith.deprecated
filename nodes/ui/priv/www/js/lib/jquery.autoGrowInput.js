@@ -4,8 +4,8 @@
 
         o = $.extend({
             maxWidth: 1000,
-            minWidth: 30,
-            comfortZone: 10,
+            minWidth: 50,
+            comfortZone: 20,
         }, o);
 
         this.filter('input:text').each(function(){

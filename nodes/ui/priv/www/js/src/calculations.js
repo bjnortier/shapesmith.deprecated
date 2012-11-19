@@ -84,11 +84,24 @@ define([], function() {
         }
     }
 
-    var objToVector = function(obj) {
+    var objToVector = function(obj, geometryGraph) {
+        var eval = function(expression) {
+            if (geometryGraph) {
+                return geometryGraph.evaluate(expression);
+            } else {
+                return expression;
+            }
+        }
         if (obj.hasOwnProperty('x')) {
-            return new THREE.Vector3(obj.x, obj.y, obj.z);
+            return new THREE.Vector3(
+                eval(obj.x), 
+                eval(obj.y), 
+                eval(obj.z));
         } else {
-            return new THREE.Vector3(obj.u, obj.v, obj.w);
+            return new THREE.Vector3(
+                eval(obj.u), 
+                eval(obj.v), 
+                eval(obj.w));
         }
     }
 
