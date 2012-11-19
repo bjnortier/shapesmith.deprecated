@@ -288,6 +288,10 @@ define([
         var originals = {};
 
         this.edit = function(vertex) {
+            if (this.isEditing()) {
+                return
+            }
+            
             var editingReplacement = vertex.cloneEditing();
             this.replace(vertex, editingReplacement);
             originals[vertex.id] = vertex;

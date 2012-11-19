@@ -295,7 +295,7 @@ img#logo {
 
 
 .error .field {
-    background: url(/ui/images/textfielderror.png) transparent bottom repeat-x;
+    border-bottom: solid thin red;
 }
 
 

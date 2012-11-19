@@ -33,4 +33,35 @@ describe('Variables', function() {
 
     });
 
+
+    it.only("can't be edit more than one at a time", function(done) {
+        this.timeout(5000)
+        client
+            .click('#variables .add')
+            .setValue('#variables .name input', 'a')
+            .setValue('#variables .expression input', '1')
+            .waitForUrlChange(
+                function() { client.clickOnWorld(0,0,0); },
+                function() {
+                    client
+                        .click('#variables .add')
+                        .setValue('#variables .name input', 'b')
+                        .setValue('#variables .expression input', '2')
+                        .waitForUrlChange(
+                            function() { client.clickOnWorld(0,0,0); },
+                            function() {
+                                client
+                                    .assertNumberOfDisplayNodes(2)
+                                    .click('#variables .a')
+                                    .assertNumberOfDisplayNodes(1)
+                                    .assertNumberOfEditingNodes(1)
+                                    .pause(1000)
+                                    .click('#variables .b')
+                                    .assertNumberOfDisplayNodes(1)
+                                    .assertNumberOfEditingNodes(1, done)
+                            });
+                });
+
+    });
+
 });
