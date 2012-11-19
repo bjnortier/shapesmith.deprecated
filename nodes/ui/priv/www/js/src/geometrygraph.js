@@ -401,7 +401,6 @@ define([
             this.add(polylineVertex, function() {
                 graph.addEdge(polylineVertex, pointVertex);
             });
-            pointVertex.trigger('change', pointVertex);
             return polylineVertex;
         }
 

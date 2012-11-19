@@ -58,7 +58,7 @@ define([
     var addToTable = function(vertex, el) {
         var placeholderSelector = '._' + vertex.id;
         if (vertex.implicit && ($(placeholderSelector).length > 0)) {
-            el.replaceAll(placeholderSelector);
+            // el.replaceAll(placeholderSelector);
         } else {
             var vertexId = vertex.id;
             var lastVertexRowIndex = lastIndex[vertexId];
@@ -70,17 +70,15 @@ define([
             }
         }
 
-
-
-        // Subsume the implicit children
-        var children = geometryGraph.childrenOf(vertex);
-        children.forEach(function(child) {
-            if (child.implicit) {
-                var childElement = $('.' + child.id);
-                var childPlaceholderSelector = '._' + child.id;
-                childElement.replaceAll(childPlaceholderSelector);
-            }
-        });
+        // // Subsume the implicit children
+        // var children = geometryGraph.childrenOf(vertex);
+        // children.forEach(function(child) {
+        //     if (child.implicit) {
+        //         var childElement = $('.' + child.id);
+        //         var childPlaceholderSelector = '._' + child.id;
+        //         childElement.replaceAll(childPlaceholderSelector);
+        //     }
+        // });
 
     }
 

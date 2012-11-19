@@ -24,8 +24,7 @@ describe('Deletion', function() {
     // ---------- Cases ----------
 
     it('can delete a point', function(done) {
-
-        this.timeout(10000);
+        this.timeout(5000);
         client
             .click('.toolbar .point')
             .waitForUrlChange(
@@ -42,9 +41,29 @@ describe('Deletion', function() {
                 });
     });
 
-    it('can delete a polyline', function(done) {
+    it.skip('can delete a selected point', function(done) {
+        this.timeout(5000);
+        client
+            .click('.toolbar .point')
+            .waitForUrlChange(
+                function() { client.clickOnWorld(5,5,0); },
+                function() {
+                    client
+                        .click('.toolbar .select')
+                        .click('.point0')
+                        .click('.point0 .delete')
+                        .assertNumberOfDisplayNodes(0)
+                        .back()
+                        .assertNumberOfDisplayNodes(1)
+                        .forward()
+                        .assertNumberOfDisplayNodes(0, done);
+                });
 
-        this.timeout(10000);
+
+    });
+
+    it('can delete a polyline', function(done) {
+        this.timeout(5000);
         client
             .click('.toolbar .polyline')
             .clickOnWorld(0,0,0)
@@ -67,6 +86,49 @@ describe('Deletion', function() {
                                 });
 
                 });
+    });
+
+    it('can delete a variable', function(done) {
+        this.timeout(5000)
+        client
+            .click('#variables .add')
+            .assertNumberOfEditingNodes(1)
+            .setValue('#variables .name input', 'a')
+            .setValue('#variables .expression input', '1')
+            .waitForUrlChange(
+                function() { client.clickOnWorld(0,0,0); },
+                function() {
+                    client
+                        .assertNumberOfDisplayNodes(1)
+                        .waitForUrlChange(
+                            function() { client.click('#variables .a .delete'); },
+                            function() {
+                                client.assertNumberOfDisplayNodes(0, done)
+                            });
+                });
+
+    });
+
+    it('can delete a variable being edited', function(done) {
+        this.timeout(5000)
+        client
+            .click('#variables .add')
+            .assertNumberOfEditingNodes(1)
+            .setValue('#variables .name input', 'a')
+            .setValue('#variables .expression input', '1')
+            .waitForUrlChange(
+                function() { client.clickOnWorld(0,0,0); },
+                function() {
+                    client
+                        .assertNumberOfDisplayNodes(1)
+                        .click('#variables .a')
+                        .waitForUrlChange(
+                            function() { client.click('#variables .delete'); },
+                            function() {
+                                client.assertNumberOfDisplayNodes(0, done)
+                            });
+                });
+
     });
 
 });

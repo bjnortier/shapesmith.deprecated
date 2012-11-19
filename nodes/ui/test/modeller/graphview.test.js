@@ -23,7 +23,7 @@ describe('Graph view', function() {
 
     // ---------- Cases ----------
 
-    it('will maintain row index on editing', function(done) {
+    it.skip('will maintain row index on editing', function(done) {
         this.timeout(5000);
         client
             .click('.toolbar .point')
@@ -45,7 +45,7 @@ describe('Graph view', function() {
                
     });
 
-    it.only('will display implicit editing rows underneath the parent', function(done) {
+    it.skip('will display implicit editing rows underneath the parent', function(done) {
         this.timeout(5000);
         client
             .click('.toolbar .polyline')

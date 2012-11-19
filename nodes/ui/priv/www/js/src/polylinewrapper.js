@@ -119,9 +119,9 @@ define([
                 '<div class="title"><img src="/ui/images/icons/polyline32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
                 '</div>' + 
-                '<table class="points">' + 
+                '<div class="points">' + 
                 '{{{renderedCoordinates}}}' +
-                '</table>' + 
+                '</div>' + 
                 '</td>';
             var view = {
                 name: this.model.vertex.name,
@@ -136,7 +136,9 @@ define([
             // cannot start with a number, so prefix an underscore
             var template = 
                 '{{#points}}' +
-                '<tr class="point _{{id}}"></tr>' +
+                '<div class="point _{{i}}">' +
+                '<div class="named">{{id}}</div>' +
+                '</div>' +
                 '{{/points}}';
             var that = this;
 
@@ -155,6 +157,8 @@ define([
         },
 
         update: function() {
+            var coordinates = this.renderCoordinates();
+            this.$el.find('.points').html(coordinates);
         },
 
     }); 

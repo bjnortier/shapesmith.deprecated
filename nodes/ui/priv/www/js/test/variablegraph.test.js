@@ -91,6 +91,10 @@ describe('Expressions', function() {
         e.name = '';
         assert.isFalse(graph.canAdd(e));
 
+        var f = variableGraph.createVertex('f', '2');
+        graph.add(f);
+        assert.isFalse(graph.canAdd(variableGraph.createVertex('f', '@@#')));
+
     });
 
     it('rejects variable name change when it has parents in graph');

@@ -64,15 +64,4 @@ describe('GeometryGraph', function() {
         });
     });
 
-    it('can add and update variables', function() {
-
-        var graph = new geometryGraph.Graph();
-        var a = graph.addVariable('a', '1');
-        assert.equal(a.id, 'a');    
-
-        assert.isUndefined(graph.updateVariable('a', 'b', ''));
-        assert.isObject(graph.updateVariable('a', 'b', '2'));
-        assert.isObject(graph.updateVariable('a', 'a', '2'));
-    })
-
 })

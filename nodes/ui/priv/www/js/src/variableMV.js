@@ -65,8 +65,10 @@ define([
                 '<td class="expression">' +  
                 '<input class="field expr" placeholder="expr" type="text" value="{{expression}}"></input>' +
                 '</td>' +
-                '<td>{{^name}}<div class="delete"></div>{{/name}}</td>';
-            var view = {};
+                '<td><div class="delete"></div></td>';
+            var view = {
+                id: this.model.vertex.id,
+            };
             if (!this.model.vertex.proto) {
                 view.name = this.model.vertex.name;
                 view.expression = this.model.vertex.parameters.expression;
@@ -90,7 +92,9 @@ define([
         delete: function() {
             if (this.model.vertex.proto) {
                 this.model.cancel();
-            } 
+            } else {
+                geometryGraph.commitDelete(this.model.vertex);
+            }
         },
 
         sceneClick: function() {
@@ -131,7 +135,7 @@ define([
             $('.field').autoGrowInput();
         },
 
-         remove: function() {
+        remove: function() {
             saveRowIndex(this.model.vertex.id, this.$el);
             vertexWrapper.DisplayDOMView.prototype.remove.call(this);
         },
