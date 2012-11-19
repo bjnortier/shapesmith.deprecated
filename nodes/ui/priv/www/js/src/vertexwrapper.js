@@ -10,6 +10,7 @@ define([
 
         initialize: function(vertex) {
             this.vertex = vertex;
+            this.views = [];
             this.vertex.on('descendantChanged', this.descendantChanged, this);
         },
 
@@ -25,6 +26,10 @@ define([
         descendantChanged: function(descendant) {
             this.vertex.trigger('change', this.vertex);
         },
+
+    });
+
+    var DOMView = Backbone.View.extend({
 
     });
 

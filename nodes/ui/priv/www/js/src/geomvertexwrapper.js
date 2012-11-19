@@ -53,6 +53,42 @@ define([
 
     });
 
+    var lastIndex = {}
+
+    var addToTable = function(vertex, el) {
+        var placeholderSelector = '._' + vertex.id;
+        if (vertex.implicit && ($(placeholderSelector).length > 0)) {
+            el.replaceAll(placeholderSelector);
+        } else {
+            var vertexId = vertex.id;
+            var lastVertexRowIndex = lastIndex[vertexId];
+            if ((lastVertexRowIndex !== undefined) && 
+                ($('#geometry tr').length > lastVertexRowIndex)) {
+                $($('#geometry tr')[lastIndex[vertexId]]).before(el);
+            } else {
+                $('#geometry').append(el);
+            }
+        }
+
+
+
+        // Subsume the implicit children
+        var children = geometryGraph.childrenOf(vertex);
+        children.forEach(function(child) {
+            if (child.implicit) {
+                var childElement = $('.' + child.id);
+                var childPlaceholderSelector = '._' + child.id;
+                childElement.replaceAll(childPlaceholderSelector);
+            }
+        });
+
+    }
+
+    var saveRowIndex = function(vertexId, el) {
+        var rowIndex = el.closest('tr').prevAll().length;
+        lastIndex[vertexId] = rowIndex;
+    }
+
     // ---------- Editing ----------
 
     var EditingModel = vertexWrapper.EditingModel.extend({
@@ -64,7 +100,6 @@ define([
             workplane.on('dblclick', this.workplaneDblClick, this);
             sceneViewEventGenerator.on('sceneViewClick', this.sceneViewClick, this);
             sceneViewEventGenerator.on('sceneViewDblClick', this.sceneViewDblClick, this);
-            this.views = [];
         },
 
         destroy: function() {
@@ -83,8 +118,13 @@ define([
 
         initialize: function() {
             vertexWrapper.EditingDOMView.prototype.initialize.call(this);
-            $('#geometry').append(this.$el);
+            addToTable(this.model.vertex, this.$el);
             $('.field').autoGrowInput();
+        },
+
+        remove: function() {
+            saveRowIndex(this.model.vertex.id, this.$el);
+            vertexWrapper.EditingDOMView.prototype.remove.call(this);
         },
 
     });
@@ -113,7 +153,6 @@ define([
             this.selected = false;
             selection.on('selected', this.select, this);
             selection.on('deselected', this.deselect, this);
-            this.views = [];
         },
 
         destroy: function() {
@@ -153,8 +192,13 @@ define([
 
         initialize: function() {
             vertexWrapper.DisplayDOMView.prototype.initialize.call(this);
-            $('#geometry').append(this.$el);
+            addToTable(this.model.vertex, this.$el);
             this.$el.addClass(this.model.vertex.name);  
+        },
+
+        remove: function() {
+            saveRowIndex(this.model.vertex.id, this.$el);
+            vertexWrapper.EditingDOMView.prototype.remove.call(this);
         },
 
         render: function() {

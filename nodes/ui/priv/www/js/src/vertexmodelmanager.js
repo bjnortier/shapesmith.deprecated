@@ -57,19 +57,18 @@ define([
         } else {
             models[vertex.id] = new wrappers[vertex.type].DisplayModel(vertex);
         }
-        // console.log('adding', vertex.id);
     }
 
     var removeVertex = function(vertex) {
-        // console.log('removing', vertex.id);
         if (!models[vertex.id]) {
             throw Error('no model for vertex:' + vertex.id);
         }
-        if (models[vertex.id]) {
-            models[vertex.id].destroy();
-            delete models[vertex.id];
-        }
+        var model = models[vertex.id];
+        model.destroy();
+        delete models[vertex.id];
+        return model;
     }
 
+    return wrappers;
 
 });

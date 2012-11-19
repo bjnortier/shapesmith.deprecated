@@ -177,7 +177,7 @@ img#logo {
     cursor: pointer;
 }
 
-#geometry .vertex:hover td {
+#geometry .vertex.display:hover td {
     border-bottom: solid #FFF 2px;
 }
 

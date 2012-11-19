@@ -119,9 +119,9 @@ define([
                 '<div class="title"><img src="/ui/images/icons/polyline32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
                 '</div>' + 
-                '<div class="points">' + 
+                '<table class="points">' + 
                 '{{{renderedCoordinates}}}' +
-                '</div>' + 
+                '</table>' + 
                 '</td>';
             var view = {
                 name: this.model.vertex.name,
@@ -136,16 +136,13 @@ define([
             // cannot start with a number, so prefix an underscore
             var template = 
                 '{{#points}}' +
-                '<div class="point _{{i}}">' +
-                '<div class="named">{{id}}</div>' + 
-                '</div>' +
+                '<tr class="point _{{id}}"></tr>' +
                 '{{/points}}';
             var that = this;
 
             var pointChildren = geometryGraph.childrenOf(this.model.vertex);
             var points = pointChildren.map(function(pointChild, i) {
                 return {
-                    editing: that.model.get('stage') === i,
                     id: pointChild.id,
                     name: pointChild.name,
                     i: i
@@ -158,8 +155,6 @@ define([
         },
 
         update: function() {
-            var coordinates = this.renderCoordinates();
-            this.$el.find('.points').html(coordinates);
         },
 
     }); 

@@ -4,15 +4,32 @@ define([
     'src/interactioncoordinator',
     ], function(vertexWrapper, geometryGraph, coordinator) {
 
+
+    var lastIndex = {}
+
+    var addToTable = function(vertex, el) {
+        var vertexId = vertex.id;
+        var lastVertexRowIndex = lastIndex[vertexId];
+        if ((lastVertexRowIndex !== undefined) && 
+            ($('#variables tr').length > lastVertexRowIndex)) {
+            $($('#variables tr')[lastIndex[vertexId]]).before(el);
+        } else {
+            $('#variables').append(el);
+        }
+    }
+
+    var saveRowIndex = function(vertexId, el) {
+        var rowIndex = el.closest('tr').prevAll().length;
+        lastIndex[vertexId] = rowIndex;
+    }
+
     // ---------- Editing ----------
 
     var EditingModel = vertexWrapper.EditingModel.extend({
 
         initialize: function(vertex) {
             vertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
-            this.views = [
-                new EditingView({model: this})
-            ]
+            this.views.push(new EditingView({model: this}));
         },
 
         destroy: function() {
@@ -29,12 +46,13 @@ define([
             vertexWrapper.EditingDOMView.prototype.initialize.call(this);
             this.render();
             this.$el.addClass('variable');
-            $('#variables').append(this.$el);
+            addToTable(this.model.vertex, this.$el);
             $('.field').autoGrowInput();
             coordinator.on('sceneClick', this.sceneClick, this);
         },
 
         remove: function() {
+            saveRowIndex(this.model.vertex.id, this.$el);
             vertexWrapper.EditingDOMView.prototype.remove.call(this);
             coordinator.off('sceneClick', this.sceneClick, this);
         },
@@ -96,9 +114,7 @@ define([
 
         initialize: function(vertex) {
             vertexWrapper.Model.prototype.initialize.call(this, vertex);
-            this.views = [
-                new DisplayDOMView({model: this})
-            ]
+            this.views.push(new DisplayDOMView({model: this}));
         },
 
         destroy: function() {
@@ -111,8 +127,13 @@ define([
 
         initialize: function() {
             vertexWrapper.DisplayDOMView.prototype.initialize.call(this);
-            $('#variables').append(this.$el);
+            addToTable(this.model.vertex, this.$el);
             $('.field').autoGrowInput();
+        },
+
+         remove: function() {
+            saveRowIndex(this.model.vertex.id, this.$el);
+            vertexWrapper.DisplayDOMView.prototype.remove.call(this);
         },
 
         render: function() {
