@@ -127,7 +127,11 @@ define(['lib/underscore-require'], function(_) {
                 for (var i in remainingIds) {
                     var vertex = this.vertexById(remainingIds[i]);
                     var outgoingVertexIds = outgoingVertices[vertex.id];
-                    if (_.intersection(outgoingVertexIds, visitedIds).length == outgoingVertexIds.length) {
+
+                    // Use uniqe ids since a vertex can be in the outgoing
+                    // array multiple times
+                    var uniqueOutgoingVertexIds = _.uniq(outgoingVertexIds);
+                    if (_.intersection(uniqueOutgoingVertexIds, visitedIds).length == uniqueOutgoingVertexIds.length) {
                         listener(vertex);
                         visitedIds.push(vertex.id);
                         remainingIds.splice(remainingIds.indexOf(vertex.id), 1)

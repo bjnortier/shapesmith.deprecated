@@ -218,4 +218,31 @@ describe('Graph', function() {
         assert.deepEqual(sequence, ['b1','b2','a','d','c']);
     });
 
+    it('can do a leaf-first search when a child occurs multiple times', function() {
+        
+        // This is a test for an infinite loop bug
+
+        var a = {id:'a'}, b1 = {id:'b1'}, b2 = {id: 'b2'};
+        var graph = new graphLib.Graph();
+
+        graph.addVertex(a);        
+        graph.addVertex(b1); 
+        graph.addVertex(b2); 
+        graph.addEdge(a,b1);
+        graph.addEdge(a,b2)
+        graph.addEdge(a,b1)
+
+        var sequence = [];
+        var listener = function(vertex) {
+            sequence.push(vertex.id);
+        }
+
+        graph.leafFirstSearch(listener);
+
+        assert.deepEqual(sequence, ['b1','b2','a']);
+
+    });
+
+
+
 });
