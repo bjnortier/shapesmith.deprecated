@@ -55,12 +55,17 @@ describe('Deletion', function() {
                 function() {
                     client
                         .click('.toolbar .select')
-                        .click('.point0 .delete')
-                        .assertNumberOfDisplayNodes(0)
-                        .back()
-                        .assertNumberOfDisplayNodes(1)
-                        .forward()
-                        .assertNumberOfDisplayNodes(0, done)
+                        .waitForUrlChange(
+                            function() { client.click('.polyline0 .delete'); },
+                            function() {
+                                client
+                                    .assertNumberOfDisplayNodes(0)
+                                    .back()
+                                    .assertNumberOfDisplayNodes(1)
+                                    .forward()
+                                    .assertNumberOfDisplayNodes(0, done);
+                                });
+
                 });
     });
 

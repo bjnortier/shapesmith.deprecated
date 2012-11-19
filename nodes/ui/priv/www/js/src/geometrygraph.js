@@ -177,7 +177,7 @@ define([
             var doFn = function(commandSuccessFn, commandErrorFn) {
                 that.remove(vertex);
                 children.forEach(function(child) {
-                    if (child.implicit) {
+                    if (child.implicit && that.vertexById(child.id)) {
                         that.remove(child);
                     } 
                 })

@@ -24,42 +24,41 @@ describe('Points', function() {
     // ---------- Cases ----------
 
     it('can be created with subsequent mouse clicks', function(done) {
-        this.timeout(10000);
+        this.timeout(5000);
         client
             .click('.toolbar .point')
-            .getEditingVertexName(function(name) {
+            .moveToWorld(20,10,0)
+            .assertCoordinateEqual('.vertex.editing .coordinate', 20, 10, 0)
+            .clickOnWorld(20,10,0)
+            .isVisible('.vertex.display.point0', function(result) {
+                assert.isTrue(result);
                 client
-                    .moveToWorld(20,10,0)
-                    .assertCoordinateEqual('.vertex.editing .coordinate', 20, 10, 0)
-                    .clickOnWorld(20,10,0)
-                    .isVisible('.vertex.display.'+name, function(result) {
-                        assert.isTrue(result);
-                        client
-                            .clickOnWorld(0,0,0)
-                            .clickOnWorld(0,10,0)
-                            .clickOnWorld(0,20,0)
-                            .click('.toolbar .select')
-                            .elements('css selector', '.vertex.display', function(result) {
-                                assert.equal(result.value.length, 4);
-                                done();
-                            });
-
-                    });
+                    .clickOnWorld(0,0,0)
+                    .clickOnWorld(0,10,0)
+                    .clickOnWorld(0,20,0)
+                    .click('.toolbar .select')
+                    .assertNumberOfDisplayNodes(4, done);
             });
+               
     });
 
     it('can be edited with dragging', function(done) {
-        this.timeout(10000);
+        this.timeout(5000);
         client
             .click('.toolbar .point')
-            .clickOnWorld(5,5,0)
-            .click('.toolbar .select')
-            .moveToWorld(5,5,0)
-            .buttonDown()
-            .moveToWorld(15,15,0)
-            .moveToWorld(15,15,0)
-            .assertCoordinateEqual('.vertex.editing .coordinate', 15, 15, 0)
-            .buttonUp(done);
+            .waitForUrlChange(
+                function() { client.clickOnWorld(5,5,0); },
+                function() {
+                    client
+                        .click('.toolbar .select')
+                        .moveToWorld(5,5,0)
+                        .buttonDown()
+                        .moveToWorld(15,15,0)
+                        .moveToWorld(15,15,0)
+                        .assertCoordinateEqual('.vertex.editing .coordinate', 15, 15, 0)
+                        .buttonUp()
+                        .assertNumberOfDisplayNodes(1, done);
+                });
     });
 
 
