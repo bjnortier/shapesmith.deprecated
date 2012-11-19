@@ -70,6 +70,10 @@ define([
                 this.trigger('deselected', deselected, this.selected);
             }
         }
+
+        this.isSelected = function(id) {
+            return this.selected.indexOf(id) !== -1;
+        }
     }
 
     return new Manager();

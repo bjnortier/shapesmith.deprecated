@@ -288,7 +288,7 @@ define([
         var originals = {};
 
         this.edit = function(vertex) {
-            if (this.isEditing()) {
+            if (this.isEditing() && !vertex.implicit) {
                 return
             }
             

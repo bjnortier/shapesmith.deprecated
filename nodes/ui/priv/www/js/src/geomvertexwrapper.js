@@ -148,7 +148,7 @@ define([
 
         initialize: function(vertex) {
             vertexWrapper.Model.prototype.initialize.call(this, vertex);
-            this.selected = false;
+            this.selected = selection.isSelected(vertex.id);
             selection.on('selected', this.select, this);
             selection.on('deselected', this.deselect, this);
         },
@@ -170,14 +170,14 @@ define([
         select: function(ids) {
             if (ids.indexOf(this.vertex.id) !== -1) {
                 this.selected = true;
-                this.trigger('selected');
+                this.trigger('updateSelection');
             }
         },
 
         deselect: function(ids) {
             if (ids.indexOf(this.vertex.id) !== -1) {
                 this.selected = false;
-                this.trigger('deselected');
+                this.trigger('updateSelection');
             }
         },
 
@@ -192,6 +192,7 @@ define([
             vertexWrapper.DisplayDOMView.prototype.initialize.call(this);
             addToTable(this.model.vertex, this.$el);
             this.$el.addClass(this.model.vertex.name);  
+            this.updateSelection();
         },
 
         remove: function() {
@@ -232,12 +233,12 @@ define([
             geometryGraph.commitDelete(this.model.vertex);
         },
 
-        select: function() {
-            this.$el.find('.vertex').addClass('selected');
-        },
-
-        deselect: function() {
-            this.$el.find('.vertex').removeClass('selected');
+        updateSelection: function() {
+            if (this.model.selected) {
+                this.$el.addClass('selected');
+            } else {
+                this.$el.removeClass('selected');
+            }
         },
 
     });
@@ -249,19 +250,18 @@ define([
         initialize: function() {
             this.color = this.unselectedColor;
             SceneView.prototype.initialize.call(this);
-            this.model.on('selected', this.select, this);
-            this.model.on('deselected', this.deselect, this);
+            this.model.on('updateSelection', this.updateSelection, this);
             this.on('mouseEnter', this.highlight, this);
             this.on('mouseLeave', this.unhighlight, this);
             this.on('click', this.click, this);
             this.on('dblclick', this.dblclick, this);
             this.model.vertex.on('change', this.render, this);
+            this.updateSelection();
         },
 
         remove: function() {
             SceneView.prototype.remove.call(this);
-            this.model.off('selected', this.select, this);
-            this.model.off('deselected', this.deselect, this);
+            this.model.off('updateSelection', this.updateSelection, this);
             this.off('mouseEnter', this.highlight, this);
             this.off('mouseLeave', this.unhighlight, this);
             this.off('click', this.click, this);
@@ -269,15 +269,14 @@ define([
             this.model.vertex.off('change', this.render, this);
         },
 
-        select: function() {
-            this.selectedColor = 0xf4f653;
-            this.selectedAmbient = 0x333333;
-            this.render();
-        },
-
-        deselect: function() {
-            delete this.selectedColor;
-            delete this.selectedAmbient;
+        updateSelection: function() {
+            if (this.model.selected) {
+                this.selectedColor = 0xf4f653;
+                this.selectedAmbient = 0x333333;
+            } else {
+                delete this.selectedColor;
+                delete this.selectedAmbient;
+            }
             this.render();
         },
 
