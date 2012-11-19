@@ -251,18 +251,23 @@ define([
                 var vertexSHAsToLoad = _.keys(graph.edges);
                 var remaining = vertexSHAsToLoad.length;
                 shasToVertices = {};
+
+                var vertexCreated = function(sha, vertex) {
+                    vertex.sha = sha;
+                    shasToVertices[sha] = vertex;
+                    --remaining;
+                    if (remaining == 0) {
+                        that.createGraph(graph, shasToVertices);
+                        loadFinished();
+                    }
+                }
+
                 if (vertexSHAsToLoad.length > 0) {
                     vertexSHAsToLoad.forEach(function(sha) {
                         get('/' + SS.session.username + '/' + SS.session.design + '/vertex/' + sha,
                             function(data) {
                                 var vertex = new geomNode.constructors[data.type](data);
-                                vertex.sha = sha;
-                                shasToVertices[sha] = vertex;
-                                --remaining;
-                                if (remaining == 0) {
-                                    that.createGraph(graph, shasToVertices);
-                                    loadFinished();
-                                }
+                                vertexCreated(sha, vertex);
                             });
                     });
                 } else {
