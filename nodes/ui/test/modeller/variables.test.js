@@ -34,7 +34,7 @@ describe('Variables', function() {
     });
 
 
-    it.only("can't be edit more than one at a time", function(done) {
+    it("can't be edit more than one at a time", function(done) {
         this.timeout(5000)
         client
             .click('#variables .add')

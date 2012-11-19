@@ -456,7 +456,15 @@ define([
         // ---------- Variable functions ----------
 
         this.evaluate = function(expression) {
-            return varGraph.evaluate(expression);
+            try {
+                return varGraph.evaluate(expression);
+            } catch (e) {
+                if (e instanceof variableGraphLib.ParseError) {
+                    console.error('Exception when evaluating expression', expression, e);
+                } else {
+                    throw e;
+                }
+            }
         }
 
         // ---------- Graph functions ----------
