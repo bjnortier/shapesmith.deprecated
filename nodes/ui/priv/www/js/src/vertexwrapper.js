@@ -1,10 +1,16 @@
 define([
+    'lib/backbone-require',
     'src/geometrygraphsingleton', 
     'src/interactioncoordinator',
     'src/scene',
     'src/scenevieweventgenerator',
     ], 
-    function(geometryGraph, coordinator, sceneModel, sceneViewEventGenerator) {
+    function(
+        Backbone,
+        geometryGraph,
+        coordinator,
+        sceneModel,
+        sceneViewEventGenerator) {
 
     // ---------- Common ----------
     
