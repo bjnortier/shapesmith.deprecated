@@ -1,8 +1,10 @@
 define([
     'src/geometrygraphsingleton', 
     'src/interactioncoordinator',
+    'src/scene',
+    'src/scenevieweventgenerator',
     ], 
-    function(geometryGraph, coordinator) {
+    function(geometryGraph, coordinator, sceneModel, sceneViewEventGenerator) {
 
     // ---------- Common ----------
     
@@ -32,6 +34,44 @@ define([
     var DOMView = Backbone.View.extend({
 
     });
+
+
+    var SceneView = Backbone.View.extend({
+
+        initialize: function() {
+            this.scene = sceneModel.view.scene;
+            this.render();
+        },
+
+        remove: function() {
+            this.scene.remove(this.sceneObject);
+            sceneViewEventGenerator.deregister(this);
+            sceneModel.view.updateScene = true;
+        },
+
+        render: function() {
+            if (this.sceneObject) {
+                this.scene.remove(this.sceneObject);
+                sceneViewEventGenerator.deregister(this);
+            }
+            // Each scene view has two objects, the one that is part of
+            // the scene, and an object that is never added to the scene
+            // but is only used for selections. E.g. an edge has cylinders 
+            // that are used for selection
+            this.sceneObject = new THREE.Object3D();
+            this.hiddenSelectionObject = new THREE.Object3D();
+            this.scene.add(this.sceneObject);
+
+            sceneViewEventGenerator.register(this);
+            sceneModel.view.updateScene = true;
+        },
+
+        isDraggable: function() {
+            return false;
+        },
+
+    });
+
 
     // ---------- Editing ----------
 
@@ -115,6 +155,7 @@ define([
 
     return {
         Model: Model,
+        SceneView: SceneView,
         EditingModel: EditingModel,
         EditingDOMView: EditingDOMView,
         DisplayDOMView: DisplayDOMView,

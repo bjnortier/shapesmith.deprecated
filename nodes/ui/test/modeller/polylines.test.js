@@ -239,19 +239,9 @@ describe('Polylines', function() {
                 function() {
                     client
                         .click('.toolbar .select')
-                        .moveToWorld(20,20,0)
-                        .buttonDown()
-                        .moveToWorld(30,30,0)
-                        .moveToWorld(30,30,0)
-                        .assertNumberOfEditingNodes(1)
-                        .assertNumberOfDisplayNodes(1)
-                        .buttonUp()
-                        .moveToWorld(20,20,0) // There is no point here so this shouldn't edit
-                        .buttonDown()
-                        .moveToWorld(30,30,0)
-                        .moveToWorld(30,30,0)
-                        .assertNumberOfEditingNodes(0)
-                        .assertNumberOfDisplayNodes(1, done);
+                        .click('.polyline0')
+                        .assertNumberOfEditingNodes(4)
+                        .assertNumberOfDisplayNodes(0, done);
                 });
     });
 

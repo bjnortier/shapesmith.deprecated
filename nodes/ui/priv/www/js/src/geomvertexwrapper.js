@@ -17,42 +17,6 @@ define([
         workplane,
         vertexWrapper) {
 
-    var SceneView = Backbone.View.extend({
-
-        initialize: function() {
-            this.scene = sceneModel.view.scene;
-            this.render();
-        },
-
-        remove: function() {
-            this.scene.remove(this.sceneObject);
-            sceneViewEventGenerator.deregister(this);
-            sceneModel.view.updateScene = true;
-        },
-
-        render: function() {
-            if (this.sceneObject) {
-                this.scene.remove(this.sceneObject);
-                sceneViewEventGenerator.deregister(this);
-            }
-            // Each scene view has two objects, the one that is part of
-            // the scene, and an object that is never added to the scene
-            // but is only used for selections. E.g. an edge has cylinders 
-            // that are used for selection
-            this.sceneObject = new THREE.Object3D();
-            this.hiddenSelectionObject = new THREE.Object3D();
-            this.scene.add(this.sceneObject);
-
-            sceneViewEventGenerator.register(this);
-            sceneModel.view.updateScene = true;
-        },
-
-        isDraggable: function() {
-            return false;
-        },
-
-    });
-
     var lastIndex = {}
 
     var addToTable = function(vertex, el) {
@@ -127,16 +91,16 @@ define([
 
     });
 
-    var EditingSceneView = SceneView.extend({
+    var EditingSceneView = vertexWrapper.SceneView.extend({
 
         initialize: function() {
             this.color = 0x94dcfc;
-            SceneView.prototype.initialize.call(this);
+            vertexWrapper.SceneView.prototype.initialize.call(this);
             this.model.vertex.on('change', this.render, this);
         },
 
         remove: function() {
-            SceneView.prototype.remove.call(this);
+            vertexWrapper.SceneView.prototype.remove.call(this);
             this.model.vertex.off('change', this.render, this);
         },
 
@@ -243,13 +207,13 @@ define([
 
     });
 
-    var DisplaySceneView = SceneView.extend({
+    var DisplaySceneView =  vertexWrapper.SceneView.extend({
 
         clickable: true,   
 
         initialize: function() {
             this.color = this.unselectedColor;
-            SceneView.prototype.initialize.call(this);
+             vertexWrapper.SceneView.prototype.initialize.call(this);
             this.model.on('updateSelection', this.updateSelection, this);
             this.on('mouseEnter', this.highlight, this);
             this.on('mouseLeave', this.unhighlight, this);
@@ -260,7 +224,7 @@ define([
         },
 
         remove: function() {
-            SceneView.prototype.remove.call(this);
+             vertexWrapper.SceneView.prototype.remove.call(this);
             this.model.off('updateSelection', this.updateSelection, this);
             this.off('mouseEnter', this.highlight, this);
             this.off('mouseLeave', this.unhighlight, this);
