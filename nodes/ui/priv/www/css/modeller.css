@@ -6,7 +6,7 @@
 }
 
 html {
-    overflow-y: scroll;
+    overflow: hidden;
 }
 
 body {
@@ -172,9 +172,10 @@ img#logo {
     background-repeat: no-repeat;
 }
 
-.delete:hover {
+.vertex .delete:hover {
     background-image: url('/ui/images/icons/delete16x16.png') !important;
     cursor: pointer;
+    background-repeat: no-repeat;
 }
 
 #geometry .vertex.display:hover td {
@@ -195,6 +196,12 @@ img#logo {
 
 .vertex.editing .coordinate.editing {
     background: rgba(91, 91, 91, 0.46);
+}
+
+.offscreen {
+    position: absolute;
+    top: -200px;
+    left: -200px;
 }
 
 .toolbar .item .icon {
@@ -292,14 +299,6 @@ img#logo {
     margin-right: 5px;
 } 
 
-
-
 .error .field {
     border-bottom: solid thin red;
 }
-
-
-
-
-
-
