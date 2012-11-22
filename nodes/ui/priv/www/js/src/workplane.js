@@ -1,4 +1,13 @@
-define(['src/calculations', 'src/interactioncoordinator', 'src/scene'], function(calc, coordinator, sceneModel) {
+define([
+    'src/colors',
+    'src/calculations', 
+    'src/interactioncoordinator', 
+    'src/scene',
+    ], function(
+        colors,
+        calc, 
+        coordinator, 
+        sceneModel) {
 
     var Model = Backbone.Model.extend({
 
@@ -72,8 +81,14 @@ define(['src/calculations', 'src/interactioncoordinator', 'src/scene'], function
 
             var majorGridLineGeometry = new THREE.Geometry();
             var minorGridLineGeometry = new THREE.Geometry();
-            var majorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.2, transparent: true });
-            var minorMaterialInside = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.02, transparent: true });
+            var majorMaterialInside = new THREE.LineBasicMaterial({ 
+                color: colors.workplane.majorGridLine, 
+                opacity: 0.2, 
+                transparent: false });
+            var minorMaterialInside = new THREE.LineBasicMaterial({ 
+                color: colors.workplane.minorGridLine, 
+                opacity: 0.02, 
+                transparent: true });
 
             majorGridLineGeometry.vertices.push(new THREE.Vector3(-100, 0, 0));
             majorGridLineGeometry.vertices.push(new THREE.Vector3(100, 0, 0));

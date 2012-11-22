@@ -25,7 +25,6 @@ body {
     font-size: 85%;
     line-height: 1em; /*color: #393939;*/
     color: #fff;
-    background-color: #020202;
 }
 
 #webgl-detector {
@@ -302,3 +301,18 @@ img#logo {
 .error .field {
     border-bottom: solid thin red;
 }
+
+/* ---------- Colors ---------- */
+
+body {
+    background-color: #020202;
+}
+
+.scene .workplane .majorGridLine {
+    color: #ffffff; 
+}
+
+.scene .workplane .minorGridLine {
+    color: #ffffff;
+}
+
