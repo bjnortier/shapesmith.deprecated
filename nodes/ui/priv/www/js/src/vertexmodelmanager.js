@@ -2,7 +2,7 @@ define([
         'src/geometrygraphsingleton', 
         'src/selection', 
         'src/variableMV',
-        'src/pointwrapper', 
+        'src/pointMV', 
         'src/polylineMV',
         'src/extrudewrapper',
     ], 
