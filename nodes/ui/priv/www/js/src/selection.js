@@ -15,6 +15,9 @@ define([
         coordinator.on('sceneClick', function() {
             that.deselectAll();
         });
+        geometryGraph.on('committed', function() {
+            that.deselectAll();
+        });
 
         this.selectOnly = function(id) {
             if (!this.canSelect) {

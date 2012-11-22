@@ -89,7 +89,7 @@ define([
 
         },
 
-        focusLost: function() {
+        tryCommit: function() {
             var name = this.$el.find('.var').val();
             var expr = this.$el.find('.expr').val();
             this.model.vertex.name = name;

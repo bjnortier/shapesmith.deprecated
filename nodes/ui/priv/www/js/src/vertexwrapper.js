@@ -136,7 +136,7 @@ define([
             var vertexFocusLostFn = function() {
                 var diff = that.vertexFocusInTimestamp - that.vertexFocusOutTimestamp;
                 if (diff < 0) {
-                    that.focusLost && that.focusLost();
+                    that.tryCommit && that.tryCommit();
                 }
             }
             setTimeout(vertexFocusLostFn, 100);
@@ -156,10 +156,14 @@ define([
         },
 
         fieldKeyUp: function(event) {
+            // Return
+            if (event.keyCode === 13) {
+                geometryGraph.commitIfEditing();
+            }
             // Escape
             if (event.keyCode === 27) {
                 this.model.cancel();
-            }
+            } 
         },
 
         delete: function() {
