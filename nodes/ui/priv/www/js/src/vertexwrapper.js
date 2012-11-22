@@ -114,13 +114,13 @@ define([
         },
 
         events: {
-            'focusin'  : 'vertexFocusIn',
-            'focusout'  : 'vertexFocusOut',
+            'focusin'         : 'vertexFocusIn',
+            'focusout'        : 'vertexFocusOut',
             'focusin .field'  : 'fieldFocusIn',
             'focusout .field' : 'fieldFocusOut',
             'change .field'   : 'fieldChange',
-            'keyup .field'   : 'fieldKeyUp',
-            'click .delete'  : 'delete',
+            'keyup .field'    : 'fieldKeyUp',
+            'click .delete'   : 'delete',
         },
 
         vertexFocusIn: function(event) {
@@ -151,6 +151,7 @@ define([
         },
 
         fieldChange: function(event) {
+            event.stopPropagation();
             this.updateFromDOM();
             this.model.vertex.trigger('change', this.model.vertex);
         },

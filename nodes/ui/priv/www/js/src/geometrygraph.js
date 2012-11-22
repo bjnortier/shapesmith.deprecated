@@ -291,7 +291,7 @@ define([
             if (this.isEditing() && !vertex.implicit) {
                 return
             }
-            
+
             var editingReplacement = vertex.cloneEditing();
             this.replace(vertex, editingReplacement);
             originals[vertex.id] = vertex;
@@ -302,6 +302,7 @@ define([
                     that.edit(child);
                 }
             });
+
         }
 
         this.editById = function(id) {
@@ -395,14 +396,21 @@ define([
         }
 
         this.createPolylinePrototype = function(options) {
-            var pointVertex = this.createPointPrototype({implicit: true, workplane: options.workplane});
             var polylineOptions = _.extend(options || {}, {
                 editing      : true,
                 proto        : true,
             });
             var polylineVertex = new geomNode.Polyline(polylineOptions);
-            // Add the vertex but add the edge as well before triggering notifications 
-            this.add(polylineVertex, function() {
+            this.add(polylineVertex);
+
+            var pointVertex = new geomNode.Point({
+                editing: true,
+                proto: true,
+                implicit: true, 
+                workplane: options.workplane,
+            });
+            
+            this.add(pointVertex, function() {
                 graph.addEdge(polylineVertex, pointVertex);
             });
             return polylineVertex;

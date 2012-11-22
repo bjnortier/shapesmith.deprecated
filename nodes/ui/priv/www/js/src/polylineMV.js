@@ -3,9 +3,10 @@ define([
     'src/colors',
     'src/geometrygraphsingleton',
     'src/geomvertexwrapper',
+    'src/pointMV',
     'src/scene',
     'src/workplane'], 
-    function(calc, colors, geometryGraph, geomVertexWrapper, sceneModel, workplaneModel) {
+    function(calc, colors, geometryGraph, geomVertexWrapper, pointMV, sceneModel, workplaneModel) {
 
     // ---------- Common ----------
 
@@ -17,6 +18,9 @@ define([
             var color = this.highlightColor || this.selectedColor || this.color || colors.geometry.default;
             
             var pointChildren = geometryGraph.childrenOf(this.model.vertex);
+            if (pointChildren.length === 0) {
+                return;
+            }
             var coordinates = pointChildren.map(function(point) {
                 return point.parameters.coordinate;
             });
@@ -50,8 +54,10 @@ define([
 
         initialize: function(vertex) {
             geomVertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
+            this.editingDOMView = new EditingDOMView({model: this});
+            this.implicitAppendElement = this.editingDOMView.$el.find('.points');
             this.views = this.views.concat([
-                new EditingDOMView({model: this}),
+                this.editingDOMView,
                 new EditingLineSceneView({model: this}),
             ]);
             this.vertex.on('beforeImplicitChildCommit', this.beforeImplicitChildCommit, this);
@@ -62,10 +68,11 @@ define([
             this.vertex.off('beforeImplicitChildCommit', this.beforeImplicitChildCommit, this);
         },
 
+        // A point has been added to the polyline with a click
         beforeImplicitChildCommit: function(childVertex) {
             if (this.vertex.proto) {
                 if (_.last(geometryGraph.childrenOf(this.vertex)) === childVertex) {
-                    geometryGraph.addPointToPolyline(this.vertex);
+                    var point = geometryGraph.addPointToPolyline(this.vertex);
                 }
             }
         },
@@ -114,6 +121,15 @@ define([
 
     var EditingDOMView = geomVertexWrapper.EditingDOMView.extend({
 
+        initialize: function() {
+            this.lastRenderedPointIds = [];
+            geomVertexWrapper.EditingDOMView.prototype.initialize.call(this);
+        },
+
+        remove: function() {
+            geomVertexWrapper.EditingDOMView.prototype.remove.call(this);
+        },
+
         render: function() {
             var template = 
                 '<td colspan="2">' + 
@@ -121,46 +137,62 @@ define([
                 '<div class="name">{{name}}</div>' + 
                 '</div>' + 
                 '<div class="points">' + 
-                '{{{renderedCoordinates}}}' +
                 '</div>' + 
                 '</td>';
             var view = {
                 name: this.model.vertex.name,
-                renderedCoordinates: this.renderCoordinates()
+                // renderPoints: this.renderPoints()
             };
             this.$el.html($.mustache(template, view));
+            // this.update();
             return this;
         },
 
-        renderCoordinates: function() {
-            // Note the coordinate class that has a number - valid class names
-            // cannot start with a number, so prefix an underscore
-            var template = 
-                '{{#points}}' +
-                '<div class="point _{{i}}">' +
-                '<div class="named">{{id}}</div>' +
-                '</div>' +
-                '{{/points}}';
-            var that = this;
+        // renderPoints: function() {
+        //     // Note the coordinate class that has a number - valid class names
+        //     // cannot start with a number, so prefix an underscore
 
-            var pointChildren = geometryGraph.childrenOf(this.model.vertex);
-            var points = pointChildren.map(function(pointChild, i) {
-                return {
-                    id: pointChild.id,
-                    name: pointChild.name,
-                    i: i
-                }
-            });
-            var view = {
-                points: points
-            }
-            return $.mustache(template, view);
-        },
+        //     var that = this;
+        //     var pointChildren = geometryGraph.childrenOf(this.model.vertex);
+        //     var appendElement = $('<div></div>');
+        //     var points = pointChildren.map(function(pointVertex, i) {
 
-        update: function() {
-            var coordinates = this.renderCoordinates();
-            this.$el.find('.points').html(coordinates);
-        },
+        //         if (pointVertex.editing) {
+        //             var modelForPoint = new pointMV.EditingModel(pointVertex, appendElement);
+        //         } else {
+        //             var template = 
+        //                 '<div class="point _{{i}}">' +
+        //                 '<div class="named">{{id}}</div>' +
+        //                 '</div>';
+        //             appendElement.append($.mustache(template, pointVertex));
+        //         }
+
+        //     });
+
+        //     return appendElement;
+        // },
+
+        // update: function() {
+        //     // Re-render when the list of children has changed. Point field updates
+        //     // are handles by the point model(s)
+        //     var childIds = geometryGraph.childrenOf(this.model.vertex).map(function(v) {
+        //         return v.id;
+        //     });
+        //     var allSame = (childIds.length === this.lastRenderedPointIds.length);
+        //     for (var i = 0; allSame && (i < childIds.length); ++i) {
+        //         if (childIds[i] !== this.lastRenderedPointIds[i]) {
+        //             allSame = false;
+        //             break;
+        //         }
+        //     }
+
+        //     if (!allSame) {
+        //         var pointsElement = this.renderPoints();
+        //         this.$el.find('.points').empty();
+        //         this.$el.find('.points').append(pointsElement);
+        //         this.lastRenderedPointIds = childIds;
+        //     }
+        // },
 
     }); 
 

@@ -14,7 +14,7 @@
    height="1052.3622047"
    id="svg2"
    version="1.1"
-   inkscape:version="0.47 r22583"
+   inkscape:version="0.48.2 r9819"
    sodipodi:docname="delete_buttin.svg">
   <defs
      id="defs4">
@@ -145,7 +145,7 @@
      pagecolor="#1b1b1b"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="1"
+     inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.24748737"
      inkscape:cx="337.37714"
@@ -158,8 +158,8 @@
      inkscape:showpageshadow="false"
      inkscape:window-width="1202"
      inkscape:window-height="745"
-     inkscape:window-x="239"
-     inkscape:window-y="5"
+     inkscape:window-x="1965"
+     inkscape:window-y="88"
      inkscape:window-maximized="0">
     <inkscape:grid
        type="xygrid"
@@ -194,14 +194,14 @@
        sodipodi:rx="220"
        sodipodi:ry="220"
        d="m 600,432.36218 a 220,220 0 1 1 -440,0 220,220 0 1 1 440,0 z"
-       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/delete_button_gray.png"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/delete16x16.disabled.png"
        inkscape:export-xdpi="3.1648352"
        inkscape:export-ydpi="3.1648352" />
     <path
        style="fill:#ffffff;fill-opacity:1;stroke:url(#linearGradient3639);stroke-width:15;stroke-miterlimit:4;stroke-dasharray:none"
        d="M 295.15625 295.0625 C 292.60006 295.0625 290.02119 296.04131 288.0625 298 L 245.65625 340.4375 C 241.73888 344.35487 241.73888 350.67638 245.65625 354.59375 L 323.4375 432.375 L 245.65625 510.15625 C 241.73888 514.07362 241.73888 520.36388 245.65625 524.28125 L 288.0625 566.71875 C 291.97987 570.63612 298.30138 570.63612 302.21875 566.71875 L 380 488.9375 L 457.78125 566.71875 C 461.69862 570.63612 468.02013 570.63612 471.9375 566.71875 L 514.34375 524.28125 C 518.26112 520.36388 518.26112 514.07362 514.34375 510.15625 L 436.5625 432.375 L 514.34375 354.59375 C 518.26112 350.67638 518.26112 344.35487 514.34375 340.4375 L 471.9375 298 C 468.02013 294.08263 461.69862 294.08263 457.78125 298 L 380 375.78125 L 302.21875 298 C 300.26006 296.04131 297.71244 295.0625 295.15625 295.0625 z "
        id="rect2820"
-       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/delete_button_gray.png"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/delete16x16.disabled.png"
        inkscape:export-xdpi="3.1648352"
        inkscape:export-ydpi="3.1648352" />
     <path
@@ -214,14 +214,14 @@
        sodipodi:rx="220"
        sodipodi:ry="220"
        d="m 600,432.36218 a 220,220 0 1 1 -440,0 220,220 0 1 1 440,0 z"
-       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/delete_button_red.png"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/delete16x16.png"
        inkscape:export-xdpi="3.1648352"
        inkscape:export-ydpi="3.1648352" />
     <path
        style="fill:#ffffff;fill-opacity:1;stroke:url(#linearGradient3639-9);stroke-width:15;stroke-miterlimit:4;stroke-dasharray:none"
        d="m 355.15625,935.0625 c -2.55619,0 -5.13506,0.97881 -7.09375,2.9375 l -42.40625,42.4375 c -3.91737,3.91737 -3.91737,10.23888 0,14.15625 l 77.78125,77.78125 -77.78125,77.7813 c -3.91737,3.9173 -3.91737,10.2076 0,14.125 l 42.40625,42.4375 c 3.91737,3.9173 10.23888,3.9173 14.15625,0 L 440,1128.9375 l 77.78125,77.7812 c 3.91737,3.9174 10.23888,3.9174 14.15625,0 l 42.40625,-42.4374 c 3.91737,-3.9174 3.91737,-10.2077 0,-14.125 l -77.78125,-77.7813 77.78125,-77.78125 c 3.91737,-3.91737 3.91737,-10.23888 0,-14.15625 L 531.9375,938 c -3.91737,-3.91737 -10.23888,-3.91737 -14.15625,0 L 440,1015.7812 362.21875,938 c -1.95869,-1.95869 -4.50631,-2.9375 -7.0625,-2.9375 z"
        id="rect2820-0"
-       inkscape:export-filename="/Users/bjnortier/development/shapesmith/static/images/delete_button_red.png"
+       inkscape:export-filename="/Users/bjnortier/development/shapesmith.phoenix/nodes/ui/priv/www/images/icons/delete16x16.png"
        inkscape:export-xdpi="3.1648352"
        inkscape:export-ydpi="3.1648352" />
   </g>

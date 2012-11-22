@@ -82,7 +82,11 @@ define([
 
         initialize: function() {
             vertexWrapper.EditingDOMView.prototype.initialize.call(this);
-            addToTable(this.model.vertex, this.$el);
+            if (this.model.appendElement) {
+                this.model.appendElement.append(this.$el);
+            } else {
+                addToTable(this.model.vertex, this.$el);
+            }
             $('.field').autoGrowInput();
         },
 
@@ -156,7 +160,11 @@ define([
 
         initialize: function() {
             vertexWrapper.DisplayDOMView.prototype.initialize.call(this);
-            addToTable(this.model.vertex, this.$el);
+            if (this.model.appendElement) {
+                this.model.appendElement.append(this.$el);
+            } else {
+                addToTable(this.model.vertex, this.$el);
+            }
             this.$el.addClass(this.model.vertex.name);  
             this.updateSelection();
         },

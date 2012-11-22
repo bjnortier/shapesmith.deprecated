@@ -13,15 +13,15 @@ define([
 
     var EditingModel = geomVertexWrapper.EditingModel.extend({
 
-        initialize: function(vertex) {
+        initialize: function(vertex, possibleEditingParentModel) {
             geomVertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
             if (workplaneModel.lastPosition) {
                 this.workplanePositionChanged(workplaneModel.lastPosition);
             }
-            this.views = this.views.concat([
-                new EditingDOMView({model: this}),
-                new EditingSceneView({model: this}),
-            ]);
+            this.views.push(new EditingSceneView({model: this}));
+
+            this.appendElement = (possibleEditingParentModel && possibleEditingParentModel.implicitAppendElement);
+            this.views.push(new EditingDOMView({model: this}));
         },
 
         workplanePositionChanged: function(position) {
@@ -158,12 +158,13 @@ define([
 
     var DisplayModel = geomVertexWrapper.DisplayModel.extend({
 
-        initialize: function(vertex) {
+        initialize: function(vertex, possibleEditingParentModel) {
             geomVertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
             this.views = this.views.concat([
                 new DisplaySceneView({model: this}),
             ]);
-            if (!vertex.implicit) {
+            this.appendElement = (possibleEditingParentModel && possibleEditingParentModel.implicitAppendElement);
+            if (!vertex.implicit || this.appendElement) {
                 this.views.push(new geomVertexWrapper.DisplayDOMView({model: this}));
             }
         },
