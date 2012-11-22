@@ -394,13 +394,13 @@ define([
             return pointVertex;
         }
 
-        this.createPolylinePrototype = function(pointOptions) {
-            var pointOptions = pointOptions || {};
-            var pointVertex = this.createPointPrototype({implicit: true});
-            var polylineVertex = new geomNode.Polyline({
+        this.createPolylinePrototype = function(options) {
+            var pointVertex = this.createPointPrototype({implicit: true, workplane: options.workplane});
+            var polylineOptions = _.extend(options || {}, {
                 editing      : true,
                 proto        : true,
             });
+            var polylineVertex = new geomNode.Polyline(polylineOptions);
             // Add the vertex but add the edge as well before triggering notifications 
             this.add(polylineVertex, function() {
                 graph.addEdge(polylineVertex, pointVertex);
@@ -408,11 +408,11 @@ define([
             return polylineVertex;
         }
 
-        this.createExtrudePrototype = function(childVertexId) {
-            var child = this.vertexById(childVertexId);
+        this.createExtrudePrototype = function(child, height) {
             var extrudeVertex = new geomNode.Extrude({
-                editing      : true,
-                proto        : true,
+                editing    : true,
+                proto      : true,
+                parameters : {vector: {u: '0', v:'0', n:'1'}, h: height},
             });
             this.add(extrudeVertex, function() {
                 graph.addEdge(extrudeVertex, child);
@@ -433,7 +433,7 @@ define([
 
         this.addPointToPolyline = function(polyline, point) {
             if (point === undefined) {
-                point = this.createPointPrototype({implicit: true});
+                point = this.createPointPrototype({implicit: true, workplane: polyline.workplane});
             } 
             graph.addEdge(polyline, point);
             return point;
@@ -530,6 +530,10 @@ define([
 
         this.vertexById = function(id) {
             return graph.vertexById(id);
+        }
+
+        this.filteredVertices = function(filterFn) {
+            return graph.vertices().filter(filterFn);
         }
 
         this.childrenOf = function(vertex) {

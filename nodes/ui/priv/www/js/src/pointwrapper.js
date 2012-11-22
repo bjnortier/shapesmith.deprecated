@@ -1,12 +1,13 @@
 define([
         'src/calculations', 
+        'src/colors',
         'src/geometrygraphsingleton', 
         'src/geomvertexwrapper', 
         'src/scene', 
         'src/scenevieweventgenerator',
         'src/workplane'
     ], 
-    function(calc, geometryGraph, geomVertexWrapper, sceneModel, sceneViewEventGenerator, workplaneModel) {
+    function(calc, colors, geometryGraph, geomVertexWrapper, sceneModel, sceneViewEventGenerator, workplaneModel) {
 
     // ---------- Editing ----------
 
@@ -109,8 +110,8 @@ define([
 
         render: function() {
             geomVertexWrapper.EditingSceneView.prototype.render.call(this);
-            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
-            var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
+            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || colors.geometry.defaultAmbient;
+            var color = this.highlightColor || this.selectedColor || this.color || colors.geometry.default;
             var point = THREE.SceneUtils.createMultiMaterialObject(
                 new THREE.CubeGeometry(1, 1, 1, 1, 1, 1), 
                 [
@@ -137,9 +138,9 @@ define([
             var positionOnWorkplane = calc.positionOnWorkplane(
                 event, workplaneModel.node, sceneModel.view.camera);
             this.point.parameters.coordinate = {
-                x: positionOnWorkplane.x,
-                y: positionOnWorkplane.y,
-                z: positionOnWorkplane.z,
+                x: positionOnWorkplane.x + workplaneModel.node.origin.x,
+                y: positionOnWorkplane.y + workplaneModel.node.origin.y,
+                z: positionOnWorkplane.z + workplaneModel.node.origin.z,
             }
             this.model.vertex.trigger('change', this.model.vertex);
         },

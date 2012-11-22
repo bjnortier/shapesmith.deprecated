@@ -114,10 +114,32 @@ define([
         },
 
         events: {
+            'focusin'  : 'vertexFocusIn',
+            'focusout'  : 'vertexFocusOut',
             'focusin .field'  : 'fieldFocusIn',
             'focusout .field' : 'fieldFocusOut',
             'change .field'   : 'fieldChange',
-            // 'keyup .field'    : 'fieldChange',
+            'keyup .field'   : 'fieldKeyUp',
+            'click .delete'  : 'delete',
+        },
+
+        vertexFocusIn: function(event) {
+            this.vertexFocusInTimestamp = new Date().getTime();
+        },
+
+        vertexFocusOut: function(event) {
+            // If the focus is lost from the editin vertex within 100ms,
+            // then the focus has been lost and editing is done
+            this.vertexFocusInTimestamp = 0;
+            this.vertexFocusOutTimestamp = new Date().getTime();
+            var that = this;
+            var vertexFocusLostFn = function() {
+                var diff = that.vertexFocusInTimestamp - that.vertexFocusOutTimestamp;
+                if (diff < 0) {
+                    that.focusLost && that.focusLost();
+                }
+            }
+            setTimeout(vertexFocusLostFn, 100);
         },
 
         fieldFocusIn: function(event) {
@@ -131,6 +153,21 @@ define([
         fieldChange: function(event) {
             this.updateFromDOM();
             this.model.vertex.trigger('change', this.model.vertex);
+        },
+
+        fieldKeyUp: function(event) {
+            // Escape
+            if (event.keyCode === 27) {
+                this.model.cancel();
+            }
+        },
+
+        delete: function() {
+            if (this.model.vertex.proto) {
+                this.model.cancel();
+            } else {
+                geometryGraph.commitDelete(this.model.vertex);
+            }
         },
 
     });

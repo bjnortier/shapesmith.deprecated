@@ -1,4 +1,5 @@
 define([
+    'src/colors',
     'src/calculations',
     'src/geometrygraphsingleton', 
     'src/interactioncoordinator', 
@@ -8,6 +9,7 @@ define([
     'src/workplane',
     'src/vertexwrapper',
     ], function(
+        colors,
         calc,
         geometryGraph,
         coordinator,
@@ -94,7 +96,7 @@ define([
     var EditingSceneView = vertexWrapper.SceneView.extend({
 
         initialize: function() {
-            this.color = 0x94dcfc;
+            this.color = colors.geometry.editing;
             vertexWrapper.SceneView.prototype.initialize.call(this);
             this.model.vertex.on('change', this.render, this);
         },
@@ -212,8 +214,8 @@ define([
         clickable: true,   
 
         initialize: function() {
-            this.color = this.unselectedColor;
-             vertexWrapper.SceneView.prototype.initialize.call(this);
+            this.color = colors.geometry.default;
+            vertexWrapper.SceneView.prototype.initialize.call(this);
             this.model.on('updateSelection', this.updateSelection, this);
             this.on('mouseEnter', this.highlight, this);
             this.on('mouseLeave', this.unhighlight, this);
@@ -224,7 +226,7 @@ define([
         },
 
         remove: function() {
-             vertexWrapper.SceneView.prototype.remove.call(this);
+            vertexWrapper.SceneView.prototype.remove.call(this);
             this.model.off('updateSelection', this.updateSelection, this);
             this.off('mouseEnter', this.highlight, this);
             this.off('mouseLeave', this.unhighlight, this);
@@ -235,8 +237,8 @@ define([
 
         updateSelection: function() {
             if (this.model.selected) {
-                this.selectedColor = 0xf4f653;
-                this.selectedAmbient = 0x333333;
+                this.selectedColor = colors.geometry.selected;
+                this.selectedAmbient = colors.geometry.selectedAmbient;
             } else {
                 delete this.selectedColor;
                 delete this.selectedAmbient;
@@ -245,7 +247,7 @@ define([
         },
 
         highlight: function() {
-            this.highlightAmbient = 0xffffff;
+            this.highlightAmbient = colors.geometry.highlightAmbient;
             this.render();
         },
 

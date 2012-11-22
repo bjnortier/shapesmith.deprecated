@@ -1,4 +1,8 @@
-define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone) {
+define([
+    'lib/underscore-require', 
+    'lib/backbone-require',
+    'src/calculations',
+    ], function(_, Backbone, calc) {
 
     var counters = {};
 
@@ -37,6 +41,7 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
         }
 
         this.implicit = options.implicit || false;
+        this.workplane = options.workplane;
         this.parameters = options.parameters || {};
         this.editing = options.editing || false;
         this.proto = options.proto || false;
@@ -46,14 +51,17 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
         counters = {};
     }
 
-    GeomNode.prototype.cloneNonEditing = function() {
-        var newNode = new this.constructor({
+    GeomNode.prototype.cloneNonEditing = function(options) {
+        var options = options || {};
+        var cloneOptions = _.extend(options, {
             type     : this.type, 
             id       : this.id,
             name     : this.name,
             implicit : this.implicit,
-            parameters : copyObj(this.parameters)
-        });
+            workplane : calc.copyObj(this.workplane),
+            parameters : calc.copyObj(this.parameters)
+        })
+        var newNode = new this.constructor(cloneOptions);
         return newNode;
     }  
 
@@ -80,25 +88,7 @@ define(['lib/underscore-require', 'lib/backbone-require'], function(_, Backbone)
         return this.toJSON() === other.toJSON();
     }
 
-    var copyObj = function(value) {
-        if ((value === null) || (value === undefined)) {
-            return undefined;
-        } if (Object.prototype.toString.call(value) === '[object Array]') {
-            return value.map(function(x) {
-                return copyObj(x);
-            });
-        } else if (typeof(value) === 'object') {
-            var returnObj = {};
-            for (var key in value) {
-                if (value.hasOwnProperty(key)) {
-                    returnObj[key] = copyObj(value[key]);
-                }
-            }
-            return returnObj;
-        } else {
-            return value;
-        }
-    }
+
 
     // ---------- Types ----------
 

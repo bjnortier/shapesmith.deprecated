@@ -20,18 +20,12 @@ define([
             this.sceneView = attributes.sceneView;
             this.scene = attributes.sceneView.scene;
             this.camera = attributes.sceneView.camera;
-            this.gridView = new GridView({model: this});
-            this.cursorViews = [];
             this.node = {
                 origin: new THREE.Vector3(),
                 axis: new THREE.Vector3(0,0,1),
                 angle: 0
             }
-            this.coordinatesOffset = {
-                x: -20,
-                y: -20,
-            }
-
+            this.gridView = new GridView({model: this});
         },
 
         workplaneClick: function(event) {
@@ -45,11 +39,10 @@ define([
         mousemove: function(event) {
             var positionOnWorkplane = calc.positionOnWorkplane(event, this.node, this.camera);
             if (!this.lastPosition || !positionOnWorkplane.equals(this.lastPosition)) {
-                this.lastPosition = positionOnWorkplane;
+                this.lastPosition = positionOnWorkplane.addSelf(calc.objToVector(this.node.origin));
                 this.attributes.sceneView.updateScene = true;
                 this.trigger('positionChanged', this.lastPosition);
             }
-
         },
 
         toolInitiated: function(name) {
@@ -79,15 +72,21 @@ define([
         render: function() {
             var scene = this.model.scene;
 
+            if (this.sceneObject) {
+                scene.remove(this.sceneObject);
+            }
+            this.sceneObject = new THREE.Object3D();
+
+
             var majorGridLineGeometry = new THREE.Geometry();
             var minorGridLineGeometry = new THREE.Geometry();
             var majorMaterialInside = new THREE.LineBasicMaterial({ 
                 color: colors.workplane.majorGridLine, 
-                opacity: 0.2, 
+                opacity: 0.5, 
                 transparent: false });
             var minorMaterialInside = new THREE.LineBasicMaterial({ 
                 color: colors.workplane.minorGridLine, 
-                opacity: 0.02, 
+                opacity: 0.1, 
                 transparent: true });
 
             majorGridLineGeometry.vertices.push(new THREE.Vector3(-100, 0, 0));
@@ -100,9 +99,9 @@ define([
                 var geometry = (x % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
                 var line = new THREE.Line(geometry, material);
                 line.position.x = x;
-                line.position.z = (x % 10 == 0) ? line.position.z : line.position.z - 0.1;
+                line.position.z = this.model.node.origin.z;
                 line.rotation.z = 90 * Math.PI / 180;
-                scene.add(line);
+                this.sceneObject.add(line);
             }
 
             for (var y = -100; y <= 100; ++y) {
@@ -110,158 +109,12 @@ define([
                 var geometry = (y % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
                 var line = new THREE.Line(geometry, material);
                 line.position.y = y;
-                line.position.z = (y % 10 == 0) ? line.position.z : line.position.z - 0.1;
-                scene.add(line);
-            }
-        },
-
-    });
-
-    var CursorView = Backbone.View.extend({
-
-        initialize: function() {
-            this.sceneObject = new THREE.Object3D();
-            this.model.on('positionChanged', this.render, this);
-        },
-
-        remove: function() {
-            this.model.scene.remove(this.sceneObject);
-            this.model.off('positionChanged', this.render, this);
-            this.model.sceneView.updateScene = true;
-        },
-
-        render: function() {
-            var scene = this.model.scene;
-            scene.remove(this.sceneObject);
-            this.sceneObject = new THREE.Object3D();
-
-            if (this.model.lastPosition && coordinator.hasInitiatedTool()) {
-                var cubeCursor = new THREE.Mesh(
-                    new THREE.CubeGeometry(0.5, 0.5, 0.5, 1, 1, 1), 
-                    new THREE.MeshBasicMaterial({color: 0xffffff}));
-                cubeCursor.position = calc.objToVector(this.model.lastPosition);
-                this.sceneObject.add(cubeCursor);
-
-                scene.add(this.sceneObject);
-            }
-        },
-    });
-
-    var CursorCoordinateConnectorView = Backbone.View.extend({
-
-        initialize: function() {
-            this.sceneObject = new THREE.Object3D();
-            this.model.on('positionChanged', this.render, this);
-        },
-
-        remove: function() {
-            this.model.scene.remove(this.sceneObject);
-            this.model.off('positionChanged', this.render, this);
-            this.model.sceneView.updateScene = true;
-        },
-
-        render: function() {
-            var scene = this.model.scene;
-            scene.remove(this.sceneObject);
-            this.sceneObject = new THREE.Object3D();
-
-            if (this.model.lastPosition && coordinator.hasInitiatedTool()) {
-                var cursorScreenCoordinates = calc.toScreenCoordinates(
-                    this.model.camera, 
-                    this.model.lastPosition.clone());
-
-                var fakeEvent = {
-                    clientX: cursorScreenCoordinates.x + this.model.coordinatesOffset.x,
-                    clientY: cursorScreenCoordinates.y + this.model.coordinatesOffset.y,
-                };
-                var normal = this.model.camera.position.clone().negate();
-                var endLineWorldPos = calc.positionOnPlane(
-                    fakeEvent, 
-                    this.model.lastPosition.clone(), 
-                    normal, 
-                    this.model.camera);
-                
-                var lineGeometry = new THREE.Geometry();
-                lineGeometry.vertices.push(this.model.lastPosition);
-                lineGeometry.vertices.push(endLineWorldPos);
-                var line = new THREE.Line(lineGeometry, 
-                    new THREE.LineBasicMaterial({ color: 0xffffff }));
+                line.position.z = this.model.node.origin.z;
                 this.sceneObject.add(line);
-
-                scene.add(this.sceneObject);
             }
-        },
-    });
 
-    var CursorCoordinateAxisProjectionView = Backbone.View.extend({
-
-        initialize: function() {
-            this.sceneObject = new THREE.Object3D();
-            this.model.on('positionChanged', this.render, this);
-        },
-
-        remove: function() {
-            this.model.scene.remove(this.sceneObject);
-            this.model.off('positionChanged', this.render, this);
-            this.model.sceneView.updateScene = true;
-        },
-
-        render: function() {
-            var scene = this.model.scene;
-            scene.remove(this.sceneObject);
-            this.sceneObject = new THREE.Object3D();
-
-            if (this.model.lastPosition && coordinator.hasInitiatedTool()) {
-                var position = this.model.lastPosition;
-                var colors = {
-                    x: 0x3da033,
-                    y: 0x4394c2,
-                    z: 0xff706b,
-                }
-
-                for(key in colors) {
-                    if (position[key]) {
-                        var lineGeometry = new THREE.Geometry();
-                        lineGeometry.vertices.push(position);
-                        lineGeometry.vertices.push(position.clone()['set' + key.toUpperCase()](0));
-                        var line = new THREE.Line(lineGeometry, 
-                            new THREE.LineBasicMaterial({ color: colors[key]}));
-                        this.sceneObject.add(line);
-                    }
-                }
-
-                scene.add(this.sceneObject);
-            }
-        },
-    });
-
-    var CursorCoordinateView = Backbone.View.extend({
-
-        className: 'coordinate',
-
-        initialize: function() {
-            $('body').append(this.$el);
-            this.render();
-            this.model.on('positionChanged', this.render, this);
-        },
-
-        remove: function() {
-            Backbone.View.prototype.remove.call(this);
-            this.model.off('positionChanged', this.render, this);
-        },
-
-        render: function() {
-            if (this.model.lastPosition) {
-                var template = '<span class="x">{{x}}</span><span class="y">{{y}}</span><span class="z">{{z}}</span>';
-                this.$el.html($.mustache(template, this.model.lastPosition));
-
-                var cursorScreenCoordinates = calc.toScreenCoordinates(
-                    this.model.camera, 
-                    this.model.lastPosition.clone());
-                this.$el.css('right', (window.innerWidth - cursorScreenCoordinates.x - this.model.coordinatesOffset.x) + 'px');
-                this.$el.css('bottom', (window.innerHeight - cursorScreenCoordinates.y - this.model.coordinatesOffset.y)+ 'px');
-            }
-            return this;
+            scene.add(this.sceneObject);
+            sceneModel.view.updateScene = true;
         },
 
     });

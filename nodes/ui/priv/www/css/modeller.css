@@ -56,7 +56,7 @@ img#logo {
 }
 
 .toolbar {
-    background: rgba(51, 51, 51, 0.46);
+    background: rgba(31, 31, 31, 0.46);
     padding: 5px;
 }
 
@@ -140,8 +140,7 @@ img#logo {
     border-spacing: 5px;
 }
 
-    
-.vertex.display, #variables, #geometry {
+#geometry .vertex.display, #geometry .vertex.editing, #variables {
     background: rgba(51, 51, 51, 0.46);
 }
 
@@ -183,10 +182,6 @@ img#logo {
 
 .vertex.selected td {
     border-bottom: solid #FF0 2px;
-}
-
-.vertex.editing {
-    background: rgba(51, 51, 51, 0.46);
 }
 
 .vertex.editing .title {
@@ -254,7 +249,6 @@ img#logo {
     width: 30px;
     border: none;
     background: none; 
-    color: white;
 }
 
 #variables .title {
@@ -305,14 +299,73 @@ img#logo {
 /* ---------- Colors ---------- */
 
 body {
-    background-color: #020202;
+    background-color: #ebf0ef;
+    color: #000;
 }
 
+#geometry {
+    background: none;
+}
+
+#elevation-plane #ruler {
+    color: #000;
+}
+
+.toolbar {
+    background: rgba(200, 200, 200, 0.7);
+}
+
+#geometry .vertex.display, #geometry .vertex.editing, #variables {
+    background: rgba(200, 200, 200, 0.7);
+}
+
+#geometry .vertex .name {
+    color: #000;
+}
+
+.field.x {
+    color: #225522; 
+}
+
+.field.y {
+    color: #222255;
+}
+
+.field.z, .field.h {
+    color: #552222;
+}
+
+/* ---------- Scene colors ---------- */
+
 .scene .workplane .majorGridLine {
-    color: #ffffff; 
+    color: #000000; 
 }
 
 .scene .workplane .minorGridLine {
+    color: #000000;
+}
+
+.scene .geometry .selected {
+    color: #f4f653;
+}
+
+.scene .geometry .selectedAmbient {
+    color: #333333;
+}
+
+.scene .geometry .highlightAmbient {
     color: #ffffff;
+}
+
+.scene .geometry .default {
+    color: #009900;
+}
+
+.scene .geometry .defaultAmbient {
+    color: #666666;
+}
+
+.scene .geometry .editing {
+    color: #007088;
 }
 

@@ -1,10 +1,11 @@
 define([
     'src/calculations',
+    'src/colors',
     'src/geometrygraphsingleton',
     'src/geomvertexwrapper',
     'src/scene',
     'src/workplane'], 
-    function(calc, geometryGraph, geomVertexWrapper, sceneModel, workplaneModel) {
+    function(calc, colors, geometryGraph, geomVertexWrapper, sceneModel, workplaneModel) {
 
     // ---------- Common ----------
 
@@ -12,8 +13,8 @@ define([
 
         render: function() {
             geomVertexWrapper.EditingSceneView.prototype.render.call(this);
-            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
-            var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
+            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || colors.geometry.defaultAmbient;
+            var color = this.highlightColor || this.selectedColor || this.color || colors.geometry.default;
             
             var pointChildren = geometryGraph.childrenOf(this.model.vertex);
             var coordinates = pointChildren.map(function(point) {
@@ -28,7 +29,7 @@ define([
                 var geometry = new THREE.Geometry();
                 geometry.vertices.push(from);
                 geometry.vertices.push(to);
-                var material = new THREE.LineBasicMaterial({ color: color });
+                var material = new THREE.LineBasicMaterial({ color: color, linewidth: 2 });
                 var line = new THREE.Line(geometry, material);
                 this.sceneObject.add(line);
 

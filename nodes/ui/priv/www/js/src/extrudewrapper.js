@@ -1,11 +1,12 @@
 define([
         'src/calculations',
+        'src/colors',
         'src/geometrygraphsingleton',
         'src/geomvertexwrapper',
         'src/scene',
         'src/workplane'
     ], 
-    function(calc, geometryGraph, geomVertexWrapper, sceneModel, workplaneModel) {
+    function(calc, colors, geometryGraph, geomVertexWrapper, sceneModel, workplaneModel) {
 
     // ---------- Common ----------
 
@@ -37,8 +38,8 @@ define([
             geometry.computeCentroids();
             geometry.computeFaceNormals();
 
-            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
-            var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
+            var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || colors.geometry.defaultAmbient;
+            var color = this.highlightColor || this.selectedColor || this.color || colors.geometry.default;
             var face = THREE.SceneUtils.createMultiMaterialObject(
                 geometry,
                 [

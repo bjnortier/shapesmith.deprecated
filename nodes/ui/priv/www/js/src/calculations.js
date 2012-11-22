@@ -1,4 +1,24 @@
 define([], function() {
+
+    var copyObj = function(value) {
+        if ((value === null) || (value === undefined)) {
+            return undefined;
+        } if (Object.prototype.toString.call(value) === '[object Array]') {
+            return value.map(function(x) {
+                return copyObj(x);
+            });
+        } else if (typeof(value) === 'object') {
+            var returnObj = {};
+            for (var key in value) {
+                if (value.hasOwnProperty(key)) {
+                    returnObj[key] = copyObj(value[key]);
+                }
+            }
+            return returnObj;
+        } else {
+            return value;
+        }
+    }
     
     var positionOnWorkplane = function(event, workplaneNode, camera) {
 
@@ -116,6 +136,7 @@ define([], function() {
     }
 
     return {
+        copyObj             : copyObj,
         positionOnWorkplane : positionOnWorkplane,
         positionOnPlane     : positionOnPlane,
         positionOnRay       : positionOnRay,

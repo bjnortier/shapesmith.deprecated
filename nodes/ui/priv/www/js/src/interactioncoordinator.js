@@ -52,36 +52,33 @@
         }
 
         this.mouseup = function(event) {
-            if (!this.ignoreNextMouseUp) {
-                if (!dragging) {
+            if (!dragging) {
 
-                    // Prevent multiple click event on double click
-                    var now = new Date().getTime();
-                    var eventPosition = eventToPosition(event);
+                // Prevent multiple click event on double click
+                var now = new Date().getTime();
+                var eventPosition = eventToPosition(event);
 
-                    var isSecondClickOfDoubleClick = false;
-                    if (this.lastClickTimestamp) {
-                        var within300ms = (now - this.lastClickTimestamp < 300);
-                        var dx = Math.abs(eventPosition.x - this.lastClickPosition .x);
-                        var dy = Math.abs(eventPosition.y - this.lastClickPosition .y);
-                        var isWithinThreshold = Math.sqrt(dx*dx + dy*dy) < dragThreshold;
-                        isSecondClickOfDoubleClick = within300ms && isWithinThreshold;
-                    }
-                        
-                    this.lastClickTimestamp = now;
-                    this.lastClickPosition = eventPosition;
+                var isSecondClickOfDoubleClick = false;
+                if (this.lastClickTimestamp) {
+                    var within300ms = (now - this.lastClickTimestamp < 300);
+                    var dx = Math.abs(eventPosition.x - this.lastClickPosition .x);
+                    var dy = Math.abs(eventPosition.y - this.lastClickPosition .y);
+                    var isWithinThreshold = Math.sqrt(dx*dx + dy*dy) < dragThreshold;
+                    isSecondClickOfDoubleClick = within300ms && isWithinThreshold;
+                }
+                    
+                this.lastClickTimestamp = now;
+                this.lastClickPosition = eventPosition;
 
-                    if (!isSecondClickOfDoubleClick) {
-                        if (sceneViewEventGenerator.overClickable()) {
-                            sceneViewEventGenerator.click(event);
-                        } else {
-                            this.trigger('sceneClick', event);
-                        }
+                if (!isSecondClickOfDoubleClick) {
+                    if (sceneViewEventGenerator.overClickable()) {
+                        sceneViewEventGenerator.click(event);
+                    } else {
+                        this.trigger('sceneClick', event);
                     }
                 }
-                sceneViewEventGenerator.mouseup(event);
             }
-            this.ignoreNextMouseUp = false;
+            sceneViewEventGenerator.mouseup(event);
             this.mouseDownEvent = undefined;
             dragging = false;
         }
@@ -100,9 +97,6 @@
         }
 
         this.mousedown = function(event) {
-            if (this.fieldHasFocus) {
-                this.ignoreNextMouseUp = true;
-            }
             this.mouseDownEvent = event;
             sceneViewEventGenerator.mousedown(event);
         }

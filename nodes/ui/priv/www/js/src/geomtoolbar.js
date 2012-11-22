@@ -1,16 +1,20 @@
 define([
+    'src/calculations',
     'src/toolbar', 
     'src/geometrygraphsingleton', 
     'src/commandstack', 
     'src/interactioncoordinator',
-    'src/selection'
+    'src/selection',
+    'src/workplane',
     ], 
     function(
+        calc,
         toolbar, 
         geometryGraph, 
         commandStack, 
         coordinator, 
-        selectionManager) {
+        selectionManager,
+        workplaneModel) {
 
     var SelectItemModel = toolbar.ItemModel.extend({
         
@@ -66,7 +70,8 @@ define([
             if (this.get('enabled')) {
                 var selectedId = selectionManager.selected[0];
                 toolbar.ItemModel.prototype.click.call(this);
-                geometryGraph.createExtrudePrototype(selectedId);
+                var polyline = geometryGraph.vertexById(selectedId);
+                geometryGraph.createExtrudePrototype(polyline, 1);
             }
         },
 
@@ -103,13 +108,16 @@ define([
         },
 
         launchTool: function(item) {
+            var workplane = calc.copyObj(workplaneModel.node);
             this.toolRelaunchVertexId = undefined;
             geometryGraph.cancelIfEditing();
             if (item.name === 'point') {
-                this.toolRelaunchVertexId = geometryGraph.createPointPrototype().id;
+                this.toolRelaunchVertexId = geometryGraph.createPointPrototype(
+                    {workplane: workplane}).id;
             }
             if (item.name === 'polyline') {
-                this.toolRelaunchVertexId = geometryGraph.createPolylinePrototype().id;
+                this.toolRelaunchVertexId = geometryGraph.createPolylinePrototype(
+                    {workplane: workplane}).id;
             }
         },
 

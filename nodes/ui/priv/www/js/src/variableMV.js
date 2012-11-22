@@ -77,10 +77,6 @@ define([
             return this;
         },
 
-        events: {
-            'click .delete'  : 'delete',
-        },
-
         update: function() {
             if (this.model.vertex.errors) {
                 this.$el.addClass('error');
@@ -89,15 +85,11 @@ define([
             }
         },
 
-        delete: function() {
-            if (this.model.vertex.proto) {
-                this.model.cancel();
-            } else {
-                geometryGraph.commitDelete(this.model.vertex);
-            }
+        updateFromDOM: function() {
+
         },
 
-        sceneClick: function() {
+        focusLost: function() {
             var name = this.$el.find('.var').val();
             var expr = this.$el.find('.expr').val();
             this.model.vertex.name = name;
@@ -107,7 +99,6 @@ define([
             } else {
                 this.model.okEdit();
             }
-
         },
 
     });
