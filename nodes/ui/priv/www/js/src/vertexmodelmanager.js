@@ -3,7 +3,7 @@ define([
         'src/selection', 
         'src/variableMV',
         'src/pointwrapper', 
-        'src/polylinewrapper',
+        'src/polylineMV',
         'src/extrudewrapper',
     ], 
     function(
