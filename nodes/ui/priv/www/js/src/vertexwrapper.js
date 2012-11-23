@@ -152,8 +152,9 @@ define([
 
         fieldChange: function(event) {
             event.stopPropagation();
-            this.updateFromDOM();
-            this.model.vertex.trigger('change', this.model.vertex);
+            if (this.updateFromDOM) {
+                this.updateFromDOM();
+            }
         },
 
         fieldKeyUp: function(event) {

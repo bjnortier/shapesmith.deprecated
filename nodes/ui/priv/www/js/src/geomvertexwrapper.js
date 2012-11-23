@@ -35,17 +35,6 @@ define([
                 $('#geometry').append(el);
             }
         }
-
-        // // Subsume the implicit children
-        // var children = geometryGraph.childrenOf(vertex);
-        // children.forEach(function(child) {
-        //     if (child.implicit) {
-        //         var childElement = $('.' + child.id);
-        //         var childPlaceholderSelector = '._' + child.id;
-        //         childElement.replaceAll(childPlaceholderSelector);
-        //     }
-        // });
-
     }
 
     var saveRowIndex = function(vertexId, el) {

@@ -88,6 +88,7 @@ define([
                     console.error(e);
                 }
             });
+            this.model.vertex.trigger('change', this.model.vertex);
         }
     });
 
