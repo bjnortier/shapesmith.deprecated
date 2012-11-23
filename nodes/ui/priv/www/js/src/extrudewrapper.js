@@ -45,6 +45,7 @@ define([
                 materials.push(new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}));
             }
             materials.push(new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}));
+            materials.push(new THREE.MeshBasicMaterial({color: color, wireframe: true}));
             var face = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
             this.sceneObject.add(face);
         },
