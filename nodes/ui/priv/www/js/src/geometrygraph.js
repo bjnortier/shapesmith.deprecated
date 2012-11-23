@@ -239,7 +239,14 @@ define([
         }
 
         // This is for webdriver to determine when things have loaded
-        var loadFinished = function() {
+        this.loadFinished = function() {
+            var workplaneVertices = this.filteredVertices(function(v) {
+                return v.type === 'workplane';
+            });
+            if (workplaneVertices.length === 0) {
+                this.add(new geomNode.Workplane());
+            }
+
             if (!SS.loadDone) {
                 SS.loadDone = true;
             }
@@ -260,7 +267,7 @@ define([
                     --remaining;
                     if (remaining == 0) {
                         that.createGraph(graph, shasToVertices);
-                        loadFinished();
+                        that.loadFinished();
                     }
                 }
 
@@ -273,7 +280,7 @@ define([
                             });
                     });
                 } else {
-                    loadFinished();
+                    that.loadFinished();
                 }
 
             });
@@ -598,6 +605,8 @@ define([
             });
             return result;
         }
+
+
     }
 
     return {

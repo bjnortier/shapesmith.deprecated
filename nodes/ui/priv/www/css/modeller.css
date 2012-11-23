@@ -148,7 +148,7 @@ img#logo {
     margin-top: 5px;
 }
 
-#variables, #geometry {
+#variables, #geometry, #workplane-settings {
     border-collapse: collapse;
     padding: 5px;
 }   
@@ -296,6 +296,21 @@ img#logo {
 
 .error .field {
     border-bottom: solid thin red;
+}
+
+/* ---------- Workplane ---------- */
+
+#workplane-settings {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    padding: 10px;
+    border-spacing: 5px;
+}
+
+#workplane-settings .field {
+    margin: 5px;
+    padding: 5px;
 }
 
 /* ---------- Colors ---------- */

@@ -4,9 +4,8 @@ define([
         'src/geometrygraphsingleton',
         'src/geomvertexwrapper',
         'src/scene',
-        'src/workplane'
     ], 
-    function(calc, colors, geometryGraph, geomVertexWrapper, sceneModel, workplaneModel) {
+    function(calc, colors, geometryGraph, geomVertexWrapper, sceneModel) {
 
     // ---------- Common ----------
 
@@ -191,8 +190,9 @@ define([
 
             var positionOnNormal = calc.positionOnRay(event, ray, sceneModel.view.camera);
             var pointPosition = calc.objToVector(this.pointVertex.parameters.coordinate, geometryGraph);
+            var snap = this.model.currentWorkplaneModel.vertex.parameters.snap;
             this.model.vertex.parameters.h = 
-                parseFloat(positionOnNormal.z.toFixed(0)) - 
+                Math.round(parseFloat(positionOnNormal.z.toFixed(0))/snap)*snap - 
                 pointPosition.z;
 
             this.model.vertex.trigger('change', this.model.vertex);

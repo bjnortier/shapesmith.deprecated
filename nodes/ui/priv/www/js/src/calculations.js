@@ -32,9 +32,11 @@ define([], function() {
         var workplanePosition = 
             rotateAroundAxis(worldPosition, axis, -workplaneVertex.workplane.angle);
 
-        return new THREE.Vector3(Math.round(workplanePosition.x),
-                                 Math.round(workplanePosition.y),
-                                 Math.round(workplanePosition.z));
+        var snap = workplaneVertex.parameters.snap;
+
+        return new THREE.Vector3(Math.round(workplanePosition.x/snap) * snap,
+                                 Math.round(workplanePosition.y/snap) * snap,
+                                 Math.round(workplanePosition.z/snap) * snap);
     }
 
     function positionOnPlane(event, origin, normal, camera) {

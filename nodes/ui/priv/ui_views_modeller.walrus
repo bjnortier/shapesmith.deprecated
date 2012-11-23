@@ -38,6 +38,7 @@
     <table id="variables"></table>
     <table id="geometry"></table>
   </div>
+  <div id="workplane-settings"></div>
   <div id="scene"></div>
   <img id="logo" src="{{logo}}"/>
 

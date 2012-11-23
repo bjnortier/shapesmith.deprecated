@@ -1,12 +1,12 @@
 define([
-    'src/calculations',
-    'src/colors',
-    'src/geometrygraphsingleton',
-    'src/geomvertexwrapper',
-    'src/pointMV',
-    'src/scene',
-    'src/workplane'], 
-    function(calc, colors, geometryGraph, geomVertexWrapper, pointMV, sceneModel, workplaneModel) {
+        'src/calculations',
+        'src/colors',
+        'src/geometrygraphsingleton',
+        'src/geomvertexwrapper',
+        'src/pointMV',
+        'src/scene',
+    ], 
+    function(calc, colors, geometryGraph, geomVertexWrapper, pointMV, sceneModel) {
 
     // ---------- Common ----------
 

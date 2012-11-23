@@ -2,7 +2,7 @@ requirejs(
     [
         'src/interactioncoordinator',
         'src/geomtoolbar',
-        'src/workplane',
+        'src/workplaneMV',
         'src/trackball',
         'src/commandstack',
         'src/geometrygraphsingleton',
@@ -13,7 +13,7 @@ requirejs(
     ], function(
         coordinator,
         geomToolbar,
-        workplane,
+        Workplane,
         trackBall,
         commandStack,
         geometryGraph,
@@ -37,6 +37,8 @@ requirejs(
 
     $(document).ready(function() {
         geometryGraph.loadFromCommit($.getQueryParam("commit"));   
+
+        geometryGraph.a
     });
 
 });

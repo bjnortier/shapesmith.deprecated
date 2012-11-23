@@ -97,10 +97,13 @@ define([
     var Workplane = function(options) {
         var options = options || {};
         options.type = 'workplane';
-        options.workplane = {
+        options.workplane = options.workplane || {
             origin: new THREE.Vector3(),
             axis: new THREE.Vector3(0,0,1),
             angle: 0
+        };
+        options.parameters = options.parameters || {
+            snap: 1.0
         };
         GeomNode.prototype.constructor.call(this, options);
     }
@@ -196,6 +199,7 @@ define([
         Polyline : Polyline,
         Extrude  : Extrude,
         constructors: {
+            'workplane': Workplane,
             'variable' : Variable,
             'point'    : Point,
             'polyline' : Polyline,
