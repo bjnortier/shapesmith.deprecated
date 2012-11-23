@@ -162,12 +162,14 @@ define([
 
             var snap = this.model.vertex.parameters.snap;
 
-            majorGridLineGeometry.vertices.push(new THREE.Vector3(-Math.floor(100/snap)*snap, 0, 0));
-            majorGridLineGeometry.vertices.push(new THREE.Vector3(Math.ceil(100/snap)*snap, 0, 0));
-            minorGridLineGeometry.vertices.push(new THREE.Vector3(-Math.floor(100/snap)*snap, 0, 0));
-            minorGridLineGeometry.vertices.push(new THREE.Vector3(Math.ceil(100/snap)*snap, 0, 0));
+            var boundary = Math.floor(snap*10)*10;
 
-            for (var x = -Math.floor(100/snap); x <= Math.ceil(100/snap); ++x) {
+            majorGridLineGeometry.vertices.push(new THREE.Vector3(-Math.floor(boundary/snap)*snap, 0, 0));
+            majorGridLineGeometry.vertices.push(new THREE.Vector3(Math.ceil(boundary/snap)*snap, 0, 0));
+            minorGridLineGeometry.vertices.push(new THREE.Vector3(-Math.floor(boundary/snap)*snap, 0, 0));
+            minorGridLineGeometry.vertices.push(new THREE.Vector3(Math.ceil(boundary/snap)*snap, 0, 0));
+
+            for (var x = -Math.floor(boundary/snap); x <= Math.ceil(boundary/snap); ++x) {
                 var material = (x % 10 == 0) ? majorMaterialInside : minorMaterialInside;
                 var geometry = (x % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
                 var line = new THREE.Line(geometry, material);
@@ -177,7 +179,7 @@ define([
                 this.sceneObject.add(line);
             }
 
-            for (var y = -Math.floor(100/snap); y <= Math.ceil(100/snap); ++y) {
+            for (var y = -Math.floor(boundary/snap); y <= Math.ceil(boundary/snap); ++y) {
                 var material = (y % 10 == 0) ? majorMaterialInside : minorMaterialInside;
                 var geometry = (y % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
                 var line = new THREE.Line(geometry, material);
