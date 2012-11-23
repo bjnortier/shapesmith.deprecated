@@ -1,13 +1,17 @@
 define([
-    'src/colors',
-    'src/calculations', 
-    'src/interactioncoordinator', 
-    'src/scene',
+        'src/colors',
+        'src/calculations', 
+        'src/interactioncoordinator', 
+        'src/scene',
+        'src/geomNode',
+        'src/geometryGraphSingleton'
     ], function(
         colors,
         calc, 
         coordinator, 
-        sceneModel) {
+        sceneModel,
+        geomNode,
+        geometryGraph) {
 
     var Model = Backbone.Model.extend({
 
@@ -20,10 +24,17 @@ define([
             this.sceneView = attributes.sceneView;
             this.scene = attributes.sceneView.scene;
             this.camera = attributes.sceneView.camera;
-            this.node = {
-                origin: new THREE.Vector3(),
-                axis: new THREE.Vector3(0,0,1),
-                angle: 0
+
+            var workplaneVertices = geometryGraph.filteredVertices(function(v) {
+                return v.type === 'workplane';
+            });
+            if (workplaneVertices.length === 0) {
+                this.vertex = new geomNode.Workplane();
+            } else if (workplaneVertices.length === 1) {
+                this.vertex = workplaneVertices[0].workplane;
+            } else {
+                this.vertex = workplaneVertices[0].workplane;
+                console.error('More than one workplane vertex in graph - using first');
             }
             this.gridView = new GridView({model: this});
         },
@@ -37,9 +48,9 @@ define([
         },
 
         mousemove: function(event) {
-            var positionOnWorkplane = calc.positionOnWorkplane(event, this.node, this.camera);
+            var positionOnWorkplane = calc.positionOnWorkplane(event, this.vertex, this.camera);
             if (!this.lastPosition || !positionOnWorkplane.equals(this.lastPosition)) {
-                this.lastPosition = positionOnWorkplane.addSelf(calc.objToVector(this.node.origin));
+                this.lastPosition = positionOnWorkplane.addSelf(calc.objToVector(this.vertex.workplane.origin));
                 this.attributes.sceneView.updateScene = true;
                 this.trigger('positionChanged', this.lastPosition);
             }
@@ -99,7 +110,7 @@ define([
                 var geometry = (x % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
                 var line = new THREE.Line(geometry, material);
                 line.position.x = x;
-                line.position.z = this.model.node.origin.z;
+                line.position.z = this.model.vertex.workplane.origin.z;
                 line.rotation.z = 90 * Math.PI / 180;
                 this.sceneObject.add(line);
             }
@@ -109,7 +120,7 @@ define([
                 var geometry = (y % 10 == 0) ? majorGridLineGeometry : minorGridLineGeometry;
                 var line = new THREE.Line(geometry, material);
                 line.position.y = y;
-                line.position.z = this.model.node.origin.z;
+                line.position.z = this.model.vertex.workplane.origin.z;
                 this.sceneObject.add(line);
             }
 

@@ -137,11 +137,11 @@ define([
         drag: function(event) {
             this.dragging = true;
             var positionOnWorkplane = calc.positionOnWorkplane(
-                event, workplaneModel.node, sceneModel.view.camera);
+                event, workplaneModel.vertex, sceneModel.view.camera);
             this.point.parameters.coordinate = {
-                x: positionOnWorkplane.x + workplaneModel.node.origin.x,
-                y: positionOnWorkplane.y + workplaneModel.node.origin.y,
-                z: positionOnWorkplane.z + workplaneModel.node.origin.z,
+                x: positionOnWorkplane.x + workplaneModel.vertex.workplane.origin.x,
+                y: positionOnWorkplane.y + workplaneModel.vertex.workplane.origin.y,
+                z: positionOnWorkplane.z + workplaneModel.vertex.workplane.origin.z,
             }
             this.model.vertex.trigger('change', this.model.vertex);
         },

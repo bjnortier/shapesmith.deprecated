@@ -372,6 +372,7 @@ define([
             } else {
                 this.commitEdit();
             }
+            originals = {};
         }
 
         // ---------- Validation ----------
