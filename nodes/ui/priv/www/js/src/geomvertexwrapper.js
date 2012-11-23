@@ -188,7 +188,8 @@ define([
         clickTitle: function(event) {
             if (this.model.canSelect()) {
                 if (event.shiftKey || event.ctrlKey || event.metaKey) {
-                    selection.addToSelection(this.model.vertex.id);
+                    // selection.addToSelection(this.model.vertex.id);
+                    selection.selectOnly(this.model.vertex.id);
                 } else {
                     selection.selectOnly(this.model.vertex.id);
                 }
@@ -268,7 +269,8 @@ define([
             }
             if (vertexToSelect) {
                 if (event.shiftKey || event.ctrlKey || event.metaKey) {
-                    selection.addToSelection(vertexToSelect.id);
+                    selection.selectOnly(vertexToSelect.id);
+                    // selection.addToSelection(vertexToSelect.id);
                 } else {
                     selection.selectOnly(vertexToSelect.id);
                 }

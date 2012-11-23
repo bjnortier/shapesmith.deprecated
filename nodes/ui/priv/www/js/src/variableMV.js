@@ -48,13 +48,13 @@ define([
             this.$el.addClass('variable');
             addToTable(this.model.vertex, this.$el);
             $('.field').autoGrowInput();
-            coordinator.on('sceneClick', this.sceneClick, this);
+            coordinator.on('sceneClick', this.tryCommit, this);
         },
 
         remove: function() {
             saveRowIndex(this.model.vertex.id, this.$el);
             vertexWrapper.EditingDOMView.prototype.remove.call(this);
-            coordinator.off('sceneClick', this.sceneClick, this);
+            coordinator.off('sceneClick', this.tryCommit, this);
         },
 
         render: function() {

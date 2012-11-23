@@ -43,7 +43,7 @@ define([
             this.trigger('click', this.lastPosition);
         },
 
-        workplaneDblClick: function(event) {
+        workplaneDblClick: function(eventst) {
             this.trigger('dblclick', this.lastPosition);
         },
 
@@ -116,11 +116,17 @@ define([
     var SettingsEditingView = vertexWrapper.EditingDOMView.extend({
 
         tagName: 'table',
-        className: 'vertex',
+        className: 'vertex editing',
 
         initialize: function() {
             vertexWrapper.EditingDOMView.prototype.initialize.call(this);
             $('#workplane-settings').append(this.$el);
+            coordinator.on('sceneClick', this.tryCommit, this);
+        },
+
+        remove: function() {
+            vertexWrapper.EditingDOMView.prototype.remove.call(this);
+            coordinator.off('sceneClick', this.tryCommit, this);
         },
 
         render: function() {
@@ -140,6 +146,11 @@ define([
         updateFromDOM: function() {
             this.model.vertex.parameters.snap = this.$el.find('.snap').val();
         },
+
+        tryCommit: function() {
+            geometryGraph.commitIfEditing();
+        },
+
 
     });    
 
