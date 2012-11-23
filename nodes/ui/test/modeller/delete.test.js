@@ -72,7 +72,7 @@ describe('Deletion', function() {
                 });
     });
 
-    it.only('can delete an extrusion', function(done) {
+    it('can delete an extrusion', function(done) {
         this.timeout(5000);
         client
             .click('.toolbar .polyline')
