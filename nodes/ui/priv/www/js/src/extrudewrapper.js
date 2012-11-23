@@ -40,12 +40,12 @@ define([
 
             var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || colors.geometry.defaultAmbient;
             var color = this.highlightColor || this.selectedColor || this.color || colors.geometry.default;
-            var face = THREE.SceneUtils.createMultiMaterialObject(
-                geometry,
-                [
-                    new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}),
-                    new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
-                ]);
+            var materials = [];
+            if (!this.model.vertex.editing) {
+                materials.push(new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}));
+            }
+            materials.push(new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}));
+            var face = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
             this.sceneObject.add(face);
         },
     }
