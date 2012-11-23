@@ -36,11 +36,6 @@ define([
         workplaneClick: function() {
             var that = this;
             if (this.vertex.proto) {
-                if (this.vertex.implicit) {
-                    geometryGraph.parentsOf(this.vertex).map(function(parent) {
-                        parent.trigger('beforeImplicitChildCommit', that.vertex);
-                    });
-                }
                 this.okCreate();
             }
         },
@@ -51,19 +46,24 @@ define([
 
         render: function() {
             var template = 
-                '<td colspan="2">' + 
-                '<div class="title"><img src="/ui/images/icons/point32x32.png"/>' +
+                '<td>' +
+                '<table><tr>' +
+                '<td class="title">' + 
+                '<img src="/ui/images/icons/point32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
-                '</div>' + 
+                '{{^implicit}}<div class="delete"></div>{{/implicit}}' + 
+                '</td></tr><tr><td>' +
                 '<div class="coordinate">' +
                 '<input class="field x" type="text" value="{{x}}"></input>' +
                 '<input class="field y" type="text" value="{{y}}"></input>' +
                 '<input class="field z" type="text" value="{{z}}"></input>' +
                 '</div>' +
-                '</td>';
+                '</td></tr></table>' +
+                '</td>'
             var view = {
                 id: this.model.vertex.id,
                 name: this.model.vertex.name,
+                implicit: this.model.vertex.implicit,
             };
             this.$el.html($.mustache(template, view));
             this.update();

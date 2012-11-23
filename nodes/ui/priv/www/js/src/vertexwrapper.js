@@ -191,7 +191,6 @@ define([
 
         initialize: function() {
             this.render();
-            this.$el.append('<td><div class="delete"></div></td>');
             this.$el.addClass(this.model.vertex.name);  
             this.model.on('updateSelection', this.updateSelection, this);
             this.model.vertex.on('change', this.update, this);

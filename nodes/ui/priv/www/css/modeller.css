@@ -158,11 +158,13 @@ img#logo {
 }
 
 .vertex .delete {   
+    display: inline-block;
     width: 16px;
     height: 16px;   
     background-image: none;
     margin-right: 5px; 
     margin-left: 5px;
+    padding-bottom: 8px;
 }
 
 .vertex:hover .delete, .vertex.variable:hover .delete {

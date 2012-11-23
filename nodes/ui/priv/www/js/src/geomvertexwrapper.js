@@ -172,13 +172,15 @@ define([
                 '<td class="title">' + 
                 '<img src="/ui/images/icons/{{type}}32x32.png"/>' + 
                 '<div class="name">{{name}}</div>' + 
+                '<div class="delete"></div>' +
                 '</td>';
             this.$el.html($.mustache(template, view));
             return this;
         },        
 
         events: {
-            'click .title' : 'clickTitle',
+            'click .title .name' : 'clickTitle',
+            'click .title img' : 'clickTitle',
             'click .delete' : 'delete',
         },
 

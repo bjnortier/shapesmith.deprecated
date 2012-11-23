@@ -91,14 +91,19 @@ define([
 
         render: function() {
             var template = 
-                '<td colspan="2">' + 
-                '<div class="title"><img src="/ui/images/icons/extrude32x32.png"/>' +
+                '<td>' +
+                '<table><tr>' +
+                '<td class="title">' + 
+                '<img src="/ui/images/icons/point32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
+                '{{^implicit}}<div class="delete"></div>{{/implicit}}' + 
+                '</td></tr><tr><td>' +
                 '</div>' + 
                 '<div class="coordinate">' + 
                 'h <input class="field h" type="text" value="{{h}}"></input>' +
                 '</div>' +
-                '</td>';
+                '</td></tr></table>' +
+                '</td>'
             var view = {
                 name: this.model.vertex.name,
                 h   : this.model.vertex.parameters.h,

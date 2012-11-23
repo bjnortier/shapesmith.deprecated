@@ -60,18 +60,18 @@ define([
                 this.editingDOMView,
                 new EditingLineSceneView({model: this}),
             ]);
-            this.vertex.on('beforeImplicitChildCommit', this.beforeImplicitChildCommit, this);
+                geometryGraph.on('committedImplicit', this.committedImplicit, this);
         },
 
         destroy: function() {
             geomVertexWrapper.EditingModel.prototype.destroy.call(this);
-            this.vertex.off('beforeImplicitChildCommit', this.beforeImplicitChildCommit, this);
+            geometryGraph.off('committedImplicit', this.committedImplicit, this);
         },
 
-        // A point has been added to the polyline with a click
-        beforeImplicitChildCommit: function(childVertex) {
-            if (this.vertex.proto) {
-                if (_.last(geometryGraph.childrenOf(this.vertex)) === childVertex) {
+        committedImplicit: function(vertices) {
+            if (this.vertex.proto && (vertices.length === 1)) {
+                var vertex = vertices[0];
+                if (_.last(geometryGraph.childrenOf(this.vertex)) === vertex) {
                     var point = geometryGraph.addPointToPolyline(this.vertex);
                 }
             }
@@ -141,13 +141,18 @@ define([
 
         render: function() {
             var template = 
-                '<td colspan="2">' + 
-                '<div class="title"><img src="/ui/images/icons/polyline32x32.png"/>' +
+                '<td>' +
+                '<table><tr>' +
+                '<td class="title">' + 
+                '<img src="/ui/images/icons/point32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
+                '{{^implicit}}<div class="delete"></div>{{/implicit}}' + 
+                '</td></tr><tr><td>' +
                 '</div>' + 
                 '<div class="points">' + 
                 '</div>' + 
-                '</td>';
+                '</td></tr></table>' +
+                '</td>'
             var view = {
                 name: this.model.vertex.name,
                 // renderPoints: this.renderPoints()
@@ -156,52 +161,6 @@ define([
             // this.update();
             return this;
         },
-
-        // renderPoints: function() {
-        //     // Note the coordinate class that has a number - valid class names
-        //     // cannot start with a number, so prefix an underscore
-
-        //     var that = this;
-        //     var pointChildren = geometryGraph.childrenOf(this.model.vertex);
-        //     var appendElement = $('<div></div>');
-        //     var points = pointChildren.map(function(pointVertex, i) {
-
-        //         if (pointVertex.editing) {
-        //             var modelForPoint = new pointMV.EditingModel(pointVertex, appendElement);
-        //         } else {
-        //             var template = 
-        //                 '<div class="point _{{i}}">' +
-        //                 '<div class="named">{{id}}</div>' +
-        //                 '</div>';
-        //             appendElement.append($.mustache(template, pointVertex));
-        //         }
-
-        //     });
-
-        //     return appendElement;
-        // },
-
-        // update: function() {
-        //     // Re-render when the list of children has changed. Point field updates
-        //     // are handles by the point model(s)
-        //     var childIds = geometryGraph.childrenOf(this.model.vertex).map(function(v) {
-        //         return v.id;
-        //     });
-        //     var allSame = (childIds.length === this.lastRenderedPointIds.length);
-        //     for (var i = 0; allSame && (i < childIds.length); ++i) {
-        //         if (childIds[i] !== this.lastRenderedPointIds[i]) {
-        //             allSame = false;
-        //             break;
-        //         }
-        //     }
-
-        //     if (!allSame) {
-        //         var pointsElement = this.renderPoints();
-        //         this.$el.find('.points').empty();
-        //         this.$el.find('.points').append(pointsElement);
-        //         this.lastRenderedPointIds = childIds;
-        //     }
-        // },
 
     }); 
 

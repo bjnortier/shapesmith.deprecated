@@ -86,6 +86,8 @@ define([
                         if (!vertex.implicit) {
                             captureGraph(commandSuccessFn);
                             that.trigger('committed', [vertex]);
+                        } else {
+                            that.trigger('committedImplicit', [vertex]);
                         }
                     }
                 });
@@ -447,9 +449,18 @@ define([
 
         this.addPointToPolyline = function(polyline, point) {
             if (point === undefined) {
-                point = this.createPointPrototype({implicit: true, workplane: polyline.workplane});
-            } 
-            graph.addEdge(polyline, point);
+                point = new geomNode.Point({
+                    editing: true,
+                    proto: true,
+                    implicit: true, 
+                    workplane: polyline.workplane,
+                });
+                this.add(point, function() {
+                    graph.addEdge(polyline, point);
+                });
+            } else {
+                graph.addEdge(polyline, point);
+            }
             return point;
         }
 
