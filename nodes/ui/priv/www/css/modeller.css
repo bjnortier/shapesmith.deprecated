@@ -85,7 +85,7 @@ img#logo {
 }
 
 .toolbar li:hover, .okcancel .button:hover {
-    border-bottom: solid 2px #fff;
+    border-bottom: solid 2px #000;
     cursor: pointer;
 }
 
@@ -115,7 +115,7 @@ img#logo {
 }
 
 #variable-manager .add:hover {
-    border-bottom: solid 2px #fff;
+    border-bottom: solid 2px #000;
     cursor: pointer;
 }
 
@@ -179,7 +179,7 @@ img#logo {
 }
 
 #geometry .vertex.display:hover td {
-    border-bottom: solid #FFF 2px;
+    border-bottom: solid #000 2px;
 }
 
 .vertex.selected td {
@@ -295,7 +295,7 @@ img#logo {
 } 
 
 .error .field {
-    border-bottom: solid thin red;
+    border-bottom: solid 2px red;
 }
 
 /* ---------- Workplane ---------- */
