@@ -134,7 +134,8 @@ define([
         render: function() {
             var template = 
                 '<td class="name">{{name}}</input></td>' +
-                '<td class="expression">{{expression}}</td>';
+                '<td class="expression">{{expression}}</td>' +
+                '<td><div class="delete"></div></td>';
             var view = {
                 id: this.model.vertex.id,   
                 name:  this.model.vertex.name,

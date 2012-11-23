@@ -35,17 +35,6 @@ define([
                 $('#geometry').append(el);
             }
         }
-
-        // // Subsume the implicit children
-        // var children = geometryGraph.childrenOf(vertex);
-        // children.forEach(function(child) {
-        //     if (child.implicit) {
-        //         var childElement = $('.' + child.id);
-        //         var childPlaceholderSelector = '._' + child.id;
-        //         childElement.replaceAll(childPlaceholderSelector);
-        //     }
-        // });
-
     }
 
     var saveRowIndex = function(vertexId, el) {
@@ -82,7 +71,11 @@ define([
 
         initialize: function() {
             vertexWrapper.EditingDOMView.prototype.initialize.call(this);
-            addToTable(this.model.vertex, this.$el);
+            if (this.model.appendElement) {
+                this.model.appendElement.append(this.$el);
+            } else {
+                addToTable(this.model.vertex, this.$el);
+            }
             $('.field').autoGrowInput();
         },
 
@@ -156,7 +149,11 @@ define([
 
         initialize: function() {
             vertexWrapper.DisplayDOMView.prototype.initialize.call(this);
-            addToTable(this.model.vertex, this.$el);
+            if (this.model.appendElement) {
+                this.model.appendElement.append(this.$el);
+            } else {
+                addToTable(this.model.vertex, this.$el);
+            }
             this.$el.addClass(this.model.vertex.name);  
             this.updateSelection();
         },
@@ -175,13 +172,15 @@ define([
                 '<td class="title">' + 
                 '<img src="/ui/images/icons/{{type}}32x32.png"/>' + 
                 '<div class="name">{{name}}</div>' + 
+                '<div class="delete"></div>' +
                 '</td>';
             this.$el.html($.mustache(template, view));
             return this;
         },        
 
         events: {
-            'click .title' : 'clickTitle',
+            'click .title .name' : 'clickTitle',
+            'click .title img' : 'clickTitle',
             'click .delete' : 'delete',
         },
 

@@ -3,9 +3,10 @@ define([
     'src/colors',
     'src/geometrygraphsingleton',
     'src/geomvertexwrapper',
+    'src/pointMV',
     'src/scene',
     'src/workplane'], 
-    function(calc, colors, geometryGraph, geomVertexWrapper, sceneModel, workplaneModel) {
+    function(calc, colors, geometryGraph, geomVertexWrapper, pointMV, sceneModel, workplaneModel) {
 
     // ---------- Common ----------
 
@@ -17,6 +18,9 @@ define([
             var color = this.highlightColor || this.selectedColor || this.color || colors.geometry.default;
             
             var pointChildren = geometryGraph.childrenOf(this.model.vertex);
+            if (pointChildren.length === 0) {
+                return;
+            }
             var coordinates = pointChildren.map(function(point) {
                 return point.parameters.coordinate;
             });
@@ -50,22 +54,25 @@ define([
 
         initialize: function(vertex) {
             geomVertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
+            this.editingDOMView = new EditingDOMView({model: this});
+            this.implicitAppendElement = this.editingDOMView.$el.find('.points');
             this.views = this.views.concat([
-                new EditingDOMView({model: this}),
+                this.editingDOMView,
                 new EditingLineSceneView({model: this}),
             ]);
-            this.vertex.on('beforeImplicitChildCommit', this.beforeImplicitChildCommit, this);
+                geometryGraph.on('committedImplicit', this.committedImplicit, this);
         },
 
         destroy: function() {
             geomVertexWrapper.EditingModel.prototype.destroy.call(this);
-            this.vertex.off('beforeImplicitChildCommit', this.beforeImplicitChildCommit, this);
+            geometryGraph.off('committedImplicit', this.committedImplicit, this);
         },
 
-        beforeImplicitChildCommit: function(childVertex) {
-            if (this.vertex.proto) {
-                if (_.last(geometryGraph.childrenOf(this.vertex)) === childVertex) {
-                    geometryGraph.addPointToPolyline(this.vertex);
+        committedImplicit: function(vertices) {
+            if (this.vertex.proto && (vertices.length === 1)) {
+                var vertex = vertices[0];
+                if (_.last(geometryGraph.childrenOf(this.vertex)) === vertex) {
+                    var point = geometryGraph.addPointToPolyline(this.vertex);
                 }
             }
         },
@@ -81,6 +88,8 @@ define([
         },
 
         sceneViewClick: function(viewAndEvent) {
+            this.lastClickSource = viewAndEvent.view;
+
             if (this.vertex.proto) {
                 var children = geometryGraph.childrenOf(this.vertex);
                 if (viewAndEvent.view.model.vertex.type === 'point') {
@@ -92,7 +101,7 @@ define([
                     geometryGraph.addPointToPolyline(this.vertex, clickedPoint);
                     if (clickedPoint === _.first(children)) {
                         this.okCreate();
-                        this.creating = true; // Prevent doube create on double click
+                        this.creating = true; // Prevent double create on double click
                     } else {
                         geometryGraph.addPointToPolyline(this.vertex);
                         this.vertex.trigger('change', this.vertex);
@@ -102,6 +111,13 @@ define([
         },
 
         sceneViewDblClick: function(viewAndEvent) {
+            // It may happen that a dbl-click on click has created a new polyline, and
+            // THIS model is the new polyline. Thus disregard a dbl-click that didn't follow
+            // a click
+            if (!this.lastClickSource || (this.lastClickSource.cid !== viewAndEvent.view.cid)) {
+                return;
+            }
+
             // Double-click on a point and the first click hasn't already 
             // created
             if (!this.creating && (viewAndEvent.view.model.vertex.type === 'point')) {
@@ -114,52 +130,36 @@ define([
 
     var EditingDOMView = geomVertexWrapper.EditingDOMView.extend({
 
+        initialize: function() {
+            this.lastRenderedPointIds = [];
+            geomVertexWrapper.EditingDOMView.prototype.initialize.call(this);
+        },
+
+        remove: function() {
+            geomVertexWrapper.EditingDOMView.prototype.remove.call(this);
+        },
+
         render: function() {
             var template = 
-                '<td colspan="2">' + 
-                '<div class="title"><img src="/ui/images/icons/polyline32x32.png"/>' +
+                '<td>' +
+                '<table><tr>' +
+                '<td class="title">' + 
+                '<img src="/ui/images/icons/point32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
+                '{{^implicit}}<div class="delete"></div>{{/implicit}}' + 
+                '</td></tr><tr><td>' +
                 '</div>' + 
                 '<div class="points">' + 
-                '{{{renderedCoordinates}}}' +
                 '</div>' + 
-                '</td>';
+                '</td></tr></table>' +
+                '</td>'
             var view = {
                 name: this.model.vertex.name,
-                renderedCoordinates: this.renderCoordinates()
+                // renderPoints: this.renderPoints()
             };
             this.$el.html($.mustache(template, view));
+            // this.update();
             return this;
-        },
-
-        renderCoordinates: function() {
-            // Note the coordinate class that has a number - valid class names
-            // cannot start with a number, so prefix an underscore
-            var template = 
-                '{{#points}}' +
-                '<div class="point _{{i}}">' +
-                '<div class="named">{{id}}</div>' +
-                '</div>' +
-                '{{/points}}';
-            var that = this;
-
-            var pointChildren = geometryGraph.childrenOf(this.model.vertex);
-            var points = pointChildren.map(function(pointChild, i) {
-                return {
-                    id: pointChild.id,
-                    name: pointChild.name,
-                    i: i
-                }
-            });
-            var view = {
-                points: points
-            }
-            return $.mustache(template, view);
-        },
-
-        update: function() {
-            var coordinates = this.renderCoordinates();
-            this.$el.find('.points').html(coordinates);
         },
 
     }); 

@@ -2,7 +2,7 @@ define([
         'src/geometrygraphsingleton', 
         'src/selection', 
         'src/variableMV',
-        'src/pointwrapper', 
+        'src/pointMV', 
         'src/polylineMV',
         'src/extrudewrapper',
     ], 
@@ -52,10 +52,20 @@ define([
     }
 
     var addVertex = function(vertex) {
+        // Try to find the editing parent model of an implicit child
+        var editingParentModel = undefined;
+        if (vertex.implicit) {
+            var parents = geometryGraph.parentsOf(vertex);
+            var editingParent = _.find(parents, function(parent) { return parent.editing; });
+            if (editingParent) {
+                editingParentModel = models[editingParent.id];
+            }
+        }
+
         if (vertex.editing) {
-            models[vertex.id] = new wrappers[vertex.type].EditingModel(vertex);
+            models[vertex.id] = new wrappers[vertex.type].EditingModel(vertex, editingParentModel);
         } else {
-            models[vertex.id] = new wrappers[vertex.type].DisplayModel(vertex);
+            models[vertex.id] = new wrappers[vertex.type].DisplayModel(vertex, editingParentModel);
         }
     }
 
@@ -66,7 +76,6 @@ define([
         var model = models[vertex.id];
         model.destroy();
         delete models[vertex.id];
-        return model;
     }
 
     return wrappers;

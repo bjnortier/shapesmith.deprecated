@@ -114,13 +114,13 @@ define([
         },
 
         events: {
-            'focusin'  : 'vertexFocusIn',
-            'focusout'  : 'vertexFocusOut',
+            'focusin'         : 'vertexFocusIn',
+            'focusout'        : 'vertexFocusOut',
             'focusin .field'  : 'fieldFocusIn',
             'focusout .field' : 'fieldFocusOut',
             'change .field'   : 'fieldChange',
-            'keyup .field'   : 'fieldKeyUp',
-            'click .delete'  : 'delete',
+            'keyup .field'    : 'fieldKeyUp',
+            'click .delete'   : 'delete',
         },
 
         vertexFocusIn: function(event) {
@@ -151,19 +151,24 @@ define([
         },
 
         fieldChange: function(event) {
-            this.updateFromDOM();
-            this.model.vertex.trigger('change', this.model.vertex);
+            event.stopPropagation();
+            if (this.updateFromDOM) {
+                this.updateFromDOM();
+            }
         },
 
         fieldKeyUp: function(event) {
-            // Return
-            if (event.keyCode === 13) {
-                geometryGraph.commitIfEditing();
+            // Bubble up to the parent for implicit vertices
+            if (!this.model.vertex.implicit) {
+                // Return
+                if (event.keyCode === 13) {
+                    geometryGraph.commitIfEditing();
+                }
+                // Escape
+                if (event.keyCode === 27) {
+                    this.model.cancel();
+                } 
             }
-            // Escape
-            if (event.keyCode === 27) {
-                this.model.cancel();
-            } 
         },
 
         delete: function() {
@@ -186,7 +191,6 @@ define([
 
         initialize: function() {
             this.render();
-            this.$el.append('<td><div class="delete"></div></td>');
             this.$el.addClass(this.model.vertex.name);  
             this.model.on('updateSelection', this.updateSelection, this);
             this.model.vertex.on('change', this.update, this);

@@ -40,12 +40,12 @@ define([
 
             var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || colors.geometry.defaultAmbient;
             var color = this.highlightColor || this.selectedColor || this.color || colors.geometry.default;
-            var face = THREE.SceneUtils.createMultiMaterialObject(
-                geometry,
-                [
-                    new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}),
-                    new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
-                ]);
+            var materials = [];
+            if (!this.model.vertex.editing) {
+                materials.push(new THREE.MeshLambertMaterial({ambient: ambient, side: THREE.DoubleSide}));
+            }
+            materials.push(new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}));
+            var face = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
             this.sceneObject.add(face);
         },
     }
@@ -91,14 +91,19 @@ define([
 
         render: function() {
             var template = 
-                '<td colspan="2">' + 
-                '<div class="title"><img src="/ui/images/icons/extrude32x32.png"/>' +
+                '<td>' +
+                '<table><tr>' +
+                '<td class="title">' + 
+                '<img src="/ui/images/icons/point32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
+                '{{^implicit}}<div class="delete"></div>{{/implicit}}' + 
+                '</td></tr><tr><td>' +
                 '</div>' + 
                 '<div class="coordinate">' + 
                 'h <input class="field h" type="text" value="{{h}}"></input>' +
                 '</div>' +
-                '</td>';
+                '</td></tr></table>' +
+                '</td>'
             var view = {
                 name: this.model.vertex.name,
                 h   : this.model.vertex.parameters.h,
