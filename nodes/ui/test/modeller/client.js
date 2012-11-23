@@ -142,14 +142,14 @@ client.addCommand('getEditingVertexName', function(callback) {
 });
 
 client.addCommand('assertNumberOfEditingNodes', function(expectedLength, callback) {
-    this.elements('css selector', '.vertex.editing', function(result) {
+    this.elements('css selector', '#graphs .vertex.editing', function(result) {
         assert.equal(result.value.length, expectedLength);
         callback();
     });
 });
 
 client.addCommand('assertNumberOfDisplayNodes', function(expectedLength, callback) {
-    this.elements('css selector', '.vertex.display', function(result) {
+    this.elements('css selector', '#graphs .vertex.display', function(result) {
         assert.equal(result.value.length, expectedLength);
         callback();
     });

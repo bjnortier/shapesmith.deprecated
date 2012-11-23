@@ -147,6 +147,14 @@ define([
             this.model.vertex.parameters.snap = this.$el.find('.snap').val();
         },
 
+        update: function() {
+            if (this.model.vertex.errors) {
+                this.$el.addClass('error');
+            } else {
+                this.$el.removeClass('error');
+            }
+        },
+
         tryCommit: function() {
             geometryGraph.commitIfEditing();
         },

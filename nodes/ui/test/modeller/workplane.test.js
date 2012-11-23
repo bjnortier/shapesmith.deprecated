@@ -44,9 +44,13 @@ describe('Workplane', function() {
         client
             .click('#workplane-settings')
             .assertNumberOfEditingNodes(1)
-            .clearElement('#workplane-settings .snap')
             .clickOnWorld(0,0,0)
             .assertNumberOfEditingNodes(0, done);
+    });
+
+    it.skip('will not change the workplane if there are errors', function(done) {
+        // Also test for trying an invalid value more than once
+        assert.isTrue(false);
     });
 
 

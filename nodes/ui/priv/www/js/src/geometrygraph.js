@@ -137,6 +137,8 @@ define([
             var originalVertices = nonEditingVertices.map(function(v) {
                 return originals[v.id];
             }); 
+            
+            originals = {};
 
             var doFn = function(commandSuccessFn, commandErrorFn) {
 
@@ -360,6 +362,7 @@ define([
             this.getEditingVertices().map(function(vertex) {
                 that.cancel(vertex);
             });
+            originals = {};
         }
 
         this.commitIfEditing = function() {
@@ -379,7 +382,6 @@ define([
             } else {
                 this.commitEdit();
             }
-            originals = {};
         }
 
         // ---------- Validation ----------
@@ -392,6 +394,22 @@ define([
                     vertex.errors = {name: 'invalid', expression: 'invalid'};
                     vertex.trigger('change', vertex);
                     return false;
+                }
+            } else if (vertex.type === 'workplane') {
+                var snapStr = vertex.parameters.snap;
+                try {
+                    var snap = parseFloat(snapStr);
+                    if (_.isNaN(snap) || (snap <= 0)) {
+                        vertex.errors = {snap: 'must be > 0'};
+                        vertex.trigger('change', vertex);
+                        return false;     
+                    }
+                    vertex.parameters.snap = snap;
+                    return true;
+                } catch (e) {
+                    vertex.errors = {snap: 'not a number'};
+                    vertex.trigger('change', vertex);
+                    return false;     
                 }
             } else {
                 return true;
