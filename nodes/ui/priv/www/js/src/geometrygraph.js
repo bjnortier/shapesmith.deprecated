@@ -342,6 +342,8 @@ define([
 
                 this.remove(vertex);
             }
+
+            this.trigger('cancelled', vertex);
         }
 
         this.cancelIfEditing = function() {

@@ -18,6 +18,9 @@ define([
         geometryGraph.on('committed', function() {
             that.deselectAll();
         });
+        geometryGraph.on('cancelled', function() {
+            that.deselectAll();
+        });        
 
         this.selectOnly = function(id) {
             if (!this.canSelect) {

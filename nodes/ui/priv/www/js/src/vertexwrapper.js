@@ -158,14 +158,17 @@ define([
         },
 
         fieldKeyUp: function(event) {
-            // Return
-            if (event.keyCode === 13) {
-                geometryGraph.commitIfEditing();
+            // Bubble up to the parent for implicit vertices
+            if (!this.model.vertex.implicit) {
+                // Return
+                if (event.keyCode === 13) {
+                    geometryGraph.commitIfEditing();
+                }
+                // Escape
+                if (event.keyCode === 27) {
+                    this.model.cancel();
+                } 
             }
-            // Escape
-            if (event.keyCode === 27) {
-                this.model.cancel();
-            } 
         },
 
         delete: function() {
