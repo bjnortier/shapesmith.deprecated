@@ -88,6 +88,8 @@ define([
         },
 
         sceneViewClick: function(viewAndEvent) {
+            this.lastClickSource = viewAndEvent.view;
+
             if (this.vertex.proto) {
                 var children = geometryGraph.childrenOf(this.vertex);
                 if (viewAndEvent.view.model.vertex.type === 'point') {
@@ -99,7 +101,7 @@ define([
                     geometryGraph.addPointToPolyline(this.vertex, clickedPoint);
                     if (clickedPoint === _.first(children)) {
                         this.okCreate();
-                        this.creating = true; // Prevent doube create on double click
+                        this.creating = true; // Prevent double create on double click
                     } else {
                         geometryGraph.addPointToPolyline(this.vertex);
                         this.vertex.trigger('change', this.vertex);
@@ -109,6 +111,13 @@ define([
         },
 
         sceneViewDblClick: function(viewAndEvent) {
+            // It may happen that a dbl-click on click has created a new polyline, and
+            // THIS model is the new polyline. Thus disregard a dbl-click that didn't follow
+            // a click
+            if (!this.lastClickSource || (this.lastClickSource.cid !== viewAndEvent.view.cid)) {
+                return;
+            }
+
             // Double-click on a point and the first click hasn't already 
             // created
             if (!this.creating && (viewAndEvent.view.model.vertex.type === 'point')) {

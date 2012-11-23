@@ -296,10 +296,14 @@ define([
             this.replace(vertex, editingReplacement);
             originals[vertex.id] = vertex;
 
+            // Edit implicit children. Don't edit the same 
+            // vertex more than once
             var that = this;
+            var implicitEditing = [];
             this.childrenOf(vertex).forEach(function(child) {
-                if (child.implicit) {
+                if (child.implicit && (implicitEditing.indexOf(child.id) === -1)) {
                     that.edit(child);
+                    implicitEditing.push(child.id);
                 }
             });
 

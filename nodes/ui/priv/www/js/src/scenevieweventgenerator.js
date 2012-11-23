@@ -107,8 +107,6 @@ define(['src/scene'], function(sceneModel) {
         }
 
         this.click = function(event) {
-
-
             var clickableViews = mouseOverViews.filter(function(view) {
                 return view.clickable;
             });
@@ -125,6 +123,7 @@ define(['src/scene'], function(sceneModel) {
         }
 
         this.dblclick = function(event) {
+
             var clickableViews = mouseOverViews.filter(function(view) {
                 return view.clickable;
             });
