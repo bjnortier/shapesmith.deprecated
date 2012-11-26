@@ -20,21 +20,23 @@ define([], function() {
         }
     }
     
-    var positionOnWorkplane = function(event, workplaneNode, camera) {
+    var positionOnWorkplane = function(event, workplaneVertex, camera) {
 
-        var origin = objToVector(workplaneNode.origin);
-        var axis   = objToVector(workplaneNode.axis);   
-        var angle  = workplaneNode.angle;
+        var origin = objToVector(workplaneVertex.workplane.origin);
+        var axis   = objToVector(workplaneVertex.workplane.axis);   
+        var angle  = workplaneVertex.workplane.angle;
         var normal = rotateAroundAxis(new THREE.Vector3(0,0,1), axis, angle);
         var worldPosition = positionOnPlane(event, origin, normal, camera);
 
         worldPosition.subSelf(origin);
         var workplanePosition = 
-            rotateAroundAxis(worldPosition, axis, -workplaneNode.angle);
+            rotateAroundAxis(worldPosition, axis, -workplaneVertex.workplane.angle);
 
-        return new THREE.Vector3(Math.round(workplanePosition.x),
-                                 Math.round(workplanePosition.y),
-                                 Math.round(workplanePosition.z));
+        var snap = workplaneVertex.parameters.snap;
+
+        return new THREE.Vector3(Math.round(workplanePosition.x/snap) * snap,
+                                 Math.round(workplanePosition.y/snap) * snap,
+                                 Math.round(workplanePosition.z/snap) * snap);
     }
 
     function positionOnPlane(event, origin, normal, camera) {

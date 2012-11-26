@@ -137,6 +137,8 @@ define([
             var originalVertices = nonEditingVertices.map(function(v) {
                 return originals[v.id];
             }); 
+            
+            originals = {};
 
             var doFn = function(commandSuccessFn, commandErrorFn) {
 
@@ -239,7 +241,14 @@ define([
         }
 
         // This is for webdriver to determine when things have loaded
-        var loadFinished = function() {
+        this.loadFinished = function() {
+            var workplaneVertices = this.filteredVertices(function(v) {
+                return v.type === 'workplane';
+            });
+            if (workplaneVertices.length === 0) {
+                this.add(new geomNode.Workplane());
+            }
+
             if (!SS.loadDone) {
                 SS.loadDone = true;
             }
@@ -260,7 +269,7 @@ define([
                     --remaining;
                     if (remaining == 0) {
                         that.createGraph(graph, shasToVertices);
-                        loadFinished();
+                        that.loadFinished();
                     }
                 }
 
@@ -273,7 +282,7 @@ define([
                             });
                     });
                 } else {
-                    loadFinished();
+                    that.loadFinished();
                 }
 
             });
@@ -353,6 +362,7 @@ define([
             this.getEditingVertices().map(function(vertex) {
                 that.cancel(vertex);
             });
+            originals = {};
         }
 
         this.commitIfEditing = function() {
@@ -384,6 +394,22 @@ define([
                     vertex.errors = {name: 'invalid', expression: 'invalid'};
                     vertex.trigger('change', vertex);
                     return false;
+                }
+            } else if (vertex.type === 'workplane') {
+                var snapStr = vertex.parameters.snap;
+                try {
+                    var snap = parseFloat(snapStr);
+                    if (_.isNaN(snap) || (snap <= 0)) {
+                        vertex.errors = {snap: 'must be > 0'};
+                        vertex.trigger('change', vertex);
+                        return false;     
+                    }
+                    vertex.parameters.snap = snap;
+                    return true;
+                } catch (e) {
+                    vertex.errors = {snap: 'not a number'};
+                    vertex.trigger('change', vertex);
+                    return false;     
                 }
             } else {
                 return true;
@@ -597,6 +623,8 @@ define([
             });
             return result;
         }
+
+
     }
 
     return {

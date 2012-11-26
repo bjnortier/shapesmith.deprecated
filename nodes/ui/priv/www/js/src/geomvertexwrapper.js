@@ -6,7 +6,7 @@ define([
     'src/scenevieweventgenerator',
     'src/selection',
     'src/scene',
-    'src/workplane',
+    'src/workplaneMV',
     'src/vertexwrapper',
     ], function(
         colors,
@@ -16,7 +16,7 @@ define([
         sceneViewEventGenerator,
         selection,
         sceneModel,
-        workplane,
+        Workplane,
         vertexWrapper) {
 
     var lastIndex = {}
@@ -47,19 +47,20 @@ define([
     var EditingModel = vertexWrapper.EditingModel.extend({
 
         initialize: function(vertex) {
+            this.currentWorkplaneModel = Workplane.getCurrent();
             vertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
-            workplane.on('positionChanged', this.workplanePositionChanged, this);
-            workplane.on('click', this.workplaneClick, this);
-            workplane.on('dblclick', this.workplaneDblClick, this);
+            this.currentWorkplaneModel.on('positionChanged', this.workplanePositionChanged, this);
+            this.currentWorkplaneModel.on('click', this.workplaneClick, this);
+            this.currentWorkplaneModel.on('dblclick', this.workplaneDblClick, this);
             sceneViewEventGenerator.on('sceneViewClick', this.sceneViewClick, this);
             sceneViewEventGenerator.on('sceneViewDblClick', this.sceneViewDblClick, this);
         },
 
         destroy: function() {
             vertexWrapper.EditingModel.prototype.destroy.call(this);
-            workplane.off('positionChanged', this.workplanePositionChanged, this);
-            workplane.off('click', this.workplaneClick, this);
-            workplane.off('dblclick', this.workplaneDblClick, this);
+            this.currentWorkplaneModel.off('positionChanged', this.workplanePositionChanged, this);
+            this.currentWorkplaneModel.off('click', this.workplaneClick, this);
+            this.currentWorkplaneModel.off('dblclick', this.workplaneDblClick, this);
             sceneViewEventGenerator.off('sceneViewClick', this.sceneViewClick, this);
             sceneViewEventGenerator.off('sceneViewDblClick', this.sceneViewDblClick, this);
         },  
@@ -187,7 +188,8 @@ define([
         clickTitle: function(event) {
             if (this.model.canSelect()) {
                 if (event.shiftKey || event.ctrlKey || event.metaKey) {
-                    selection.addToSelection(this.model.vertex.id);
+                    // selection.addToSelection(this.model.vertex.id);
+                    selection.selectOnly(this.model.vertex.id);
                 } else {
                     selection.selectOnly(this.model.vertex.id);
                 }
@@ -267,7 +269,8 @@ define([
             }
             if (vertexToSelect) {
                 if (event.shiftKey || event.ctrlKey || event.metaKey) {
-                    selection.addToSelection(vertexToSelect.id);
+                    selection.selectOnly(vertexToSelect.id);
+                    // selection.addToSelection(vertexToSelect.id);
                 } else {
                     selection.selectOnly(vertexToSelect.id);
                 }

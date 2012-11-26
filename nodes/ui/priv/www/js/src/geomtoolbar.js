@@ -5,7 +5,7 @@ define([
     'src/commandstack', 
     'src/interactioncoordinator',
     'src/selection',
-    'src/workplane',
+    'src/workplaneMV',
     ], 
     function(
         calc,
@@ -14,7 +14,7 @@ define([
         commandStack, 
         coordinator, 
         selectionManager,
-        workplaneModel) {
+        Workplane) {
 
     var SelectItemModel = toolbar.ItemModel.extend({
         
@@ -108,14 +108,15 @@ define([
         },
 
         launchTool: function(item) {
-            var workplane = calc.copyObj(workplaneModel.node);
             this.toolRelaunchVertexId = undefined;
             geometryGraph.cancelIfEditing();
             if (item.name === 'point') {
+                var workplane = calc.copyObj(Workplane.getCurrent().vertex.workplane);
                 this.toolRelaunchVertexId = geometryGraph.createPointPrototype(
                     {workplane: workplane}).id;
             }
             if (item.name === 'polyline') {
+                var workplane = calc.copyObj(Workplane.getCurrent().vertex.workplane);
                 this.toolRelaunchVertexId = geometryGraph.createPolylinePrototype(
                     {workplane: workplane}).id;
             }

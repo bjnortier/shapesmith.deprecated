@@ -5,9 +5,9 @@ define([
         'src/geomvertexwrapper', 
         'src/scene', 
         'src/scenevieweventgenerator',
-        'src/workplane'
+        'src/workplaneMV'
     ], 
-    function(calc, colors, geometryGraph, geomVertexWrapper, sceneModel, sceneViewEventGenerator, workplaneModel) {
+    function(calc, colors, geometryGraph, geomVertexWrapper, sceneModel, sceneViewEventGenerator, Workplane) {
 
     // ---------- Editing ----------
 
@@ -15,8 +15,8 @@ define([
 
         initialize: function(vertex, possibleEditingParentModel) {
             geomVertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
-            if (workplaneModel.lastPosition) {
-                this.workplanePositionChanged(workplaneModel.lastPosition);
+            if (this.currentWorkplaneModel.lastPosition) {
+                this.workplanePositionChanged(this.currentWorkplaneModel.lastPosition);
             }
             this.views.push(new EditingSceneView({model: this}));
 
@@ -137,11 +137,11 @@ define([
         drag: function(event) {
             this.dragging = true;
             var positionOnWorkplane = calc.positionOnWorkplane(
-                event, workplaneModel.node, sceneModel.view.camera);
+                event, this.model.currentWorkplaneModel.vertex, sceneModel.view.camera);
             this.point.parameters.coordinate = {
-                x: positionOnWorkplane.x + workplaneModel.node.origin.x,
-                y: positionOnWorkplane.y + workplaneModel.node.origin.y,
-                z: positionOnWorkplane.z + workplaneModel.node.origin.z,
+                x: positionOnWorkplane.x + this.model.currentWorkplaneModel.vertex.workplane.origin.x,
+                y: positionOnWorkplane.y + this.model.currentWorkplaneModel.vertex.workplane.origin.y,
+                z: positionOnWorkplane.z + this.model.currentWorkplaneModel.vertex.workplane.origin.z,
             }
             this.model.vertex.trigger('change', this.model.vertex);
         },
