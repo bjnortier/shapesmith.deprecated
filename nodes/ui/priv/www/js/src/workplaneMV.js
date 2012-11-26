@@ -151,12 +151,10 @@ define([
         initialize: function() {
             vertexWrapper.EditingDOMView.prototype.initialize.call(this);
             $('#workplane-settings').append(this.$el);
-            coordinator.on('sceneClick', this.tryCommit, this);
         },
 
         remove: function() {
             vertexWrapper.EditingDOMView.prototype.remove.call(this);
-            coordinator.off('sceneClick', this.tryCommit, this);
         },
 
         render: function() {
@@ -183,10 +181,6 @@ define([
             } else {
                 this.$el.removeClass('error');
             }
-        },
-
-        tryCommit: function() {
-            geometryGraph.commitIfEditing();
         },
 
 

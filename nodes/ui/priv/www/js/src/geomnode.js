@@ -41,7 +41,11 @@ define([
         }
 
         this.implicit = options.implicit || false;
-        this.workplane = options.workplane;
+        this.workplane = options.workplane || {
+            origin: new THREE.Vector3(),
+            axis: new THREE.Vector3(0,0,1),
+            angle: 0
+        };
         this.parameters = options.parameters || {};
         this.editing = options.editing || false;
         this.proto = options.proto || false;
@@ -98,11 +102,6 @@ define([
     var Workplane = function(options) {
         var options = options || {};
         options.type = 'workplane';
-        options.workplane = options.workplane || {
-            origin: new THREE.Vector3(),
-            axis: new THREE.Vector3(0,0,1),
-            angle: 0
-        };
         options.parameters = options.parameters || {
             snap: 1.0
         };
