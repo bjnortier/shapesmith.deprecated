@@ -3,7 +3,7 @@ define([
         'src/selection', 
         'src/workplaneMV',
         'src/variableMV',
-        'src/pointMV', 
+        'src/pointMV2', 
         'src/polylineMV',
         'src/extrudeMV',
     ], 
@@ -33,42 +33,42 @@ define([
         removeVertex(vertex);
     });
 
-    geometryGraph.on('vertexReplaced', function(original, replacement) {
-        removeVertex(original);
-        addVertex(replacement);
-    });
+    // geometryGraph.on('vertexReplaced', function(original, replacement) {
+    //     removeVertex(original);
+    //     addVertex(replacement);
+    // });
 
-    selectionManager.on('selected', function(ids, selection) {
-        updateEditingForSelected(selection);
-    });
+    // selectionManager.on('selected', function(ids, selection) {
+    //     updateEditingForSelected(selection);
+    // });
 
-    selectionManager.on('deselected', function(ids, selection) {
-        updateEditingForSelected(selection);
-    });
+    // selectionManager.on('deselected', function(ids, selection) {
+    //     updateEditingForSelected(selection);
+    // });
 
-    var updateEditingForSelected = function(selection) {
-        if (selection.length === 1) {
-            geometryGraph.editById(selection[0]);
-        } else {
-            geometryGraph.commitIfEditing();
-        }
-    }
+    // var updateEditingForSelected = function(selection) {
+    //     if (selection.length === 1) {
+    //         geometryGraph.editById(selection[0]);
+    //     } else {
+    //         geometryGraph.commitIfEditing();
+    //     }
+    // }
 
     var addVertex = function(vertex) {
         // Try to find the editing parent model of an implicit child
-        var editingParentModel = undefined;
-        if (vertex.implicit) {
-            var parents = geometryGraph.parentsOf(vertex);
-            var editingParent = _.find(parents, function(parent) { return parent.editing; });
-            if (editingParent) {
-                editingParentModel = models[editingParent.id];
-            }
-        }
+        // var editingParentModel = undefined;
+        // if (vertex.implicit) {
+        //     var parents = geometryGraph.parentsOf(vertex);
+        //     var editingParent = _.find(parents, function(parent) { return parent.editing; });
+        //     if (editingParent) {
+        //         editingParentModel = models[editingParent.id];
+        //     }
+        // }
 
         if (vertex.editing) {
-            models[vertex.id] = new wrappers[vertex.type].EditingModel(vertex, editingParentModel);
+            models[vertex.id] = new wrappers[vertex.type].EditingModel(vertex);
         } else {
-            models[vertex.id] = new wrappers[vertex.type].DisplayModel(vertex, editingParentModel);
+            models[vertex.id] = new wrappers[vertex.type].DisplayModel(vertex);
         }
     }
 

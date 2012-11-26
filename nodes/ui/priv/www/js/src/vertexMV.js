@@ -1,19 +1,17 @@
 define([
-    'lib/backbone-require',
-    'src/geometrygraphsingleton', 
-    'src/interactioncoordinator',
     'src/scene',
+    'src/interactioncoordinator',
     'src/scenevieweventgenerator',
-    ], 
-    function(
-        Backbone,
-        geometryGraph,
-        coordinator,
+    'src/asyncAPI',
+    ], function(
         sceneModel,
-        sceneViewEventGenerator) {
+        coordinator,
+        sceneViewEventGenerator,
+        AsyncAPI
+    ) {
 
     // ---------- Common ----------
-    
+
     var Model = Backbone.Model.extend({
 
         initialize: function(vertex) {
@@ -34,10 +32,6 @@ define([
         descendantChanged: function(descendant) {
             this.vertex.trigger('change', this.vertex);
         },
-
-    });
-
-    var DOMView = Backbone.View.extend({
 
     });
 
@@ -78,21 +72,54 @@ define([
 
     });
 
-
     // ---------- Editing ----------
 
     var EditingModel = Model.extend({
 
-        okCreate: function() {
-            geometryGraph.commitCreate(this.vertex);
+        initialize: function(vertex) {
+            Model.prototype.initialize.call(this, vertex);
+            coordinator.on('keyup', this.cancel, this);
         },
 
-        okEdit: function() {
-            geometryGraph.commitEdit();
+        destroy: function() {
+            Model.prototype.destroy.call(this);
+            coordinator.off('keyup', this.cancel, this);
+
+        },
+
+        tryCommit: function(callback) {
+            var that = this;
+            if (this.vertex.proto) {
+                AsyncAPI.tryCommitCreate([this.vertex], function(result) {
+                    if (!result.error) {
+                        that.destroy();
+                        var newVertex = result.newVertices[0];
+                        new that.displayModelConstructor(newVertex);
+                        callback(true);
+                    } else {
+                        callback(false);
+                    }
+                });
+            } else {
+                AsyncAPI.tryCommitEdit([this.vertex], function(result) {
+                    console.log('committed edit', result);
+                    if (!result.error) {
+                        callback(true);
+                    } else {
+                        callback(false);
+                    }
+                });
+            }
+        },
+
+        tryDelete: function() {
+
         },
 
         cancel: function() {
-            geometryGraph.cancel(this.vertex);
+            if (this.vertex.proto) {
+                AsyncAPI.cancel(this.vertex);
+            }
         },
 
     });
@@ -116,8 +143,6 @@ define([
         events: {
             'focusin'         : 'vertexFocusIn',
             'focusout'        : 'vertexFocusOut',
-            'focusin .field'  : 'fieldFocusIn',
-            'focusout .field' : 'fieldFocusOut',
             'change .field'   : 'fieldChange',
             'keyup .field'    : 'fieldKeyUp',
             'click .delete'   : 'delete',
@@ -129,25 +154,17 @@ define([
 
         vertexFocusOut: function(event) {
             // If the focus is lost from the editin vertex within 100ms,
-            // then the focus has been lost and editing is done
+            // then the focus has been lost
             this.vertexFocusInTimestamp = 0;
             this.vertexFocusOutTimestamp = new Date().getTime();
             var that = this;
             var vertexFocusLostFn = function() {
                 var diff = that.vertexFocusInTimestamp - that.vertexFocusOutTimestamp;
                 if (diff < 0) {
-                    that.tryCommit && that.tryCommit();
+                    that.tryCommit();
                 }
             }
             setTimeout(vertexFocusLostFn, 100);
-        },
-
-        fieldFocusIn: function(event) {
-            coordinator.setFieldFocus(true);
-        },
-
-        fieldFocusOut: function(event) {
-            coordinator.setFieldFocus(false);
         },
 
         fieldChange: function(event) {
@@ -158,32 +175,28 @@ define([
         },
 
         fieldKeyUp: function(event) {
-            event.stopPropagation();
-            // Bubble up to the parent for implicit vertices
-            if (!this.model.vertex.implicit) {
-                // Return
-                if (event.keyCode === 13) {
-                    geometryGraph.commitIfEditing();
-                }
-                // Escape
-                if (event.keyCode === 27) {
-                    this.model.cancel();
-                } 
+            // Return
+            if (event.keyCode === 13) {
+                this.model.tryCommit()
             }
+            // Escape
+            if (event.keyCode === 27) {
+                this.model.cancel();
+            } 
         },
 
         delete: function() {
             if (this.model.vertex.proto) {
                 this.model.cancel();
             } else {
-                geometryGraph.commitDelete(this.model.vertex);
+                this.model.tryDelete();
             }
         },
 
     });
 
+    // ---------- Display ----------
 
-    // ---------- Display ---------
 
     var DisplayDOMView = Backbone.View.extend({
 
@@ -205,15 +218,14 @@ define([
 
     });
 
-    return {
-        Model: Model,
-        SceneView: SceneView,
-        EditingModel: EditingModel,
-        EditingDOMView: EditingDOMView,
-        DisplayDOMView: DisplayDOMView,
+    // ---------- Module ----------
 
+    return {
+        Model          : Model,
+        SceneView      : SceneView,
+        EditingModel   : EditingModel,
+        EditingDOMView : EditingDOMView,
+        DisplayDOMView : DisplayDOMView
     }
-    
 
 });
-

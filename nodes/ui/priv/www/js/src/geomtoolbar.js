@@ -83,9 +83,8 @@ define([
 
         initialize: function(attributes) {
             toolbar.Model.prototype.initialize.call(this, attributes);
-            geometryGraph.on('committed', this.geometryCommitted, this);
+            geometryGraph.on('vertexRemoved', this.vertexRemoved, this);
             commandStack.on('beforePop', this.beforePop, this);
-            coordinator.on('keydown', this.keydown, this);
         },
 
         activate: function(item) {
@@ -108,40 +107,24 @@ define([
         },
 
         launchTool: function(item) {
-            this.toolRelaunchVertexId = undefined;
-            geometryGraph.cancelIfEditing();
             if (item.name === 'point') {
                 var workplane = calc.copyObj(Workplane.getCurrent().vertex.workplane);
-                this.toolRelaunchVertexId = geometryGraph.createPointPrototype(
-                    {workplane: workplane}).id;
+                geometryGraph.createPointPrototype({workplane: workplane});
             }
             if (item.name === 'polyline') {
                 var workplane = calc.copyObj(Workplane.getCurrent().vertex.workplane);
-                this.toolRelaunchVertexId = geometryGraph.createPolylinePrototype(
-                    {workplane: workplane}).id;
+                geometryGraph.createPolylinePrototype({workplane: workplane});
             }
         },
 
-        keydown: function() {
-            if (event.keyCode === 27) {
-                // Activate the select tool
-                this.activate(this.items[0]);
+        vertexRemoved: function(vertex) {
+            if (vertex.proto) {
+                this.setToSelect();
             }
         },
 
         itemClicked: function(item) {
             this.activate(item);
-        },
-
-        // If the vertex committed is the tool vertex, create another
-        // of the same type. Child vertices (e.g. points of polylines)
-        // can be committed, so only create another for the top-level tools 
-        geometryCommitted: function(vertices) {
-            if ((vertices.length === 1) && (vertices[0].id === this.toolRelaunchVertexId)) {
-                this.launchTool(this.activeItem);
-            } else {
-                this.setToSelect();
-            }
         },
 
         // Cancel any active tools when geometry is popped

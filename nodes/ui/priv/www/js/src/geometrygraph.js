@@ -5,32 +5,9 @@ define([
     'src/graph',
     'src/geomnode',
     'src/variablegraph',
-    'src/command',
-    'src/commandstack',
+
     ], 
-    function(_, Backbone, crypto, graphLib, geomNode, variableGraphLib, Command, commandStack) {
-
-    var post = function(url, data, successFn, errorFn) {
-        $.ajax({
-            type: 'POST',
-            url: url,
-            contentType: 'application/json',
-            data: data,
-            dataType: 'json',
-            success: successFn,
-            error: errorFn,
-        });
-    }
-
-    var get = function(url, successFn, errorFn) {
-        $.ajax({
-            type: 'GET',
-            url: url,
-            dataType: 'json',
-            success: successFn,
-            error: errorFn,
-        });
-    }
+    function(_, Backbone, crypto, graphLib, geomNode, variableGraphLib) {
 
     var GeometryGraph = function() {
 
@@ -238,54 +215,6 @@ define([
                     }
                 }
             }
-        }
-
-        // This is for webdriver to determine when things have loaded
-        this.loadFinished = function() {
-            var workplaneVertices = this.filteredVertices(function(v) {
-                return v.type === 'workplane';
-            });
-            if (workplaneVertices.length === 0) {
-                this.add(new geomNode.Workplane());
-            }
-
-            if (!SS.loadDone) {
-                SS.loadDone = true;
-            }
-        }
-
-
-        this.loadFromCommit = function(commit) {
-            var url = '/' + SS.session.username + '/' + SS.session.design + '/graph/' + commit;
-            this.removeAll();
-            get(url, function(graph) {
-                var vertexSHAsToLoad = _.keys(graph.edges);
-                var remaining = vertexSHAsToLoad.length;
-                shasToVertices = {};
-
-                var vertexCreated = function(sha, vertex) {
-                    vertex.sha = sha;
-                    shasToVertices[sha] = vertex;
-                    --remaining;
-                    if (remaining == 0) {
-                        that.createGraph(graph, shasToVertices);
-                        that.loadFinished();
-                    }
-                }
-
-                if (vertexSHAsToLoad.length > 0) {
-                    vertexSHAsToLoad.forEach(function(sha) {
-                        get('/' + SS.session.username + '/' + SS.session.design + '/vertex/' + sha,
-                            function(data) {
-                                var vertex = new geomNode.constructors[data.type](data);
-                                vertexCreated(sha, vertex);
-                            });
-                    });
-                } else {
-                    that.loadFinished();
-                }
-
-            });
         }
 
         this.removeAll = function() {

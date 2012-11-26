@@ -8,8 +8,8 @@
         var dragging = false;
 
         var that = this;
-        window.addEventListener('keydown', function(event) {
-            that.trigger('keydown', event);
+        window.addEventListener('keyup', function(event) {
+            that.trigger('keyup', event);
         }, false);
 
         $('#scene').mousemove(function(event) {
@@ -110,13 +110,6 @@
             var dy = Math.abs(pos1.y - pos2.y);
             return Math.sqrt(dx*dx + dy*dy) > dragThreshold;
         };
-
-        // When a field input has focus, we want to prevent a 'click out'
-        // on the scene to unselect the editing vertex, or any other scene 
-        // click for that matter
-        this.setFieldFocus = function(val) {
-            this.fieldHasFocus = val;
-        }
     }
 
     var eventToPosition = function(event) {

@@ -10,7 +10,7 @@ define([
 
         _.extend(this, Backbone.Events);
 
-        this.do = function(command, callback) {
+        this.do = function(command, callback, newVertices) {
 
             var successFn = function(sha) {
                 command.fromCommit = $.getQueryParam("commit");
@@ -18,11 +18,11 @@ define([
                 history.pushState({commit: sha}, SS.design, url);
                 command.toCommit = sha;
                 undoStack.push(command);
-                callback && callback();
+                callback && callback({newVertices: newVertices});
             };
             var errorFn = function(msg) {
                 console.error(msg);
-                callback && callback();
+                callback && callback({error: msg});
             }
             command.do(successFn, errorFn);
 

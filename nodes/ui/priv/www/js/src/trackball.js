@@ -90,21 +90,19 @@ define(['src/scene',  'src/interactioncoordinator'], function(sceneModel, coordi
             }
         };
 
-        this.keydown = function(event) {
-            if (!coordinator.fieldHasFocus) {
-                var factor = 10;
-                switch (event.keyCode) {
-                case 187:
-                case 107:
-                    this.zoom(Math.sqrt(position.distance)*factor);
-                    event.preventDefault();
-                    break;
-                case 189:
-                case 109:
-                    this.zoom(-Math.sqrt(position.distance)*factor);
-                    event.preventDefault();
-                    break;
-                }
+        this.keyup = function(event) {
+            var factor = 10;
+            switch (event.keyCode) {
+            case 187:
+            case 107:
+                this.zoom(Math.sqrt(position.distance)*factor);
+                event.preventDefault();
+                break;
+            case 189:
+            case 109:
+                this.zoom(-Math.sqrt(position.distance)*factor);
+                event.preventDefault();
+                break;
             }
         }
 
@@ -144,7 +142,7 @@ define(['src/scene',  'src/interactioncoordinator'], function(sceneModel, coordi
         coordinator.on('mousedown', this.mousedown, this);
         coordinator.on('mouseup', this.mouseup, this);
         coordinator.on('mousewheel', this.mousewheel, this);
-        coordinator.on('keydown', this.keydown, this);
+        coordinator.on('keyup', this.keyup, this);
         sceneModel.view.on('prerender', this.updateCamera, this);
 
     } 
