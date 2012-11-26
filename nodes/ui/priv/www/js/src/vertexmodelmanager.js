@@ -38,17 +38,17 @@ define([
         addVertex(replacement);
     });
 
-    selectionManager.on('selected', function(ids, selectionManager) {
-        updateEditingForSelected(selectionManager);
+    selectionManager.on('selected', function(ids, selection) {
+        updateEditingForSelected(selection);
     });
 
-    selectionManager.on('deselected', function(ids, selectionManager) {
-        updateEditingForSelected(selectionManager);
+    selectionManager.on('deselected', function(ids, selection) {
+        updateEditingForSelected(selection);
     });
 
-    var updateEditingForSelected = function(selectionManager) {
-        if (selectionManager.length === 1) {
-            geometryGraph.editById(selectionManager[0]);
+    var updateEditingForSelected = function(selection) {
+        if (selection.length === 1) {
+            geometryGraph.editById(selection[0]);
         } else {
             geometryGraph.commitIfEditing();
         }

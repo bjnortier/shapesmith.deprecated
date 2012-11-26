@@ -65,7 +65,7 @@ define([
             post(url, JSON.stringify(that.serialize()), callback);
         }
 
-        this.commitCreate = function(editingVertex) {
+        this.commitCreate = function(editingVertex, callback) {
             if (!this.validate(editingVertex)) {
                 return;
             }
@@ -116,7 +116,7 @@ define([
             }
 
             var command = new Command(doFn, undoFn, redoFn);
-            commandStack.do(command);
+            commandStack.do(command, callback);
         }
 
         this.commitEdit = function() {

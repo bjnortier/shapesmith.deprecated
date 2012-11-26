@@ -141,6 +141,13 @@ client.addCommand('getEditingVertexName', function(callback) {
     });
 });
 
+client.addCommand('assertNumberOfElements', function(selector, expectedLength, callback) {
+    this.elements('css selector', selector, function(result) {
+        assert.equal(result.value.length, expectedLength);
+        callback();
+    });
+});
+
 client.addCommand('assertNumberOfEditingNodes', function(expectedLength, callback) {
     this.elements('css selector', '#graphs .vertex.editing', function(result) {
         assert.equal(result.value.length, expectedLength);

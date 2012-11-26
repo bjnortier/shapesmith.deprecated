@@ -76,6 +76,7 @@ define([
             type: this.type, 
             name: this.name,
             implicit: this.implicit,
+            workplane: this.workplane,
             parameters: this.parameters,
         }
     }

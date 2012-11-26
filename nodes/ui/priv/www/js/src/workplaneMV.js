@@ -6,6 +6,7 @@ define([
         'src/geomnode',
         'src/geometrygraphsingleton',
         'src/vertexwrapper',
+        'src/selection',
     ], function(
         colors,
         calc, 
@@ -13,7 +14,8 @@ define([
         sceneModel,
         geomNode,
         geometryGraph,
-        vertexWrapper) {
+        vertexWrapper,
+        selection) {
 
     var currentDisplayModel = undefined;
 
@@ -32,11 +34,15 @@ define([
             
             this.gridView = new GridView({model: this});
             this.settingsView = new SettingsDisplayView({model: this});
+            this.persistentHeight = 0;
+            geometryGraph.on('vertexReplaced', this.vertexReplaced, this);
         },
 
         destroy: function() {
             this.gridView.remove();
             this.settingsView.remove();
+
+            geometryGraph.off('vertexReplaced', this.vertexReplaced, this);
         },
 
         workplaneClick: function(event) {
@@ -60,11 +66,34 @@ define([
             geometryGraph.edit(this.vertex);
         },
 
+        pushVertex: function(vertex) {
+            this.persistentHeight = this.vertex.workplane.origin.z;
+            this.vertex.workplane.origin.z = vertex.workplane.origin.z;
+            this.trigger('change');
+        },
+
+        popVertex: function(vertex) {
+            this.vertex.workplane.origin.z = this.persistentHeight;
+            this.trigger('change');
+        },
+
+        vertexReplaced: function(original, replacement) {
+            if (replacement.type === 'workplane') {
+                return;
+            }
+            if (replacement.editing && !replacement.implicit) {
+                this.pushVertex(replacement);
+            } else  if (original.editing && !original.implciit) {
+                this.popVertex(replacement);
+            }
+        },
+
     });
 
-    var EditingModel = Backbone.Model.extend({
+    var EditingModel = vertexWrapper.EditingModel.extend({
 
         initialize: function(vertex) {
+            vertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
             currentDisplayModel = this;
             this.vertex = vertex;
             this.sceneView = sceneModel.view;
@@ -75,6 +104,7 @@ define([
         },
 
         destroy: function() {
+            vertexWrapper.EditingModel.prototype.destroy.call(this);
             this.gridView.remove();
             this.settingsView.remove();
         },
@@ -108,7 +138,7 @@ define([
         },
 
         click: function() {
-            this.model.edit();
+            selection.selectOnly(this.model.vertex.id);
         },
 
     });
@@ -164,7 +194,16 @@ define([
 
     var GridView = vertexWrapper.SceneView.extend({
 
+        initialize: function() {
+            vertexWrapper.SceneView.prototype.initialize.call(this);
+            this.model.on('change', this.render, this);
+        },
 
+        remove: function() {
+            vertexWrapper.SceneView.prototype.remove.call(this);
+            this.model.off('change', this.render, this);
+        },
+        
         render: function() {
             vertexWrapper.SceneView.prototype.render.call(this);
 
