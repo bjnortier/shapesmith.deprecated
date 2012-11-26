@@ -40,18 +40,15 @@ describe('Workplane', function() {
     });
 
     it('cancels editing when clicking on the workplane', function(done) {
-        this.timeout(5000);
+        this.timeout(10000);
         client
             .click('#workplane-settings')
-            .assertNumberOfEditingNodes(1)
+            .assertNumberOfElements('#workplane-settings .vertex.editing', 1)
             .clickOnWorld(0,0,0)
-            .assertNumberOfEditingNodes(0, done);
+            .assertNumberOfElements('#workplane-settings .vertex.editing', 0, done);
     });
 
-    it.skip('will not change the workplane if there are errors', function(done) {
-        // Also test for trying an invalid value more than once
-        assert.isTrue(false);
-    });
+    it.skip('will not change the workplane if there are errors');
 
 
 });
