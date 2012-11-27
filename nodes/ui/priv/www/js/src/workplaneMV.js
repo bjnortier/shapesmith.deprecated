@@ -5,7 +5,7 @@ define([
         'src/scene',
         'src/geomnode',
         'src/geometrygraphsingleton',
-        'src/vertexwrapper',
+        'src/vertexMV',
         'src/selection',
     ], function(
         colors,
@@ -14,14 +14,19 @@ define([
         sceneModel,
         geomNode,
         geometryGraph,
-        vertexWrapper,
+        VertexMV,
         selection) {
 
     var currentDisplayModel = undefined;
 
-    var DisplayModel = Backbone.Model.extend({
+    var DisplayModel = VertexMV.DisplayModel.extend({
 
         initialize: function(vertex) {
+            this.editingModelConstructor = EditingModel;
+            this.displayModelConstructor = DisplayModel;
+
+            VertexMV.DisplayModel.prototype.initialize.call(this, vertex);
+
             currentDisplayModel = this;
             this.vertex = vertex;
 
@@ -39,6 +44,8 @@ define([
         },
 
         destroy: function() {
+            VertexMV.DisplayModel.prototype.destroy.call(this);
+
             this.gridView.remove();
             this.settingsView.remove();
 
@@ -90,10 +97,12 @@ define([
 
     });
 
-    var EditingModel = vertexWrapper.EditingModel.extend({
+    var EditingModel = VertexMV.EditingModel.extend({
 
-        initialize: function(vertex) {
-            vertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
+        initialize: function(original, vertex) {
+            this.displayModelConstructor = DisplayModel;
+            VertexMV.EditingModel.prototype.initialize.call(this, original, vertex);
+            
             currentDisplayModel = this;
             this.vertex = vertex;
             this.sceneView = sceneModel.view;
@@ -104,7 +113,7 @@ define([
         },
 
         destroy: function() {
-            vertexWrapper.EditingModel.prototype.destroy.call(this);
+            VertexMV.EditingModel.prototype.destroy.call(this);
             this.gridView.remove();
             this.settingsView.remove();
         },
@@ -112,12 +121,12 @@ define([
     });
 
 
-    var SettingsDisplayView = vertexWrapper.DisplayDOMView.extend({
+    var SettingsDisplayView = VertexMV.DisplayDOMView.extend({
 
         tagName: 'table',
 
         initialize: function() {
-            vertexWrapper.DisplayDOMView.prototype.initialize.call(this);
+            VertexMV.DisplayDOMView.prototype.initialize.call(this);
             $('#workplane-settings').append(this.$el);
         },
 
@@ -143,18 +152,14 @@ define([
 
     });
 
-    var SettingsEditingView = vertexWrapper.EditingDOMView.extend({
+    var SettingsEditingView = VertexMV.EditingDOMView.extend({
 
         tagName: 'table',
         className: 'vertex editing',
 
         initialize: function() {
-            vertexWrapper.EditingDOMView.prototype.initialize.call(this);
+            VertexMV.EditingDOMView.prototype.initialize.call(this);
             $('#workplane-settings').append(this.$el);
-        },
-
-        remove: function() {
-            vertexWrapper.EditingDOMView.prototype.remove.call(this);
         },
 
         render: function() {
@@ -186,20 +191,20 @@ define([
 
     });    
 
-    var GridView = vertexWrapper.SceneView.extend({
+    var GridView = VertexMV.SceneView.extend({
 
         initialize: function() {
-            vertexWrapper.SceneView.prototype.initialize.call(this);
+            VertexMV.SceneView.prototype.initialize.call(this);
             this.model.on('change', this.render, this);
         },
 
         remove: function() {
-            vertexWrapper.SceneView.prototype.remove.call(this);
+            VertexMV.SceneView.prototype.remove.call(this);
             this.model.off('change', this.render, this);
         },
         
         render: function() {
-            vertexWrapper.SceneView.prototype.render.call(this);
+            VertexMV.SceneView.prototype.render.call(this);
 
             var majorGridLineGeometry = new THREE.Geometry();
             var minorGridLineGeometry = new THREE.Geometry();

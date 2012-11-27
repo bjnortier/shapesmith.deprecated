@@ -1,6 +1,7 @@
 define([
         'src/geometrygraphsingleton', 
         'src/selection', 
+        'src/vertexMV',
         'src/workplaneMV',
         'src/variableMV',
         'src/pointMV2', 
@@ -10,6 +11,7 @@ define([
     function(
         geometryGraph, 
         selectionManager, 
+        VertexMV,
         Workplane,
         Variable,
         Point, 
@@ -33,10 +35,12 @@ define([
         removeVertex(vertex);
     });
 
-    // geometryGraph.on('vertexReplaced', function(original, replacement) {
-    //     removeVertex(original);
-    //     addVertex(replacement);
-    // });
+    geometryGraph.on('vertexReplaced', function(original, replacement) {
+        if (!original.editing && !replacement.editing) {
+            var model = VertexMV.getModelForVertex(original);
+            model.replaceDisplayVertex(original, replacement);
+        }
+    });
 
     // selectionManager.on('selected', function(ids, selection) {
     //     updateEditingForSelected(selection);
@@ -66,19 +70,18 @@ define([
         // }
 
         if (vertex.editing) {
-            models[vertex.id] = new wrappers[vertex.type].EditingModel(vertex);
+            new wrappers[vertex.type].EditingModel(undefined, vertex);
         } else {
-            models[vertex.id] = new wrappers[vertex.type].DisplayModel(vertex);
+            new wrappers[vertex.type].DisplayModel(vertex);
         }
     }
 
     var removeVertex = function(vertex) {
-        if (!models[vertex.id]) {
+        var model = VertexMV.getModelForVertex(vertex);
+        if (!model) {
             throw Error('no model for vertex:' + vertex.id);
         }
-        var model = models[vertex.id];
         model.destroy();
-        delete models[vertex.id];
     }
 
     return wrappers;

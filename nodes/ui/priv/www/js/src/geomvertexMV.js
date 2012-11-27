@@ -4,21 +4,22 @@ define([
         'src/workplaneMV',
         'src/vertexMV',
         'src/selection',
-    ],
-    function(
+        'src/asyncAPI',
+    ], function(
         colors, 
         sceneViewEventGenerator, 
         Workplane, 
         VertexMV,
-        selection) {
+        selection,
+        AsyncAPI) {
 
     // ---------- Editing ----------
 
     var EditingModel = VertexMV.EditingModel.extend({
 
-        initialize: function(vertex) {
+        initialize: function(original, vertex) {
             this.currentWorkplaneModel = Workplane.getCurrent();
-            VertexMV.EditingModel.prototype.initialize.call(this, vertex);
+            VertexMV.EditingModel.prototype.initialize.call(this, original, vertex);
             this.workplanePositionChanged(this.currentWorkplaneModel.lastPosition);
 
             this.currentWorkplaneModel.on('positionChanged', this.workplanePositionChanged, this);
@@ -70,18 +71,18 @@ define([
 
     // ---------- Display ----------
 
-    var DisplayModel = VertexMV.Model.extend({ 
+    var DisplayModel = VertexMV.DisplayModel.extend({ 
 
         initialize: function(vertex) {
-            VertexMV.Model.prototype.initialize.call(this, vertex);
+            VertexMV.DisplayModel.prototype.initialize.call(this, vertex);
             this.selected = selection.isSelected(vertex.id);
             selection.on('selected', this.select, this);
             selection.on('deselected', this.deselect, this);
         },
 
         destroy: function() {
-            VertexMV.Model.prototype.destroy.call(this);
-            selection.off('selected', this.selected, this);
+            VertexMV.DisplayModel.prototype.destroy.call(this);
+            selection.off('selected', this.select, this);
             selection.off('deselected', this.deselected, this);
         },  
 
@@ -97,6 +98,12 @@ define([
             if (ids.indexOf(this.vertex.id) !== -1) {
                 this.selected = true;
                 this.trigger('updateSelection');
+
+                if (selection.selected.length === 1) {
+                    this.destroy();
+                    var editingVertex = AsyncAPI.edit(this.vertex);
+                    new this.editingModelConstructor(this.vertex, editingVertex);
+                }
             }
         },
 
@@ -137,7 +144,6 @@ define([
         },        
 
         events: {
-            'click .title' : 'clickTitle',
             'click .title' : 'clickTitle',
             'click .delete': 'delete',
         },

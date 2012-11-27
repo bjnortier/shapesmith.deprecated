@@ -62,9 +62,9 @@ define([
 
         var doFn = function(commandSuccessFn, commandErrorFn) {
             captureVertices(nonEditingVertices, function() {
-                nonEditingVertices.forEach(function(v, i) {
-                    geometryGraph.replace(editingVertices[i], v);
-                });
+                for (var i = 0; i < editingVertices.length; ++i) {
+                    geometryGraph.replace(editingVertices[i], nonEditingVertices[i]);
+                }
                 captureGraph(commandSuccessFn);
             });
         }
@@ -85,8 +85,47 @@ define([
         commandStack.do(command, callback, nonEditingVertices);
     }
 
+    var tryCommitEdit = function(originalVertices, editingVertices, callback) {
+
+        var nonEditingVertices = editingVertices.map(function(v) {
+            return v.cloneNonEditing();
+        });
+
+        var doFn = function(commandSuccessFn, commandErrorFn) {
+
+            captureVertices(nonEditingVertices, function(shas) {
+                for (var i = 0; i < editingVertices.length; ++i) {
+                    geometryGraph.replace(editingVertices[i], nonEditingVertices[i]);
+                }
+                captureGraph(commandSuccessFn);
+            });
+        }
+
+        var undoFn = function() {
+            for (var i = 0; i < nonEditingVertices.length; ++i) {
+                geometryGraph.replace(nonEditingVertices[i], originalVertices[i]);
+            }
+        }
+
+        var redoFn = function() {
+            for (var i = 0; i < originalVertices.length; ++i) {
+                geometryGraph.replace(originalVertices[i], nonEditingVertices[i]);
+            }
+        }
+
+        var command = new Command(doFn, undoFn, redoFn);
+        commandStack.do(command, callback, nonEditingVertices);
+
+    }
+
     var cancel = function(vertex) {
         geometryGraph.remove(vertex);
+    }
+
+    var edit = function(vertex) {
+        var editingReplacement = vertex.cloneEditing();
+        geometryGraph.replace(vertex, editingReplacement);
+        return editingReplacement;
     }
 
     var loadFromCommit = function(commit) {
@@ -138,6 +177,8 @@ define([
     }
 
     return {
+        edit            : edit,
+        tryCommitEdit   : tryCommitEdit,
         tryCommitCreate : tryCommitCreate,
         cancel          : cancel,
         loadFromCommit  : loadFromCommit,

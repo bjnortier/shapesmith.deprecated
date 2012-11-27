@@ -1,16 +1,24 @@
 define([
-    'src/scene',
-    'src/interactioncoordinator',
-    'src/scenevieweventgenerator',
-    'src/asyncAPI',
+        'src/scene',
+        'src/interactioncoordinator',
+        'src/scenevieweventgenerator',
+        'src/selection',
+        'src/asyncAPI',
     ], function(
         sceneModel,
         coordinator,
         sceneViewEventGenerator,
+        selection,
         AsyncAPI
     ) {
 
     // ---------- Common ----------
+
+    var modelForVertex = {};
+
+    var getModelForVertex  =function(vertex) {
+        return modelForVertex[vertex.id];
+    }
 
     var Model = Backbone.Model.extend({
 
@@ -18,6 +26,7 @@ define([
             this.vertex = vertex;
             this.views = [];
             this.vertex.on('descendantChanged', this.descendantChanged, this);
+            modelForVertex[vertex.id] = this;
         },
 
         destroy: function() {
@@ -26,6 +35,7 @@ define([
             });
             this.views = [];
             this.vertex.off('descendantChanged', this.descendantChanged, this);
+            delete modelForVertex[this.vertex.id];
 
         },  
 
@@ -76,7 +86,11 @@ define([
 
     var EditingModel = Model.extend({
 
-        initialize: function(vertex) {
+        initialize: function(original, vertex) {
+            if (!this.displayModelConstructor) {
+                throw Error('no Display model constructor set');
+            }
+            this.originalVertex = original;
             Model.prototype.initialize.call(this, vertex);
             coordinator.on('keyup', this.cancel, this);
         },
@@ -95,18 +109,21 @@ define([
                         that.destroy();
                         var newVertex = result.newVertices[0];
                         new that.displayModelConstructor(newVertex);
-                        callback(true);
+                        callback && callback(true);
                     } else {
-                        callback(false);
+                        callback && callback(false);
                     }
                 });
             } else {
-                AsyncAPI.tryCommitEdit([this.vertex], function(result) {
-                    console.log('committed edit', result);
+                AsyncAPI.tryCommitEdit([this.originalVertex], [this.vertex], function(result) {
                     if (!result.error) {
-                        callback(true);
+                        selection.deselectAll();
+                        that.destroy();
+                        new that.displayModelConstructor(that.vertex);
+                        callback && callback(true);
                     } else {
-                        callback(false);
+                        throw Error('not implemented');
+                        callback && callback(false);
                     }
                 });
             }
@@ -161,7 +178,7 @@ define([
             var vertexFocusLostFn = function() {
                 var diff = that.vertexFocusInTimestamp - that.vertexFocusOutTimestamp;
                 if (diff < 0) {
-                    that.tryCommit();
+                    that.model.tryCommit();
                 }
             }
             setTimeout(vertexFocusLostFn, 100);
@@ -197,6 +214,25 @@ define([
 
     // ---------- Display ----------
 
+    var DisplayModel = Model.extend({
+
+        initialize: function(vertex) {
+            if (!this.displayModelConstructor) {
+                throw Error('no Display model constructor set');
+            }
+            if (!this.editingModelConstructor) {
+                throw Error('no Editing model constructor set');
+            }
+            Model.prototype.initialize.call(this, vertex);
+        },
+
+        replaceDisplayVertex: function(original, replacement) {
+            this.destroy();
+            new this.displayModelConstructor(replacement);
+        },
+
+    });
+
 
     var DisplayDOMView = Backbone.View.extend({
 
@@ -220,12 +256,15 @@ define([
 
     // ---------- Module ----------
 
+
     return {
-        Model          : Model,
-        SceneView      : SceneView,
-        EditingModel   : EditingModel,
-        EditingDOMView : EditingDOMView,
-        DisplayDOMView : DisplayDOMView
+        getModelForVertex : getModelForVertex,
+        Model             : Model,
+        SceneView         : SceneView,
+        EditingModel      : EditingModel,
+        EditingDOMView    : EditingDOMView,
+        DisplayModel      : DisplayModel,
+        DisplayDOMView    : DisplayDOMView
     }
 
 });

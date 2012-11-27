@@ -2,30 +2,34 @@ define([
         'src/calculations', 
         'src/colors',
         'src/scene', 
+        'src/scenevieweventgenerator',
         'src/geometrygraphsingleton',
         'src/geomvertexMV', 
+        'src/asyncAPI',
     ], 
     function(
         calc, 
         colors, 
         sceneModel, 
+        sceneViewEventGenerator,
         geometryGraph,
-        GeomVertexMV) {
+        GeomVertexMV,
+        AsyncAPI) {
 
     // ---------- Editing ----------
 
     var EditingModel = GeomVertexMV.EditingModel.extend({
 
-        initialize: function(vertex, possibleEditingParentModel) {
-            GeomVertexMV.EditingModel.prototype.initialize.call(this, vertex);
+        initialize: function(original, vertex) {
             this.displayModelConstructor = DisplayModel;
+            GeomVertexMV.EditingModel.prototype.initialize.call(this, original, vertex);
 
             this.views.push(new EditingSceneView({model: this}));
             this.views.push(new EditingDOMView({model: this}));
         },
 
         workplanePositionChanged: function(position) {
-            if (this.vertex.proto) {
+            if (position && this.vertex.proto) {
                 this.vertex.parameters.coordinate.x = position.x;
                 this.vertex.parameters.coordinate.y = position.y;
                 this.vertex.parameters.coordinate.z = position.z;
@@ -35,13 +39,16 @@ define([
 
         workplaneClick: function() {
             var that = this;
-            var callback = function(success) {
-                if (success && that.vertex.proto) {
-                    var workplane = calc.copyObj(that.currentWorkplaneModel.vertex.workplane);
-                    geometryGraph.createPointPrototype({workplane: workplane});
-                }
+            if(that.vertex.proto) {
+                this.tryCommit(function(success) {
+                    if (success) {
+                        var workplane = calc.copyObj(that.currentWorkplaneModel.vertex.workplane);
+                        geometryGraph.createPointPrototype({workplane: workplane});
+                    }
+                });
+            } else {
+                this.tryCommit();
             }
-            this.tryCommit(callback);
         },
 
     });
@@ -128,32 +135,41 @@ define([
         // This view is not draggable, but the display scene view can transfer 
         // the dragging to this view (e.g. when a point is dragged), but only for
         // points that are not prototypes any more
-        // isDraggable: function() {
-        //     return !this.model.vertex.proto;
-        // },
+        isDraggable: function() {
+            return !this.model.vertex.proto;
+        },
 
-        // dragStarted: function() {
-        //     this.dragStartedWhilstEditing = true;
-        // },
+        dragStarted: function() {
+            // The drag was started when the point was being edited, as
+            // opposed to starting from a display node
+            this.dragStartedInEditingMode = true;
+        },
 
-        // drag: function(event) {
-        //     this.dragging = true;
-        //     var positionOnWorkplane = calc.positionOnWorkplane(
-        //         event, this.model.currentWorkplaneModel.vertex, sceneModel.view.camera);
-        //     this.point.parameters.coordinate = {
-        //         x: positionOnWorkplane.x + this.model.currentWorkplaneModel.vertex.workplane.origin.x,
-        //         y: positionOnWorkplane.y + this.model.currentWorkplaneModel.vertex.workplane.origin.y,
-        //         z: positionOnWorkplane.z + this.model.currentWorkplaneModel.vertex.workplane.origin.z,
-        //     }
-        //     this.model.vertex.trigger('change', this.model.vertex);
-        // },
+        drag: function(event) {
+            this.dragging = true;
+            var positionOnWorkplane = calc.positionOnWorkplane(
+                event, this.model.currentWorkplaneModel.vertex, sceneModel.view.camera);
+            var workplaneOrigin = this.model.currentWorkplaneModel.vertex.workplane.origin;
+            this.model.vertex.parameters.coordinate = {
+                x: positionOnWorkplane.x + workplaneOrigin.x,
+                y: positionOnWorkplane.y + workplaneOrigin.y,
+                z: positionOnWorkplane.z + workplaneOrigin.z,
+            }
+            this.model.vertex.trigger('change', this.model.vertex);
+        },
 
-        // dragEnded: function() {
-        //     if (this.dragging && !this.dragStartedWhilstEditing) {
-        //         this.model.okEdit();
-        //         this.dragging = false;
-        //     }
-        // },
+        dragEnded: function() {
+            if (!this.dragStartedInEditingMode) {
+                this.model.tryCommit(function(success) {
+
+                });
+            }
+            // if (this.dragging && !this.dragStartedWhilstEditing) {
+            //     this.model.okEdit();
+            //     this.dragging = false;
+            // }
+            // this.model.tryCommit();
+        },
 
     });
 
@@ -162,7 +178,10 @@ define([
     var DisplayModel = GeomVertexMV.DisplayModel.extend({
 
         initialize: function(vertex, possibleEditingParentModel) {
+            this.editingModelConstructor = EditingModel;
+            this.displayModelConstructor = DisplayModel;
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, vertex);
+
             this.views = this.views.concat([
                 new DisplaySceneView({model: this}),
                 new GeomVertexMV.DisplayDOMView({model: this}),
@@ -214,15 +233,16 @@ define([
             }
         },
 
-        // isDraggable: function() {
-        //     return !geometryGraph.isEditing();
-        // },
+        isDraggable: function() {
+            return !geometryGraph.isEditing();
+        },
 
-        // dragStarted: function(event) {
-        //     this.dragging = true;
-        //     geometryGraph.edit(this.model.vertex);
-        //     sceneViewEventGenerator.replaceInDraggable(this, this.model.vertex.id);
-        // },
+        dragStarted: function(event) {
+            this.model.destroy();
+            var editingVertex = AsyncAPI.edit(this.model.vertex);
+            new this.model.editingModelConstructor(this.model.vertex, editingVertex);
+            sceneViewEventGenerator.replaceInDraggable(this, this.model.vertex.id);
+        },
 
     });
 

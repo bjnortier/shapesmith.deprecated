@@ -254,64 +254,64 @@ define([
         }
 
         this.cancel = function(vertex) {
-            // Vertices being edited will have originals, new vertices
-            // will not have originals
-            if (originals[vertex.id]) {
-                this.replace(vertex, originals[vertex.id]);
-                delete originals[vertex.id];
-            } else {
+            // // Vertices being edited will have originals, new vertices
+            // // will not have originals
+            // if (originals[vertex.id]) {
+            //     this.replace(vertex, originals[vertex.id]);
+            //     delete originals[vertex.id];
+            // } else {
 
-                // Remove implicit children that are not editing
-                // for prototype objects, but only remove them once
-                // and only if they are not shared with other parents
-                var that = this;
-                var removed = [];
-                var children = this.childrenOf(vertex);
-                children.map(function(child) {
-                    var parents = that.parentsOf(child);
-                    var hasOtherParent = _.any(parents, function(parent) {
-                        parent.id !== vertex.id;
-                    });
-                    if (child.implicit && !child.editing && !hasOtherParent) {
-                        if(removed.indexOf(child) === -1) {
-                            that.remove(child);
-                            removed.push(child);
-                        }
-                    }
-                });
+            //     // Remove implicit children that are not editing
+            //     // for prototype objects, but only remove them once
+            //     // and only if they are not shared with other parents
+            //     var that = this;
+            //     var removed = [];
+            //     var children = this.childrenOf(vertex);
+            //     children.map(function(child) {
+            //         var parents = that.parentsOf(child);
+            //         var hasOtherParent = _.any(parents, function(parent) {
+            //             parent.id !== vertex.id;
+            //         });
+            //         if (child.implicit && !child.editing && !hasOtherParent) {
+            //             if(removed.indexOf(child) === -1) {
+            //                 that.remove(child);
+            //                 removed.push(child);
+            //             }
+            //         }
+            //     });
 
-                this.remove(vertex);
-            }
+            //     this.remove(vertex);
+            // }
 
-            this.trigger('cancelled', vertex);
+            // this.trigger('cancelled', vertex);
         }
 
-        this.cancelIfEditing = function() {
-            var that = this;
-            this.getEditingVertices().map(function(vertex) {
-                that.cancel(vertex);
-            });
-            originals = {};
-        }
+        // this.cancelIfEditing = function() {
+        //     var that = this;
+        //     this.getEditingVertices().map(function(vertex) {
+        //         that.cancel(vertex);
+        //     });
+        //     originals = {};
+        // }
 
-        this.commitIfEditing = function() {
-            var editingVertices = this.getEditingVertices();
-            var allAreSame = true;
-            for (var i = 0; i < editingVertices.length; ++i) {
-                if (!originals[editingVertices[i].id].hasSameJSON(editingVertices[i])) {
-                    allAreSame = false;
-                    break;
-                }
-            }
+        // this.commitIfEditing = function() {
+        //     var editingVertices = this.getEditingVertices();
+        //     var allAreSame = true;
+        //     for (var i = 0; i < editingVertices.length; ++i) {
+        //         if (!originals[editingVertices[i].id].hasSameJSON(editingVertices[i])) {
+        //             allAreSame = false;
+        //             break;
+        //         }
+        //     }
 
-            if (allAreSame) {
-                editingVertices.map(function(editingVertex, i) {
-                    that.replace(editingVertex, originals[editingVertex.id]);
-                });
-            } else {
-                this.commitEdit();
-            }
-        }
+        //     if (allAreSame) {
+        //         editingVertices.map(function(editingVertex, i) {
+        //             that.replace(editingVertex, originals[editingVertex.id]);
+        //         });
+        //     } else {
+        //         this.commitEdit();
+        //     }
+        // }
 
         // ---------- Validation ----------
 
