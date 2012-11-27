@@ -195,12 +195,13 @@ define([
         this.createGraph = function(shaGraph, shasToVertices) {
             var handledSHAs = [];
             while(_.keys(shaGraph.edges).length > 0) {
+                var handledOne = false;
                 for(parentSHA in shaGraph.edges) {
                     var childrenSHAs = shaGraph.edges[parentSHA];
                     var uniqueChildrenSHAs = _.uniq(childrenSHAs);
                     var canHandle = _.intersection(uniqueChildrenSHAs, handledSHAs).length == uniqueChildrenSHAs.length;
                     if (canHandle) {
-
+                        handledOne = true;
                         var parentVertex = shasToVertices[parentSHA];
                         var childVertices = childrenSHAs.map(function(childSHA) {
                             return shasToVertices[childSHA];
@@ -212,7 +213,11 @@ define([
                         });
                         handledSHAs.push(parentSHA);
                         delete shaGraph.edges[parentSHA];
+                        break;
                     }
+                }
+                if (!handledOne) {
+                    throw Error('nothing to handle');
                 }
             }
         }

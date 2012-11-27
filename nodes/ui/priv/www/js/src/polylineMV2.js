@@ -4,6 +4,7 @@ define([
         'src/scene', 
         'src/scenevieweventgenerator',
         'src/geometrygraphsingleton',
+        'src/vertexMV',
         'src/geomvertexMV', 
         'src/implicitpointMV',
         'src/asyncAPI',
@@ -14,6 +15,7 @@ define([
         sceneModel, 
         sceneViewEventGenerator,
         geometryGraph,
+        VertexMV,
         GeomVertexMV,
         ImplicitPointMV,
         AsyncAPI) {
@@ -72,25 +74,28 @@ define([
 
             // Create the child models
             var that = this;
-            var pointChildren = geometryGraph.childrenOf(this.vertex);
-            this.subModels = pointChildren.map(function(child) {
-                if (child.implicit) {
-                    return new ImplicitPointMV.EditingModel(undefined, child, that);
-                } else {
-                    throw Error('not implemented');
-                }
-            });
-
             if (this.vertex.proto) {
+                // Prototype polylines will always have an implicit point as first child
+                var pointChildren = geometryGraph.childrenOf(this.vertex);
+                this.subModels = [
+                    new ImplicitPointMV.EditingModel(undefined, pointChildren[0], that)
+                ];
                 this.activePoint = this.subModels[0];
+            } else {
+                this.originalImplicitChildren = _.uniq(geometryGraph.childrenOf(this.vertex));
+                this.editingImplicitChildren = this.originalImplicitChildren.map(function(child) {
+                    return AsyncAPI.edit(child);
+                })
+                this.subModels = this.originalImplicitChildren.map(function(child, i) {
+                    if (child.implicit) {
+                        // Replace the original model with an editign model
+                        VertexMV.getModelForVertex(child).destroy();
+                        return new ImplicitPointMV.EditingModel(child, that.editingImplicitChildren[i], that);
+                    } else {
+                        throw Error('not implemented');
+                    }
+                });
             }
-        },
-
-        destroy: function() {
-            GeomVertexMV.EditingModel.prototype.destroy.call(this);
-            this.subModels.forEach(function(model) {
-                model.destroy();
-            });
         },
 
         workplanePositionChanged: function(position) {
@@ -103,29 +108,29 @@ define([
         },
 
         workplaneClick: function(position) {
-            var that = this;
-            if(this.vertex.proto) {
+            if (this.vertex.proto) {
                 this.addPoint(position);
-            } 
+            } else {
+                this.tryCommit();
+            }
         },
 
         workplaneDblClick: function(event) {
-            var children = geometryGraph.childrenOf(this.vertex);
-            if (children.length > 2) {
-                // Remove the extra point added
-                geometryGraph.removeLastPointFromPolyline(this.vertex);
-                this.tryCommit();
-            } 
+            if (this.vertex.proto) {
+                var children = geometryGraph.childrenOf(this.vertex);
+                if (children.length > 2) {
+                    this.removeLastPoint();
+                    this.tryCommit();
+                } 
+            }
         },
 
         sceneViewClick: function(viewAndEvent) {
-            this.lastClickSource = viewAndEvent.view;
-
             if (this.vertex.proto) {
                 var children = geometryGraph.childrenOf(this.vertex);
                 if (viewAndEvent.view.model.vertex.type === 'point') {
 
-                    geometryGraph.removeLastPointFromPolyline(this.vertex);
+                    this.removeLastPoint();
                     
                     // Finish on the first point
                     var clickedPoint = viewAndEvent.view.model.vertex;
@@ -141,26 +146,23 @@ define([
         },
 
         sceneViewDblClick: function(viewAndEvent) {
-            // It may happen that a dbl-click on click has created a new polyline, and
-            // THIS model is the new polyline. Thus disregard a dbl-click that didn't follow
-            // a click
-            if (!this.lastClickSource || (this.lastClickSource.cid !== viewAndEvent.view.cid)) {
-                return;
-            }
-
-            // Double-click on a point and the first click hasn't already 
-            // created
+            // Double-click on a point and the first click hasn't already created
             if (!this.creating && (viewAndEvent.view.model.vertex.type === 'point')) {
                 geometryGraph.removeLastPointFromPolyline(this.vertex);
-                this.okCreate();
+                this.tryCommit();
             }
         },
 
         addPoint: function(position) {
             var point = geometryGraph.addPointToPolyline(this.vertex);
-            var newLength = this.subModels.push(new ImplicitPointMV.EditingModel(this, undefined, point));
+            var newLength = this.subModels.push(new ImplicitPointMV.EditingModel(undefined, point, this));
             this.activePoint = this.subModels[newLength - 1];
             this.workplanePositionChanged(position);
+        },
+
+        removeLastPoint: function() {
+            geometryGraph.removeLastPointFromPolyline(this.vertex);
+            this.subModels[this.subModels.length - 1].destroy();
         },
 
         isChildClickable: function(childModel) {

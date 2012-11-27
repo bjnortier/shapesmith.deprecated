@@ -17,14 +17,23 @@ define([
     // ---------- Common ----------
 
     var modelForVertex = {};
+    
+    var keyForVertex = function(vertex) {
+        return vertex.editing ? 'editing_' + vertex.id : 'display_' + vertex.id;
+    }
 
-    var getModelForVertex  =function(vertex) {
-        return modelForVertex[vertex.id];
+    var getModelForVertex = function(vertex) {
+        return modelForVertex[keyForVertex(vertex)];
     }
 
     var Model = Backbone.Model.extend({
 
         initialize: function(vertex) {
+            // Add/remove must be symmetric
+            if (modelForVertex[keyForVertex(vertex)]) {
+                throw Error('Already a model for:', vertex.id);
+            }
+
             this.vertex = vertex;
             this.views = [];
             this.selected = selection.isSelected(vertex.id);
@@ -33,10 +42,15 @@ define([
             selection.on('selected', this.select, this);
             selection.on('deselected', this.deselect, this);
 
-            modelForVertex[vertex.id] = this;
+            modelForVertex[keyForVertex(vertex)] = this;
         },
 
         destroy: function() {
+            // Add/remove must be symmetric
+            if (!modelForVertex[keyForVertex(this.vertex)]) {
+                throw Error('No model for:', keyForVertex(this.vertex));
+            }
+
             this.views.forEach(function(view) {
                 view.remove();
             });
@@ -46,7 +60,7 @@ define([
             selection.off('selected', this.select, this);
             selection.off('deselected', this.deselected, this);
 
-            delete modelForVertex[this.vertex.id];
+            delete modelForVertex[keyForVertex(this.vertex)];
         },  
 
         descendantChanged: function(descendant) {
@@ -115,8 +129,7 @@ define([
         },
 
         cameraChanged: function(cameraPosition) {
-            if (this.rerenderOnCameraChange) {
-                this.updateCameraScale(cameraPosition);
+            if (this.rerenderOnCameraChange && this.updateCameraScale(cameraPosition)) {
                 this.render();
             }
         },
@@ -124,7 +137,7 @@ define([
         updateCameraScale: function(cameraPosition) {
             var cameraDistance = cameraPosition.length();
             var newScale = cameraDistance/150;
-            if (newScale !== this.cameraScale.x) {
+            if (newScale.toFixed(1) !== this.cameraScale.x.toFixed(1)) {
                 this.cameraScale = new THREE.Vector3(newScale, newScale, newScale);
                 return true;
             } else {
@@ -164,35 +177,67 @@ define([
         },
 
         tryCommit: function(callback) {
+            if (this.parentModel) {
+                return this.parentModel.tryCommit(callback);
+            }
+
+            // Prevent multiple commits, e.g. when focus is lost
+            // and the user clicks on the workplane
+            if (this.committing) {
+                return;
+            }
+            this.committing = true;
+
             var that = this;
             if (this.vertex.proto) {
-                var uniqueImplicitChildren = _.uniq(
-                    geometryGraph.childrenOf(this.vertex).filter(
-                        function(v) {
-                            return v.implicit;
-                        })); 
+                var uniqueImplicitChildren = _.uniq(geometryGraph.childrenOf(this.vertex).filter(function(v) {
+                    return v.implicit;
+                })); 
 
-                AsyncAPI.tryCommitCreate(uniqueImplicitChildren.concat(this.vertex), function(result) {
+                var originals = uniqueImplicitChildren.concat(this.vertex);
+                AsyncAPI.tryCommitCreate(originals, function(result) {
                     if (!result.error) {
-                        that.destroy();
-                        var newVertex = result.newVertices[0];
-                        new that.displayModelConstructor(newVertex);
+                        var replacements = result.newVertices;
+                        originals.forEach(function(original, i) {
+                            var modelToDestroy = getModelForVertex(original);
+                            modelToDestroy.destroy();
+                            new modelToDestroy.displayModelConstructor(replacements[i]);
+                        });
+
                         callback && callback(true);
                     } else {
                         callback && callback(false);
                     }
+
+                    this.committing = false;
                 });
             } else {
-                AsyncAPI.tryCommitEdit([this.originalVertex], [this.vertex], function(result) {
+                var originals = [this.originalVertex];
+                var editing = [this.vertex];
+
+                if (this.originalImplicitChildren) {
+                    originals = originals.concat(this.originalImplicitChildren);
+                    editing = editing.concat(this.editingImplicitChildren);
+                }
+
+                AsyncAPI.tryCommitEdit(originals, editing, function(result) {
                     if (!result.error) {
                         selection.deselectAll();
-                        that.destroy();
-                        new that.displayModelConstructor(that.vertex);
+                        
+                        var committedVertices = result.newVertices;
+                        editing.forEach(function(editingVertex, i) {
+                            var modelToDestroy = getModelForVertex(editingVertex);
+                            modelToDestroy.destroy();
+                            new modelToDestroy.displayModelConstructor(committedVertices[i]);
+                        });
+
                         callback && callback(true);
                     } else {
                         throw Error('not implemented');
                         callback && callback(false);
                     }
+
+                    this.committing = false;
                 });
             }
         },
@@ -236,31 +281,31 @@ define([
         },
 
         events: {
-            'focusin'         : 'vertexFocusIn',
-            'focusout'        : 'vertexFocusOut',
+            // 'focusin'         : 'vertexFocusIn',
+            // 'focusout'        : 'vertexFocusOut',
             'change .field'   : 'fieldChange',
             'keyup .field'    : 'fieldKeyUp',
             'click .delete'   : 'delete',
         },
 
-        vertexFocusIn: function(event) {
-            this.vertexFocusInTimestamp = new Date().getTime();
-        },
+        // vertexFocusIn: function(event) {
+        //     this.vertexFocusInTimestamp = new Date().getTime();
+        // },
 
-        vertexFocusOut: function(event) {
-            // If the focus is lost from the editin vertex within 100ms,
-            // then the focus has been lost
-            this.vertexFocusInTimestamp = 0;
-            this.vertexFocusOutTimestamp = new Date().getTime();
-            var that = this;
-            var vertexFocusLostFn = function() {
-                var diff = that.vertexFocusInTimestamp - that.vertexFocusOutTimestamp;
-                if (diff < 0) {
-                    that.model.tryCommit();
-                }
-            }
-            setTimeout(vertexFocusLostFn, 100);
-        },
+        // vertexFocusOut: function(event) {
+        //     // If the focus is lost from the editin vertex within 100ms,
+        //     // then the focus has been lost
+        //     this.vertexFocusInTimestamp = 0;
+        //     this.vertexFocusOutTimestamp = new Date().getTime();
+        //     var that = this;
+        //     var vertexFocusLostFn = function() {
+        //         var diff = that.vertexFocusInTimestamp - that.vertexFocusOutTimestamp;
+        //         if (diff < 0) {
+        //             that.model.tryCommit();
+        //         }
+        //     }
+        //     setTimeout(vertexFocusLostFn, 100);
+        // },
 
         fieldChange: function(event) {
             event.stopPropagation();
@@ -270,6 +315,7 @@ define([
         },
 
         fieldKeyUp: function(event) {
+            event.stopPropagation();
             // Return
             if (event.keyCode === 13) {
                 this.model.tryCommit()

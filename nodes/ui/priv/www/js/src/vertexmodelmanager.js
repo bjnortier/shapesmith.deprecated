@@ -5,7 +5,7 @@ define([
         'src/workplaneMV',
         'src/variableMV',
         'src/pointMV2', 
-        'src/implicitPointMV', 
+        'src/implicitpointMV', 
         'src/polylineMV2',
         'src/extrudeMV',
     ], 
@@ -43,39 +43,16 @@ define([
             var model = VertexMV.getModelForVertex(original);
             model.replaceDisplayVertex(original, replacement);
         }
-    });
-
-    // selectionManager.on('selected', function(ids, selection) {
-    //     updateEditingForSelected(selection);
-    // });
-
-    // selectionManager.on('deselected', function(ids, selection) {
-    //     updateEditingForSelected(selection);
-    // });
-
-    // var updateEditingForSelected = function(selection) {
-    //     if (selection.length === 1) {
-    //         geometryGraph.editById(selection[0]);
-    //     } else {
-    //         geometryGraph.commitIfEditing();
-    //     }
-    // }
+    }); 
 
     var addVertex = function(vertex) {
-        // Try to find the editing parent model of an implicit child
-        // var editingParentModel = undefined;
-        // if (vertex.implicit) {
-        //     var parents = geometryGraph.parentsOf(vertex);
-        //     var editingParent = _.find(parents, function(parent) { return parent.editing; });
-        //     if (editingParent) {
-        //         editingParentModel = models[editingParent.id];
-        //     }
-        // }
+        var implicitEditing = vertex.implicit && vertex.editing;
+        if (implicitEditing) {
+            return
+        }
 
         if (vertex.editing) {
-            if (!vertex.implicit) {
-                new wrappers[vertex.type].EditingModel(undefined, vertex);
-            }
+            new wrappers[vertex.type].EditingModel(undefined, vertex);
         } else {
             new wrappers[vertex.type].DisplayModel(vertex);
         }
@@ -83,13 +60,15 @@ define([
 
     var removeVertex = function(vertex) {
         var implicitEditing = vertex.implicit && vertex.editing;
-        if (!implicitEditing) {
-            var model = VertexMV.getModelForVertex(vertex);
-            if (!model) {
-                throw Error('no model for vertex:' + vertex.id);
-            }
-            model.destroy();
+        if (implicitEditing) {
+            return
         }
+
+        var model = VertexMV.getModelForVertex(vertex);
+        if (!model) {
+            throw Error('no model for vertex:' + vertex.id);
+        }
+        model.destroy();
     }
 
     return wrappers;

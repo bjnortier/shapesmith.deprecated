@@ -66,6 +66,11 @@ define([
             return this;
         },
 
+        events: {
+            'change .field'   : 'fieldChange',
+            'keyup .field'    : 'fieldKeyUp',
+        },
+
         update: function() {
             var that = this;
             ['x', 'y', 'z'].forEach(function(key) {
@@ -162,7 +167,7 @@ define([
 
     var DisplayModel = GeomVertexMV.DisplayModel.extend({
 
-        initialize: function(vertex, possibleEditingParentModel) {
+        initialize: function(vertex) {
             this.editingModelConstructor = EditingModel;
             this.displayModelConstructor = DisplayModel;
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, vertex);
