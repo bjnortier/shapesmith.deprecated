@@ -139,13 +139,17 @@ define([
             }
             this.originalVertex = original;
             Model.prototype.initialize.call(this, vertex);
+            coordinator.on('keyup', this.keyUp, this);
         },
 
         destroy: function() {
             Model.prototype.destroy.call(this);
+            coordinator.off('keyup', this.keyUp, this);
 
         },
 
+        // Selecting another vertex will cancel the editing
+        // of this one
         deselect: function(ids, selection) {
             Model.prototype.deselect.call(this, ids, selection);
             if ((selection.length > 0) && (ids.indexOf(this.vertex.id) !== -1)) {
@@ -192,6 +196,12 @@ define([
                 AsyncAPI.cancelEdit(this.originalVertex, this.vertex);
                 this.destroy();
                 new this.displayModelConstructor(this.originalVertex);
+            }
+        },
+
+        keyUp: function(event) {
+            if (event.keyCode === 27) {
+                this.cancel();
             }
         },
 
