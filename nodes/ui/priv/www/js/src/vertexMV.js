@@ -250,9 +250,21 @@ define([
             if (this.vertex.proto) {
                 AsyncAPI.cancelCreate(this.vertex);
             } else {
-                AsyncAPI.cancelEdit(this.originalVertex, this.vertex);
-                this.destroy();
-                new this.displayModelConstructor(this.originalVertex);
+                var originals = [this.originalVertex];
+                var editing = [this.vertex];
+
+                if (this.originalImplicitChildren) {
+                    originals = originals.concat(this.originalImplicitChildren);
+                    editing = editing.concat(this.editingImplicitChildren);
+                }
+
+                AsyncAPI.cancelEdit(editing, originals, function() {
+                    editing.forEach(function(editingVertex, i) {
+                        var modelToDestroy = getModelForVertex(editingVertex);
+                        modelToDestroy.destroy();
+                        new modelToDestroy.displayModelConstructor(originals[i]);
+                    });
+                });
             }
         },
 

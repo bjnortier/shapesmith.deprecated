@@ -82,18 +82,21 @@ define([
                 ];
                 this.activePoint = this.subModels[0];
             } else {
-                this.originalImplicitChildren = _.uniq(geometryGraph.childrenOf(this.vertex));
+                this.originalImplicitChildren = _.uniq(
+                    geometryGraph.childrenOf(this.vertex).filter(
+                        function(v) {
+                            return v.implicit;
+                        }));
                 this.editingImplicitChildren = this.originalImplicitChildren.map(function(child) {
                     return AsyncAPI.edit(child);
                 })
                 this.subModels = this.originalImplicitChildren.map(function(child, i) {
                     if (child.implicit) {
-                        // Replace the original model with an editign model
-                        VertexMV.getModelForVertex(child).destroy();
-                        return new ImplicitPointMV.EditingModel(child, that.editingImplicitChildren[i], that);
-                    } else {
-                        throw Error('not implemented');
-                    }
+                        // Replace the original model with an editing model
+                        var modelToDestroy = VertexMV.getModelForVertex(child)
+                        modelToDestroy.destroy();
+                        return new modelToDestroy.editingModelConstructor(child, that.editingImplicitChildren[i], that);
+                    } 
                 });
             }
         },
@@ -127,14 +130,15 @@ define([
 
         sceneViewClick: function(viewAndEvent) {
             if (this.vertex.proto) {
-                var children = geometryGraph.childrenOf(this.vertex);
-                if (viewAndEvent.view.model.vertex.type === 'point') {
+                var type = viewAndEvent.view.model.vertex.type;
+                if ((type === 'point') || (type === 'implicit_point')) {
 
                     this.removeLastPoint();
-                    
-                    // Finish on the first point
                     var clickedPoint = viewAndEvent.view.model.vertex;
                     geometryGraph.addPointToPolyline(this.vertex, clickedPoint);
+                    
+                    // Finish on the first point
+                    var children = geometryGraph.childrenOf(this.vertex);
                     if (clickedPoint === _.first(children)) {
                         this.tryCommit();
                         this.creating = true; // Prevent double create on double click

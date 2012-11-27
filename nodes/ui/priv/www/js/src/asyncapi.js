@@ -122,10 +122,12 @@ define([
         geometryGraph.remove(vertex);
     }
 
-    var cancelEdit = function(original, vertex) {
-        geometryGraph.replace(vertex, original);
+    var cancelEdit = function(editingVertices, originalVertices, callback) {
+        editingVertices.forEach(function(editingVertex, i) {
+            geometryGraph.replace(editingVertex, originalVertices[i]);
+        });
+        callback();
     }
-
 
     var edit = function(vertex) {
         var editingReplacement = vertex.cloneEditing();
