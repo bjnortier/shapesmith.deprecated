@@ -118,9 +118,14 @@ define([
 
     }
 
-    var cancel = function(vertex) {
+    var cancelCreate = function(vertex) {
         geometryGraph.remove(vertex);
     }
+
+    var cancelEdit = function(original, vertex) {
+        geometryGraph.replace(vertex, original);
+    }
+
 
     var edit = function(vertex) {
         var editingReplacement = vertex.cloneEditing();
@@ -180,7 +185,8 @@ define([
         edit            : edit,
         tryCommitEdit   : tryCommitEdit,
         tryCommitCreate : tryCommitCreate,
-        cancel          : cancel,
+        cancelEdit      : cancelEdit,
+        cancelCreate    : cancelCreate,
         loadFromCommit  : loadFromCommit,
     }
 

@@ -109,6 +109,7 @@ define([
             this.on('dragStarted', this.dragStarted, this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);
+            this.rerenderOnCameraChange = true;
         },
 
         remove: function() {
@@ -129,6 +130,7 @@ define([
                     new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                 ]);
             point.position = calc.objToVector(this.model.vertex.parameters.coordinate, geometryGraph);
+            point.scale = this.cameraScale;
             this.sceneObject.add(point);
         },
 
@@ -197,6 +199,7 @@ define([
             this.on('dragStarted', this.dragStarted, this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);
+            this.rerenderOnCameraChange = true;
         },
 
         remove: function() {
@@ -220,6 +223,7 @@ define([
             point.position = calc.objToVector(
                 this.model.vertex.parameters.coordinate,
                 geometryGraph);
+            point.scale = this.cameraScale;
             this.sceneObject.add(point);
 
             if (this.model.vertex.implicit) {
@@ -229,6 +233,7 @@ define([
                 selectionPoint.position = calc.objToVector(
                     this.model.vertex.parameters.coordinate,
                     geometryGraph);
+                selectionPoint.scale = this.cameraScale;
                 this.hiddenSelectionObject.add(selectionPoint);
             }
         },

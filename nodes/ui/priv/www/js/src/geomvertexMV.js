@@ -13,6 +13,7 @@ define([
         selection,
         AsyncAPI) {
 
+
     // ---------- Editing ----------
 
     var EditingModel = VertexMV.EditingModel.extend({
@@ -75,15 +76,10 @@ define([
 
         initialize: function(vertex) {
             VertexMV.DisplayModel.prototype.initialize.call(this, vertex);
-            this.selected = selection.isSelected(vertex.id);
-            selection.on('selected', this.select, this);
-            selection.on('deselected', this.deselect, this);
         },
 
         destroy: function() {
             VertexMV.DisplayModel.prototype.destroy.call(this);
-            selection.off('selected', this.select, this);
-            selection.off('deselected', this.deselected, this);
         },  
 
         canSelect: function() {
@@ -94,27 +90,17 @@ define([
             return false;
         },
 
-        select: function(ids) {
-            if (ids.indexOf(this.vertex.id) !== -1) {
-                this.selected = true;
-                this.trigger('updateSelection');
+        select: function(ids, selection) {
+            VertexMV.DisplayModel.prototype.select.call(this, ids, selection);
+            if ((selection.length === 1) && this.selected) {
+                this.destroy();
+                var editingVertex = AsyncAPI.edit(this.vertex);
+                new this.editingModelConstructor(this.vertex, editingVertex);
 
-                if (selection.selected.length === 1) {
-                    this.destroy();
-                    var editingVertex = AsyncAPI.edit(this.vertex);
-                    new this.editingModelConstructor(this.vertex, editingVertex);
-                }
             }
         },
 
-        deselect: function(ids) {
-            if (ids.indexOf(this.vertex.id) !== -1) {
-                this.selected = false;
-                this.trigger('updateSelection');
-            }
-        },
     });
-
 
     var DisplayDOMView = VertexMV.DisplayDOMView.extend({
 
@@ -191,8 +177,9 @@ define([
         },
 
         remove: function() {
-            VertexMV.SceneView.prototype.remove.call(this);
             this.model.off('updateSelection', this.updateSelection, this);
+
+            VertexMV.SceneView.prototype.remove.call(this);
             this.off('mouseEnter', this.highlight, this);
             this.off('mouseLeave', this.unhighlight, this);
             this.off('click', this.click, this);

@@ -25,7 +25,12 @@ define([
         initialize: function(vertex) {
             this.vertex = vertex;
             this.views = [];
+            this.selected = selection.isSelected(vertex.id);
+
             this.vertex.on('descendantChanged', this.descendantChanged, this);
+            selection.on('selected', this.select, this);
+            selection.on('deselected', this.deselect, this);
+
             modelForVertex[vertex.id] = this;
         },
 
@@ -34,13 +39,30 @@ define([
                 view.remove();
             });
             this.views = [];
-            this.vertex.off('descendantChanged', this.descendantChanged, this);
-            delete modelForVertex[this.vertex.id];
 
+            this.vertex.off('descendantChanged', this.descendantChanged, this);
+            selection.off('selected', this.select, this);
+            selection.off('deselected', this.deselected, this);
+
+            delete modelForVertex[this.vertex.id];
         },  
 
         descendantChanged: function(descendant) {
             this.vertex.trigger('change', this.vertex);
+        },
+
+        select: function(ids, selection) {
+            if (selection.indexOf(this.vertex.id) !== -1) {
+                this.selected = true;
+                this.trigger('updateSelection', selection);
+            }
+        },
+
+        deselect: function(ids, selection) {
+            if (selection.indexOf(this.vertex.id) !== -1) {
+                this.selected = false;
+                this.trigger('updateSelection', selection);
+            }
         },
 
     });
@@ -50,13 +72,19 @@ define([
 
         initialize: function() {
             this.scene = sceneModel.view.scene;
+            this.rerenderOnCameraChange = false;
+            this.cameraScale = new THREE.Vector3(1,1,1);
+            this.updateCameraScale(sceneModel.view.camera.position);
             this.render();
+            sceneModel.on('cameraChange', this.cameraChanged, this);
         },
 
         remove: function() {
             this.scene.remove(this.sceneObject);
             sceneViewEventGenerator.deregister(this);
             sceneModel.view.updateScene = true;
+
+            sceneModel.off('cameraChange', this.cameraChanged, this);
         },
 
         render: function() {
@@ -80,6 +108,25 @@ define([
             return false;
         },
 
+        cameraChanged: function(cameraPosition) {
+            if (this.rerenderOnCameraChange) {
+                this.updateCameraScale(cameraPosition);
+                this.render();
+            }
+        },
+
+        updateCameraScale: function(cameraPosition) {
+            var cameraDistance = cameraPosition.length();
+            var newScale = cameraDistance/150;
+            if (newScale !== this.cameraScale.x) {
+                this.cameraScale = new THREE.Vector3(newScale, newScale, newScale);
+                return true;
+            } else {
+                return false;
+            }
+        },
+
+
     });
 
     // ---------- Editing ----------
@@ -99,6 +146,13 @@ define([
             Model.prototype.destroy.call(this);
             coordinator.off('keyup', this.cancel, this);
 
+        },
+
+        deselect: function(ids, selection) {
+            Model.prototype.deselect.call(this, ids, selection);
+            if (ids.indexOf(this.vertex.id) !== -1) {
+                this.cancel();
+            }
         },
 
         tryCommit: function(callback) {
@@ -135,7 +189,11 @@ define([
 
         cancel: function() {
             if (this.vertex.proto) {
-                AsyncAPI.cancel(this.vertex);
+                AsyncAPI.cancelCreate(this.vertex);
+            } else {
+                AsyncAPI.cancelEdit(this.originalVertex, this.vertex);
+                this.destroy();
+                new this.displayModelConstructor(this.originalVertex);
             }
         },
 
