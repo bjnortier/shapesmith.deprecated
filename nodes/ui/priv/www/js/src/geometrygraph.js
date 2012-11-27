@@ -359,21 +359,21 @@ define([
         }
 
         this.createPolylinePrototype = function(options) {
-            var polylineOptions = _.extend(options || {}, {
-                editing      : true,
-                proto        : true,
-            });
-            var polylineVertex = new geomNode.Polyline(polylineOptions);
-            this.add(polylineVertex);
-
-            var pointVertex = new geomNode.Point({
+            var pointVertex = new geomNode.ImplicitPoint({
                 editing: true,
                 proto: true,
                 implicit: true, 
                 workplane: options.workplane,
             });
+            this.add(pointVertex);
             
-            this.add(pointVertex, function() {
+            var polylineOptions = _.extend(options || {}, {
+                editing      : true,
+                proto        : true,
+            });
+            var polylineVertex = new geomNode.Polyline(polylineOptions);
+            
+            this.add(polylineVertex, function() {
                 graph.addEdge(polylineVertex, pointVertex);
             });
             return polylineVertex;
@@ -404,7 +404,7 @@ define([
 
         this.addPointToPolyline = function(polyline, point) {
             if (point === undefined) {
-                point = new geomNode.Point({
+                point = new geomNode.ImplicitPoint({
                     editing: true,
                     proto: true,
                     implicit: true, 

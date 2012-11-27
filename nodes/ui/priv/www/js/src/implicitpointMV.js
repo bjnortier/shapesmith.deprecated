@@ -4,8 +4,8 @@ define([
         'src/scene', 
         'src/scenevieweventgenerator',
         'src/geometrygraphsingleton',
-        'src/geomvertexMV', 
         'src/asyncAPI',
+        'src/geomvertexMV'
     ], 
     function(
         calc, 
@@ -13,57 +13,43 @@ define([
         sceneModel, 
         sceneViewEventGenerator,
         geometryGraph,
-        GeomVertexMV,
-        AsyncAPI) {
+        AsyncAPI,
+        GeomVertexMV) {
 
     // ---------- Editing ----------
 
     var EditingModel = GeomVertexMV.EditingModel.extend({
 
-        initialize: function(original, vertex) {
+        initialize: function(original, vertex, parentModel) {
             this.displayModelConstructor = DisplayModel;
             GeomVertexMV.EditingModel.prototype.initialize.call(this, original, vertex);
 
+            this.parentModel = parentModel;
             this.views.push(new EditingSceneView({model: this}));
             this.views.push(new EditingDOMView({model: this}));
         },
 
         workplanePositionChanged: function(position) {
-            if (this.vertex.proto) {
-                this.vertex.parameters.coordinate.x = position.x;
-                this.vertex.parameters.coordinate.y = position.y;
-                this.vertex.parameters.coordinate.z = position.z;
-                this.vertex.trigger('change', this.vertex);            
-            }
-        },
-
-        workplaneClick: function() {
-            var that = this;
-            if(that.vertex.proto) {
-                this.tryCommit(function(success) {
-                    if (success) {
-                        var workplane = calc.copyObj(that.currentWorkplaneModel.vertex.workplane);
-                        geometryGraph.createPointPrototype({workplane: workplane});
-                    }
-                });
-            } else {
-                this.tryCommit();
-            }
+            // Handled by the parent model
         },
 
     });
 
     var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
 
+        initialize: function() {
+            GeomVertexMV.EditingDOMView.prototype.initialize.call(this);
+            if (this.model.parentModel) {
+                this.model.parentModel.domView.insertChild(this.model, this.$el);
+            } else {
+                $('#geometry').append(this.$el);
+            }
+        },
+
         render: function() {
             var template = 
                 '<td>' +
-                '<table><tr>' +
-                '<td class="title">' + 
-                '<img src="/ui/images/icons/point32x32.png"/>' +
-                '<div class="name">{{name}}</div>' + 
-                '<div class="delete"></div>' + 
-                '</td></tr><tr><td>' +
+                '<table><tr><td>' +
                 '<div class="coordinate">' +
                 '<input class="field x" type="text" value="{{x}}"></input>' +
                 '<input class="field y" type="text" value="{{y}}"></input>' +
@@ -101,7 +87,7 @@ define([
             this.model.vertex.trigger('change', this.model.vertex);
         }
     });
- 
+
     var EditingSceneView = GeomVertexMV.EditingSceneView.extend({
 
         initialize: function(options) {
@@ -134,9 +120,10 @@ define([
             this.sceneObject.add(point);
         },
 
-        // This view is not draggable, but the display scene view can transfer 
-        // the dragging to this view (e.g. when a point is dragged), but only for
-        // points that are not prototypes any more
+        isClickable: function() {
+            return this.model.parentModel && this.model.parentModel.isChildClickable(this.model);
+        },
+
         isDraggable: function() {
             return !this.model.vertex.proto;
         },
@@ -166,14 +153,10 @@ define([
 
                 });
             }
-            // if (this.dragging && !this.dragStartedWhilstEditing) {
-            //     this.model.okEdit();
-            //     this.dragging = false;
-            // }
-            // this.model.tryCommit();
         },
 
     });
+
 
     // ---------- Display ----------
 
@@ -186,11 +169,10 @@ define([
 
             this.views = this.views.concat([
                 new DisplaySceneView({model: this}),
-                new GeomVertexMV.DisplayDOMView({model: this}),
             ]);
         },
 
-    });    
+    });   
 
     var DisplaySceneView = GeomVertexMV.DisplaySceneView.extend({
 
@@ -245,12 +227,11 @@ define([
         dragStarted: function(event) {
             this.model.destroy();
             var editingVertex = AsyncAPI.edit(this.model.vertex);
-            new this.model.editingModelConstructor(this.model.vertex, editingVertex);
+            new EditingModel(this.model.vertex, editingVertex);
             sceneViewEventGenerator.replaceInDraggable(this, this.model.vertex.id);
         },
 
     });
-
 
     // ---------- Module ----------
 
@@ -259,6 +240,7 @@ define([
         DisplayModel: DisplayModel,
     }
 
-
 });
+
+
 

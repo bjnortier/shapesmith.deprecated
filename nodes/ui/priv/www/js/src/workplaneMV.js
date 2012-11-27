@@ -64,8 +64,10 @@ define([
             var positionOnWorkplane = calc.positionOnWorkplane(event, this.vertex, this.camera);
             if (!this.lastPosition || !positionOnWorkplane.equals(this.lastPosition)) {
                 this.lastPosition = positionOnWorkplane.addSelf(calc.objToVector(this.vertex.workplane.origin));
-                this.sceneView.updateScene = true;
-                this.trigger('positionChanged', this.lastPosition);
+                if (this.lastPosition) {
+                    this.sceneView.updateScene = true;
+                    this.trigger('positionChanged', this.lastPosition);
+                }
             }
         },
 

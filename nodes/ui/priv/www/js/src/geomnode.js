@@ -156,6 +156,25 @@ define([
 
     _.extend(Point.prototype, GeomNode.prototype);
 
+    // ---------- Implicit Point ----------
+
+    var ImplicitPoint = function(options) {
+        var options = options || {};
+        options.type = 'implicit_point';
+        options.parameters = options.parameters || {coordinate: {x: '0', y:'0', z:'0'}};
+        GeomNode.prototype.constructor.call(this, options);
+    }
+
+    ImplicitPoint.prototype.getExpressions = function() {
+        return [
+            this.parameters.coordinate.x, 
+            this.parameters.coordinate.y, 
+            this.parameters.coordinate.z,
+        ];
+    }
+
+    _.extend(ImplicitPoint.prototype, GeomNode.prototype);
+
     // ---------- Polyline ----------
 
     var Polyline = function(options) {
@@ -192,18 +211,20 @@ define([
 
     return {
         resetIDCounters : resetIDCounters,
-        Node     : GeomNode,
-        Workplane: Workplane,
-        Variable : Variable,
-        Point    : Point,
-        Polyline : Polyline,
-        Extrude  : Extrude,
+        Node            : GeomNode,
+        Workplane       : Workplane,
+        Variable        : Variable,
+        Point           : Point,
+        ImplicitPoint   : ImplicitPoint,
+        Polyline        : Polyline,
+        Extrude         : Extrude,
         constructors: {
-            'workplane': Workplane,
-            'variable' : Variable,
-            'point'    : Point,
-            'polyline' : Polyline,
-            'extrude'  : Extrude,
+            'workplane'      : Workplane,
+            'variable'       : Variable,
+            'point'          : Point,
+            'implicit_point' : ImplicitPoint,
+            'polyline'       : Polyline,
+            'extrude'        : Extrude,
         }
     }
 

@@ -157,6 +157,10 @@ define([
                         function(data) {
                             var vertex = new geomNode.constructors[data.type](data);
                             vertexCreated(sha, vertex);
+                        },
+                        function(msg) {
+                            console.log('error fetching vertex', sha);
+                            --remaining;
                         });
                 });
             } else {

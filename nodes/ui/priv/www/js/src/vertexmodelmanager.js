@@ -5,7 +5,8 @@ define([
         'src/workplaneMV',
         'src/variableMV',
         'src/pointMV2', 
-        'src/polylineMV',
+        'src/implicitPointMV', 
+        'src/polylineMV2',
         'src/extrudeMV',
     ], 
     function(
@@ -15,16 +16,18 @@ define([
         Workplane,
         Variable,
         Point, 
+        ImplicitPoint,
         Polyline,
         Extrude) {
     
     var models = {};
     var wrappers = {
-        'workplane': Workplane,
-        'variable' : Variable,
-        'point'    : Point,
-        'polyline' : Polyline,
-        'extrude'  : Extrude,
+        'workplane'      : Workplane,
+        'variable'       : Variable,
+        'point'          : Point,
+        'implicit_point' : ImplicitPoint,
+        'polyline'       : Polyline,
+        'extrude'        : Extrude,
     }
 
     geometryGraph.on('vertexAdded', function(vertex) {
@@ -70,18 +73,23 @@ define([
         // }
 
         if (vertex.editing) {
-            new wrappers[vertex.type].EditingModel(undefined, vertex);
+            if (!vertex.implicit) {
+                new wrappers[vertex.type].EditingModel(undefined, vertex);
+            }
         } else {
             new wrappers[vertex.type].DisplayModel(vertex);
         }
     }
 
     var removeVertex = function(vertex) {
-        var model = VertexMV.getModelForVertex(vertex);
-        if (!model) {
-            throw Error('no model for vertex:' + vertex.id);
+        var implicitEditing = vertex.implicit && vertex.editing;
+        if (!implicitEditing) {
+            var model = VertexMV.getModelForVertex(vertex);
+            if (!model) {
+                throw Error('no model for vertex:' + vertex.id);
+            }
+            model.destroy();
         }
-        model.destroy();
     }
 
     return wrappers;

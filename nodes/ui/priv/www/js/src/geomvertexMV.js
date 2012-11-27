@@ -45,7 +45,9 @@ define([
 
         initialize: function() {
             VertexMV.EditingDOMView.prototype.initialize.call(this);
-            $('#geometry').append(this.$el);
+            if (!this.model.vertex.implicit) {
+                $('#geometry').append(this.$el);
+            }
             $('.field').autoGrowInput();
         },
 
@@ -162,8 +164,6 @@ define([
 
     var DisplaySceneView =  VertexMV.SceneView.extend({
 
-        clickable: true,   
-
         initialize: function() {
             this.color = colors.geometry.default;
             VertexMV.SceneView.prototype.initialize.call(this);
@@ -185,6 +185,10 @@ define([
             this.off('click', this.click, this);
             this.off('dblclick', this.dblclick, this);
             this.model.vertex.off('change', this.render, this);
+        },
+
+        isClickable: function() {
+            return true;
         },
 
         updateSelection: function() {

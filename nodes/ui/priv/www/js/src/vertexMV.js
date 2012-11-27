@@ -3,12 +3,14 @@ define([
         'src/interactioncoordinator',
         'src/scenevieweventgenerator',
         'src/selection',
+        'src/geometrygraphsingleton',
         'src/asyncAPI',
     ], function(
         sceneModel,
         coordinator,
         sceneViewEventGenerator,
         selection,
+        geometryGraph,
         AsyncAPI
     ) {
 
@@ -104,6 +106,10 @@ define([
             sceneModel.view.updateScene = true;
         },
 
+        isClickable: function() {
+            return false;
+        },
+
         isDraggable: function() {
             return false;
         },
@@ -160,7 +166,13 @@ define([
         tryCommit: function(callback) {
             var that = this;
             if (this.vertex.proto) {
-                AsyncAPI.tryCommitCreate([this.vertex], function(result) {
+                var uniqueImplicitChildren = _.uniq(
+                    geometryGraph.childrenOf(this.vertex).filter(
+                        function(v) {
+                            return v.implicit;
+                        })); 
+
+                AsyncAPI.tryCommitCreate(uniqueImplicitChildren.concat(this.vertex), function(result) {
                     if (!result.error) {
                         that.destroy();
                         var newVertex = result.newVertices[0];
