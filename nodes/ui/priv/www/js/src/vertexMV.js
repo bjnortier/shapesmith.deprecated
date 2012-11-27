@@ -243,12 +243,35 @@ define([
         },
 
         tryDelete: function() {
-
+            var that = this;
+            AsyncAPI.tryCommitDelete(this.vertex, function(result) {
+                if (that.editingImplicitChildren) {
+                    that.editingImplicitChildren.forEach(function(editingVertex, i) {
+                        var modelToDestroy = getModelForVertex(editingVertex);
+                        modelToDestroy.destroy();
+                    });
+                }
+            });
         },
 
         cancel: function() {
+            selection.deselectAll();
+
             if (this.vertex.proto) {
+
+                // IMplicit hildren that aren't shared with other geometry
+                var uniqueImplicitChildrenWithOneParent = _.uniq(
+                    geometryGraph.childrenOf(this.vertex).filter(function(v) {
+                        return v.implicit && (geometryGraph.parentsOf(v).length === 1);
+                    }));
+
                 AsyncAPI.cancelCreate(this.vertex);
+                uniqueImplicitChildrenWithOneParent.forEach(function(child) {
+                    AsyncAPI.cancelCreate(child);
+                    getModelForVertex(child).destroy();
+                });
+
+
             } else {
                 var originals = [this.originalVertex];
                 var editing = [this.vertex];
@@ -365,6 +388,10 @@ define([
         replaceDisplayVertex: function(original, replacement) {
             this.destroy();
             new this.displayModelConstructor(replacement);
+        },
+
+        tryDelete: function() {
+            AsyncAPI.tryCommitDelete(this.vertex);
         },
 
     });

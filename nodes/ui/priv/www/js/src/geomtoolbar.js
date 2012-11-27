@@ -13,7 +13,7 @@ define([
         geometryGraph, 
         commandStack, 
         coordinator, 
-        selectionManager,
+        selection,
         Workplane) {
 
     var SelectItemModel = toolbar.ItemModel.extend({
@@ -22,13 +22,13 @@ define([
 
         activate: function() {
             toolbar.ItemModel.prototype.activate.call(this);
-            selectionManager.canSelect = true;
+            selection.canSelect = true;
         },
 
         deactivate: function() {
             toolbar.ItemModel.prototype.deactivate.call(this);
-            selectionManager.canSelect = false;
-            selectionManager.deselectAll();
+            selection.canSelect = false;
+            selection.deselectAll();
         },
 
     });
@@ -47,8 +47,8 @@ define([
         initialize: function(attributes) {
             toolbar.ItemModel.prototype.initialize.call(this, attributes);
             this.set('enabled', false);
-            selectionManager.on('selected', this.selectionChanged, this);
-            selectionManager.on('deselected', this.selectionChanged, this);
+            selection.on('selected', this.selectionChanged, this);
+            selection.on('deselected', this.selectionChanged, this);
         },
 
         selectionChanged: function(_, selection) {
@@ -68,7 +68,7 @@ define([
 
         click: function() {
             if (this.get('enabled')) {
-                var selectedId = selectionManager.selected[0];
+                var selectedId = selection.selected[0];
                 toolbar.ItemModel.prototype.click.call(this);
                 var polyline = geometryGraph.vertexById(selectedId);
                 geometryGraph.createExtrudePrototype(polyline, 1);
@@ -130,6 +130,7 @@ define([
         // Cancel any active tools when geometry is popped
         beforePop: function() {
             this.setToSelect();
+            selection.deselectAll();
         },
 
         setToSelect: function() {

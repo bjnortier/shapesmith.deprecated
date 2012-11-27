@@ -78,7 +78,7 @@ define(['lib/backbone-require'], function(Backbone) {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
-            this.model.trigger('cameraChange', this.camera.potion);
+            this.model.trigger('cameraChange', this.camera.position);
             this.updateScene = true;
         },
 

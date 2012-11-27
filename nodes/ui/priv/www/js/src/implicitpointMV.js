@@ -33,6 +33,10 @@ define([
             // Handled by the parent model
         },
 
+        cancel: function() {
+            // Handled by the parent model
+        },
+
     });
 
     var EditingDOMView = GeomVertexMV.EditingDOMView.extend({

@@ -118,6 +118,69 @@ define([
 
     }
 
+    var tryCommitDelete = function(vertex, callback) {
+
+        var children = _.uniq(geometryGraph.childrenOf(vertex));
+        var parents =  geometryGraph.parentsOf(vertex);
+
+        if (parents.length > 0) {
+            callback({error: 'cannot delete veretx with parents'});
+            return;
+        }
+
+        var doFn = function(commandSuccessFn, commandErrorFn) {
+            geometryGraph.remove(vertex);
+
+            var removedChildren = [];
+            children.forEach(function(child) {
+                // Avoid removing shared children more than once
+                if (child.implicit && (removedChildren.indexOf(child) === -1)) {
+                    geometryGraph.remove(child);
+                    removedChildren.push(child);
+                } 
+            })
+            captureGraph(commandSuccessFn);
+        }
+
+        var undoFn = function() {
+            // Editing is set to false for both the vertex
+            // and children for deleting whilst editing
+
+            var addedChildren = [];
+            children.forEach(function(child) {
+                if (child.implicit && (addedChildren.indexOf(child) === -1)) {
+                    child.editing = false;
+                    geometryGraph.add(child);
+                    addedChildren.push(child);
+                }
+            })
+            
+            vertex.editing = false;
+            geometryGraph.add(vertex, function() {
+                children.forEach(function(child) {
+                    geometryGraph.addEdge(vertex, child);
+                });
+            });
+        }
+
+        var redoFn = function() {
+            geometryGraph.remove(vertex);
+
+            var removedChildren = [];
+            children.forEach(function(child) {
+                // Avoid removing shared children more than once
+                if (child.implicit && (removedChildren.indexOf(child) === -1)) {
+                    geometryGraph.remove(child);
+                    removedChildren.push(child);
+                } 
+            })
+        }
+
+        var command = new Command(doFn, undoFn, redoFn);
+        commandStack.do(command, callback, []);
+
+    }
+
     var cancelCreate = function(vertex) {
         geometryGraph.remove(vertex);
     }
@@ -191,6 +254,7 @@ define([
         edit            : edit,
         tryCommitEdit   : tryCommitEdit,
         tryCommitCreate : tryCommitCreate,
+        tryCommitDelete : tryCommitDelete,
         cancelEdit      : cancelEdit,
         cancelCreate    : cancelCreate,
         loadFromCommit  : loadFromCommit,
