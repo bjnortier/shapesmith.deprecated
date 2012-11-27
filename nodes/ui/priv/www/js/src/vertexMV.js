@@ -139,18 +139,16 @@ define([
             }
             this.originalVertex = original;
             Model.prototype.initialize.call(this, vertex);
-            coordinator.on('keyup', this.cancel, this);
         },
 
         destroy: function() {
             Model.prototype.destroy.call(this);
-            coordinator.off('keyup', this.cancel, this);
 
         },
 
         deselect: function(ids, selection) {
             Model.prototype.deselect.call(this, ids, selection);
-            if (ids.indexOf(this.vertex.id) !== -1) {
+            if ((selection.length > 0) && (ids.indexOf(this.vertex.id) !== -1)) {
                 this.cancel();
             }
         },

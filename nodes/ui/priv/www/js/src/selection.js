@@ -39,7 +39,7 @@ define([
             this.selected = [id];
             
             if (deselected.length > 0) {
-                this.trigger('deselected', deselected, []);
+                this.trigger('deselected', deselected, this.selected);
             }
             this.trigger('selected', [id], this.selected);
 
