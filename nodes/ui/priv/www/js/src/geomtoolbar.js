@@ -6,6 +6,7 @@ define([
     'src/interactioncoordinator',
     'src/selection',
     'src/workplaneMV',
+    'src/vertexMV',
     ], 
     function(
         calc,
@@ -14,7 +15,8 @@ define([
         commandStack, 
         coordinator, 
         selection,
-        Workplane) {
+        Workplane,
+        VertexMV) {
 
     var SelectItemModel = toolbar.ItemModel.extend({
         
@@ -38,7 +40,7 @@ define([
     });
 
     var Polyline = toolbar.ItemModel.extend({
-        name: 'polyline',
+        name: 'polyline',   
     });
 
     var Extrude = toolbar.ItemModel.extend({
@@ -70,20 +72,22 @@ define([
             if (this.get('enabled')) {
                 var selectedId = selection.selected[0];
                 toolbar.ItemModel.prototype.click.call(this);
-                var polyline = geometryGraph.vertexById(selectedId);
+                var editingPolyline = geometryGraph.vertexById(selectedId);
+
+                VertexMV.getModelForVertex(editingPolyline).cancel();
+                var polyline = geometryGraph.vertexById(editingPolyline.id);
                 geometryGraph.createExtrudePrototype(polyline, 1);
             }
         },
 
-
     });
-
 
     var GeomToolbarModel = toolbar.Model.extend({
 
         initialize: function(attributes) {
             toolbar.Model.prototype.initialize.call(this, attributes);
             geometryGraph.on('vertexRemoved', this.vertexRemoved, this);
+            geometryGraph.on('vertexReplaced', this.vertexReplaced, this);
             commandStack.on('beforePop', this.beforePop, this);
         },
 
@@ -118,7 +122,13 @@ define([
         },
 
         vertexRemoved: function(vertex) {
-            if (vertex.proto) {
+            if (vertex.proto && !vertex.implicit) {
+                this.setToSelect();
+            }
+        },
+
+        vertexReplaced: function(original, replacement) {
+            if (original.proto && !original.implicit) {
                 this.setToSelect();
             }
         },

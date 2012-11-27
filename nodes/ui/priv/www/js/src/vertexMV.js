@@ -203,7 +203,7 @@ define([
                             modelToDestroy.destroy();
                             new modelToDestroy.displayModelConstructor(replacements[i]);
                         });
-
+                        
                         callback && callback(true);
                     } else {
                         callback && callback(false);

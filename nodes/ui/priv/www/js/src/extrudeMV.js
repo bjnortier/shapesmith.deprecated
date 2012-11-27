@@ -2,17 +2,17 @@ define([
         'src/calculations',
         'src/colors',
         'src/geometrygraphsingleton',
-        'src/geomvertexwrapper',
+        'src/geomvertexMV',
         'src/scene',
     ], 
-    function(calc, colors, geometryGraph, geomVertexWrapper, sceneModel) {
+    function(calc, colors, geometryGraph, GeomVertexMV, sceneModel) {
 
     // ---------- Common ----------
 
     var RenderExtrudeFacesMixin = {
 
         render: function() {
-            geomVertexWrapper.EditingSceneView.prototype.render.call(this);
+            GeomVertexMV.EditingSceneView.prototype.render.call(this);
             var polyline = _.first(geometryGraph.childrenOf(this.model.vertex));
             var points = geometryGraph.childrenOf(polyline);
             for (var i = 1; i < points.length; ++i) {
@@ -52,15 +52,17 @@ define([
 
     // ---------- Editing ----------
 
-    var EditingModel = geomVertexWrapper.EditingModel.extend({
+    var EditingModel = GeomVertexMV.EditingModel.extend({
 
-        initialize: function(vertex) {
-            geomVertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
+        initialize: function(original, vertex) {
+            this.displayModelConstructor = DisplayModel;
+            GeomVertexMV.EditingModel.prototype.initialize.call(this, original, vertex);
+
             this.views = this.views.concat([
                 new EditingDOMView({model: this}),
                 new EditingFacesSceneView({model: this}),
             ]);
-            var polyline = _.first(geometryGraph.childrenOf(this.vertex));
+            var polyline = geometryGraph.childrenOf(this.vertex)[0];
             var points = geometryGraph.childrenOf(polyline);
             for (var i = 0; i < points.length; ++i) {
                 this.views.push(new EditingHeightAnchor({model: this, pointVertex: points[i]}));
@@ -69,7 +71,7 @@ define([
         },
 
         destroy: function() {
-            geomVertexWrapper.EditingModel.prototype.destroy.call(this);
+            GeomVertexMV.EditingModel.prototype.destroy.call(this);
             this.vertex.off('descendantChanged', this.descendantChanged, this);
         },
 
@@ -78,16 +80,17 @@ define([
             this.vertex.trigger('change', this.vertex);
         },
 
+        workplanePositionChanged: function(position) {
+            // Do nothing
+        },
+
         workplaneClick: function() {
-            if (this.vertex.proto) {
-                this.okCreate();
-            } 
-            // Edit is handled by listening to selection
+            this.tryCommit();
         },
 
     });
 
-    var EditingDOMView = geomVertexWrapper.EditingDOMView.extend({
+    var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
 
         render: function() {
             var template = 
@@ -125,25 +128,26 @@ define([
 
     }); 
 
-    var EditingHeightAnchor = geomVertexWrapper.EditingSceneView.extend({
+    var EditingHeightAnchor = GeomVertexMV.EditingSceneView.extend({
 
         initialize: function(options) {
             this.pointVertex = options.pointVertex;
-            geomVertexWrapper.EditingSceneView.prototype.initialize.call(this);
+            GeomVertexMV.EditingSceneView.prototype.initialize.call(this);
             this.on('dragStarted', this.dragStarted, this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);
+            this.rerenderOnCameraChange = true;
         },
 
         remove: function() {
-            geomVertexWrapper.EditingSceneView.prototype.remove.call(this);
+            GeomVertexMV.EditingSceneView.prototype.remove.call(this);
             this.off('dragStarted', this.dragStarted, this);
             this.off('drag', this.drag, this);
             this.off('dragEnded', this.dragEnded, this);
         },
 
         render: function() {
-            geomVertexWrapper.EditingSceneView.prototype.render.call(this);
+            GeomVertexMV.EditingSceneView.prototype.render.call(this);
             var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
             var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
 
@@ -156,6 +160,7 @@ define([
             var pointPosition = calc.objToVector(this.pointVertex.parameters.coordinate, geometryGraph);
             pointSceneObject.position = pointPosition;
             pointSceneObject.position.z = geometryGraph.evaluate(this.model.vertex.parameters.h) + pointPosition.z;
+            pointSceneObject.scale = this.cameraScale;
             this.sceneObject.add(pointSceneObject);
 
             if (this.showHeightLine) {
@@ -200,24 +205,27 @@ define([
 
     });
 
-    var EditingFacesSceneView = geomVertexWrapper.EditingSceneView.extend(RenderExtrudeFacesMixin);
+    var EditingFacesSceneView = GeomVertexMV.EditingSceneView.extend(RenderExtrudeFacesMixin);
 
     // ---------- Display ----------
 
-    var DisplayModel = geomVertexWrapper.DisplayModel.extend({
+    var DisplayModel = GeomVertexMV.DisplayModel.extend({
 
         initialize: function(vertex) {
-            geomVertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
+            this.displayModelConstructor = DisplayModel;
+            this.editingModelConstructor = EditingModel;
+            GeomVertexMV.DisplayModel.prototype.initialize.call(this, vertex);
+
             this.views = this.views.concat([
                 new DisplayFacesSceneView({model: this}),
-                new geomVertexWrapper.DisplayDOMView({model: this}),
+                new GeomVertexMV.DisplayDOMView({model: this}),
             ]);
 
         },
 
     });
 
-    var DisplayFacesSceneView = geomVertexWrapper.DisplaySceneView.extend(RenderExtrudeFacesMixin);
+    var DisplayFacesSceneView = GeomVertexMV.DisplaySceneView.extend(RenderExtrudeFacesMixin);
 
 
     return {

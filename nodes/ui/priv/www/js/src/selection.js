@@ -11,16 +11,16 @@ define([
         this.selected = [];
         this.canSelect = false;
 
-        var that = this;
-        coordinator.on('sceneClick', function() {
-            that.deselectAll();
-        });
-        geometryGraph.on('committed', function() {
-            that.deselectAll();
-        });
-        geometryGraph.on('cancelled', function() {
-            that.deselectAll();
-        });        
+        // var that = this;
+        // coordinator.on('sceneClick', function() {
+        //     that.deselectAll();
+        // });
+        // geometryGraph.on('committed', function() {
+        //     that.deselectAll();
+        // });
+        // geometryGraph.on('cancelled', function() {
+        //     that.deselectAll();
+        // });        
 
         this.selectOnly = function(id) {
             if (!this.canSelect) {
