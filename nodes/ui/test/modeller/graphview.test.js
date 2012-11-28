@@ -24,7 +24,7 @@ describe('Graph view', function() {
     // ---------- Cases ----------
 
     it('will maintain geometry row index on editing', function(done) {
-        this.timeout(5000);
+        this.timeout(10000);
         client
             .click('.toolbar .point')
             .waitForUrlChange(
@@ -49,7 +49,7 @@ describe('Graph view', function() {
     });   
 
     it('will maintain variable row index on editing', function(done) {
-        this.timeout(5000);
+        this.timeout(10000);
         client
             .click('#variables .add')
             .setValue('#variables .name input', 'a')
@@ -61,6 +61,7 @@ describe('Graph view', function() {
                         .click('#variables .add')
                         .setValue('#variables .name input', 'b')
                         .setValue('#variables .expression input', '2')
+                        .pause(100)
                         .waitForUrlChange(
                             function() { client.clickOnWorld(0,0,0); },
                             function() {

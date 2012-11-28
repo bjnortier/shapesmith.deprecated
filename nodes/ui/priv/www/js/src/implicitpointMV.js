@@ -238,7 +238,10 @@ define([
         dragStarted: function(event) {
             this.model.destroy();
             var editingVertex = AsyncAPI.edit(this.model.vertex);
-            new EditingModel(this.model.vertex, editingVertex);
+            new EditingModel({
+                original: this.model.vertex, 
+                vertex: editingVertex,
+            });
             sceneViewEventGenerator.replaceInDraggable(this, this.model.vertex.id);
         },
 
