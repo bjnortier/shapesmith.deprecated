@@ -26,6 +26,20 @@ define([
         return modelForVertex[keyForVertex(vertex)];
     }
 
+    var cancelIfEditing = function() {
+        _.values(modelForVertex).forEach(function(model) {
+            if (model.cancel) {
+                model.cancel();
+            }
+        });
+    }
+
+    var EventProxy = function() {
+        _.extend(this, Backbone.Events);
+    }
+
+    var eventProxy = new EventProxy();
+
     var Model = Backbone.Model.extend({
 
         initialize: function(vertex) {
@@ -58,7 +72,7 @@ define([
 
             this.vertex.off('descendantChanged', this.descendantChanged, this);
             selection.off('selected', this.select, this);
-            selection.off('deselected', this.deselected, this);
+            selection.off('deselected', this.deselect, this);
 
             delete modelForVertex[keyForVertex(this.vertex)];
         },  
@@ -68,14 +82,14 @@ define([
         },
 
         select: function(ids, selection) {
-            if (selection.indexOf(this.vertex.id) !== -1) {
+            if (ids.indexOf(this.vertex.id) !== -1) {
                 this.selected = true;
                 this.trigger('updateSelection', selection);
             }
         },
 
         deselect: function(ids, selection) {
-            if (selection.indexOf(this.vertex.id) !== -1) {
+            if (ids.indexOf(this.vertex.id) !== -1) {
                 this.selected = false;
                 this.trigger('updateSelection', selection);
             }
@@ -171,14 +185,14 @@ define([
         // of this one
         deselect: function(ids, selection) {
             Model.prototype.deselect.call(this, ids, selection);
-            if ((selection.length > 0) && (ids.indexOf(this.vertex.id) !== -1)) {
+            if (ids.indexOf(this.vertex.id) !== -1) {
                 this.cancel();
             }
         },
 
-        tryCommit: function(callback) {
+        tryCommit: function() {
             if (this.parentModel) {
-                return this.parentModel.tryCommit(callback);
+                return this.parentModel.tryCommit();
             }
 
             // Prevent multiple commits, e.g. when focus is lost
@@ -194,19 +208,19 @@ define([
                     return v.implicit;
                 })); 
 
-                var originals = uniqueImplicitChildren.concat(this.vertex);
+                var originals = [this.vertex].concat(uniqueImplicitChildren.concat());
                 AsyncAPI.tryCommitCreate(originals, function(result) {
                     if (!result.error) {
-                        var replacements = result.newVertices;
+                        var committedVertices = result.newVertices;
                         originals.forEach(function(original, i) {
                             var modelToDestroy = getModelForVertex(original);
                             modelToDestroy.destroy();
-                            new modelToDestroy.displayModelConstructor(replacements[i]);
+                            new modelToDestroy.displayModelConstructor(committedVertices[i]);
                         });
-                        
-                        callback && callback(true);
+                        eventProxy.trigger('committedCreate', originals, committedVertices);
+                        selection.deselectAll();
+
                     } else {
-                        callback && callback(false);
                     }
 
                     this.committing = false;
@@ -222,8 +236,6 @@ define([
 
                 AsyncAPI.tryCommitEdit(originals, editing, function(result) {
                     if (!result.error) {
-                        selection.deselectAll();
-                        
                         var committedVertices = result.newVertices;
                         editing.forEach(function(editingVertex, i) {
                             var modelToDestroy = getModelForVertex(editingVertex);
@@ -231,10 +243,12 @@ define([
                             new modelToDestroy.displayModelConstructor(committedVertices[i]);
                         });
 
-                        callback && callback(true);
+                        eventProxy.trigger('committedEdit', committedVertices);
+                        selection.deselectAll();
+
+
                     } else {
                         throw Error('not implemented');
-                        callback && callback(false);
                     }
 
                     this.committing = false;
@@ -251,12 +265,12 @@ define([
                         modelToDestroy.destroy();
                     });
                 }
+                eventProxy.trigger('committedDelete');
+                selection.deselectAll();
             });
         },
 
         cancel: function() {
-            selection.deselectAll();
-
             if (this.vertex.proto) {
 
                 // IMplicit hildren that aren't shared with other geometry
@@ -270,7 +284,7 @@ define([
                     AsyncAPI.cancelCreate(child);
                     getModelForVertex(child).destroy();
                 });
-
+                eventProxy.trigger('cancelledCreate');
 
             } else {
                 var originals = [this.originalVertex];
@@ -281,19 +295,21 @@ define([
                     editing = editing.concat(this.editingImplicitChildren);
                 }
 
-                AsyncAPI.cancelEdit(editing, originals, function() {
-                    editing.forEach(function(editingVertex, i) {
-                        var modelToDestroy = getModelForVertex(editingVertex);
-                        modelToDestroy.destroy();
-                        new modelToDestroy.displayModelConstructor(originals[i]);
-                    });
+                AsyncAPI.cancelEdit(editing, originals);
+                editing.forEach(function(editingVertex, i) {
+                    var modelToDestroy = getModelForVertex(editingVertex);
+                    modelToDestroy.destroy();
+                    new modelToDestroy.displayModelConstructor(originals[i]);
                 });
+                eventProxy.trigger('cancelledEdit');
             }
+
         },
 
         keyUp: function(event) {
             if (event.keyCode === 27) {
                 this.cancel();
+                selection.deselectAll();
             }
         },
 
@@ -422,6 +438,8 @@ define([
 
     return {
         getModelForVertex : getModelForVertex,
+        cancelIfEditing   : cancelIfEditing,
+        eventProxy        : eventProxy,
         Model             : Model,
         SceneView         : SceneView,
         EditingModel      : EditingModel,

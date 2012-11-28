@@ -158,9 +158,7 @@ define([
 
         dragEnded: function() {
             if (!this.dragStartedInEditingMode) {
-                this.model.tryCommit(function(success) {
-
-                });
+                this.model.tryCommit();
             }
         },
 
@@ -179,6 +177,10 @@ define([
             this.views = this.views.concat([
                 new DisplaySceneView({model: this}),
             ]);
+        },
+
+        selectParentOnClick: function() {
+            return true;
         },
 
     });   

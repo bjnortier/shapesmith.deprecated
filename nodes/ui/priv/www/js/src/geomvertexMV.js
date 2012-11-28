@@ -4,6 +4,7 @@ define([
         'src/workplaneMV',
         'src/vertexMV',
         'src/selection',
+        'src/geometrygraphsingleton',
         'src/asyncAPI',
     ], function(
         colors, 
@@ -11,6 +12,7 @@ define([
         Workplane, 
         VertexMV,
         selection,
+        geometryGraph,
         AsyncAPI) {
 
 
@@ -21,7 +23,6 @@ define([
         initialize: function(original, vertex) {
             this.currentWorkplaneModel = Workplane.getCurrent();
             VertexMV.EditingModel.prototype.initialize.call(this, original, vertex);
-            this.workplanePositionChanged(this.currentWorkplaneModel.lastPosition);
 
             this.currentWorkplaneModel.on('positionChanged', this.workplanePositionChanged, this);
             this.currentWorkplaneModel.on('click', this.workplaneClick, this);
@@ -215,11 +216,13 @@ define([
         click: function() {
             var vertexToSelect, parents;
             if (this.model.canSelect()) {
-                vertexToSelect = this.model.vertex;
-            } else if (this.model.selectParentOnClick()) {
-                parents = geometryGraph.parentsOf(this.model.vertex);
-                if (parents.length === 1) {
-                    vertexToSelect = parents[0];
+                if (this.model.selectParentOnClick()) {
+                    parents = geometryGraph.parentsOf(this.model.vertex);
+                    if (parents.length === 1) {
+                        vertexToSelect = parents[0];
+                    }
+                } else {
+                    vertexToSelect = this.model.vertex;
                 }
             }
             if (vertexToSelect) {

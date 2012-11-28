@@ -38,17 +38,7 @@ define([
         },
 
         workplaneClick: function() {
-            var that = this;
-            if(that.vertex.proto) {
-                this.tryCommit(function(success) {
-                    if (success) {
-                        var workplane = calc.copyObj(that.currentWorkplaneModel.vertex.workplane);
-                        geometryGraph.createPointPrototype({workplane: workplane});
-                    }
-                });
-            } else {
-                this.tryCommit();
-            }
+            this.tryCommit()
         },
 
     });
@@ -162,15 +152,8 @@ define([
 
         dragEnded: function() {
             if (!this.dragStartedInEditingMode) {
-                this.model.tryCommit(function(success) {
-
-                });
+                this.model.tryCommit();
             }
-            // if (this.dragging && !this.dragStartedWhilstEditing) {
-            //     this.model.okEdit();
-            //     this.dragging = false;
-            // }
-            // this.model.tryCommit();
         },
 
     });

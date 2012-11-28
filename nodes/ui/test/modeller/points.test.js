@@ -29,16 +29,18 @@ describe('Points', function() {
             .click('.toolbar .point')
             .moveToWorld(20,10,0)
             .assertCoordinateEqual('.vertex.editing .coordinate', 20, 10, 0)
-            .clickOnWorld(20,10,0)
-            .isVisible('.vertex.display.point0', function(result) {
-                assert.isTrue(result);
-                client
-                    .clickOnWorld(0,0,0)
-                    .clickOnWorld(0,10,0)
-                    .clickOnWorld(0,20,0)
-                    .click('.toolbar .select')
-                    .assertNumberOfDisplayNodes(4, done);
-            });
+            .waitForUrlChange(
+                function() { client.clickOnWorld(20,10,0); },
+                function() {
+                    client
+                        .assertNumberOfDisplayNodes(1)
+                        .assertNumberOfEditingNodes(1)
+                        .clickOnWorld(0,0,0)
+                        .clickOnWorld(0,10,0)
+                        .clickOnWorld(0,20,0)
+                        .click('.toolbar .select')
+                        .assertNumberOfDisplayNodes(4, done);
+                });
                
     });
 
@@ -56,8 +58,12 @@ describe('Points', function() {
                         .moveToWorld(15,15,0)
                         .moveToWorld(15,15,0)
                         .assertCoordinateEqual('.vertex.editing .coordinate', 15, 15, 0)
-                        .buttonUp()
-                        .assertNumberOfDisplayNodes(1, done);
+                        .waitForUrlChange(
+                            function() { client.buttonUp(); },
+                            function() {
+                                client
+                                    .assertNumberOfDisplayNodes(1, done);
+                            });
                 });
     });
 

@@ -72,23 +72,25 @@ define([
             if (this.get('enabled')) {
                 var selectedId = selection.selected[0];
                 toolbar.ItemModel.prototype.click.call(this);
-                var editingPolyline = geometryGraph.vertexById(selectedId);
-
-                VertexMV.getModelForVertex(editingPolyline).cancel();
-                var polyline = geometryGraph.vertexById(editingPolyline.id);
+                var polyline = geometryGraph.vertexById(selectedId);
                 geometryGraph.createExtrudePrototype(polyline, 1);
             }
         },
 
     });
 
+    var selectItemModel   = new SelectItemModel();
+    var pointItemModel    = new PointItemModel();
+    var polylineItemModel = new Polyline();
+    var extrudeItemModel  = new Extrude();
+
     var GeomToolbarModel = toolbar.Model.extend({
 
         initialize: function(attributes) {
             toolbar.Model.prototype.initialize.call(this, attributes);
-            geometryGraph.on('vertexRemoved', this.vertexRemoved, this);
-            geometryGraph.on('vertexReplaced', this.vertexReplaced, this);
             commandStack.on('beforePop', this.beforePop, this);
+            VertexMV.eventProxy.on('committedCreate', this.committedCreate, this);
+            VertexMV.eventProxy.on('cancelledCreate', this.setToSelect, this);
         },
 
         activate: function(item) {
@@ -111,6 +113,7 @@ define([
         },
 
         launchTool: function(item) {
+            VertexMV.cancelIfEditing();
             if (item.name === 'point') {
                 var workplane = calc.copyObj(Workplane.getCurrent().vertex.workplane);
                 geometryGraph.createPointPrototype({workplane: workplane});
@@ -118,18 +121,6 @@ define([
             if (item.name === 'polyline') {
                 var workplane = calc.copyObj(Workplane.getCurrent().vertex.workplane);
                 geometryGraph.createPolylinePrototype({workplane: workplane});
-            }
-        },
-
-        vertexRemoved: function(vertex) {
-            if (vertex.proto && !vertex.implicit) {
-                this.setToSelect();
-            }
-        },
-
-        vertexReplaced: function(original, replacement) {
-            if (original.proto && !original.implicit) {
-                this.setToSelect();
             }
         },
 
@@ -143,21 +134,35 @@ define([
             selection.deselectAll();
         },
 
+        committedCreate: function(committedVertices) {
+            var isPointCreate = committedVertices[0].type === 'point';
+            var isPolylineCreate = committedVertices[0].type === 'polyline';
+
+            if (isPointCreate) {
+                this.launchTool(pointItemModel);
+            } else if (isPolylineCreate) {
+                this.launchTool(polylineItemModel);
+            } else {
+                this.setToSelect();
+            }
+
+        },
+
         setToSelect: function() {
-            this.activate(this.items[0]);
+            this.activate(selectItemModel);
         },
 
         isSelectActive: function() {
-            return this.activeItem === this.items[0];
+            return this.activeItem === selectItemModel;
         },
 
     });
 
     var toolbarModel = new GeomToolbarModel({name: 'geometry'});
-    toolbarModel.addItem(new SelectItemModel({toolbarModel: toolbarModel}));
-    toolbarModel.addItem(new PointItemModel({toolbarModel: toolbarModel}));
-    toolbarModel.addItem(new Polyline({toolbarModel: toolbarModel}));
-    toolbarModel.addItem(new Extrude({toolbarModel: toolbarModel}));
+    toolbarModel.addItem(selectItemModel);
+    toolbarModel.addItem(pointItemModel);
+    toolbarModel.addItem(polylineItemModel);
+    toolbarModel.addItem(extrudeItemModel);
     toolbarModel.setToSelect();
     return toolbarModel;
 

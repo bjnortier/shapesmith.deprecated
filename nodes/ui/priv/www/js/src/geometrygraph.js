@@ -5,7 +5,6 @@ define([
     'src/graph',
     'src/geomnode',
     'src/variablegraph',
-
     ], 
     function(_, Backbone, crypto, graphLib, geomNode, variableGraphLib) {
 

@@ -185,11 +185,10 @@ define([
         geometryGraph.remove(vertex);
     }
 
-    var cancelEdit = function(editingVertices, originalVertices, callback) {
+    var cancelEdit = function(editingVertices, originalVertices) {
         editingVertices.forEach(function(editingVertex, i) {
             geometryGraph.replace(editingVertex, originalVertices[i]);
         });
-        callback();
     }
 
     var edit = function(vertex) {
