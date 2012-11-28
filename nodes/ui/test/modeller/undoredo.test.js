@@ -79,10 +79,11 @@ describe('Undo/Redo', function() {
                     client  
                         .click('.toolbar .select')
                         .assertNumberOfDisplayNodes(1)
-                        .clickOnWorld(0,0,0)
+                        .click('.point0')
                         .assertNumberOfEditingNodes(1)
                         .clickOnWorld(10,10,10)
                         .back() 
+                        .pause(100)
                         .assertNumberOfDisplayNodes(0, done)
                 });
     });
@@ -130,14 +131,14 @@ describe('Undo/Redo', function() {
                                     .back()
                                     .clickOnWorld(0,0,0)
                                     .assertNumberOfEditingNodes(3)
-                                    .assertCoordinateEqual('.vertex.editing.point0 .coordinate', 0,0,0)
-                                    .assertCoordinateEqual('.vertex.editing.point1 .coordinate', 20,20,0)
+                                    .assertCoordinateEqual('.vertex.editing.implicit_point0 .coordinate', 0,0,0)
+                                    .assertCoordinateEqual('.vertex.editing.implicit_point1 .coordinate', 20,20,0)
                                     .clickOnWorld(15,15,0)
                                     .forward()
                                     .clickOnWorld(-10,-10,0)
                                     .assertNumberOfEditingNodes(3)
-                                    .assertCoordinateEqual('.vertex.editing.point0 .coordinate', -10,-10,0)
-                                    .assertCoordinateEqual('.vertex.editing.point1 .coordinate', 20,0,0, done)
+                                    .assertCoordinateEqual('.vertex.editing.implicit_point0 .coordinate', -10,-10,0)
+                                    .assertCoordinateEqual('.vertex.editing.implicit_point1 .coordinate', 20,0,0, done)
                             });
 
                 });

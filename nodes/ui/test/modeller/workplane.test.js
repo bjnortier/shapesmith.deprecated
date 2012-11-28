@@ -39,15 +39,6 @@ describe('Workplane', function() {
                 });
     });
 
-    it('cancels editing when clicking on the workplane', function(done) {
-        this.timeout(5000);
-        client
-            .click('#workplane-settings')
-            .assertNumberOfElements('#workplane-settings .vertex.editing', 1)
-            .clickOnWorld(0,0,0)
-            .assertNumberOfElements('#workplane-settings .vertex.editing', 0, done);
-    });
-
     it('will not change the workplane if there are errors', function(done) {
         this.timeout(5000);
         client

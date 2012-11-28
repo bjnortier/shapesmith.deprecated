@@ -104,6 +104,21 @@ define([
             return;
         }
 
+        var allAreSame = true;
+        for (var i = 0; i < editingVertices.length; ++i) {
+            if (!originalVertices[i].hasSameJSON(editingVertices[i])) {
+                allAreSame = false;
+                break;
+            }
+        }
+        if (allAreSame) {
+            editingVertices.map(function(editingVertex, i) {
+                geometryGraph.replace(editingVertex, originalVertices[i]);
+            });
+            callback({newVertices: originalVertices});
+            return;
+        }
+
         var nonEditingVertices = editingVertices.map(function(v) {
             return v.cloneNonEditing();
         });

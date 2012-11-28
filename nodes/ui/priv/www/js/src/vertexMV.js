@@ -195,13 +195,6 @@ define([
                 return this.parentModel.tryCommit();
             }
 
-            // Prevent multiple commits, e.g. when focus is lost
-            // and the user clicks on the workplane
-            if (this.committing) {
-                return;
-            }
-            this.committing = true;
-
             var that = this;
             if (this.vertex.proto) {
                 var uniqueImplicitChildren = _.uniq(geometryGraph.childrenOf(this.vertex).filter(function(v) {
@@ -221,8 +214,6 @@ define([
                         selection.deselectAll();
 
                     }
-
-                    that.committing = false;
                 });
             } else {
                 var originals = [this.originalVertex];
@@ -244,11 +235,7 @@ define([
 
                         eventProxy.trigger('committedEdit', committedVertices);
                         selection.deselectAll();
-
-
                     } 
-
-                    that.committing = false;
                 });
             }
         },
