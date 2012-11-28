@@ -217,7 +217,7 @@ define([
             var vertexToSelect, parents;
             if (this.model.canSelect()) {
                 if (this.model.selectParentOnClick()) {
-                    parents = geometryGraph.parentsOf(this.model.vertex);
+                    var parents = _.uniq(geometryGraph.parentsOf(this.model.vertex));
                     if (parents.length === 1) {
                         vertexToSelect = parents[0];
                     }

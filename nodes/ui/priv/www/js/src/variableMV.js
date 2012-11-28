@@ -1,60 +1,67 @@
 define([
-    'src/vertexwrapper',
-    'src/geometrygraphsingleton', 
-    'src/interactioncoordinator',
-    ], function(vertexWrapper, geometryGraph, coordinator) {
+        'src/vertexMV',
+        'src/geometrygraphsingleton', 
+        'src/interactioncoordinator',
+        'src/asyncAPI',
+    ], function(
+        VertexMV, 
+        geometryGraph, 
+        coordinator,
+        AsyncAPI) {
 
 
-    var lastIndex = {}
+    // var lastIndex = {}
 
-    var addToTable = function(vertex, el) {
-        var vertexId = vertex.id;
-        var lastVertexRowIndex = lastIndex[vertexId];
-        if ((lastVertexRowIndex !== undefined) && 
-            ($('#variables tr').length > lastVertexRowIndex)) {
-            $($('#variables tr')[lastIndex[vertexId]]).before(el);
-        } else {
-            $('#variables').append(el);
-        }
-    }
+    // var addToTable = function(vertex, el) {
+    //     var vertexId = vertex.id;
+    //     var lastVertexRowIndex = lastIndex[vertexId];
+    //     if ((lastVertexRowIndex !== undefined) && 
+    //         ($('#variables tr').length > lastVertexRowIndex)) {
+    //         $($('#variables tr')[lastIndex[vertexId]]).before(el);
+    //     } else {
+    //         $('#variables').append(el);
+    //     }
+    // }
 
-    var saveRowIndex = function(vertexId, el) {
-        var rowIndex = el.closest('tr').prevAll().length;
-        lastIndex[vertexId] = rowIndex;
-    }
+    // var saveRowIndex = function(vertexId, el) {
+    //     var rowIndex = el.closest('tr').prevAll().length;
+    //     lastIndex[vertexId] = rowIndex;
+    // }
 
     // ---------- Editing ----------
 
-    var EditingModel = vertexWrapper.EditingModel.extend({
+    var EditingModel = VertexMV.EditingModel.extend({
 
-        initialize: function(vertex) {
-            vertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
+        initialize: function(original, vertex) {
+            this.displayModelConstructor = DisplayModel;
+            VertexMV.EditingModel.prototype.initialize.call(this, original, vertex);
             this.views.push(new EditingView({model: this}));
+            coordinator.on('sceneClick', this.tryCommit, this);
         },
 
         destroy: function() {
-            vertexWrapper.EditingModel.prototype.destroy.call(this);
+            VertexMV.EditingModel.prototype.destroy.call(this);
+            coordinator.off('sceneClick', this.tryCommit, this);
         },
 
     });
 
-    var EditingView = vertexWrapper.EditingDOMView.extend({
+    var EditingView = VertexMV.EditingDOMView.extend({
 
         tagName: 'tr',
 
         initialize: function() {
-            vertexWrapper.EditingDOMView.prototype.initialize.call(this);
+            VertexMV.EditingDOMView.prototype.initialize.call(this);
             this.render();
             this.$el.addClass('variable');
-            addToTable(this.model.vertex, this.$el);
+            $('#variables').append(this.$el);
             $('.field').autoGrowInput();
-            coordinator.on('sceneClick', this.tryCommit, this);
+
         },
 
         remove: function() {
-            saveRowIndex(this.model.vertex.id, this.$el);
-            vertexWrapper.EditingDOMView.prototype.remove.call(this);
-            coordinator.off('sceneClick', this.tryCommit, this);
+            VertexMV.EditingDOMView.prototype.remove.call(this);
+            coordinator.off('sceneClick', this.model.tryCommit, this.model);
         },
 
         render: function() {
@@ -86,49 +93,41 @@ define([
         },
 
         updateFromDOM: function() {
-
-        },
-
-        tryCommit: function() {
             var name = this.$el.find('.var').val();
             var expr = this.$el.find('.expr').val();
             this.model.vertex.name = name;
             this.model.vertex.parameters.expression = expr;
-            if (this.model.vertex.proto) {
-                this.model.okCreate();
-            } else {
-                this.model.okEdit();
-            }
         },
 
     });
 
     // ---------- Editing ----------
 
-    var DisplayModel = vertexWrapper.Model.extend({
+    var DisplayModel = VertexMV.DisplayModel.extend({
 
         initialize: function(vertex) {
-            vertexWrapper.Model.prototype.initialize.call(this, vertex);
+            this.displayModelConstructor = DisplayModel;
+            this.editingModelConstructor = EditingModel;
+            VertexMV.DisplayModel.prototype.initialize.call(this, vertex);
             this.views.push(new DisplayDOMView({model: this}));
         },
 
         destroy: function() {
-            vertexWrapper.Model.prototype.destroy.call(this);
+            VertexMV.DisplayModel.prototype.destroy.call(this);
         },
 
     });
 
-    var DisplayDOMView = vertexWrapper.DisplayDOMView.extend({
+    var DisplayDOMView = VertexMV.DisplayDOMView.extend({
 
         initialize: function() {
-            vertexWrapper.DisplayDOMView.prototype.initialize.call(this);
-            addToTable(this.model.vertex, this.$el);
+            VertexMV.DisplayDOMView.prototype.initialize.call(this);
+            $('#variables').append(this.$el);
             $('.field').autoGrowInput();
         },
 
         remove: function() {
-            saveRowIndex(this.model.vertex.id, this.$el);
-            vertexWrapper.DisplayDOMView.prototype.remove.call(this);
+            VertexMV.DisplayDOMView.prototype.remove.call(this);
         },
 
         render: function() {
@@ -148,15 +147,18 @@ define([
         events: {
             'click .name' : 'click',
             'click .expression' : 'click',
-            'click .delete' : 'delete',
-        },
-
-        delete: function() {
-            geometryGraph.commitDelete(this.model.vertex);
+            'click .delete': 'delete',
         },
 
         click: function() {
-            geometryGraph.edit(this.model.vertex);
+            this.model.destroy();
+            var editingVertex = AsyncAPI.edit(this.model.vertex);
+            new this.model.editingModelConstructor(this.model.vertex, editingVertex);
+        },
+
+        delete: function(event) {
+            event.stopPropagation();
+            this.model.tryDelete();
         },
 
     });
