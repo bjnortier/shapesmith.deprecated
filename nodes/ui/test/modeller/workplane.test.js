@@ -40,7 +40,7 @@ describe('Workplane', function() {
     });
 
     it('cancels editing when clicking on the workplane', function(done) {
-        this.timeout(10000);
+        this.timeout(5000);
         client
             .click('#workplane-settings')
             .assertNumberOfElements('#workplane-settings .vertex.editing', 1)
@@ -48,7 +48,16 @@ describe('Workplane', function() {
             .assertNumberOfElements('#workplane-settings .vertex.editing', 0, done);
     });
 
-    it.skip('will not change the workplane if there are errors');
+    it('will not change the workplane if there are errors', function(done) {
+        this.timeout(5000);
+        client
+            .click('#workplane-settings')
+            .clearElement('#workplane-settings .snap')
+            .setValue('#workplane-settings .snap', '##')
+            .clickOnWorld(0,0,0)
+            .hasClass('#workplane-settings .vertex.editing', 'error', done)
+
+    });
 
 
 });

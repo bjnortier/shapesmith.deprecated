@@ -7,6 +7,7 @@ define([
         'src/geometrygraphsingleton',
         'src/vertexMV',
         'src/selection',
+        'src/asyncAPI',
     ], function(
         colors,
         calc, 
@@ -15,7 +16,8 @@ define([
         geomNode,
         geometryGraph,
         VertexMV,
-        selection) {
+        selection,
+        AsyncAPI) {
 
     var currentDisplayModel = undefined;
 
@@ -112,10 +114,13 @@ define([
             this.camera = this.sceneView.camera;
             this.gridView = new GridView({model: this});
             this.settingsView = new SettingsEditingView({model: this});
+
+            coordinator.on('sceneClick', this.tryCommit, this);
         },
 
         destroy: function() {
             VertexMV.EditingModel.prototype.destroy.call(this);
+            coordinator.off('sceneClick', this.tryCommit, this);
             this.gridView.remove();
             this.settingsView.remove();
         },
@@ -149,7 +154,11 @@ define([
         },
 
         click: function() {
-            selection.selectOnly(this.model.vertex.id);
+            if (!geometryGraph.isEditing()) {
+                this.model.destroy();
+                var editingVertex = AsyncAPI.edit(this.model.vertex);
+                new this.model.editingModelConstructor(this.model.vertex, editingVertex);
+            }
         },
 
     });
