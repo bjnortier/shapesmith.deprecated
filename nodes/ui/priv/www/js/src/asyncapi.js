@@ -52,9 +52,16 @@ define([
     }
     
     var tryCommitCreate = function(editingVertices, callback) {
-        // if (!this.validate(editingVertex)) {
-        //     return;
-        // }
+        var allOk = true;
+        editingVertices.forEach(function(v) {
+            if (!geometryGraph.validate(v)) {
+                allOk = false;
+            }
+        });
+        if (!allOk) {
+            callback({'error' : 'validation'});
+            return;
+        }
 
         var nonEditingVertices = editingVertices.map(function(v) {
             return v.cloneNonEditing();
@@ -86,6 +93,16 @@ define([
     }
 
     var tryCommitEdit = function(originalVertices, editingVertices, callback) {
+        var allOk = true;
+        editingVertices.forEach(function(v) {
+            if (!geometryGraph.validate(v)) {
+                allOk = false;
+            }
+        });
+        if (!allOk) {
+            callback({'error' : 'validation'});
+            return;
+        }
 
         var nonEditingVertices = editingVertices.map(function(v) {
             return v.cloneNonEditing();
@@ -124,7 +141,7 @@ define([
         var parents =  geometryGraph.parentsOf(vertex);
 
         if (parents.length > 0) {
-            callback({error: 'cannot delete veretx with parents'});
+            callback &&     callback({error: 'cannot delete vertex with parents'});
             return;
         }
 

@@ -34,7 +34,7 @@ describe('Variables', function() {
     });
 
 
-    it("can't be edit more than one at a time", function(done) {
+    it("can't be edited more than one at a time", function(done) {
         this.timeout(5000)
         client
             .click('#variables .add')
@@ -55,7 +55,6 @@ describe('Variables', function() {
                                     .click('#variables .a')
                                     .assertNumberOfDisplayNodes(1)
                                     .assertNumberOfEditingNodes(1)
-                                    .pause(1000)
                                     .click('#variables .b')
                                     .assertNumberOfDisplayNodes(1)
                                     .assertNumberOfEditingNodes(1, done)

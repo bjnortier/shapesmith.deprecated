@@ -220,10 +220,9 @@ define([
                         eventProxy.trigger('committedCreate', originals, committedVertices);
                         selection.deselectAll();
 
-                    } else {
                     }
 
-                    this.committing = false;
+                    that.committing = false;
                 });
             } else {
                 var originals = [this.originalVertex];
@@ -247,11 +246,9 @@ define([
                         selection.deselectAll();
 
 
-                    } else {
-                        throw Error('not implemented');
-                    }
+                    } 
 
-                    this.committing = false;
+                    that.committing = false;
                 });
             }
         },

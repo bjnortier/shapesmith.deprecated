@@ -151,9 +151,11 @@ define([
         },
 
         click: function() {
-            this.model.destroy();
-            var editingVertex = AsyncAPI.edit(this.model.vertex);
-            new this.model.editingModelConstructor(this.model.vertex, editingVertex);
+            if (!geometryGraph.isEditing()) {
+                this.model.destroy();
+                var editingVertex = AsyncAPI.edit(this.model.vertex);
+                new this.model.editingModelConstructor(this.model.vertex, editingVertex);
+            }
         },
 
         delete: function(event) {
