@@ -23,14 +23,13 @@ define([
 
     var DisplayModel = VertexMV.DisplayModel.extend({
 
-        initialize: function(vertex) {
+        initialize: function(options) {
             this.editingModelConstructor = EditingModel;
             this.displayModelConstructor = DisplayModel;
 
-            VertexMV.DisplayModel.prototype.initialize.call(this, vertex);
+            VertexMV.DisplayModel.prototype.initialize.call(this, options);
 
             currentDisplayModel = this;
-            this.vertex = vertex;
 
             coordinator.on('mousemove', this.mousemove, this);
             coordinator.on('sceneClick', this.workplaneClick, this);
@@ -103,12 +102,12 @@ define([
 
     var EditingModel = VertexMV.EditingModel.extend({
 
-        initialize: function(original, vertex) {
+        initialize: function(options) {
             this.displayModelConstructor = DisplayModel;
-            VertexMV.EditingModel.prototype.initialize.call(this, original, vertex);
+            VertexMV.EditingModel.prototype.initialize.call(this, options);
             
             currentDisplayModel = this;
-            this.vertex = vertex;
+            
             this.sceneView = sceneModel.view;
             this.scene = this.sceneView.scene;
             this.camera = this.sceneView.camera;
@@ -157,7 +156,10 @@ define([
             if (!geometryGraph.isEditing()) {
                 this.model.destroy();
                 var editingVertex = AsyncAPI.edit(this.model.vertex);
-                new this.model.editingModelConstructor(this.model.vertex, editingVertex);
+                new this.model.editingModelConstructor({
+                    original:this.model.vertex, 
+                    vertex: editingVertex
+                });
             }
         },
 

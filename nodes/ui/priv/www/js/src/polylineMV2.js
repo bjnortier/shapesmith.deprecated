@@ -64,21 +64,23 @@ define([
 
     var EditingModel = GeomVertexMV.EditingModel.extend({
 
-        initialize: function(original, vertex) {
+        initialize: function(options) {
             this.displayModelConstructor = DisplayModel;
-            GeomVertexMV.EditingModel.prototype.initialize.call(this, original, vertex);
+            GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
 
             this.domView = new EditingDOMView({model: this});
             this.views.push(this.domView);
             this.views.push(new EditingLineSceneView({model: this}));
 
             // Create the child models
-            var that = this;
             if (this.vertex.proto) {
                 // Prototype polylines will always have an implicit point as first child
                 var pointChildren = geometryGraph.childrenOf(this.vertex);
                 this.subModels = [
-                    new ImplicitPointMV.EditingModel(undefined, pointChildren[0], that)
+                    new ImplicitPointMV.EditingModel({
+                        vertex: pointChildren[0],
+                        parentModel: this
+                    })
                 ];
                 this.activePoint = this.subModels[0];
             } else {
@@ -90,12 +92,17 @@ define([
                 this.editingImplicitChildren = this.originalImplicitChildren.map(function(child) {
                     return AsyncAPI.edit(child);
                 })
+                var that = this;
                 this.subModels = this.originalImplicitChildren.map(function(child, i) {
                     if (child.implicit) {
                         // Replace the original model with an editing model
                         var modelToDestroy = VertexMV.getModelForVertex(child)
                         modelToDestroy.destroy();
-                        return new modelToDestroy.editingModelConstructor(child, that.editingImplicitChildren[i], that);
+                        return new modelToDestroy.editingModelConstructor({
+                            original: child,
+                            vertex: that.editingImplicitChildren[i],
+                            parentModel: that
+                        });
                     } 
                 });
             }
@@ -159,7 +166,10 @@ define([
 
         addPoint: function(position) {
             var point = geometryGraph.addPointToPolyline(this.vertex);
-            var newLength = this.subModels.push(new ImplicitPointMV.EditingModel(undefined, point, this));
+            var newLength = this.subModels.push(new ImplicitPointMV.EditingModel({
+                vertex: point, 
+                parentModel: this
+            }));
             this.activePoint = this.subModels[newLength - 1];
             this.workplanePositionChanged(position);
         },
@@ -219,10 +229,10 @@ define([
 
     var DisplayModel = GeomVertexMV.DisplayModel.extend({
 
-        initialize: function(vertex, possibleEditingParentModel) {
+        initialize: function(options) {
             this.editingModelConstructor = EditingModel;
             this.displayModelConstructor = DisplayModel;
-            GeomVertexMV.DisplayModel.prototype.initialize.call(this, vertex);
+            GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
 
             this.views = this.views.concat([
                 new DisplayLineSceneView({model: this}),

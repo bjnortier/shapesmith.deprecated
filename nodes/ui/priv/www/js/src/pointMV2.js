@@ -20,9 +20,9 @@ define([
 
     var EditingModel = GeomVertexMV.EditingModel.extend({
 
-        initialize: function(original, vertex) {
+        initialize: function(options) {
             this.displayModelConstructor = DisplayModel;
-            GeomVertexMV.EditingModel.prototype.initialize.call(this, original, vertex);
+            GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
 
             this.views.push(new EditingSceneView({model: this}));
             this.views.push(new EditingDOMView({model: this}));
@@ -162,10 +162,10 @@ define([
 
     var DisplayModel = GeomVertexMV.DisplayModel.extend({
 
-        initialize: function(vertex, possibleEditingParentModel) {
+        initialize: function(options) {
             this.editingModelConstructor = EditingModel;
             this.displayModelConstructor = DisplayModel;
-            GeomVertexMV.DisplayModel.prototype.initialize.call(this, vertex);
+            GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
 
             this.views = this.views.concat([
                 new DisplaySceneView({model: this}),
@@ -228,7 +228,10 @@ define([
         dragStarted: function(event) {
             this.model.destroy();
             var editingVertex = AsyncAPI.edit(this.model.vertex);
-            new this.model.editingModelConstructor(this.model.vertex, editingVertex);
+            new this.model.editingModelConstructor({
+                original: this.model.vertex, 
+                vertex: editingVertex
+            });
             sceneViewEventGenerator.replaceInDraggable(this, this.model.vertex.id);
         },
 

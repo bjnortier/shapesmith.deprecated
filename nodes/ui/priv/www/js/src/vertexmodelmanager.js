@@ -52,9 +52,9 @@ define([
         }
 
         if (vertex.editing) {
-            new wrappers[vertex.type].EditingModel(undefined, vertex);
+            new wrappers[vertex.type].EditingModel({vertex: vertex});
         } else {
-            new wrappers[vertex.type].DisplayModel(vertex);
+            new wrappers[vertex.type].DisplayModel({vertex: vertex});
         }
     }
 

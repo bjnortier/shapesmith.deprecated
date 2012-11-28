@@ -20,9 +20,9 @@ define([
 
     var EditingModel = VertexMV.EditingModel.extend({
 
-        initialize: function(original, vertex) {
+        initialize: function(options) {
             this.currentWorkplaneModel = Workplane.getCurrent();
-            VertexMV.EditingModel.prototype.initialize.call(this, original, vertex);
+            VertexMV.EditingModel.prototype.initialize.call(this, options);
 
             this.currentWorkplaneModel.on('positionChanged', this.workplanePositionChanged, this);
             this.currentWorkplaneModel.on('click', this.workplaneClick, this);
@@ -47,7 +47,7 @@ define([
         initialize: function() {
             VertexMV.EditingDOMView.prototype.initialize.call(this);
             if (!this.model.vertex.implicit) {
-                $('#geometry').append(this.$el);
+                VertexMV.replaceOrAppendInTable(this, '#geometry'); 
             }
             $('.field').autoGrowInput();
         },
@@ -77,14 +77,6 @@ define([
 
     var DisplayModel = VertexMV.DisplayModel.extend({ 
 
-        initialize: function(vertex) {
-            VertexMV.DisplayModel.prototype.initialize.call(this, vertex);
-        },
-
-        destroy: function() {
-            VertexMV.DisplayModel.prototype.destroy.call(this);
-        },  
-
         canSelect: function() {
             return true;
         },
@@ -96,10 +88,7 @@ define([
         select: function(ids, selection) {
             VertexMV.DisplayModel.prototype.select.call(this, ids, selection);
             if ((selection.length === 1) && this.selected) {
-                this.destroy();
-                var editingVertex = AsyncAPI.edit(this.vertex);
-                new this.editingModelConstructor(this.vertex, editingVertex);
-
+                VertexMV.replaceWithEditing(this.vertex, AsyncAPI.edit(this.vertex));
             }
         },
 
@@ -113,7 +102,7 @@ define([
         initialize: function() {
             VertexMV.DisplayDOMView.prototype.initialize.call(this);
             this.$el.addClass(this.model.vertex.name);  
-            $('#geometry').append(this.$el);
+            VertexMV.replaceOrAppendInTable(this, '#geometry'); 
             this.updateSelection();
         },
 

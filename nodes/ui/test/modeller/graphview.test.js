@@ -23,7 +23,7 @@ describe('Graph view', function() {
 
     // ---------- Cases ----------
 
-    it.skip('will maintain row index on editing', function(done) {
+    it('will maintain geometry row index on editing', function(done) {
         this.timeout(5000);
         client
             .click('.toolbar .point')
@@ -38,38 +38,44 @@ describe('Graph view', function() {
                                     .click('.toolbar .select')
                                     .click('#geometry .point0')
                                     .assertTextEqual('#geometry tr:nth-child(1) .title', 'point0')
-                                    .assertTextEqual('#geometry tr:nth-child(2) .title', 'point1', done)
+                                    .assertTextEqual('#geometry tr:nth-child(2) .title', 'point1')
+                                    .clickOnWorld(0,0,0)
+                                    .click('#geometry .point1')
+                                    .assertTextEqual('#geometry tr:nth-child(1) .title', 'point0')
+                                    .assertTextEqual('#geometry tr:nth-child(2) .title', 'point1', done);
                             });
     
-            });
-               
-    });
+                });
+    });   
 
-    it.skip('will display implicit editing rows underneath the parent', function(done) {
+    it('will maintain variable row index on editing', function(done) {
         this.timeout(5000);
         client
-            .click('.toolbar .polyline')
-            .clickOnWorld(0,0,0)
-            .clickOnWorld(10,10,0)
-            .elements('css selector', '.vertex.editing.polyline0 tr', function(result) {
-                assert.equal(result.value.length, 2),
-                client
-                    .waitForUrlChange(
-                        function() { client.dblClickOnWorld(10,10,0); },
-                        function() {
-                            client
-                                .pause(1000)
-                                .click('.toolbar .select')
-                                .click('.vertex.display.polyline0')
-                                .elements('css selector', '.vertex.editing.polyline0 tr', function(result) {
-                                    assert.equal(result.value.length, 2);
-                                    done();
-                                });
-                        });
-            });
-
-
-    });
+            .click('#variables .add')
+            .setValue('#variables .name input', 'a')
+            .setValue('#variables .expression input', '1')
+            .waitForUrlChange(
+                function() { client.clickOnWorld(0,0,0); },
+                function() {
+                    client
+                        .click('#variables .add')
+                        .setValue('#variables .name input', 'b')
+                        .setValue('#variables .expression input', '2')
+                        .waitForUrlChange(
+                            function() { client.clickOnWorld(0,0,0); },
+                            function() {
+                                client
+                                    .click('#variables .a')
+                                    .assertValueEqual('#variables tr:nth-child(2) .name .field', 'a')
+                                    .assertTextEqual('#variables tr:nth-child(3) .name', 'b')
+                                    .pause(100)
+                                    .clickOnWorld(0,0,0)
+                                    .click('#variables .b')
+                                    .assertTextEqual('#variables tr:nth-child(2) .name', 'a')
+                                    .assertValueEqual('#variables tr:nth-child(3) .name .field', 'b', done);
+                            });
+                });
+    });               
 
 
 });

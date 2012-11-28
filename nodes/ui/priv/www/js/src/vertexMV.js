@@ -40,9 +40,42 @@ define([
 
     var eventProxy = new EventProxy();
 
+    var replaceWithDisplay = function(original, replacement) {
+        var modelToDestroy = getModelForVertex(original);
+        var rowIndex = modelToDestroy.domView.$el.closest('tr').prevAll().length;
+        modelToDestroy.destroy();
+        new modelToDestroy.displayModelConstructor({
+            vertex: replacement,
+            rowIndex: rowIndex,
+        });
+    }
+
+    var replaceWithEditing = function(original, replacement) {
+        var modelToDestroy = getModelForVertex(original);
+        var rowIndex = modelToDestroy.domView.$el.closest('tr').prevAll().length;
+        modelToDestroy.destroy();
+        var newModel = new modelToDestroy.editingModelConstructor({
+            original: original, 
+            vertex:   replacement,
+            rowIndex: rowIndex,
+        });
+    }
+
+    var replaceOrAppendInTable = function(view, tableSelector) {
+        var rowIndex = view.model.attributes.rowIndex;
+        if ((rowIndex !== undefined) && 
+            (rowIndex < $(tableSelector + ' tr').length)) {
+            $($(tableSelector + ' tr')[rowIndex]).before(view.$el);
+        } else {
+            $(tableSelector).append(view.$el);
+        }
+    }
+
     var Model = Backbone.Model.extend({
 
-        initialize: function(vertex) {
+        initialize: function(options) {
+            var vertex = options.vertex;
+
             // Add/remove must be symmetric
             if (modelForVertex[keyForVertex(vertex)]) {
                 throw Error('Already a model for:', vertex.id);
@@ -166,12 +199,12 @@ define([
 
     var EditingModel = Model.extend({
 
-        initialize: function(original, vertex) {
+        initialize: function(options) {
             if (!this.displayModelConstructor) {
                 throw Error('no Display model constructor set');
             }
-            this.originalVertex = original;
-            Model.prototype.initialize.call(this, vertex);
+            this.originalVertex = options.original;
+            Model.prototype.initialize.call(this, options);
             coordinator.on('keyup', this.keyUp, this);
         },
 
@@ -206,9 +239,7 @@ define([
                     if (!result.error) {
                         var committedVertices = result.newVertices;
                         originals.forEach(function(original, i) {
-                            var modelToDestroy = getModelForVertex(original);
-                            modelToDestroy.destroy();
-                            new modelToDestroy.displayModelConstructor(committedVertices[i]);
+                            replaceWithDisplay(original, committedVertices[i]);
                         });
                         eventProxy.trigger('committedCreate', originals, committedVertices);
                         selection.deselectAll();
@@ -228,11 +259,8 @@ define([
                     if (!result.error) {
                         var committedVertices = result.newVertices;
                         editing.forEach(function(editingVertex, i) {
-                            var modelToDestroy = getModelForVertex(editingVertex);
-                            modelToDestroy.destroy();
-                            new modelToDestroy.displayModelConstructor(committedVertices[i]);
+                            replaceWithDisplay(editingVertex, committedVertices[i]);
                         });
-
                         eventProxy.trigger('committedEdit', committedVertices);
                         selection.deselectAll();
                     } 
@@ -281,9 +309,7 @@ define([
 
                 AsyncAPI.cancelEdit(editing, originals);
                 editing.forEach(function(editingVertex, i) {
-                    var modelToDestroy = getModelForVertex(editingVertex);
-                    modelToDestroy.destroy();
-                    new modelToDestroy.displayModelConstructor(originals[i]);
+                    replaceWithDisplay(editingVertex, originals[i]);
                 });
                 eventProxy.trigger('cancelledEdit');
             }
@@ -305,6 +331,7 @@ define([
         className: 'vertex editing',
 
         initialize: function() {
+            this.model.domView = this;
             this.render();
             this.$el.addClass(this.model.vertex.id);
             this.model.vertex.on('change', this.update, this);
@@ -316,31 +343,10 @@ define([
         },
 
         events: {
-            // 'focusin'         : 'vertexFocusIn',
-            // 'focusout'        : 'vertexFocusOut',
             'change .field'   : 'fieldChange',
             'keyup .field'    : 'fieldKeyUp',
             'click .delete'   : 'delete',
         },
-
-        // vertexFocusIn: function(event) {
-        //     this.vertexFocusInTimestamp = new Date().getTime();
-        // },
-
-        // vertexFocusOut: function(event) {
-        //     // If the focus is lost from the editin vertex within 100ms,
-        //     // then the focus has been lost
-        //     this.vertexFocusInTimestamp = 0;
-        //     this.vertexFocusOutTimestamp = new Date().getTime();
-        //     var that = this;
-        //     var vertexFocusLostFn = function() {
-        //         var diff = that.vertexFocusInTimestamp - that.vertexFocusOutTimestamp;
-        //         if (diff < 0) {
-        //             that.model.tryCommit();
-        //         }
-        //     }
-        //     setTimeout(vertexFocusLostFn, 100);
-        // },
 
         fieldChange: function(event) {
             event.stopPropagation();
@@ -375,19 +381,19 @@ define([
 
     var DisplayModel = Model.extend({
 
-        initialize: function(vertex) {
+        initialize: function(options) {
             if (!this.displayModelConstructor) {
                 throw Error('no Display model constructor set');
             }
             if (!this.editingModelConstructor) {
                 throw Error('no Editing model constructor set');
             }
-            Model.prototype.initialize.call(this, vertex);
+            Model.prototype.initialize.call(this, options);
         },
 
         replaceDisplayVertex: function(original, replacement) {
             this.destroy();
-            new this.displayModelConstructor(replacement);
+            new this.displayModelConstructor({vertex: replacement});
         },
 
         tryDelete: function() {
@@ -403,6 +409,7 @@ define([
         className: 'vertex display',
 
         initialize: function() {
+            this.model.domView = this;
             this.render();
             this.$el.addClass(this.model.vertex.name);  
             this.model.on('updateSelection', this.updateSelection, this);
@@ -421,15 +428,18 @@ define([
 
 
     return {
-        getModelForVertex : getModelForVertex,
-        cancelIfEditing   : cancelIfEditing,
-        eventProxy        : eventProxy,
-        Model             : Model,
-        SceneView         : SceneView,
-        EditingModel      : EditingModel,
-        EditingDOMView    : EditingDOMView,
-        DisplayModel      : DisplayModel,
-        DisplayDOMView    : DisplayDOMView
+        getModelForVertex      : getModelForVertex,
+        cancelIfEditing        : cancelIfEditing,
+        eventProxy             : eventProxy,
+        replaceWithDisplay     : replaceWithDisplay,
+        replaceWithEditing     : replaceWithEditing,
+        replaceOrAppendInTable : replaceOrAppendInTable,
+        Model                  : Model,
+        SceneView              : SceneView,
+        EditingModel           : EditingModel,
+        EditingDOMView         : EditingDOMView,
+        DisplayModel           : DisplayModel,
+        DisplayDOMView         : DisplayDOMView
     }
 
 });

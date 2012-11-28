@@ -9,25 +9,6 @@ define([
         coordinator,
         AsyncAPI) {
 
-
-    // var lastIndex = {}
-
-    // var addToTable = function(vertex, el) {
-    //     var vertexId = vertex.id;
-    //     var lastVertexRowIndex = lastIndex[vertexId];
-    //     if ((lastVertexRowIndex !== undefined) && 
-    //         ($('#variables tr').length > lastVertexRowIndex)) {
-    //         $($('#variables tr')[lastIndex[vertexId]]).before(el);
-    //     } else {
-    //         $('#variables').append(el);
-    //     }
-    // }
-
-    // var saveRowIndex = function(vertexId, el) {
-    //     var rowIndex = el.closest('tr').prevAll().length;
-    //     lastIndex[vertexId] = rowIndex;
-    // }
-
     // ---------- Editing ----------
 
     var EditingModel = VertexMV.EditingModel.extend({
@@ -54,7 +35,7 @@ define([
             VertexMV.EditingDOMView.prototype.initialize.call(this);
             this.render();
             this.$el.addClass('variable');
-            $('#variables').append(this.$el);
+            VertexMV.replaceOrAppendInTable(this, '#variables'); 
             $('.field').autoGrowInput();
 
         },
@@ -122,7 +103,7 @@ define([
 
         initialize: function() {
             VertexMV.DisplayDOMView.prototype.initialize.call(this);
-            $('#variables').append(this.$el);
+            VertexMV.replaceOrAppendInTable(this, '#variables'); 
             $('.field').autoGrowInput();
         },
 
@@ -152,9 +133,8 @@ define([
 
         click: function() {
             if (!geometryGraph.isEditing()) {
-                this.model.destroy();
                 var editingVertex = AsyncAPI.edit(this.model.vertex);
-                new this.model.editingModelConstructor(this.model.vertex, editingVertex);
+                VertexMV.replaceWithEditing(this.model.vertex, editingVertex);
             }
         },
 
