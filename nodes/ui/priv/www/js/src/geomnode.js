@@ -190,6 +190,8 @@ define([
 
     _.extend(Polyline.prototype, GeomNode.prototype);
 
+    // ---------- Extrude ----------
+
     var Extrude = function(options) {
         var options = options || {};
         options.type = 'extrude';

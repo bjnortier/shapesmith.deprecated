@@ -7,6 +7,7 @@ define([
         'src/vertexMV',
         'src/geomvertexMV', 
         'src/implicitpointMV',
+        'src/workplaneMV',
         'src/asyncAPI',
     ], 
     function(
@@ -18,6 +19,7 @@ define([
         VertexMV,
         GeomVertexMV,
         ImplicitPointMV,
+        WorkplaneMV,
         AsyncAPI) {
 
     // ---------- Common ----------
@@ -146,13 +148,15 @@ define([
                     
                     // Finish on the first point
                     var children = geometryGraph.childrenOf(this.vertex);
-                    if (clickedPoint === _.first(children)) {
+                    if ((clickedPoint === _.first(children)) && (children.length > 2)) {
                         this.tryCommit();
                         this.creating = true; // Prevent double create on double click
                     } else {
                         this.addPoint(clickedPoint.parameters.coordinate);
                     }
-                } 
+                } else {
+                    this.workplaneClick(WorkplaneMV.getCurrent().lastPosition);
+                }
             }
         },
 
@@ -201,7 +205,7 @@ define([
                 '<td>' +
                 '<table><tr>' +
                 '<td class="title">' + 
-                '<img src="/ui/images/icons/point32x32.png"/>' +
+                '<img src="/ui/images/icons/polyline32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
                 '<div class="delete"></div>' + 
                 '</td></tr><tr><td>' +
