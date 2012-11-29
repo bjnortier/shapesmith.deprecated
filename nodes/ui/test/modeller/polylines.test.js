@@ -48,8 +48,8 @@ describe('Polylines', function() {
             .clickOnWorld(0,10,0)
             .clickOnWorld(20,0,0)
             .clickOnWorld(10,10,0)
-            .assertNumberOfEditingNodes(2)
-            .assertNumberOfDisplayNodes(4, done)
+            .assertNumberOfEditingNodes(6)
+            .assertNumberOfDisplayNodes(0, done)
     });
 
 
@@ -153,17 +153,17 @@ describe('Polylines', function() {
             .clickOnWorld(10,10,0)
             .clickOnWorld(0,10,0)
             .waitForUrlChange(
-                function() { client.dblClickOnWorld(0,0,0); },
+                function() { client.clickOnWorld(0,0,0); },
                 function() {
                     client
                         .click('.toolbar .select')
                         .clickOnWorld(10,10,0)
-                        .assertCoordinateEqual('.vertex.editing.point0 .coordinate', 0,0,0)
-                        .assertCoordinateEqual('.vertex.editing.point1 .coordinate', 10,10,0)
-                        .assertCoordinateEqual('.vertex.editing.point2 .coordinate', 0,10,0)
+                        .assertCoordinateEqual('.vertex.editing.implicit_point0 .coordinate', 0,0,0)
+                        .assertCoordinateEqual('.vertex.editing.implicit_point1 .coordinate', 10,10,0)
+                        .assertCoordinateEqual('.vertex.editing.implicit_point2 .coordinate', 0,10,0)
                         .moveToWorld(10,10,0)
                         .dragToWorld(20,20,0)
-                        .assertCoordinateEqual('.vertex.editing.point1 .coordinate', 20,20,0)
+                        .assertCoordinateEqual('.vertex.editing.implicit_point1 .coordinate', 20,20,0)
                         .waitForUrlChange(
                             function() { client.clickOnWorld(30,30,0); },
                             function() {
@@ -196,16 +196,17 @@ describe('Polylines', function() {
                                     .clickOnWorld(10,10,0)
                                     .assertNumberOfEditingNodes(4)
                                     .assertNumberOfDisplayNodes(1)
-                                    .assertCoordinateEqual('.vertex.editing.point0 .coordinate', 0,0,0)
-                                    .assertCoordinateEqual('.vertex.editing.point1 .coordinate', 10,10,0)
-                                    .assertCoordinateEqual('.vertex.editing.point2 .coordinate', 0,10,0)
+                                    .assertCoordinateEqual('.vertex.editing.implicit_point0 .coordinate', 0,0,0)
+                                    .assertCoordinateEqual('.vertex.editing.implicit_point1 .coordinate', 10,10,0)
+                                    .assertCoordinateEqual('.vertex.editing.implicit_point2 .coordinate', 0,10,0)
                                     .clickOnWorld(25,25,0)
                                     .assertNumberOfEditingNodes(4)
                                     .assertNumberOfDisplayNodes(1)
-                                    .assertCoordinateEqual('.vertex.editing.point4 .coordinate', 25,0,0)
-                                    .assertCoordinateEqual('.vertex.editing.point5 .coordinate', 25,25,0)
-                                    .assertCoordinateEqual('.vertex.editing.point6 .coordinate', 0,25,0)
+                                    .assertCoordinateEqual('.vertex.editing.implicit_point4 .coordinate', 25,0,0)
+                                    .assertCoordinateEqual('.vertex.editing.implicit_point5 .coordinate', 25,25,0)
+                                    .assertCoordinateEqual('.vertex.editing.implicit_point6 .coordinate', 0,25,0)
                                     .clickOnWorld(-10,-10,0)
+                                    .pause(100)
                                     .assertNumberOfEditingNodes(0)
                                     .assertNumberOfDisplayNodes(2, done)
                             });

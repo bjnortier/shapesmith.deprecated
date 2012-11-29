@@ -41,7 +41,11 @@ define([
         }
 
         this.implicit = options.implicit || false;
-        this.workplane = options.workplane;
+        this.workplane = options.workplane || {
+            origin: new THREE.Vector3(),
+            axis: new THREE.Vector3(0,0,1),
+            angle: 0
+        };
         this.parameters = options.parameters || {};
         this.editing = options.editing || false;
         this.proto = options.proto || false;
@@ -98,11 +102,6 @@ define([
     var Workplane = function(options) {
         var options = options || {};
         options.type = 'workplane';
-        options.workplane = options.workplane || {
-            origin: new THREE.Vector3(),
-            axis: new THREE.Vector3(0,0,1),
-            angle: 0
-        };
         options.parameters = options.parameters || {
             snap: 1.0
         };
@@ -157,6 +156,25 @@ define([
 
     _.extend(Point.prototype, GeomNode.prototype);
 
+    // ---------- Implicit Point ----------
+
+    var ImplicitPoint = function(options) {
+        var options = options || {};
+        options.type = 'implicit_point';
+        options.parameters = options.parameters || {coordinate: {x: '0', y:'0', z:'0'}};
+        GeomNode.prototype.constructor.call(this, options);
+    }
+
+    ImplicitPoint.prototype.getExpressions = function() {
+        return [
+            this.parameters.coordinate.x, 
+            this.parameters.coordinate.y, 
+            this.parameters.coordinate.z,
+        ];
+    }
+
+    _.extend(ImplicitPoint.prototype, GeomNode.prototype);
+
     // ---------- Polyline ----------
 
     var Polyline = function(options) {
@@ -171,6 +189,8 @@ define([
     }
 
     _.extend(Polyline.prototype, GeomNode.prototype);
+
+    // ---------- Extrude ----------
 
     var Extrude = function(options) {
         var options = options || {};
@@ -193,18 +213,20 @@ define([
 
     return {
         resetIDCounters : resetIDCounters,
-        Node     : GeomNode,
-        Workplane: Workplane,
-        Variable : Variable,
-        Point    : Point,
-        Polyline : Polyline,
-        Extrude  : Extrude,
+        Node            : GeomNode,
+        Workplane       : Workplane,
+        Variable        : Variable,
+        Point           : Point,
+        ImplicitPoint   : ImplicitPoint,
+        Polyline        : Polyline,
+        Extrude         : Extrude,
         constructors: {
-            'workplane': Workplane,
-            'variable' : Variable,
-            'point'    : Point,
-            'polyline' : Polyline,
-            'extrude'  : Extrude,
+            'workplane'      : Workplane,
+            'variable'       : Variable,
+            'point'          : Point,
+            'implicit_point' : ImplicitPoint,
+            'polyline'       : Polyline,
+            'extrude'        : Extrude,
         }
     }
 

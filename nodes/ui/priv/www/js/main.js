@@ -10,6 +10,7 @@ requirejs(
         'src/vertexmodelmanager',
         'src/webdriverutils',
         'src/maintoolbar',
+        'src/asyncAPI'
     ], function(
         coordinator,
         geomToolbar,
@@ -20,7 +21,8 @@ requirejs(
         variableManager,
         vertexModelManager,
         wdutils,
-        mainToolbar) {
+        mainToolbar,
+        AsyncAPI) {
 
     // *Sometimes* chrome will not generate a postate event on initial load
     // and Firefox doesn't popstate() on initial load. So for initial load we 
@@ -30,15 +32,13 @@ requirejs(
         window.onpopstate = function(event) { 
             var commit = (event.state && event.state.commit) || $.getQueryParam("commit");
             if (!commandStack.pop(commit)) {
-                geometryGraph.loadFromCommit(commit);
+                AsyncAPI.loadFromCommit(commit);
             }
         }
     }, 500);
 
     $(document).ready(function() {
-        geometryGraph.loadFromCommit($.getQueryParam("commit"));   
-
-        geometryGraph.a
+        AsyncAPI.loadFromCommit($.getQueryParam("commit"));   
     });
 
 });

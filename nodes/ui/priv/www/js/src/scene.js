@@ -65,7 +65,7 @@ define(['lib/backbone-require'], function(Backbone) {
 
             var dCameraPosition = new THREE.Vector3().sub(this.camera.position, lastCameraPosition);
             if ((dCameraPosition.length() > 0.1) || (this.updateScene)) {
-                this.trigger('cameraChange', this.camera.position);
+                this.model.trigger('cameraChange', this.camera.position);
                 this.pointLight1.position = this.camera.position;
                 this.renderer.render(this.scene, this.camera);
                 this.updateScene = false;
@@ -78,7 +78,7 @@ define(['lib/backbone-require'], function(Backbone) {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
-            this.trigger('cameraChange', this.camera.potion);
+            this.model.trigger('cameraChange', this.camera.position);
             this.updateScene = true;
         },
 

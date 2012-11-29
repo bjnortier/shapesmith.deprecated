@@ -94,7 +94,7 @@ define(['src/scene'], function(sceneModel) {
 
         this.overClickable = function(event) {
             var clickableViews = mouseOverViews.filter(function(view) {
-                return view.clickable;
+                return view.isClickable();
             });
             return clickableViews.length > 0;
         }
@@ -108,16 +108,18 @@ define(['src/scene'], function(sceneModel) {
 
         this.click = function(event) {
             var clickableViews = mouseOverViews.filter(function(view) {
-                return view.clickable;
+                return view.isClickable();
             });
 
             // Return value is used to deselect all of no scene view
             // click event is generated
             if (clickableViews.length > 0) {
+                this.clickView = clickableViews[0];
                 clickableViews[0].trigger('click', event);
                 this.trigger('sceneViewClick', {event: event, view: clickableViews[0]});
                 return true;
             } else {
+                this.clickView = undefined;
                 return false;
             }
         }
@@ -125,12 +127,16 @@ define(['src/scene'], function(sceneModel) {
         this.dblclick = function(event) {
 
             var clickableViews = mouseOverViews.filter(function(view) {
-                return view.clickable;
+                return view.isClickable();
             });
             if (clickableViews.length > 0) {
-                clickableViews[0].trigger('dblclick', event);
-                this.trigger('sceneViewDblClick', {event: event, view: clickableViews[0]});
+                if (this.clickview === clickableViews[0]) {
+                    clickableViews[0].trigger('dblclick', event);
+                    this.trigger('sceneViewDblClick', {event: event, view: clickableViews[0]});
+                    return true;
+                }
             }
+            return false;
         }
 
         this.findViewsForEvent = function(event) {

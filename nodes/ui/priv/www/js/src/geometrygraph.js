@@ -5,32 +5,8 @@ define([
     'src/graph',
     'src/geomnode',
     'src/variablegraph',
-    'src/command',
-    'src/commandstack',
     ], 
-    function(_, Backbone, crypto, graphLib, geomNode, variableGraphLib, Command, commandStack) {
-
-    var post = function(url, data, successFn, errorFn) {
-        $.ajax({
-            type: 'POST',
-            url: url,
-            contentType: 'application/json',
-            data: data,
-            dataType: 'json',
-            success: successFn,
-            error: errorFn,
-        });
-    }
-
-    var get = function(url, successFn, errorFn) {
-        $.ajax({
-            type: 'GET',
-            url: url,
-            dataType: 'json',
-            success: successFn,
-            error: errorFn,
-        });
-    }
+    function(_, Backbone, crypto, graphLib, geomNode, variableGraphLib) {
 
     var GeometryGraph = function() {
 
@@ -39,191 +15,16 @@ define([
         var varGraph = new variableGraphLib.Graph(graph);
         var that = this;
 
-        var captureVertices = function(vertices, callback) {
-            var url = '/' + SS.session.username + '/' + SS.session.design + '/vertex/';
-
-            var shas = vertices.map(function() {
-                return undefined;
-            })
-            vertices.forEach(function(v, i) {
-                post(url, v.toJSON(), function(sha) {
-                    v.sha = sha;
-                    shas[i] = sha;
-                    var someRemaining = _.any(shas, function(sha) {
-                        return sha === undefined;
-                    });
-                    if (!someRemaining) {
-                        callback(shas);
-                    }
-                });
-            });
-
-        }
-
-        var captureGraph = function(callback) {
-            var url = '/' + SS.session.username + '/' + SS.session.design + '/graph/';
-            post(url, JSON.stringify(that.serialize()), callback);
-        }
-
-        this.commitCreate = function(editingVertex, callback) {
-            if (!this.validate(editingVertex)) {
-                return;
-            }
-
-            var vertex = editingVertex.cloneNonEditing();
-            var that = this;
-            var children = this.childrenOf(vertex);
-
-            var doFn = function(commandSuccessFn, commandErrorFn) {
-                
-                captureVertices([vertex], function() {
-                    // When a polyline is ended with
-                    // a double-click, the vertex is captured async, and is removed
-                    // synchronously from the graph. So if it's no longer in the graph,
-                    // don't do the replacement
-                    if (graph.vertexById(vertex.id) !== undefined) {
-                        that.replace(editingVertex, vertex);
-                        if (!vertex.implicit) {
-                            captureGraph(commandSuccessFn);
-                            that.trigger('committed', [vertex]);
-                        } else {
-                            that.trigger('committedImplicit', [vertex]);
-                        }
-                    }
-                });
-            }
-
-            var undoFn = function() {
-                that.remove(vertex);
-                children.forEach(function(child) {
-                    // Implicit children can be shared
-                    if (child.implicit && that.vertexById(child.id)) {
-                        that.remove(child);
-                    } 
-                })
-            }
-            var redoFn = function() {
-                children.forEach(function(child) {
-                    if (child.implicit && !that.vertexById(child.id)) {
-                        that.add(child);
-                    }
-                })
-                that.add(vertex, function() {
-                    children.forEach(function(child) {
-                        graph.addEdge(vertex, child);
-                    });
-                });
-            }
-
-            var command = new Command(doFn, undoFn, redoFn);
-            commandStack.do(command, callback);
-        }
-
-        this.commitEdit = function() {
-            var editingVertices = this.getEditingVertices();
-            var allOk = true;
-            editingVertices.forEach(function(v) {
-                if(!that.validate(v)) {
-                    allOk = false;
-                }
-            })
-            if (!allOk) {
-                return;
-            }
-
-            var nonEditingVertices = editingVertices.map(function(v) {
-                return v.cloneNonEditing();
-            })
-            var originalVertices = nonEditingVertices.map(function(v) {
-                return originals[v.id];
-            }); 
-            
-            originals = {};
-
-            var doFn = function(commandSuccessFn, commandErrorFn) {
-
-                captureVertices(nonEditingVertices, function(shas) {
-                    for (var i = 0; i < editingVertices.length; ++i) {
-                        that.replace(editingVertices[i], nonEditingVertices[i]);
-                    }
-                    captureGraph(commandSuccessFn);
-                    that.trigger('committed', nonEditingVertices);
-                });
-            }
-
-            var undoFn = function() {
-                originalVertices.map(function(originalVertex, i) {
-                    that.replace(nonEditingVertices[i], originalVertex);
-                });
-            }
-
-            var redoFn = function() {
-                originalVertices.map(function(originalVertex, i) {
-                    that.replace(originalVertex, nonEditingVertices[i]);
-                });
-            }
-
-            var command = new Command(doFn, undoFn, redoFn);
-            commandStack.do(command);
-        }
-
-        this.commitDelete = function(vertex) {
-
-            var that = this;
-            var children = this.childrenOf(vertex);
-            var parents =  this.parentsOf(vertex);
-
-            if (parents.length > 0) {
-                vertex.errors = {delete: 'cannot delete veretx with parents'};
-                return;
-            }
-
-            var doFn = function(commandSuccessFn, commandErrorFn) {
-                that.remove(vertex);
-                children.forEach(function(child) {
-                    if (child.implicit && that.vertexById(child.id)) {
-                        that.remove(child);
-                    } 
-                })
-                captureGraph(commandSuccessFn);
-            }
-
-            var undoFn = function() {
-                children.forEach(function(child) {
-                    if (child.implicit && !that.vertexById(child.id)) {
-                        that.add(child);
-                    }
-                })
-                that.add(vertex, function() {
-                    children.forEach(function(child) {
-                        graph.addEdge(vertex, child);
-                    });
-                });
-            }
-
-            var redoFn = function() {
-                that.remove(vertex);
-                children.forEach(function(child) {
-                    if (child.implicit && that.vertexById(child.id)) {
-                        that.remove(child);
-                    } 
-                })
-            }
-
-            var command = new Command(doFn, undoFn, redoFn);
-            commandStack.do(command);
-        }
-
-
         this.createGraph = function(shaGraph, shasToVertices) {
             var handledSHAs = [];
             while(_.keys(shaGraph.edges).length > 0) {
+                var handledOne = false;
                 for(parentSHA in shaGraph.edges) {
                     var childrenSHAs = shaGraph.edges[parentSHA];
                     var uniqueChildrenSHAs = _.uniq(childrenSHAs);
                     var canHandle = _.intersection(uniqueChildrenSHAs, handledSHAs).length == uniqueChildrenSHAs.length;
                     if (canHandle) {
-
+                        handledOne = true;
                         var parentVertex = shasToVertices[parentSHA];
                         var childVertices = childrenSHAs.map(function(childSHA) {
                             return shasToVertices[childSHA];
@@ -235,153 +36,19 @@ define([
                         });
                         handledSHAs.push(parentSHA);
                         delete shaGraph.edges[parentSHA];
+                        break;
                     }
                 }
-            }
-        }
-
-        // This is for webdriver to determine when things have loaded
-        this.loadFinished = function() {
-            var workplaneVertices = this.filteredVertices(function(v) {
-                return v.type === 'workplane';
-            });
-            if (workplaneVertices.length === 0) {
-                this.add(new geomNode.Workplane());
-            }
-
-            if (!SS.loadDone) {
-                SS.loadDone = true;
-            }
-        }
-
-
-        this.loadFromCommit = function(commit) {
-            var url = '/' + SS.session.username + '/' + SS.session.design + '/graph/' + commit;
-            this.removeAll();
-            get(url, function(graph) {
-                var vertexSHAsToLoad = _.keys(graph.edges);
-                var remaining = vertexSHAsToLoad.length;
-                shasToVertices = {};
-
-                var vertexCreated = function(sha, vertex) {
-                    vertex.sha = sha;
-                    shasToVertices[sha] = vertex;
-                    --remaining;
-                    if (remaining == 0) {
-                        that.createGraph(graph, shasToVertices);
-                        that.loadFinished();
-                    }
+                if (!handledOne) {
+                    throw Error('nothing to handle');
                 }
-
-                if (vertexSHAsToLoad.length > 0) {
-                    vertexSHAsToLoad.forEach(function(sha) {
-                        get('/' + SS.session.username + '/' + SS.session.design + '/vertex/' + sha,
-                            function(data) {
-                                var vertex = new geomNode.constructors[data.type](data);
-                                vertexCreated(sha, vertex);
-                            });
-                    });
-                } else {
-                    that.loadFinished();
-                }
-
-            });
+            }
         }
 
         this.removeAll = function() {
             graph.vertices().forEach(function(vertex) {
                 that.remove(vertex);
             });
-        }
-
-        // When editing, the original vertex is kept 
-        // for the cancel operation
-        var originals = {};
-
-        this.edit = function(vertex) {
-            if (this.isEditing() && !vertex.implicit) {
-                return
-            }
-
-            var editingReplacement = vertex.cloneEditing();
-            this.replace(vertex, editingReplacement);
-            originals[vertex.id] = vertex;
-
-            // Edit implicit children. Don't edit the same 
-            // vertex more than once
-            var that = this;
-            var implicitEditing = [];
-            this.childrenOf(vertex).forEach(function(child) {
-                if (child.implicit && (implicitEditing.indexOf(child.id) === -1)) {
-                    that.edit(child);
-                    implicitEditing.push(child.id);
-                }
-            });
-
-        }
-
-        this.editById = function(id) {
-            this.edit(graph.vertexById(id));
-        }
-
-        this.cancel = function(vertex) {
-            // Vertices being edited will have originals, new vertices
-            // will not have originals
-            if (originals[vertex.id]) {
-                this.replace(vertex, originals[vertex.id]);
-                delete originals[vertex.id];
-            } else {
-
-                // Remove implicit children that are not editing
-                // for prototype objects, but only remove them once
-                // and only if they are not shared with other parents
-                var that = this;
-                var removed = [];
-                var children = this.childrenOf(vertex);
-                children.map(function(child) {
-                    var parents = that.parentsOf(child);
-                    var hasOtherParent = _.any(parents, function(parent) {
-                        parent.id !== vertex.id;
-                    });
-                    if (child.implicit && !child.editing && !hasOtherParent) {
-                        if(removed.indexOf(child) === -1) {
-                            that.remove(child);
-                            removed.push(child);
-                        }
-                    }
-                });
-
-                this.remove(vertex);
-            }
-
-            this.trigger('cancelled', vertex);
-        }
-
-        this.cancelIfEditing = function() {
-            var that = this;
-            this.getEditingVertices().map(function(vertex) {
-                that.cancel(vertex);
-            });
-            originals = {};
-        }
-
-        this.commitIfEditing = function() {
-            var editingVertices = this.getEditingVertices();
-            var allAreSame = true;
-            for (var i = 0; i < editingVertices.length; ++i) {
-                if (!originals[editingVertices[i].id].hasSameJSON(editingVertices[i])) {
-                    allAreSame = false;
-                    break;
-                }
-            }
-
-            if (allAreSame) {
-                editingVertices.map(function(editingVertex, i) {
-                    that.replace(editingVertex, originals[editingVertex.id]);
-                });
-            } else {
-                this.commitEdit();
-            }
         }
 
         // ---------- Validation ----------
@@ -430,21 +97,21 @@ define([
         }
 
         this.createPolylinePrototype = function(options) {
-            var polylineOptions = _.extend(options || {}, {
-                editing      : true,
-                proto        : true,
-            });
-            var polylineVertex = new geomNode.Polyline(polylineOptions);
-            this.add(polylineVertex);
-
-            var pointVertex = new geomNode.Point({
+            var pointVertex = new geomNode.ImplicitPoint({
                 editing: true,
                 proto: true,
                 implicit: true, 
                 workplane: options.workplane,
             });
+            this.add(pointVertex);
             
-            this.add(pointVertex, function() {
+            var polylineOptions = _.extend(options || {}, {
+                editing      : true,
+                proto        : true,
+            });
+            var polylineVertex = new geomNode.Polyline(polylineOptions);
+            
+            this.add(polylineVertex, function() {
                 graph.addEdge(polylineVertex, pointVertex);
             });
             return polylineVertex;
@@ -475,7 +142,7 @@ define([
 
         this.addPointToPolyline = function(polyline, point) {
             if (point === undefined) {
-                point = new geomNode.Point({
+                point = new geomNode.ImplicitPoint({
                     editing: true,
                     proto: true,
                     implicit: true, 
@@ -498,10 +165,8 @@ define([
             this.remove(children[children.length - 1]);
         }
 
-        this.addChildTo = function(parent, child) {
-            this.add(child, function() {
-                graph.addEdge(parent, child);
-            });
+        this.addEdge = function(from, to) {
+            graph.addEdge(from, to);
         }
 
         // ---------- Variable functions ----------

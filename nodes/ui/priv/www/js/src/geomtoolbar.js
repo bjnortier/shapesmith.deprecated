@@ -6,6 +6,7 @@ define([
     'src/interactioncoordinator',
     'src/selection',
     'src/workplaneMV',
+    'src/vertexMV',
     ], 
     function(
         calc,
@@ -13,8 +14,9 @@ define([
         geometryGraph, 
         commandStack, 
         coordinator, 
-        selectionManager,
-        Workplane) {
+        selection,
+        Workplane,
+        VertexMV) {
 
     var SelectItemModel = toolbar.ItemModel.extend({
         
@@ -22,13 +24,13 @@ define([
 
         activate: function() {
             toolbar.ItemModel.prototype.activate.call(this);
-            selectionManager.canSelect = true;
+            selection.canSelect = true;
         },
 
         deactivate: function() {
             toolbar.ItemModel.prototype.deactivate.call(this);
-            selectionManager.canSelect = false;
-            selectionManager.deselectAll();
+            selection.canSelect = false;
+            selection.deselectAll();
         },
 
     });
@@ -38,7 +40,7 @@ define([
     });
 
     var Polyline = toolbar.ItemModel.extend({
-        name: 'polyline',
+        name: 'polyline',   
     });
 
     var Extrude = toolbar.ItemModel.extend({
@@ -47,8 +49,8 @@ define([
         initialize: function(attributes) {
             toolbar.ItemModel.prototype.initialize.call(this, attributes);
             this.set('enabled', false);
-            selectionManager.on('selected', this.selectionChanged, this);
-            selectionManager.on('deselected', this.selectionChanged, this);
+            selection.on('selected', this.selectionChanged, this);
+            selection.on('deselected', this.selectionChanged, this);
         },
 
         selectionChanged: function(_, selection) {
@@ -68,24 +70,27 @@ define([
 
         click: function() {
             if (this.get('enabled')) {
-                var selectedId = selectionManager.selected[0];
+                var selectedId = selection.selected[0];
                 toolbar.ItemModel.prototype.click.call(this);
                 var polyline = geometryGraph.vertexById(selectedId);
                 geometryGraph.createExtrudePrototype(polyline, 1);
             }
         },
 
-
     });
 
+    var selectItemModel   = new SelectItemModel();
+    var pointItemModel    = new PointItemModel();
+    var polylineItemModel = new Polyline();
+    var extrudeItemModel  = new Extrude();
 
     var GeomToolbarModel = toolbar.Model.extend({
 
         initialize: function(attributes) {
             toolbar.Model.prototype.initialize.call(this, attributes);
-            geometryGraph.on('committed', this.geometryCommitted, this);
             commandStack.on('beforePop', this.beforePop, this);
-            coordinator.on('keydown', this.keydown, this);
+            VertexMV.eventProxy.on('committedCreate', this.committedCreate, this);
+            VertexMV.eventProxy.on('cancelledCreate', this.setToSelect, this);
         },
 
         activate: function(item) {
@@ -108,24 +113,14 @@ define([
         },
 
         launchTool: function(item) {
-            this.toolRelaunchVertexId = undefined;
-            geometryGraph.cancelIfEditing();
+            VertexMV.cancelIfEditing();
             if (item.name === 'point') {
                 var workplane = calc.copyObj(Workplane.getCurrent().vertex.workplane);
-                this.toolRelaunchVertexId = geometryGraph.createPointPrototype(
-                    {workplane: workplane}).id;
+                geometryGraph.createPointPrototype({workplane: workplane});
             }
             if (item.name === 'polyline') {
                 var workplane = calc.copyObj(Workplane.getCurrent().vertex.workplane);
-                this.toolRelaunchVertexId = geometryGraph.createPolylinePrototype(
-                    {workplane: workplane}).id;
-            }
-        },
-
-        keydown: function() {
-            if (event.keyCode === 27) {
-                // Activate the select tool
-                this.activate(this.items[0]);
+                geometryGraph.createPolylinePrototype({workplane: workplane});
             }
         },
 
@@ -133,37 +128,41 @@ define([
             this.activate(item);
         },
 
-        // If the vertex committed is the tool vertex, create another
-        // of the same type. Child vertices (e.g. points of polylines)
-        // can be committed, so only create another for the top-level tools 
-        geometryCommitted: function(vertices) {
-            if ((vertices.length === 1) && (vertices[0].id === this.toolRelaunchVertexId)) {
-                this.launchTool(this.activeItem);
-            } else {
-                this.setToSelect();
-            }
-        },
-
         // Cancel any active tools when geometry is popped
         beforePop: function() {
             this.setToSelect();
+            selection.deselectAll();
+        },
+
+        committedCreate: function(committedVertices) {
+            var isPointCreate = committedVertices[0].type === 'point';
+            var isPolylineCreate = committedVertices[0].type === 'polyline';
+
+            if (isPointCreate) {
+                this.launchTool(pointItemModel);
+            } else if (isPolylineCreate) {
+                this.launchTool(polylineItemModel);
+            } else {
+                this.setToSelect();
+            }
+
         },
 
         setToSelect: function() {
-            this.activate(this.items[0]);
+            this.activate(selectItemModel);
         },
 
         isSelectActive: function() {
-            return this.activeItem === this.items[0];
+            return this.activeItem === selectItemModel;
         },
 
     });
 
     var toolbarModel = new GeomToolbarModel({name: 'geometry'});
-    toolbarModel.addItem(new SelectItemModel({toolbarModel: toolbarModel}));
-    toolbarModel.addItem(new PointItemModel({toolbarModel: toolbarModel}));
-    toolbarModel.addItem(new Polyline({toolbarModel: toolbarModel}));
-    toolbarModel.addItem(new Extrude({toolbarModel: toolbarModel}));
+    toolbarModel.addItem(selectItemModel);
+    toolbarModel.addItem(pointItemModel);
+    toolbarModel.addItem(polylineItemModel);
+    toolbarModel.addItem(extrudeItemModel);
     toolbarModel.setToSelect();
     return toolbarModel;
 

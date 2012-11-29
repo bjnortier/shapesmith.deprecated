@@ -158,6 +158,7 @@ define([
         },
 
         fieldKeyUp: function(event) {
+            event.stopPropagation();
             // Bubble up to the parent for implicit vertices
             if (!this.model.vertex.implicit) {
                 // Return

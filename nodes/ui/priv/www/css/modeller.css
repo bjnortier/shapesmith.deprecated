@@ -85,7 +85,7 @@ img#logo {
 }
 
 .toolbar li:hover, .okcancel .button:hover {
-    border-bottom: solid 2px #000;
+    border-bottom: solid 2px #ff0;
     cursor: pointer;
 }
 
@@ -115,7 +115,7 @@ img#logo {
 }
 
 #variable-manager .add:hover {
-    border-bottom: solid 2px #000;
+    border-bottom: solid 2px #ff0;
     cursor: pointer;
 }
 
@@ -179,11 +179,11 @@ img#logo {
 }
 
 #geometry .vertex.display:hover td {
-    border-bottom: solid #000 2px;
+    border-bottom: solid #ff0 2px;
 }
 
 .vertex.selected td {
-    border-bottom: solid #FF0 2px;
+    border-bottom: solid #ff0 2px;
 }
 
 .vertex.editing .title {

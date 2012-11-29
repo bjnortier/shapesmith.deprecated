@@ -1,28 +1,33 @@
 define([
         'src/geometrygraphsingleton', 
         'src/selection', 
+        'src/vertexMV',
         'src/workplaneMV',
         'src/variableMV',
-        'src/pointMV', 
-        'src/polylineMV',
+        'src/pointMV2', 
+        'src/implicitpointMV', 
+        'src/polylineMV2',
         'src/extrudeMV',
     ], 
     function(
         geometryGraph, 
         selectionManager, 
+        VertexMV,
         Workplane,
         Variable,
         Point, 
+        ImplicitPoint,
         Polyline,
         Extrude) {
     
     var models = {};
     var wrappers = {
-        'workplane': Workplane,
-        'variable' : Variable,
-        'point'    : Point,
-        'polyline' : Polyline,
-        'extrude'  : Extrude,
+        'workplane'      : Workplane,
+        'variable'       : Variable,
+        'point'          : Point,
+        'implicit_point' : ImplicitPoint,
+        'polyline'       : Polyline,
+        'extrude'        : Extrude,
     }
 
     geometryGraph.on('vertexAdded', function(vertex) {
@@ -34,51 +39,36 @@ define([
     });
 
     geometryGraph.on('vertexReplaced', function(original, replacement) {
-        removeVertex(original);
-        addVertex(replacement);
-    });
-
-    selectionManager.on('selected', function(ids, selection) {
-        updateEditingForSelected(selection);
-    });
-
-    selectionManager.on('deselected', function(ids, selection) {
-        updateEditingForSelected(selection);
-    });
-
-    var updateEditingForSelected = function(selection) {
-        if (selection.length === 1) {
-            geometryGraph.editById(selection[0]);
-        } else {
-            geometryGraph.commitIfEditing();
+        if (!original.editing && !replacement.editing) {
+            var model = VertexMV.getModelForVertex(original);
+            model.replaceDisplayVertex(original, replacement);
         }
-    }
+    }); 
 
     var addVertex = function(vertex) {
-        // Try to find the editing parent model of an implicit child
-        var editingParentModel = undefined;
-        if (vertex.implicit) {
-            var parents = geometryGraph.parentsOf(vertex);
-            var editingParent = _.find(parents, function(parent) { return parent.editing; });
-            if (editingParent) {
-                editingParentModel = models[editingParent.id];
-            }
+        var implicitEditing = vertex.implicit && vertex.editing;
+        if (implicitEditing) {
+            return
         }
 
         if (vertex.editing) {
-            models[vertex.id] = new wrappers[vertex.type].EditingModel(vertex, editingParentModel);
+            new wrappers[vertex.type].EditingModel({vertex: vertex});
         } else {
-            models[vertex.id] = new wrappers[vertex.type].DisplayModel(vertex, editingParentModel);
+            new wrappers[vertex.type].DisplayModel({vertex: vertex});
         }
     }
 
     var removeVertex = function(vertex) {
-        if (!models[vertex.id]) {
+        var implicitEditing = vertex.implicit && vertex.editing;
+        if (implicitEditing) {
+            return
+        }
+
+        var model = VertexMV.getModelForVertex(vertex);
+        if (!model) {
             throw Error('no model for vertex:' + vertex.id);
         }
-        var model = models[vertex.id];
         model.destroy();
-        delete models[vertex.id];
     }
 
     return wrappers;

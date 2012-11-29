@@ -70,8 +70,8 @@ define(['src/toolbar',
     });
 
     var toolbarModel = new MainToolbarModel({name: 'main'});
-    toolbarModel.addItem(new SaveItemModel({toolbarModel: toolbarModel}));
-    toolbarModel.addItem(new ExitItemModel({toolbarModel: toolbarModel}));
+    toolbarModel.addItem(new SaveItemModel());
+    toolbarModel.addItem(new ExitItemModel());
     return toolbarModel;
 
 });

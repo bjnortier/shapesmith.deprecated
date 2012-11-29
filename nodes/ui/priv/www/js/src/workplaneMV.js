@@ -5,8 +5,9 @@ define([
         'src/scene',
         'src/geomnode',
         'src/geometrygraphsingleton',
-        'src/vertexwrapper',
+        'src/vertexMV',
         'src/selection',
+        'src/asyncAPI',
     ], function(
         colors,
         calc, 
@@ -14,16 +15,21 @@ define([
         sceneModel,
         geomNode,
         geometryGraph,
-        vertexWrapper,
-        selection) {
+        VertexMV,
+        selection,
+        AsyncAPI) {
 
     var currentDisplayModel = undefined;
 
-    var DisplayModel = Backbone.Model.extend({
+    var DisplayModel = VertexMV.DisplayModel.extend({
 
-        initialize: function(vertex) {
+        initialize: function(options) {
+            this.editingModelConstructor = EditingModel;
+            this.displayModelConstructor = DisplayModel;
+
+            VertexMV.DisplayModel.prototype.initialize.call(this, options);
+
             currentDisplayModel = this;
-            this.vertex = vertex;
 
             coordinator.on('mousemove', this.mousemove, this);
             coordinator.on('sceneClick', this.workplaneClick, this);
@@ -39,6 +45,8 @@ define([
         },
 
         destroy: function() {
+            VertexMV.DisplayModel.prototype.destroy.call(this);
+
             this.gridView.remove();
             this.settingsView.remove();
 
@@ -57,8 +65,10 @@ define([
             var positionOnWorkplane = calc.positionOnWorkplane(event, this.vertex, this.camera);
             if (!this.lastPosition || !positionOnWorkplane.equals(this.lastPosition)) {
                 this.lastPosition = positionOnWorkplane.addSelf(calc.objToVector(this.vertex.workplane.origin));
-                this.sceneView.updateScene = true;
-                this.trigger('positionChanged', this.lastPosition);
+                if (this.lastPosition) {
+                    this.sceneView.updateScene = true;
+                    this.trigger('positionChanged', this.lastPosition);
+                }
             }
         },
 
@@ -90,21 +100,26 @@ define([
 
     });
 
-    var EditingModel = vertexWrapper.EditingModel.extend({
+    var EditingModel = VertexMV.EditingModel.extend({
 
-        initialize: function(vertex) {
-            vertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
+        initialize: function(options) {
+            this.displayModelConstructor = DisplayModel;
+            VertexMV.EditingModel.prototype.initialize.call(this, options);
+            
             currentDisplayModel = this;
-            this.vertex = vertex;
+            
             this.sceneView = sceneModel.view;
             this.scene = this.sceneView.scene;
             this.camera = this.sceneView.camera;
             this.gridView = new GridView({model: this});
             this.settingsView = new SettingsEditingView({model: this});
+
+            coordinator.on('sceneClick', this.tryCommit, this);
         },
 
         destroy: function() {
-            vertexWrapper.EditingModel.prototype.destroy.call(this);
+            VertexMV.EditingModel.prototype.destroy.call(this);
+            coordinator.off('sceneClick', this.tryCommit, this);
             this.gridView.remove();
             this.settingsView.remove();
         },
@@ -112,12 +127,12 @@ define([
     });
 
 
-    var SettingsDisplayView = vertexWrapper.DisplayDOMView.extend({
+    var SettingsDisplayView = VertexMV.DisplayDOMView.extend({
 
         tagName: 'table',
 
         initialize: function() {
-            vertexWrapper.DisplayDOMView.prototype.initialize.call(this);
+            VertexMV.DisplayDOMView.prototype.initialize.call(this);
             $('#workplane-settings').append(this.$el);
         },
 
@@ -138,25 +153,26 @@ define([
         },
 
         click: function() {
-            selection.selectOnly(this.model.vertex.id);
+            if (!geometryGraph.isEditing()) {
+                this.model.destroy();
+                var editingVertex = AsyncAPI.edit(this.model.vertex);
+                new this.model.editingModelConstructor({
+                    original:this.model.vertex, 
+                    vertex: editingVertex
+                });
+            }
         },
 
     });
 
-    var SettingsEditingView = vertexWrapper.EditingDOMView.extend({
+    var SettingsEditingView = VertexMV.EditingDOMView.extend({
 
         tagName: 'table',
         className: 'vertex editing',
 
         initialize: function() {
-            vertexWrapper.EditingDOMView.prototype.initialize.call(this);
+            VertexMV.EditingDOMView.prototype.initialize.call(this);
             $('#workplane-settings').append(this.$el);
-            coordinator.on('sceneClick', this.tryCommit, this);
-        },
-
-        remove: function() {
-            vertexWrapper.EditingDOMView.prototype.remove.call(this);
-            coordinator.off('sceneClick', this.tryCommit, this);
         },
 
         render: function() {
@@ -185,27 +201,23 @@ define([
             }
         },
 
-        tryCommit: function() {
-            geometryGraph.commitIfEditing();
-        },
-
 
     });    
 
-    var GridView = vertexWrapper.SceneView.extend({
+    var GridView = VertexMV.SceneView.extend({
 
         initialize: function() {
-            vertexWrapper.SceneView.prototype.initialize.call(this);
+            VertexMV.SceneView.prototype.initialize.call(this);
             this.model.on('change', this.render, this);
         },
 
         remove: function() {
-            vertexWrapper.SceneView.prototype.remove.call(this);
+            VertexMV.SceneView.prototype.remove.call(this);
             this.model.off('change', this.render, this);
         },
         
         render: function() {
-            vertexWrapper.SceneView.prototype.render.call(this);
+            VertexMV.SceneView.prototype.render.call(this);
 
             var majorGridLineGeometry = new THREE.Geometry();
             var minorGridLineGeometry = new THREE.Geometry();

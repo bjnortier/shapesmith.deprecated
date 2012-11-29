@@ -8,8 +8,8 @@
         var dragging = false;
 
         var that = this;
-        window.addEventListener('keydown', function(event) {
-            that.trigger('keydown', event);
+        window.addEventListener('keyup', function(event) {
+            that.trigger('keyup', event);
         }, false);
 
         $('#scene').mousemove(function(event) {
@@ -60,11 +60,11 @@
 
                 var isSecondClickOfDoubleClick = false;
                 if (this.lastClickTimestamp) {
-                    var within300ms = (now - this.lastClickTimestamp < 300);
+                    var within500ms = (now - this.lastClickTimestamp < 500);
                     var dx = Math.abs(eventPosition.x - this.lastClickPosition .x);
                     var dy = Math.abs(eventPosition.y - this.lastClickPosition .y);
                     var isWithinThreshold = Math.sqrt(dx*dx + dy*dy) < dragThreshold;
-                    isSecondClickOfDoubleClick = within300ms && isWithinThreshold;
+                    isSecondClickOfDoubleClick = within500ms && isWithinThreshold;
                 }
                     
                 this.lastClickTimestamp = now;
@@ -84,9 +84,9 @@
         }
 
         this.dblclick = function(event) {
-            if (sceneViewEventGenerator.overClickable()) {
-                sceneViewEventGenerator.dblclick(event);
-            } else {
+            // If this wasn't a sceneview double click, generate
+            // a noremal double click
+            if (!sceneViewEventGenerator.dblclick(event)) {
                 this.trigger('sceneDblClick', event);
             }
         }
@@ -110,13 +110,6 @@
             var dy = Math.abs(pos1.y - pos2.y);
             return Math.sqrt(dx*dx + dy*dy) > dragThreshold;
         };
-
-        // When a field input has focus, we want to prevent a 'click out'
-        // on the scene to unselect the editing vertex, or any other scene 
-        // click for that matter
-        this.setFieldFocus = function(val) {
-            this.fieldHasFocus = val;
-        }
     }
 
     var eventToPosition = function(event) {

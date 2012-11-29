@@ -39,18 +39,15 @@ describe('Workplane', function() {
                 });
     });
 
-    it('cancels editing when clicking on the workplane', function(done) {
+    it('will not change the workplane if there are errors', function(done) {
         this.timeout(5000);
         client
             .click('#workplane-settings')
-            .assertNumberOfEditingNodes(1)
+            .clearElement('#workplane-settings .snap')
+            .setValue('#workplane-settings .snap', '##')
             .clickOnWorld(0,0,0)
-            .assertNumberOfEditingNodes(0, done);
-    });
+            .hasClass('#workplane-settings .vertex.editing', 'error', done)
 
-    it.skip('will not change the workplane if there are errors', function(done) {
-        // Also test for trying an invalid value more than once
-        assert.isTrue(false);
     });
 
 

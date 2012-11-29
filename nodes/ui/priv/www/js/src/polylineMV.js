@@ -78,6 +78,8 @@ define([
         },
 
         workplaneDblClick: function(event) {
+            console.log('workplaneDblClick', viewAndEvent.view.model.vertex.id);
+            
             this.finished = true;
             var children = geometryGraph.childrenOf(this.vertex);
             if (children.length > 2) {
@@ -88,6 +90,7 @@ define([
         },
 
         sceneViewClick: function(viewAndEvent) {
+            console.log('sceneViewClick', viewAndEvent.view.model.vertex.id);
             this.lastClickSource = viewAndEvent.view;
 
             if (this.vertex.proto) {
@@ -111,6 +114,8 @@ define([
         },
 
         sceneViewDblClick: function(viewAndEvent) {
+            console.log('sceneViewDblClick', viewAndEvent.view.model.vertex.id);
+
             // It may happen that a dbl-click on click has created a new polyline, and
             // THIS model is the new polyline. Thus disregard a dbl-click that didn't follow
             // a click

@@ -5,7 +5,6 @@ define(['src/interactioncoordinator', 'src/geometrygraphsingleton'],
 
         initialize: function(attributes) {
             this.view = new ItemView({model: this});
-            this.toolbarModel = attributes.toolbarModel;
             this.set('enabled', true);
         },
 
@@ -80,6 +79,7 @@ define(['src/interactioncoordinator', 'src/geometrygraphsingleton'],
         },
 
         addItem: function(itemModel) {
+            itemModel.toolbarModel = this;
             this.items.push(itemModel);
             this.view.$el.append(itemModel.view.$el);
         },
