@@ -6,7 +6,7 @@ define([
         'src/geometrygraphsingleton',
         'src/vertexMV',
         'src/geomvertexMV', 
-        'src/implicitpointMV',
+        'src/pointMV', 
         'src/workplaneMV',
         'src/asyncAPI',
     ], 
@@ -18,7 +18,7 @@ define([
         geometryGraph,
         VertexMV,
         GeomVertexMV,
-        ImplicitPointMV,
+        PointMV,
         WorkplaneMV,
         AsyncAPI) {
 
@@ -79,7 +79,7 @@ define([
                 // Prototype polylines will always have an implicit point as first child
                 var pointChildren = geometryGraph.childrenOf(this.vertex);
                 this.subModels = [
-                    new ImplicitPointMV.EditingModel({
+                    new PointMV.EditingModel({
                         vertex: pointChildren[0],
                         parentModel: this
                     })
@@ -170,7 +170,7 @@ define([
 
         addPoint: function(position) {
             var point = geometryGraph.addPointToPolyline(this.vertex);
-            var newLength = this.subModels.push(new ImplicitPointMV.EditingModel({
+            var newLength = this.subModels.push(new PointMV.EditingModel({
                 vertex: point, 
                 parentModel: this
             }));

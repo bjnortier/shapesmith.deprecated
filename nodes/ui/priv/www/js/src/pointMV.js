@@ -29,6 +29,10 @@ define([
         },
 
         workplanePositionChanged: function(position) {
+            if (this.vertex.implicit) {
+                // handled by parent model
+                return
+            }
             if (this.vertex.proto) {
                 this.vertex.parameters.coordinate.x = position.x;
                 this.vertex.parameters.coordinate.y = position.y;
@@ -38,8 +42,21 @@ define([
         },
 
         workplaneClick: function() {
+            if (this.vertex.implicit) {
+                // handled by parent
+                return
+            }
             this.tryCommit()
         },
+
+        cancel: function() {
+            if (this.vertex.implicit) {
+                // handled by parent
+                return
+            }
+            GeomVertexMV.EditingModel.prototype.cancel.call(this);
+
+        }
 
     });
 
@@ -49,11 +66,14 @@ define([
             var template = 
                 '<td>' +
                 '<table><tr>' +
+                '{{^implicit}}' +
                 '<td class="title">' + 
                 '<img src="/ui/images/icons/point32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
                 '<div class="delete"></div>' + 
-                '</td></tr><tr><td>' +
+                '</td></tr><tr>' + 
+                '{{/implicit}}' +
+                '<td>' +
                 '<div class="coordinate">' +
                 '<input class="field x" type="text" value="{{x}}"></input>' +
                 '<input class="field y" type="text" value="{{y}}"></input>' +
@@ -64,6 +84,7 @@ define([
             var view = {
                 id: this.model.vertex.id,
                 name: this.model.vertex.name,
+                implicit: this.model.vertex.implicit,
             };
             this.$el.html($.mustache(template, view));
             this.update();
@@ -124,6 +145,14 @@ define([
             this.sceneObject.add(point);
         },
 
+        isClickable: function() { 
+            if (this.model.vertex.implicit) {
+                return this.model.parentModel && this.model.parentModel.isChildClickable(this.model);
+            } else {
+                return GeomVertexMV.EditingSceneView.prototype.isClickable(this);
+            }
+        },
+
         // This view is not draggable, but the display scene view can transfer 
         // the dragging to this view (e.g. when a point is dragged), but only for
         // points that are not prototypes any more
@@ -167,11 +196,16 @@ define([
             this.displayModelConstructor = DisplayModel;
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
 
-            this.views = this.views.concat([
-                new DisplaySceneView({model: this}),
-                new GeomVertexMV.DisplayDOMView({model: this}),
-            ]);
+            this.views.push(new DisplaySceneView({model: this}));
+            if (!this.vertex.implicit) {
+                this.views.push(new GeomVertexMV.DisplayDOMView({model: this}));
+            };
         },
+
+        selectParentOnClick: function() {
+            return this.vertex.implicit;
+        },
+
 
     });    
 

@@ -77,9 +77,9 @@ describe('Save/Load', function() {
                                                 .clickOnWorld(-10,-10,0)
                                                 .assertNumberOfEditingNodes(3)
                                                 .assertCoordinateEqual(
-                                                    '.vertex.editing.implicit_point0 .coordinate', -10,-10,0)
+                                                    '.vertex.editing.point0 .coordinate', -10,-10,0)
                                                 .assertCoordinateEqual(
-                                                    '.vertex.editing.implicit_point1 .coordinate', 20,20,0, done)
+                                                    '.vertex.editing.point1 .coordinate', 20,20,0, done)
                                         });
                                     });
                             });

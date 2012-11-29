@@ -21,6 +21,7 @@ define([
     var EditingModel = VertexMV.EditingModel.extend({
 
         initialize: function(options) {
+            this.parentModel = options.parentModel;
             this.currentWorkplaneModel = Workplane.getCurrent();
             VertexMV.EditingModel.prototype.initialize.call(this, options);
 
@@ -46,7 +47,9 @@ define([
 
         initialize: function() {
             VertexMV.EditingDOMView.prototype.initialize.call(this);
-            if (!this.model.vertex.implicit) {
+            if (this.model.parentModel) {
+                this.model.parentModel.domView.insertChild(this.model, this.$el);
+            } else {
                 VertexMV.replaceOrAppendInTable(this, '#geometry'); 
             }
             $('.field').autoGrowInput();
