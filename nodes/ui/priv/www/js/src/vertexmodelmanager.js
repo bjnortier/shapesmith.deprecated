@@ -4,9 +4,8 @@ define([
         'src/vertexMV',
         'src/workplaneMV',
         'src/variableMV',
-        'src/pointMV2', 
-        'src/implicitpointMV', 
-        'src/polylineMV2',
+        'src/pointMV', 
+        'src/polylineMV',
         'src/extrudeMV',
     ], 
     function(
@@ -16,7 +15,6 @@ define([
         Workplane,
         Variable,
         Point, 
-        ImplicitPoint,
         Polyline,
         Extrude) {
     
@@ -25,7 +23,6 @@ define([
         'workplane'      : Workplane,
         'variable'       : Variable,
         'point'          : Point,
-        'implicit_point' : ImplicitPoint,
         'polyline'       : Polyline,
         'extrude'        : Extrude,
     }

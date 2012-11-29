@@ -97,7 +97,7 @@ define([
         }
 
         this.createPolylinePrototype = function(options) {
-            var pointVertex = new geomNode.ImplicitPoint({
+            var pointVertex = new geomNode.Point({
                 editing: true,
                 proto: true,
                 implicit: true, 
@@ -142,7 +142,7 @@ define([
 
         this.addPointToPolyline = function(polyline, point) {
             if (point === undefined) {
-                point = new geomNode.ImplicitPoint({
+                point = new geomNode.Point({
                     editing: true,
                     proto: true,
                     implicit: true, 

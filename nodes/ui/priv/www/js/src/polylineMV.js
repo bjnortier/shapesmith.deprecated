@@ -1,19 +1,33 @@
 define([
-        'src/calculations',
+        'src/calculations', 
         'src/colors',
+        'src/scene', 
+        'src/scenevieweventgenerator',
         'src/geometrygraphsingleton',
-        'src/geomvertexwrapper',
-        'src/pointMV',
-        'src/scene',
+        'src/vertexMV',
+        'src/geomvertexMV', 
+        'src/pointMV', 
+        'src/workplaneMV',
+        'src/asyncAPI',
     ], 
-    function(calc, colors, geometryGraph, geomVertexWrapper, pointMV, sceneModel) {
+    function(
+        calc, 
+        colors, 
+        sceneModel, 
+        sceneViewEventGenerator,
+        geometryGraph,
+        VertexMV,
+        GeomVertexMV,
+        PointMV,
+        WorkplaneMV,
+        AsyncAPI) {
 
     // ---------- Common ----------
 
     var LineSceneView = {
 
         render: function() {
-            geomVertexWrapper.EditingSceneView.prototype.render.call(this);
+            GeomVertexMV.EditingSceneView.prototype.render.call(this);
             var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || colors.geometry.defaultAmbient;
             var color = this.highlightColor || this.selectedColor || this.color || colors.geometry.default;
             
@@ -50,98 +64,140 @@ define([
 
     // ---------- Editing ----------
 
-    var EditingModel = geomVertexWrapper.EditingModel.extend({
+    var EditingModel = GeomVertexMV.EditingModel.extend({
 
-        initialize: function(vertex) {
-            geomVertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
-            this.editingDOMView = new EditingDOMView({model: this});
-            this.implicitAppendElement = this.editingDOMView.$el.find('.points');
-            this.views = this.views.concat([
-                this.editingDOMView,
-                new EditingLineSceneView({model: this}),
-            ]);
-                geometryGraph.on('committedImplicit', this.committedImplicit, this);
+        initialize: function(options) {
+            this.displayModelConstructor = DisplayModel;
+            GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
+
+            this.domView = new EditingDOMView({model: this});
+            this.views.push(this.domView);
+            this.views.push(new EditingLineSceneView({model: this}));
+
+            // Create the child models
+            if (this.vertex.proto) {
+                // Prototype polylines will always have an implicit point as first child
+                var pointChildren = geometryGraph.childrenOf(this.vertex);
+                this.subModels = [
+                    new PointMV.EditingModel({
+                        vertex: pointChildren[0],
+                        parentModel: this
+                    })
+                ];
+                this.activePoint = this.subModels[0];
+            } else {
+                this.originalImplicitChildren = _.uniq(
+                    geometryGraph.childrenOf(this.vertex).filter(
+                        function(v) {
+                            return v.implicit;
+                        }));
+                this.editingImplicitChildren = this.originalImplicitChildren.map(function(child) {
+                    return AsyncAPI.edit(child);
+                })
+                var that = this;
+                this.subModels = this.originalImplicitChildren.map(function(child, i) {
+                    if (child.implicit) {
+                        // Replace the original model with an editing model
+                        var modelToDestroy = VertexMV.getModelForVertex(child)
+                        modelToDestroy.destroy();
+                        return new modelToDestroy.editingModelConstructor({
+                            original: child,
+                            vertex: that.editingImplicitChildren[i],
+                            parentModel: that
+                        });
+                    } 
+                });
+            }
         },
 
-        destroy: function() {
-            geomVertexWrapper.EditingModel.prototype.destroy.call(this);
-            geometryGraph.off('committedImplicit', this.committedImplicit, this);
+        workplanePositionChanged: function(position) {
+            if (this.vertex.proto && this.activePoint) {
+                this.activePoint.vertex.parameters.coordinate.x = position.x;
+                this.activePoint.vertex.parameters.coordinate.y = position.y;
+                this.activePoint.vertex.parameters.coordinate.z = position.z;
+                this.activePoint.vertex.trigger('change', this.activePoint.vertex);            
+            }
         },
 
-        committedImplicit: function(vertices) {
-            if (this.vertex.proto && (vertices.length === 1)) {
-                var vertex = vertices[0];
-                if (_.last(geometryGraph.childrenOf(this.vertex)) === vertex) {
-                    var point = geometryGraph.addPointToPolyline(this.vertex);
-                }
+        workplaneClick: function(position) {
+            if (this.vertex.proto) {
+                this.addPoint(position);
+            } else {
+                this.tryCommit();
             }
         },
 
         workplaneDblClick: function(event) {
-            console.log('workplaneDblClick', viewAndEvent.view.model.vertex.id);
-            
-            this.finished = true;
-            var children = geometryGraph.childrenOf(this.vertex);
-            if (children.length > 2) {
-                // Remove the extra point added
-                geometryGraph.removeLastPointFromPolyline(this.vertex);
-                this.okCreate();
-            } 
-        },
-
-        sceneViewClick: function(viewAndEvent) {
-            console.log('sceneViewClick', viewAndEvent.view.model.vertex.id);
-            this.lastClickSource = viewAndEvent.view;
-
             if (this.vertex.proto) {
                 var children = geometryGraph.childrenOf(this.vertex);
-                if (viewAndEvent.view.model.vertex.type === 'point') {
-
-                    geometryGraph.removeLastPointFromPolyline(this.vertex);
-                    
-                    // Finish on the first point
-                    var clickedPoint = viewAndEvent.view.model.vertex;
-                    geometryGraph.addPointToPolyline(this.vertex, clickedPoint);
-                    if (clickedPoint === _.first(children)) {
-                        this.okCreate();
-                        this.creating = true; // Prevent double create on double click
-                    } else {
-                        geometryGraph.addPointToPolyline(this.vertex);
-                        this.vertex.trigger('change', this.vertex);
-                    }
+                if (children.length > 2) {
+                    this.removeLastPoint();
+                    this.tryCommit();
                 } 
             }
         },
 
-        sceneViewDblClick: function(viewAndEvent) {
-            console.log('sceneViewDblClick', viewAndEvent.view.model.vertex.id);
+        sceneViewClick: function(viewAndEvent) {
+            if (this.vertex.proto) {
+                var type = viewAndEvent.view.model.vertex.type;
+                if ((type === 'point') || (type === 'implicit_point')) {
 
-            // It may happen that a dbl-click on click has created a new polyline, and
-            // THIS model is the new polyline. Thus disregard a dbl-click that didn't follow
-            // a click
-            if (!this.lastClickSource || (this.lastClickSource.cid !== viewAndEvent.view.cid)) {
-                return;
+                    this.removeLastPoint();
+                    var clickedPoint = viewAndEvent.view.model.vertex;
+                    geometryGraph.addPointToPolyline(this.vertex, clickedPoint);
+                    
+                    // Finish on the first point
+                    var children = geometryGraph.childrenOf(this.vertex);
+                    if ((clickedPoint === _.first(children)) && (children.length > 2)) {
+                        this.tryCommit();
+                        this.creating = true; // Prevent double create on double click
+                    } else {
+                        this.addPoint(clickedPoint.parameters.coordinate);
+                    }
+                } else {
+                    this.workplaneClick(WorkplaneMV.getCurrent().lastPosition);
+                }
             }
+        },
 
-            // Double-click on a point and the first click hasn't already 
-            // created
+        sceneViewDblClick: function(viewAndEvent) {
+            // Double-click on a point and the first click hasn't already created
             if (!this.creating && (viewAndEvent.view.model.vertex.type === 'point')) {
                 geometryGraph.removeLastPointFromPolyline(this.vertex);
-                this.okCreate();
+                this.tryCommit();
             }
+        },
+
+        addPoint: function(position) {
+            var point = geometryGraph.addPointToPolyline(this.vertex);
+            var newLength = this.subModels.push(new PointMV.EditingModel({
+                vertex: point, 
+                parentModel: this
+            }));
+            this.activePoint = this.subModels[newLength - 1];
+            this.workplanePositionChanged(position);
+        },
+
+        removeLastPoint: function() {
+            geometryGraph.removeLastPointFromPolyline(this.vertex);
+            this.subModels[this.subModels.length - 1].destroy();
+        },
+
+        isChildClickable: function(childModel) {
+            // Can't click the active point
+            return childModel !== this.activePoint;
         },
 
     });
 
-    var EditingDOMView = geomVertexWrapper.EditingDOMView.extend({
+    var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
 
         initialize: function() {
-            this.lastRenderedPointIds = [];
-            geomVertexWrapper.EditingDOMView.prototype.initialize.call(this);
+            GeomVertexMV.EditingDOMView.prototype.initialize.call(this);
         },
 
         remove: function() {
-            geomVertexWrapper.EditingDOMView.prototype.remove.call(this);
+            GeomVertexMV.EditingDOMView.prototype.remove.call(this);
         },
 
         render: function() {
@@ -149,9 +205,9 @@ define([
                 '<td>' +
                 '<table><tr>' +
                 '<td class="title">' + 
-                '<img src="/ui/images/icons/point32x32.png"/>' +
+                '<img src="/ui/images/icons/polyline32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
-                '{{^implicit}}<div class="delete"></div>{{/implicit}}' + 
+                '<div class="delete"></div>' + 
                 '</td></tr><tr><td>' +
                 '</div>' + 
                 '<div class="points">' + 
@@ -160,43 +216,43 @@ define([
                 '</td>'
             var view = {
                 name: this.model.vertex.name,
-                // renderPoints: this.renderPoints()
             };
             this.$el.html($.mustache(template, view));
-            // this.update();
             return this;
+        },
+
+        insertChild: function(childModel, childElement) {
+            this.$el.find('.points').append(childElement);
         },
 
     }); 
 
-    var EditingLineSceneView = geomVertexWrapper.EditingSceneView.extend(LineSceneView, {});
-
+    var EditingLineSceneView = GeomVertexMV.EditingSceneView.extend(LineSceneView, {});
 
     // ---------- Display ----------
 
-    var DisplayModel = geomVertexWrapper.DisplayModel.extend({
+    var DisplayModel = GeomVertexMV.DisplayModel.extend({
 
-        initialize: function(vertex) {
-            geomVertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
+        initialize: function(options) {
+            this.editingModelConstructor = EditingModel;
+            this.displayModelConstructor = DisplayModel;
+            GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
+
             this.views = this.views.concat([
                 new DisplayLineSceneView({model: this}),
-                new geomVertexWrapper.DisplayDOMView({model: this}),
+                new GeomVertexMV.DisplayDOMView({model: this}),
             ]);
         },
-
-        destroy: function() {
-            geomVertexWrapper.DisplayModel.prototype.destroy.call(this);
-        },
-
     });
 
-    var DisplayLineSceneView = geomVertexWrapper.DisplaySceneView.extend(LineSceneView);    
+    var DisplayLineSceneView = GeomVertexMV.DisplaySceneView.extend(LineSceneView);  
+
+
+    // ---------- Module ----------
 
     return {
-        DisplayModel: DisplayModel,
         EditingModel: EditingModel,
+        DisplayModel: DisplayModel,
     }
 
-
 });
-

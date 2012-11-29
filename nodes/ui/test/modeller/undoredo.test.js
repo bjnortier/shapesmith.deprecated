@@ -131,14 +131,14 @@ describe('Undo/Redo', function() {
                                     .back()
                                     .clickOnWorld(0,0,0)
                                     .assertNumberOfEditingNodes(3)
-                                    .assertCoordinateEqual('.vertex.editing.implicit_point0 .coordinate', 0,0,0)
-                                    .assertCoordinateEqual('.vertex.editing.implicit_point1 .coordinate', 20,20,0)
+                                    .assertCoordinateEqual('.vertex.editing.point0 .coordinate', 0,0,0)
+                                    .assertCoordinateEqual('.vertex.editing.point1 .coordinate', 20,20,0)
                                     .clickOnWorld(15,15,0)
                                     .forward()
                                     .clickOnWorld(-10,-10,0)
                                     .assertNumberOfEditingNodes(3)
-                                    .assertCoordinateEqual('.vertex.editing.implicit_point0 .coordinate', -10,-10,0)
-                                    .assertCoordinateEqual('.vertex.editing.implicit_point1 .coordinate', 20,0,0, done)
+                                    .assertCoordinateEqual('.vertex.editing.point0 .coordinate', -10,-10,0)
+                                    .assertCoordinateEqual('.vertex.editing.point1 .coordinate', 20,0,0, done)
                             });
 
                 });

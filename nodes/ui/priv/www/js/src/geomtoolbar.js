@@ -135,15 +135,18 @@ define([
         },
 
         committedCreate: function(committedVertices) {
-            var isPointCreate = committedVertices[0].type === 'point';
-            var isPolylineCreate = committedVertices[0].type === 'polyline';
+            // The first vertex in the list is by convention the parent vertex 
+            if (!committedVertices[0].implicit) {
+                var isPointCreate = committedVertices[0].type === 'point';
+                var isPolylineCreate = committedVertices[0].type === 'polyline';
 
-            if (isPointCreate) {
-                this.launchTool(pointItemModel);
-            } else if (isPolylineCreate) {
-                this.launchTool(polylineItemModel);
-            } else {
-                this.setToSelect();
+                if (isPointCreate) {
+                    this.launchTool(pointItemModel);
+                } else if (isPolylineCreate) {
+                    this.launchTool(polylineItemModel);
+                } else {
+                    this.setToSelect();
+                }
             }
 
         },

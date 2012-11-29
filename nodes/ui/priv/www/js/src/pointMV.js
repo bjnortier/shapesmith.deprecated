@@ -1,30 +1,38 @@
 define([
         'src/calculations', 
         'src/colors',
-        'src/geometrygraphsingleton', 
-        'src/geomvertexwrapper', 
         'src/scene', 
         'src/scenevieweventgenerator',
-        'src/workplaneMV'
+        'src/geometrygraphsingleton',
+        'src/geomvertexMV', 
+        'src/asyncAPI',
     ], 
-    function(calc, colors, geometryGraph, geomVertexWrapper, sceneModel, sceneViewEventGenerator, Workplane) {
+    function(
+        calc, 
+        colors, 
+        sceneModel, 
+        sceneViewEventGenerator,
+        geometryGraph,
+        GeomVertexMV,
+        AsyncAPI) {
 
     // ---------- Editing ----------
 
-    var EditingModel = geomVertexWrapper.EditingModel.extend({
+    var EditingModel = GeomVertexMV.EditingModel.extend({
 
-        initialize: function(vertex, possibleEditingParentModel) {
-            geomVertexWrapper.EditingModel.prototype.initialize.call(this, vertex);
-            if (this.currentWorkplaneModel.lastPosition) {
-                this.workplanePositionChanged(this.currentWorkplaneModel.lastPosition);
-            }
+        initialize: function(options) {
+            this.displayModelConstructor = DisplayModel;
+            GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
+
             this.views.push(new EditingSceneView({model: this}));
-
-            this.appendElement = (possibleEditingParentModel && possibleEditingParentModel.implicitAppendElement);
             this.views.push(new EditingDOMView({model: this}));
         },
 
         workplanePositionChanged: function(position) {
+            if (this.vertex.implicit) {
+                // handled by parent model
+                return
+            }
             if (this.vertex.proto) {
                 this.vertex.parameters.coordinate.x = position.x;
                 this.vertex.parameters.coordinate.y = position.y;
@@ -34,25 +42,38 @@ define([
         },
 
         workplaneClick: function() {
-            var that = this;
-            if (this.vertex.proto) {
-                this.okCreate();
+            if (this.vertex.implicit) {
+                // handled by parent
+                return
             }
+            this.tryCommit()
         },
+
+        cancel: function() {
+            if (this.vertex.implicit) {
+                // handled by parent
+                return
+            }
+            GeomVertexMV.EditingModel.prototype.cancel.call(this);
+
+        }
 
     });
 
-    var EditingDOMView = geomVertexWrapper.EditingDOMView.extend({
+    var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
 
         render: function() {
             var template = 
                 '<td>' +
                 '<table><tr>' +
+                '{{^implicit}}' +
                 '<td class="title">' + 
                 '<img src="/ui/images/icons/point32x32.png"/>' +
                 '<div class="name">{{name}}</div>' + 
-                '{{^implicit}}<div class="delete"></div>{{/implicit}}' + 
-                '</td></tr><tr><td>' +
+                '<div class="delete"></div>' + 
+                '</td></tr><tr>' + 
+                '{{/implicit}}' +
+                '<td>' +
                 '<div class="coordinate">' +
                 '<input class="field x" type="text" value="{{x}}"></input>' +
                 '<input class="field y" type="text" value="{{y}}"></input>' +
@@ -91,26 +112,26 @@ define([
             this.model.vertex.trigger('change', this.model.vertex);
         }
     });
-
-    var EditingSceneView = geomVertexWrapper.EditingSceneView.extend({
+ 
+    var EditingSceneView = GeomVertexMV.EditingSceneView.extend({
 
         initialize: function(options) {
-            this.point = this.model.vertex;
-            geomVertexWrapper.EditingSceneView.prototype.initialize.call(this);
+            GeomVertexMV.EditingSceneView.prototype.initialize.call(this);
             this.on('dragStarted', this.dragStarted, this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);
+            this.rerenderOnCameraChange = true;
         },
 
         remove: function() {
-            geomVertexWrapper.EditingSceneView.prototype.remove.call(this);
+            GeomVertexMV.EditingSceneView.prototype.remove.call(this);
             this.off('dragStarted', this.dragStarted, this);
             this.off('drag', this.drag, this);
             this.off('dragEnded', this.dragEnded, this);
         },
 
         render: function() {
-            geomVertexWrapper.EditingSceneView.prototype.render.call(this);
+            GeomVertexMV.EditingSceneView.prototype.render.call(this);
             var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || colors.geometry.defaultAmbient;
             var color = this.highlightColor || this.selectedColor || this.color || colors.geometry.default;
             var point = THREE.SceneUtils.createMultiMaterialObject(
@@ -119,8 +140,17 @@ define([
                     new THREE.MeshBasicMaterial({color: color, wireframe: false, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                     new THREE.MeshBasicMaterial({color: color, wireframe: true, transparent: true, opacity: 0.5, side: THREE.DoubleSide}),
                 ]);
-            point.position = calc.objToVector(this.point.parameters.coordinate, geometryGraph);
+            point.position = calc.objToVector(this.model.vertex.parameters.coordinate, geometryGraph);
+            point.scale = this.cameraScale;
             this.sceneObject.add(point);
+        },
+
+        isClickable: function() { 
+            if (this.model.vertex.implicit) {
+                return this.model.parentModel && this.model.parentModel.isChildClickable(this.model);
+            } else {
+                return GeomVertexMV.EditingSceneView.prototype.isClickable(this);
+            }
         },
 
         // This view is not draggable, but the display scene view can transfer 
@@ -131,25 +161,27 @@ define([
         },
 
         dragStarted: function() {
-            this.dragStartedWhilstEditing = true;
+            // The drag was started when the point was being edited, as
+            // opposed to starting from a display node
+            this.dragStartedInEditingMode = true;
         },
 
         drag: function(event) {
             this.dragging = true;
             var positionOnWorkplane = calc.positionOnWorkplane(
                 event, this.model.currentWorkplaneModel.vertex, sceneModel.view.camera);
-            this.point.parameters.coordinate = {
-                x: positionOnWorkplane.x + this.model.currentWorkplaneModel.vertex.workplane.origin.x,
-                y: positionOnWorkplane.y + this.model.currentWorkplaneModel.vertex.workplane.origin.y,
-                z: positionOnWorkplane.z + this.model.currentWorkplaneModel.vertex.workplane.origin.z,
+            var workplaneOrigin = this.model.currentWorkplaneModel.vertex.workplane.origin;
+            this.model.vertex.parameters.coordinate = {
+                x: positionOnWorkplane.x + workplaneOrigin.x,
+                y: positionOnWorkplane.y + workplaneOrigin.y,
+                z: positionOnWorkplane.z + workplaneOrigin.z,
             }
             this.model.vertex.trigger('change', this.model.vertex);
         },
 
         dragEnded: function() {
-            if (this.dragging && !this.dragStartedWhilstEditing) {
-                this.model.okEdit();
-                this.dragging = false;
+            if (!this.dragStartedInEditingMode) {
+                this.model.tryCommit();
             }
         },
 
@@ -157,47 +189,45 @@ define([
 
     // ---------- Display ----------
 
-    var DisplayModel = geomVertexWrapper.DisplayModel.extend({
+    var DisplayModel = GeomVertexMV.DisplayModel.extend({
 
-        initialize: function(vertex, possibleEditingParentModel) {
-            geomVertexWrapper.DisplayModel.prototype.initialize.call(this, vertex);
-            this.views = this.views.concat([
-                new DisplaySceneView({model: this}),
-            ]);
-            this.appendElement = (possibleEditingParentModel && possibleEditingParentModel.implicitAppendElement);
-            if (!vertex.implicit || this.appendElement) {
-                this.views.push(new geomVertexWrapper.DisplayDOMView({model: this}));
-            }
-        },
+        initialize: function(options) {
+            this.editingModelConstructor = EditingModel;
+            this.displayModelConstructor = DisplayModel;
+            GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
 
-        canSelect: function() {
-            return !this.vertex.implicit;
+            this.views.push(new DisplaySceneView({model: this}));
+            if (!this.vertex.implicit) {
+                this.views.push(new GeomVertexMV.DisplayDOMView({model: this}));
+            };
         },
 
         selectParentOnClick: function() {
             return this.vertex.implicit;
         },
 
-    });
 
-    var DisplaySceneView = geomVertexWrapper.DisplaySceneView.extend({
+    });    
+
+    var DisplaySceneView = GeomVertexMV.DisplaySceneView.extend({
 
         initialize: function(vertex) {
-            geomVertexWrapper.DisplaySceneView.prototype.initialize.call(this, vertex);
+            GeomVertexMV.DisplaySceneView.prototype.initialize.call(this, vertex);
             this.on('dragStarted', this.dragStarted, this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);
+            this.rerenderOnCameraChange = true;
         },
 
         remove: function() {
-            geomVertexWrapper.DisplaySceneView.prototype.remove.call(this);
+            GeomVertexMV.DisplaySceneView.prototype.remove.call(this);
             this.off('dragStarted', this.dragStarted, this);
             this.off('drag', this.drag, this);
             this.off('dragEnded', this.dragEnded, this);
         },
 
         render: function() {
-            geomVertexWrapper.EditingSceneView.prototype.render.call(this);
+            GeomVertexMV.EditingSceneView.prototype.render.call(this);
             var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
             var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
             var radius = this.model.vertex.implicit ? 0.35 : 0.5;
@@ -210,6 +240,7 @@ define([
             point.position = calc.objToVector(
                 this.model.vertex.parameters.coordinate,
                 geometryGraph);
+            point.scale = this.cameraScale;
             this.sceneObject.add(point);
 
             if (this.model.vertex.implicit) {
@@ -219,6 +250,7 @@ define([
                 selectionPoint.position = calc.objToVector(
                     this.model.vertex.parameters.coordinate,
                     geometryGraph);
+                selectionPoint.scale = this.cameraScale;
                 this.hiddenSelectionObject.add(selectionPoint);
             }
         },
@@ -228,18 +260,25 @@ define([
         },
 
         dragStarted: function(event) {
-            this.dragging = true;
-            geometryGraph.edit(this.model.vertex);
+            this.model.destroy();
+            var editingVertex = AsyncAPI.edit(this.model.vertex);
+            new this.model.editingModelConstructor({
+                original: this.model.vertex, 
+                vertex: editingVertex
+            });
             sceneViewEventGenerator.replaceInDraggable(this, this.model.vertex.id);
         },
 
     });
 
 
+    // ---------- Module ----------
+
     return {
-        DisplayModel: DisplayModel,
         EditingModel: EditingModel,
+        DisplayModel: DisplayModel,
     }
 
 
 });
+
