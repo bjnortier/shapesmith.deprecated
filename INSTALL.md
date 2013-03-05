@@ -36,7 +36,7 @@ From within the cloned shapesmith repo:
     $ cd nodes/apps/worker/priv
     $ ./regen_build.sh
 
-If all the tests pass you should now have a usable worker process
+If all the tests pass you should now have a usable worker process. (Note: if the tests do not compile, and you are running Ubuntu 12x, see the notes about compiling gtest in INSTALL.ubuntu.md).
 
 ## Optional Installs
 
@@ -63,3 +63,19 @@ If all the tests pass, run shapesmith:
 Point your browser to
 
     $ http://localhost:8000 
+
+
+## Note: Use the local 'rebar' instance
+
+The latest rebar does not work with the one of the dependencies (erlang-bcrypt). So, even if you have rebar installed, be sure to use the rebar that comes with this project. This means, when the instructions below say:
+
+    $ ./rebar foo
+
+Do not forget the "./" in front of the 'rebar' command, this insures that you are running this program from the current directory. Whereas, running:
+
+    $ rebar foo
+
+will run rebar from wherever it is installed on your system...and if your version of rebar is recent, then rebar might not compile your project correctly (as is currently the case with erlang-bcrypt).
+
+See: 
+    https://github.com/smarkets/erlang-bcrypt/pull/6
