@@ -28,6 +28,7 @@ ensure_started(App) ->
     end.
 
 start() ->
-	ensure_started(lager),
+    ensure_started(lager),
+    ensure_started(folsom),
     application:start(worker_master).
 

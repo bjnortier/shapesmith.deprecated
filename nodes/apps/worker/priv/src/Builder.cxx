@@ -5,7 +5,6 @@
 #include "Util.h"
 #include "base64.h"
 
-
 TopoDS_Shape Builder::shape() {
     return shape_;
 }
@@ -62,6 +61,55 @@ void Builder::ApplyTransforms(map< string, mValue > json) {
     } 
 }
 
+void Builder::ApplyWorkplane(map< string, mValue> json) {
+    if (!json["workplane"].is_null()) {
+        map< string, mValue > workplane_origin = json["workplane"].get_obj()["origin"].get_obj();
+        double x = Util::to_d(workplane_origin["x"]);
+        double y = Util::to_d(workplane_origin["y"]);
+        double z = Util::to_d(workplane_origin["z"]);
+
+        map< string, mValue > workplane_axis = json["workplane"].get_obj()["axis"].get_obj();
+        double u = Util::to_d(workplane_axis["x"]);
+        double v = Util::to_d(workplane_axis["y"]);
+        double w = Util::to_d(workplane_axis["z"]);
+
+        double angle = Util::to_d(json["workplane"].get_obj()["angle"]);
+
+        gp_Trsf transformation1 = gp_Trsf();
+        transformation1.SetRotation(gp_Ax1(gp_Pnt(0.0,0.0,0.0), gp_Dir(u,v,w)), angle/180*M_PI);
+        shape_ = BRepBuilderAPI_Transform(shape_, transformation1).Shape();
+
+        gp_Trsf transformation2 = gp_Trsf();
+        transformation2.SetTranslation(gp_Vec(x,y,z));
+        shape_ = BRepBuilderAPI_Transform(shape_, transformation2).Shape();
+    }
+}
+
+void Builder::ApplyReverseWorkplane(map< string, mValue> json) {
+    if (!json["workplane"].is_null()) {
+        map< string, mValue > workplane_origin = json["workplane"].get_obj()["origin"].get_obj();
+        double x = -Util::to_d(workplane_origin["x"]);
+        double y = -Util::to_d(workplane_origin["y"]);
+        double z = -Util::to_d(workplane_origin["z"]);
+        
+        map< string, mValue > workplane_axis = json["workplane"].get_obj()["axis"].get_obj();
+        double u = Util::to_d(workplane_axis["x"]);
+        double v = Util::to_d(workplane_axis["y"]);
+        double w = Util::to_d(workplane_axis["z"]);
+        
+        double angle = -Util::to_d(json["workplane"].get_obj()["angle"]);
+        
+        gp_Trsf transformation1 = gp_Trsf();
+        transformation1.SetTranslation(gp_Vec(x,y,z));
+        shape_ = BRepBuilderAPI_Transform(shape_, transformation1).Shape();
+        
+        gp_Trsf transformation2 = gp_Trsf();
+        transformation2.SetRotation(gp_Ax1(gp_Pnt(0.0,0.0,0.0), gp_Dir(u,v,w)), angle/180*M_PI);
+        shape_ = BRepBuilderAPI_Transform(shape_, transformation2).Shape();
+        
+    }
+}
+
 #pragma mark 3D builders
 
 void Builder3D::Mesh() {
@@ -79,6 +127,7 @@ void Builder3D::Mesh() {
 void Builder3D::PostProcess(map< string, mValue > json) {
     this->ApplyOrigin(json);
     this->ApplyTransforms(json);
+    this->ApplyWorkplane(json);
     this->Mesh();
 }
 
@@ -87,25 +136,25 @@ CuboidBuilder::CuboidBuilder(map< string, mValue > json) {
     double width = Util::to_d(parameters["u"]);
     double depth = Util::to_d(parameters["v"]);
     double height = Util::to_d(parameters["w"]);
-	 
+         
     map< string, mValue > origin = json["origin"].get_obj();
-	 
+         
     if (width < 0) {
-	origin["x"] = Util::to_d(origin["x"]) + width;
-	width = -width;
+        origin["x"] = Util::to_d(origin["x"]) + width;
+        width = -width;
     }
 
     if (depth < 0) {
-	origin["y"] = Util::to_d(origin["y"]) + depth;
-	depth = -depth;
+        origin["y"] = Util::to_d(origin["y"]) + depth;
+        depth = -depth;
     }
-	 
+         
     if (height < 0) {
-	origin["z"] = Util::to_d(origin["z"]) + height;
-	height = -height;
+        origin["z"] = Util::to_d(origin["z"]) + height;
+        height = -height;
     }
     json["origin"] = origin;
-	 
+         
     shape_ = BRepPrimAPI_MakeBox(width, depth, height).Shape();
     PostProcess(json);
 }
@@ -124,8 +173,8 @@ CylinderBuilder::CylinderBuilder(map< string, mValue > json) {
     
     map< string, mValue > origin = json["origin"].get_obj();
     if(h < 0) {
-	origin["z"] = Util::to_d(origin["z"]) + h;
-	h = -h;
+        origin["z"] = Util::to_d(origin["z"]) + h;
+        h = -h;
     }
     json["origin"] = origin;
     
@@ -144,9 +193,9 @@ ConeBuilder::ConeBuilder(map< string, mValue > json) {
 
     map< string, mValue > origin = json["origin"].get_obj();
     if(h < 0) {
-	origin["z"] = Util::to_d(origin["z"]) + h;
-	h = -h;
-	swap(r1, r2);
+        origin["z"] = Util::to_d(origin["z"]) + h;
+        h = -h;
+        swap(r1, r2);
     }
     json["origin"] = origin;
         
@@ -163,8 +212,8 @@ WedgeBuilder::WedgeBuilder(map< string, mValue > json) {
 
     map< string, mValue > origin = json["origin"].get_obj();
     if(w < 0) {
-	origin["z"] = Util::to_d(origin["z"]) + w;
-	w = -w;
+        origin["z"] = Util::to_d(origin["z"]) + w;
+        w = -w;
     }
     json["origin"] = origin;
     shape_ = BRepPrimAPI_MakeWedge(u1, v, w, u2).Shape();
@@ -224,8 +273,8 @@ void Builder2D::Mesh() {
 
 void Builder2D::PostProcess(map< string, mValue > json) {
     this->ApplyOrigin(json);
-
     this->ApplyTransforms(json);
+    this->ApplyWorkplane(json);
     this->Mesh();
 }
 
@@ -324,6 +373,7 @@ Triangle2DBuilder::Triangle2DBuilder(map< string, mValue > json) {
 void Builder1D::PostProcess(map< string, mValue > json) {
     this->ApplyOrigin(json);
     this->ApplyTransforms(json);
+    this->ApplyWorkplane(json);
 }
 
 Ellipse1DBuilder::Ellipse1DBuilder(map< string, mValue > json) {
@@ -606,7 +656,9 @@ void BuilderND::Mesh() {
 }
 
 void BuilderND::PostProcess(map< string, mValue > json) {
+    this->ApplyReverseWorkplane(json);
     this->ApplyTransforms(json);
+    this->ApplyWorkplane(json);
     this->Mesh();
 }
 
@@ -705,14 +757,60 @@ SubtractBuilder::SubtractBuilder(map< string, mValue > json, vector<TopoDS_Shape
 
 #pragma mark Modifier builders
 
+map< string, mValue > toGlobalUsingWorkplane(map< string, mValue > json, double u, double v, double w) {
+    map< string, mValue > rotated = map< string, mValue >();
+    if (!json["workplane"].is_null()) {
+        map< string, mValue > workplane = json["workplane"].get_obj();
+        map< string, mValue > origin = workplane["origin"].get_obj();
+        map< string, mValue > axis = workplane["axis"].get_obj();
+        double half_angle = Util::to_d(workplane["angle"])/2/180*M_PI;
+        double s = sin(half_angle);
+
+        double x = Util::to_d(axis["x"]);
+        double y = Util::to_d(axis["y"]);
+        double z = Util::to_d(axis["z"]);
+
+        double qx = x*s;
+        double qy = y*s;
+        double qz = z*s;
+        double qw = cos(half_angle);
+
+        double ix =  qw * u + qy * w - qz * v;
+        double iy =  qw * v + qz * u - qx * w;
+        double iz =  qw * w + qx * v - qy * u;
+        double iw = -qx * u - qy * v - qz * w;
+        
+        double ox = Util::to_d(origin["x"]);
+        double oy = Util::to_d(origin["y"]);
+        double oz = Util::to_d(origin["z"]);
+
+
+        rotated["x"] = ox + (ix * qw + iw * -qx + iy * -qz - iz * -qy);
+        rotated["y"] = oy + (iy * qw + iw * -qy + iz * -qx - ix * -qz);
+        rotated["z"] = oz + (iz * qw + iw * -qz + ix * -qy - iy * -qx);
+        
+    } else {
+        rotated["x"] = u;
+        rotated["y"] = v;
+        rotated["z"] = w;
+    }
+    return rotated;
+}
+
 PrismBuilder::PrismBuilder(map< string, mValue > json, TopoDS_Shape shape) {
 
     map< string, mValue > parameters = json["parameters"].get_obj();
     double u = Util::to_d(parameters["u"]);
     double v = Util::to_d(parameters["v"]);
     double w = Util::to_d(parameters["w"]);
-    gp_Vec prismVec(u,v,w);
-
+    
+    map< string, mValue > rotatedTo = toGlobalUsingWorkplane(json, u, v, w);
+    map< string, mValue > rotatedFrom = toGlobalUsingWorkplane(json, 0, 0, 0);
+    gp_Vec prismVec(
+        Util::to_d(rotatedTo["x"]) - Util::to_d(rotatedFrom["x"]),
+        Util::to_d(rotatedTo["y"]) - Util::to_d(rotatedFrom["y"]),
+        Util::to_d(rotatedTo["z"]) - Util::to_d(rotatedFrom["z"]));
+        
     try {
         shape_ = BRepPrimAPI_MakePrism(shape, prismVec);
     } catch (...) {
@@ -882,14 +980,26 @@ RevolveBuilder::RevolveBuilder(map< string, mValue > json, TopoDS_Shape shape) {
     double x = Util::to_d(origin["x"]);
     double y = Util::to_d(origin["y"]);
     double z = Util::to_d(origin["z"]);
+    map< string, mValue > globalOrigin = toGlobalUsingWorkplane(json, x, y, z);
+    gp_Pnt axisOrigin = gp_Pnt(
+        Util::to_d(globalOrigin["x"]),
+        Util::to_d(globalOrigin["y"]),
+        Util::to_d(globalOrigin["z"]));
+
     
     double u = Util::to_d(parameters["u"]);
     double v = Util::to_d(parameters["v"]);
     double w = Util::to_d(parameters["w"]);
+    map< string, mValue > axisTo = toGlobalUsingWorkplane(json, u, v, w);
+    map< string, mValue > axisFrom = toGlobalUsingWorkplane(json, 0, 0, 0);
+    gp_Dir axisDir = gp_Dir(
+        Util::to_d(axisTo["x"]) - Util::to_d(axisFrom["x"]),
+        Util::to_d(axisTo["y"]) - Util::to_d(axisFrom["y"]),
+        Util::to_d(axisTo["z"]) - Util::to_d(axisFrom["z"]));
     
     double angle = Util::to_d(parameters["angle"]);
     
-    gp_Ax1 axis(gp_Pnt(x,y,z),gp_Dir(u,v,w));
+    gp_Ax1 axis(axisOrigin, axisDir);
     shape_ = BRepPrimAPI_MakeRevol(shape,axis,angle/180*M_PI);
     PostProcess(json);
 }

@@ -16,23 +16,27 @@ Transform.prototype.editableCopy = function() {
     for (key in this.parameters) {
         copiedParameters[key] = this.parameters[key];
     }
-    return new Transform({type: this.type,
-			  origin: this.origin,
-                          parameters: copiedParameters,
-                          editing: this.editing});
+    return new Transform({
+            type: this.type,
+            origin: this.origin,
+            parameters: copiedParameters,
+            editing: this.editing
+        });
 }
 
 Transform.prototype.json = function() {
-    return JSON.stringify({type: this.type,
-			   origin: this.origin,
-                           parameters: this.parameters});
+    return JSON.stringify({
+                type: this.type,
+                origin: this.origin,
+                parameters: this.parameters
+            });
 }
 
 SS.createNextGeomNodeCounter = function() {
     var count = 0;
     var closure = function() {
-	++count;
-	return count;
+        ++count;
+        return count;
     }
     return closure;
 }
@@ -46,12 +50,12 @@ function GeomNode() {
 
     var that = this;
     var updateId = function(geomNode) {
-	geomNode.id = SS.nextGeomCounter() + '_' + geomNode.sha;
+        geomNode.id = SS.nextGeomCounter() + '_' + geomNode.sha;
     };
 
     this.setSHA = function(sha) {
-	that.sha = sha;
-	updateId(that);
+        that.sha = sha;
+        updateId(that);
     }
 
     if (!arguments[0].type) {
@@ -64,33 +68,20 @@ function GeomNode() {
     updateId(this);
 
     this.origin = arguments[0].origin;
-
-    var copyValue = function(value) {
-        if ((value === null) || (value === undefined)) {
-            return undefined;
-        } if (Object.prototype.toString.call( value ) === '[object Array]') {
-            return value.map(function(x) {
-                return copyValue(x);
-            });
-        } else if (typeof(value) === 'object') {
-            var returnObj = {};
-            for (var key in value) {
-                returnObj[key] = copyValue(value[key]);
-            }
-            return returnObj;
-        } else {
-            return value;
-        }
-    }
-
     this.contents = arguments[0].contents;
-    this.parameters = copyValue(arguments[0].parameters);
+    this.parameters = SS.copyObj(arguments[0].parameters);
     this.mesh = arguments[0].mesh;
     this.children = [];
 
+    if (arguments[0].workplane) {
+        this.workplane = new SS.WorkplaneNode(arguments[0].workplane);
+    } else {
+        this.workplane = new SS.WorkplaneNode();
+    }
+
     var transformDescriptions = arguments[0].transforms || [];
     this.transforms = transformDescriptions.map(function(transformDescription) {
-	return new Transform(transformDescription);
+        return new Transform(transformDescription);
     });
 
     if (arguments[1]) {
@@ -113,28 +104,27 @@ GeomNode.prototype.editableCopy = function() {
 
     var copiedOrigin = null;
     if (this.origin) {
-	copiedOrigin = {};
-	for (key in this.origin) {
+        copiedOrigin = {};
+        for (key in this.origin) {
             copiedOrigin[key] = this.origin[key];
-	}
+        }
     }
 
-    var copiedParameters = {};
-    for (key in this.parameters) {
-        copiedParameters[key] = this.parameters[key];
-    }
+    var copiedWorkplane = SS.copyObj(this.workplane);
+    var copiedParameters = SS.copyObj(this.parameters);
     var copiedTransforms = this.transforms.map(function(transform) {
         return transform.editableCopy();
     });
-
-        
+    
     var newNode = new GeomNode({type : this.type,
                                 contents: this.contents,
-				origin: copiedOrigin,
+                                origin: copiedOrigin,
                                 parameters : copiedParameters,
+                                workplane: copiedWorkplane,
                                 transforms : copiedTransforms,
                                 mesh : this.mesh,
-                               }, this.children);
+                               }, 
+                               this.children);
     return newNode;
 }
 
@@ -144,17 +134,24 @@ GeomNode.prototype.editableCopy = function() {
 GeomNode.prototype.toShallowJson = function() {
     // No need to do somethign special with parameters if they are not 
     // defined, as JSON.stringify simply ignores those fields
-    var obj = {type: this.type,
-               parameters: this.parameters,
-               contents: this.contents,
-               children: this.children.map(function(child) {
-                   return child.sha;
-               }),
-               transforms: this.transforms.map(function(tx) {
-                   return JSON.parse(tx.json());
-               })};
+    var obj = {
+        type: this.type,
+        parameters: this.parameters,
+        contents: this.contents,
+        children: this.children.map(function(child) {
+           return child.sha;
+        }),
+        transforms: this.transforms.map(function(tx) {
+           return JSON.parse(tx.json());
+        })
+    };
+
+    if (!(new SS.WorkplaneNode(this.workplane).isGlobalXY())) {
+        obj.workplane = this.workplane.serializableSubset();
+    }
+
     if (this.origin) {
-	obj.origin = this.origin;
+        obj.origin = this.origin;
     }
     return JSON.stringify(obj);
 }
@@ -163,14 +160,12 @@ GeomNode.fromDeepJson = function(json) {
     var geometry = json.geometry;
     var jsonChildren = json.geometry.children;
     if (json.geometry.children) {
-	delete json.geometry.children;
+        delete json.geometry.children;
     }
     geometry.sha = json.sha;
     var geomNode = new GeomNode(geometry);
     
-    if (jsonChildren && 
-	(jsonChildren.length > 0)) {
-
+    if (jsonChildren && (jsonChildren.length > 0)) {
         geomNode.children = jsonChildren.map(function(childJson) {
             return GeomNode.fromDeepJson(childJson);
         });
@@ -178,9 +173,12 @@ GeomNode.fromDeepJson = function(json) {
     return geomNode;
 }
 
+GeomNode.prototype.isTransformEditing = function() {
+    return _.pluck(this.transforms, "editing").indexOf(true) >= 0;
+}
+
 GeomNode.prototype.isEditingOrTransformEditing = function() {
-    var editingTransform = _.pluck(this.transforms, "editing").indexOf(true) >= 0;
-    return this.editing || editingTransform;
+    return this.editing || this.isTransformEditing();
 }
 
 

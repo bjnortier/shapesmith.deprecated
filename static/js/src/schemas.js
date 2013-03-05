@@ -1,18 +1,29 @@
 var SS = SS || {};
 
 SS.schemas = {};
-SS.schemas.originSchema =  {
+SS.schemas.vectorSchema =  {
     type: 'object',
     properties: {'x' : {type: 'number'},
                  'y' : {type: 'number'},
                  'z' : {type: 'number'}}
 };
 
+SS.schemas.workplane = {
+    description: "Workplane",
+    type: 'object',
+    properties: {
+        origin: SS.schemas.vectorSchema,
+        'axis' : SS.schemas.vectorSchema,
+        'angle' : {type: 'number'},
+    }
+};
+
 SS.schemas.cuboid = {
     description: "Cuboid",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        workplane: SS.schemas.workplane,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -28,7 +39,8 @@ SS.schemas.sphere = {
     description: "Sphere",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        workplane: SS.schemas.workplane,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -42,7 +54,8 @@ SS.schemas.cylinder = {
     description: "Cylinder",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        workplane: SS.schemas.workplane,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -57,7 +70,8 @@ SS.schemas.cone = {
     description: "Cone",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        workplane: SS.schemas.workplane,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -73,7 +87,8 @@ SS.schemas.wedge = {
     description: "Wedge",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        workplane: SS.schemas.workplane,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -90,7 +105,7 @@ SS.schemas.torus = {
     description: "Torus",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -105,7 +120,8 @@ SS.schemas.ellipse2d = {
     description: "Ellipse2D",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        workplane: SS.schemas.workplane,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -122,7 +138,8 @@ SS.schemas.ellipse1d = {
     description: "Ellipse1D",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        workplane: SS.schemas.workplane,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -140,7 +157,8 @@ SS.schemas.rectangle2d = {
     description: "Rectangle2D",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        workplane: SS.schemas.workplane,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -155,7 +173,8 @@ SS.schemas.triangle2d = {
     description: "Triangle2D",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        workplane: SS.schemas.workplane,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -181,7 +200,8 @@ SS.schemas.polyline = {
     description: "Polyline",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        workplane: SS.schemas.workplane,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -207,7 +227,8 @@ SS.schemas.bezier = {
     description: "Bezier",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        workplane: SS.schemas.workplane,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -234,7 +255,8 @@ SS.schemas.text2d = {
     description: "Text2D",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        workplane: SS.schemas.workplane,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -254,7 +276,8 @@ SS.schemas.prism = {
     description: "Prism",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        workplane: SS.schemas.workplane,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -283,7 +306,8 @@ SS.schemas.revolve = {
     description: "Revolve",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        workplane: SS.schemas.workplane,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -299,19 +323,25 @@ SS.schemas.revolve = {
 SS.schemas.intersect = {
     description: "Intersect",
     type: 'object',
-    properties: {}
+    properties: {
+        workplane: SS.schemas.workplane,
+    }
 }
 
 SS.schemas.union = {
     description: "Intersect",
     type: 'object',
-    properties: {}
+    properties: {
+        workplane: SS.schemas.workplane,
+    }
 }
 
 SS.schemas.subtract = {
     description: "Intersect",
     type: 'object',
-    properties: {}
+    properties: {
+        workplane: SS.schemas.workplane,
+    }
 }
 
 SS.schemas.make_face = {
@@ -336,7 +366,7 @@ SS.schemas.translate = {
     description: "Translate",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -356,7 +386,7 @@ SS.schemas.scale = {
     description: "Scale",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -370,7 +400,7 @@ SS.schemas.rotate = {
     description: "Rotate",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {
@@ -391,7 +421,7 @@ SS.schemas.mirror = {
     description: "Mirror",
     type: 'object',
     properties: {
-        origin: SS.schemas.originSchema,
+        origin: SS.schemas.vectorSchema,
         parameters: {
             type: 'object',
             properties: {

@@ -40,7 +40,7 @@ mValue Tesselator1D::Tesselate() {
     bool hasFaces = TopExp_Explorer(shape_,TopAbs_FACE).More();
     
     // Don't tesselate the edges of 3D objects with a lot of edges, e.g. STL imports
-    if (!(hasFaces && (edgeCount > 50))) {
+    if (!(hasFaces && (edgeCount > 500))) {
         int index = 0;
         for (Ex.Init(shape_,TopAbs_EDGE); Ex.More(); Ex.Next()) { 
             

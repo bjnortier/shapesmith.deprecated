@@ -33,58 +33,6 @@ function renderValue(clazz, key,  value, context, jsonSchema) {
     
 }
 
-function renderInputElement(key, context, jsonSchema) {
-    
-    var item = jsonSchema.properties[key];
-    if ((item.type === 'number') || (item.type === 'integer')) {
-        var element = '<input class="field" id="{{key}}" type="number" value="{{value}}"';
-        if (item.minimum !== undefined) {
-            element += ' min="' + item.minimum + '"';
-        }
-        if (item.maximum) {
-            element += ' max="' + item.maximum + '"';
-        }
-        element += '/>';
-        return element;
-
-    } else if (item.type === 'string') {
-        if (item['enum']) {
-            var data = {
-                key: key,
-                options: item['enum']
-            };
-            var template = '<select id={{key}} name={{key}}>{{#options}}<option value="{{.}}">{{.}}</option>{{/options}}</select>';
-            return $.mustache(template, data);
-        } else {
-            return '<input id="{{key}}" type="text" value="{{value}}"/>';
-        }
-    } else if (item.type === 'array') {
-        
-        var elements = '';
-        for (var k = 0; k < context[key].length; ++k) {
-
-            var object = context[key][k];
-            var subSchema = jsonSchema.properties[key].items;
-            var items = [];
-            for (var subKey in object) {
-                var template = '<tr><td>{{label}}</td><td>' + renderInputElement(subKey, object[subKey], subSchema) + '</td></tr>';
-                items.push($.mustache(template, {label: subKey, 
-                                                 value: context[key][k][subKey],
-                                                 key: subKey + '_' + k}));
-            }
-
-            var template = '<table><tr><td>{{index}}</td><td><table>{{#items}}{{{.}}}{{/items}}</table></td></tr></table>';
-            var view = {
-                index: k,
-                items: items
-            };
-            var x = $.mustache(template, view);
-            elements += x;
-        }
-        return elements;
-    }
-        
-}
 
 function renderTransform(geomNode, transformIndex) {
     var transform = geomNode.transforms[transformIndex];
@@ -93,16 +41,16 @@ function renderTransform(geomNode, transformIndex) {
     // Origin & Orientation
     var originTable = null;
     if (transform.origin) {
-	var originArr = [];
+        var originArr = [];
         for (key in transform.origin) {
-	    originArr.push({key: key, 
-		            value: transform.origin[key], 
-		            'edit-class': 'edit-transform target-' + geomNode.id + '-' + transformIndex,
-		            editing: transform.editing
+            originArr.push({key: key, 
+                            value: transform.origin[key], 
+                            'edit-class': 'edit-transform target-' + geomNode.id + '-' + transformIndex,
+                            editing: transform.editing
                            });
-	}
-	var originTemplate = '<table>{{#originArr}}<tr><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}</td></tr>{{/originArr}}</table>';
-	var originTable = $.mustache(originTemplate, {originArr : originArr});
+        }
+        var originTemplate = '<table>{{#originArr}}<tr><td>{{key}}</td><td>{{^editing}}<span class="{{edit-class}}">{{value}}</span>{{/editing}}</td></tr>{{/originArr}}</table>';
+        var originTable = $.mustache(originTemplate, {originArr : originArr});
     }
 
     // Params
@@ -121,11 +69,11 @@ function renderTransform(geomNode, transformIndex) {
 
     var view = {
         type: transform.type,
-	editing: transform.editing,
+        editing: transform.editing,
         contentsStyle: (transform.editing ? '' : 'display:none;'),
         'delete-class': 'delete-transform target-' + geomNode.id + '-' + transformIndex,
-	originTable: originTable,
-	paramsTable: paramsTable};
+        originTable: originTable,
+        paramsTable: paramsTable};
     var transformTable = $.mustache(template, view);
     return transformTable;
 }
@@ -140,14 +88,14 @@ function renderNode(geomNode) {
     if (schema.properties.origin) {
         var originArr = [];
         for (key in geomNode.origin) {
-	    originArr.push({key: key, 
-		            value: geomNode.origin[key], 
-		            clazz: 'edit-geom target-' + geomNode.id,
-		            editing: geomNode.editing
+            originArr.push({key: key, 
+                            value: geomNode.origin[key], 
+                            clazz: 'edit-geom target-' + geomNode.id,
+                            editing: geomNode.editing
                            });
-	}
-	var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{clazz}}">{{value}}</span>{{/editing}}</td></tr>{{/originArr}}</table>';
-	var originTable = $.mustache(originTemplate, {originArr : originArr});
+        }
+        var originTemplate = '<table>{{#originArr}}<tr {{#editing}}class="field"{{/editing}}><td>{{key}}</td><td>{{^editing}}<span class="{{clazz}}">{{value}}</span>{{/editing}}</td></tr>{{/originArr}}</table>';
+        var originTable = $.mustache(originTemplate, {originArr : originArr});
     }
 
     // Params
@@ -179,8 +127,8 @@ function renderNode(geomNode) {
     var childTemplate = '{{#editing}}<div id="{{id}}"><div id="editing-area"></div></div>{{/editing}}{{^editing}}<table id="{{id}}" class="geomnode-table"><tr><td><img class="show-hide-siblings siblings-showing" src="/static/images/arrow_showing.png"></img><span class="{{clazz}}">{{type}}</span><span class="node-actions">{{{copyHtml}}}}{{{deleteGeomHtml}}}{{{eyeHtml}}</span></td></tr><tr><td>{{{originTable}}}</td></tr><tr><td>{{{paramsTable}}}</td></tr>{{#transformRows}}<tr><td>{{{.}}}</tr></td>{{/transformRows}}{{#children}}<tr><td>{{{.}}}</td></td>{{/children}}</table>{{/editing}}';
 
     var clazz = geom_doc.isRoot(geomNode) ? 
-	'select-geom target-' + geomNode.id : 
-	'target-' + geomNode.id;
+        'select-geom target-' + geomNode.id : 
+        'target-' + geomNode.id;
 
     var copyTemplate = '<img class="copy-geom {{clazz}}" src="/static/images/copy_10.png"/>'
     var copyHtml = $.mustache(copyTemplate, {clazz: 'target-' + geomNode.id});
@@ -198,14 +146,14 @@ function renderNode(geomNode) {
                                      'delete-clazz': 'target-' + geomNode.id,
                                     });
 
-	
+        
     var view = {type: geomNode.type,
                 editing: geomNode.editing,
-		id: geomNode.id,
+                id: geomNode.id,
                 copyHtml: copyHtml,
                 eyeHtml: eyeHtml,
                 deleteGeomHtml: deleteGeomHtml,
-		originTable: originTable,
+                originTable: originTable,
                 paramsTable: paramsTable,
                 transformRows: transformRows,
                 clazz: clazz,
@@ -245,14 +193,14 @@ function TreeView() {
             }
         }
 
-	var transformBeingEdited; 
-	for (var i in geomNode.transforms) {
-	    if (geomNode.transforms[i].editing) {
-		transformBeingEdited = geomNode.transforms[i];
-	    }
-	}
-	
-	var okGeomFunction = function() {
+        var transformBeingEdited; 
+        for (var i in geomNode.transforms) {
+            if (geomNode.transforms[i].editing) {
+                transformBeingEdited = geomNode.transforms[i];
+            }
+        }
+        
+        var okGeomFunction = function() {
             var updateParameters = function(key, parameters) {
                 var schema = SS.schemas[geomNode.type];
                 var itemSchema = schema.properties.parameters.properties[key];
@@ -265,66 +213,66 @@ function TreeView() {
 
             };
             
-	    if (precursor) {
-		for (key in geomNode.origin) {
+            if (precursor) {
+                for (key in geomNode.origin) {
                     geomNode.origin[key] = parseFloat($('#' + key).val());
-		}
-		for (key in geomNode.parameters) {
+                }
+                for (key in geomNode.parameters) {
                     updateParameters(key, geomNode.parameters);
-		}
-		return update_geom_command(precursor, geomNode, geomNode);
+                }
+                return update_geom_command(precursor, geomNode, geomNode);
             } else {
-		var origin = {};
-		for (key in geomNode.origin) {
+                var origin = {};
+                for (key in geomNode.origin) {
                     origin[key] = parseFloat($('#' + key).val());
-		}
-		var parameters = {};
-		for (key in geomNode.parameters) {
+                }
+                var parameters = {};
+                for (key in geomNode.parameters) {
                     updateParameters(key, parameters);
-		}
-		return create_geom_command(geomNode, {type: geomNode.type,
-						      origin: origin,
+                }
+                return create_geom_command(geomNode, {type: geomNode.type,
+                                                      origin: origin,
                                                       parameters: parameters});
             }
-	}
+        }
 
-	var okTransformFn = function() {
-	    for (key in transformBeingEdited.origin) {
-		transformBeingEdited.origin[key] = parseFloat($('#' + key).val());
-	    }
-	    for (key in transformBeingEdited.parameters) {
-		transformBeingEdited.parameters[key] = parseFloat($('#' + key).val());
-	    }
-	    return update_geom_command(precursor, geomNode, geomNode);
-	}
+        var okTransformFn = function() {
+            for (key in transformBeingEdited.origin) {
+                transformBeingEdited.origin[key] = parseFloat($('#' + key).val());
+            }
+            for (key in transformBeingEdited.parameters) {
+                transformBeingEdited.parameters[key] = parseFloat($('#' + key).val());
+            }
+            return update_geom_command(precursor, geomNode, geomNode);
+        }
 
         if (geomNode.editing || transformBeingEdited) {
-	    
+            
             $('#modal-ok').click(function() {
 
                 var cmd;
-		if (geomNode.editing) {
+                if (geomNode.editing) {
                     cmd = okGeomFunction();
-		} else {
-		    cmd = okTransformFn();
-		}
+                } else {
+                    cmd = okTransformFn();
+                }
                 command_stack.execute(cmd);
                 
             });
 
-	    var cancelFunction = function() {
-		if (precursor) {
-		    geom_doc.replace(geomNode, precursor);
+            var cancelFunction = function() {
+                if (precursor) {
+                    geom_doc.replace(geomNode, precursor);
                 } else {
                     geom_doc.remove(geomNode);
                 }
-	    }
+            }
 
-	    $(document).bind('keyup.editing', function(e) {
-		if (e.keyCode == 27) { 
-		    cancelFunction();
-		}
-	    });
+            $(document).bind('keyup.editing', function(e) {
+                if (e.keyCode == 27) { 
+                    cancelFunction();
+                }
+            });
 
             $('#modal-cancel').click(function() {
                 cancelFunction();
@@ -360,12 +308,12 @@ function TreeView() {
             if (!id) {
                 throw Error('id for editing could not be determined');
             }
-	    selectionManager.pick(id);
+            selectionManager.pick(id);
         });
 
         // Edit geom
-        $('.edit-geom').unbind('dblclick');
-        $('.edit-geom').dblclick(function() { 
+        $('.edit-geom').unbind('click');
+        $('.edit-geom').click(function() { 
             var id;
             var pattern = /^target-(.*)$/;
             var classes = $(this).attr('class').split(' ');
@@ -378,7 +326,7 @@ function TreeView() {
             if (!id) {
                 throw Error('id for editing could not be determined');
             }
-	    that.edit(id);
+            that.edit(id);
         });
 
         // Copy geom
@@ -396,14 +344,14 @@ function TreeView() {
             if (!id) {
                 throw Error('id for editing could not be determined');
             }
-	    var geomNode = geom_doc.findById(id);
+            var geomNode = geom_doc.findById(id);
             copyNode(geomNode);
         });
-	
+        
 
         // Edit transform
-        $('.edit-transform').unbind('dblclick');
-        $('.edit-transform').dblclick(function() { 
+        $('.edit-transform').unbind('click');
+        $('.edit-transform').click(function() { 
             var id;
             var transformIndex;
             var pattern = /^target-(.*)-(.*)$/;
@@ -519,16 +467,16 @@ function TreeView() {
     }
 
     this.edit = function(id) {
-	var geomNode = geom_doc.findById(id);
-	if (SS.creators[geomNode.type]) {
+        var geomNode = geom_doc.findById(id);
+        if (SS.creators[geomNode.type]) {
             var editingNode = geomNode.editableCopy();
             editingNode.editing = true;
             selectionManager.deselectAll();
             geom_doc.replace(geomNode, editingNode);
             new SS.creators[geomNode.type]({editingNode: editingNode, originalNode: geomNode});
-	}
+        }
     }
-				 
+                                 
 
     this.geomDocAdd = function(geomNode) {
         var nodeTable = renderNode(geomNode);
@@ -539,20 +487,20 @@ function TreeView() {
     }
 
     this.geomDocRemove = function(geomNode) {
-	$(document).unbind('keyup.editing');
+        $(document).unbind('keyup.editing');
 
-	// Preview model is removed on cancel
-	SS.materials.active && SS.materials.disposeActive();
+        // Preview model is removed on cancel
+        SS.materials.active && SS.materials.disposeActive();
 
         $('#' + geomNode.id).remove();
         delete this.domNodeLookup[geomNode];
     }
 
     this.geomDocReplace = function(original, replacement) {
-	$(document).unbind('keyup.editing');
+        $(document).unbind('keyup.editing');
 
-	// Preview model is replaced with real model on success
-	SS.materials.active && SS.materials.disposeActive();
+        // Preview model is replaced with real model on success
+        SS.materials.active && SS.materials.disposeActive();
         
         var nodeTable = renderNode(replacement);
         $('#' + original.id).replaceWith(nodeTable);
@@ -573,13 +521,19 @@ function TreeView() {
         }
     }
     
-    $('#advanced').change(function() {
+    $('#advanced-geometry-checkbox').change(function() {
         $('#geom-model-doc :visible').length > 0 ? 
             $('#geom-model-doc').hide() :
             $('#geom-model-doc').show();
         
     });
+
+    $('#advanced-workplane-checkbox').change(function() {
+    $('#workplane :visible').length > 0 ? 
+        $('#workplane').hide() :
+        $('#workplane').show();
         
+    });
 
     geom_doc.on('add', this.geomDocAdd, this);
     geom_doc.on('remove', this.geomDocRemove, this);
