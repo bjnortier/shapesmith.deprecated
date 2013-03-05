@@ -103,7 +103,7 @@ SS.TranslateTransformerView = SS.InteractiveSceneView.extend({
         return this;
     },
 
-    drag: function() {
+    drag: function(event) {
         var workplanePosition = SS.sceneView.determinePositionOnWorkplane(event);
         var u = workplanePosition.x - this.model.node.origin.x;
         var v = workplanePosition.y - this.model.node.origin.y;
