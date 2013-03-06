@@ -20,7 +20,7 @@ define([
 
         render: function() {
             var template = 
-                '<div class="title">CHOOSE MATERIAL...</div>' + 
+                '<div class="title">COLORS...</div>' + 
                 '<div class="options">' +
                     '<div class="colors">{{#colors}}' +
                         '<div class="color" data-color="{{hex}}" style="background-color:{{hex}}"></div>' +

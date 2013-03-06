@@ -39,7 +39,7 @@ define(['src/interactioncoordinator', 'src/geometrygraphsingleton'],
         },
 
         render: function() {
-            $(this.el).html('<div class="icon"></div>' + this.model.name.toUpperCase());
+            $(this.el).html('<div class="icon"></div><div class="label">' + this.model.name.toUpperCase() + "</div>");
             return this;
         },
 
