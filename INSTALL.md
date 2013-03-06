@@ -10,11 +10,17 @@
 
  * Please refer to the INSTALL.MacOSX.md or INSTALL.Ubuntu.md for platform-specific install instructions.
 
-## Install OCE v 0.4
+## Install OCE v 0.8
+
+There are packages on recent versions of ubuntu:
+
+    $ sudo apt-get install liboce-modeling-dev liboce-visualization-dev liboce-ocaf-dev
+    
+Otherwise install from source:
  
     $ git clone https://github.com/tpaviot/oce.git
     $ cd oce
-    $ git checkout -b 0.4.0 OCE-0.4.0
+    $ git checkout -b 0.8.0 OCE-0.8.0
     $ mkdir build
     $ cd build
     $ cmake ..
