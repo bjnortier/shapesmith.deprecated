@@ -24,6 +24,7 @@ For mesh simplification we user the GTS library: [http://gts.sourceforge.net/](h
     $ ./configure
     $ make
     $ sudo make install
+    $ sudo ldconfig
     $ sudo ln -s $PWD/examples/coarsen /usr/local/bin/coarsen
 
 ### Verify
