@@ -3,7 +3,6 @@ define([
         'jquery',
         'lib/jquery.mustache',
         'src/colors',
-        'src/textures',
         'src/scene',
         'src/interactioncoordinator',
         'src/scenevieweventgenerator',
@@ -20,7 +19,6 @@ define([
         Backbone,
         $, __$,
         colors, 
-        textures,
         sceneModel,
         coordinator,
         sceneViewEventGenerator, 
@@ -128,39 +126,7 @@ define([
                 },
 
             }
-
-            if (vertexMaterial && vertexMaterial.texture) {
-                var that = this;
-                var texture = THREE.ImageUtils.loadTexture('/materials/' + vertexMaterial.texture, {}, function() {
-                    // Async - could have been removed when texture is loaded
-                    if (!that.removed) {
-                        that.render();
-                    }
-                });
-                texture.wrapS = THREE.RepeatWrapping;
-                texture.wrapT = THREE.RepeatWrapping;
-                texture.repeat.x = 0.25;
-                texture.repeat.y = 0.25;
-                var opacity = (vertexMaterial.texture === 'glass.png') ? 0.5 : 1.0;
-                this.materials.normal.face = new THREE.MeshBasicMaterial({
-                    map: texture, transparent: opacity !== 1.0, opacity: opacity
-                });
-
-                this.materials.normal.faceTranslucent = new THREE.MeshBasicMaterial({
-                    map: texture, transparent: true, opacity: 0.5, 
-                });
-
-                var transparentTexture = THREE.ImageUtils.loadTexture('/materials/private/transparent.png', {}, function() {
-                    // Async - could have been removed when texture is loaded
-                    if (!that.removed) {
-                        that.render();
-                    }
-                });
-                this.materials.highlight.face = new THREE.MeshBasicMaterial({
-                    map: transparentTexture, side: THREE.DoubleSide, transparent: true, opacity: 0.5
-                });
-            }
-
+            
             VertexMV.SceneView.prototype.initialize.call(this);
             sceneModel.view.on('cameraMoveStopped', this.updateScreenBox, this);
         },

@@ -191,11 +191,6 @@ define([
     var toolbarModel = new GeomToolbarModel({name: 'geometry'});
     var expander = new toolbar.ExpanderItem();
     toolbarModel.addItem(selectItemModel);
-    toolbarModel.addItem(wallItemModel);
-    toolbarModel.addItem(slabItemModel);
-    toolbarModel.addItem(blockItemModel);
-    toolbarModel.addItem(noteItemModel);
-    toolbarModel.addItem(expander);
     toolbarModel.addItem(pointItemModel);
     toolbarModel.addItem(polylineItemModel);
     toolbarModel.addItem(extrudeItemModel);

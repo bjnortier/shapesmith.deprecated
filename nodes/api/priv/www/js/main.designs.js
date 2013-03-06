@@ -53,16 +53,15 @@ requirejs([
             if ((event.keyCode === 13) && (newDesignName.length)) {
                 var that = this;
                 $.ajax({
-                    type: 'POST',
-                    url: '/' + encodeURIComponent(globals.user)  + '/' + encodeURIComponent(newDesignName) + '/',
+                    type: 'put',
+                    url: '/_api/' + encodeURIComponent(globals.user)  + '/' + encodeURIComponent(newDesignName) + '/',
                     data: '{}',
                     dataType: 'json',
                     contentType: 'application/json',
                     success: function(response) {
-                        console.log(response);
-                        window.location.href = '/' + encodeURIComponent(globals.user) + 
+                        window.location.href = '/_ui/' + encodeURIComponent(globals.user) + 
                             '/' + encodeURIComponent(newDesignName) + 
-                            '/modeller?commit=' + response.refs.heads.master + 
+                            '/modeller?commit=' + response.heads.master + 
                             '&splash=true';
                     },
                     error: function(response) {
@@ -239,7 +238,7 @@ requirejs([
         new CreateModel();
 
         // Create models for designs
-        $.getJSON('/_api/' + encodeURIComponent(globals.user) + '/designs.json', function(designs) {
+        $.getJSON('/_api/' + encodeURIComponent(globals.user) + '/designs', function(designs) {
             
             $('#designs .placeholder').remove();
             var designModels = {};

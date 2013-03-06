@@ -1,0 +1,44 @@
+/*body {
+    background-color: #F1FFEF;
+}
+
+.splash {
+    box-shadow: 0px 0px 30px #888;
+    border-radius: 5px;
+    border-top: solid thin #E0E0E0;
+    border-left: solid thin #E0E0E0;
+}
+
+
+#dialog .button-container {
+    padding-top: 20px;
+}
+
+#dialog .button {
+   border: 1px solid #000000;
+   background: #1c2a33;
+   background: -webkit-gradient(linear, left top, left bottom, from(#3b6078), to(#1c2a33));
+   background: -webkit-linear-gradient(top, #3b6078, #1c2a33);
+   background: -moz-linear-gradient(top, #3b6078, #1c2a33);
+   background: -o-linear-gradient(top, #3b6078, #1c2a33);
+   padding: 9px 18px;
+   border-radius: 4px;
+   color: white;
+   font-size: 16px;
+   text-decoration: none;
+   vertical-align: middle;
+   text-align: center;
+   cursor: pointer;
+   display: inline-block;
+   margin-right: 10px;
+}
+
+#dialog .button:hover {
+   background: #28597a;
+   color: #ccc;
+}
+
+#dialog .button {
+   cursor: pointer;
+}
+*/

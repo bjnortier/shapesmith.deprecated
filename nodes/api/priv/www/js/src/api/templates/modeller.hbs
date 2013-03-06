@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html >
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="/ui/css/reset.css" rel="stylesheet" type="text/css"/>
+  <link href="/ui/css/modeller.css" rel="stylesheet" type="text/css"/>
+  <link href="/ui/css/shapesmith.css" rel="stylesheet" type="text/css"/>
+  <style type="text/css">
+  html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow:hidden;
+  }
+
+  #borderContainer {
+    width: 100%;
+    height: 100%;
+  }
+
+  #stackContainer {
+    border: 1px solid #ccc;
+    margin-top: 10px;
+  }
+
+  #stackContainer div {
+      padding: 5px;
+  }
+  </style>
+
+   <script>
+        var globals = globals || {};
+        globals.user = '{{user}}';
+        globals.design = '{{design}}';
+    </script>
+  
+  <script data-main="/ui/js/{{js_environment}}main.ui.js" src="/ui/js/lib/require-jquery.js"></script>
+
+  <script type="text/javascript" src="/ui/js/lib/Detector.js"></script>
+  <script type="text/javascript" src="/ui/js/lib/three.min.js"></script>
+  <script type="text/javascript" src="/ui/js/src/PipeGeometry.js"></script>
+  <script type="text/javascript" src="/ui/js/lib/stats.min.js"></script>
+  <script type="text/javascript" src="/ui/js/lib/dat.gui.min.js"></script>
+
+</head>
+<body>
+
+  <div id="graphs">
+    <table id="variables"></table>
+    <table id="notes"></table>
+    <div id="geometry" class="layer-container root"><div></div></div>
+  </div>
+
+  <div id="scene"></div>
+  <div id="toolbar"></div>
+  <div id="workplane-settings"></div>
+
+</body>

@@ -1,9 +1,8 @@
 define([
-        'src/textures',
         'src/scene',
         'src/modelviews/overlaydomview'
     ],
-    function(textures, sceneModel, OverlayDOMView) {
+    function(sceneModel, OverlayDOMView) {
 
     var MaterialsDOMView = OverlayDOMView.extend({
 
@@ -26,9 +25,6 @@ define([
                     '<div class="colors">{{#colors}}' +
                         '<div class="color" data-color="{{hex}}" style="background-color:{{hex}}"></div>' +
                     '{{/colors}}</div>' +
-                    '<div class="textures">{{#textures}}' +
-                        '<div class="texture" data-texture="{{filename}}" style="background-image:url(\'/materials/{{filename}}\')">{{name}}</div>' +
-                    '{{/textures}}</div>' +
                 '<div>';
             var view = {
                 colors: [
@@ -39,12 +35,6 @@ define([
                     {hex: '#f2f377'},
                     {hex: '#888888'},
                 ],
-                textures: _.map(textures, function(image, filename) {
-                        return {
-                            filename: filename,
-                            name: filename.split('.').slice(0,-1).join('.').toUpperCase() // remove extension
-                        }
-                    })
             }
             this.$el.html($.mustache(template, view));
         },

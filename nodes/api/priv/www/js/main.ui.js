@@ -60,16 +60,10 @@ requirejs([
         StatsView,
         RenderingOptionsView,
         SplashScreen,
-        _Designer,
+        Designer,
         layertreeManager) {
 
     var originalReplaceFn = Workplane.DisplayModel.prototype.vertexReplaced;
-    Workplane.DisplayModel.prototype.vertexReplaced = function(original, replacement) {
-        if (replacement.type === 'elevation_plane') {
-            return;
-        }
-        originalReplaceFn.call(this, original, replacement);
-    }
 
     $(document).ready(function() {
         var resizeContainers = function() {
@@ -81,8 +75,8 @@ requirejs([
         var statsView = new StatsView();
         var renderingOptionsView = new RenderingOptionsView();
 
-        var vertexUrl = '/' + SS.session.username + '/' + SS.session.design + '/vertex/';
-        var graphUrl = '/' + SS.session.username + '/' + SS.session.design + '/graph/';
+        var vertexUrl = '/_api/' + globals.user + '/' + globals.design + '/vertex/';
+        var graphUrl = '/_api/' + globals.user + '/' + globals.design + '/graph/';
         var replicator = new AJAXReplicator(vertexUrl, graphUrl);
         geometryGraph.attachReplicator(replicator);
 
@@ -99,9 +93,9 @@ requirejs([
             }
         });
 
-        if ($.getQueryParam('splash')) {
-            new SplashScreen();
-        }
+        // if ($.getQueryParam('splash')) {
+        //     new SplashScreen();
+        // }
 
         window.designer = new Designer();
 
