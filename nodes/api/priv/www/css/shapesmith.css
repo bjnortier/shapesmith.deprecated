@@ -9,6 +9,10 @@ body {
     border-left: solid thin #E0E0E0;
 }
 
+#toolbar {
+    margin-left: -174px;
+}
+
 #toolbar .item {
     padding-bottom: 10px;
 }
@@ -45,4 +49,12 @@ body {
     margin-top: -1px;
     margin-right: -1px;
     /*border-radius: 2px;*/
+}
+
+.toolbar.geometry .cube .icon {
+    background-image: url('/ui/images/icons/cube32x32.png');
+}
+
+.icon24.cube {
+    background-image: url('/ui/images/icons/cube24x24.png');
 }

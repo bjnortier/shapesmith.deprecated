@@ -378,6 +378,18 @@ img#logo {
     background-image: url('/ui/images/icons/extrude32x32.png');
 }
 
+.icon24.point {
+    background-image: url('/ui/images/icons/point24x24.png');
+}
+
+.icon24.polyline {
+    background-image: url('/ui/images/icons/polyline24x24.png');
+}
+
+.icon24.extrude {
+    background-image: url('/ui/images/icons/extrude24x24.png');
+}
+
 .coordinate span {
     padding: 2px;
 }

@@ -114,9 +114,20 @@ define([
 
     });
 
+    var Cube = toolbar.ItemModel.extend({
+        
+        name: 'cube',   
+        
+        activate: function() {
+            throw Error('not implemented');
+        },
+
+    });
+
     var selectItemModel   = new SelectItemModel();
     var pointItemModel    = new PointItemModel();
     var polylineItemModel = new Polyline();
+    var cubeItemModel     = new Cube();
     var extrudeItemModel  = new Extrude();
 
     var GeomToolbarModel = toolbar.Model.extend({
@@ -193,6 +204,7 @@ define([
     toolbarModel.addItem(selectItemModel);
     toolbarModel.addItem(pointItemModel);
     toolbarModel.addItem(polylineItemModel);
+    toolbarModel.addItem(cubeItemModel);
     toolbarModel.addItem(extrudeItemModel);
     toolbarModel.setToSelect();
     expander.toggle();
