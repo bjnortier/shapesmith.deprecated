@@ -277,15 +277,14 @@ define([
                         this.materials.editing.wire
                     ]);
             } else {
-                var material;
+                var materials;
                 if (this.model.vertex.implicit && !this.highlighted) {
-                    material = this.materials.implicit.face;
+                    materials = [this.materials.implicit.face];
                 } else {
-                    material = this.materials.normal.face;
+                    materials = [this.materials.normal.face, this.materials.normal.wire];
                 }
-                this.point = new THREE.Mesh(
-                    new THREE.SphereGeometry(radius, 10, 10), 
-                    material);
+                this.point = THREE.SceneUtils.createMultiMaterialObject(
+                    new THREE.CubeGeometry(1, 1, 1), materials);
             }
 
             this.point.scale = this.cameraScale;
