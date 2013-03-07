@@ -178,10 +178,14 @@ define([
             });
             objects.meshes.forEach(function(mesh) {
                 if (mesh.material) {
-                    if (mesh.material.name.indexOf('Translucent') !== -1) {
-                        mesh.material = that.materials[key].faceTranslucent;
-                    } else {
-                        mesh.material = that.materials[key].face;
+                    if (mesh.material.name.endsWith('face')) {
+                        if (mesh.material.name.indexOf('Translucent') !== -1) {
+                            mesh.material = that.materials[key].faceTranslucent;
+                        } else {
+                            mesh.material = that.materials[key].face;
+                        }
+                    } else if (mesh.material.name.endsWith('wire')) {
+                        mesh.material = that.materials[key].wire;
                     }
                 }
             });

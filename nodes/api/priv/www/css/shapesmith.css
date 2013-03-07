@@ -58,3 +58,12 @@ body {
 .icon24.cube {
     background-image: url('/ui/images/icons/cube24x24.png');
 }
+
+.toolbar.geometry .sphere .icon {
+    background-image: url('/ui/images/icons/sphere32x32.png');
+}
+
+.icon24.sphere {
+    background-image: url('/ui/images/icons/sphere24x24.png');
+}
+

@@ -123,6 +123,7 @@ define([
         options.type = 'workplane';
         GeomNode.prototype.constructor.call(this, options);
     }
+
     _.extend(Workplane.prototype, GeomNode.prototype);    
 
     Workplane.prototype.getExpressions = function() {
@@ -206,6 +207,55 @@ define([
         return {};
     }
 
+    // ----------- Cube ---------- 
+
+    var Cube = function(options) {
+        var options = options || {};
+        options.type = 'cube';
+        options.category = 'geometry';
+        options.parameters = options.parameters || {height: 0};
+        GeomNode.prototype.constructor.call(this, options);
+    }
+
+    _.extend(Cube.prototype, GeomNode.prototype);
+
+    Cube.prototype.getExpressions = function() {
+        return {
+            'height' : this.parameters.height,
+        };
+    }
+
+    Cube.prototype.validateSchema = function() {
+        if (this.parameters === undefined) {
+            return {parameters: 'missing'}
+        }
+        return {};
+    }
+
+    // ----------- Sphere ---------- 
+
+    var Sphere = function(options) {
+        var options = options || {};
+        options.type = 'sphere';
+        options.category = 'geometry';
+        options.parameters = options.parameters || {radius: 0};
+        GeomNode.prototype.constructor.call(this, options);
+    }
+
+    _.extend(Sphere.prototype, GeomNode.prototype);
+
+    Sphere.prototype.getExpressions = function() {
+        return {
+            'radius' : this.parameters.radius,
+        };
+    }
+
+    Sphere.prototype.validateSchema = function() {
+        if (this.parameters === undefined) {
+            return {parameters: 'missing'}
+        }
+        return {};
+    }
 
     // ---------- Extrude ----------
 
@@ -250,13 +300,17 @@ define([
         Variable        : Variable,
         Point           : Point,
         Polyline        : Polyline,
+        Cube            : Cube,
+        Sphere          : Sphere,
         Extrude         : Extrude,
         constructors: {
-            'workplane'      : Workplane,
-            'variable'       : Variable,
-            'point'          : Point,
-            'polyline'       : Polyline,
-            'extrude'        : Extrude,
+            'workplane' : Workplane,
+            'variable'  : Variable,
+            'point'     : Point,
+            'polyline'  : Polyline,
+            'cube'      : Cube,
+            'sphere'    : Sphere,
+            'extrude'   : Extrude,
         }
     }
 

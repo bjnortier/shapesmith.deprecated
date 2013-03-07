@@ -1,6 +1,8 @@
 define([
     'src/calculations',
     'src/toolbar', 
+    'src/calculations',
+    'src/geomnode',
     'src/geometrygraphsingleton', 
     'src/commandstack', 
     'src/interactioncoordinator',
@@ -11,11 +13,13 @@ define([
     function(
         calc,
         toolbar, 
+        Calc,
+        GeomNode,
         geometryGraph, 
         commandStack, 
         coordinator, 
         selection,
-        Workplane,
+        WorkplaneMV,
         VertexMV) {
 
     var SelectItemModel = toolbar.ItemModel.extend({
@@ -41,7 +45,7 @@ define([
         
         activate: function() {
             toolbar.ItemModel.prototype.activate.call(this);
-            var workplane = calc.copyObj(Workplane.getCurrent().vertex.workplane);
+            var workplane = calc.copyObj(WorkplaneMV.getCurrent().vertex.workplane);
             geometryGraph.createPointPrototype({workplane: workplane});
         },
 
@@ -53,7 +57,7 @@ define([
         
         activate: function() {
             toolbar.ItemModel.prototype.activate.call(this);
-            var workplane = calc.copyObj(Workplane.getCurrent().vertex.workplane);
+            var workplane = calc.copyObj(WorkplaneMV.getCurrent().vertex.workplane);
             geometryGraph.createPolylinePrototype({workplane: workplane});
         },
 
@@ -119,15 +123,65 @@ define([
         name: 'cube',   
         
         activate: function() {
-            throw Error('not implemented');
+            toolbar.ItemModel.prototype.activate.call(this);
+
+            var workplane = Calc.copyObj(WorkplaneMV.getCurrent().vertex.workplane);
+            var point = new GeomNode.Point({
+                editing   : true,
+                proto     : true,
+                implicit  : true, 
+                workplane : workplane,
+            });
+            geometryGraph.add(point);
+            
+            var cubeOptions = {
+                editing      : true,
+                proto        : true,
+                workplane    : workplane,
+            }
+            var cubeVertex = new GeomNode.Cube(cubeOptions);
+            geometryGraph.add(cubeVertex, function() {
+                geometryGraph.addEdge(cubeVertex, point);
+            });
         },
 
     });
+
+    var Sphere = toolbar.ItemModel.extend({
+        
+        name: 'sphere',   
+        
+        activate: function() {
+            toolbar.ItemModel.prototype.activate.call(this);
+
+            var workplane = Calc.copyObj(WorkplaneMV.getCurrent().vertex.workplane);
+            var point = new GeomNode.Point({
+                editing   : true,
+                proto     : true,
+                implicit  : true, 
+                workplane : workplane,
+            });
+            geometryGraph.add(point);
+            
+            var sphereOptions = {
+                editing      : true,
+                proto        : true,
+                workplane    : workplane,
+            }
+            var sphereVertex = new GeomNode.Sphere(sphereOptions);
+            geometryGraph.add(sphereVertex, function() {
+                geometryGraph.addEdge(sphereVertex, point);
+            });
+        },
+
+    });
+
 
     var selectItemModel   = new SelectItemModel();
     var pointItemModel    = new PointItemModel();
     var polylineItemModel = new Polyline();
     var cubeItemModel     = new Cube();
+    var sphereItemModel    = new Sphere();
     var extrudeItemModel  = new Extrude();
 
     var GeomToolbarModel = toolbar.Model.extend({
@@ -205,6 +259,7 @@ define([
     toolbarModel.addItem(pointItemModel);
     toolbarModel.addItem(polylineItemModel);
     toolbarModel.addItem(cubeItemModel);
+    toolbarModel.addItem(sphereItemModel);
     toolbarModel.addItem(extrudeItemModel);
     toolbarModel.setToSelect();
     expander.toggle();

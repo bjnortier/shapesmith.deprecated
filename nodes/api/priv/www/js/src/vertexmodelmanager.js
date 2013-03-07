@@ -6,25 +6,31 @@ define([
         'src/variableMV',
         'src/pointMV', 
         'src/polylineMV',
+        'src/modelviews/CubeMV',
+        'src/modelviews/SphereMV',
         'src/extrudeMV',
     ], 
     function(
         geometryGraph, 
         selectionManager, 
         VertexMV,
-        Workplane,
-        Variable,
-        Point, 
-        Polyline,
-        Extrude) {
+        WorkplaneMV,
+        VariableMV,
+        PointMV, 
+        PolylineMV,
+        CubeMV,
+        SphereMV,
+        ExtrudeMV) {
     
     var models = {};
     var wrappers = {
-        'workplane'      : Workplane,
-        'variable'       : Variable,
-        'point'          : Point,
-        'polyline'       : Polyline,
-        'extrude'        : Extrude,
+        'workplane' : WorkplaneMV,
+        'variable'  : VariableMV,
+        'point'     : PointMV,
+        'polyline'  : PolylineMV,
+        'cube'      : CubeMV,
+        'sphere'    : SphereMV,
+        'extrude'   : ExtrudeMV,
     }
 
     geometryGraph.on('vertexAdded', function(vertex) {

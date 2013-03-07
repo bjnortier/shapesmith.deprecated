@@ -191,17 +191,17 @@ define([
             }
 
             // Don't render the workplane plane if someone else rendered a zero plane
-            var shouldRenderPlane = 
-                this.model.vertex.workplane.origin.z === 0 ?
-                    workplaneCoordinator.shouldRenderAtZero() : true;
-            if (shouldRenderPlane) {
-                var planeGeometry = new THREE.PlaneGeometry(boundary*2, boundary*2);
-                var planeMaterial = new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.5, side: THREE.DoubleSide});
-                var plane = new THREE.Mesh(planeGeometry, planeMaterial);
-                plane.receiveShadow = true; 
-                plane.position.z = this.model.vertex.workplane.origin.z - 0.05;
-                this.sceneObject.add(plane);
-            }
+            // var shouldRenderPlane = 
+            //     this.model.vertex.workplane.origin.z === 0 ?
+            //         workplaneCoordinator.shouldRenderAtZero() : true;
+            // if (shouldRenderPlane) {
+            //     var planeGeometry = new THREE.PlaneGeometry(boundary*2, boundary*2);
+            //     var planeMaterial = new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.5, side: THREE.DoubleSide});
+            //     var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            //     plane.receiveShadow = true; 
+            //     plane.position.z = this.model.vertex.workplane.origin.z - 0.05;
+            //     this.sceneObject.add(plane);
+            // }
 
         },
 
