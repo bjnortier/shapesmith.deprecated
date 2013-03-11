@@ -3,6 +3,7 @@ requirejs.config({
         'underscore': 'node_modules/underscore/underscore',
         'backbone-events': 'node_modules/backbone-events/lib/backbone-events',
         'backbone': 'node_modules/backbone/backbone',
+        'lathe': 'node_modules/lathe/lib',
     },
     shim: {
         'underscore': {
@@ -73,7 +74,7 @@ requirejs([
         }
 
         var statsView = new StatsView();
-        var renderingOptionsView = new RenderingOptionsView();
+        // var renderingOptionsView = new RenderingOptionsView();
 
         var vertexUrl = '/_api/' + globals.user + '/' + globals.design + '/vertex/';
         var graphUrl = '/_api/' + globals.user + '/' + globals.design + '/graph/';

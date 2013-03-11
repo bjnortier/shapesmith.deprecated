@@ -1,31 +1,25 @@
 define([
-        'underscore',
         'jquery',
         'lib/jquery.mustache',
         'src/calculations',
-        'src/settings',
-        'src/scene',
-        'src/scenevieweventgenerator',
         'src/worldcursor',
         'src/geometrygraphsingleton',
         'src/vertexMV',
         'src/geomvertexMV', 
         'src/pointMV', 
         'src/asyncAPI',
+        'src/lathe/models',
     ], 
     function(
-        _,
         $, __$,
         calc,
-        settings,
-        sceneModel,
-        sceneViewEventGenerator,
         worldCursor,
         geometryGraph,
         VertexMV,
         GeomVertexMV,
         PointMV,
-        AsyncAPI) {
+        AsyncAPI,
+        LatheModels) {
 
     // ---------- Common ----------
 
@@ -39,18 +33,9 @@ define([
                 return;
             }
 
-            var materials;
-            if (this.model.vertex.editing) {
-                materials = [
-                    this.materials.editing.face, 
-                    // this.materials.editing.wire
-                ]
-            } else {
-                materials = [
-                    this.materials.normal.face, 
-                    // this.materials.normal.wire
-                ]
-            }
+            var faceMaterial = this.model.vertex.editing ? 
+                this.materials.editing.face :
+                this.materials.normal.face;
 
             var center = calc.objToVector(points[0].parameters.coordinate, geometryGraph, THREE.Vector3);
             var radius = geometryGraph.evaluate(this.model.vertex.parameters.radius);
@@ -58,7 +43,7 @@ define([
             if (radius > 0) {
                 var sphere = THREE.SceneUtils.createMultiMaterialObject(
                     new THREE.SphereGeometry(radius, 20, 20),
-                    materials);
+                    [faceMaterial]);
                 sphere.position = center;
                 sphere.rotation.x = Math.PI/2;
                 this.sceneObject.add(sphere);
@@ -270,7 +255,7 @@ define([
             this.editingModelConstructor = EditingModel;
             this.displayModelConstructor = DisplayModel;
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
-
+            this.vertex.bsp = LatheModels.createSphere(0,0,0,20,20,20);
             this.sceneView = new DisplaySceneView({model: this});
             this.views.push(this.sceneView);
             this.views.push(new GeomVertexMV.DisplayDOMView({model: this}));
@@ -288,6 +273,28 @@ define([
 
         initialize: function() {
             GeomVertexMV.DisplaySceneView.prototype.initialize.call(this);
+        },
+
+        render: function() {
+            GeomVertexMV.DisplaySceneView.prototype.render.call(this);
+
+            var points = geometryGraph.childrenOf(this.model.vertex);
+            var center = calc.objToVector(points[0].parameters.coordinate, geometryGraph, THREE.Vector3);
+            var radius = geometryGraph.evaluate(this.model.vertex.parameters.radius);
+
+            this.model.vertex.bsp = LatheModels.createSphere(
+                center.x,
+                center.y,
+                center.z,
+                radius).bsp;
+
+            var polygons = LatheModels.toBrep(this.model.vertex.bsp);
+            var toMesh = this.polygonsToMesh(polygons);
+            var faceGeometry = toMesh.geometry;
+            var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
+                this.materials.normal.face, 
+            ]);
+            this.sceneObject.add(meshObject);
         },
 
         remove: function() {

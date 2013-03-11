@@ -291,6 +291,22 @@ define([
         return {};
     }
 
+    // ---------- Subtract ----------
+
+    var Subtract = function(options) {
+        var options = options || {};
+        options.type = 'subtract';
+        options.category = 'geometry';
+        GeomNode.prototype.constructor.call(this, options);
+    }
+
+    _.extend(Subtract.prototype, GeomNode.prototype);
+
+    Subtract.prototype.getExpressions = function() {
+        return {}
+    }
+
+    // ---------- Module ----------
 
     return {
         resetIDCounters : resetIDCounters,
@@ -303,6 +319,7 @@ define([
         Cube            : Cube,
         Sphere          : Sphere,
         Extrude         : Extrude,
+        Subtract        : Subtract,
         constructors: {
             'workplane' : Workplane,
             'variable'  : Variable,
@@ -311,6 +328,7 @@ define([
             'cube'      : Cube,
             'sphere'    : Sphere,
             'extrude'   : Extrude,
+            'subtract'  : Subtract,
         }
     }
 

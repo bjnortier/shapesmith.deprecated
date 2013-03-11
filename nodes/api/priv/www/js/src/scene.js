@@ -47,25 +47,25 @@ define([
             this.ambientLight = new THREE.AmbientLight(0x999999);
             this.scene.add(this.ambientLight);
 
-            this.sunLight = new THREE.SpotLight( 0xffffff, sunIntensity, 0, Math.PI, 1 );
+            // this.sunLight = new THREE.SpotLight( 0xffffff, sunIntensity, 0, Math.PI, 1 );
 
-            var r = 1000, elevation = 45, azimuth = 45;
-            this.sunLight.position.x = r*Math.sin((90 - elevation)/180*Math.PI)*Math.cos(azimuth/180*Math.PI),
-            this.sunLight.position.y = r*Math.sin((90 - elevation)/180*Math.PI)*Math.sin(azimuth/180*Math.PI),
-            this.sunLight.position.z = r*Math.cos((90 - elevation)/180*Math.PI);
+            // var r = 1000, elevation = 45, azimuth = 45;
+            // this.sunLight.position.x = r*Math.sin((90 - elevation)/180*Math.PI)*Math.cos(azimuth/180*Math.PI),
+            // this.sunLight.position.y = r*Math.sin((90 - elevation)/180*Math.PI)*Math.sin(azimuth/180*Math.PI),
+            // this.sunLight.position.z = r*Math.cos((90 - elevation)/180*Math.PI);
 
-            this.sunLight.castShadow = true;
-            this.sunLight.shadowCameraVisible = false;
-            this.sunLight.shadowCameraNear = 500;
-            this.sunLight.shadowCameraFar = 4000;
-            this.sunLight.shadowCameraFov = 30;
-            this.sunLight.shadowDarkness = 0.22;
-            this.sunLight.shadowBias = -0.0015;
+            // this.sunLight.castShadow = true;
+            // this.sunLight.shadowCameraVisible = false;
+            // this.sunLight.shadowCameraNear = 500;
+            // this.sunLight.shadowCameraFar = 4000;
+            // this.sunLight.shadowCameraFov = 30;
+            // this.sunLight.shadowDarkness = 0.22;
+            // this.sunLight.shadowBias = -0.0015;
 
-            this.scene.add(this.sunLight);
+            // this.scene.add(this.sunLight);
 
             // Lights
-            this.pointLight1 = new THREE.PointLight(0x444444);
+            this.pointLight1 = new THREE.PointLight(0xcccccc);
             this.pointLight1.position.set(1000, 1000, 1000);
             this.scene.add(this.pointLight1);
 

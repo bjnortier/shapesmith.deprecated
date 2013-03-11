@@ -242,7 +242,37 @@ define([
             }
             updateScreenBoxForObj(this.sceneObject);
         },
-        
+
+        polygonsToMesh: function(polygons) {
+            var geometry = new THREE.Geometry();
+            var indices = polygons.map(function(polygon, i) {
+                var vertices = polygon.toVertices();
+                var coordinates = vertices.map(function(vertex) {
+                    return vertex.toCoordinate();
+                });
+                var indices = coordinates.map(function(coordinate) {
+                    return geometry.vertices.push(new THREE.Vector3(coordinate.x, coordinate.y, coordinate.z)) - 1;
+                });
+                if (coordinates.length < 3) {
+                    throw Error('invalid polygon');
+                } else if (coordinates.length === 3) {
+                    geometry.faces.push(new THREE.Face3(indices[0],indices[1],indices[2]));
+                } else if (coordinates.length === 4) {
+                    geometry.faces.push(new THREE.Face4(indices[0],indices[1],indices[2],indices[3]));
+                } else {
+                    // Only support cnvex polygons
+                    geometry.faces.push(new THREE.Face3(indices[0],indices[1],indices[2]));
+                    for (var i = 2; i < coordinates.length -1; ++i) {
+                        geometry.faces.push(new THREE.Face3(indices[0], indices[0]+i,indices[0]+i+1));
+                    }
+                }
+                return indices;
+
+            })
+
+            geometry.computeFaceNormals();
+            return {geometry: geometry, indices: indices};
+        }   
 
     });
 
@@ -299,6 +329,14 @@ define([
         vertexReplaced: function(original, replacement) {
             if (replacement.type === 'workplane') {
                 this.vertex.workplane = calc.copyObj(replacement.workplane);
+            }
+        },
+
+       select: function(ids, selection) {
+            VertexMV.EditingModel.prototype.select.call(this, ids, selection);
+            if ((selection.length > 0) && this.selected) {
+                // Cancelling maintains the selection
+                this.cancel();
             }
         },
 
@@ -600,7 +638,11 @@ define([
                 vertexToSelect = findNonImplicitParent(this.model.vertex);
             } 
             if (vertexToSelect) {
-                selection.selectOnly(vertexToSelect.id);
+                if (event.shiftKey) {
+                    selection.addToSelection(vertexToSelect.id);
+                } else {
+                    selection.selectOnly(vertexToSelect.id);
+                }
             }
         },
 

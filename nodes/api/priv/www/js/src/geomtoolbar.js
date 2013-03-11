@@ -176,13 +176,48 @@ define([
 
     });
 
+    var Subtract = toolbar.ItemModel.extend({
+        
+        name: 'subtract',
+
+        initialize: function(attributes) {
+            toolbar.ItemModel.prototype.initialize.call(this, attributes);
+            this.set('enabled', false);
+            selection.on('selected', this.selectionChanged, this);
+            selection.on('deselected', this.selectionChanged, this);
+        },
+
+        selectionChanged: function(_, selection) {
+            console.log('selection', selection);
+            var polyline;
+            this.set('enabled', (selection.length === 2));
+        },
+
+        activate: function(savedSelection) {
+            toolbar.ItemModel.prototype.activate.call(this);
+            if (this.get('enabled')) {
+                var a = geometryGraph.vertexById(savedSelection[0]);
+                var b = geometryGraph.vertexById(savedSelection[1]);
+
+                var boolVertex = new GeomNode.Subtract({});
+                geometryGraph.add(boolVertex, function() {
+                    geometryGraph.addEdge(boolVertex, a);
+                    geometryGraph.addEdge(boolVertex, b);
+                });
+
+            }
+        },
+
+    });
+
 
     var selectItemModel   = new SelectItemModel();
     var pointItemModel    = new PointItemModel();
     var polylineItemModel = new Polyline();
     var cubeItemModel     = new Cube();
-    var sphereItemModel    = new Sphere();
+    var sphereItemModel   = new Sphere();
     var extrudeItemModel  = new Extrude();
+    var subtractItemModel = new Subtract();
 
     var GeomToolbarModel = toolbar.Model.extend({
 
@@ -261,6 +296,7 @@ define([
     toolbarModel.addItem(cubeItemModel);
     toolbarModel.addItem(sphereItemModel);
     toolbarModel.addItem(extrudeItemModel);
+    toolbarModel.addItem(subtractItemModel);
     toolbarModel.setToSelect();
     expander.toggle();
     return toolbarModel;

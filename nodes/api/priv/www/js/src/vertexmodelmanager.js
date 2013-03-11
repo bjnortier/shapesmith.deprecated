@@ -9,6 +9,7 @@ define([
         'src/modelviews/CubeMV',
         'src/modelviews/SphereMV',
         'src/extrudeMV',
+        'src/modelviews/subtractMV',
     ], 
     function(
         geometryGraph, 
@@ -20,7 +21,8 @@ define([
         PolylineMV,
         CubeMV,
         SphereMV,
-        ExtrudeMV) {
+        ExtrudeMV,
+        SubtractMV) {
     
     var models = {};
     var wrappers = {
@@ -31,6 +33,7 @@ define([
         'cube'      : CubeMV,
         'sphere'    : SphereMV,
         'extrude'   : ExtrudeMV,
+        'subtract'  : SubtractMV,
     }
 
     geometryGraph.on('vertexAdded', function(vertex) {

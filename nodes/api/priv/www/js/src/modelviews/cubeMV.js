@@ -1,11 +1,7 @@
 define([
-        'underscore',
         'jquery',
         'lib/jquery.mustache',
         'src/calculations',
-        'src/settings',
-        'src/scene',
-        'src/scenevieweventgenerator',
         'src/worldcursor',
         'src/geometrygraphsingleton',
         'src/vertexMV',
@@ -13,21 +9,19 @@ define([
         'src/pointMV', 
         'src/heightanchorview',
         'src/asyncAPI',
+        'src/lathe/models',
     ], 
     function(
-        _,
         $, __$,
         calc,
-        settings,
-        sceneModel,
-        sceneViewEventGenerator,
         worldCursor,
         geometryGraph,
         VertexMV,
         GeomVertexMV,
         PointMV,
         EditingHeightAnchor,
-        AsyncAPI) {
+        AsyncAPI,
+        LatheModels) {
 
     // ---------- Common ----------
 
@@ -40,12 +34,6 @@ define([
             if (points.length !== 2) {
                 return;
             }
-
-            var positions = points.map(function(p) {
-                return calc.objToVector(
-                    p.parameters.coordinate, geometryGraph, THREE.Vector3);
-            });
-
 
             var materials;
             if (this.model.vertex.editing) {
@@ -60,20 +48,36 @@ define([
                 ]
             }
 
-            var width = Math.abs(positions[1].x - positions[0].x);
-            var depth = Math.abs(positions[1].y - positions[0].y);
-            var height = Math.abs(geometryGraph.evaluate(this.model.vertex.parameters.height));
-
-            var position = new THREE.Vector3(
-                Math.min(positions[0].x, positions[1].x) + width/2,
-                Math.min(positions[0].y, positions[1].y) + depth/2,
-                Math.min(positions[0].z, positions[0].z + height) + height/2);
+            var positionAndDims = this.determinePositionAndDims(points);
+            var position = positionAndDims.position;
+            var dims = positionAndDims.dims;
 
             var cube = THREE.SceneUtils.createMultiMaterialObject(
-                new THREE.CubeGeometry(width, depth, height),
+                new THREE.CubeGeometry(dims.width, dims.depth, dims.height),
                 materials);
-            cube.position = position;
+            cube.position = position.add(new THREE.Vector3(
+                dims.width/2, dims.depth/2, dims.height/2));
             this.sceneObject.add(cube);
+        },
+
+        determinePositionAndDims: function(points) {
+            var positions = points.map(function(p) {
+                return calc.objToVector(
+                    p.parameters.coordinate, geometryGraph, THREE.Vector3);
+            });
+
+            var dims = {
+                width : Math.abs(positions[1].x - positions[0].x),
+                depth : Math.abs(positions[1].y - positions[0].y),
+                height : Math.abs(geometryGraph.evaluate(this.model.vertex.parameters.height)),
+            }
+
+            var position = new THREE.Vector3(
+                Math.min(positions[0].x, positions[1].x),
+                Math.min(positions[0].y, positions[1].y),
+                Math.min(positions[0].z, positions[0].z + dims.height));
+
+            return {position: position, dims:dims};
         },
     }
 
@@ -288,6 +292,7 @@ define([
 
     });
 
+
     // ---------- Display ----------
 
     var DisplayModel = GeomVertexMV.DisplayModel.extend({
@@ -296,7 +301,6 @@ define([
             this.editingModelConstructor = EditingModel;
             this.displayModelConstructor = DisplayModel;
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
-
             this.sceneView = new DisplaySceneView({model: this});
             this.views.push(this.sceneView);
             this.views.push(new GeomVertexMV.DisplayDOMView({model: this}));
@@ -318,6 +322,27 @@ define([
 
         remove: function() {
             GeomVertexMV.DisplaySceneView.prototype.remove.call(this);
+        },
+
+        render: function() {
+            GeomVertexMV.SceneView.prototype.render.call(this);
+            var points = geometryGraph.childrenOf(this.model.vertex);
+            var positionAndDims = this.determinePositionAndDims(points);
+            this.model.vertex.bsp = LatheModels.createCube(
+                positionAndDims.position.x,
+                positionAndDims.position.y,
+                positionAndDims.position.z,
+                positionAndDims.dims.width,
+                positionAndDims.dims.depth,
+                positionAndDims.dims.height).bsp;
+
+            var polygons = LatheModels.toBrep(this.model.vertex.bsp);
+            var toMesh = this.polygonsToMesh(polygons);
+            var faceGeometry = toMesh.geometry;
+            var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
+                this.materials.normal.face, 
+            ]);
+            this.sceneObject.add(meshObject);
         },
 
     })
