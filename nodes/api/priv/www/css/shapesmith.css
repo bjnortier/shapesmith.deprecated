@@ -52,8 +52,13 @@ body {
 }
 
 .toolbar.geometry .cube .icon {
+    background-image: url('/ui/images/icons/cube32x32.greyscale.png');
+}
+
+.toolbar.geometry .cube:hover .icon {
     background-image: url('/ui/images/icons/cube32x32.png');
 }
+
 
 .icon24.cube {
     background-image: url('/ui/images/icons/cube24x24.png');

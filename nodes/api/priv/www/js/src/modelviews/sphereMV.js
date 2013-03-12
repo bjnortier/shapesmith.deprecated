@@ -291,8 +291,9 @@ define([
                 radius);
 
             var that = this;
-            Lathe.broker.on(jobId, function(polygons) {
-                var toMesh = that.polygonsToMesh(polygons);
+            Lathe.broker.on(jobId, function(result) {
+                that.model.vertex.bsp = result.bsp;
+                var toMesh = that.polygonsToMesh(result.polygons);
                 var faceGeometry = toMesh.geometry;
                 var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
                     that.materials.normal.face, 

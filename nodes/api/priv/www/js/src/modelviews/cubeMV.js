@@ -330,6 +330,7 @@ define([
             GeomVertexMV.SceneView.prototype.render.call(this);
             var points = geometryGraph.childrenOf(this.model.vertex);
             var positionAndDims = this.determinePositionAndDims(points);
+            
             var jobId = Lathe.createCube(
                 positionAndDims.position.x,
                 positionAndDims.position.y,
@@ -339,8 +340,9 @@ define([
                 positionAndDims.dims.height);
 
             var that = this;
-            Lathe.broker.on(jobId, function(polygons) {
-                var toMesh = that.polygonsToMesh(polygons);
+            Lathe.broker.on(jobId, function(result) {
+                that.model.vertex.bsp = result.bsp;
+                var toMesh = that.polygonsToMesh(result.polygons);
                 var faceGeometry = toMesh.geometry;
                 var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
                     that.materials.normal.face, 

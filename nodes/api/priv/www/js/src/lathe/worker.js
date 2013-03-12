@@ -9,11 +9,12 @@ requirejs.config({
     },
 });
 requirejs([
+        'lathe/bsp',
         'lathe/primitives/cube',
         'lathe/primitives/sphere',
         'lathe/conv',
     ],
-    function(Cube, Sphere, Conv) {
+    function(BSP, Cube, Sphere, Conv) {
 
         function construct(constructor, args) {
             function F() {
@@ -30,6 +31,10 @@ requirejs([
                 bsp = construct(Sphere, e.data.sphere).bsp;
             } else if (e.data.cube) {
                 bsp = construct(Cube, e.data.cube).bsp;
+            } else if (e.data.subtract) {
+                var a = BSP.deserialize(e.data.subtract[0]);
+                var b = BSP.deserialize(e.data.subtract[1]);
+                var bsp = BSP.difference(a,b);
             } else {
                 postMessage({error: 'unknown worker message:' + JSON.stringify(e.data)});
             }
@@ -41,7 +46,7 @@ requirejs([
                         return v.toCoordinate();
                     });
                 });
-                postMessage({id: e.data.id, polygons: polygons});
+                postMessage({id: e.data.id, bsp: BSP.serialize(bsp), polygons: polygons});
             } 
         }, false);
     }

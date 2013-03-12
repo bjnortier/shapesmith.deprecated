@@ -3,6 +3,7 @@ define([
         'lib/jquery.mustache',
         'src/calculations',
         'src/worldcursor',
+        'src/scene',
         'src/geometrygraphsingleton',
         'src/vertexMV',
         'src/geomvertexMV', 
@@ -15,6 +16,7 @@ define([
         $, __$,
         calc,
         worldCursor,
+        sceneModel,
         geometryGraph,
         VertexMV,
         GeomVertexMV,
@@ -54,21 +56,25 @@ define([
             GeomVertexMV.DisplaySceneView.prototype.render.call(this);
 
             var children = geometryGraph.childrenOf(this.model.vertex);
-            var a = children[0].bsp;
-            var b = children[1].bsp;
+            var bspA = children[0].bsp;
+            var bspB = children[1].bsp;
 
-            var subtract = LatheModels.subtract(a, b);
-            var polygons = LatheModels.toBrep(subtract);
+            var jobId = Lathe.createSubtract(bspB, bspA);
 
-            var toMesh = this.polygonsToMesh(polygons);
-            var faceGeometry = toMesh.geometry;
-            var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
-                this.materials.normal.face, 
-            ]);
-            this.sceneObject.add(meshObject);
+            var that = this;
+            Lathe.broker.on(jobId, function(result) {
+                that.model.vertex.bsp = result.bsp;
+                var toMesh = that.polygonsToMesh(result.polygons);
+                var faceGeometry = toMesh.geometry;
+                var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
+                    that.materials.normal.face, 
+                ]);
+                that.sceneObject.add(meshObject);
+                sceneModel.view.updateScene = true;
 
-            geometryGraph.remove(children[0]);
-            geometryGraph.remove(children[1]);
+                geometryGraph.remove(children[0]);
+                geometryGraph.remove(children[1]);
+            });
         },
 
         remove: function() {

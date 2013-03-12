@@ -16,13 +16,6 @@ define([
         Conv,
         Events) {
 
-    var getJobId = (function() {
-        var jobId = 0;
-        return function() {
-            return jobId++;
-        }
-    })();
-
     // Create a worker pool and an event broker. The event broker
     // will be used by the caller to listen to the job results
     var poolSize = 4;
@@ -47,6 +40,7 @@ define([
         this.broker = broker;
 
         var queue = [];
+        var nextJobId = 0;
 
         var workers = workers;
         for (var i = 0; i < workers.length; ++i) {
@@ -55,7 +49,11 @@ define([
                 // A worker returns either the result or an error,
                 // and is then available
                 if (evt.data.hasOwnProperty('id')) {
-                    broker.trigger(evt.data.id, evt.data.polygons);
+                    var bsp = BSP.deserialize(evt.data.bsp);
+                    broker.trigger(evt.data.id, {
+                        bsp: bsp, 
+                        polygons: evt.data.polygons
+                    });
                 } else if (evt.data.error) {
                     console.error('worker error:', evt.data.error);
                 } else {
@@ -67,7 +65,7 @@ define([
         }
 
         this.queueJob = function(job) {
-            var jobId = getJobId();
+            var jobId = nextJobId++;
             job.id = jobId;
             var worker = getAvailableWorker();
             if (worker) {
@@ -104,25 +102,26 @@ define([
     var jobQueue = new JobQueue(workers);
 
     var createSphere = function(x,y,z,r) {
-        return jobQueue.queueJob({sphere: [x,y,z,r,24]})
+        return jobQueue.queueJob({sphere: [x,y,z,r,16]})
     }
 
     var createCube = function(x,y,z,w,d,h) {
         return jobQueue.queueJob({cube: [x,y,z,w,d,h]});
     }
 
-    // var subtract = function(a,b) {
-    //     return BSP.difference(a, b, Polygon3D);
-    // }
+    var createSubtract = function(a,b) {
+        return jobQueue.queueJob({subtract: [BSP.serialize(a), BSP.serialize(b)]});
+    }
 
     // var toBrep = function(bsp) {
     //     return Conv.bspToBrep(bsp);
     // }
 
     return {
-        createCube  : createCube,
-        createSphere: createSphere,
-        broker      : jobQueue.broker,
+        createCube     : createCube,
+        createSphere   : createSphere,
+        createSubtract : createSubtract,
+        broker         : jobQueue.broker,
     }
 
 });
