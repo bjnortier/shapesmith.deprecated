@@ -15,8 +15,6 @@ requirejs([
     ],
     function(Cube, Sphere, Conv) {
 
-        postMessage('ready');
-
         function construct(constructor, args) {
             function F() {
                 return constructor.apply(this, args);
