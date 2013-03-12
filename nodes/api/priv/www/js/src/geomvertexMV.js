@@ -245,11 +245,7 @@ define([
 
         polygonsToMesh: function(polygons) {
             var geometry = new THREE.Geometry();
-            var indices = polygons.map(function(polygon, i) {
-                var vertices = polygon.toVertices();
-                var coordinates = vertices.map(function(vertex) {
-                    return vertex.toCoordinate();
-                });
+            var indices = polygons.map(function(coordinates, i) {
                 var indices = coordinates.map(function(coordinate) {
                     return geometry.vertices.push(new THREE.Vector3(coordinate.x, coordinate.y, coordinate.z)) - 1;
                 });

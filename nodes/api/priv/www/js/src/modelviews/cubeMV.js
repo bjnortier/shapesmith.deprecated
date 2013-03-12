@@ -3,25 +3,27 @@ define([
         'lib/jquery.mustache',
         'src/calculations',
         'src/worldcursor',
+        'src/scene',
         'src/geometrygraphsingleton',
         'src/vertexMV',
         'src/geomvertexMV', 
         'src/pointMV', 
         'src/heightanchorview',
         'src/asyncAPI',
-        'src/lathe/models',
+        'src/lathe/pool',
     ], 
     function(
         $, __$,
         calc,
         worldCursor,
+        sceneModel,
         geometryGraph,
         VertexMV,
         GeomVertexMV,
         PointMV,
         EditingHeightAnchor,
         AsyncAPI,
-        LatheModels) {
+        Lathe) {
 
     // ---------- Common ----------
 
@@ -328,21 +330,24 @@ define([
             GeomVertexMV.SceneView.prototype.render.call(this);
             var points = geometryGraph.childrenOf(this.model.vertex);
             var positionAndDims = this.determinePositionAndDims(points);
-            this.model.vertex.bsp = LatheModels.createCube(
+            var jobId = Lathe.createCube(
                 positionAndDims.position.x,
                 positionAndDims.position.y,
                 positionAndDims.position.z,
                 positionAndDims.dims.width,
                 positionAndDims.dims.depth,
-                positionAndDims.dims.height).bsp;
+                positionAndDims.dims.height);
 
-            var polygons = LatheModels.toBrep(this.model.vertex.bsp);
-            var toMesh = this.polygonsToMesh(polygons);
-            var faceGeometry = toMesh.geometry;
-            var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
-                this.materials.normal.face, 
-            ]);
-            this.sceneObject.add(meshObject);
+            var that = this;
+            Lathe.broker.on(jobId, function(polygons) {
+                var toMesh = that.polygonsToMesh(polygons);
+                var faceGeometry = toMesh.geometry;
+                var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
+                    that.materials.normal.face, 
+                ]);
+                that.sceneObject.add(meshObject);
+                sceneModel.view.updateScene = true;
+            });
         },
 
     })

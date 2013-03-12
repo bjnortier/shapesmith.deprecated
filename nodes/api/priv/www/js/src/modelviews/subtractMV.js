@@ -9,7 +9,7 @@ define([
         'src/pointMV', 
         'src/heightanchorview',
         'src/asyncAPI',
-        'src/lathe/models',
+        'src/lathe/pool',
     ], 
     function(
         $, __$,
@@ -21,7 +21,7 @@ define([
         PointMV,
         EditingHeightAnchor,
         AsyncAPI,
-        LatheModels) {
+        Lathe) {
 
 
     // ---------- Display ----------

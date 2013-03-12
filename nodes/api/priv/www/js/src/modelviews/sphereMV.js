@@ -3,23 +3,25 @@ define([
         'lib/jquery.mustache',
         'src/calculations',
         'src/worldcursor',
+        'src/scene',
         'src/geometrygraphsingleton',
         'src/vertexMV',
         'src/geomvertexMV', 
         'src/pointMV', 
         'src/asyncAPI',
-        'src/lathe/models',
+        'src/lathe/pool',
     ], 
     function(
         $, __$,
         calc,
         worldCursor,
+        sceneModel,
         geometryGraph,
         VertexMV,
         GeomVertexMV,
         PointMV,
         AsyncAPI,
-        LatheModels) {
+        Lathe) {
 
     // ---------- Common ----------
 
@@ -255,7 +257,6 @@ define([
             this.editingModelConstructor = EditingModel;
             this.displayModelConstructor = DisplayModel;
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
-            this.vertex.bsp = LatheModels.createSphere(0,0,0,20,20,20);
             this.sceneView = new DisplaySceneView({model: this});
             this.views.push(this.sceneView);
             this.views.push(new GeomVertexMV.DisplayDOMView({model: this}));
@@ -282,19 +283,23 @@ define([
             var center = calc.objToVector(points[0].parameters.coordinate, geometryGraph, THREE.Vector3);
             var radius = geometryGraph.evaluate(this.model.vertex.parameters.radius);
 
-            this.model.vertex.bsp = LatheModels.createSphere(
+            // this.model.vertex.bsp = 
+            var jobId = Lathe.createSphere(
                 center.x,
                 center.y,
                 center.z,
-                radius).bsp;
+                radius);
 
-            var polygons = LatheModels.toBrep(this.model.vertex.bsp);
-            var toMesh = this.polygonsToMesh(polygons);
-            var faceGeometry = toMesh.geometry;
-            var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
-                this.materials.normal.face, 
-            ]);
-            this.sceneObject.add(meshObject);
+            var that = this;
+            Lathe.broker.on(jobId, function(polygons) {
+                var toMesh = that.polygonsToMesh(polygons);
+                var faceGeometry = toMesh.geometry;
+                var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
+                    that.materials.normal.face, 
+                ]);
+                that.sceneObject.add(meshObject);
+                sceneModel.view.updateScene = true;
+            });
         },
 
         remove: function() {
