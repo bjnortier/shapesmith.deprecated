@@ -60,29 +60,59 @@ body {
     height: 32px;
 }
 
-.toolbar svg path, .toolbar svg rect {
+.icon24 svg {
+    width: 24px;
+    height: 24px;
+}
+
+.icon24, .icon32 {
+    svg {
+        path, rect {
+            fill-opacity:0.9;
+            stroke-width:1.5px;
+            stroke-linejoin:round;
+            stroke-opacity:1;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+    }
+}
+
+.icon24 {
+    svg {
+        path, rect {
+            fill-opacity:0.5;
+        }
+    }
+}
+
+#geometry .editing .icon24 svg {
     fill:#eee;
-    fill-opacity:0.9;
     stroke:#999;
-    stroke-width:1.5px;
-    stroke-linejoin:round;
-    stroke-opacity:1
-    stroke-linecap: round;
-    stroke-linejoin: round;
 }
 
-.toolbar .item:hover path, .toolbar .item:hover rect {
-    fill:#e6271c;
-    fill-opacity:0.9;
-    stroke:#e6271c;
-    stroke-width:1.5px;
-    stroke-linejoin:round;
-    stroke-opacity:1
+.toolbar .icon32 svg {
+    fill:#eee;
+    stroke:#999;
 }
 
-.toolbar .item.disabled svg path, .toolbar .item.disabled svg rect {
-    fill-opacity:0.1;
-    stroke-opacity:0.5;
+.toolbar .item:hover {
+    path, rect {
+        fill:#7DE61C;
+        stroke:#538A41;
+    }
+}
+
+.toolbar .item.disabled {
+    path, rect {
+        fill-opacity:0.1;
+        stroke-opacity:0.5;
+    }
+}
+
+/* Icon-specific overrides */
+.toolbar .designs path {
+    stroke-width:1.2px;
 }
 
 .vertex.editing .title {
@@ -91,5 +121,10 @@ body {
 
 input.field[type="text"] {
     background: rgba(255, 255, 255, 0.64);
+}
+
+.toolbar .expander {
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 

@@ -424,13 +424,17 @@ define([
         },
 
         render: function() {
+            var parameters = this.model.vertex.parameters;
+            var color = (parameters.material && parameters.material.color) || '#888888';
             var view = {
                 name: this.model.vertex.name,
                 type: this.model.vertex.type,
+                fill: color,
+                stroke: color,
             }
             var template = 
                 '<div class="title" draggable="true">' + 
-                '<div class="icon24 {{type}}"></div>' + 
+                '<div class="icon24" style="fill: {{fill}}; stroke: {{stroke}};">' + this.model.icon + '</div>' +
                 '<div class="name">{{name}}</div>' + 
                 '<div class="delete"></div>' +
                 '</div>';

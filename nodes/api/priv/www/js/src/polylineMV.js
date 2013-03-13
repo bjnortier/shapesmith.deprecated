@@ -12,6 +12,7 @@ define([
         'src/pointMV', 
         'src/workplaneMV',
         'src/asyncAPI',
+        'requirejsplugins/text!/ui/images/icons/polyline.svg',
     ], 
     function(
         $, __$,
@@ -25,7 +26,8 @@ define([
         GeomVertexMV,
         PointMV,
         WorkplaneMV,
-        AsyncAPI) {
+        AsyncAPI,
+        icon) {
 
     // ---------- Common ----------
 
@@ -249,7 +251,7 @@ define([
             var template = 
                 '<table><tr>' +
                 '<td class="title">' + 
-                '<img src="/ui/images/icons/polyline24x24.png"/>' +
+                '<div class="icon24">' + icon + '</div>' +
                 '<div class="name">{{name}}</div>' + 
                 '<div class="delete"></div>' + 
                 '</td></tr><tr><td>' +
@@ -288,6 +290,9 @@ define([
                 this.views.push(new GeomVertexMV.DisplayDOMView({model: this}));
             }
         },
+
+        icon: icon,
+
     });
 
     var DisplayLineSceneView = GeomVertexMV.DisplaySceneView.extend(LineSceneView);

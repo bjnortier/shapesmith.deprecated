@@ -11,6 +11,7 @@ define([
         'src/geomvertexMV', 
         'src/modelviews/dimensionview',
         'src/asyncAPI',
+        'requirejsplugins/text!/ui/images/icons/point.svg',
     ], 
     function(
         $, __$,
@@ -23,7 +24,8 @@ define([
         geometryGraph,
         GeomVertexMV,
         DimensionView,
-        AsyncAPI) {
+        AsyncAPI,
+        icon) {
 
     // ---------- Editing ----------
 
@@ -77,7 +79,7 @@ define([
                 '<table><tr>' +
                 '{{^implicit}}' +
                 '<td class="title">' + 
-                '<img src="/ui/images/icons/point24x24.png"/>' +
+                '<div class="icon24">' + icon + '</div>' +
                 '<div class="name">{{name}}</div>' + 
                 '<div class="delete"></div>' + 
                 '</td></tr><tr>' + 
@@ -244,6 +246,8 @@ define([
         selectParentOnClick: function() {
             return this.vertex.implicit;
         },
+
+        icon: icon,
 
 
     });    

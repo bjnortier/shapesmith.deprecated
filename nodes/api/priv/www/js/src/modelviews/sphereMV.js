@@ -10,6 +10,7 @@ define([
         'src/pointMV', 
         'src/asyncAPI',
         'src/lathe/pool',
+        'requirejsplugins/text!/ui/images/icons/sphere.svg',
     ], 
     function(
         $, __$,
@@ -21,7 +22,8 @@ define([
         GeomVertexMV,
         PointMV,
         AsyncAPI,
-        Lathe) {
+        Lathe,
+        icon) {
 
     // ---------- Common ----------
 
@@ -185,7 +187,7 @@ define([
             var template = 
                 '<table><tr>' +
                 '<td class="title">' + 
-                '<img src="/ui/images/icons/sphere24x24.png"/>' +
+                '<div class="icon24">' + icon + '</div>' +
                 '<div class="name">{{name}}</div>' + 
                 '<div class="delete"></div>' + 
                 '</td></tr><tr><td>' +
@@ -268,7 +270,9 @@ define([
             this.vertex.off('change', this.updateCumulativeArea, this);
         },
 
-    });
+        icon: icon,
+
+    }); 
 
     var DisplaySceneView = GeomVertexMV.DisplaySceneView.extend(SceneViewMixin).extend({
 

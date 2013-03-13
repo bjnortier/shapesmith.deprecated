@@ -7,8 +7,17 @@ define([
         'src/geomvertexMV',
         'src/scene',
         'src/heightanchorview',
+        'requirejsplugins/text!/ui/images/icons/extrude.svg',
     ], 
-    function($, __$, calc, colors, geometryGraph, GeomVertexMV, sceneModel, EditingHeightAnchor) {
+    function(
+        $, __$,
+        calc,
+        colors,
+        geometryGraph,
+        GeomVertexMV,
+        sceneModel,
+        EditingHeightAnchor,
+        icon) {
 
     // ---------- Common ----------
 
@@ -118,7 +127,7 @@ define([
             var template = 
                 '<table><tr>' +
                 '<td class="title">' + 
-                '<img src="/ui/images/icons/extrude24x24.png"/>' +
+                '<div class="icon24">' + icon + '</div>' +
                 '<div class="name">{{name}}</div>' + 
                 '{{^implicit}}<div class="delete"></div>{{/implicit}}' + 
                 '</td></tr><tr><td>' +
@@ -163,6 +172,8 @@ define([
             this.views.push(this.sceneView);
             this.views.push(new GeomVertexMV.DisplayDOMView({model: this}));
         },
+
+        icon: icon,
 
     });
 
