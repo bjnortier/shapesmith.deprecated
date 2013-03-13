@@ -35,6 +35,7 @@ define([
         },
 
         renderPlaneForPoints: function(pointA, pointB) {
+
             var faceGeometry = new THREE.Geometry();
             var h = geometryGraph.evaluate(this.model.vertex.parameters.height);
             var a  = calc.objToVector(pointA.parameters.coordinate, geometryGraph, THREE.Vector3);
@@ -72,8 +73,6 @@ define([
             }
 
             var face = new THREE.Mesh(faceGeometry, faceMaterial);
-            face.receiveShadow = true;
-            face.castShadow = true;
             this.sceneObject.add(face);
 
             var lineGeometry = new THREE.Geometry();
