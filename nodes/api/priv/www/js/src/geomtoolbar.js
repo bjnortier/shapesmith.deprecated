@@ -14,6 +14,7 @@ define([
     'requirejsplugins/text!/ui/images/icons/cube.svg',
     'requirejsplugins/text!/ui/images/icons/sphere.svg',
     'requirejsplugins/text!/ui/images/icons/extrude.svg',
+    'requirejsplugins/text!/ui/images/icons/subtract.svg',
     ], 
     function(
         calc,
@@ -30,7 +31,8 @@ define([
         polylineIcon,
         cubeIcon, 
         sphereIcon,
-        extrudeIcon) {
+        extrudeIcon,
+        subtractIcon) {
 
     var SelectItemModel = toolbar.ItemModel.extend({
         
@@ -227,6 +229,8 @@ define([
 
             }
         },
+
+        icon: subtractIcon,
 
     });
 

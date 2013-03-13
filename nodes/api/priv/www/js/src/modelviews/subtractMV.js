@@ -11,6 +11,7 @@ define([
         'src/heightanchorview',
         'src/asyncAPI',
         'src/lathe/pool',
+         'requirejsplugins/text!/ui/images/icons/subtract.svg',
     ], 
     function(
         $, __$,
@@ -23,7 +24,8 @@ define([
         PointMV,
         EditingHeightAnchor,
         AsyncAPI,
-        Lathe) {
+        Lathe,
+        icon) {
 
 
     // ---------- Display ----------
@@ -43,6 +45,8 @@ define([
             GeomVertexMV.DisplayModel.prototype.destroy.call(this);
             this.vertex.off('change', this.updateCumulativeArea, this);
         },
+
+        icon: icon,
 
     });
 

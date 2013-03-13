@@ -101,6 +101,11 @@ body {
         fill:#7DE61C;
         stroke:#538A41;
     }
+    g[label=nofilldashed] {
+        path, rect {
+            fill:none;
+        }
+    }
 }
 
 .toolbar .item.disabled {
@@ -113,6 +118,13 @@ body {
 /* Icon-specific overrides */
 .toolbar .designs path {
     stroke-width:1.2px;
+}
+
+svg g[label=nofilldashed] {
+    fill:none;
+    stroke-miterlimit:4;
+    stroke-dasharray:1, 2;
+    stroke-dashoffset:0;
 }
 
 .vertex.editing .title {
