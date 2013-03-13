@@ -9,6 +9,11 @@ define([
     'src/selection',
     'src/workplaneMV',
     'src/vertexMV',
+    'requirejsplugins/text!../../images/icons/point.svg',
+    'requirejsplugins/text!../../images/icons/polyline.svg',
+    'requirejsplugins/text!../../images/icons/cube.svg',
+    'requirejsplugins/text!../../images/icons/sphere.svg',
+    'requirejsplugins/text!../../images/icons/extrude.svg',
     ], 
     function(
         calc,
@@ -20,7 +25,12 @@ define([
         coordinator, 
         selection,
         WorkplaneMV,
-        VertexMV) {
+        VertexMV,
+        pointIcon,
+        polylineIcon,
+        cubeIcon, 
+        sphereIcon,
+        extrudeIcon) {
 
     var SelectItemModel = toolbar.ItemModel.extend({
         
@@ -49,6 +59,8 @@ define([
             geometryGraph.createPointPrototype({workplane: workplane});
         },
 
+        icon: pointIcon,
+
     });
 
     var Polyline = toolbar.ItemModel.extend({
@@ -60,6 +72,8 @@ define([
             var workplane = calc.copyObj(WorkplaneMV.getCurrent().vertex.workplane);
             geometryGraph.createPolylinePrototype({workplane: workplane});
         },
+
+        icon: polylineIcon,
 
     });
 
@@ -116,6 +130,8 @@ define([
             }
         },
 
+        icon: extrudeIcon,
+
     });
 
     var Cube = toolbar.ItemModel.extend({
@@ -145,6 +161,8 @@ define([
             });
         },
 
+        icon: cubeIcon,
+
     });
 
     var Sphere = toolbar.ItemModel.extend({
@@ -173,6 +191,8 @@ define([
                 geometryGraph.addEdge(sphereVertex, point);
             });
         },
+
+        icon: sphereIcon,
 
     });
 

@@ -20,7 +20,7 @@ body {
 #toolbar .item .label {
     display: none;
     position: absolute;
-    top: 0;
+    top: -20px;
     left: 0;
     text-align: center;
     width: 42px;
@@ -43,32 +43,53 @@ body {
     font-size: 8px;
 }
 
+.toolbar {
+    background: none;
+}
+
 #toolbar .item.active {
-    border-top: solid thin #FDFFD5;
-    border-right: solid thin #FCFDE2;
-    margin-top: -1px;
-    margin-right: -1px;
     /*border-radius: 2px;*/
 }
 
-.toolbar.geometry .cube .icon {
-    background-image: url('/ui/images/icons/cube32x32.greyscale.png');
+.toolbar.geometry .select .icon32 {
+    background-image: url('/ui/images/icons/mouse32x32.png');
 }
 
-.toolbar.geometry .cube:hover .icon {
-    background-image: url('/ui/images/icons/cube32x32.png');
+.icon32 svg {
+    width: 32px;
+    height: 32px;
 }
 
-
-.icon24.cube {
-    background-image: url('/ui/images/icons/cube24x24.png');
+.toolbar svg path, .toolbar svg rect {
+    fill:#eee;
+    fill-opacity:0.9;
+    stroke:#999;
+    stroke-width:1.5px;
+    stroke-linejoin:round;
+    stroke-opacity:1
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
-.toolbar.geometry .sphere .icon {
-    background-image: url('/ui/images/icons/sphere32x32.png');
+.toolbar .item:hover path, .toolbar .item:hover rect {
+    fill:#e6271c;
+    fill-opacity:0.9;
+    stroke:#e6271c;
+    stroke-width:1.5px;
+    stroke-linejoin:round;
+    stroke-opacity:1
 }
 
-.icon24.sphere {
-    background-image: url('/ui/images/icons/sphere24x24.png');
+.toolbar .item.disabled svg path, .toolbar .item.disabled svg rect {
+    fill-opacity:0.1;
+    stroke-opacity:0.5;
+}
+
+.vertex.editing .title {
+    background: rgba(255, 255, 255, 0.64);
+}
+
+input.field[type="text"] {
+    background: rgba(255, 255, 255, 0.64);
 }
 

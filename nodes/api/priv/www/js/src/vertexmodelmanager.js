@@ -52,23 +52,38 @@ define([
         }
     }); 
 
+    var hiddenChildren = {};
+
     var addVertex = function(vertex) {
+        // Implciit editing vertices are handles by the parent editing model
         var implicitEditing = vertex.implicit && vertex.editing;
         if (implicitEditing) {
-            return
+            return;
         }
 
         if (vertex.editing) {
             new wrappers[vertex.type].EditingModel({vertex: vertex});
         } else {
+            // Non-implicit children are removed when the parent is created
+            var children = geometryGraph.childrenOf(vertex);
+            children.forEach(function(child) {
+                hiddenChildren[vertex.id] = [];
+                if (!child.implicit) {
+                    var childModel = VertexMV.getModelForVertex(child);
+                    childModel.destroy();
+                    hiddenChildren[vertex.id].push(child.id);
+                }
+            })
+
             new wrappers[vertex.type].DisplayModel({vertex: vertex});
         }
     }
 
     var removeVertex = function(vertex) {
+        // Implicit editing vertices are handles by the parent editing model
         var implicitEditing = vertex.implicit && vertex.editing;
         if (implicitEditing) {
-            return
+            return;
         }
 
         var model = VertexMV.getModelForVertex(vertex);

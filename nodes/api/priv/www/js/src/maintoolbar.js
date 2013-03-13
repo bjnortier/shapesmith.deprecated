@@ -11,7 +11,10 @@ define([
         'src/workplaneMV',
         'src/asyncAPI',
         'src/hintview',
-        ], 
+        'requirejsplugins/text!../../images/icons/cog.svg',
+        'requirejsplugins/text!../../images/icons/tag.svg',
+        'requirejsplugins/text!../../images/icons/list.svg',
+    ], 
     function(
             $, __$,
             toolbar,
@@ -23,19 +26,26 @@ define([
             VertexMV,
             WorkplaneMV,
             AsyncAPI,
-            hintView) {
+            hintView,
+            cogIcon,
+            tagIcon,
+            listIcon) {
 
     var SettingsItemModel = toolbar.ItemModel.extend({
+
         name: 'settings',
 
         click: function() {
             settings.edit();
         },
 
+        icon: cogIcon,
+
     });
 
     var SaveItemModel = toolbar.ItemModel.extend({
-        name: 'save',
+
+        name: 'tag',
 
         click: function() {
 
@@ -63,6 +73,8 @@ define([
             });
         },
 
+        icon: tagIcon,
+
     });
 
     var ExportOBJItemModel = toolbar.ItemModel.extend({
@@ -76,11 +88,14 @@ define([
     });
 
     var ExitItemModel = toolbar.ItemModel.extend({
-        name: 'models',
+
+        name: 'designs',
 
         click: function() {
             window.location = '/_ui/' + globals.username + '/designs.html';
         },
+
+        icon: listIcon,
 
     });
 

@@ -1,4 +1,9 @@
-define(['src/interactioncoordinator', 'src/geometrygraphsingleton'], 
+define([
+        'jquery',
+        'lib/jquery.mustache',
+        'src/interactioncoordinator', 
+        'src/geometrygraphsingleton',
+    ], 
     function(coordinator, geometryGraph) {
 
     var ItemModel = Backbone.Model.extend({
@@ -39,7 +44,14 @@ define(['src/interactioncoordinator', 'src/geometrygraphsingleton'],
         },
 
         render: function() {
-            $(this.el).html('<div class="icon"></div><div class="label">' + this.model.name.toUpperCase() + "</div>");
+            var view = {
+                icon: this.model.icon,
+                label: this.model.name.toUpperCase(),
+            }
+            var template = 
+                '<div class="icon32">{{{icon}}}</div>' + 
+                '<div class="label">{{label}}</div>';
+            $(this.el).html($.mustache(template, view));
             return this;
         },
 

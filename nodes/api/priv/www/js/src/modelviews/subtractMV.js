@@ -71,9 +71,6 @@ define([
                 ]);
                 that.sceneObject.add(meshObject);
                 sceneModel.view.updateScene = true;
-
-                geometryGraph.remove(children[0]);
-                geometryGraph.remove(children[1]);
             });
         },
 
