@@ -342,17 +342,32 @@ define([
 
         this.vertexChanged = function(vertex) {
             var that = this;
-            var notifyAncestors = function(v) {
+            var notifyParents = function(v) {
                 that.parentsOf(v).map(function(parent) {
                     try {
                         parent.trigger('change', parent);
                     } catch (e) {
                         console.warn('exception on parent notify: ' + e);
                     }
-                    notifyAncestors(parent);
+                    notifyParents(parent);
                 });
             }
-            notifyAncestors(vertex);
+            notifyParents(vertex);
+
+            // Use a different event here as children beng notified 
+            // of parent changes is used less, and would also lead to 
+            // recursive notifications if 'change' was used.
+            var notifyChildren = function(v) {
+                that.childrenOf(v).map(function(child) {
+                    try {
+                        child.trigger('parentChange', child);
+                    } catch (e) {
+                        console.warn('exception on child notify: ' + e);
+                    }
+                    notifyChildren(child);
+                });
+            }
+            notifyChildren(vertex);
         }
 
         this.vertexById = function(id) {

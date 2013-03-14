@@ -39,7 +39,6 @@ requirejs([
         'src/inspect/renderingoptionsview',
         'src/splashscreen',
         'src/scripting/designer',
-        'src/layers/layertreemanager',       
     ], function(
         $, _$,
         sceneModel,
@@ -61,8 +60,7 @@ requirejs([
         StatsView,
         RenderingOptionsView,
         SplashScreen,
-        Designer,
-        layertreeManager) {
+        Designer) {
 
     var originalReplaceFn = Workplane.DisplayModel.prototype.vertexReplaced;
 

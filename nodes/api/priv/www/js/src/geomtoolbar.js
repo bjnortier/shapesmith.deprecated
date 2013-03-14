@@ -210,7 +210,6 @@ define([
         },
 
         selectionChanged: function(_, selection) {
-            console.log('selection', selection);
             var polyline;
             this.set('enabled', (selection.length === 2));
         },
@@ -221,7 +220,10 @@ define([
                 var a = geometryGraph.vertexById(savedSelection[0]);
                 var b = geometryGraph.vertexById(savedSelection[1]);
 
-                var boolVertex = new GeomNode.Subtract({});
+                var boolVertex = new GeomNode.Subtract({
+                    proto: true,
+                    editing: true,
+                });
                 geometryGraph.add(boolVertex, function() {
                     geometryGraph.addEdge(boolVertex, a);
                     geometryGraph.addEdge(boolVertex, b);

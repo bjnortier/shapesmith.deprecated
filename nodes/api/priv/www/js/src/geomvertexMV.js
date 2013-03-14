@@ -94,7 +94,7 @@ define([
     var SceneView = VertexMV.SceneView.extend({
 
         initialize: function() {
-            var normalColor = 0x888888;
+            var normalColor = 0x6cbe32;
             var vertexMaterial = this.model.vertex.parameters.material;
             if (vertexMaterial && vertexMaterial.color) {
                 normalColor = vertexMaterial.color
@@ -425,7 +425,7 @@ define([
 
         render: function() {
             var parameters = this.model.vertex.parameters;
-            var color = (parameters.material && parameters.material.color) || '#888888';
+            var color = (parameters.material && parameters.material.color) || '#6cbe32';
             var view = {
                 name: this.model.vertex.name,
                 type: this.model.vertex.type,
@@ -645,8 +645,6 @@ define([
                 }
             }
         },
-
-        
 
     });
 

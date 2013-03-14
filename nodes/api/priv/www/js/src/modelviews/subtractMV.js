@@ -27,6 +27,20 @@ define([
         Lathe,
         icon) {
 
+    // ---------- Editing ----------
+
+     var EditingModel = GeomVertexMV.EditingModel.extend({
+
+        initialize: function(options) {
+            this.displayModelConstructor = DisplayModel;
+            GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
+            if (this.vertex.proto) {
+                this.tryCommit();
+            }
+        },
+
+    });
+
 
     // ---------- Display ----------
 
@@ -34,6 +48,7 @@ define([
 
         initialize: function(options) {
             this.displayModelConstructor = DisplayModel;
+            this.editingModelConstructor = EditingModel;
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
             this.sceneView = new DisplaySceneView({model: this});
             this.views.push(this.sceneView);
@@ -60,6 +75,7 @@ define([
             GeomVertexMV.DisplaySceneView.prototype.render.call(this);
 
             var children = geometryGraph.childrenOf(this.model.vertex);
+            
             var bspA = children[0].bsp;
             var bspB = children[1].bsp;
 
@@ -84,10 +100,13 @@ define([
 
     })
 
+
+
     // ---------- Module ----------
 
     return {
         DisplayModel: DisplayModel,
+        EditingModel: EditingModel,
     } 
 
 });
