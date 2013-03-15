@@ -217,8 +217,8 @@ define([
         activate: function(savedSelection) {
             toolbar.ItemModel.prototype.activate.call(this);
             if (this.get('enabled')) {
-                var a = geometryGraph.vertexById(savedSelection[0]);
-                var b = geometryGraph.vertexById(savedSelection[1]);
+                var a = geometryGraph.vertexById(savedSelection[1]);
+                var b = geometryGraph.vertexById(savedSelection[0]);
 
                 var boolVertex = new GeomNode.Subtract({
                     proto: true,
