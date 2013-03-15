@@ -283,16 +283,10 @@ define([
         render: function() {
             GeomVertexMV.DisplaySceneView.prototype.render.call(this);
 
-            var points = geometryGraph.childrenOf(this.model.vertex);
-            var center = calc.objToVector(points[0].parameters.coordinate, geometryGraph, THREE.Vector3);
-            var radius = geometryGraph.evaluate(this.model.vertex.parameters.radius);
-
             var that = this;
             latheAdapter.generateSphere(
-                center.x,
-                center.y,
-                center.z,
-                radius, function(err, result) {
+                that.model.vertex,
+                function(err, result) {
 
                 if (err) {
                     console.error('no mesh', that.model.vertex.id);

@@ -37,21 +37,13 @@ requirejs([
         }
         var bspdb = new BSPDB(infoHandler, errorHandler);
 
-        function construct(constructor, args) {
-            function F() {
-                return constructor.apply(this, args);
-            }
-            F.prototype = constructor.prototype;
-            return new F();
-        }
-
         this.addEventListener('message', function(e) {
             var bsp;
             // Create new with the arguments
             if (e.data.sphere) {
-                bsp = construct(Sphere, e.data.sphere).bsp;
+                bsp = new Sphere(e.data.sphere).bsp;
             } else if (e.data.cube) {
-                bsp = construct(Cube, e.data.cube).bsp;
+                bsp = new Cube(e.data.cube).bsp;
             } else if (e.data.subtract) {
                 var a = BSP.deserialize(e.data.subtract[0]);
                 var b = BSP.deserialize(e.data.subtract[1]);

@@ -1,9 +1,10 @@
 // The adapter is the interface between vertices and lathe objects
 define([
         'src/casgraph/sha1hasher',
+        'src/lathe/normalize',
         'src/lathe/pool',
         'src/lathe/bspdb',
-    ], function(SHA1Hasher, Lathe, BSPDB) {
+    ], function(SHA1Hasher, Normalize, Lathe, BSPDB) {
 
     var infoHandler = function(a,b,c,d) {
         console.info.apply(console, arguments);
@@ -30,14 +31,23 @@ define([
         });
     }
 
-    var generateSphere = function(x,y,z,r,callback) {
-        var sha = SHA1Hasher.hash({x: x, y:y, z:z, r:r});
+    var generateSphere = function(vertex, callback) {
+        var normalized = Normalize.normalizeVertex(vertex);
+        var sha = SHA1Hasher.hash(normalized);
         getOrGenerate(sha, function() {
-            return Lathe.createSphere(sha, x,y,z,r);
+            return Lathe.createSphere(sha, normalized);
         }, callback);
     }
 
-    var generateCube = function(x,y,z,w,d,h,callback) {
+    var generateCube = function(vertex, callback) {
+        var normalized = Normalize.normalizeVertex(vertex);
+        var sha = SHA1Hasher.hash(normalized);
+        getOrGenerate(sha, function() {
+            return Lathe.createCube(sha, normalized);
+        }, callback);
+    }
+
+    var generateSubtract = function(vertex,callback) {
         var sha = SHA1Hasher.hash({x: x, y:y, z:z, w:w, d:d, h:h});
         getOrGenerate(sha, function() {
             return Lathe.createCube(sha, x,y,z,w,d,h);

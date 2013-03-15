@@ -106,12 +106,12 @@ define([
 
     var jobQueue = new JobQueue(workers);
 
-    var createSphere = function(sha, x,y,z,r) {
-        return jobQueue.queueJob({sphere: [x,y,z,r,16], sha: sha})
+    var createSphere = function(sha, dimensions) {
+        return jobQueue.queueJob({sphere: dimensions, sha: sha})
     }
 
-    var createCube = function(sha, x,y,z,w,d,h) {
-        return jobQueue.queueJob({cube: [x,y,z,w,d,h], sha: sha});
+    var createCube = function(sha, dimensions) {
+        return jobQueue.queueJob({cube: dimensions, sha: sha});
     }
 
     var createSubtract = function(a,b) {

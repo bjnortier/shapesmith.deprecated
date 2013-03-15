@@ -330,17 +330,10 @@ define([
 
         render: function() {
             GeomVertexMV.SceneView.prototype.render.call(this);
-            var points = geometryGraph.childrenOf(this.model.vertex);
-            var positionAndDims = this.determinePositionAndDims(points);
 
             var that = this;
             latheAdapter.generateCube(
-                positionAndDims.position.x,
-                positionAndDims.position.y,
-                positionAndDims.position.z,
-                positionAndDims.dims.width,
-                positionAndDims.dims.depth,
-                positionAndDims.dims.height,
+                that.model.vertex,
                 function(err, result) {
 
                 if (err) {
