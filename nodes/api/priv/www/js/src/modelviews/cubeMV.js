@@ -341,7 +341,14 @@ define([
                 positionAndDims.dims.width,
                 positionAndDims.dims.depth,
                 positionAndDims.dims.height,
-                function(result) {
+                function(err, result) {
+
+                console.info(result);
+
+                if (err) {
+                    console.error('no mesh', that.model.vertex.id);
+                    return;
+                }
 
                 var toMesh = that.polygonsToMesh(result.polygons);
                 var faceGeometry = toMesh.geometry;

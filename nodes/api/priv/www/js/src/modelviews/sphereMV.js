@@ -292,7 +292,12 @@ define([
                 center.x,
                 center.y,
                 center.z,
-                radius, function(result) {
+                radius, function(err, result) {
+
+                if (err) {
+                    console.error('no mesh', that.model.vertex.id);
+                    return;
+                }
 
                 that.clear();
                 var toMesh = that.polygonsToMesh(result.polygons);

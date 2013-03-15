@@ -599,7 +599,7 @@ define([
             }
             var implicitViews = this.findImplicitDescendantSceneviews(this.model.vertex);
             implicitViews.forEach(function(view) {
-                view.highlight();
+                view.highlight && view.highlight();
             })
         },
 

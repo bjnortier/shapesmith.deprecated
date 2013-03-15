@@ -13,15 +13,15 @@ define([
         var that = this;
         var db;
 
-        var request = indexedDB.open("test13", 1);
+        var openDBRequest = indexedDB.open("test15", 1);
         
-        request.onerror = function(event) {
+        openDBRequest.onerror = function(event) {
             console.error('Could not create BSP database');
         }
 
         // Request success. Trigger initialized event if first success.
         var successCount = 0;
-        request.onsuccess = function(event) {
+        openDBRequest.onsuccess = function(event) {
             if (!successCount) {
                 that.trigger('initialized');
                 console.info('BSP DB initialized');
@@ -35,24 +35,23 @@ define([
 
         // Will be called when the DB is created the first time or when
         // the version is older than the existing version
-        request.onupgradeneeded = function(event) {
+        openDBRequest.onupgradeneeded = function(event) {
             console.log('creating/upgrading BSP db');
             var db = event.target.result;
             bspStore = db.createObjectStore("bsp", { keyPath: "sha" });
         }
 
         this.read = function(sha, callback) {
-            var transaction = db.transaction("bsp", "readonly");
+            var transaction = db.transaction(["bsp"], "readonly");
 
             transaction.onerror = function(event) {
                 console.error('could not read bsp', event);
                 callback(event);
             }
-            
 
             var request = transaction.objectStore("bsp").get(sha);
             request.onsuccess = function(event) {
-                console.log('read success:', request.result);
+                console.log('read success:', request.result && request.result.sha);
                 callback(undefined, request.result);
             }
 
@@ -65,21 +64,35 @@ define([
                 callback(event);
             };
             transaction.oncomplete = function() {
-                console.info('transaction complete');
+                // console.info('write transaction complete');
             }
 
-            // BSP store fails - perhaps because of circular JSON?
-            var request = transaction.objectStore("bsp").add({
-                sha: value.sha, 
-                bsp: BSP.serialize(value.bsp),
-                polygons: value.polygons
-            });
-            request.onsuccess = function(event) {
-                console.log('write success');
-                callback(undefined);
+            var readRequest = transaction.objectStore("bsp").get(value.sha);
+            readRequest.onsuccess = function(event) {
+                if (readRequest.result) {
+                    callback(undefined);
+                } else {
+
+
+                    // BSP is serialized manually otherwise the IndexDB shim fails
+                    // because JSON.stringify fails because of circular references 
+                    var writeRequest = transaction.objectStore("bsp").add({
+                        sha: value.sha, 
+                        bsp: BSP.serialize(value.bsp),
+                        polygons: value.polygons
+                    });
+                    writeRequest.onsuccess = function(event) {
+                        // console.log('write success', value.sha);
+                        callback(undefined);
+                    }
+                    writeRequest.onerror = function(event) {
+                        console.error('write request error', event);
+                    }
+                }
             }
-            request.onerror = function(event) {
-                console.error('write request error', event);
+
+            readRequest.onerror = function(event) {
+                console.error('read error during write', event);
             }
         }
 
@@ -101,20 +114,20 @@ define([
             // Read from the DB, or generate it if it doesn't exist
             that.read(sha, function(err, jobResult) {
                 if (err) {
-                    console.error('error readin from BSP DB', err);
+                    console.error('error reading from BSP DB', err);
                 }
                 if (jobResult) {
-                    callback(jobResult);
+                    callback(undefined, jobResult);
                 } else {
                     var jobId = generator();
                     Lathe.broker.on(jobId, function(jobResult) {
                         jobResult.sha = sha;
                         that.write(jobResult, function(err) {
                             if (err) {
-                                console.error('error reading from BSP DB', err);
-                                callback({});
+                                console.error('error writing to BSP DB', err);
+                                callback(err);
                             } else {
-                                callback(jobResult);
+                                callback(undefined, jobResult);
                             }
                         })
                     })
