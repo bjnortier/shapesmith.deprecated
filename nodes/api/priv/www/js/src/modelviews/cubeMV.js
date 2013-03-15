@@ -11,6 +11,7 @@ define([
         'src/heightanchorview',
         'src/asyncAPI',
         'src/lathe/adapter',
+        'src/lathe/normalize',
         'requirejsplugins/text!/ui/images/icons/cube.svg',
     ], 
     function(
@@ -25,6 +26,7 @@ define([
         EditingHeightAnchor,
         AsyncAPI,
         latheAdapter,
+        Normalize,
         icon) {
 
     // ---------- Common ----------
@@ -52,37 +54,17 @@ define([
                 ]
             }
 
-            var positionAndDims = this.determinePositionAndDims(points);
-            var position = positionAndDims.position;
-            var dims = positionAndDims.dims;
+            var dimensions = Normalize.normalizeVertex(this.model.vertex);
+            var position = new THREE.Vector3(dimensions.x, dimensions.y, dimensions.z);
 
             var cube = THREE.SceneUtils.createMultiMaterialObject(
-                new THREE.CubeGeometry(dims.width, dims.depth, dims.height),
+                new THREE.CubeGeometry(dimensions.w, dimensions.d, dimensions.h),
                 materials);
             cube.position = position.add(new THREE.Vector3(
-                dims.width/2, dims.depth/2, dims.height/2));
+                dimensions.w/2, dimensions.d/2, dimensions.h/2));
             this.sceneObject.add(cube);
         },
 
-        determinePositionAndDims: function(points) {
-            var positions = points.map(function(p) {
-                return calc.objToVector(
-                    p.parameters.coordinate, geometryGraph, THREE.Vector3);
-            });
-
-            var dims = {
-                width : Math.abs(positions[1].x - positions[0].x),
-                depth : Math.abs(positions[1].y - positions[0].y),
-                height : Math.abs(geometryGraph.evaluate(this.model.vertex.parameters.height)),
-            }
-
-            var position = new THREE.Vector3(
-                Math.min(positions[0].x, positions[1].x),
-                Math.min(positions[0].y, positions[1].y),
-                Math.min(positions[0].z, positions[0].z + dims.height));
-
-            return {position: position, dims:dims};
-        },
     }
 
     // ---------- Editing ----------
