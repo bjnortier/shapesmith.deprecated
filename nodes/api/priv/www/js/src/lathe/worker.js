@@ -5,7 +5,19 @@ var worker = self;
 requirejs.config({
     baseUrl: "/ui/js",
     paths: {
+        'underscore': 'node_modules/underscore/underscore',
+        'backbone-events': 'node_modules/backbone-events/lib/backbone-events',
+        'backbone': 'node_modules/backbone/backbone',
         'lathe': 'node_modules/lathe/lib',
+    },
+    shim: {
+        'underscore': {
+            exports: '_'
+        },
+        'backbone': {
+            deps: ['underscore', 'jquery'],
+            exports: 'Backbone'
+        },
     },
 });
 requirejs([
@@ -13,8 +25,17 @@ requirejs([
         'lathe/primitives/cube',
         'lathe/primitives/sphere',
         'lathe/conv',
+        'src/lathe/bspdb',
     ],
-    function(BSP, Cube, Sphere, Conv) {
+    function(BSP, Cube, Sphere, Conv, BSPDB) {
+
+        var infoHandler = function(a,b,c,d) {
+            postMessage({info: [a,b,c,d].join('')});
+        }
+        var errorHandler = function(a,b,c,d) {
+            postMessage({error: [a,b,c,d].join('')});
+        }
+        var bspdb = new BSPDB(infoHandler, errorHandler);
 
         function construct(constructor, args) {
             function F() {
@@ -46,7 +67,19 @@ requirejs([
                         return v.toCoordinate();
                     });
                 });
-                postMessage({id: e.data.id, bsp: BSP.serialize(bsp), polygons: polygons});
+                var jobResult = {
+                    id: e.data.id, 
+                    sha: e.data.sha,
+                    bsp: BSP.serialize(bsp),
+                    polygons: polygons,
+                }
+                postMessage(jobResult);
+                
+                bspdb.write(jobResult, function(err) {
+                    if (err) {
+                        postMessage({error: 'error writing to BSP DB' + err});
+                    }
+                })
             } 
         }, false);
     }

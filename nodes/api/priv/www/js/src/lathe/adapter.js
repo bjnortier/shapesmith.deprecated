@@ -3,7 +3,15 @@ define([
         'src/casgraph/sha1hasher',
         'src/lathe/pool',
         'src/lathe/bspdb',
-    ], function(SHA1Hasher, Lathe, bspdb) {
+    ], function(SHA1Hasher, Lathe, BSPDB) {
+
+    var infoHandler = function(a,b,c,d) {
+        console.info.apply(console, arguments);
+    }
+    var errorHandler = function(a,b,c,d) {
+        console.error.apply(console, arguments);
+    }
+    var bspdb = new BSPDB(infoHandler, errorHandler); 
 
     var getOrGenerate = function(sha, generator, callback) {
         // Read from the DB, or generate it if it doesn't exist
@@ -16,16 +24,8 @@ define([
             } else {
                 var jobId = generator();
                 Lathe.broker.on(jobId, function(jobResult) {
-                    jobResult.sha = sha;
-                    bspdb.write(jobResult, function(err) {
-                        if (err) {
-                            console.error('error writing to BSP DB', err);
-                            callback(err);
-                        } else {
-                            callback(undefined, jobResult);
-                        }
-                    })
-                })
+                    callback(undefined, jobResult);
+                });
             }
         });
     }
@@ -33,18 +33,19 @@ define([
     var generateSphere = function(x,y,z,r,callback) {
         var sha = SHA1Hasher.hash({x: x, y:y, z:z, r:r});
         getOrGenerate(sha, function() {
-            return Lathe.createSphere(x,y,z,r);
+            return Lathe.createSphere(sha, x,y,z,r);
         }, callback);
     }
 
     var generateCube = function(x,y,z,w,d,h,callback) {
         var sha = SHA1Hasher.hash({x: x, y:y, z:z, w:w, d:d, h:h});
         getOrGenerate(sha, function() {
-            return Lathe.createCube(x,y,z,w,d,h);
+            return Lathe.createCube(sha, x,y,z,w,d,h);
         }, callback);
     }
 
     return {
+        bspdb          : bspdb,
         generateCube   : generateCube,
         generateSphere : generateSphere,
     }

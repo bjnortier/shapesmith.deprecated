@@ -6,6 +6,7 @@ define([
         'lathe/bsp',
         'lathe/conv',
         'backbone-events',
+        'src/lathe/bspdb',
     ], 
     function(
         _,
@@ -14,7 +15,8 @@ define([
         Polygon3D,
         BSP,
         Conv,
-        Events) {
+        Events,
+        bspdb) {
 
     // Create a worker pool and an event broker. The event broker
     // will be used by the caller to listen to the job results
@@ -49,11 +51,14 @@ define([
                 // A worker returns either the result or an error,
                 // and is then available
                 if (evt.data.hasOwnProperty('id')) {
-                    var bsp = BSP.deserialize(evt.data.bsp);
-                    broker.trigger(evt.data.id, {
-                        bsp: bsp, 
-                        polygons: evt.data.polygons
-                    });
+                    var jobResult = {
+                        bsp: BSP.deserialize(evt.data.bsp),
+                        polygons: evt.data.polygons,
+                    }
+                    broker.trigger(evt.data.id, jobResult);
+
+                } else if (evt.data.info) {
+                    console.info('worker info:', evt.data.info);
                 } else if (evt.data.error) {
                     console.error('worker error:', evt.data.error);
                 } else {
@@ -101,12 +106,12 @@ define([
 
     var jobQueue = new JobQueue(workers);
 
-    var createSphere = function(x,y,z,r) {
-        return jobQueue.queueJob({sphere: [x,y,z,r,16]})
+    var createSphere = function(sha, x,y,z,r) {
+        return jobQueue.queueJob({sphere: [x,y,z,r,16], sha: sha})
     }
 
-    var createCube = function(x,y,z,w,d,h) {
-        return jobQueue.queueJob({cube: [x,y,z,w,d,h]});
+    var createCube = function(sha, x,y,z,w,d,h) {
+        return jobQueue.queueJob({cube: [x,y,z,w,d,h], sha: sha});
     }
 
     var createSubtract = function(a,b) {

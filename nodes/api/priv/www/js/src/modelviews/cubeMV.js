@@ -343,8 +343,6 @@ define([
                 positionAndDims.dims.height,
                 function(err, result) {
 
-                console.info(result);
-
                 if (err) {
                     console.error('no mesh', that.model.vertex.id);
                     return;

@@ -17,11 +17,11 @@ requirejs.config({
 });
 
 requirejs([
-        'src/lathe/bspdb'
-    ], function(bspdb) {
+        'src/lathe/adapter'
+    ], function(adapter) {
 
         // Initialize the BSP DB before anything else
-        bspdb.on('initialized', function() {
+        adapter.bspdb.on('initialized', function() {
 
             requirejs([
                 'jquery',
