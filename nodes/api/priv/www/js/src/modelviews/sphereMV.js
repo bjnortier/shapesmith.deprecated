@@ -284,7 +284,7 @@ define([
             GeomVertexMV.DisplaySceneView.prototype.render.call(this);
 
             var that = this;
-            latheAdapter.generateSphere(
+            latheAdapter.generate(
                 that.model.vertex,
                 function(err, result) {
 

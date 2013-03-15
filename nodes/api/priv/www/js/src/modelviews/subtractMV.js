@@ -10,8 +10,8 @@ define([
         'src/pointMV', 
         'src/heightanchorview',
         'src/asyncAPI',
-        'src/lathe/pool',
-         'requirejsplugins/text!/ui/images/icons/subtract.svg',
+        'src/lathe/adapter',
+        'requirejsplugins/text!/ui/images/icons/subtract.svg',
     ], 
     function(
         $, __$,
@@ -24,7 +24,7 @@ define([
         PointMV,
         EditingHeightAnchor,
         AsyncAPI,
-        Lathe,
+        latheAdapter,
         icon) {
 
     // ---------- Editing ----------
@@ -74,16 +74,17 @@ define([
         render: function() {
             GeomVertexMV.DisplaySceneView.prototype.render.call(this);
 
-            var children = geometryGraph.childrenOf(this.model.vertex);
-            
-            var bspA = children[0].bsp;
-            var bspB = children[1].bsp;
-
-            var jobId = Lathe.createSubtract(bspB, bspA);
-
             var that = this;
-            Lathe.broker.on(jobId, function(result) {
-                that.model.vertex.bsp = result.bsp;
+            latheAdapter.generate(
+                that.model.vertex,
+                function(err, result) {
+
+                if (err) {
+                    console.error('no mesh', that.model.vertex.id);
+                    return;
+                }
+
+                that.clear();
                 var toMesh = that.polygonsToMesh(result.polygons);
                 var faceGeometry = toMesh.geometry;
                 var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [

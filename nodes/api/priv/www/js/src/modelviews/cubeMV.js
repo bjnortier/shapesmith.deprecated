@@ -314,7 +314,7 @@ define([
             GeomVertexMV.SceneView.prototype.render.call(this);
 
             var that = this;
-            latheAdapter.generateCube(
+            latheAdapter.generate(
                 that.model.vertex,
                 function(err, result) {
 

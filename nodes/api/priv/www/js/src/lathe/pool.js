@@ -23,10 +23,13 @@ define([
     var poolSize = 4;
     var workers = [];
     for (var i = 0; i < poolSize; ++i) {
-        workers[i] = new Worker('/ui/js/src/lathe/worker.js');
-        workers[i].onerror = function () {
+        worker = new Worker('/ui/js/src/lathe/worker.js');
+        worker.onerror = function () {
             console.error("worker error", arguments);
         }
+        worker.busy = false;
+        worker.initialized = false;
+        workers[i] = worker;
     }
 
     // The job queue will manage the jobs, and put jobs in a queue
@@ -50,7 +53,9 @@ define([
             worker.onmessage = function(evt) {
                 // A worker returns either the result or an error,
                 // and is then available
-                if (evt.data.hasOwnProperty('id')) {
+                if (evt.data === 'initialized') {
+                    worker.initialized = true;
+                } else if (evt.data.hasOwnProperty('id')) {
                     var jobResult = {
                         bsp: BSP.deserialize(evt.data.bsp),
                         polygons: evt.data.polygons,
@@ -87,7 +92,7 @@ define([
         }
 
         var doNextJob = function(worker) {
-            if (queue.length) {
+            if (worker.initialized && !worker.busy && queue.length) {
                 var job = queue.shift();
                 console.log('doing queued job', job.id);
                 doJob(job, worker);
@@ -96,7 +101,7 @@ define([
 
         var getAvailableWorker = function() {
             for (var i = 0; i < workers.length; ++i) {
-                if (!workers[i].busy) {
+                if (workers[i].initialized && !workers[i].busy) {
                     return workers[i];
                 }
             }
@@ -107,20 +112,16 @@ define([
     var jobQueue = new JobQueue(workers);
 
     var createSphere = function(sha, dimensions) {
-        return jobQueue.queueJob({sphere: dimensions, sha: sha})
+        return jobQueue.queueJob({sha: sha, sphere: dimensions})
     }
 
     var createCube = function(sha, dimensions) {
-        return jobQueue.queueJob({cube: dimensions, sha: sha});
+        return jobQueue.queueJob({sha: sha, cube: dimensions});
     }
 
-    var createSubtract = function(a,b) {
-        return jobQueue.queueJob({subtract: [BSP.serialize(a), BSP.serialize(b)]});
+    var createSubtract = function(sha, childSHAs) {
+        return jobQueue.queueJob({sha: sha, subtract: childSHAs});
     }
-
-    // var toBrep = function(bsp) {
-    //     return Conv.bspToBrep(bsp);
-    // }
 
     return {
         createCube     : createCube,
