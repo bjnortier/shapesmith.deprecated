@@ -9,7 +9,7 @@ define([
         'src/geomvertexMV', 
         'src/pointMV', 
         'src/asyncAPI',
-        'src/lathe/pool',
+        'src/lathe/bspdb',
         'requirejsplugins/text!/ui/images/icons/sphere.svg',
     ], 
     function(
@@ -22,7 +22,7 @@ define([
         GeomVertexMV,
         PointMV,
         AsyncAPI,
-        Lathe,
+        bspdb,
         icon) {
 
     // ---------- Common ----------
@@ -287,16 +287,14 @@ define([
             var center = calc.objToVector(points[0].parameters.coordinate, geometryGraph, THREE.Vector3);
             var radius = geometryGraph.evaluate(this.model.vertex.parameters.radius);
 
-            // this.model.vertex.bsp = 
-            var jobId = Lathe.createSphere(
+            var that = this;
+            bspdb.generateSphere(
                 center.x,
                 center.y,
                 center.z,
-                radius);
+                radius, function(result) {
 
-            var that = this;
-            Lathe.broker.on(jobId, function(result) {
-                that.model.vertex.bsp = result.bsp;
+                that.clear();
                 var toMesh = that.polygonsToMesh(result.polygons);
                 var faceGeometry = toMesh.geometry;
                 var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [

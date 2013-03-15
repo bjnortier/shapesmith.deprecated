@@ -159,6 +159,10 @@ define([
         },
 
         render: function() {
+            this.clear();
+        },
+
+        clear: function() {
             // For async renders (e.g. when loading textures), don't render if the 
             // view has been removed
             if (this.removed) {

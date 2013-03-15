@@ -10,7 +10,7 @@ define([
         'src/pointMV', 
         'src/heightanchorview',
         'src/asyncAPI',
-        'src/lathe/pool',
+        'src/lathe/bspdb',
         'requirejsplugins/text!/ui/images/icons/cube.svg',
     ], 
     function(
@@ -24,7 +24,7 @@ define([
         PointMV,
         EditingHeightAnchor,
         AsyncAPI,
-        Lathe,
+        bspdb,
         icon) {
 
     // ---------- Common ----------
@@ -333,17 +333,16 @@ define([
             var points = geometryGraph.childrenOf(this.model.vertex);
             var positionAndDims = this.determinePositionAndDims(points);
 
-            var jobId = Lathe.createCube(
+            var that = this;
+            bspdb.generateCube(
                 positionAndDims.position.x,
                 positionAndDims.position.y,
                 positionAndDims.position.z,
                 positionAndDims.dims.width,
                 positionAndDims.dims.depth,
-                positionAndDims.dims.height);
+                positionAndDims.dims.height,
+                function(result) {
 
-            var that = this;
-            Lathe.broker.on(jobId, function(result) {
-                that.model.vertex.bsp = result.bsp;
                 var toMesh = that.polygonsToMesh(result.polygons);
                 var faceGeometry = toMesh.geometry;
                 var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
