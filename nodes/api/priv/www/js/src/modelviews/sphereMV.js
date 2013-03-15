@@ -9,7 +9,7 @@ define([
         'src/geomvertexMV', 
         'src/pointMV', 
         'src/asyncAPI',
-        'src/lathe/bspdb',
+        'src/lathe/adapter',
         'requirejsplugins/text!/ui/images/icons/sphere.svg',
     ], 
     function(
@@ -22,7 +22,7 @@ define([
         GeomVertexMV,
         PointMV,
         AsyncAPI,
-        bspdb,
+        latheAdapter,
         icon) {
 
     // ---------- Common ----------
@@ -288,7 +288,7 @@ define([
             var radius = geometryGraph.evaluate(this.model.vertex.parameters.radius);
 
             var that = this;
-            bspdb.generateSphere(
+            latheAdapter.generateSphere(
                 center.x,
                 center.y,
                 center.z,

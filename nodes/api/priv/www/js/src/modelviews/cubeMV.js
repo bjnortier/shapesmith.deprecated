@@ -10,7 +10,7 @@ define([
         'src/pointMV', 
         'src/heightanchorview',
         'src/asyncAPI',
-        'src/lathe/bspdb',
+        'src/lathe/adapter',
         'requirejsplugins/text!/ui/images/icons/cube.svg',
     ], 
     function(
@@ -24,7 +24,7 @@ define([
         PointMV,
         EditingHeightAnchor,
         AsyncAPI,
-        bspdb,
+        latheAdapter,
         icon) {
 
     // ---------- Common ----------
@@ -334,7 +334,7 @@ define([
             var positionAndDims = this.determinePositionAndDims(points);
 
             var that = this;
-            bspdb.generateCube(
+            latheAdapter.generateCube(
                 positionAndDims.position.x,
                 positionAndDims.position.y,
                 positionAndDims.position.z,

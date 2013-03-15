@@ -2,10 +2,8 @@ define([
         'underscore',
         'backbone-events',
         'lathe/bsp',
-        'src/lathe/pool',
-        'src/casgraph/sha1hasher'
     ],
-    function(_, Events, BSP, Lathe, SHA1Hasher) {
+    function(_, Events, BSP) {
 
     var DB = function() {
 
@@ -96,44 +94,8 @@ define([
             }
         }
 
-        this.generateSphere = function(x,y,z,r,callback) {
-            var sha = SHA1Hasher.hash({x: x, y:y, z:z, r:r});
-            getOrGenerate(sha, function() {
-                return Lathe.createSphere(x,y,z,r);
-            }, callback);
-        }
-
-        this.generateCube = function(x,y,z,w,d,h,callback) {
-            var sha = SHA1Hasher.hash({x: x, y:y, z:z, w:w, d:d, h:h});
-            getOrGenerate(sha, function() {
-                return Lathe.createCube(x,y,z,w,d,h);
-            }, callback);
-        }
-
-        var getOrGenerate = function(sha, generator, callback) {
-            // Read from the DB, or generate it if it doesn't exist
-            that.read(sha, function(err, jobResult) {
-                if (err) {
-                    console.error('error reading from BSP DB', err);
-                }
-                if (jobResult) {
-                    callback(undefined, jobResult);
-                } else {
-                    var jobId = generator();
-                    Lathe.broker.on(jobId, function(jobResult) {
-                        jobResult.sha = sha;
-                        that.write(jobResult, function(err) {
-                            if (err) {
-                                console.error('error writing to BSP DB', err);
-                                callback(err);
-                            } else {
-                                callback(undefined, jobResult);
-                            }
-                        })
-                    })
-                }
-            });
-        }
+       
+ 
 
 
     }
