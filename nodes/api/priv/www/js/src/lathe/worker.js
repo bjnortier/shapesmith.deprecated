@@ -91,6 +91,7 @@ requirejs([
                         } else if (!result) {
                             postMessage({error: 'child BSP not found: ' + childSHA});
                         } else {
+                            postMessage({info: 'fetched' + childSHA});
                             childBSPs.splice(childBSPs.indexOf(childSHA), 1, result.bsp);
                             --remaining;
                             if (remaining === 0) {
