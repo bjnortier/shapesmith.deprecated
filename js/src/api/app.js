@@ -10,14 +10,13 @@ requirejs.config({
     nodeRequire: require,
 });
 
-console.log('requirejs:', path.normalize(__dirname + '/..'));
-
 // ---------- Configuration ----------
 nconf.argv()
-     .file({ file: 'config/devel.config.json' });
+     .file({file: __dirname + '/config/devel.config.json' });
 var diskDBPath = nconf.get('diskDBPath');
 console.info('configuration:');
 console.info('--------------');
+console.info('diskDBPath:',diskDBPath);
 
 // ---------- Create db ----------
 var DB = requirejs('src/api/disk_db');
