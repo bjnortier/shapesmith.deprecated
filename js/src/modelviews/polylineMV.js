@@ -232,18 +232,13 @@ define([
                 '<div class="delete"></div>' + 
                 '</td></tr><tr><td>' +
                 '</div>' + 
-                '<div class="points">' + 
-                '</div>' + 
+                '<div class="children"></div>' +
                 '</td></tr></table>';
             var view = {
                 name: this.model.vertex.name,
             };
             this.$el.html($.mustache(template, view));
             return this;
-        },
-
-        insertChild: function(childModel, childElement) {
-            this.$el.find('.points').append(childElement);
         },
 
     }); 

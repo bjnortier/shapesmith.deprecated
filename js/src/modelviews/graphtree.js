@@ -122,6 +122,9 @@ define([
                 replaceDomElement: replaceDomElement,
             });
 
+            newModel.domView.$el.find('.children').replaceWith(
+                node.model.domView.$el.find('.children'));
+
             node.model.destroy();
             node.model = newModel;
 

@@ -291,7 +291,7 @@ define([
 
     var EditingDOMView = Backbone.View.extend({
 
-        className: 'layer-leaf vertex editing',
+        className: 'vertex editing',
 
         initialize: function() {
             this.model.domView = this;
