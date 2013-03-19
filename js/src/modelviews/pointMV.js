@@ -158,7 +158,7 @@ define([
 
         isClickable: function() { 
             if (this.model.vertex.implicit) {
-                return this.model.parentModel && this.model.parentModel.isChildClickable(this.model);
+                return true;
             } else {
                 return GeomVertexMV.EditingSceneView.prototype.isClickable(this);
             }

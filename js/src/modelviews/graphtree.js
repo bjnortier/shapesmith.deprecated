@@ -52,7 +52,6 @@ define([
     }
 
     Node.prototype.findVertex = function(vertex) {
-        console.log(this.vertex.id);
         var found = [];
         if (vertex.id === this.vertex.id) {
             found.push(this);
@@ -63,19 +62,43 @@ define([
         return found;
     }
 
+    Node.prototype.remove = function() {
+        this.children.forEach(function(child) {
+            child.remove();
+        })
+        this.model.destroy();
+    }
+
     var addVertex = function(vertex) {
         if (hasTree(vertex)) {
-            trees.push(createTree(vertex));
+            trees.push(createTree(vertex, $('#geometry')));
+        } else if (vertex.implicit) {
+            // Implicit vertices will be added as children to all 
+            // parent nodes
+            var parentVertices = geometryGraph.parentsOf(vertex);
+            var parentNodes = [];
+            parentVertices.forEach(function(parentVertex) {
+                trees.forEach(function(tree) {
+                    parentNodes = parentNodes.concat(tree.findVertex(parentVertex));
+                })
+            });
+
+            parentNodes.forEach(function(parentNode) {
+                var parentDomElement = parentNode.model.domView.$el.find('.children');
+                parentNode.children.push(createTree(vertex, parentDomElement));
+            })
         }
     }
 
     var removeVertex = function(vertex) {
-        trees = trees.reduce(function(acc, node) {
-            if (node.vertex.id === vertex.id) {
-                node.model.destroy();
+        trees = trees.reduce(function(acc, root) {
+            root.findVertex(vertex).forEach(function(node) {
+                node.remove();
+            })
+            if (root.vertex.id === vertex.id) {
                 return acc;
             } else {
-                return acc.concat(node);
+                return acc.concat(root);
             }
         }, []);
     }
@@ -115,9 +138,7 @@ define([
         'polyline'  : PolylineMV,
     }
 
-    var createTree = function(vertex) {
-
-        var domElement = $('#geometry');
+    var createTree = function(vertex, domElement) {
 
         var modelCtor = vertex.editing ? 
             wrappers[vertex.type].EditingModel :
@@ -131,7 +152,8 @@ define([
             vertex, 
             model,
             geometryGraph.childrenOf(vertex).map(function(child) {
-                return createTree(child);
+                var parentDomElement = model.domView.$el.find('.children');
+                return createTree(child, parentDomElement);
             })
         )
     }

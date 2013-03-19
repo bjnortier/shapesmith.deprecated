@@ -8,7 +8,7 @@ define([
     'src/interactioncoordinator',
     'src/selection',
     'src/workplaneMV',
-    'src/vertexMV',
+    'src/modelviews/vertexMV',
     'requirejsplugins/text!/ui/images/icons/point.svg',
     'requirejsplugins/text!/ui/images/icons/polyline.svg',
     'requirejsplugins/text!/ui/images/icons/cube.svg',

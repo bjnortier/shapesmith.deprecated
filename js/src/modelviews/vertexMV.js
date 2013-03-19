@@ -20,11 +20,7 @@ define([
     // ---------- Common ----------
 
     var cancelIfEditing = function() {
-        _.values(modelForVertex).forEach(function(model) {
-            if (model.cancel) {
-                model.cancel();
-            }
-        });
+        console.warn('cancel if editing');
     }
 
     var EventProxy = function() {
@@ -266,25 +262,6 @@ define([
             }
 
             if (this.vertex.proto) {
-                var removeImplicitChildModels = function(parent) {
-                    // Implicit hildren that aren't shared with other geometry
-                    // I.e. has a parent other than the current parent
-                    var uniqueImplicitChildrenWithOneParent = _.uniq(
-                        geometryGraph.childrenOf(parent).filter(function(v) {
-                            var parents = geometryGraph.parentsOf(v);
-                            var hasOtherParent = _.find(parents, function(p) {
-                                return p.id !== parent.id;
-                            });
-                            return v.implicit && (!hasOtherParent);
-                        }));
-
-                    uniqueImplicitChildrenWithOneParent.forEach(function(child) {
-                        getModelForVertex(child).destroy();
-                        removeImplicitChildModels(child);
-                        AsyncAPI.cancelCreate(child);
-                    });
-                }
-                removeImplicitChildModels(this.vertex);
                 AsyncAPI.cancelCreate(this.vertex);
                 eventProxy.trigger('cancelledCreate');
 
@@ -297,7 +274,6 @@ define([
                     editing = editing.concat(this.editingImplicitChildren);
                 }
 
-                var that = this;
                 AsyncAPI.cancelEdit(editing, originals);
                 eventProxy.trigger('cancelledEdit');
             }

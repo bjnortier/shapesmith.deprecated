@@ -392,11 +392,12 @@ define([
                     '<div class="icon24" style="fill: {{fill}}; stroke: {{stroke}};">' + this.model.icon + '</div>' +
                     '<div class="name">{{name}}</div>' + 
                     '<div class="delete"></div>' +
+                    '<div class="children"></div>' +
                     '</div>';
                 this.$el.html($.mustache(template, view));
                 return this;
             } else {
-                this.$el.html('');
+                this.$el.html(this.model.vertex.id);
             }
         },        
 

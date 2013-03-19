@@ -90,13 +90,7 @@ define([
                 this.updateHint();
                 // Prototype polylines will always have an implicit point as first child
                 var pointChildren = geometryGraph.childrenOf(this.vertex);
-                this.subModels = [
-                    new PointMV.EditingModel({
-                        vertex: pointChildren[0],
-                        parentModel: this
-                    })
-                ];
-                this.activePoint = this.subModels[0];
+                this.activePoint = pointChildren[0];
             } else {
                 this.originalImplicitChildren = _.uniq(
                     geometryGraph.childrenOf(this.vertex).filter(
@@ -106,19 +100,6 @@ define([
                 this.editingImplicitChildren = this.originalImplicitChildren.map(function(child) {
                     return AsyncAPI.edit(child);
                 })
-                var that = this;
-                this.subModels = this.originalImplicitChildren.map(function(child, i) {
-                    if (child.implicit) {
-                        // Replace the original model with an editing model
-                        // var modelToDestroy = VertexMV.getModelForVertex(child)
-                        // modelToDestroy.destroy();
-                        // return new modelToDestroy.editingModelConstructor({
-                        //     original: child,
-                        //     vertex: that.editingImplicitChildren[i],
-                        //     parentModel: that
-                        // });
-                    } 
-                });
             }
 
             this.setMainSceneView(new EditingLineSceneView({model: this}));
@@ -129,10 +110,10 @@ define([
                 return;
             }
             if (this.vertex.proto && this.activePoint) {
-                this.activePoint.vertex.parameters.coordinate.x = position.x;
-                this.activePoint.vertex.parameters.coordinate.y = position.y;
-                this.activePoint.vertex.parameters.coordinate.z = position.z;
-                this.activePoint.vertex.trigger('change', this.activePoint.vertex);            
+                this.activePoint.parameters.coordinate.x = position.x;
+                this.activePoint.parameters.coordinate.y = position.y;
+                this.activePoint.parameters.coordinate.z = position.z;
+                this.activePoint.trigger('change', this.activePoint);            
             }
         },
 
@@ -163,7 +144,7 @@ define([
         },
 
         sceneViewClick: function(viewAndEvent) {
-            if (this.vertex.implicit) {
+            if (this.vertex.implicit || (viewAndEvent.view.model.vertex === this.activePoint)) {
                 return;
             }
 
@@ -203,18 +184,13 @@ define([
 
         addPoint: function(position) {
             var point = geometryGraph.addPointToParent(this.vertex);
-            var newLength = this.subModels.push(new PointMV.EditingModel({
-                vertex: point, 
-                parentModel: this
-            }));
-            this.activePoint = this.subModels[newLength - 1];
+            this.activePoint = point;
             this.workplanePositionChanged(position);
             this.updateHint();
         },
 
         removeLastPoint: function() {
             geometryGraph.removeLastPointFromPolyline(this.vertex);
-            this.subModels[this.subModels.length - 1].destroy();
         },
 
         isChildClickable: function(childModel) {
