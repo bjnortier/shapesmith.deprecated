@@ -4,51 +4,56 @@ define([
         'src/vertexMV',
         'src/workplaneMV',
         'src/variableMV',
-        'src/pointMV', 
-        'src/polylineMV',
-        'src/modelviews/CubeMV',
-        'src/modelviews/SphereMV',
-        'src/extrudeMV',
-        'src/modelviews/subtractMV',
+        // 'src/pointMV', 
+        // 'src/polylineMV',
+        // 'src/modelviews/CubeMV',
+        // 'src/modelviews/SphereMV',
+        // 'src/extrudeMV',
+        // 'src/modelviews/subtractMV',
     ], 
     function(
         geometryGraph, 
         selectionManager, 
         VertexMV,
         WorkplaneMV,
-        VariableMV,
-        PointMV, 
-        PolylineMV,
-        CubeMV,
-        SphereMV,
-        ExtrudeMV,
-        SubtractMV) {
+        VariableMV) {
+        // PointMV, 
+        // PolylineMV,
+        // CubeMV,
+        // SphereMV,
+        // ExtrudeMV,
+        // SubtractMV) {
     
-    var models = {};
     var wrappers = {
         'workplane' : WorkplaneMV,
         'variable'  : VariableMV,
-        'point'     : PointMV,
-        'polyline'  : PolylineMV,
-        'cube'      : CubeMV,
-        'sphere'    : SphereMV,
-        'extrude'   : ExtrudeMV,
-        'subtract'  : SubtractMV,
+        // 'point'     : PointMV,
+        // 'polyline'  : PolylineMV,
+        // 'cube'      : CubeMV,
+        // 'sphere'    : SphereMV,
+        // 'extrude'   : ExtrudeMV,
+        // 'subtract'  : SubtractMV,
     }
 
     geometryGraph.on('vertexAdded', function(vertex) {
-        addVertex(vertex);
+        if (vertex.category !== 'geometry') {
+            addVertex(vertex);
+        }
     });
 
     geometryGraph.on('vertexRemoved', function(vertex) {
-        removeVertex(vertex);
+        if (vertex.category !== 'geometry') {
+            removeVertex(vertex);
+        }
     });
 
     // Editing replacements are handled by the models
     geometryGraph.on('vertexReplaced', function(original, replacement) {
-        if (!original.editing && !replacement.editing) {
-            var model = VertexMV.getModelForVertex(original);
-            model.replaceWithDisplay(original, replacement);
+        if (replacement.category !== 'geometry') {
+            if (!original.editing && !replacement.editing) {
+                var model = VertexMV.getModelForVertex(original);
+                model.replaceWithDisplay(original, replacement);
+            }
         }
     }); 
 
