@@ -193,11 +193,6 @@ define([
             geometryGraph.removeLastPointFromPolyline(this.vertex);
         },
 
-        isChildClickable: function(childModel) {
-            // Can't click the active point
-            return childModel !== this.activePoint;
-        },
-
         updateHint: function() {
             if (this.vertex.proto) {
                 var points = geometryGraph.childrenOf(this.polyline);

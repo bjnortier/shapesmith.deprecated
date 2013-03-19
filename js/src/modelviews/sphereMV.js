@@ -5,8 +5,7 @@ define([
         'src/worldcursor',
         'src/scene',
         'src/geometrygraphsingleton',
-        'src/vertexMV',
-        'src/geomvertexMV', 
+        'src/modelviews/geomvertexMV', 
         'src/pointMV', 
         'src/asyncAPI',
         'src/lathe/adapter',
@@ -18,7 +17,6 @@ define([
         worldCursor,
         sceneModel,
         geometryGraph,
-        VertexMV,
         GeomVertexMV,
         PointMV,
         AsyncAPI,
@@ -89,15 +87,9 @@ define([
             // Create the child models
             var that = this;
             if (this.vertex.proto) {
-                this.stage = 0;
+                this.stage = 'center';
                 this.updateHint();
-                this.subModels = [
-                    new PointMV.EditingModel({
-                        vertex: points[0],
-                        parentModel: this,
-                    }),
-                ];
-                this.activePoint = this.subModels[0];
+                this.activePoint = points[0];
             } else {
                 this.originalImplicitChildren = geometryGraph.childrenOf(this.vertex);
                 this.editingImplicitChildren = [];
@@ -105,16 +97,6 @@ define([
                     var editing = AsyncAPI.edit(child);
                     return editing;
                 })
-                this.subModels = this.originalImplicitChildren.map(function(child, i) {
-                    // Replace the original model with an editing model
-                    var modelToDestroy = VertexMV.getModelForVertex(child)
-                    modelToDestroy.destroy();
-                    return new modelToDestroy.editingModelConstructor({
-                        original: child,
-                        vertex: that.editingImplicitChildren[i],
-                        parentModel: that
-                    });
-                });
             }
 
             this.setMainSceneView(new EditingSceneView({model: this}));
@@ -122,12 +104,14 @@ define([
 
         workplanePositionChanged: function(position, event) {
             if (this.vertex.proto) {
-                if (this.stage === 0) {
-                    this.activePoint.vertex.parameters.coordinate.x = position.x;
-                    this.activePoint.vertex.parameters.coordinate.y = position.y;
-                    this.activePoint.vertex.parameters.coordinate.z = position.z;
-                    this.activePoint.vertex.trigger('change', this.activePoint.vertex);            
-                } else if (this.stage === 1) {
+                // Center
+                if (this.stage === 'center') {
+                    this.activePoint.parameters.coordinate.x = position.x;
+                    this.activePoint.parameters.coordinate.y = position.y;
+                    this.activePoint.parameters.coordinate.z = position.z;
+                    this.activePoint.trigger('change', this.activePoint);  
+                // Radius          
+                } else if (this.stage === 'radius') {
                     var points = geometryGraph.childrenOf(this.vertex);
                     var center = 
                         calc.objToVector(points[0].parameters.coordinate, geometryGraph, THREE.Vector3);
@@ -149,10 +133,10 @@ define([
 
         workplaneClick: function(position) {
             if (this.vertex.proto) {
-                if (this.stage === 0) {
-                    ++this.stage;
+                if (this.stage === 'center') {
+                    this.stage ='radius';
                     this.updateHint();
-                } else if (this.stage === 1) {
+                } else if (this.stage === 'radius') {
                     this.tryCommit();
                 }
             } else {
@@ -192,11 +176,8 @@ define([
                 '<div class="delete"></div>' + 
                 '</td></tr><tr><td>' +
                 '</div>' + 
-                '<div>' + 
-                'radius <input class="field radius" type="text" value="{{radius}}"></input>' +
-                '</div>' +
-                '<div class="points">' + 
-                '</div>' + 
+                '<div class="children"></div>' +
+                '<div>radius <input class="field radius" type="text" value="{{radius}}"></input></div>' +
                 '</td></tr></table>';
             var view = {
                 name      : this.model.vertex.name,

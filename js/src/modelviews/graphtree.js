@@ -18,11 +18,16 @@ define([
         'src/geometrygraphsingleton',
         'src/modelviews/pointMV', 
         'src/modelviews/polylineMV',
+        'src/modelviews/cubeMV',
+        'src/modelviews/sphereMV',
+
     ], 
     function(
         geometryGraph,
         PointMV, 
-        PolylineMV) {
+        PolylineMV,
+        CubeMV,
+        SphereMV) {
 
     geometryGraph.on('vertexAdded', function(vertex) {
         if (vertex.category === 'geometry') {
@@ -139,6 +144,8 @@ define([
     var wrappers = {
         'point'     : PointMV,
         'polyline'  : PolylineMV,
+        'cube'      : CubeMV,
+        'sphere'    : SphereMV,
     }
 
     var createTree = function(vertex, domElement) {

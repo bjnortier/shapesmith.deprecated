@@ -5,8 +5,7 @@ define([
         'src/worldcursor',
         'src/scene',
         'src/geometrygraphsingleton',
-        'src/vertexMV',
-        'src/geomvertexMV', 
+        'src/modelviews/geomvertexMV', 
         'src/pointMV', 
         'src/heightanchorview',
         'src/asyncAPI',
@@ -20,7 +19,6 @@ define([
         worldCursor,
         sceneModel,
         geometryGraph,
-        VertexMV,
         GeomVertexMV,
         PointMV,
         EditingHeightAnchor,
@@ -77,7 +75,6 @@ define([
 
             var points = geometryGraph.childrenOf(this.vertex);
 
-            this.faceGroup = options.faceGroup;
             this.domView = new EditingDOMView({model: this});
             this.views.push(this.domView);
 
@@ -86,39 +83,19 @@ define([
             if (this.vertex.proto) {
                 this.stage = 0;
                 this.updateHint();
-                this.subModels = [
-                    new PointMV.EditingModel({
-                        vertex: points[0],
-                        parentModel: this,
-                    }),
-                ];
-                this.activePoint = this.subModels[0];
+                this.activePoint = points[0];
             } else {
                 this.originalImplicitChildren = geometryGraph.childrenOf(this.vertex);
                 this.editingImplicitChildren = [];
                 this.editingImplicitChildren = this.originalImplicitChildren.map(function(child, i) {
                     var editing = AsyncAPI.edit(child);
-
-                    if (!that.faceGroup) {
-                        that.views.push(new EditingHeightAnchor({
-                            model: that, 
-                            heightKey: 'height',
-                            pointVertex: editing
-                        }));
-                    }
+                    that.views.push(new EditingHeightAnchor({
+                        model: that, 
+                        heightKey: 'height',
+                        pointVertex: editing
+                    }));
                     return editing;
                 })
-                this.subModels = this.originalImplicitChildren.map(function(child, i) {
-
-                    // Replace the original model with an editing model
-                    var modelToDestroy = VertexMV.getModelForVertex(child)
-                    modelToDestroy.destroy();
-                    return new modelToDestroy.editingModelConstructor({
-                        original: child,
-                        vertex: that.editingImplicitChildren[i],
-                        parentModel: that
-                    });
-                });
             }
 
             this.setMainSceneView(new EditingSceneView({model: this}));
@@ -127,10 +104,10 @@ define([
         workplanePositionChanged: function(position, event) {
             if (this.vertex.proto) {
                 if (this.activePoint) {
-                    this.activePoint.vertex.parameters.coordinate.x = position.x;
-                    this.activePoint.vertex.parameters.coordinate.y = position.y;
-                    this.activePoint.vertex.parameters.coordinate.z = position.z;
-                    this.activePoint.vertex.trigger('change', this.activePoint.vertex);            
+                    this.activePoint.parameters.coordinate.x = position.x;
+                    this.activePoint.parameters.coordinate.y = position.y;
+                    this.activePoint.parameters.coordinate.z = position.z;
+                    this.activePoint.trigger('change', this.activePoint);            
                 } else if (this.activeHeightAnchor) {
                     this.activeHeightAnchor.drag(position, undefined, event);
                 }
@@ -154,7 +131,7 @@ define([
                     this.activeHeightAnchor = new EditingHeightAnchor({
                         model: this, 
                         heightKey: 'height',
-                        pointVertex: this.activePoint.vertex
+                        pointVertex: this.activePoint
                     });
                     this.activeHeightAnchor.dragStarted();
                     this.activeHeightAnchor.isDraggable = function() {
@@ -173,19 +150,8 @@ define([
 
         addPoint: function(position) {
             var point = geometryGraph.addPointToParent(this.vertex);
-            if (this.stage === 0) {
-                this.subModels.push(new PointMV.EditingModel({
-                    vertex: point, 
-                    parentModel: this
-                }));
-                this.activePoint = this.subModels[1];
-            }
+            this.activePoint = point;
             this.workplanePositionChanged(position);
-        },
-
-        isChildClickable: function(childModel) {
-            // Can't click the active point
-            return childModel !== this.activePoint;
         },
 
         updateHint: function() {

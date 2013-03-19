@@ -4,7 +4,7 @@ define([
     'src/geometrygraphsingleton',
     'src/settings',
     'src/workplaneMV',
-    'src/geomvertexMV',
+    'src/modelviews/geomvertexMV',
     ], function(calc, sceneModel, geometryGraph, settings, WorkplaneMV, GeomVertexMV) {
 
     var EditingHeightAnchor = GeomVertexMV.EditingSceneView.extend({

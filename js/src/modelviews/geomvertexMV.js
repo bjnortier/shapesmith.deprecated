@@ -397,7 +397,7 @@ define([
                 this.$el.html($.mustache(template, view));
                 return this;
             } else {
-                this.$el.html(this.model.vertex.id);
+                this.$el.html('');
             }
         },        
 
