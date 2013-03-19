@@ -5,10 +5,7 @@ define([
         'src/worldcursor',
         'src/scene',
         'src/geometrygraphsingleton',
-        'src/vertexMV',
-        'src/geomvertexMV', 
-        'src/pointMV', 
-        'src/heightanchorview',
+        'src/modelviews/geomvertexMV', 
         'src/asyncAPI',
         'src/lathe/adapter',
         'requirejsplugins/text!/ui/images/icons/subtract.svg',
@@ -19,10 +16,7 @@ define([
         worldCursor,
         sceneModel,
         geometryGraph,
-        VertexMV,
         GeomVertexMV,
-        PointMV,
-        EditingHeightAnchor,
         AsyncAPI,
         latheAdapter,
         icon) {
@@ -34,9 +28,36 @@ define([
         initialize: function(options) {
             this.displayModelConstructor = DisplayModel;
             GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
+
+            this.domView = new EditingDOMView({model: this});
+            this.views.push(this.domView);
+
             if (this.vertex.proto) {
                 this.tryCommit();
             }
+        },
+
+    });
+
+    var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
+
+        render: function() {
+            var template = 
+                '<table><tr>' +
+                '<td class="title">' + 
+                '<div class="icon24">' + icon + '</div>' +
+                '<div class="name">{{name}}</div>' + 
+                '<div class="delete"></div>' + 
+                '</td></tr><tr><td>' +
+                '</div>' + 
+                '<div class="children"></div>' +
+                '</td></tr></table>';
+            var view = {
+                name      : this.model.vertex.name,
+                height    : this.model.vertex.parameters.height,
+            };
+            this.$el.html($.mustache(template, view));
+            return this;
         },
 
     });

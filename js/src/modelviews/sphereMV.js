@@ -80,7 +80,6 @@ define([
 
             var points = geometryGraph.childrenOf(this.vertex);
 
-            this.faceGroup = options.faceGroup;
             this.domView = new EditingDOMView({model: this});
             this.views.push(this.domView);
 
@@ -185,10 +184,6 @@ define([
             };
             this.$el.html($.mustache(template, view));
             return this;
-        },
-
-        insertChild: function(childModel, childElement) {
-            this.$el.find('.points').append(childElement);
         },
 
         update: function() {

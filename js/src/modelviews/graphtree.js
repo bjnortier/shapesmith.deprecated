@@ -20,14 +20,15 @@ define([
         'src/modelviews/polylineMV',
         'src/modelviews/cubeMV',
         'src/modelviews/sphereMV',
-
+        'src/modelviews/subtractMV',
     ], 
     function(
         geometryGraph,
         PointMV, 
         PolylineMV,
         CubeMV,
-        SphereMV) {
+        SphereMV,
+        SubtractMV) {
 
     geometryGraph.on('vertexAdded', function(vertex) {
         if (vertex.category === 'geometry') {
@@ -146,6 +147,7 @@ define([
         'polyline'  : PolylineMV,
         'cube'      : CubeMV,
         'sphere'    : SphereMV,
+        'subtract'  : SubtractMV,
     }
 
     var createTree = function(vertex, domElement) {
@@ -158,12 +160,12 @@ define([
             appendDomElement: domElement,
         });
 
+        var childrenPlaceholder = model.domView.$el.find('.children')
         return new Node(
             vertex, 
             model,
             geometryGraph.childrenOf(vertex).map(function(child) {
-                var parentDomElement = model.domView.$el.find('.children');
-                return createTree(child, parentDomElement);
+                return createTree(child, childrenPlaceholder);
             })
         )
     }

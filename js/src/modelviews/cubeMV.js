@@ -187,8 +187,7 @@ define([
                 '<div>' + 
                 'height <input class="field height" type="text" value="{{height}}"></input>' +
                 '</div>' +
-                '<div class="points">' + 
-                '</div>' + 
+                '<div class="children"></div>' +
                 '</td></tr></table>';
             var view = {
                 name      : this.model.vertex.name,
@@ -196,10 +195,6 @@ define([
             };
             this.$el.html($.mustache(template, view));
             return this;
-        },
-
-        insertChild: function(childModel, childElement) {
-            this.$el.find('.points').append(childElement);
         },
 
         update: function() {
