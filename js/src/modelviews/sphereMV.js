@@ -80,9 +80,6 @@ define([
 
             var points = geometryGraph.childrenOf(this.vertex);
 
-            this.domView = new EditingDOMView({model: this});
-            this.views.push(this.domView);
-
             // Create the child models
             var that = this;
             if (this.vertex.proto) {
@@ -99,6 +96,12 @@ define([
             }
 
             this.setMainSceneView(new EditingSceneView({model: this}));
+        },
+
+        addTreeView: function() {
+            var domView = new EditingDOMView({model: this});
+            this.views.push(domView);
+            return domView;
         },
 
         workplanePositionChanged: function(position, event) {
@@ -237,7 +240,6 @@ define([
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
             this.sceneView = new DisplaySceneView({model: this});
             this.views.push(this.sceneView);
-            this.views.push(new GeomVertexMV.DisplayDOMView({model: this}));
             this.vertex.on('change', this.updateCumulativeArea, this);
         },
 

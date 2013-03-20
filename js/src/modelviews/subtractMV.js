@@ -28,13 +28,12 @@ define([
         initialize: function(options) {
             this.displayModelConstructor = DisplayModel;
             GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
+        },
 
-            this.domView = new EditingDOMView({model: this});
-            this.views.push(this.domView);
-
-            if (this.vertex.proto) {
-                this.tryCommit();
-            }
+        addTreeView: function() {
+            var domView = new EditingDOMView({model: this});
+            this.views.push(domView);
+            return domView;
         },
 
     });
@@ -73,7 +72,6 @@ define([
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
             this.sceneView = new DisplaySceneView({model: this});
             this.views.push(this.sceneView);
-            this.views.push(new GeomVertexMV.DisplayDOMView({model: this}));
             this.vertex.on('change', this.updateCumulativeArea, this);
         },
 

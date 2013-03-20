@@ -384,6 +384,11 @@ define([
             });
         }
 
+        this.verticesByCategory = function(category) {
+            return graph.vertices().filter(function(v) {
+                return v.category === category;
+            });
+        }
 
         this.childrenOf = function(vertex) {
             return graph.getOutgoing(vertex);

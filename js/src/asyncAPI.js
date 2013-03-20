@@ -144,7 +144,7 @@ define([
             geometryGraph.childrenOf(parent).forEach(function(child) {
 
                 // Avoid removing shared children more than once
-                if (child.implicit && (toRemove.indexOf(child) === -1)) {
+                if (toRemove.indexOf(child) === -1) {
                     // Delete children that have only this parent
                     var parents = geometryGraph.parentsOf(child);
                     var hasOtherParent = _.find(parents, function(p) {

@@ -338,6 +338,12 @@ define([
             coordinator.off('keyup', this.keyup, this);
         },
 
+        addTreeView: function() {
+            var domView = new DisplayDOMView({model: this});
+            this.views.push(domView);
+            return domView;
+        },
+
         canSelect: function() {
             return !this.vertex.implicit;
         },
@@ -473,6 +479,10 @@ define([
         //         view.unhighlight();
         //     })
         // },
+
+        hide: function() {
+            this.clear();
+        },
 
         click: function(event) {
             var vertexToSelect, parents;

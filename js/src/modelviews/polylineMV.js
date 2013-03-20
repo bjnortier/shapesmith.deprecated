@@ -81,9 +81,6 @@ define([
             }
 
             this.polyline = this.vertex;
-            this.domView = new EditingDOMView({model: this});
-            this.views.push(this.domView);
-
 
             // Create the child models
             if (this.vertex.proto) {
@@ -103,6 +100,12 @@ define([
             }
 
             this.setMainSceneView(new EditingLineSceneView({model: this}));
+        },
+
+        addTreeView: function() {
+            var domView = new EditingDOMView({model: this});
+            this.views.push(domView);
+            return domView;
         },
 
         workplanePositionChanged: function(position) {
@@ -252,9 +255,6 @@ define([
             this.polyline = this.vertex;
             this.sceneView = new DisplayLineSceneView({model: this});
             this.views.push(this.sceneView);
-            if (!this.vertex.implicit) {
-                this.views.push(new GeomVertexMV.DisplayDOMView({model: this}));
-            }
         },
 
         icon: icon,

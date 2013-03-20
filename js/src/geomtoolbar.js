@@ -9,6 +9,7 @@ define([
     'src/selection',
     'src/workplaneMV',
     'src/modelviews/vertexMV',
+    'src/asyncAPI',
     'requirejsplugins/text!/ui/images/icons/point.svg',
     'requirejsplugins/text!/ui/images/icons/polyline.svg',
     'requirejsplugins/text!/ui/images/icons/cube.svg',
@@ -27,6 +28,7 @@ define([
         selection,
         WorkplaneMV,
         VertexMV,
+        AsyncAPI,
         pointIcon,
         polylineIcon,
         cubeIcon, 
@@ -222,12 +224,17 @@ define([
 
                 var boolVertex = new GeomNode.Subtract({
                     proto: true,
-                    editing: true,
                 });
                 geometryGraph.add(boolVertex, function() {
                     geometryGraph.addEdge(boolVertex, a);
                     geometryGraph.addEdge(boolVertex, b);
                 });
+                var result = AsyncAPI.tryCommitCreate([boolVertex]);
+                if (!result.error) {
+                    var committedVertices = result.newVertices;
+                    VertexMV.eventProxy.trigger('committedCreate', [boolVertex], committedVertices);
+                    selection.deselectAll();
+                }
 
             }
         },

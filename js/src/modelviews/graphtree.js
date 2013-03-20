@@ -15,6 +15,7 @@
 //      tree will be duplicated.
 
 define([
+        'underscore',
         'src/geometrygraphsingleton',
         'src/modelviews/pointMV', 
         'src/modelviews/polylineMV',
@@ -23,6 +24,7 @@ define([
         'src/modelviews/subtractMV',
     ], 
     function(
+        _,
         geometryGraph,
         PointMV, 
         PolylineMV,
@@ -51,9 +53,10 @@ define([
     var trees = [];
 
     // A tree node
-    var Node = function(vertex, model, children) {
+    var Node = function(vertex, model, domView, children) {
         this.vertex = vertex;
         this.model = model;
+        this.domView = domView;
         this.children = children || [];
     }
 
@@ -76,11 +79,13 @@ define([
     }
 
     var addVertex = function(vertex) {
-        if (hasTree(vertex)) {
+        if (shouldHaveTree(vertex)) {
             trees.push(createTree(vertex, $('#geometry')));
         } else if (vertex.implicit) {
             // Implicit vertices will be added as children to all 
-            // parent nodes
+            // parent nodes. This happens during editing when a new
+            // point is added
+
             var parentVertices = geometryGraph.parentsOf(vertex);
             var parentNodes = [];
             parentVertices.forEach(function(parentVertex) {
@@ -90,13 +95,23 @@ define([
             });
 
             parentNodes.forEach(function(parentNode) {
-                var parentDomElement = parentNode.model.domView.$el.find('.children');
+                var parentDomElement = parentNode.domView.$el.find('.children');
                 parentNode.children.push(createTree(vertex, parentDomElement));
             })
         }
+
+        console.log(geometryGraph.verticesByCategory('geometry'), trees);
+        // Remove the trees that should not be there, e.g. when creating
+        // booleans
+        // trees = trees.reduce(function(acc, root) {
+        //     if (!shouldHaveTree(root.vertex)) {
+
+        //     }
+        // }, [])
     }
 
     var removeVertex = function(vertex) {
+
         trees = trees.reduce(function(acc, root) {
             root.findVertex(vertex).forEach(function(node) {
                 node.remove();
@@ -107,6 +122,21 @@ define([
                 return acc.concat(root);
             }
         }, []);
+
+        // If any of the children of the removed vertex should now be trees, 
+        // create them
+        var geomVerticesWithoutTrees = geometryGraph.filteredVertices(function(v) { 
+            var isGeom = (v.category === 'geometry');
+            var hasTree = _.find(trees, function(t) { return t.vertex.id === v.id});
+            return isGeom && !hasTree;
+
+        });
+        geomVerticesWithoutTrees.forEach(function(v) {
+            if (shouldHaveTree(v)) {
+                trees.push(createTree(v, $('#geometry')));
+            }
+        });
+        console.log(geometryGraph.verticesByCategory('geometry'), trees);
     }
 
     // Find the nodes in the tree representing the vertex and replace
@@ -128,17 +158,19 @@ define([
                 replaceDomElement: replaceDomElement,
             });
 
-            newModel.domView.$el.find('.children').replaceWith(
-                node.model.domView.$el.find('.children'));
+            var newDOMView = newModel.addTreeView();
+            newDOMView.$el.find('.children').replaceWith(
+                node.domView.$el.find('.children'));
 
             node.model.destroy();
             node.model = newModel;
+            node.domView = newDOMView;
 
         });
     }
 
     // Doesn the vertex have a tree?
-    var hasTree = function(vertex) {
+    var shouldHaveTree = function(vertex) {
         return !vertex.implicit && !geometryGraph.parentsOf(vertex).length;
     }
 
@@ -160,12 +192,27 @@ define([
             appendDomElement: domElement,
         });
 
-        var childrenPlaceholder = model.domView.$el.find('.children')
+        var domView = model.addTreeView();
+        var childrenPlaceholder = domView.$el.find('.children')
         return new Node(
             vertex, 
             model,
+            domView,
             geometryGraph.childrenOf(vertex).map(function(child) {
-                return createTree(child, childrenPlaceholder);
+
+                // Look for existign trees that should become children, e.g.
+                // when a boolean is created
+                var foundTree = _.find(trees, function(t) {
+                    return (t.vertex.id === child.id);
+                });
+                if (foundTree) {
+                    trees.splice(trees.indexOf(foundTree), 1);
+                    childrenPlaceholder.append(foundTree.domView.$el);
+                    foundTree.model.sceneView.hide();
+                    return foundTree;
+                } else {
+                    return createTree(child, childrenPlaceholder);
+                }
             })
         )
     }

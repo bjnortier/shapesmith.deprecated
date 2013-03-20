@@ -34,10 +34,14 @@ define([
         initialize: function(options) {
             this.displayModelConstructor = DisplayModel;
             GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
-
             this.setMainSceneView(new EditingSceneView({model: this}));
-            this.views.push(new EditingDOMView({model: this}));
             this.views.push(new CoordinateDOMView({model: this}));
+        },
+
+        addTreeView: function() {
+            var domView = new EditingDOMView({model: this});
+            this.views.push(domView);
+            return domView;
         },
 
         workplanePositionChanged: function(position) {
@@ -235,10 +239,8 @@ define([
             this.editingModelConstructor = EditingModel;
             this.displayModelConstructor = DisplayModel;
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
-
             this.sceneView = new DisplaySceneView({model: this});
             this.views.push(this.sceneView);
-            this.views.push(new GeomVertexMV.DisplayDOMView({model: this}));
         },
 
         selectParentOnClick: function() {
@@ -246,7 +248,6 @@ define([
         },
 
         icon: icon,
-
 
     });    
 

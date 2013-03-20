@@ -188,7 +188,7 @@ define(['underscore', 'backbone-events'], function(_, Events) {
         }
 
         this.fromObj = function(obj) {
-            root = new RootContainer().fromObj(obj);
+            root = new RootContainer().fromObj(obj || []);
             counters = {};
         }
 
