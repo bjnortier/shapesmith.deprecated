@@ -200,6 +200,7 @@ define([
                 });
                 if (foundTree) {
                     trees.splice(trees.indexOf(foundTree), 1);
+                    foundTree.domView.render();
                     childrenPlaceholder.append(foundTree.domView.$el);
                     foundTree.model.sceneView.hide();
                     return foundTree;

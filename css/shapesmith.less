@@ -158,42 +158,35 @@ input.field[type="text"] {
 #geometry {
     .vertex {
         background-color: rgba(255,255,255,0);
-        .actions {
+        .actions, .expand {
             display: inline-block;
-            visibility:hidden;
             vertical-align: middle;
             margin-top: -13px;
+            color: black;
+            font-size: 16px;
+        }
+        .actions {
+            visibility:hidden;
             i {
                 margin: 2px;
             }
+        }
+        .expand {
+            margin-right: 5px;
         }
         &:hover {
             .actions {
                 visibility:visible;
             }
         }
-        .delete {
-            &:hover {
-                color: red;
-            }
-        }
-        .showhide {
-            &:hover {
-                color: blue;
-            }
-        }
+        .delete   { &:hover { color: red; } }
+        .showhide { &:hover { color: blue; } }
+        .expand   { &:hover { color: rgb(83, 167, 44); } }
     }
     .vertex.editing {
         .children > .vertex {
             margin-left: 10px;
         }
-    }
-    // Hide children of children
-    .vertex .vertex {
-        .actions {
-            display: none;
-        }
-
     }
 
 }

@@ -409,22 +409,33 @@ define([
             if (!this.model.vertex.implicit) {
                 var parameters = this.model.vertex.parameters;
                 var color = (parameters.material && parameters.material.color) || '#6cbe32';
+                var hasExplicitChildren = !!_.find(
+                    geometryGraph.childrenOf(this.model.vertex),
+                    function(child) {
+                        return !child.implicit
+                    });
                 var view = {
                     id:   this.model.vertex.id,
                     name: this.model.vertex.name,
                     type: this.model.vertex.type,
                     fill: color,
                     stroke: color,
+                    isTopLevel: !geometryGraph.parentsOf(this.model.vertex).length,
+                    hasExplicitChildren: hasExplicitChildren,
                 }
                 var template = 
                     '<div class="title">' + 
+                    '{{#hasExplicitChildren}}' +
+                    '<i class="expand icon-chevron-left"></i>' +
+                    '{{/hasExplicitChildren}}' +    
                     '<div class="icon24" style="fill: {{fill}}; stroke: {{stroke}};">' + this.model.icon + '</div>' +
                     '<div class="name">{{name}}</div>' + 
+                    '{{#isTopLevel}}' +
                     '<div class="actions">' +
                         '<i class="showhide icon-eye-open"></i>' +
                         '<i class="delete icon-remove"></i>' +
-                        '<i class="expand icon-chevron-right"></i>' +
                     '</div>' +
+                    '{{/isTopLevel}}' +
                     '<div class="children {{id}}"></div>' +
                     '</div>';
                 this.$el.html($.mustache(template, view));
