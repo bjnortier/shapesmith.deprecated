@@ -175,29 +175,24 @@ define([
             }
         },
 
+        icon: icon,
 
     });
 
     var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
 
         render: function() {
+            GeomVertexMV.EditingDOMView.prototype.render.call(this);
             var template = 
-                '<table><tr>' +
-                '<td class="title">' + 
-                '<div class="icon24">' + icon + '</div>' +
-                '<div class="name">{{name}}</div>' + 
-                '<div class="delete"></div>' + 
-                '</td></tr><tr><td>' +
-                '</div>' + 
+                this.beforeTemplate +
                 '<div>' + 
                 'height <input class="field height" type="text" value="{{height}}"></input>' +
                 '</div>' +
-                '<div class="children"></div>' +
-                '</td></tr></table>';
-            var view = {
-                name      : this.model.vertex.name,
-                height    : this.model.vertex.parameters.height,
-            };
+                this.afterTemplate;
+                
+            var view = _.extend(this.baseView, {
+                height : this.model.vertex.parameters.height,
+            });
             this.$el.html($.mustache(template, view));
             return this;
         },

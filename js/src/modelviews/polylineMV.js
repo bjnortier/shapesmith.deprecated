@@ -102,6 +102,8 @@ define([
             this.setMainSceneView(new EditingLineSceneView({model: this}));
         },
 
+        icon: icon,
+
         addTreeView: function() {
             var domView = new EditingDOMView({model: this});
             this.views.push(domView);
@@ -222,19 +224,14 @@ define([
         },
 
         render: function() {
+            GeomVertexMV.EditingDOMView.prototype.render.call(this);
             var template = 
-                '<table><tr>' +
-                '<td class="title">' + 
-                '<div class="icon24">' + icon + '</div>' +
-                '<div class="name">{{name}}</div>' + 
-                '<div class="delete"></div>' + 
-                '</td></tr><tr><td>' +
-                '</div>' + 
-                '<div class="children"></div>' +
-                '</td></tr></table>';
-            var view = {
-                name: this.model.vertex.name,
-            };
+                this.beforeTemplate +
+                '<div>radius <input class="field radius" type="text" value="{{radius}}"></input></div>' +
+                this.afterTemplate;
+            var view = _.extend(this.baseView, {
+                radius : this.model.vertex.parameters.radius,
+            });
             this.$el.html($.mustache(template, view));
             return this;
         },

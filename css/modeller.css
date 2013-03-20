@@ -170,10 +170,6 @@ img#logo {
     z-index: 1;
 }
 
-#geometry .vertex.display, #geometry .vertex.editing, #variables {
-    background: rgba(51, 51, 51, 0.46);
-}
-
 #geometry {
     margin-top: 5px;
 }
@@ -608,11 +604,11 @@ body {
 }
 
 .toolbar {
-    background: rgba(200, 200, 200, 0.7);
+    background-color: rgba(200, 200, 200, 0.7);
 }
 
-#geometry .vertex.display, #geometry .vertex.editing, #variables {
-    background: rgba(200, 200, 200, 0.7);
+#geometry .vertex, #variables {
+    background-color: rgba(200, 200, 200, 0.7);
 }
 
 #geometry .vertex .name {

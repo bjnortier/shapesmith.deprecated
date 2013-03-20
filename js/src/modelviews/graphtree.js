@@ -95,19 +95,12 @@ define([
             });
 
             parentNodes.forEach(function(parentNode) {
-                var parentDomElement = parentNode.domView.$el.find('.children');
+                var parentDomElement = parentNode.domView.$el.find('.children.' + parentNode.vertex.id);
                 parentNode.children.push(createTree(vertex, parentDomElement));
             })
         }
 
         console.log(geometryGraph.verticesByCategory('geometry'), trees);
-        // Remove the trees that should not be there, e.g. when creating
-        // booleans
-        // trees = trees.reduce(function(acc, root) {
-        //     if (!shouldHaveTree(root.vertex)) {
-
-        //     }
-        // }, [])
     }
 
     var removeVertex = function(vertex) {
@@ -159,8 +152,8 @@ define([
             });
 
             var newDOMView = newModel.addTreeView();
-            newDOMView.$el.find('.children').replaceWith(
-                node.domView.$el.find('.children'));
+            newDOMView.$el.find('.children.' + original.id).replaceWith(
+                node.domView.$el.find('.children,' + replacement.id));
 
             node.model.destroy();
             node.model = newModel;
@@ -193,7 +186,7 @@ define([
         });
 
         var domView = model.addTreeView();
-        var childrenPlaceholder = domView.$el.find('.children')
+        var childrenPlaceholder = domView.$el.find('.children.' + vertex.id);
         return new Node(
             vertex, 
             model,

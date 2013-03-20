@@ -74,32 +74,23 @@ define([
             this.tryCommit()
         },
 
+        icon: icon,
+
     });
 
     var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
 
         render: function() {
+            GeomVertexMV.EditingDOMView.prototype.render.call(this);
             var template = 
-                '<table><tr>' +
-                '{{^implicit}}' +
-                '<td class="title">' + 
-                '<div class="icon24">' + icon + '</div>' +
-                '<div class="name">{{name}}</div>' + 
-                '<div class="delete"></div>' + 
-                '</td></tr><tr>' + 
-                '{{/implicit}}' +
-                '<td>' +
+                this.beforeTemplate +
                 '<div class="coordinate">' +
                 '<input class="field x" type="text" value="{{x}}"></input>' +
                 '<input class="field y" type="text" value="{{y}}"></input>' +
                 '<input class="field z" type="text" value="{{z}}"></input>' +
                 '</div>' +
-                '</td></tr></table>';
-            var view = {
-                id: this.model.vertex.id,
-                name: this.model.vertex.name,
-                implicit: this.model.vertex.implicit,
-            };
+                this.afterTemplate;
+            var view = this.baseView;
             this.$el.html($.mustache(template, view));
             this.update();
             return this;

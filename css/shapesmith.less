@@ -149,8 +149,18 @@ input.field[type="text"] {
     padding-bottom: 0;
 }
 
-#geometry .vertex.editing {
-    .children > .vertex {
-        margin-left: 10px;
+#geometry, #variables {
+    border: solid thin rgba(211, 211, 211, 0.51);
+    background-color: rgba(255,255,255,0.7);
+}
+
+#geometry {
+    .vertex {
+        background-color: rgba(255,255,255,0);
+    }
+    .vertex.editing {
+        .children > .vertex {
+            margin-left: 10px;
+        }
     }
 }

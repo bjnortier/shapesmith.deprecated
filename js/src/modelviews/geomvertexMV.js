@@ -300,6 +300,28 @@ define([
             } else if (this.model.attributes.replaceDomElement) {
                 this.model.attributes.replaceDomElement.replaceWith(this.$el);
             }
+            
+        },
+
+        render: function() {
+            this.beforeTemplate = 
+                '<table>' +
+                '{{^implicit}}' +
+                '<tr><td class="title">' + 
+                '<div class="icon24">' + this.model.icon + '</div>' +
+                '<div class="name">{{name}}</div>' + 
+                '<div class="delete"></div>' + 
+                '</td></tr>{{/implicit}}' +
+                '<tr><td>' +
+                '</div>' + 
+                '<div class="children {{id}}"></div>';
+            this.afterTemplate = 
+                '</td></tr></table>';
+            this.baseView = {
+                id: this.model.vertex.id,
+                name : this.model.vertex.name,
+                implicit: this.model.vertex.implicit,
+            }
         },
 
         remove: function() {
@@ -388,22 +410,24 @@ define([
                 var parameters = this.model.vertex.parameters;
                 var color = (parameters.material && parameters.material.color) || '#6cbe32';
                 var view = {
+                    id:   this.model.vertex.id,
                     name: this.model.vertex.name,
                     type: this.model.vertex.type,
                     fill: color,
                     stroke: color,
+                    canDelete: !geometryGraph.parentsOf(this.model.vertex).length,
                 }
                 var template = 
                     '<div class="title">' + 
                     '<div class="icon24" style="fill: {{fill}}; stroke: {{stroke}};">' + this.model.icon + '</div>' +
                     '<div class="name">{{name}}</div>' + 
-                    '<div class="delete"></div>' +
-                    '<div class="children"></div>' +
+                    '{{#canDelete}}<div class="delete"></div>{{/canDelete}}' +
+                    '<div class="children {{id}}"></div>' +
                     '</div>';
                 this.$el.html($.mustache(template, view));
                 return this;
             } else {
-                this.$el.html('');
+                this.$el.html(this.model.vertex.id);
             }
         },        
 
