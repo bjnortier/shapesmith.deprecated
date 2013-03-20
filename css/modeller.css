@@ -191,7 +191,7 @@ img#logo {
     cursor: pointer;    
 }
 
-.vertex .delete {   
+/*.vertex .delete {   
     display: inline-block;
     width: 16px;
     height: 16px;   
@@ -210,7 +210,7 @@ img#logo {
     background-image: url('/ui/images/icons/delete16x16.png') !important;
     cursor: pointer;
     background-repeat: no-repeat;
-}
+}*/
 
 .materials {
     position: absolute;

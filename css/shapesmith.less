@@ -1,3 +1,4 @@
+
 body {
     background-color: #fcfcfc;
 }
@@ -157,15 +158,42 @@ input.field[type="text"] {
 #geometry {
     .vertex {
         background-color: rgba(255,255,255,0);
+        .actions {
+            display: inline-block;
+            visibility:hidden;
+            vertical-align: middle;
+            margin-top: -13px;
+            i {
+                margin: 2px;
+            }
+        }
+        &:hover {
+            .actions {
+                visibility:visible;
+            }
+        }
+        .delete {
+            &:hover {
+                color: red;
+            }
+        }
+        .showhide {
+            &:hover {
+                color: blue;
+            }
+        }
     }
     .vertex.editing {
         .children > .vertex {
             margin-left: 10px;
         }
     }
+    // Hide children of children
     .vertex .vertex {
-        .delete {
+        .actions {
             display: none;
         }
+
     }
+
 }

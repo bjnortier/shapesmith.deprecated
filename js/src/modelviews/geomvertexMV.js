@@ -420,13 +420,17 @@ define([
                     '<div class="title">' + 
                     '<div class="icon24" style="fill: {{fill}}; stroke: {{stroke}};">' + this.model.icon + '</div>' +
                     '<div class="name">{{name}}</div>' + 
-                    '<div class="delete"></div>' +
+                    '<div class="actions">' +
+                        '<i class="showhide icon-eye-open"></i>' +
+                        '<i class="delete icon-remove"></i>' +
+                        '<i class="expand icon-chevron-right"></i>' +
+                    '</div>' +
                     '<div class="children {{id}}"></div>' +
                     '</div>';
                 this.$el.html($.mustache(template, view));
                 return this;
             } else {
-                this.$el.html(this.model.vertex.id);
+                this.$el.html();
             }
         },        
 
