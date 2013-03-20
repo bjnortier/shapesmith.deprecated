@@ -415,13 +415,12 @@ define([
                     type: this.model.vertex.type,
                     fill: color,
                     stroke: color,
-                    canDelete: !geometryGraph.parentsOf(this.model.vertex).length,
                 }
                 var template = 
                     '<div class="title">' + 
                     '<div class="icon24" style="fill: {{fill}}; stroke: {{stroke}};">' + this.model.icon + '</div>' +
                     '<div class="name">{{name}}</div>' + 
-                    '{{#canDelete}}<div class="delete"></div>{{/canDelete}}' +
+                    '<div class="delete"></div>' +
                     '<div class="children {{id}}"></div>' +
                     '</div>';
                 this.$el.html($.mustache(template, view));
