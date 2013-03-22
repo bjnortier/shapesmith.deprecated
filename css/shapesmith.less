@@ -156,9 +156,12 @@ input.field[type="text"] {
 }
 
 #geometry {
+    .parent {
+        display: inline-block;
+    }
     .vertex {
         background-color: rgba(255,255,255,0);
-        .actions, .expand {
+        .actions, .expand, .breadcrumb {
             display: inline-block;
             vertical-align: middle;
             margin-top: -13px;
@@ -173,6 +176,11 @@ input.field[type="text"] {
         }
         .expand {
             margin-right: 5px;
+        }
+        .breadcrumb {
+            margin-left: 5px;
+            margin-right: 5px;
+            margin-top: -19px;
         }
         &:hover {
             .actions {

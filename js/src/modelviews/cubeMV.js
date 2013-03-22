@@ -11,7 +11,7 @@ define([
         'src/asyncAPI',
         'src/lathe/adapter',
         'src/lathe/normalize',
-        'requirejsplugins/text!/ui/images/icons/cube.svg',
+        
     ], 
     function(
         $, __$,
@@ -24,8 +24,7 @@ define([
         EditingHeightAnchor,
         AsyncAPI,
         latheAdapter,
-        Normalize,
-        icon) {
+        Normalize) {
 
     // ---------- Common ----------
 
@@ -74,8 +73,6 @@ define([
             GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
 
             var points = geometryGraph.childrenOf(this.vertex);
-
-            
 
             // Create the child models
             var that = this;
@@ -175,8 +172,6 @@ define([
             }
         },
 
-        icon: icon,
-
     });
 
     var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
@@ -246,17 +241,17 @@ define([
             this.editingModelConstructor = EditingModel;
             this.displayModelConstructor = DisplayModel;
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
-            this.sceneView = new DisplaySceneView({model: this});
-            this.views.push(this.sceneView);
-            this.vertex.on('change', this.updateCumulativeArea, this);
         },
 
         destroy: function() {
             GeomVertexMV.DisplayModel.prototype.destroy.call(this);
-            this.vertex.off('change', this.updateCumulativeArea, this);
         },
 
-        icon: icon,
+        addSceneView: function() {
+            this.sceneView = new DisplaySceneView({model: this});
+            this.views.push(this.sceneView);
+            return this.sceneView;
+        },
 
     });
 
@@ -288,8 +283,10 @@ define([
                 var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
                     that.materials.normal.face, 
                 ]);
-                that.sceneObject.add(meshObject);
-                sceneModel.view.updateScene = true;
+                if (!that.hidden) {
+                    that.sceneObject.add(meshObject);
+                    sceneModel.view.updateScene = true;
+                }
             });
         },
 

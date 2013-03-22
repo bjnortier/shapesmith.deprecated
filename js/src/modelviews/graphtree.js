@@ -53,11 +53,39 @@ define([
     var trees = [];
 
     // A tree node
-    var Node = function(vertex, model, domView, children) {
+    var Node = function(vertex, model, domView, sceneView, children) {
         this.vertex = vertex;
         this.model = model;
-        this.domView = domView;
         this.children = children || [];
+
+        var that = this;
+        this.children.forEach(function(child) {
+            child.parent = this;            
+        })
+
+        this.expand = function() {
+            this.domView.$el.find('> .title').hide();
+            this.domView.$el.find('> .children').show();
+            this.children.forEach(function(child) {
+                child.sceneView.show();
+            })
+        }
+
+        // Listen to expand events from the domview
+        this.__defineSetter__('domView', function(domView) {
+            if (this._domView) {
+                this._domView.off('expand', this.expand, this);
+            }
+            this._domView = domView;
+            this._domView.on('expand', this.expand, this);
+        });
+
+        this.__defineGetter__('domView', function(domView) {
+            return this._domView;
+        });
+
+        this.domView = domView;
+        this.sceneView = sceneView;
     }
 
     Node.prototype.findVertex = function(vertex) {
@@ -75,17 +103,26 @@ define([
         this.children.forEach(function(child) {
             child.remove();
         })
+        this.domView.off('expand', this.expand, this);
         this.model.destroy();
+    }
+
+    Node.prototype.getRoot = function() {
+        if (this.parent) {
+            return this.parent.getRoot();
+        } else {
+            return this;
+        }
     }
 
     var addVertex = function(vertex) {
         if (shouldHaveTree(vertex)) {
             trees.push(createTree(vertex, $('#geometry')));
         } else if (vertex.implicit) {
+
             // Implicit vertices will be added as children to all 
             // parent nodes. This happens during editing when a new
             // point is added
-
             var parentVertices = geometryGraph.parentsOf(vertex);
             var parentNodes = [];
             parentVertices.forEach(function(parentVertex) {
@@ -93,14 +130,13 @@ define([
                     parentNodes = parentNodes.concat(tree.findVertex(parentVertex));
                 })
             });
-
             parentNodes.forEach(function(parentNode) {
                 var parentDomElement = parentNode.domView.$el.find('.children.' + parentNode.vertex.id);
                 parentNode.children.push(createTree(vertex, parentDomElement));
             })
         }
 
-        console.log(geometryGraph.verticesByCategory('geometry'), trees);
+        // console.log(geometryGraph.verticesByCategory('geometry'), trees);
     }
 
     var removeVertex = function(vertex) {
@@ -129,7 +165,7 @@ define([
                 trees.push(createTree(v, $('#geometry')));
             }
         });
-        console.log(geometryGraph.verticesByCategory('geometry'), trees);
+        // console.log(geometryGraph.verticesByCategory('geometry'), trees);
     }
 
     // Find the nodes in the tree representing the vertex and replace
@@ -186,11 +222,14 @@ define([
         });
 
         var domView = model.addTreeView();
+        var sceneView = model.addSceneView();
+        sceneView.hide();
         var childrenPlaceholder = domView.$el.find('.children.' + vertex.id);
         return new Node(
             vertex, 
             model,
             domView,
+            sceneView,
             geometryGraph.childrenOf(vertex).map(function(child) {
 
                 // Look for existign trees that should become children, e.g.
@@ -202,7 +241,7 @@ define([
                     trees.splice(trees.indexOf(foundTree), 1);
                     foundTree.domView.render();
                     childrenPlaceholder.append(foundTree.domView.$el);
-                    foundTree.model.sceneView.hide();
+                    foundTree.sceneView.hide();
                     return foundTree;
                 } else {
                     return createTree(child, childrenPlaceholder);

@@ -8,7 +8,6 @@ define([
         'src/modelviews/geomvertexMV', 
         'src/asyncAPI',
         'src/lathe/adapter',
-        'requirejsplugins/text!/ui/images/icons/subtract.svg',
     ], 
     function(
         $, __$,
@@ -18,8 +17,7 @@ define([
         geometryGraph,
         GeomVertexMV,
         AsyncAPI,
-        latheAdapter,
-        icon) {
+        latheAdapter) {
 
     // ---------- Editing ----------
 
@@ -41,20 +39,14 @@ define([
     var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
 
         render: function() {
+            GeomVertexMV.EditingDOMView.prototype.render.call(this);
             var template = 
-                '<table><tr>' +
-                '<td class="title">' + 
-                '<div class="icon24">' + icon + '</div>' +
-                '<div class="name">{{name}}</div>' + 
-                '<div class="delete"></div>' + 
-                '</td></tr><tr><td>' +
-                '</div>' + 
-                '<div class="children"></div>' +
-                '</td></tr></table>';
-            var view = {
-                name      : this.model.vertex.name,
-                height    : this.model.vertex.parameters.height,
-            };
+                this.beforeTemplate +
+                '<div>' + 
+                'height <input class="field height" type="text" value="{{height}}"></input>' +
+                '</div>' +
+                this.afterTemplate;
+            var view = this.baseView;
             this.$el.html($.mustache(template, view));
             return this;
         },
@@ -70,17 +62,17 @@ define([
             this.displayModelConstructor = DisplayModel;
             this.editingModelConstructor = EditingModel;
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
-            this.sceneView = new DisplaySceneView({model: this});
-            this.views.push(this.sceneView);
-            this.vertex.on('change', this.updateCumulativeArea, this);
         },
 
         destroy: function() {
             GeomVertexMV.DisplayModel.prototype.destroy.call(this);
-            this.vertex.off('change', this.updateCumulativeArea, this);
         },
 
-        icon: icon,
+        addSceneView: function() {
+            this.sceneView = new DisplaySceneView({model: this});
+            this.views.push(this.sceneView);
+            return this.sceneView;
+        },
 
     });
 
