@@ -12,7 +12,6 @@ define([
         'src/pointMV', 
         'src/workplaneMV',
         'src/asyncAPI',
-        'requirejsplugins/text!/ui/images/icons/polyline.svg',
     ], 
     function(
         $, __$,
@@ -26,8 +25,7 @@ define([
         GeomVertexMV,
         PointMV,
         WorkplaneMV,
-        AsyncAPI,
-        icon) {
+        AsyncAPI) {
 
     // ---------- Common ----------
 
@@ -101,8 +99,6 @@ define([
 
             this.setMainSceneView(new EditingLineSceneView({model: this}));
         },
-
-        icon: icon,
 
         addTreeView: function() {
             var domView = new EditingDOMView({model: this});
@@ -253,8 +249,6 @@ define([
             this.sceneView = new DisplayLineSceneView({model: this});
             this.views.push(this.sceneView);
         },
-
-        icon: icon,
 
     });
 

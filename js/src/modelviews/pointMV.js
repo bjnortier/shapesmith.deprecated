@@ -11,7 +11,6 @@ define([
         'src/modelviews/geomvertexMV', 
         'src/modelviews/dimensionview',
         'src/asyncAPI',
-        'requirejsplugins/text!/ui/images/icons/point.svg',
     ], 
     function(
         $, __$,
@@ -24,8 +23,7 @@ define([
         geometryGraph,
         GeomVertexMV,
         DimensionView,
-        AsyncAPI,
-        icon) {
+        AsyncAPI) {
 
     // ---------- Editing ----------
 
@@ -73,8 +71,6 @@ define([
             }
             this.tryCommit()
         },
-
-        icon: icon,
 
     });
 
@@ -230,15 +226,13 @@ define([
             this.editingModelConstructor = EditingModel;
             this.displayModelConstructor = DisplayModel;
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
+        },
+
+        addSceneView: function() {
             this.sceneView = new DisplaySceneView({model: this});
             this.views.push(this.sceneView);
+            return this.sceneView;
         },
-
-        selectParentOnClick: function() {
-            return this.vertex.implicit;
-        },
-
-        icon: icon,
 
     });    
 

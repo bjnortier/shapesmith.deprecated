@@ -13,7 +13,8 @@ define([
         'src/selection',
         'src/geometrygraphsingleton',
         'src/asyncAPI',
-        'src/modelviews/materialsdomview'
+        'src/modelviews/materialsdomview',
+        'src/icons',
     ], function(
         Backbone,
         $, __$,
@@ -28,7 +29,8 @@ define([
         selection,
         geometryGraph,
         AsyncAPI,
-        MaterialsDOMView) {
+        MaterialsDOMView,
+        icons) {
 
     // ---------- Common ----------
 
@@ -305,18 +307,17 @@ define([
 
         render: function() {
             this.beforeTemplate = 
-                '<table>' +
+                '<div>' +
                 '{{^implicit}}' +
-                '<tr><td class="title">' + 
-                '<div class="icon24">' + this.model.icon + '</div>' +
+                '<div class="title">' + 
+                '<div class="icon24">' + icons[this.model.vertex.type] + '</div>' +
                 '<div class="name">{{name}}</div>' + 
                 '<div class="delete"></div>' + 
-                '</td></tr>{{/implicit}}' +
-                '<tr><td>' +
+                '{{/implicit}}' +
                 '</div>' + 
                 '<div class="children {{id}}"></div>';
             this.afterTemplate = 
-                '</td></tr></table>';
+                '</div>';
             this.baseView = {
                 id: this.model.vertex.id,
                 name : this.model.vertex.name,
@@ -370,10 +371,6 @@ define([
             return !this.vertex.implicit;
         },
 
-        selectParentOnClick: function() {
-            return false;
-        },
-
         select: function(ids, selection) {
             VertexMV.DisplayModel.prototype.select.call(this, ids, selection);
             if ((selection.length === 1) && this.selected) {
@@ -403,10 +400,17 @@ define([
             } else if (this.model.attributes.replaceDomElement) {
                 this.model.attributes.replaceDomElement.replaceWith(this.$el);
             }
+
         },
 
         render: function() {
             if (!this.model.vertex.implicit) {
+                var parents = geometryGraph.parentsOf(this.model.vertex).map(function(p) {
+                    return {
+                        color:  (p.parameters.material && p.parameters.material.color) || '#6cbe32',
+                        icon: icons[p.type],
+                    }
+                });
                 var parameters = this.model.vertex.parameters;
                 var color = (parameters.material && parameters.material.color) || '#6cbe32';
                 var hasExplicitChildren = !!_.find(
@@ -415,29 +419,34 @@ define([
                         return !child.implicit
                     });
                 var view = {
+                    parents: parents,
                     id:   this.model.vertex.id,
                     name: this.model.vertex.name,
                     type: this.model.vertex.type,
-                    fill: color,
-                    stroke: color,
+                    color: color,
+                    icon: icons[this.model.vertex.type],
                     isTopLevel: !geometryGraph.parentsOf(this.model.vertex).length,
                     hasExplicitChildren: hasExplicitChildren,
                 }
                 var template = 
                     '<div class="title">' + 
-                    '{{#hasExplicitChildren}}' +
-                    '<i class="expand icon-chevron-left"></i>' +
-                    '{{/hasExplicitChildren}}' +    
-                    '<div class="icon24" style="fill: {{fill}}; stroke: {{stroke}};">' + this.model.icon + '</div>' +
-                    '<div class="name">{{name}}</div>' + 
-                    '{{#isTopLevel}}' +
-                    '<div class="actions">' +
-                        '<i class="showhide icon-eye-open"></i>' +
-                        '<i class="delete icon-remove"></i>' +
+                        '{{#parents}}<div class="parent">' +
+                            '<div class="icon24" style="fill: {{color}}; stroke: {{color}};">{{{icon}}}</div>' +
+                            '<i class="icon-angle-right breadcrumb"></i>' +
+                        '</div>{{/parents}}' +
+                        '{{#hasExplicitChildren}}' +
+                        '<i class="expand icon-chevron-right"></i>' +
+                        '{{/hasExplicitChildren}}' +    
+                        '<div class="icon24" style="fill: {{color}}; stroke: {{color}};">{{{icon}}}</div>' +
+                        '<div class="name">{{name}}</div>' + 
+                        '{{#isTopLevel}}' +
+                        '<div class="actions">' +
+                            '<i class="showhide icon-eye-open"></i>' +
+                            '<i class="delete icon-remove"></i>' +
+                        '</div>' +
+                        '{{/isTopLevel}}' +
                     '</div>' +
-                    '{{/isTopLevel}}' +
-                    '<div class="children {{id}}"></div>' +
-                    '</div>';
+                    '<div class="children {{id}}" style="display: none;"></div>';
                 this.$el.html($.mustache(template, view));
                 return this;
             } else {
@@ -448,6 +457,12 @@ define([
         events: {
             'click .title' : 'clickTitle',
             'click .delete': 'delete',
+            'click .expand': 'expand',
+        },
+
+        expand: function(event) {
+            event.stopPropagation();
+            this.trigger('expand');
         },
 
         clickTitle: function(event) {
@@ -520,6 +535,12 @@ define([
 
         hide: function() {
             this.clear();
+            this.hidden = true;
+        },
+
+        show: function() {
+            this.render();
+            this.hidden = false;
         },
 
         click: function(event) {

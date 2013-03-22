@@ -9,7 +9,6 @@ define([
         'src/pointMV', 
         'src/asyncAPI',
         'src/lathe/adapter',
-        'requirejsplugins/text!/ui/images/icons/sphere.svg',
     ], 
     function(
         $, __$,
@@ -20,8 +19,7 @@ define([
         GeomVertexMV,
         PointMV,
         AsyncAPI,
-        latheAdapter,
-        icon) {
+        latheAdapter) {
 
     // ---------- Common ----------
 
@@ -164,9 +162,6 @@ define([
             }
         },
 
-        icon: icon,
-
-
     });
 
     var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
@@ -235,15 +230,11 @@ define([
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
             this.sceneView = new DisplaySceneView({model: this});
             this.views.push(this.sceneView);
-            this.vertex.on('change', this.updateCumulativeArea, this);
         },
 
         destroy: function() {
             GeomVertexMV.DisplayModel.prototype.destroy.call(this);
-            this.vertex.off('change', this.updateCumulativeArea, this);
         },
-
-        icon: icon,
 
     }); 
 
