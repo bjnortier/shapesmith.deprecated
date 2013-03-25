@@ -46,11 +46,6 @@
         $('#scene canvas').mousewheel(function(event) {
             that.trigger('mousewheel', event);
         });
-        $('#explorer').click(function(event) {
-            calc.addOffset('#explorer', event);
-            event.stopPropagation();
-            that.trigger('containerClick', event);
-        });
 
         this.mousemove = function(event) {
             if (this.overDragThreshold(eventToPosition(event))) {

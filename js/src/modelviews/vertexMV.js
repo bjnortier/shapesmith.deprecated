@@ -52,6 +52,19 @@ define([
             selection.off('deselected', this.deselect, this);
         },  
 
+        addTreeView: function() {
+            var domView = new this.DOMView({model: this});
+            this.views.push(domView);
+            return domView;
+        },
+
+
+        addSceneView: function() {
+            this.sceneView = new this.SceneView({model: this});
+            this.views.push(this.sceneView);
+            return this.sceneView;
+        },
+
         select: function(ids, selection) {
             if (ids.indexOf(this.vertex.id) !== -1) {
                 this.set('selected', true);

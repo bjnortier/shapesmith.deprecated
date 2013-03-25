@@ -294,16 +294,6 @@
             geometryGraph.off('vertexReplaced', this.vertexReplaced, this);
         },  
 
-        containerClick: function(event) {
-            event.stopPropagation();
-            if (this.parentModel) {
-                return;
-            }
-            if (!this.proto) {
-                this.tryCommit();
-            }
-        },
-
         keyup: function(event) {
             // Delete
             if (!this.vertex.implicit && (event.keyCode === 46)) {
@@ -378,6 +368,7 @@
     var DisplayModel = VertexMV.DisplayModel.extend({ 
 
         initialize: function(options) {
+            this.DOMView = DisplayDOMView;
             VertexMV.DisplayModel.prototype.initialize.call(this, options);
             coordinator.on('keyup', this.keyup, this);
             worldCursor.on('click', this.workplaneClick, this);
@@ -389,11 +380,6 @@
             worldCursor.off('click', this.workplaneClick, this);
         },
 
-        addTreeView: function() {
-            var domView = new DisplayDOMView({model: this});
-            this.views.push(domView);
-            return domView;
-        },
 
         canSelect: function() {
             return !this.vertex.implicit;
@@ -470,11 +456,11 @@
         },        
 
         events: {
-            'click .title'   : 'clickTitle',
-            'dblclick .title': 'dblclickTitle',
-            'click .delete'  : 'delete',
-            'click .dive'    : 'clickDive',
-            'click .ascend'  : 'clickAscend',
+            'click > .title'   : 'clickTitle',
+            'dblclick > .title': 'dblclickTitle',
+            'click > .title > .actions > .delete'  : 'delete',
+            'click > .title > .dive'    : 'clickDive',
+            'click > .title > .ascend'  : 'clickAscend',
         },
 
         clickDive: function(event) {

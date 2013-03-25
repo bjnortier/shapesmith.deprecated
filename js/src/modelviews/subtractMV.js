@@ -23,19 +23,9 @@ define([
 
         initialize: function(options) {
             this.displayModelConstructor = DisplayModel;
+            this.DOMView = EditingDOMView;
+            this.SceneView = EditingSceneView;
             GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
-        },
-
-        addTreeView: function() {
-            var domView = new EditingDOMView({model: this});
-            this.views.push(domView);
-            return domView;
-        },
-
-        addSceneView: function() {
-            this.sceneView = new EditingSceneView({model: this});
-            this.views.push(this.sceneView);
-            return this.sceneView;
         },
 
         workplaneClick: function(position) {
@@ -70,10 +60,7 @@ define([
             this.renderMesh();
         },
 
-
     });
-
-
 
     // ---------- Display ----------
 
@@ -82,17 +69,12 @@ define([
         initialize: function(options) {
             this.displayModelConstructor = DisplayModel;
             this.editingModelConstructor = EditingModel;
+            this.SceneView = DisplaySceneView;
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
         },
 
         destroy: function() {
             GeomVertexMV.DisplayModel.prototype.destroy.call(this);
-        },
-
-        addSceneView: function() {
-            this.sceneView = new DisplaySceneView({model: this});
-            this.views.push(this.sceneView);
-            return this.sceneView;
         },
 
     });

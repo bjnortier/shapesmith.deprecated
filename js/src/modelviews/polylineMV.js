@@ -72,6 +72,8 @@ define([
 
         initialize: function(options) {
             this.displayModelConstructor = DisplayModel;
+            this.DOMView = EditingDOMView;
+            this.SceneView = EditingLineSceneView;
             GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
 
             if (this.vertex.implicit) {
@@ -97,12 +99,6 @@ define([
                 })
             }
 
-        },
-
-        addTreeView: function() {
-            var domView = new EditingDOMView({model: this});
-            this.views.push(domView);
-            return domView;
         },
 
         workplanePositionChanged: function(position) {
@@ -242,11 +238,9 @@ define([
         initialize: function(options) {
             this.editingModelConstructor = EditingModel;
             this.displayModelConstructor = DisplayModel;
+            this.SceneView = DisplayLineSceneView;
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
-
             this.polyline = this.vertex;
-            this.sceneView = new DisplayLineSceneView({model: this});
-            this.views.push(this.sceneView);
         },
 
     });
