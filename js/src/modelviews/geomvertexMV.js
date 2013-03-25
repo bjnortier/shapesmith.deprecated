@@ -52,9 +52,11 @@
 
         initialize: function() {
             var normalColor = 0x6cbe32;
+            var highlightColor = normalColor;
             var vertexMaterial = this.model.vertex.parameters.material;
             if (vertexMaterial && vertexMaterial.color) {
                 normalColor = vertexMaterial.color
+                highlightColor = normalColor;
             }
             this.materials = {
                 normal: {
@@ -70,10 +72,16 @@
                     edge: new THREE.LineBasicMaterial({color: 0x000000, transparent: true, opacity: 0, linewidth: 1, name: 'implicit.edge'}),  
                 },
                 highlight: {
-                    face: new THREE.MeshLambertMaterial({color: 0xffff66, transparent: true, opacity: 0.6, name: 'highlight.face'}),
-                    faceTranslucent: new THREE.MeshLambertMaterial({color: 0xffff66, transparent: true, opacity: 0.2, name: 'highlight.faceTranslucent'}),
-                    wire: new THREE.MeshBasicMaterial({color: 0xffff00, wireframe: true, linewidth: 1, name: 'highlight.wire'}),
-                    edge: new THREE.LineBasicMaterial({color: 0xffff00, linewidth: 2, name: 'highlight.edge'}),
+                    face: new THREE.MeshLambertMaterial({color: highlightColor, ambient: 0xffff99, name: 'highlight.face'}),
+                    faceTranslucent: new THREE.MeshLambertMaterial({color: highlightColor, transparent: true, opacity: 0.6, name: 'highlight.faceTranslucent'}),
+                    wire: new THREE.MeshBasicMaterial({color: highlightColor, wireframe: true, linewidth: 1, name: 'highlight.wire'}),
+                    edge: new THREE.LineBasicMaterial({color: highlightColor, linewidth: 2, name: 'highlight.edge'}),
+                },
+                selected: {
+                    face: new THREE.MeshLambertMaterial({color: 0xffff66, name: 'selected.face'}),
+                    faceTranslucent: new THREE.MeshLambertMaterial({color: 0xffff66, transparent: true, opacity: 0.6, name: 'selected.faceTranslucent'}),
+                    wire: new THREE.MeshBasicMaterial({color: 0xffff66, wireframe: true, linewidth: 1, name: 'selected.wire'}),
+                    edge: new THREE.LineBasicMaterial({color: 0xffff66, linewidth: 2, name: 'selected.edge'}),
                 },
                 editing: {
                     face: new THREE.MeshLambertMaterial({color: 0x0099cc, transparent: true, opacity: 0.5, name: 'editing.face'}),
@@ -372,11 +380,13 @@
         initialize: function(options) {
             VertexMV.DisplayModel.prototype.initialize.call(this, options);
             coordinator.on('keyup', this.keyup, this);
+            worldCursor.on('click', this.workplaneClick, this);
         },
 
         destroy: function() {
             VertexMV.DisplayModel.prototype.destroy.call(this);
             coordinator.off('keyup', this.keyup, this);
+            worldCursor.off('click', this.workplaneClick, this);
         },
 
         addTreeView: function() {
@@ -395,6 +405,10 @@
                     this.tryDelete();
                 }
             }
+        },
+
+        workplaneClick: function(event) {
+            selection.deselectAll();
         },
 
     }).extend(Common);
@@ -515,6 +529,7 @@
             this.on('click', this.click, this);
             this.on('dblclick', this.dblclick, this);
             this.model.vertex.on('change', this.render, this);
+            this.model.on('change:selected', this.updateSelected, this);
         },
 
         remove: function() {
@@ -524,10 +539,19 @@
             this.off('click', this.click, this);
             this.off('dblclick', this.dblclick, this);
             this.model.vertex.off('change', this.render, this);
+            this.model.off('change:selected', this.updateSelected, this);
         },
 
         isClickable: function() {
             return true;
+        },
+
+        updateSelected: function() {
+            if (this.model.get('selected')) {
+                this.updateMaterials('selected');
+            } else {
+                this.updateMaterials('normal');
+            }
         },
 
         highlight: function() {
@@ -551,7 +575,8 @@
                 if (this.model.vertex.implicit) {
                     this.updateMaterials('implicit');
                 } else {
-                    this.updateMaterials('normal');
+                    this.updateSelected();
+                    // this.updateMaterials('normal');
                 }
             }
             // var implicitViews = this.findImplicitDescendantSceneviews(this.model.vertex);

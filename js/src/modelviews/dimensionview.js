@@ -25,7 +25,6 @@ define([
             'mouseup'   : 'mouseup',
         },
 
-
         mousemove: function(event) {
             calc.addOffset('#scene canvas', event);
             coordinator.mousemove(event);

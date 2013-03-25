@@ -36,7 +36,7 @@ define([
 
             this.vertex = vertex;
             this.views = [];
-            this.selected = selection.isSelected(vertex.id);
+            this.set('selected', selection.isSelected(vertex.id));
 
             selection.on('selected', this.select, this);
             selection.on('deselected', this.deselect, this);
@@ -54,15 +54,13 @@ define([
 
         select: function(ids, selection) {
             if (ids.indexOf(this.vertex.id) !== -1) {
-                this.selected = true;
-                console.log('select', this.vertex.id);
+                this.set('selected', true);
             }
         },
 
         deselect: function(ids, selection) {
             if (ids.indexOf(this.vertex.id) !== -1) {
-                this.selected = false;
-                console.log('deselect', this.vertex.id);
+                this.set('selected', false);
             }
         },
 
