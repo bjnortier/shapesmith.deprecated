@@ -172,7 +172,7 @@ define(['src/calculations', 'src/scene', 'src/geometrygraphsingleton'], function
 
             var clickableViews = getClickableViews();
             if (clickableViews.length > 0) {
-                if (this.clickview === clickableViews[0]) {
+                if (this.clickView.cid === clickableViews[0].cid) {
                     clickableViews[0].trigger('dblclick', event);
                     this.trigger('sceneViewDblClick', {event: event, view: clickableViews[0]});
                     return true;

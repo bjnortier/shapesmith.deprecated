@@ -310,16 +310,6 @@
             }
         },
 
-        select: function(ids, selection) {
-            VertexMV.EditingModel.prototype.select.call(this, ids, selection);
-            if ((selection.length > 0) && this.selected) {
-                // Cancelling maintains the selection
-                this.cancel();
-            }
-        },
-
-
-
     }).extend(Common);
 
     var EditingDOMView = VertexMV.EditingDOMView.extend({
@@ -343,7 +333,7 @@
                 '<div class="delete"></div>' + 
                 '{{/implicit}}' +
                 '</div>' + 
-                '<div class="children {{id}}"></div>';
+                '<div class="children {{id}}" style="display: none;"></div>';
             this.afterTemplate = '';
             this.baseView = {
                 id: this.model.vertex.id,
@@ -397,13 +387,6 @@
 
         canSelect: function() {
             return !this.vertex.implicit;
-        },
-
-        select: function(ids, selection) {
-            VertexMV.DisplayModel.prototype.select.call(this, ids, selection);
-            if ((selection.length === 1) && this.selected && this.inContext) {
-                AsyncAPI.edit(this.vertex);
-            }
         },
 
         keyup: function(event) {
@@ -547,35 +530,35 @@
             return true;
         },
 
-        // highlight: function() {
-        //     this.highlighted = true;
-        //     if (!geometryGraph.isEditing()) {
-        //         if (this.model.vertex.implicit) {
-        //             this.updateMaterials('normal');
-        //         } else {
-        //             this.updateMaterials('highlight');
-        //         }
-        //     }
-        //     var implicitViews = this.findImplicitDescendantSceneviews(this.model.vertex);
-        //     implicitViews.forEach(function(view) {
-        //         view.highlight && view.highlight();
-        //     })
-        // },
+        highlight: function() {
+            this.highlighted = true;
+            if (!geometryGraph.isEditing()) {
+                if (this.model.vertex.implicit) {
+                    this.updateMaterials('normal');
+                } else {
+                    this.updateMaterials('highlight');
+                }
+            }
+            // var implicitViews = this.findImplicitDescendantSceneviews(this.model.vertex);
+            // implicitViews.forEach(function(view) {
+            //     view.highlight && view.highlight();
+            // })
+        },
 
-        // unhighlight: function() {
-        //     delete this.highlighted;
-        //     if (!geometryGraph.isEditing()) {
-        //         if (this.model.vertex.implicit) {
-        //             this.updateMaterials('implicit');
-        //         } else {
-        //             this.updateMaterials('normal');
-        //         }
-        //     }
-        //     var implicitViews = this.findImplicitDescendantSceneviews(this.model.vertex);
-        //     implicitViews.forEach(function(view) {
-        //         view.unhighlight();
-        //     })
-        // },
+        unhighlight: function() {
+            delete this.highlighted;
+            if (!geometryGraph.isEditing()) {
+                if (this.model.vertex.implicit) {
+                    this.updateMaterials('implicit');
+                } else {
+                    this.updateMaterials('normal');
+                }
+            }
+            // var implicitViews = this.findImplicitDescendantSceneviews(this.model.vertex);
+            // implicitViews.forEach(function(view) {
+            //     view.unhighlight();
+            // })
+        },
 
         click: function(event) {
             var vertexToSelect, parents;
@@ -603,6 +586,13 @@
                 } else {
                     selection.selectOnly(vertexToSelect.id);
                 }
+            }
+        },
+
+        dblclick: function(event) {
+            if (!geometryGraph.isEditing()) {
+                selection.deselectAll();
+                AsyncAPI.edit(this.model.vertex);
             }
         },
 
