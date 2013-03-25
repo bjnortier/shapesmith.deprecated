@@ -470,10 +470,11 @@
         },        
 
         events: {
-            'click .title' : 'clickTitle',
-            'click .delete': 'delete',
-            'click .dive'  : 'clickDive',
-            'click .ascend': 'clickAscend',
+            'click .title'   : 'clickTitle',
+            'dblclick .title': 'dblclickTitle',
+            'click .delete'  : 'delete',
+            'click .dive'    : 'clickDive',
+            'click .ascend'  : 'clickAscend',
         },
 
         clickDive: function(event) {
@@ -510,6 +511,14 @@
             event.stopPropagation();
             if (this.model.canSelect()) {
                 selection.selectOnly(this.model.vertex.id);
+            }
+        },
+
+        dblclickTitle: function(event) {
+            event.stopPropagation();
+            if (!geometryGraph.isEditing()) {
+                selection.deselectAll();
+                AsyncAPI.edit(this.model.vertex);
             }
         },
 
