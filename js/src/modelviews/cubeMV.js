@@ -9,7 +9,6 @@ define([
         'src/pointMV', 
         'src/heightanchorview',
         'src/asyncAPI',
-        'src/lathe/adapter',
         'src/lathe/normalize',
         
     ], 
@@ -23,7 +22,6 @@ define([
         PointMV,
         EditingHeightAnchor,
         AsyncAPI,
-        latheAdapter,
         Normalize) {
 
     // ---------- Common ----------
@@ -94,13 +92,18 @@ define([
                 })
             }
 
-            this.setMainSceneView(new EditingSceneView({model: this}));
         },
 
         addTreeView: function() {
             var domView = new EditingDOMView({model: this});
             this.views.push(domView);
             return domView;
+        },
+
+        addSceneView: function() {
+            this.sceneView = new EditingSceneView({model: this});
+            this.views.push(this.sceneView);
+            return this.sceneView;
         },
 
         workplanePositionChanged: function(position, event) {
@@ -257,37 +260,9 @@ define([
 
     var DisplaySceneView = GeomVertexMV.DisplaySceneView.extend(SceneViewMixin).extend({
 
-        initialize: function() {
-            GeomVertexMV.DisplaySceneView.prototype.initialize.call(this);
-        },
-
-        remove: function() {
-            GeomVertexMV.DisplaySceneView.prototype.remove.call(this);
-        },
-
         render: function() {
             GeomVertexMV.SceneView.prototype.render.call(this);
-
-            var that = this;
-            latheAdapter.generate(
-                that.model.vertex,
-                function(err, result) {
-
-                if (err) {
-                    console.error('no mesh', that.model.vertex.id);
-                    return;
-                }
-
-                var toMesh = that.polygonsToMesh(result.polygons);
-                var faceGeometry = toMesh.geometry;
-                var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
-                    that.materials.normal.face, 
-                ]);
-                if (!that.hidden) {
-                    that.sceneObject.add(meshObject);
-                    sceneModel.view.updateScene = true;
-                }
-            });
+            this.renderMesh();
         },
 
     })

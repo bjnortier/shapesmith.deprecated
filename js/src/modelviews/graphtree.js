@@ -63,21 +63,36 @@ define([
             child.parent = this;            
         })
 
-        this.expand = function() {
-            this.domView.$el.find('> .title').hide();
+        this.dive = function() {
             this.domView.$el.find('> .children').show();
             this.children.forEach(function(child) {
                 child.sceneView.show();
             })
+            this.sceneView.hide();
         }
 
-        // Listen to expand events from the domview
+        this.ascend = function() {
+            this.sceneView.show();
+            this.domView.$el.find('.children').hide();
+            var hideDescendants = function(node) {
+                node.children.forEach(function(child) {
+                    child.sceneView.hide();
+                    child.domView.ascend();
+                    hideDescendants(child);
+                })
+            }
+            hideDescendants(this);
+        }
+
+        // Listen to dive/ascend events from the domview
         this.__defineSetter__('domView', function(domView) {
             if (this._domView) {
-                this._domView.off('expand', this.expand, this);
+                this._domView.off('dive', this.dive, this);
+                this._domView.off('ascend', this.ascend, this);
             }
             this._domView = domView;
-            this._domView.on('expand', this.expand, this);
+            this._domView.on('dive', this.dive, this);
+            this._domView.on('ascend', this.ascend, this);
         });
 
         this.__defineGetter__('domView', function(domView) {
@@ -103,7 +118,8 @@ define([
         this.children.forEach(function(child) {
             child.remove();
         })
-        this.domView.off('expand', this.expand, this);
+        this.domView.off('dive', this.dive, this);
+        this.domView.off('ascend', this.ascend, this);
         this.model.destroy();
     }
 
@@ -136,7 +152,6 @@ define([
             })
         }
 
-        // console.log(geometryGraph.verticesByCategory('geometry'), trees);
     }
 
     var removeVertex = function(vertex) {
@@ -165,7 +180,6 @@ define([
                 trees.push(createTree(v, $('#geometry')));
             }
         });
-        // console.log(geometryGraph.verticesByCategory('geometry'), trees);
     }
 
     // Find the nodes in the tree representing the vertex and replace
@@ -188,12 +202,14 @@ define([
             });
 
             var newDOMView = newModel.addTreeView();
-            newDOMView.$el.find('.children.' + original.id).replaceWith(
-                node.domView.$el.find('.children,' + replacement.id));
+            newDOMView.$el.find('> .children.' + original.id).replaceWith(
+                node.domView.$el.find('> .children,' + replacement.id));
+            var sceneView = newModel.addSceneView();
 
             node.model.destroy();
             node.model = newModel;
             node.domView = newDOMView;
+            node.sceneView = sceneView;
 
         });
     }
@@ -223,8 +239,8 @@ define([
 
         var domView = model.addTreeView();
         var sceneView = model.addSceneView();
-        sceneView.hide();
-        var childrenPlaceholder = domView.$el.find('.children.' + vertex.id);
+        // sceneView.hide();
+        var childrenPlaceholder = domView.$el.find('> .children.' + vertex.id);
         return new Node(
             vertex, 
             model,
@@ -244,7 +260,9 @@ define([
                     foundTree.sceneView.hide();
                     return foundTree;
                 } else {
-                    return createTree(child, childrenPlaceholder);
+                    var childTree = createTree(child, childrenPlaceholder);
+                    childTree.sceneView.hide();
+                    return childTree;
                 }
             })
         )

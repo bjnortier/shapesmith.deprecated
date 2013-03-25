@@ -10,12 +10,7 @@ define([
     'src/workplaneMV',
     'src/modelviews/vertexMV',
     'src/asyncAPI',
-    'requirejsplugins/text!/ui/images/icons/point.svg',
-    'requirejsplugins/text!/ui/images/icons/polyline.svg',
-    'requirejsplugins/text!/ui/images/icons/cube.svg',
-    'requirejsplugins/text!/ui/images/icons/sphere.svg',
-    'requirejsplugins/text!/ui/images/icons/extrude.svg',
-    'requirejsplugins/text!/ui/images/icons/subtract.svg',
+    'src/icons',
     ], 
     function(
         calc,
@@ -29,12 +24,7 @@ define([
         WorkplaneMV,
         VertexMV,
         AsyncAPI,
-        pointIcon,
-        polylineIcon,
-        cubeIcon, 
-        sphereIcon,
-        extrudeIcon,
-        subtractIcon) {
+        icons) {
 
     var SelectItemModel = toolbar.ItemModel.extend({
         
@@ -63,7 +53,7 @@ define([
             geometryGraph.createPointPrototype({workplane: workplane});
         },
 
-        icon: pointIcon,
+        icon: icons['point'],
 
     });
 
@@ -77,7 +67,7 @@ define([
             geometryGraph.createPolylinePrototype({workplane: workplane});
         },
 
-        icon: polylineIcon,
+        icon: icons['polyline'],
 
     });
 
@@ -134,7 +124,7 @@ define([
             }
         },
 
-        icon: extrudeIcon,
+        icon: icons['extrude'],
 
     });
 
@@ -165,7 +155,7 @@ define([
             });
         },
 
-        icon: cubeIcon,
+        icon: icons['cube'],
 
     });
 
@@ -196,7 +186,7 @@ define([
             });
         },
 
-        icon: sphereIcon,
+        icon: icons['sphere'],
 
     });
 
@@ -218,28 +208,26 @@ define([
 
         activate: function(savedSelection) {
             toolbar.ItemModel.prototype.activate.call(this);
-            if (this.get('enabled')) {
-                var a = geometryGraph.vertexById(savedSelection[1]);
-                var b = geometryGraph.vertexById(savedSelection[0]);
+            var a = geometryGraph.vertexById(savedSelection[1]);
+            var b = geometryGraph.vertexById(savedSelection[0]);
 
-                var boolVertex = new GeomNode.Subtract({
-                    proto: true,
-                });
-                geometryGraph.add(boolVertex, function() {
-                    geometryGraph.addEdge(boolVertex, a);
-                    geometryGraph.addEdge(boolVertex, b);
-                });
-                var result = AsyncAPI.tryCommitCreate([boolVertex]);
-                if (!result.error) {
-                    var committedVertices = result.newVertices;
-                    VertexMV.eventProxy.trigger('committedCreate', [boolVertex], committedVertices);
-                    selection.deselectAll();
-                }
-
+            var boolVertex = new GeomNode.Subtract({
+                proto: true,
+                editing: true,
+            });
+            geometryGraph.add(boolVertex, function() {
+                geometryGraph.addEdge(boolVertex, a);
+                geometryGraph.addEdge(boolVertex, b);
+            });
+            var result = AsyncAPI.tryCommitCreate([boolVertex]);
+            if (!result.error) {
+                var committedVertices = result.newVertices;
+                VertexMV.eventProxy.trigger('committedCreate', [boolVertex], committedVertices);
+                selection.deselectAll();
             }
         },
 
-        icon: subtractIcon,
+        icon: icons['subtract'],
 
     });
 
@@ -270,6 +258,7 @@ define([
 
                 // Don't re-enter on cancel
                 VertexMV.eventProxy.off('cancelledCreate', this.setToSelect, this);
+                selection.deselectAll();
                 VertexMV.cancelIfEditing();
                 VertexMV.eventProxy.on('cancelledCreate', this.setToSelect, this);
 

@@ -1,4 +1,4 @@
-define([
+  define([
         'backbone',
         'jquery',
         'lib/jquery.mustache',
@@ -15,6 +15,7 @@ define([
         'src/asyncAPI',
         'src/modelviews/materialsdomview',
         'src/icons',
+        'src/lathe/adapter',
     ], function(
         Backbone,
         $, __$,
@@ -30,20 +31,21 @@ define([
         geometryGraph,
         AsyncAPI,
         MaterialsDOMView,
-        icons) {
+        icons,
+        latheAdapter) {
 
     // ---------- Common ----------
 
     var Common = {
 
-        setMainSceneView: function(sceneView) {
-            this.sceneView = sceneView;
-            this.views.push(sceneView);
-            this.sceneView.updateScreenBox(sceneModel.view.camera);
-            if (this.vertex.editing && !this.vertex.proto && !this.vertex.implicit && !this.isQuickEditing) {
-                this.views.push(new MaterialsDOMView({model: this}));
-            }
-        }
+        // setMainSceneView: function(sceneView) {
+        //     this.sceneView = sceneView;
+        //     this.views.push(sceneView);
+        //     this.sceneView.updateScreenBox(sceneModel.view.camera);
+        //     if (this.vertex.editing && !this.vertex.proto && !this.vertex.implicit && !this.isQuickEditing) {
+        //         this.views.push(new MaterialsDOMView({model: this}));
+        //     }
+        // }
     }
 
     var SceneView = VertexMV.SceneView.extend({
@@ -223,7 +225,32 @@ define([
 
             geometry.computeFaceNormals();
             return {geometry: geometry, indices: indices};
-        }   
+        },
+
+        renderMesh: function() {
+            var that = this;
+            latheAdapter.generate(
+                that.model.vertex,
+                function(err, result) {
+
+                if (err) {
+                    console.error('no mesh', that.model.vertex.id);
+                    return;
+                }
+
+                that.clear();
+                if (that.model.inContext) {
+                    var toMesh = that.polygonsToMesh(result.polygons);
+                    var faceGeometry = toMesh.geometry;
+                    var faceMaterial = that.model.vertex.editing ? 
+                        that.materials.editing.face :
+                        that.materials.normal.face;
+                    var meshObject = new THREE.Mesh(faceGeometry, faceMaterial);
+                    that.sceneObject.add(meshObject);
+                    sceneModel.view.updateScene = true;
+                }
+            });
+        },
 
     });
 
@@ -283,13 +310,15 @@ define([
             }
         },
 
-       select: function(ids, selection) {
+        select: function(ids, selection) {
             VertexMV.EditingModel.prototype.select.call(this, ids, selection);
             if ((selection.length > 0) && this.selected) {
                 // Cancelling maintains the selection
                 this.cancel();
             }
         },
+
+
 
     }).extend(Common);
 
@@ -307,21 +336,20 @@ define([
 
         render: function() {
             this.beforeTemplate = 
-                '<div>' +
                 '{{^implicit}}' +
                 '<div class="title">' + 
-                '<div class="icon24">' + icons[this.model.vertex.type] + '</div>' +
+                '<div class="icon24">{{{icon}}}</div>' +
                 '<div class="name">{{name}}</div>' + 
                 '<div class="delete"></div>' + 
                 '{{/implicit}}' +
                 '</div>' + 
                 '<div class="children {{id}}"></div>';
-            this.afterTemplate = 
-                '</div>';
+            this.afterTemplate = '';
             this.baseView = {
                 id: this.model.vertex.id,
                 name : this.model.vertex.name,
                 implicit: this.model.vertex.implicit,
+                icon: icons[this.model.vertex.type],
             }
         },
 
@@ -373,7 +401,7 @@ define([
 
         select: function(ids, selection) {
             VertexMV.DisplayModel.prototype.select.call(this, ids, selection);
-            if ((selection.length === 1) && this.selected) {
+            if ((selection.length === 1) && this.selected && this.inContext) {
                 AsyncAPI.edit(this.vertex);
             }
         },
@@ -405,12 +433,6 @@ define([
 
         render: function() {
             if (!this.model.vertex.implicit) {
-                var parents = geometryGraph.parentsOf(this.model.vertex).map(function(p) {
-                    return {
-                        color:  (p.parameters.material && p.parameters.material.color) || '#6cbe32',
-                        icon: icons[p.type],
-                    }
-                });
                 var parameters = this.model.vertex.parameters;
                 var color = (parameters.material && parameters.material.color) || '#6cbe32';
                 var hasExplicitChildren = !!_.find(
@@ -419,7 +441,6 @@ define([
                         return !child.implicit
                     });
                 var view = {
-                    parents: parents,
                     id:   this.model.vertex.id,
                     name: this.model.vertex.name,
                     type: this.model.vertex.type,
@@ -430,21 +451,18 @@ define([
                 }
                 var template = 
                     '<div class="title">' + 
-                        '{{#parents}}<div class="parent">' +
-                            '<div class="icon24" style="fill: {{color}}; stroke: {{color}};">{{{icon}}}</div>' +
-                            '<i class="icon-angle-right breadcrumb"></i>' +
-                        '</div>{{/parents}}' +
                         '{{#hasExplicitChildren}}' +
-                        '<i class="expand icon-chevron-right"></i>' +
+                        '<i class="dive icon-caret-down"></i>' +
+                        '<i class="ascend icon-caret-up"></i>' +
                         '{{/hasExplicitChildren}}' +    
                         '<div class="icon24" style="fill: {{color}}; stroke: {{color}};">{{{icon}}}</div>' +
                         '<div class="name">{{name}}</div>' + 
-                        '{{#isTopLevel}}' +
                         '<div class="actions">' +
-                            '<i class="showhide icon-eye-open"></i>' +
+                            '{{#isTopLevel}}' +
+                            // '<i class="showhide icon-eye-open"></i>' +
                             '<i class="delete icon-remove"></i>' +
+                            '{{/isTopLevel}}' +
                         '</div>' +
-                        '{{/isTopLevel}}' +
                     '</div>' +
                     '<div class="children {{id}}" style="display: none;"></div>';
                 this.$el.html($.mustache(template, view));
@@ -457,12 +475,38 @@ define([
         events: {
             'click .title' : 'clickTitle',
             'click .delete': 'delete',
-            'click .expand': 'expand',
+            'click .dive'  : 'clickDive',
+            'click .ascend': 'clickAscend',
         },
 
-        expand: function(event) {
+        clickDive: function(event) {
             event.stopPropagation();
-            this.trigger('expand');
+            this.trigger('dive');
+            this.dive()
+        },
+
+        clickAscend: function(event) {
+            event.stopPropagation();
+            this.trigger('ascend');
+            this.ascend();
+        },
+
+        ascend: function() {
+            this.$el.removeClass('dived');
+            var parameters = this.model.vertex.parameters;
+            var color = (parameters.material && parameters.material.color) || '#6cbe32';
+            this.$el.find('> .title > .icon24').attr(
+                "style", 
+                $.mustache("fill: {{color}}; stroke: {{color}}", {color: color}));
+        },
+
+
+        dive: function() {
+            this.$el.addClass('dived');
+            var color = "#eee";
+            this.$el.find('> .title > .icon24').attr(
+                "style", 
+                $.mustache("fill: {{color}}; stroke: {{color}}", {color: color}));
         },
 
         clickTitle: function(event) {
@@ -533,34 +577,25 @@ define([
         //     })
         // },
 
-        hide: function() {
-            this.clear();
-            this.hidden = true;
-        },
-
-        show: function() {
-            this.render();
-            this.hidden = false;
-        },
-
         click: function(event) {
             var vertexToSelect, parents;
             if (this.model.canSelect()) {
                 vertexToSelect = this.model.vertex;
             } else if (this.model.vertex.implicit) {
-                var findNonImplicitParent = function(vertex) {
-                    var parents = _.uniq(geometryGraph.parentsOf(vertex));
-                    if (parents.length === 1) {
-                        if (parents[0].implicit) {
-                            return findNonImplicitParent(parents[0]);
-                        } else {
-                            return parents[0];
-                        }
-                    } else {
-                        return undefined;
-                    }
-                }
-                vertexToSelect = findNonImplicitParent(this.model.vertex);
+                // Select the parent that is in context
+                // var findNonImplicitContextParent = function(vertex) {
+                //     var parents = _.uniq(geometryGraph.parentsOf(vertex));
+                //     if (parents.length === 1) {
+                //         if (parents[0].implicit) {
+                //             return findNonImplicitContextParent(parents[0]);
+                //         } else {
+                //             return parents[0];
+                //         }
+                //     } else {
+                //         return undefined;
+                //     }
+                // }
+                // vertexToSelect = findNonImplicitContextParent(this.model.vertex);
             } 
             if (vertexToSelect) {
                 if (event.shiftKey) {

@@ -97,7 +97,6 @@ define([
                 })
             }
 
-            this.setMainSceneView(new EditingLineSceneView({model: this}));
         },
 
         addTreeView: function() {

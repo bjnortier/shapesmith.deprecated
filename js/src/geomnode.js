@@ -43,7 +43,7 @@ define([
         
         if (options.hasOwnProperty('id')) {
             validateIdOrName(options.id);
-            if (!options.canHaveDuplicateId) {
+            if (!options.isClone) {
                 validateIdIsUnique(options.id);
             }
             this.id = options.id;
@@ -82,11 +82,12 @@ define([
         var cloneOptions = _.extend(options, {
             type     : this.type, 
             id       : this.id,
-            canHaveDuplicateId : true,
+            isClone : true,
             name     : this.name,
             implicit : this.implicit,
             workplane : calc.copyObj(this.workplane),
-            parameters : calc.copyObj(this.parameters)
+            parameters : calc.copyObj(this.parameters),
+            inContext: this.inContext,
         })
         var newNode = new this.constructor(cloneOptions);
         return newNode;

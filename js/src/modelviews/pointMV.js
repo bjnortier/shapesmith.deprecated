@@ -32,7 +32,6 @@ define([
         initialize: function(options) {
             this.displayModelConstructor = DisplayModel;
             GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
-            this.setMainSceneView(new EditingSceneView({model: this}));
             this.views.push(new CoordinateDOMView({model: this}));
         },
 
@@ -40,6 +39,12 @@ define([
             var domView = new EditingDOMView({model: this});
             this.views.push(domView);
             return domView;
+        },
+
+        addSceneView: function() {
+            this.sceneView = new EditingSceneView({model: this});
+            this.views.push(this.sceneView);
+            return this.sceneView;
         },
 
         workplanePositionChanged: function(position) {

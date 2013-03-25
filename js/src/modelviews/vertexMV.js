@@ -55,12 +55,14 @@ define([
         select: function(ids, selection) {
             if (ids.indexOf(this.vertex.id) !== -1) {
                 this.selected = true;
+                console.log('select', this.vertex.id);
             }
         },
 
         deselect: function(ids, selection) {
             if (ids.indexOf(this.vertex.id) !== -1) {
                 this.selected = false;
+                console.log('deselect', this.vertex.id);
             }
         },
 
@@ -71,6 +73,7 @@ define([
 
         initialize: function() {
             this.scene = sceneModel.view.scene;
+            this.model.inContext = true;
             this.updateCameraScale();
             this.render();
             sceneModel.view.on('cameraMoveStarted', this.cameraMoveStarted, this);
@@ -170,6 +173,16 @@ define([
             var cameraDistance = camera.position.length();
             var newScale = cameraDistance/150;
             this.cameraScale = new THREE.Vector3(newScale, newScale, newScale);
+        },
+
+        hide: function() {
+            this.clear();
+            this.model.inContext = false;
+        },
+
+        show: function() {
+            this.render();
+            this.model.inContext = true;
         },
 
     });
@@ -284,6 +297,13 @@ define([
             if (event.keyCode === 27) {
                 this.cancel();
                 selection.deselectAll();
+            }
+        },
+
+        deselect: function(ids, selection) {
+            Model.prototype.select.call(this, ids, selection);
+            if (!this.selected) {
+                this.cancel();
             }
         },
 

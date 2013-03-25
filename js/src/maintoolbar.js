@@ -11,9 +11,7 @@ define([
         'src/workplaneMV',
         'src/asyncAPI',
         'src/hintview',
-        'requirejsplugins/text!../../images/icons/cog.svg',
-        'requirejsplugins/text!../../images/icons/tag.svg',
-        'requirejsplugins/text!../../images/icons/list.svg',
+        'src/icons',
     ], 
     function(
             $, __$,
@@ -27,9 +25,7 @@ define([
             WorkplaneMV,
             AsyncAPI,
             hintView,
-            cogIcon,
-            tagIcon,
-            listIcon) {
+            icons) {
 
     var SettingsItemModel = toolbar.ItemModel.extend({
 
@@ -39,7 +35,7 @@ define([
             settings.edit();
         },
 
-        icon: cogIcon,
+        icon: icons['cog'],
 
     });
 
@@ -73,7 +69,7 @@ define([
             });
         },
 
-        icon: tagIcon,
+        icon: icons['tag'],
 
     });
 
@@ -95,7 +91,7 @@ define([
             window.location = '/_ui/' + globals.username + '/designs.html';
         },
 
-        icon: listIcon,
+        icon: icons['list'],
 
     });
 

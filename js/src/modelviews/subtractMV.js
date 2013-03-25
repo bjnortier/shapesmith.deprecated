@@ -7,7 +7,6 @@ define([
         'src/geometrygraphsingleton',
         'src/modelviews/geomvertexMV', 
         'src/asyncAPI',
-        'src/lathe/adapter',
     ], 
     function(
         $, __$,
@@ -16,12 +15,11 @@ define([
         sceneModel,
         geometryGraph,
         GeomVertexMV,
-        AsyncAPI,
-        latheAdapter) {
+        AsyncAPI) {
 
     // ---------- Editing ----------
 
-     var EditingModel = GeomVertexMV.EditingModel.extend({
+    var EditingModel = GeomVertexMV.EditingModel.extend({
 
         initialize: function(options) {
             this.displayModelConstructor = DisplayModel;
@@ -32,6 +30,18 @@ define([
             var domView = new EditingDOMView({model: this});
             this.views.push(domView);
             return domView;
+        },
+
+        addSceneView: function() {
+            this.sceneView = new EditingSceneView({model: this});
+            this.views.push(this.sceneView);
+            return this.sceneView;
+        },
+
+        workplaneClick: function(position) {
+            if (!this.vertex.proto) {
+                this.tryCommit();
+            }
         },
 
     });
@@ -52,6 +62,17 @@ define([
         },
 
     });
+
+    var EditingSceneView = GeomVertexMV.EditingSceneView.extend({
+
+        render: function() {
+            GeomVertexMV.EditingSceneView.prototype.render.call(this);
+            this.renderMesh();
+        },
+
+
+    });
+
 
 
     // ---------- Display ----------
@@ -78,39 +99,12 @@ define([
 
     var DisplaySceneView = GeomVertexMV.DisplaySceneView.extend({
 
-        initialize: function() {
-            GeomVertexMV.DisplaySceneView.prototype.initialize.call(this);
-        },
-
         render: function() {
             GeomVertexMV.DisplaySceneView.prototype.render.call(this);
-
-            var that = this;
-            latheAdapter.generate(
-                that.model.vertex,
-                function(err, result) {
-
-                if (err) {
-                    console.error('no mesh', that.model.vertex.id);
-                    return;
-                }
-
-                that.clear();
-                var toMesh = that.polygonsToMesh(result.polygons);
-                var faceGeometry = toMesh.geometry;
-                var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
-                    that.materials.normal.face, 
-                ]);
-                that.sceneObject.add(meshObject);
-                sceneModel.view.updateScene = true;
-            });
+            this.renderMesh();
         },
 
-        remove: function() {
-            GeomVertexMV.DisplaySceneView.prototype.remove.call(this);
-        },
-
-    })
+    });
 
 
 

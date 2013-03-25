@@ -8,7 +8,6 @@ define([
         'src/modelviews/geomvertexMV', 
         'src/pointMV', 
         'src/asyncAPI',
-        'src/lathe/adapter',
     ], 
     function(
         $, __$,
@@ -18,8 +17,7 @@ define([
         geometryGraph,
         GeomVertexMV,
         PointMV,
-        AsyncAPI,
-        latheAdapter) {
+        AsyncAPI) {
 
     // ---------- Common ----------
 
@@ -92,14 +90,18 @@ define([
                     return editing;
                 })
             }
-
-            this.setMainSceneView(new EditingSceneView({model: this}));
         },
 
         addTreeView: function() {
             var domView = new EditingDOMView({model: this});
             this.views.push(domView);
             return domView;
+        },
+
+        addSceneView: function() {
+            this.sceneView = new EditingSceneView({model: this});
+            this.views.push(this.sceneView);
+            return this.sceneView;
         },
 
         workplanePositionChanged: function(position, event) {
@@ -142,11 +144,6 @@ define([
             } else {
                 this.tryCommit();
             }
-        },
-
-        isChildClickable: function(childModel) {
-            // Can't click the active point
-            return childModel !== this.activePoint;
         },
 
         updateHint: function() {
@@ -228,48 +225,25 @@ define([
             this.editingModelConstructor = EditingModel;
             this.displayModelConstructor = DisplayModel;
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
-            this.sceneView = new DisplaySceneView({model: this});
-            this.views.push(this.sceneView);
         },
 
         destroy: function() {
             GeomVertexMV.DisplayModel.prototype.destroy.call(this);
         },
 
+        addSceneView: function() {
+            this.sceneView = new DisplaySceneView({model: this});
+            this.views.push(this.sceneView);
+            return this.sceneView;
+        },
+
     }); 
 
     var DisplaySceneView = GeomVertexMV.DisplaySceneView.extend(SceneViewMixin).extend({
 
-        initialize: function() {
-            GeomVertexMV.DisplaySceneView.prototype.initialize.call(this);
-        },
-
         render: function() {
-            GeomVertexMV.DisplaySceneView.prototype.render.call(this);
-
-            var that = this;
-            latheAdapter.generate(
-                that.model.vertex,
-                function(err, result) {
-
-                if (err) {
-                    console.error('no mesh', that.model.vertex.id);
-                    return;
-                }
-
-                that.clear();
-                var toMesh = that.polygonsToMesh(result.polygons);
-                var faceGeometry = toMesh.geometry;
-                var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
-                    that.materials.normal.face, 
-                ]);
-                that.sceneObject.add(meshObject);
-                sceneModel.view.updateScene = true;
-            });
-        },
-
-        remove: function() {
-            GeomVertexMV.DisplaySceneView.prototype.remove.call(this);
+            GeomVertexMV.SceneView.prototype.render.call(this);
+            this.renderMesh();
         },
 
     })

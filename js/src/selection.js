@@ -56,6 +56,7 @@ define([
                 selected.push(id);
                 this.trigger('selected', [id], selected);
             }
+
         }
 
         this.deselectAll = function() {
@@ -71,7 +72,7 @@ define([
         }
 
         this.getSelected = function() {
-            return selected.splice(0);
+            return selected.slice(0);
         }
     }
 

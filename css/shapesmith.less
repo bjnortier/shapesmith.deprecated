@@ -97,8 +97,8 @@ body {
 }
 
 #geometry .editing .icon24 svg {
-    fill:#eee;
-    stroke:#999;
+    fill: rgba(166, 219, 230, 0.42);
+    stroke: rgb(166, 219, 230);
 }
 
 .toolbar .icon32 svg {
@@ -150,18 +150,33 @@ input.field[type="text"] {
     padding-bottom: 0;
 }
 
-#geometry, #variables {
+#graphs {
+    padding: 0;
+    height: 100%;
+    border-right: solid thin rgb(255, 252, 252);
+    min-width: 150px;
+    box-shadow: 3px 00px 10px rgba(0, 0, 0, 0.2);
+    background-color: rgba(255, 255, 255, 0.64);
+}
+
+/*#geometry, #variables {
     border: solid thin rgba(211, 211, 211, 0.51);
     background-color: rgba(255,255,255,0.7);
 }
+*/
+
+#variables {
+    background: none;
+    width: 100%;
+}
 
 #geometry {
-    .parent {
-        display: inline-block;
-    }
     .vertex {
+        .vertex {
+            margin-left: 10px;
+        }
         background-color: rgba(255,255,255,0);
-        .actions, .expand, .breadcrumb {
+        .actions, .dive, .ascend {
             display: inline-block;
             vertical-align: middle;
             margin-top: -13px;
@@ -174,13 +189,8 @@ input.field[type="text"] {
                 margin: 2px;
             }
         }
-        .expand {
+        .dive {
             margin-right: 5px;
-        }
-        .breadcrumb {
-            margin-left: 5px;
-            margin-right: 5px;
-            margin-top: -19px;
         }
         &:hover {
             .actions {
@@ -189,12 +199,37 @@ input.field[type="text"] {
         }
         .delete   { &:hover { color: red; } }
         .showhide { &:hover { color: blue; } }
-        .expand   { &:hover { color: rgb(83, 167, 44); } }
+        .ascend { display: none; }
+        .dive, .ascend { &:hover { color: rgb(83, 167, 44); } }
+    }
+    .vertex.dived {
+        >.title {
+            /*>.icon24 {
+                fill: #eee;
+                stroke: #999;
+            }*/
+            >.name {
+                display: none;
+            }
+            >.dive {
+                display: none;
+                
+            }
+            >.ascend {
+                display: inline-block;
+            }
+            >.actions { 
+                // >.showhide, >.delete,  {
+                //     display: none;
+                // }
+            }
+        }
+        .title {
+            display: inline;
+        }
     }
     .vertex.editing {
         .children > .vertex {
-            margin-left: 10px;
         }
     }
-
 }
