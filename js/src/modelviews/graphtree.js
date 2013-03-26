@@ -225,6 +225,9 @@ define([
             newDOMView.$el.find('> .children.' + original.id).replaceWith(
                 node.domView.$el.find('> .children,' + replacement.id));
             var sceneView = newModel.addSceneView();
+            if (!node.model.inContext) {
+                sceneView.hide();
+            }
 
             node.model.destroy();
             node.model = newModel;
