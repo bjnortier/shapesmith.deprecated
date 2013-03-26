@@ -2,6 +2,7 @@ define([
         'jquery',
         'lib/jquery.getQueryParam',
         'src/toolbar',
+        'src/geomtoolbar',
         'src/scene',
         'src/geometrygraphsingleton',
         'src/vertexmodelmanager',
@@ -16,6 +17,7 @@ define([
     function(
             $, __$,
             toolbar,
+            geomToolbar,
             sceneModel,
             geometryGraph,
             vertexModelManager,
