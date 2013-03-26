@@ -80,7 +80,10 @@ define([
 
         render: function() {
             GeomVertexMV.DisplaySceneView.prototype.render.call(this);
-            this.renderMesh();
+            var that = this;
+            this.createMesh(function(result) {
+                that.renderMesh(result);
+            });
         },
 
     });

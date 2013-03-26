@@ -235,7 +235,7 @@
             return {geometry: geometry, indices: indices};
         },
 
-        renderMesh: function() {
+        createMesh: function(callback) {
             var that = this;
             latheAdapter.generate(
                 that.model.vertex,
@@ -244,20 +244,25 @@
                 if (err) {
                     console.error('no mesh', that.model.vertex.id);
                     return;
+                } else if(callback) {
+                    callback(result);
                 }
-
-                that.clear();
-                if (that.model.inContext) {
-                    var toMesh = that.polygonsToMesh(result.polygons);
-                    var faceGeometry = toMesh.geometry;
-                    var faceMaterial = that.model.vertex.editing ? 
-                        that.materials.editing.face :
-                        that.materials.normal.face;
-                    var meshObject = new THREE.Mesh(faceGeometry, faceMaterial);
-                    that.sceneObject.add(meshObject);
-                    sceneModel.view.updateScene = true;
-                }
+                
             });
+        },
+
+        renderMesh: function(result) {
+            this.clear();
+            if (this.model.inContext) {
+                var toMesh = this.polygonsToMesh(result.polygons);
+                var faceGeometry = toMesh.geometry;
+                var faceMaterial = this.model.vertex.editing ? 
+                    this.materials.editing.face :
+                    this.materials.normal.face;
+                var meshObject = new THREE.Mesh(faceGeometry, faceMaterial);
+                this.sceneObject.add(meshObject);
+                sceneModel.view.updateScene = true;
+            }
         },
 
     });

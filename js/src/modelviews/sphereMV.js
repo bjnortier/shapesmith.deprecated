@@ -229,8 +229,11 @@ define([
     var DisplaySceneView = GeomVertexMV.DisplaySceneView.extend(SceneViewMixin).extend({
 
         render: function() {
-            GeomVertexMV.SceneView.prototype.render.call(this);
-            this.renderMesh();
+            GeomVertexMV.DisplaySceneView.prototype.render.call(this);
+            var that = this;
+            this.createMesh(function(result) {
+                that.renderMesh(result);
+            });
         },
 
     })
