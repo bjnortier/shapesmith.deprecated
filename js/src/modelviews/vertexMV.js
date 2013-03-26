@@ -346,6 +346,9 @@ define([
             this.model.domView = this;
             this.render();
             this.$el.addClass(this.model.vertex.id);
+            if (this.model.vertex.implicit) {
+                this.$el.addClass('implicit');
+            }
             this.model.vertex.on('change', this.update, this);
         },
 

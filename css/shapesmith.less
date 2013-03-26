@@ -176,25 +176,29 @@ input.field[type="text"] {
             margin-left: 10px;
         }
         background-color: rgba(255,255,255,0);
-        .actions, .dive, .ascend {
-            display: inline-block;
-            vertical-align: middle;
-            margin-top: -13px;
-            color: black;
-            font-size: 16px;
-        }
-        .actions {
-            visibility:hidden;
-            i {
-                margin: 2px;
+        >.title {
+            >.actions, >.dive {
+                display: inline-block;
+                vertical-align: middle;
+                margin-top: -13px;
+                color: black;
+                font-size: 16px;
+            }
+            .actions {
+                visibility:hidden;
+                i {
+                    margin: 2px;
+                }
             }
         }
         .dive {
             margin-right: 5px;
         }
         &:hover {
-            .actions {
-                visibility:visible;
+            >.title {
+                .actions {
+                    visibility:visible;
+                }
             }
         }
         .delete   { &:hover { color: red; } }
@@ -228,8 +232,22 @@ input.field[type="text"] {
             display: inline;
         }
     }
+    .vertex.display {
+        >.children {
+            display: none;
+        }
+    }
+    .vertex.display.dived {
+        >.children {
+            display: block;
+        }
+    }
     .vertex.editing {
-        .children > .vertex {
+        >.children > .vertex {
+            display: none;
+        }
+        >.children > .vertex.implicit {
+            display: block;
         }
     }
 }

@@ -210,7 +210,6 @@ define([
             GeomVertexMV.EditingDOMView.prototype.render.call(this);
             var template = 
                 this.beforeTemplate +
-                '<div>radius <input class="field radius" type="text" value="{{radius}}"></input></div>' +
                 this.afterTemplate;
             var view = _.extend(this.baseView, {
                 radius : this.model.vertex.parameters.radius,

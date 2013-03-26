@@ -1,4 +1,4 @@
-// The graph tree is a tree-like interface to a graph. Trees are much
+// The object tree is a tree-like interface to the geometry graph. Trees are much
 // easier to display and interact with than graphs, since they are simple
 // collapsable hierarchies. 
 //
@@ -12,7 +12,7 @@
 //   1. Each vertex in the graph that has no parents and is not implicit 
 //      will have a tree.
 //   2. Vertices in the graph that are shared between more than one resulting
-//      tree will be duplicated.
+//      tree will have multiple tree views 
 
 define([
         'underscore',
@@ -39,7 +39,7 @@ define([
         })
 
         this.dive = function() {
-            this.domView.$el.find('> .children').show();
+            // this.domView.$el.find('> .children').show();
             this.children.forEach(function(child) {
                 child.showInScene()
             })
@@ -48,7 +48,7 @@ define([
 
         this.ascend = function() {
             this.showInScene();
-            this.domView.$el.find('.children').hide();
+            // this.domView.$el.find('.children').hide();
             var hideDescendants = function(node) {
                 node.children.forEach(function(child) {
                     if (!child.vertex.implicit) {
@@ -187,8 +187,6 @@ define([
             var newDOMView = replacementModel.addTreeView({replaceDomElement: replaceDomElement});
             var oldChildrenElement = newDOMView.$el.find('> .children.' + original.id);
             var newChildrenElement = node.domView.$el.find('> .children,' + replacement.id)
-            var style = oldChildrenElement.attr('style');
-            newChildrenElement.attr('style', style);
             oldChildrenElement.replaceWith(newChildrenElement);
             node.domView = newDOMView;
 
@@ -221,6 +219,7 @@ define([
                     trees.splice(trees.indexOf(foundTree), 1);
                     foundTree.domView.render();
                     childrenPlaceholder.append(foundTree.domView.$el);
+                    foundTree.domView.delegateEvents();
                     foundTree.hideInScene();
                     return foundTree;
                 } else {

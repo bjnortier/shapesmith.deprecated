@@ -36,18 +36,6 @@
 
     // ---------- Common ----------
 
-    var Common = {
-
-        // setMainSceneView: function(sceneView) {
-        //     this.sceneView = sceneView;
-        //     this.views.push(sceneView);
-        //     this.sceneView.updateScreenBox(sceneModel.view.camera);
-        //     if (this.vertex.editing && !this.vertex.proto && !this.vertex.implicit && !this.isQuickEditing) {
-        //         this.views.push(new MaterialsDOMView({model: this}));
-        //     }
-        // }
-    }
-
     var SceneView = VertexMV.SceneView.extend({
 
         initialize: function() {
@@ -313,7 +301,7 @@
             }
         },
 
-    }).extend(Common);
+    })
 
     var EditingDOMView = VertexMV.EditingDOMView.extend({
 
@@ -402,7 +390,7 @@
             selection.deselectAll();
         },
 
-    }).extend(Common);
+    })
 
     var DisplayDOMView = VertexMV.DisplayDOMView.extend({
 
@@ -452,7 +440,7 @@
                             '{{/isTopLevel}}' +
                         '</div>' +
                     '</div>' +
-                    '<div class="children {{id}}" style="display: none;"></div>';
+                    '<div class="children {{id}}"></div>';
                 this.$el.html($.mustache(template, view));
                 return this;
             } else {
@@ -576,7 +564,6 @@
                     this.updateMaterials('implicit');
                 } else {
                     this.updateSelected();
-                    // this.updateMaterials('normal');
                 }
             }
             // var implicitViews = this.findImplicitDescendantSceneviews(this.model.vertex);
