@@ -296,26 +296,28 @@ define([
         },
 
         updateScaledObjects: function() {
-            this.point.scale = this.cameraScale;
+            if (this.model.inContext) {
+                this.point.scale = this.cameraScale;
 
-            if (this.selectionPoint) {
-                this.hiddenSelectionObject.remove(this.selectionPoint);
+                if (this.selectionPoint) {
+                    this.hiddenSelectionObject.remove(this.selectionPoint);
+                }
+
+                var hiddenGeometry = new THREE.CubeGeometry(2, 2, 2);
+                var that = this;
+                hiddenGeometry.vertices = hiddenGeometry.vertices.map(function(vertex) {
+                    vertex.multiply(that.cameraScale);
+                    vertex.add(that.point.position);
+                    return vertex;
+                });
+                hiddenGeometry.computeCentroids();
+                hiddenGeometry.computeFaceNormals();
+                hiddenGeometry.computeBoundingSphere();
+                this.selectionPoint = new THREE.Mesh(
+                    hiddenGeometry,
+                    new THREE.MeshBasicMaterial({color: 0x000000, side: THREE.DoubleSide }));
+                this.hiddenSelectionObject.add(this.selectionPoint);  
             }
-
-            var hiddenGeometry = new THREE.CubeGeometry(2, 2, 2);
-            var that = this;
-            hiddenGeometry.vertices = hiddenGeometry.vertices.map(function(vertex) {
-                vertex.multiply(that.cameraScale);
-                vertex.add(that.point.position);
-                return vertex;
-            });
-            hiddenGeometry.computeCentroids();
-            hiddenGeometry.computeFaceNormals();
-            hiddenGeometry.computeBoundingSphere();
-            this.selectionPoint = new THREE.Mesh(
-                hiddenGeometry,
-                new THREE.MeshBasicMaterial({color: 0x000000, side: THREE.DoubleSide }));
-            this.hiddenSelectionObject.add(this.selectionPoint);  
         },
 
         isDraggable: function() {

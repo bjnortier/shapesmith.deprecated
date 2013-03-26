@@ -66,17 +66,17 @@ define([
         this.dive = function() {
             this.domView.$el.find('> .children').show();
             this.children.forEach(function(child) {
-                child.sceneView.show();
+                child.showInScene()
             })
-            this.sceneView.hide();
+            this.hideInScene();
         }
 
         this.ascend = function() {
-            this.sceneView.show();
+            this.showInScene();
             this.domView.$el.find('.children').hide();
             var hideDescendants = function(node) {
                 node.children.forEach(function(child) {
-                    child.sceneView.hide();
+                    child.hideInScene();
                     child.domView.ascend();
                     hideDescendants(child);
                 })
@@ -121,6 +121,26 @@ define([
         this.domView.off('dive', this.dive, this);
         this.domView.off('ascend', this.ascend, this);
         this.model.destroy();
+    }
+
+    // Hide the node in the scene - includes hiding 
+    // scene views of implicit children
+    Node.prototype.hideInScene = function() {
+        this.sceneView.hide();
+        this.children.forEach(function(childNode) {
+            if (childNode.vertex.implicit) {
+                childNode.sceneView.hide();
+            }
+        });
+    }
+
+    Node.prototype.showInScene = function() {
+        this.sceneView.show();
+        this.children.forEach(function(childNode) {
+            if (childNode.vertex.implicit) {
+                childNode.sceneView.show();
+            }
+        });
     }
 
     Node.prototype.getRoot = function() {
@@ -239,7 +259,6 @@ define([
 
         var domView = model.addTreeView();
         var sceneView = model.addSceneView();
-        // sceneView.hide();
         var childrenPlaceholder = domView.$el.find('> .children.' + vertex.id);
         return new Node(
             vertex, 
@@ -257,11 +276,11 @@ define([
                     trees.splice(trees.indexOf(foundTree), 1);
                     foundTree.domView.render();
                     childrenPlaceholder.append(foundTree.domView.$el);
-                    foundTree.sceneView.hide();
+                    foundTree.hideInScene();
                     return foundTree;
                 } else {
                     var childTree = createTree(child, childrenPlaceholder);
-                    childTree.sceneView.hide();
+                    childTree.hideInScene();
                     return childTree;
                 }
             })
