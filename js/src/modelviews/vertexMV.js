@@ -19,10 +19,6 @@ define([
 
     // ---------- Common ----------
 
-    var cancelIfEditing = function() {
-        console.warn('cancel if editing');
-    }
-
     var EventProxy = function() {
         _.extend(this, Backbone.Events);
     }
@@ -84,7 +80,7 @@ define([
 
         initialize: function() {
             this.scene = sceneModel.view.scene;
-            this.model.inContext = true;
+            this.model.inContext = false;
             this.showStack = 0;
             this.updateCameraScale();
             this.clear();
@@ -296,10 +292,22 @@ define([
             }
 
             if (this.vertex.proto) {
-                AsyncAPI.cancelCreate(this.vertex);
+                var cancelVertices = [this.vertex];
+                var findImplicitChildren = function(parent) {
+                    var uniqueImplicitChildren = _.uniq(geometryGraph.childrenOf(parent).filter(function(v) {
+                        return v.implicit;
+                    })); 
+                    cancelVertices = cancelVertices.concat(uniqueImplicitChildren);
+                    uniqueImplicitChildren.forEach(findImplicitChildren);
+                };
+                findImplicitChildren(this.vertex);
+                cancelVertices.forEach(function(v) {
+                    AsyncAPI.cancelCreate(v);
+                });
                 eventProxy.trigger('cancelledCreate');
 
             } else {
+
                 var originals = [this.originalVertex];
                 var editing = [this.vertex];
 
@@ -421,7 +429,6 @@ define([
 
 
     return {
-        cancelIfEditing        : cancelIfEditing,
         eventProxy             : eventProxy,
         Model                  : Model,
         SceneView              : SceneView,

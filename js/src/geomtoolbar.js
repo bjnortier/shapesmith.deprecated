@@ -9,6 +9,7 @@ define([
     'src/selection',
     'src/workplaneMV',
     'src/modelviews/vertexMV',
+    'src/modelviews/modelgraph',
     'src/asyncAPI',
     'src/icons',
     ], 
@@ -23,6 +24,7 @@ define([
         selection,
         WorkplaneMV,
         VertexMV,
+        models,
         AsyncAPI,
         icons) {
 
@@ -259,7 +261,7 @@ define([
                 // Don't re-enter on cancel
                 VertexMV.eventProxy.off('cancelledCreate', this.setToSelect, this);
                 selection.deselectAll();
-                VertexMV.cancelIfEditing();
+                models.cancelIfEditing();
                 VertexMV.eventProxy.on('cancelledCreate', this.setToSelect, this);
 
                 this.setActive(item, savedSelection);

@@ -206,14 +206,6 @@ define([
 
     var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
 
-        initialize: function() {
-            GeomVertexMV.EditingDOMView.prototype.initialize.call(this);
-        },
-
-        remove: function() {
-            GeomVertexMV.EditingDOMView.prototype.remove.call(this);
-        },
-
         render: function() {
             GeomVertexMV.EditingDOMView.prototype.render.call(this);
             var template = 

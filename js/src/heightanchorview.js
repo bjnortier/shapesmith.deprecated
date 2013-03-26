@@ -13,6 +13,7 @@ define([
             this.pointVertex = options.pointVertex;
             this.heightKey = options.heightKey;
             GeomVertexMV.EditingSceneView.prototype.initialize.call(this);
+            this.render();
             this.on('dragStarted', this.dragStarted, this);
             this.on('drag', this.drag, this);
             this.on('dragEnded', this.dragEnded, this);

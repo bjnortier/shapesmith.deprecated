@@ -7,6 +7,7 @@ define([
         'underscore',
         'backbone-events',
         'src/geometrygraphsingleton',
+        'src/modelviews/vertexMV', 
         'src/modelviews/pointMV', 
         'src/modelviews/polylineMV',
         'src/modelviews/cubeMV',
@@ -17,6 +18,7 @@ define([
         _,
         Events,
         geometryGraph,
+        VertexMV,
         PointMV, 
         PolylineMV,
         CubeMV,
@@ -35,9 +37,8 @@ define([
 
         _.extend(this, Events);
 
-        var models = {};
-
         var that = this;
+        var models = {};
 
         geometryGraph.on('vertexAdded', function(vertex) {
             if (vertex.category === 'geometry') {
@@ -63,6 +64,7 @@ define([
                 }
                 var model = models[vertex.id];
                 model.destroy();
+                delete models[vertex.id];
 
                 that.trigger('removed', vertex, model);
             }
@@ -74,13 +76,11 @@ define([
                 if (!models[original.id]) {
                     throw Error('no model for ' + original.id);
                 }
-                var originalModel = models[original.id];
-                originalModel.destroy();
 
+                var originalModel = models[original.id];
                 var modelConstructor = replacement.editing ? 
                     wrappers[replacement.type].EditingModel :
                     wrappers[replacement.type].DisplayModel;
-
                 var replacementModel = new modelConstructor({
                     original: original, 
                     vertex: replacement,
@@ -88,14 +88,30 @@ define([
 
                 replacementModel.addSceneView();
 
-                models[replacement.id] = replacementModel;
+                if (originalModel.sceneView.showStack) {
+                    for (var i = 0; i < originalModel.sceneView.showStack; ++i) {
+                        replacementModel.sceneView.pushShowStack();
+                    }
+                }
 
+                models[replacement.id] = replacementModel;
                 that.trigger('replaced', original, originalModel, replacement, replacementModel);
+
+                // Destroy after replacement for DOM replacement
+                originalModel.destroy();
             }
         }); 
 
         this.get = function(vertex) {
             return models[vertex.id];
+        }
+
+        this.cancelIfEditing = function() {
+            _.map(models, function(model) {
+                if (model.vertex.editing) {
+                    model.cancel();
+                }
+            });
         }
     }
 

@@ -42,9 +42,6 @@ define([
             GeomVertexMV.EditingDOMView.prototype.render.call(this);
             var template = 
                 this.beforeTemplate +
-                '<div>' + 
-                'height <input class="field height" type="text" value="{{height}}"></input>' +
-                '</div>' +
                 this.afterTemplate;
             var view = this.baseView;
             this.$el.html($.mustache(template, view));

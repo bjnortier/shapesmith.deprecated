@@ -331,7 +331,7 @@
                 '<div class="delete"></div>' + 
                 '{{/implicit}}' +
                 '</div>' + 
-                '<div class="children {{id}}" style="display: none;"></div>';
+                '<div class="children {{id}}"></div>';
             this.afterTemplate = '';
             this.baseView = {
                 id: this.model.vertex.id,
