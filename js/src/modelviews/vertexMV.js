@@ -52,8 +52,8 @@ define([
             selection.off('deselected', this.deselect, this);
         },  
 
-        addTreeView: function() {
-            var domView = new this.DOMView({model: this});
+        addTreeView: function(options) {
+            var domView = new this.DOMView(_.extend(options, {model: this}));
             this.views.push(domView);
             return domView;
         },
@@ -85,8 +85,9 @@ define([
         initialize: function() {
             this.scene = sceneModel.view.scene;
             this.model.inContext = true;
+            this.showStack = 0;
             this.updateCameraScale();
-            this.render();
+            this.clear();
             sceneModel.view.on('cameraMoveStarted', this.cameraMoveStarted, this);
             sceneModel.view.on('cameraMoved', this.cameraMoved, this);
             sceneModel.view.on('cameraMoveStopped', this.cameraMoveStopped, this);
@@ -186,15 +187,24 @@ define([
             this.cameraScale = new THREE.Vector3(newScale, newScale, newScale);
         },
 
-        hide: function() {
-            this.clear();
-            this.model.inContext = false;
+        pushShowStack: function() {
+            if (this.showStack === 0) {
+                this.render();
+                this.model.inContext = true;
+            }
+            ++this.showStack;
         },
 
-        show: function() {
-            this.render();
-            this.model.inContext = true;
-        },
+        popShowStack: function() {
+            if (this.showStack === 0) {
+                throw Error('show stack for ' + this.model.vertex.id + ' is zero');
+            }
+            --this.showStack
+            if (this.showStack === 0) {
+                this.clear();
+                this.model.inContext = false;
+            }
+        }
 
     });
 

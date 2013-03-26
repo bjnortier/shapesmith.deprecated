@@ -312,12 +312,12 @@
 
     var EditingDOMView = VertexMV.EditingDOMView.extend({
 
-        initialize: function() {
-            VertexMV.EditingDOMView.prototype.initialize.call(this);
-            if (this.model.attributes.appendDomElement) {
-                this.model.attributes.appendDomElement.append(this.$el);
-            } else if (this.model.attributes.replaceDomElement) {
-                this.model.attributes.replaceDomElement.replaceWith(this.$el);
+        initialize: function(options) {
+            VertexMV.EditingDOMView.prototype.initialize.call(this, options);
+            if (options.appendDomElement) {
+                options.appendDomElement.append(this.$el);
+            } else if (options.replaceDomElement) {
+                options.replaceDomElement.replaceWith(this.$el);
             }
             
         },
@@ -403,13 +403,13 @@
 
         className: 'vertex display',
 
-        initialize: function() {
-            VertexMV.DisplayDOMView.prototype.initialize.call(this);
+        initialize: function(options) {
+            VertexMV.DisplayDOMView.prototype.initialize.call(this, options);
             this.$el.addClass(this.model.vertex.name);  
-            if (this.model.attributes.appendDomElement) {
-                this.model.attributes.appendDomElement.append(this.$el);
-            } else if (this.model.attributes.replaceDomElement) {
-                this.model.attributes.replaceDomElement.replaceWith(this.$el);
+            if (options.appendDomElement) {
+                options.appendDomElement.append(this.$el);
+            } else if (options.replaceDomElement) {
+                options.replaceDomElement.replaceWith(this.$el);
             }
 
         },
@@ -487,7 +487,7 @@
 
         dive: function() {
             this.$el.addClass('dived');
-            var color = "#eee";
+            var color = "#bbb";
             this.$el.find('> .title > .icon24').attr(
                 "style", 
                 $.mustache("fill: {{color}}; stroke: {{color}}", {color: color}));

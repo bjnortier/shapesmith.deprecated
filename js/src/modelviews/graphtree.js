@@ -17,45 +17,20 @@
 define([
         'underscore',
         'src/geometrygraphsingleton',
-        'src/modelviews/pointMV', 
-        'src/modelviews/polylineMV',
-        'src/modelviews/cubeMV',
-        'src/modelviews/sphereMV',
-        'src/modelviews/subtractMV',
+        'src/modelviews/modelgraph'
     ], 
     function(
         _,
         geometryGraph,
-        PointMV, 
-        PolylineMV,
-        CubeMV,
-        SphereMV,
-        SubtractMV) {
-
-    geometryGraph.on('vertexAdded', function(vertex) {
-        if (vertex.category === 'geometry') {
-            addVertex(vertex);
-        }
-    });
-
-    geometryGraph.on('vertexRemoved', function(vertex) {
-        if (vertex.category === 'geometry') {
-            removeVertex(vertex);
-        }
-    });
-
-    geometryGraph.on('vertexReplaced', function(original, replacement) {
-        if (replacement.category === 'geometry') {
-            replaceVertex(original, replacement);
-        }
-    }); 
+        models) {
 
     var trees = [];
 
     // A tree node
-    var Node = function(vertex, model, domView, sceneView, children) {
+    var Node = function(vertex, model, domView, children) {
         this.vertex = vertex;
         this.model = model;
+        this.domView = domView;
         this.children = children || [];
 
         var that = this;
@@ -76,9 +51,11 @@ define([
             this.domView.$el.find('.children').hide();
             var hideDescendants = function(node) {
                 node.children.forEach(function(child) {
-                    child.hideInScene();
-                    child.domView.ascend();
-                    hideDescendants(child);
+                    if (!child.vertex.implicit) {
+                        child.hideInScene();
+                        child.domView.ascend();
+                        hideDescendants(child);
+                    }
                 })
             }
             hideDescendants(this);
@@ -100,177 +77,248 @@ define([
         });
 
         this.domView = domView;
-        this.sceneView = sceneView;
-    }
-
-    Node.prototype.findVertex = function(vertex) {
-        var found = [];
-        if (vertex.id === this.vertex.id) {
-            found.push(this);
-        }
-        this.children.forEach(function(child) {
-            found = found.concat(child.findVertex(vertex));
-        })
-        return found;
-    }
-
-    Node.prototype.remove = function() {
-        this.children.forEach(function(child) {
-            child.remove();
-        })
-        this.domView.off('dive', this.dive, this);
-        this.domView.off('ascend', this.ascend, this);
-        this.model.destroy();
     }
 
     // Hide the node in the scene - includes hiding 
     // scene views of implicit children
     Node.prototype.hideInScene = function() {
-        this.sceneView.hide();
+        this.model.sceneView.popShowStack();
         this.children.forEach(function(childNode) {
             if (childNode.vertex.implicit) {
-                childNode.sceneView.hide();
+                childNode.model.sceneView.popShowStack();
             }
         });
     }
 
     Node.prototype.showInScene = function() {
-        this.sceneView.show();
+        this.model.sceneView.pushShowStack();
         this.children.forEach(function(childNode) {
             if (childNode.vertex.implicit) {
-                childNode.sceneView.show();
+                childNode.model.sceneView.pushShowStack();
             }
         });
     }
 
-    Node.prototype.getRoot = function() {
-        if (this.parent) {
-            return this.parent.getRoot();
-        } else {
-            return this;
-        }
-    }
-
-    var addVertex = function(vertex) {
+    models.on('added', function(vertex, model) {
         if (shouldHaveTree(vertex)) {
             trees.push(createTree(vertex, $('#geometry')));
+
         } else if (vertex.implicit) {
 
             // Implicit vertices will be added as children to all 
             // parent nodes. This happens during editing when a new
             // point is added
-            var parentVertices = geometryGraph.parentsOf(vertex);
-            var parentNodes = [];
-            parentVertices.forEach(function(parentVertex) {
-                trees.forEach(function(tree) {
-                    parentNodes = parentNodes.concat(tree.findVertex(parentVertex));
-                })
-            });
-            parentNodes.forEach(function(parentNode) {
-                var parentDomElement = parentNode.domView.$el.find('.children.' + parentNode.vertex.id);
-                parentNode.children.push(createTree(vertex, parentDomElement));
-            })
+            // var parentVertices = geometryGraph.parentsOf(vertex);
+            // var parentNodes = [];
+            // parentVertices.forEach(function(parentVertex) {
+            //     trees.forEach(function(tree) {
+            //         parentNodes = parentNodes.concat(tree.findVertex(parentVertex));
+            //     })
+            // });
+            // parentNodes.forEach(function(parentNode) {
+            //     var parentDomElement = parentNode.domView.$el.find('.children.' + parentNode.vertex.id);
+            //     parentNode.children.push(createTree(vertex, parentDomElement));
+            // })
         }
 
-    }
+    });
 
-    var removeVertex = function(vertex) {
+    // geometryGraph.on('vertexRemoved', function(vertex) {
+    //     if (vertex.category === 'geometry') {
+    //         removeVertex(vertex);
+    //     }
+    // });
 
-        trees = trees.reduce(function(acc, root) {
-            root.findVertex(vertex).forEach(function(node) {
-                node.remove();
-            })
-            if (root.vertex.id === vertex.id) {
-                return acc;
-            } else {
-                return acc.concat(root);
-            }
-        }, []);
+    // geometryGraph.on('vertexReplaced', function(original, replacement) {
+    //     if (replacement.category === 'geometry') {
+    //         replaceVertex(original, replacement);
+    //     }
+    // }); 
 
-        // If any of the children of the removed vertex should now be trees, 
-        // create them
-        var geomVerticesWithoutTrees = geometryGraph.filteredVertices(function(v) { 
-            var isGeom = (v.category === 'geometry');
-            var hasTree = _.find(trees, function(t) { return t.vertex.id === v.id});
-            return isGeom && !hasTree;
+    // var trees = [];
 
-        });
-        geomVerticesWithoutTrees.forEach(function(v) {
-            if (shouldHaveTree(v)) {
-                trees.push(createTree(v, $('#geometry')));
-            }
-        });
-    }
+    // // A tree node
+    // var Node = function(vertex, model, domView, sceneView, children) {
+    //     this.vertex = vertex;
+    //     this.model = model;
+    //     this.children = children || [];
 
-    // Find the nodes in the tree representing the vertex and replace
-    // with the new model
-    var replaceVertex = function(original, replacement) {
-        var nodes = [];
-        trees.forEach(function(node) {
-            nodes = nodes.concat(node.findVertex(original));
-        })
-        nodes.forEach(function(node) {
-            var modelCtor = replacement.editing ? 
-                wrappers[replacement.type].EditingModel :
-                wrappers[replacement.type].DisplayModel;
-            var replaceDomElement = node.model.domView.$el;
+    //     var that = this;
+    //     this.children.forEach(function(child) {
+    //         child.parent = this;            
+    //     })
 
-            var newModel = new modelCtor({
-                original: original, 
-                vertex: replacement,
-                replaceDomElement: replaceDomElement,
-            });
+    //     this.dive = function() {
+    //         this.domView.$el.find('> .children').show();
+    //         this.children.forEach(function(child) {
+    //             child.showInScene()
+    //         })
+    //         this.hideInScene();
+    //     }
 
-            var newDOMView = newModel.addTreeView();
-            newDOMView.$el.find('> .children.' + original.id).replaceWith(
-                node.domView.$el.find('> .children,' + replacement.id));
-            var sceneView = newModel.addSceneView();
-            if (!node.model.inContext) {
-                sceneView.hide();
-            }
+    //     this.ascend = function() {
+    //         this.showInScene();
+    //         this.domView.$el.find('.children').hide();
+    //         var hideDescendants = function(node) {
+    //             node.children.forEach(function(child) {
+    //                 child.hideInScene();
+    //                 child.domView.ascend();
+    //                 hideDescendants(child);
+    //             })
+    //         }
+    //         hideDescendants(this);
+    //     }
 
-            node.model.destroy();
-            node.model = newModel;
-            node.domView = newDOMView;
-            node.sceneView = sceneView;
+    //     // Listen to dive/ascend events from the domview
+    //     this.__defineSetter__('domView', function(domView) {
+    //         if (this._domView) {
+    //             this._domView.off('dive', this.dive, this);
+    //             this._domView.off('ascend', this.ascend, this);
+    //         }
+    //         this._domView = domView;
+    //         this._domView.on('dive', this.dive, this);
+    //         this._domView.on('ascend', this.ascend, this);
+    //     });
 
-        });
-    }
+    //     this.__defineGetter__('domView', function(domView) {
+    //         return this._domView;
+    //     });
+
+    //     this.domView = domView;
+    //     this.sceneView = sceneView;
+    // }
+
+    // Node.prototype.findVertex = function(vertex) {
+    //     var found = [];
+    //     if (vertex.id === this.vertex.id) {
+    //         found.push(this);
+    //     }
+    //     this.children.forEach(function(child) {
+    //         found = found.concat(child.findVertex(vertex));
+    //     })
+    //     return found;
+    // }
+
+    // Node.prototype.remove = function() {
+    //     this.children.forEach(function(child) {
+    //         child.remove();
+    //     })
+    //     this.domView.off('dive', this.dive, this);
+    //     this.domView.off('ascend', this.ascend, this);
+    //     this.model.destroy();
+    // }
+
+    // // Hide the node in the scene - includes hiding 
+    // // scene views of implicit children
+    // Node.prototype.hideInScene = function() {
+    //     this.sceneView.hide();
+    //     this.children.forEach(function(childNode) {
+    //         if (childNode.vertex.implicit) {
+    //             childNode.sceneView.hide();
+    //         }
+    //     });
+    // }
+
+    // Node.prototype.showInScene = function() {
+    //     this.sceneView.show();
+    //     this.children.forEach(function(childNode) {
+    //         if (childNode.vertex.implicit) {
+    //             childNode.sceneView.show();
+    //         }
+    //     });
+    // }
+
+    // Node.prototype.getRoot = function() {
+    //     if (this.parent) {
+    //         return this.parent.getRoot();
+    //     } else {
+    //         return this;
+    //     }
+    // }
+
+
+
+    // var removeVertex = function(vertex) {
+
+    //     trees = trees.reduce(function(acc, root) {
+    //         root.findVertex(vertex).forEach(function(node) {
+    //             node.remove();
+    //         })
+    //         if (root.vertex.id === vertex.id) {
+    //             return acc;
+    //         } else {
+    //             return acc.concat(root);
+    //         }
+    //     }, []);
+
+    //     // If any of the children of the removed vertex should now be trees, 
+    //     // create them
+    //     var geomVerticesWithoutTrees = geometryGraph.filteredVertices(function(v) { 
+    //         var isGeom = (v.category === 'geometry');
+    //         var hasTree = _.find(trees, function(t) { return t.vertex.id === v.id});
+    //         return isGeom && !hasTree;
+
+    //     });
+    //     geomVerticesWithoutTrees.forEach(function(v) {
+    //         if (shouldHaveTree(v)) {
+    //             trees.push(createTree(v, $('#geometry')));
+    //         }
+    //     });
+    // }
+
+    // // Find the nodes in the tree representing the vertex and replace
+    // // with the new model
+    // var replaceVertex = function(original, replacement) {
+    //     var nodes = [];
+    //     trees.forEach(function(node) {
+    //         nodes = nodes.concat(node.findVertex(original));
+    //     })
+    //     nodes.forEach(function(node) {
+    //         var modelCtor = replacement.editing ? 
+    //             wrappers[replacement.type].EditingModel :
+    //             wrappers[replacement.type].DisplayModel;
+    //         var replaceDomElement = node.model.domView.$el;
+
+    //         var newModel = new modelCtor({
+    //             original: original, 
+    //             vertex: replacement,
+    //             replaceDomElement: replaceDomElement,
+    //         });
+
+    //         var newDOMView = newModel.addTreeView();
+    //         newDOMView.$el.find('> .children.' + original.id).replaceWith(
+    //             node.domView.$el.find('> .children,' + replacement.id));
+    //         var sceneView = newModel.addSceneView();
+    //         if (!node.model.inContext) {
+    //             sceneView.hide();
+    //         }
+
+    //         node.model.destroy();
+    //         node.model = newModel;
+    //         node.domView = newDOMView;
+    //         node.sceneView = sceneView;
+
+    //     });
+    // }
 
     // Doesn the vertex have a tree?
     var shouldHaveTree = function(vertex) {
         return !vertex.implicit && !geometryGraph.parentsOf(vertex).length;
     }
 
-    var wrappers = {
-        'point'     : PointMV,
-        'polyline'  : PolylineMV,
-        'cube'      : CubeMV,
-        'sphere'    : SphereMV,
-        'subtract'  : SubtractMV,
-    }
 
     var createTree = function(vertex, domElement) {
 
-        var modelCtor = vertex.editing ? 
-            wrappers[vertex.type].EditingModel :
-            wrappers[vertex.type].DisplayModel;
-        var model = new modelCtor({
-            vertex: vertex,
-            appendDomElement: domElement,
-        });
-
-        var domView = model.addTreeView();
-        var sceneView = model.addSceneView();
+        var model = models.get(vertex);
+        var domView = model.addTreeView({appendDomElement: domElement});
         var childrenPlaceholder = domView.$el.find('> .children.' + vertex.id);
-        return new Node(
+        var node = new Node(
             vertex, 
             model,
             domView,
-            sceneView,
             geometryGraph.childrenOf(vertex).map(function(child) {
 
-                // Look for existign trees that should become children, e.g.
+                // Look for existing trees that should become children, e.g.
                 // when a boolean is created
                 var foundTree = _.find(trees, function(t) {
                     return (t.vertex.id === child.id);
@@ -288,6 +336,8 @@ define([
                 }
             })
         )
+        node.showInScene();
+        return node;
     }
 
 })
