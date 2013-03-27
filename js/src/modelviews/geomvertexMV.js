@@ -478,7 +478,6 @@
         },
 
         ascend: function() {
-            console.log('ascend', this.model.vertex.id);
             this.$el.removeClass('dived');
             var parameters = this.model.vertex.parameters;
             var color = (parameters.material && parameters.material.color) || '#6cbe32';

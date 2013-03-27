@@ -191,7 +191,6 @@ define([
                 this.model.inContext = true;
             }
             ++this.showStack;
-            !this.model.vertex.implicit && console.log('push', this.model.vertex.id, this.showStack);
         },
 
         popShowStack: function() {
@@ -203,7 +202,6 @@ define([
                 this.clear();
                 this.model.inContext = false;
             }
-            !this.model.vertex.implicit && console.log('pop', this.model.vertex.id, this.showStack);
         }
 
     });
