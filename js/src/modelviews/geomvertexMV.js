@@ -508,7 +508,7 @@
 
         dblclickTitle: function(event) {
             event.stopPropagation();
-            if (!geometryGraph.isEditing() && this.model.inContext) {
+            if (!geometryGraph.isEditing() && this.model.inContext &&  !this.model.vertex.implicit) {
                 selection.deselectAll();
                 AsyncAPI.edit(this.model.vertex);
             }
@@ -615,7 +615,7 @@
         },
 
         dblclick: function(event) {
-            if (!geometryGraph.isEditing()) {
+            if (!geometryGraph.isEditing() && !this.model.vertex.implicit) {
                 selection.deselectAll();
                 AsyncAPI.edit(this.model.vertex);
             }

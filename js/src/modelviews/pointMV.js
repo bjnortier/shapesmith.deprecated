@@ -225,12 +225,6 @@ define([
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
         },
 
-        addSceneView: function() {
-            this.sceneView = new DisplaySceneView({model: this});
-            this.views.push(this.sceneView);
-            return this.sceneView;
-        },
-
     });    
 
     var DisplaySceneView = GeomVertexMV.DisplaySceneView.extend({

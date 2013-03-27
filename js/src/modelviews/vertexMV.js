@@ -54,16 +54,10 @@ define([
             return domView;
         },
 
-        removeTreeView: function(domView) {
-            var index = this.views.indexOf(domView);
-            if (index === -1) {
-                throw Error('domView not found in model ' + this.verte.id);
-            }
-            domView.remove();
-            this.views.splice(domView, 1);
-        },
-
         addSceneView: function() {
+            if (this.sceneView) {
+                throw Error('Cannot have multiple scne views');
+            }
             this.sceneView = new this.SceneView({model: this});
             this.views.push(this.sceneView);
             return this.sceneView;

@@ -212,18 +212,10 @@ define([
     }
 
 
-    var createTree = function(vertex, domElement) {
-        geometryGraph.childrenOf(vertex).map(function(child) {
-            var foundTree = _.find(trees, function(t) {
-                return (t.vertex.id === child.id);
-            });
-            if (foundTree) {
-                trees.splice(trees.indexOf(foundTree), 1);
-                foundTree.model.removeTreeView(foundTree.domView);
-                foundTree.hideInScene();
-            } 
-        });
 
+
+
+    var createTree = function(vertex, domElement) {
         var model = models.get(vertex);
         var domView = model.addTreeView({appendDomElement: domElement});
         var childrenPlaceholder = domView.$el.find('> .children.' + vertex.id);
@@ -232,10 +224,23 @@ define([
             model,
             domView,
             geometryGraph.childrenOf(vertex).map(function(child) {
-                var childTree = createTree(child, childrenPlaceholder);
-                childTree.domView.delegateEvents();
-                childTree.hideInScene();
-                return childTree;
+                // Look for existing trees that should become children, e.g.
+                // when a boolean is created
+                var foundTree = _.find(trees, function(t) {
+                    return (t.vertex.id === child.id);
+                });
+                if (foundTree) {
+                    trees.splice(trees.indexOf(foundTree), 1);
+                    foundTree.domView.render();
+                    childrenPlaceholder.append(foundTree.domView.$el);
+                    foundTree.domView.delegateEvents();
+                    foundTree.hideInScene();
+                    return foundTree;
+                } else {
+                    var childTree = createTree(child, childrenPlaceholder);
+                    childTree.hideInScene();
+                    return childTree;
+                }
             })
         )
         node.showInScene();
