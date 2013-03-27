@@ -375,7 +375,7 @@
 
 
         canSelect: function() {
-            return !this.vertex.implicit;
+            return !this.vertex.implicit && this.inContext;
         },
 
         keyup: function(event) {
@@ -405,6 +405,13 @@
                 options.replaceDomElement.replaceWith(this.$el);
             }
 
+            // var isTopLevel = !geometryGraph.parentsOf(this.model.vertex).length;
+            // if (!isTopLevel) {
+            //     var color = "#bbb";
+            //     this.$el.find('> .title > .icon24').attr(
+            //         "style", 
+            //         $.mustache("fill: {{color}}; stroke: {{color}}", {color: color}));
+            // }
         },
 
         render: function() {
@@ -449,8 +456,10 @@
         },        
 
         events: {
-            'click > .title'   : 'clickTitle',
-            'dblclick > .title': 'dblclickTitle',
+            'click > .title .icon24'   : 'clickTitle',
+            'click > .title .name'   : 'clickTitle',
+            'dblclick > .title .name': 'dblclickTitle',
+            'dblclick > .title .icon24': 'dblclickTitle',
             'click > .title > .actions > .delete'  : 'delete',
             'click > .title > .dive'    : 'clickDive',
             'click > .title > .ascend'  : 'clickAscend',
@@ -469,6 +478,7 @@
         },
 
         ascend: function() {
+            console.log('ascend', this.model.vertex.id);
             this.$el.removeClass('dived');
             var parameters = this.model.vertex.parameters;
             var color = (parameters.material && parameters.material.color) || '#6cbe32';
@@ -476,7 +486,6 @@
                 "style", 
                 $.mustache("fill: {{color}}; stroke: {{color}}", {color: color}));
         },
-
 
         dive: function() {
             this.$el.addClass('dived');
@@ -489,13 +498,17 @@
         clickTitle: function(event) {
             event.stopPropagation();
             if (this.model.canSelect()) {
-                selection.selectOnly(this.model.vertex.id);
+                if (event.shiftKey) {
+                    selection.addToSelection(this.model.vertex.id);
+                } else {
+                    selection.selectOnly(this.model.vertex.id);
+                }
             }
         },
 
         dblclickTitle: function(event) {
             event.stopPropagation();
-            if (!geometryGraph.isEditing()) {
+            if (!geometryGraph.isEditing() && this.model.inContext) {
                 selection.deselectAll();
                 AsyncAPI.edit(this.model.vertex);
             }
