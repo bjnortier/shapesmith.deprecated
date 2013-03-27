@@ -170,7 +170,7 @@ requirejs([
             var that = this;
             $.ajax({
                 type: 'DELETE',
-                url: '/' + encodeURIComponent(globals.user)  + '/' + encodeURIComponent(this.model.name) + '/',
+                url: '/_api/' + encodeURIComponent(globals.user)  + '/' + encodeURIComponent(this.model.name) + '/',
                 success: function(response) {
                     that.model.destroy();
                 },
@@ -226,8 +226,9 @@ requirejs([
         },
 
         open: function() {
-            var designUrl = '/' + encodeURIComponent(globals.user) + '/' + encodeURIComponent(this.model.name) + '/modeller';
-            window.location = designUrl + '?commit=' + this.model.commit;
+            window.location = '/_ui/' + encodeURIComponent(globals.user) + 
+                              '/' + encodeURIComponent(this.model.name) + 
+                              '/modeller?commit=' + this.model.commit;
         },
 
     });
@@ -250,7 +251,7 @@ requirejs([
 
                 $.getJSON(designURL, function(data) {
 
-                    var master = data.refs.heads.master;
+                    var master = data.heads.master;
                     if (_.isString(master)) {
                         // No screenshot, just a commit
                         designModels[name].updateDesign({name: name, commit: master});

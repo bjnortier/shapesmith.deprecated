@@ -55,7 +55,7 @@ define([
             var commit = $.getQueryParam("commit");
             $.ajax({
                 type: 'PUT',
-                url: '/_api/' + globals.username + '/' + globals.design + '/refs/heads/master/',
+                url: '/_api/' + globals.user + '/' + globals.design + '/refs/heads/master/',
                 contentType: 'application/json',
                 data: JSON.stringify({commit: commit, screenshot: screenshot}),
                 success: function(response) {
@@ -80,7 +80,7 @@ define([
 
         click: function() {
             var graphSHA = $.getQueryParam("commit");
-            window.location = '/' + globals.username + '/' + globals.design + '/obj/' + graphSHA + '/';
+            window.location = '/' + globals.user + '/' + globals.design + '/obj/' + graphSHA + '/';
         },
 
     });
@@ -90,7 +90,7 @@ define([
         name: 'designs',
 
         click: function() {
-            window.location = '/_ui/' + globals.username + '/designs.html';
+            window.location = '/_ui/' + globals.user + '/designs';
         },
 
         icon: icons['list'],

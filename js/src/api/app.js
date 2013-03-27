@@ -13,14 +13,14 @@ requirejs.config({
 // ---------- Configuration ----------
 nconf.argv()
      .file({file: __dirname + '/config/devel.config.json' });
-var diskDBPath = nconf.get('diskDBPath');
+var diskDBPath = path.normalize(path.join(__dirname, nconf.get('diskDBPath')));
 console.info('configuration:');
 console.info('--------------');
 console.info('diskDBPath:',diskDBPath);
 
 // ---------- Create db ----------
 var DB = requirejs('src/api/disk_db');
-var db = new DB({root: __dirname + '/' + diskDBPath});
+var db = new DB({root: diskDBPath});
 
 app.set('view engine', 'hbs');
 app.set('views', __dirname + '/templates');
@@ -35,8 +35,8 @@ app.use(function(err, req, res, next){
   res.send(500, 'Oops. An error occurred.');
 });
 
-app.get('/', function(req, res){
-  res.json({name: 'shapesmith', version: 'unknown'});
+app.get('/', function(req, res) {
+  res.redirect('/_ui/design');
 });
 
 // Designs UI
@@ -123,97 +123,65 @@ app.post(/^\/_api\/([\w%]+)\/([\w%]+)\/?$/, function(req, res) {
   } else if (!/^[a-zA-Z_][a-zA-Z0-9-_\\s]*$/.test(req.body.newName)) {
     res.json(400, 'invalid new name');
   } else {
-    var designsPath = path.join(diskDBPath, user, '_designs');
-    fs.readFile(designsPath, function (err, data) {
+    var newName = req.body.newName;
+    db.renameDesign(user, design, newName, function(err, data) {
       if (err) {
-        res.send(500, err);
-      } else {
-        var designs = JSON.parse(data);
-        var newName = req.body.newName;
-        var oldDirectoryPath = path.join(diskDBPath, user, design);
-        var newdirectoryPath = path.join(diskDBPath, user, newName);
-
-        var safeRename = function() {
-          fs.rename(oldDirectoryPath, newdirectoryPath, function(err) {
-            if (err) {
-              res.send(500, err);
-            } else {
-              designs.splice(designs.indexOf(design), 1, newName);
-              fs.writeFile(designsPath, JSON.stringify(designs), function(err) {
-                if (err) {
-                  res.send(500, err);
-                } else {
-                  res.json(200, 'ok');
-                }
-              });
-            }
-          });
+        if (err === 'alreadyExists') {
+          res.send(409, 'already exists');
+        } else {
+          res.send(500, err);
         }
-
-        fs.exists(newdirectoryPath, function(exists) {
-          if (exists) {
-            if (designs.indexOf(newName) === -1) {
-              // Deleted design still lurking - delete the directory
-              var deletedName = newdirectoryPath + '.deleted.' + new Date().getTime();
-              fs.rename(newdirectoryPath, deletedName, function(err) {
-                if (err) {
-                  res.send(500, err);
-                } else {
-                  safeRename();
-                }
-              });
-            } else {
-              res.json(400, 'name already exists')
-            }
-          } else {
-            safeRename();
-          }
-        });
+      } else {
+        res.json(data);
       }
-    })
+    });
   }
 });
 
-// Get Refs
-app.get(/^\/([\w%]+)\/([\w%]+)\/refs$/, function(req, res) {
+// Delete design
+app.delete(/^\/_api\/([\w%]+)\/([\w%]+)\/?$/, function(req, res) {
   var user = decodeURI(req.params[0]);
   var design = decodeURI(req.params[1]);
+  db.deleteDesign(user, design, function(err, data) {
+    if (err) {
+      if (err === 'notFound') {
+        res.send(404, 'not found');
+      } else {
+        res.send(500, err);
+      }
+    } else {
+      res.json(data);
+    }
+  });
+});
 
-  var filePath = path.join(diskDBPath, user, design, '_root');
-  var refs = fs.readFile(filePath, function (err, data) {
+// Get Refs
+app.get(/^\/_api\/([\w%]+)\/([\w%]+)\/refs$/, function(req, res) {
+  var user = decodeURI(req.params[0]);
+  var design = decodeURI(req.params[1]);
+  db.getRefs(user, design, function(err, data) {
     if (err) {
       res.send(500, err)
     } else {
-      res.send(data);
+      res.json(data);
     }
   });
 });
 
 // Update ref
-app.put(/^\/([\w%]+)\/([\w%]+)\/refs\/(\w+)\/(\w+)$/, function(req, res) {
+app.put(/^\/_api\/([\w%]+)\/([\w%]+)\/refs\/(\w+)\/(\w+)\/?$/, function(req, res) {
   var user = decodeURI(req.params[0]);
   var design = decodeURI(req.params[1]);
   var type = req.params[2];
   var ref = req.params[3];
-
-  var filePath = path.join(diskDBPath, user, design, '_root');
-  var refs = fs.readFile(filePath, function (err, data) {
+  db.updateRefs(user, design, type, ref, req.body, function(err, data) {
     if (err) {
       res.send(500, err)
     } else {
-      var refsJson = JSON.parse(data);
-      refsJson.refs[type][ref] = req.body;
-      console.log(refsJson);
-      fs.writeFile(filePath, JSON.stringify(refsJson), function (err) {
-        if (err) {
-          res.send(500, err);
-        } else {
-          res.type('json');
-          res.json('ok');
-        }
-      });
+      res.json(data);
     }
   });
+
 });
 
 // Modeller UI

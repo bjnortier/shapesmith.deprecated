@@ -145,14 +145,98 @@ define([
       });
     }
 
-    this.createRefs = function(user, design, refs, callback) {
-      var designPath = path.join(root, user, design);
-      var refsPath = path.join(designPath, '_refs');
-      fs.writeFile(refsPath, JSON.stringify(refs), function (err) {
+    this.renameDesign = function(user, design, newName, callback) {
+
+      var designsPath = path.join(root, user, '_designs');
+      fs.readFile(designsPath, function (err, data) {
         if (err) {
           callback(err);
         } else {
-          callback();
+          var designs = JSON.parse(data);
+          var oldDirectoryPath = path.join(root, user, design);
+          var newDirectoryPath = path.join(root, user, newName);
+
+          fs.exists(newDirectoryPath, function(exists) {
+            if (exists || (designs.indexOf(newName) !== -1)) {
+              callback('alreadyExists')
+            } else {
+              
+              fs.rename(oldDirectoryPath, newDirectoryPath, function(err) {
+              if (err) {
+                callback(err);
+              } else {
+                designs.splice(designs.indexOf(design), 1, newName);
+                fs.writeFile(designsPath, JSON.stringify(designs), function(err) {
+                  if (err) {
+                    callback(err);
+                  } else {
+                    callback(undefined, 'ok');
+                  }
+                });
+              }
+            });
+
+            }
+          });
+
+        }
+      });
+
+    }
+
+    // 
+    this.deleteDesign = function(user, design, callback) {
+      var designsPath = path.join(root, user, '_designs');
+      fs.readFile(designsPath, function (err, data) {
+        if (err) {
+          callback(err);
+        } else {
+          // Add the new design
+          var designs = JSON.parse(data);
+          var index = designs.indexOf(design);
+          if (index === -1) {
+            callback('notFound');
+          } else {
+            designs.splice(index, 1);
+            fs.writeFile(designsPath, JSON.stringify(designs), function(err) {
+
+              var directoryPath = path.join(root, user, design);
+              var deletedDirectoryPath = directoryPath + '.deleted.' + new Date().getTime();
+                fs.rename(directoryPath, deletedDirectoryPath, function(err) {
+                  callback(err, 'ok');
+                });
+
+            });
+          }
+        }
+      });
+    }
+
+    this.getRefs = function(user, design, callback) {
+      var refsPath = path.join(root, user, design, '_refs');
+      fs.readFile(refsPath, function (err, data) {
+        callback(err, data && JSON.parse(data));
+      });
+    }
+
+    this.createRefs = function(user, design, refs, callback) {
+      var refsPath = path.join(root, user, design, '_refs');
+      fs.writeFile(refsPath, JSON.stringify(refs), function (err) {
+        callback(err);
+      });
+    }
+
+    this.updateRefs = function(user, design, type, ref, refData, callback) {
+      var refsPath = path.join(root, user, design, '_refs');
+      var refs = fs.readFile(refsPath, function (err, currentRefs) {
+        if (err) {
+          callback(err);
+        } else {
+          var refsJson = JSON.parse(currentRefs);
+          refsJson[type][ref] = refData;
+          fs.writeFile(refsPath, JSON.stringify(refsJson), function (err) {
+            callback(err, 'ok')
+          });
         }
       });
     }
