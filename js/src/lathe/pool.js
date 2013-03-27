@@ -18,24 +18,27 @@ define([
         Events,
         bspdb) {
 
-    // Create a worker pool and an event broker. The event broker
-    // will be used by the caller to listen to the job results
-    var poolSize = 4;
-    var workers = [];
-    for (var i = 0; i < poolSize; ++i) {
-        worker = new Worker('/ui/js/src/lathe/worker.js');
-        worker.onerror = function () {
-            console.error("worker error", arguments);
-        }
-        worker.busy = false;
-        worker.initialized = false;
-        workers[i] = worker;
-    }
+    
 
     // The job queue will manage the jobs, and put jobs in a queue
     // if there are no workers available. When a worker becomes available,
     // it will be assigned the next jon in the queue
-    var JobQueue = function(workers) {
+    var JobQueue = function() {
+
+        // Create a worker pool and an event broker. The event broker
+        // will be used by the caller to listen to the job results
+        var poolSize = 4;
+        var workers = [];
+        for (var i = 0; i < poolSize; ++i) {
+            worker = new Worker('/ui/js/src/lathe/worker.js');
+            worker.onerror = function () {
+                console.error("worker error", arguments);
+            }
+            worker.busy = false;
+            worker.initialized = false;
+            workers[i] = worker;
+        }
+        var countInitialized = 0;
 
         // Event broker use to listen for events. Events not on the
         // queue itself so the job queue object is not exposed externally
@@ -55,6 +58,10 @@ define([
                 // and is then available
                 if (evt.data === 'initialized') {
                     worker.initialized = true;
+                    ++countInitialized;
+                    if (countInitialized === poolSize) {
+                        broker.trigger('initialized');
+                    }
                 } else if (evt.data.hasOwnProperty('id')) {
                     var jobResult = {
                         bsp: BSP.deserialize(evt.data.bsp),
@@ -109,7 +116,7 @@ define([
         }
     }
 
-    var jobQueue = new JobQueue(workers);
+    var jobQueue = new JobQueue();
 
     var createSphere = function(sha, dimensions) {
         return jobQueue.queueJob({sha: sha, sphere: dimensions})

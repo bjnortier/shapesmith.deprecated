@@ -21,7 +21,7 @@ requirejs([
     ], function(adapter) {
 
         // Initialize the BSP DB before anything else
-        adapter.bspdb.on('initialized', function() {
+        adapter.broker.on('initialized', function() {
 
             requirejs([
                 'jquery',

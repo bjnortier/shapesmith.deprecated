@@ -33,7 +33,6 @@ define([
         });
     }
 
-
     var generateParent = function(vertex, callback) {
 
         var children = geometryGraph.childrenOf(vertex);
@@ -94,9 +93,28 @@ define([
         }
     }
 
+    var broker = new function() {
+            _.extend(this, Events);
+        }
+        this.broker = broker;
+
+    var uiDBInitialized = false, poolInitialized = false;
+    bspdb.on('initialized', function() {
+        uiDBInitialized = true;
+        if (uiDBInitialized && poolInitialized) {
+            broker.trigger('initialized');
+        }
+    });
+    Lathe.broker.on('initialized', function() {
+        poolInitialized = true;
+        if (uiDBInitialized && poolInitialized) {
+            broker.trigger('initialized');
+        }
+    });
+
     return {
-        bspdb    : bspdb,
-        generate : generate,
+        generate: generate,
+        broker  :  broker,
     }
 
 });
