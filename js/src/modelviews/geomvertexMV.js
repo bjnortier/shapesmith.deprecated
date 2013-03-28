@@ -558,7 +558,7 @@
             this.highlighted = true;
             if (!geometryGraph.isEditing()) {
                 if (this.model.vertex.implicit) {
-                    this.updateMaterials('normal');
+                    // this.updateMaterials('normal');
                 } else {
                     this.updateMaterials('highlight');
                 }
@@ -573,7 +573,7 @@
             delete this.highlighted;
             if (!geometryGraph.isEditing()) {
                 if (this.model.vertex.implicit) {
-                    this.updateMaterials('implicit');
+                    // this.updateMaterials('implicit');
                 } else {
                     this.updateSelected();
                 }

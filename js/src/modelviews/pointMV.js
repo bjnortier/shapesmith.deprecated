@@ -275,19 +275,19 @@ define([
             this.updateScaledObjects();
         },
 
-        mouseenter: function() {
-            if (!geometryGraph.isEditing()) {
-                this.mouseIsOver = true;
-                this.render();
-            }
-        },
+        // mouseenter: function() {
+        //     if (!geometryGraph.isEditing()) {
+        //         this.mouseIsOver = true;
+        //         this.render();
+        //     }
+        // },
 
-        mouseleave: function() {
-            if (!geometryGraph.isEditing()) {
-                delete this.mouseIsOver;
-                this.render();
-            }
-        },
+        // mouseleave: function() {
+        //     if (!geometryGraph.isEditing()) {
+        //         delete this.mouseIsOver;
+        //         this.render();
+        //     }
+        // },
 
         updateScaledObjects: function() {
             if (this.model.inContext) {
@@ -315,7 +315,12 @@ define([
         },
 
         isDraggable: function() {
-            return !geometryGraph.isEditing();
+            return !this.model.vertex.implicit;
+            // return !geometryGraph.isEditing();
+        },
+
+        isClickable: function() {
+            return !this.model.vertex.implicit;
         },
 
         dragStarted: function() {
