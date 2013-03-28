@@ -26,7 +26,9 @@ define([
         render: function() {
             GeomVertexMV.SceneView.prototype.render.call(this);
 
-            var points = geometryGraph.childrenOf(this.model.vertex);
+            var points = geometryGraph.childrenOf(this.model.vertex).filter(function(v) {
+                return v.type === 'point'
+            });
             if (points.length !== 1) {
                 return;
             }
@@ -76,7 +78,9 @@ define([
             this.SceneView = EditingSceneView;
             GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
 
-            var points = geometryGraph.childrenOf(this.vertex);
+            var points = geometryGraph.childrenOf(this.vertex).filter(function(v) {
+                return v.type === 'point'
+            });
 
             // Create the child models
             var that = this;
@@ -105,7 +109,9 @@ define([
                     this.activePoint.trigger('change', this.activePoint);  
                 // Radius          
                 } else if (this.stage === 'radius') {
-                    var points = geometryGraph.childrenOf(this.vertex);
+                    var points = geometryGraph.childrenOf(this.vertex).filter(function(v) {
+                        return v.type === 'point'
+                    });
                     var center = 
                         calc.objToVector(points[0].parameters.coordinate, geometryGraph, THREE.Vector3);
                     var radius = Math.sqrt(
