@@ -18,6 +18,7 @@ Shapemsith is an
 ### Requirements
 
 1. Nodejs with NPM
+1. A WebGL-capable browser
 
 I recommend using [Homebrew](http://mxcl.github.com/homebrew/) to install nodejs. When you have homebrew, install nodejs (npm is included):
      
