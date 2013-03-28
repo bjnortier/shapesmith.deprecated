@@ -9,6 +9,7 @@ You can find the original, stable, version at [http://github.com/bjnortier/shape
 Shapemsith is an
 
  * Open Source
+ * parametric
  * full-stack Javascript
  * 3D modelling application
  * for 3D printing
