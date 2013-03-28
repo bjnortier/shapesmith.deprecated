@@ -1,6 +1,6 @@
 # Shapesmith[.next]
 
-Welcome to Shapesmith.next, the next generation implementation of Shapesmith. 
+Welcome to Shapesmith.next, the next generation EXPERIMENTAL implementation of Shapesmith. 
 
 You can find the original, stable, version at [http://github.com/bjnortier/shapesmith](http://github.com/bjnortier/shapesmith)
 
@@ -9,7 +9,7 @@ You can find the original, stable, version at [http://github.com/bjnortier/shape
 Shapemsith is an
 
  * Open Source
- * Full-stack Javascript
+ * full-stack Javascript
  * 3D modelling application
  * for 3D printing
 
@@ -17,9 +17,9 @@ Shapemsith is an
 
 ### Requirements
 
-1. Nodejs and NPM
+1. Nodejs with NPM
 
-I recommend using [Homebrew](http://mxcl.github.com/homebrew/):
+I recommend using [Homebrew](http://mxcl.github.com/homebrew/) to install nodejs. When you have homebrew, install nodejs (npm is included):
      
     $ brew install node
 
@@ -31,9 +31,29 @@ I recommend using [Homebrew](http://mxcl.github.com/homebrew/):
 
     $ bin/start
 
+    DEBUG: Running node-supervisor with
+    DEBUG:   program 'src/api/app.js'
+    DEBUG:   --watch '.'
+    DEBUG:   --ignore 'undefined'
+    DEBUG:   --extensions 'node|js'
+    DEBUG:   --exec 'node'
+    
+    DEBUG: Starting child process with 'node src/api/app.js'
+    DEBUG: Watching directory '/Users/bjnortier/development/ss2' for changes.
+    
+    
+    configuration:
+    --------------
+    baseUrl:      /Users/bjnortier/development/ss2/src
+    disk db path: /Users/bjnortier/development/ss2/db/
+    --------------
+    server started on :8000
+
 ### Open your browser
 
-    [http://localhost:8000](http://localhost:8000)
+    http://localhost:8000
+
+
 
 
 
