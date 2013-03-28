@@ -31,7 +31,9 @@ define([
         render: function() {
             GeomVertexMV.SceneView.prototype.render.call(this);
 
-            var points = geometryGraph.childrenOf(this.model.vertex);
+            var points = geometryGraph.childrenOf(this.model.vertex).filter(function(v) {
+                return v.type === 'point'
+            });
             if (points.length !== 2) {
                 return;
             }
@@ -72,7 +74,9 @@ define([
             this.SceneView = EditingSceneView;
             GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
 
-            var points = geometryGraph.childrenOf(this.vertex);
+            var points = geometryGraph.childrenOf(this.vertex).filter(function(v) {
+                return v.type === 'point'
+            });
 
             // Create the child models
             var that = this;
@@ -81,7 +85,9 @@ define([
                 this.updateHint();
                 this.activePoint = points[0];
             } else {
-                this.originalImplicitChildren = geometryGraph.childrenOf(this.vertex);
+                this.originalImplicitChildren = geometryGraph.childrenOf(this.vertex).filter(function(v) {
+                    return v.implicit;
+                })
                 this.editingImplicitChildren = [];
                 this.editingImplicitChildren = this.originalImplicitChildren.map(function(child, i) {
                     var editing = AsyncAPI.edit(child);

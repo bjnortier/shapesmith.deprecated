@@ -27,6 +27,8 @@ define([
             } else {
                 var jobId = generator();
                 Lathe.broker.on(jobId, function(jobResult) {
+                    jobResult.sha = sha;
+                    jobResult.id = jobId;
                     callback(undefined, jobResult);
                 });
             }
@@ -36,7 +38,7 @@ define([
     var generateParent = function(vertex, callback) {
 
         var children = geometryGraph.childrenOf(vertex);
-        var childSHAs = {}
+        var childSHAs = {};
         var allChildrenExist;
 
         // Ensure all children exist 

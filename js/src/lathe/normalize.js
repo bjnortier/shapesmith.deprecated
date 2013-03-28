@@ -8,20 +8,23 @@ define([
 
     var normalizeCube = function(cube) {
 
-        var points = geometryGraph.childrenOf(cube);
+        var points = geometryGraph.childrenOf(cube).filter(function(v) {
+            return v.type === 'point'
+        });
         var positions = points.map(function(p) {
             return calc.objToVector(
                 p.parameters.coordinate, geometryGraph, THREE.Vector3);
         });
 
-        var h = Math.abs(geometryGraph.evaluate(cube.parameters.height));
+        var h = geometryGraph.evaluate(cube.parameters.height);
+        var hAbs = Math.abs(h);
         return {
             x: Math.min(positions[0].x, positions[1].x),
             y: Math.min(positions[0].y, positions[1].y),
             z: Math.min(positions[0].z, positions[0].z + h),
             w: Math.abs(positions[1].x - positions[0].x),
             d: Math.abs(positions[1].y - positions[0].y),
-            h: h,
+            h: hAbs,
         }
 
     }

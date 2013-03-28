@@ -342,17 +342,17 @@ define([
 
         this.vertexChanged = function(vertex) {
             var that = this;
-            var notifyParents = function(v) {
+            var ancestors = [];
+            var findAncestors = function(v) {
                 that.parentsOf(v).map(function(parent) {
-                    try {
-                        parent.trigger('change', parent);
-                    } catch (e) {
-                        console.warn('exception on parent notify: ' + e);
-                    }
-                    notifyParents(parent);
+                    ancestors = _.uniq(ancestors.concat(parent));
+                    findAncestors(parent);
                 });
             }
-            notifyParents(vertex);
+            findAncestors(vertex);
+            ancestors.forEach(function(v) {
+                v.trigger('change', v);
+            });
 
             // Use a different event here as children beng notified 
             // of parent changes is used less, and would also lead to 

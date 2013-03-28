@@ -346,12 +346,12 @@
         initialize: function() {
             this.color = colors.geometry.editing;
             SceneView.prototype.initialize.call(this);
-            this.model.vertex.on('change', this.render, this);
+            this.model.vertex.on('change', this.renderIfInContext, this);
         },
 
         remove: function() {
             SceneView.prototype.remove.call(this);
-            this.model.vertex.off('change', this.render, this);
+            this.model.vertex.off('change', this.renderIfInContext, this);
         },
 
     });
@@ -421,7 +421,7 @@
                 var hasExplicitChildren = !!_.find(
                     geometryGraph.childrenOf(this.model.vertex),
                     function(child) {
-                        return !child.implicit
+                        return !child.implicit && !(child.type === 'variable');
                     });
                 var view = {
                     id:   this.model.vertex.id,
@@ -528,7 +528,7 @@
             this.on('mouseleavefirst', this.unhighlight, this);
             this.on('click', this.click, this);
             this.on('dblclick', this.dblclick, this);
-            this.model.vertex.on('change', this.render, this);
+            this.model.vertex.on('change', this.renderIfInContext, this);
             this.model.on('change:selected', this.updateSelected, this);
         },
 
@@ -538,7 +538,7 @@
             this.off('mouseleavefirst', this.unhighlight, this);
             this.off('click', this.click, this);
             this.off('dblclick', this.dblclick, this);
-            this.model.vertex.off('change', this.render, this);
+            this.model.vertex.off('change', this.renderIfInContext, this);
             this.model.off('change:selected', this.updateSelected, this);
         },
 

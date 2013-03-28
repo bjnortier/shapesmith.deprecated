@@ -32,6 +32,7 @@ define([
 
             this.vertex = vertex;
             this.views = [];
+            this.inContext = false;
             this.set('selected', selection.isSelected(vertex.id));
 
             selection.on('selected', this.select, this);
@@ -82,7 +83,6 @@ define([
 
         initialize: function() {
             this.scene = sceneModel.view.scene;
-            this.model.inContext = false;
             this.showStack = 0;
             this.updateCameraScale();
             this.clear();
@@ -99,6 +99,12 @@ define([
             sceneModel.view.off('cameraMoveStarted', this.cameraMoveStarted, this);
             sceneModel.view.off('cameraMoved', this.cameraMoved, this);
             sceneModel.view.off('cameraMoveStopped', this.cameraMoveStopped, this);
+        },
+
+        renderIfInContext: function() {
+            if (this.model.inContext) {
+                this.render();
+            }
         },
 
         render: function() {

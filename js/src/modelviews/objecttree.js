@@ -211,10 +211,6 @@ define([
         return !vertex.implicit && !geometryGraph.parentsOf(vertex).length;
     }
 
-
-
-
-
     var createTree = function(vertex, domElement) {
         var model = models.get(vertex);
         var domView = model.addTreeView({appendDomElement: domElement});
@@ -223,25 +219,30 @@ define([
             vertex, 
             model,
             domView,
-            geometryGraph.childrenOf(vertex).map(function(child) {
-                // Look for existing trees that should become children, e.g.
-                // when a boolean is created
-                var foundTree = _.find(trees, function(t) {
-                    return (t.vertex.id === child.id);
-                });
-                if (foundTree) {
-                    trees.splice(trees.indexOf(foundTree), 1);
-                    foundTree.domView.render();
-                    childrenPlaceholder.append(foundTree.domView.$el);
-                    foundTree.domView.delegateEvents();
-                    foundTree.hideInScene();
-                    return foundTree;
+            geometryGraph.childrenOf(vertex).reduce(function(acc, child) {
+                // Ignore non-geometry childre, e.g. variables
+                if (child.category === 'geometry') {
+                    // Look for existing trees that should become children, e.g.
+                    // when a boolean is created
+                    var foundTree = _.find(trees, function(t) {
+                        return (t.vertex.id === child.id);
+                    });
+                    if (foundTree) {
+                        trees.splice(trees.indexOf(foundTree), 1);
+                        foundTree.domView.render();
+                        childrenPlaceholder.append(foundTree.domView.$el);
+                        foundTree.domView.delegateEvents();
+                        foundTree.hideInScene();
+                        return acc.concat(foundTree);
+                    } else {
+                        var childTree = createTree(child, childrenPlaceholder);
+                        childTree.hideInScene();
+                        return acc.concat(childTree);
+                    }
                 } else {
-                    var childTree = createTree(child, childrenPlaceholder);
-                    childTree.hideInScene();
-                    return childTree;
+                    return acc;
                 }
-            })
+            }, [])
         )
         node.showInScene();
         return node;
