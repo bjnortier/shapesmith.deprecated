@@ -202,7 +202,6 @@ define([
             redelegateChildren(node);
 
             node.domView = newDOMView;
-
         });
     });
 
@@ -229,7 +228,6 @@ define([
                     });
                     if (foundTree) {
                         trees.splice(trees.indexOf(foundTree), 1);
-                        foundTree.domView.render();
                         childrenPlaceholder.append(foundTree.domView.$el);
                         foundTree.domView.delegateEvents();
                         foundTree.hideInScene();
