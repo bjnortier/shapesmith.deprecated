@@ -2,5 +2,5 @@
 for i in *.svg; 
 do 
 echo $i
-node ../../nodes/api/priv/www/js/scripts/svgtoicon.js $i ../../nodes/api/priv/www/images/icons/$i; 
+node ../../js/scripts/svgtoicon.js $i ../../images/icons/$i; 
 done
