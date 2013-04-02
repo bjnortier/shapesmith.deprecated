@@ -196,17 +196,17 @@ define([
         })
     }
 
-    var loadFinished = function() {
+    var defaultVertices = {
+        'workplane' : GeomNode.Workplane,
+    }
 
+    var loadFinished = function() {
 
         geometryGraph.notifyAdded(function(v) {
             return true;
         });
 
-        var defaults = {
-            'workplane'       : GeomNode.Workplane,
-        }
-        _.map(defaults, function(ctor, type) {
+        _.map(defaultVertices, function(ctor, type) {
             var hasOne = geometryGraph.verticesByType(type).length > 0;
             if (!hasOne) {
                 geometryGraph.add(new ctor());
@@ -228,6 +228,7 @@ define([
     }
 
     return {
+        defaultVertices  : defaultVertices,
         edit             : edit,
         commit           : commit,
         tryCommitEdit    : tryCommitEdit,
@@ -235,7 +236,7 @@ define([
         tryCommitAdd     : tryCommitAdd,
         tryCommitCreate  : tryCommitCreate,
         tryCommitDelete  : tryCommitDelete,
-        commitLayerTree : commitLayerTree,
+        commitLayerTree  : commitLayerTree,
         cancelEdit       : cancelEdit,
         cancelCreate     : cancelCreate,
         loadFromCommit   : loadFromCommit,

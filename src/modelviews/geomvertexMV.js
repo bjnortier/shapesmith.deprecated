@@ -404,14 +404,6 @@
             } else if (options.replaceDomElement) {
                 options.replaceDomElement.replaceWith(this.$el);
             }
-
-            // var isTopLevel = !geometryGraph.parentsOf(this.model.vertex).length;
-            // if (!isTopLevel) {
-            //     var color = "#bbb";
-            //     this.$el.find('> .title > .icon24').attr(
-            //         "style", 
-            //         $.mustache("fill: {{color}}; stroke: {{color}}", {color: color}));
-            // }
         },
 
         render: function() {
