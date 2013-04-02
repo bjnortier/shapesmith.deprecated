@@ -215,22 +215,7 @@ define([
     }); 
 
 
-    var EditingSceneView = GeomVertexMV.EditingSceneView.extend(SceneViewMixin).extend({
-
-        initialize: function(options) {
-            GeomVertexMV.EditingSceneView.prototype.initialize.call(this);
-            this.on('dragEnded', this.dragEnded, this);
-            this.on('drag', this.drag, this);
-        },
-
-        remove: function() {
-            GeomVertexMV.EditingSceneView.prototype.remove.call(this);
-            this.off('dragEnded', this.dragEnded, this);
-            this.off('drag', this.drag, this);
-        },
-
-    });
-
+    var EditingSceneView = GeomVertexMV.EditingSceneView.extend(SceneViewMixin);
 
     // ---------- Display ----------
 
