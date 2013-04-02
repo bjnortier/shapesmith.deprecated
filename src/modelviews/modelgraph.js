@@ -7,12 +7,7 @@ define([
         'underscore',
         'backbone-events',
         'geometrygraphsingleton',
-        'modelviews/vertexMV', 
-        'modelviews/pointMV', 
-        'modelviews/polylineMV',
-        'modelviews/cubeMV',
-        'modelviews/sphereMV',
-        'modelviews/subtractMV',
+        'modelviews/vertexMV',
     ], 
     function(
         _,
