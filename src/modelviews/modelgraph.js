@@ -18,20 +18,7 @@ define([
         _,
         Events,
         geometryGraph,
-        VertexMV,
-        PointMV, 
-        PolylineMV,
-        CubeMV,
-        SphereMV,
-        SubtractMV) {
-
-    var wrappers = {
-        'point'     : PointMV,
-        'polyline'  : PolylineMV,
-        'cube'      : CubeMV,
-        'sphere'    : SphereMV,
-        'subtract'  : SubtractMV,
-    }
+        VertexMV) {
 
     var Models = function() {
 
@@ -39,6 +26,12 @@ define([
 
         var that = this;
         var models = {};
+        var wrappers = {
+        }
+
+        this.addWrapper = function(type, wrapper) {
+            wrappers[type] = wrapper;
+        }
 
         geometryGraph.on('vertexAdded', function(vertex) {
             if (vertex.category === 'geometry') {

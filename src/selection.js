@@ -3,7 +3,7 @@ define([
     'backbone', 
     'geometrygraphsingleton', 
     'interactioncoordinator'], 
-    function(_, Backbone, geometryGraph, coordinator, geomToolbarModel) {
+    function(_, Backbone, geometryGraph, coordinator) {
     
     var Manager = function() {
 

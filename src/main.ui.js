@@ -23,91 +23,83 @@ requirejs([
         // Initialize the BSP DB before anything else
         adapter.broker.on('initialized', function() {
 
-            requirejs([
-                'jquery',
-                'lib/jquery.getQueryParam',
-                'scene',
-                'interactioncoordinator',
-                'worldcursor',
-                'geomtoolbar',
-                'workplaneMV',
-                'trackball',
-                'commandstack',
-                'geometrygraphsingleton',
-                'casgraph/ajaxreplicator',
-                'variablemanager',       
-                'vertexmodelmanager',
-                'modelviews/modelgraph',
-                'modelviews/objecttree',
-                'webdriverutils',
-                'maintoolbar',
-                'asyncAPI',
-                'geomnode',
-                'hintview',
-                'inspect/statsview',
-                'inspect/renderingoptionsview',
-                'splashscreen',
-                'scripting/designer',
-            ], function(
-                $, _$,
-                sceneModel,
-                coordinator,
-                worldCursor,
-                geomToolbar,
-                Workplane,
-                trackBall,
-                commandStack,
-                geometryGraph,
-                AJAXReplicator,
-                variableManager,
-                vertexModelManager,
-                modelGraph,
-                objectTree,
-                wdutils,
-                mainToolbar,
-                AsyncAPI,
-                geomNode,
-                hintView,
-                StatsView,
-                RenderingOptionsView,
-                SplashScreen,
-                Designer) {
+            requirejs(['designer'], function(designer) {
 
-            var originalReplaceFn = Workplane.DisplayModel.prototype.vertexReplaced;
+                requirejs([
+                    'jquery',
+                    'lib/jquery.getQueryParam',
+                    'scene',
+                    'interactioncoordinator',
+                    'worldcursor',
+                    'workplaneMV',
+                    'trackball',
+                    'commandstack',
+                    'geometrygraphsingleton',
+                    'casgraph/ajaxreplicator',
+                    'variablemanager',       
+                    'vertexmodelmanager',
+                    'modelviews/modelgraph',
+                    'modelviews/objecttree',
+                    'webdriverutils',
+                    'asyncAPI',
+                    'geomnode',
+                    'hintview',
+                    'inspect/statsview',
+                    'inspect/renderingoptionsview',
+                    'splashscreen',
+                    'scripting/designer',
+                ], function(
+                    $, _$,
+                    sceneModel,
+                    coordinator,
+                    worldCursor,
+                    Workplane,
+                    trackBall,
+                    commandStack,
+                    geometryGraph,
+                    AJAXReplicator,
+                    variableManager,
+                    vertexModelManager,
+                    modelGraph,
+                    objectTree,
+                    wdutils,
+                    AsyncAPI,
+                    geomNode,
+                    hintView,
+                    StatsView,
+                    RenderingOptionsView,
+                    SplashScreen,
+                    Designer) {
 
-            $(document).ready(function() {
-                var resizeContainers = function() {
-                    sceneModel.view.resize();
-                    $('#variables').css('width', $('#explorer').width() + 'px')
-                    $('#geometry').css('width', $('#explorer').width() + 'px')
-                }
+                var originalReplaceFn = Workplane.DisplayModel.prototype.vertexReplaced;
 
-                var statsView = new StatsView();
-                // var renderingOptionsView = new RenderingOptionsView();
+                $(document).ready(function() {
 
-                var vertexUrl = '/_api/' + globals.user + '/' + globals.design + '/vertex/';
-                var graphUrl = '/_api/' + globals.user + '/' + globals.design + '/graph/';
-                var replicator = new AJAXReplicator(vertexUrl, graphUrl);
-                geometryGraph.attachReplicator(replicator);
+                    designer.init();
 
-                var commitSHA = $.getQueryParam("commit");
-                AsyncAPI.loadFromCommit(replicator, commitSHA, function() {
+                    var statsView = new StatsView();
 
-                    worldCursor.registerEvents();
-                    window.onpopstate = function(event) { 
-                    
-                        var commit = (event.state && event.state.commit) || $.getQueryParam("commit");
-                        if (!commandStack.pop(commit)) {
-                            AsyncAPI.loadFromCommit(replicator, commit);
-                        }    
-                    }
+                    var vertexUrl = '/_api/' + globals.user + '/' + globals.design + '/vertex/';
+                    var graphUrl = '/_api/' + globals.user + '/' + globals.design + '/graph/';
+                    var replicator = new AJAXReplicator(vertexUrl, graphUrl);
+                    geometryGraph.attachReplicator(replicator);
+
+                    var commitSHA = $.getQueryParam("commit");
+                    AsyncAPI.loadFromCommit(replicator, commitSHA, function() {
+
+                        worldCursor.registerEvents();
+                        window.onpopstate = function(event) { 
+                        
+                            var commit = (event.state && event.state.commit) || $.getQueryParam("commit");
+                            if (!commandStack.pop(commit)) {
+                                AsyncAPI.loadFromCommit(replicator, commit);
+                            }    
+                        }
+                    });
+
+                    window.designer = new Designer();
+
                 });
-
-                // if ($.getQueryParam('splash')) {
-                //     new SplashScreen();
-                // }
-
-                window.designer = new Designer();
 
             });
 

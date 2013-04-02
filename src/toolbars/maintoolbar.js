@@ -1,8 +1,8 @@
 define([
         'jquery',
         'lib/jquery.getQueryParam',
-        'toolbar',
-        'geomtoolbar',
+        'toolbars/toolbar',
+        'toolbars/geomtoolbar',
         'scene',
         'geometrygraphsingleton',
         'vertexmodelmanager',
