@@ -58,32 +58,32 @@ define([
     }); 
 
     var addVertex = function(vertex) {
-        // Implciit editing vertices are handles by the parent editing model
-        var implicitEditing = vertex.implicit && vertex.editing;
-        if (implicitEditing) {
-            return;
-        }
+        // // Implciit editing vertices are handles by the parent editing model
+        // var implicitEditing = vertex.implicit && vertex.editing;
+        // if (implicitEditing) {
+        //     return;
+        // }
 
-        if (vertex.editing) {
-            new wrappers[vertex.type].EditingModel({vertex: vertex});
-        } else {
-            new wrappers[vertex.type].DisplayModel({vertex: vertex});
-        }
+        // if (vertex.editing) {
+        //     new wrappers[vertex.type].EditingModel({vertex: vertex});
+        // } else {
+        //     new wrappers[vertex.type].DisplayModel({vertex: vertex});
+        // }
     }
 
     var removeVertex = function(vertex) {
-        // Implicit editing vertices are handles by the parent editing model
-        var implicitEditing = vertex.implicit && vertex.editing;
-        if (implicitEditing) {
-            return;
-        }
+        // // Implicit editing vertices are handles by the parent editing model
+        // var implicitEditing = vertex.implicit && vertex.editing;
+        // if (implicitEditing) {
+        //     return;
+        // }
 
-        var model = VertexMV.getModelForVertex(vertex);
-        if (!model) {
-            throw Error('no model for vertex:' + vertex.id);
-        }
+        // var model = VertexMV.getModelForVertex(vertex);
+        // if (!model) {
+        //     throw Error('no model for vertex:' + vertex.id);
+        // }
 
-        model.destroy();
+        // model.destroy();
     }
 
     return wrappers;

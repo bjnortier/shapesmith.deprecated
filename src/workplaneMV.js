@@ -6,7 +6,7 @@ define([
         'settings',
         'geomnode',
         'geometrygraphsingleton',
-        'vertexMV',
+        'modelviews/vertexMV',
         'workplanecoordinator',
         'selection',
         'asyncAPI',
@@ -29,7 +29,7 @@ define([
 
         initialize: function(options) {
             this.displayModelConstructor = DisplayModel;
-
+            this.SceneView = GridView;
             VertexMV.DisplayModel.prototype.initialize.call(this, options);
 
             currentDisplayModel = this;
@@ -97,6 +97,7 @@ define([
         // when it's being editied
         vertexReplaced: function(original, replacement) {
             if (replacement.category !== 'geometry') {
+                this.trigger('change');
                 return;
             }
             if (!replacement.proto && replacement.editing && !replacement.implicit) {

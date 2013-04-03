@@ -57,11 +57,10 @@ define([
 
         addSceneView: function() {
             if (this.sceneView) {
-                throw Error('Cannot have multiple scne views');
+                throw Error('Cannot have multiple scene views');
             }
             this.sceneView = new this.SceneView({model: this});
             this.views.push(this.sceneView);
-            return this.sceneView;
         },
 
         select: function(ids, selection) {

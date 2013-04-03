@@ -89,7 +89,7 @@ define([
         this.model.sceneView.popShowStack();
         this.children.forEach(function(childNode) {
             if (childNode.vertex.implicit) {
-                childNode.model.sceneView.popShowStack();
+                childNode.hideInScene();
             }
         });
     }
@@ -98,7 +98,7 @@ define([
         this.model.sceneView.pushShowStack();
         this.children.forEach(function(childNode) {
             if (childNode.vertex.implicit) {
-                childNode.model.sceneView.pushShowStack();
+                childNode.showInScene();
             }
         });
     }
@@ -122,87 +122,94 @@ define([
         this.domView.off('ascend', this.ascend, this);
     }
 
-    // ---------- Observer the models ----------
+    // ---------- Observe the models ----------
 
     models.on('added', function(vertex, model) {
-        if (shouldHaveTree(vertex)) {
-            trees.push(createTree(vertex, $('#geometry')));
+        if (vertex.category === 'geometry') {
+            if (shouldHaveTree(vertex)) {
+                trees.push(createTree(vertex, $('#geometry')));
 
-        } else if (vertex.implicit) {
+            } else if (vertex.implicit) {
 
-            // Implicit vertices will be added as children to all 
-            // parent nodes. This happens during editing when a new
-            // point is added
-            var parentVertices = geometryGraph.parentsOf(vertex);
-            var parentNodes = [];
-            parentVertices.forEach(function(parentVertex) {
-                trees.forEach(function(tree) {
-                    parentNodes = parentNodes.concat(tree.findVertex(parentVertex));
+                // Implicit vertices will be added as children to all 
+                // parent nodes. This happens during editing when a new
+                // point is added
+                var parentVertices = geometryGraph.parentsOf(vertex);
+                var parentNodes = [];
+                parentVertices.forEach(function(parentVertex) {
+                    trees.forEach(function(tree) {
+                        parentNodes = parentNodes.concat(tree.findVertex(parentVertex));
+                    })
+                });
+                parentNodes.forEach(function(parentNode) {
+                    var parentDomElement = parentNode.domView.$el.find('.children.' + parentNode.vertex.id);
+                    parentNode.children.push(createTree(vertex, parentDomElement));
                 })
-            });
-            parentNodes.forEach(function(parentNode) {
-                var parentDomElement = parentNode.domView.$el.find('.children.' + parentNode.vertex.id);
-                parentNode.children.push(createTree(vertex, parentDomElement));
-            })
+            }
+        } else {
+            model.sceneView && model.sceneView.pushShowStack();   
         }
 
     });
 
     models.on('removed', function(vertex, model) {
+        if (vertex.category === 'geometry') {
+            trees = trees.reduce(function(acc, root) {
+                root.findVertex(vertex).forEach(function(node) {
+                    node.remove();
+                })
+                if (root.vertex.id === vertex.id) {
+                    return acc;
+                } else {
+                    return acc.concat(root);
+                }
+            }, []);
 
-        trees = trees.reduce(function(acc, root) {
-            root.findVertex(vertex).forEach(function(node) {
-                node.remove();
-            })
-            if (root.vertex.id === vertex.id) {
-                return acc;
-            } else {
-                return acc.concat(root);
-            }
-        }, []);
+            // If any of the children of the removed vertex should now be trees, 
+            // create them
+            var geomVerticesWithoutTrees = geometryGraph.filteredVertices(function(v) { 
+                var isGeom = (v.category === 'geometry');
+                var hasTree = _.find(trees, function(t) { return t.vertex.id === v.id});
+                return isGeom && !hasTree;
 
-        // If any of the children of the removed vertex should now be trees, 
-        // create them
-        var geomVerticesWithoutTrees = geometryGraph.filteredVertices(function(v) { 
-            var isGeom = (v.category === 'geometry');
-            var hasTree = _.find(trees, function(t) { return t.vertex.id === v.id});
-            return isGeom && !hasTree;
-
-        });
-        geomVerticesWithoutTrees.forEach(function(v) {
-            if (shouldHaveTree(v)) {
-                trees.push(createTree(v, $('#geometry')));
-            }
-        });
+            });
+            geomVerticesWithoutTrees.forEach(function(v) {
+                if (shouldHaveTree(v)) {
+                    trees.push(createTree(v, $('#geometry')));
+                }
+            });
+        }
     });
 
     models.on('replaced', function(original, originalModel, replacement, replacementModel) {
-        // Find the nodes in the tree representing the vertex and replace
-        // with the new model
-        var nodes = [];
-        trees.forEach(function(node) {
-            nodes = nodes.concat(node.findVertex(original));
-        })
-        nodes.forEach(function(node) {
+        if (original.category === 'geometry') { 
+            // Find the nodes in the tree representing the vertex and replace
+            // with the new model
+            var nodes = [];
+            trees.forEach(function(node) {
+                nodes = nodes.concat(node.findVertex(original));
+            })
+            nodes.forEach(function(node) {
 
-            node.model = replacementModel;
+                node.model = replacementModel;
 
-            var replaceDomElement = node.domView.$el;
-            var newDOMView = replacementModel.addTreeView({replaceDomElement: replaceDomElement});
-            var oldChildrenElement = newDOMView.$el.find('> .children.' + original.id);
-            var newChildrenElement = node.domView.$el.find('> .children,' + replacement.id)
-            oldChildrenElement.replaceWith(newChildrenElement);
+                var replaceDomElement = node.domView.$el;
+                var newDOMView = replacementModel.addTreeView({replaceDomElement: replaceDomElement});
+                var oldChildrenElement = newDOMView.$el.find('> .children.' + original.id);
+                var newChildrenElement = node.domView.$el.find('> .children,' + replacement.id)
+                oldChildrenElement.replaceWith(newChildrenElement);
 
-            var redelegateChildren = function(n) {
-                n.children.forEach(function(child) {
-                    child.domView.delegateEvents();
-                    redelegateChildren(child);
-                })
-            }
-            redelegateChildren(node);
+                var redelegateChildren = function(n) {
+                    n.children.forEach(function(child) {
+                        child.domView.delegateEvents();
+                        redelegateChildren(child);
+                    })
+                }
+                redelegateChildren(node);
 
-            node.domView = newDOMView;
-        });
+                node.domView = newDOMView;
+            });
+        }
     });
 
     // Doesn the vertex have a tree?

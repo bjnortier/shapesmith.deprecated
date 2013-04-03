@@ -4,7 +4,7 @@ define([
         'calculations',
         'scene',
         'scenevieweventgenerator',
-        'vertexMV',
+        'modelviews/vertexMV',
         'settings',
         'workplaneMV'
     ], function(_, Events, calc, sceneModel, sceneViewEventGenerator, VertexMV, userSettings, WorkplaneMV) {
