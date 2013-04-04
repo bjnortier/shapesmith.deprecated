@@ -191,27 +191,6 @@ img#logo {
     cursor: pointer;    
 }
 
-/*.vertex .delete {   
-    display: inline-block;
-    width: 16px;
-    height: 16px;   
-    background-image: none;
-    margin-right: 5px; 
-    margin-left: 5px;
-    margin-bottom: 2px;
-}
-
-.vertex:hover .delete, .vertex.variable:hover .delete {
-    background-image: url('/images/icons/delete16x16.disabled.png');
-    background-repeat: no-repeat;
-}
-
-.vertex .delete:hover {
-    background-image: url('/images/icons/delete16x16.png') !important;
-    cursor: pointer;
-    background-repeat: no-repeat;
-}*/
-
 .materials {
     position: absolute;
     border-top: solid thin #ADACAC;
@@ -525,29 +504,6 @@ input.field[type="text"] {
 .layer-container.root  > .layer-container, .layer-container.root > .layer-leaf  {
     margin-left: 2px;
 }
-
-.layer-container > .title > .delete {   
-    display: inline-block;
-    width: 16px;
-    height: 16px;   
-    background-image: none;
-    margin-right: 5px; 
-    margin-left: 5px;
-    padding-bottom: 8px;
-}
-
-.layer-container > .title:hover > .delete {
-    background-image: url('/images/icons/delete16x16.disabled.png');
-    background-repeat: no-repeat;
-}
-
-.layer-container > .title > .delete:hover {
-    background-image: url('/images/icons/delete16x16.png') !important;
-    cursor: pointer;
-    background-repeat: no-repeat;
-}
-
-
 
 /* ---------- Dialog ---------- */
 

@@ -73,7 +73,6 @@ define([
     var EditingModel = GeomVertexMV.EditingModel.extend({
 
         initialize: function(options) {
-            this.displayModelConstructor = DisplayModel;
             this.DOMView = EditingDOMView;
             this.SceneView = EditingSceneView;
             GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
@@ -219,8 +218,6 @@ define([
     var DisplayModel = GeomVertexMV.DisplayModel.extend({
 
         initialize: function(options) {
-            this.editingModelConstructor = EditingModel;
-            this.displayModelConstructor = DisplayModel;
             this.SceneView = DisplaySceneView;
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
         },

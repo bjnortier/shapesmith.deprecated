@@ -1,12 +1,13 @@
 define([
-    'modelviews/modelgraph',
-    'icons',
+    'modelviews/variableMV',
     'modelviews/workplaneMV',
     'modelviews/pointMV',
     'modelviews/polylineMV',
     'modelviews/cubeMV',
     'modelviews/sphereMV',
     'modelviews/subtractMV',
+    'modelviews/modelgraph',
+    'icons',
     'toolbars/toolbar',
     'toolbars/geomtoolbar',
     'toolbars/maintoolbar',
@@ -20,14 +21,15 @@ define([
     'toolbars/exititemmodel',
     'toolbars/exportobjitemmodel',
     ], function(
-        modelgraph,
-        icons,
+        VariableMV,
         WorkplaneMV,
         PointMV,
         PolylineMV,
         CubeMV,
         SphereMV,
         SubtractMV,
+        modelgraph,
+        icons,
         Toolbar,
         geomToolbar,
         mainToolbar,
@@ -43,6 +45,7 @@ define([
 
     var init = function() {
 
+        modelgraph.addWrapper('variable', VariableMV);
         modelgraph.addWrapper('workplane', WorkplaneMV);
         modelgraph.addWrapper('point', PointMV);
         modelgraph.addWrapper('polyline', PolylineMV);

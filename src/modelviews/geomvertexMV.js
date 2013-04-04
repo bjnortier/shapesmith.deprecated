@@ -107,22 +107,6 @@
             return {lines: lines, meshes: meshes};
         },
 
-        findImplicitDescendantSceneviews: function(parent) {
-            var sceneViews = [];
-            var children = geometryGraph.childrenOf(parent);
-            for (var i = 0; i < children.length; ++i) {
-                var child = children[i];
-                if (child.implicit) {
-                    var childModel = VertexMV.getModelForVertex(child);
-                    if (childModel && childModel.sceneView) {
-                        sceneViews.push(childModel.sceneView);
-                    }
-                    sceneViews = sceneViews.concat(this.findImplicitDescendantSceneviews(child));
-                }
-            }
-            return sceneViews;
-        },
-
         updateMaterials: function(key) {
             var objects = this.findObjects([this.sceneObject]);
             var that = this;
@@ -321,7 +305,12 @@
                 '<div class="title">' + 
                 '<div class="icon24">{{{icon}}}</div>' +
                 '<div class="name">{{name}}</div>' + 
-                '<div class="delete"></div>' + 
+                '<div class="actions">' +
+                    '{{#isTopLevel}}' +
+                    // '<i class="showhide icon-eye-open"></i>' +
+                    '<i class="delete icon-remove"></i>' +
+                    '{{/isTopLevel}}' +
+                '</div>' +
                 '{{/implicit}}' +
                 '</div>' + 
                 '<div class="children {{id}}"></div>';
@@ -331,6 +320,7 @@
                 name : this.model.vertex.name,
                 implicit: this.model.vertex.implicit,
                 icon: icons[this.model.vertex.type],
+                isTopLevel: !geometryGraph.parentsOf(this.model.vertex).length,
             }
         },
 

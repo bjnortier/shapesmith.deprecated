@@ -13,15 +13,28 @@ define([
         coordinator,
         AsyncAPI) {
 
+    var replaceOrAppendInTable = function(newDOMView) {
+        var originalModel = newDOMView.model.attributes.originalModel;
+        var rowIndex =  originalModel ?
+                originalModel.domView.$el.closest('tr').prevAll().length : undefined;
+        if ((rowIndex !== undefined) && 
+            (rowIndex < $('#variables tr').length)) {
+            $($('#variables tr')[rowIndex]).before(newDOMView.$el);
+        } else {
+            $('#variables').append(newDOMView.$el);
+        }
+    }
+
 
     // ---------- Editing ----------
 
     var EditingModel = VertexMV.EditingModel.extend({
 
         initialize: function(original, vertex) {
-            this.displayModelConstructor = DisplayModel;
+            this.SceneView = VertexMV.SceneView;
             VertexMV.EditingModel.prototype.initialize.call(this, original, vertex);
-            this.views.push(new EditingView({model: this}));
+            this.domView = new EditingView({model: this});
+            this.views.push(this.domView);
             coordinator.on('sceneClick', this.tryCommit, this);
         },
 
@@ -35,6 +48,16 @@ define([
             this.tryCommit();
         },
 
+        // replaceOrAppendInTable: function(view, tableSelector) {
+        //     var rowIndex = view.model.attributes.rowIndex;
+        //     if ((rowIndex !== undefined) && 
+        //         (rowIndex < $(tableSelector + ' tr').length)) {
+        //         $($(tableSelector + ' tr')[rowIndex]).before(view.$el);
+        //     } else {
+        //         $(tableSelector).append(view.$el);
+        //     }
+        // },
+
     })
 
     var EditingView = VertexMV.EditingDOMView.extend({
@@ -45,7 +68,7 @@ define([
             VertexMV.EditingDOMView.prototype.initialize.call(this);
             this.render();
             this.$el.addClass('variable');
-            this.model.replaceOrAppendInTable(this, '#variables'); 
+            replaceOrAppendInTable(this); 
             $('.field').autoGrowInput();
 
         },
@@ -63,7 +86,7 @@ define([
                 '<td class="expression">' +  
                 '<input class="field expr" placeholder="expr" type="text" value="{{expression}}"></input>' +
                 '</td>' +
-                '<td><div class="delete"></div></td>';
+                '<td><i class="delete icon-remove"></i></td>';
             var view = {
                 id: this.model.vertex.id,
             };
@@ -97,15 +120,25 @@ define([
     var DisplayModel = VertexMV.DisplayModel.extend({
 
         initialize: function(vertex) {
-            this.displayModelConstructor = DisplayModel;
-            this.editingModelConstructor = EditingModel;
+            this.SceneView = VertexMV.SceneView;
             VertexMV.DisplayModel.prototype.initialize.call(this, vertex);
-            this.views.push(new DisplayDOMView({model: this}));
+            this.domView = new DisplayDOMView({model: this});
+            this.views.push(this.domView);
         },
 
         destroy: function() {
             VertexMV.DisplayModel.prototype.destroy.call(this);
         },
+
+        // replaceOrAppendInTable: function(view, tableSelector) {
+        //     var rowIndex = view.model.attributes.rowIndex;
+        //     if ((rowIndex !== undefined) && 
+        //         (rowIndex < $(tableSelector + ' tr').length)) {
+        //         $($(tableSelector + ' tr')[rowIndex]).before(view.$el);
+        //     } else {
+        //         $(tableSelector).append(view.$el);
+        //     }
+        // },
 
     })
 
@@ -116,7 +149,7 @@ define([
 
         initialize: function() {
             VertexMV.DisplayDOMView.prototype.initialize.call(this);
-            this.model.replaceOrAppendInTable(this, '#variables'); 
+            replaceOrAppendInTable(this); 
             $('.field').autoGrowInput();
         },
 
@@ -128,7 +161,7 @@ define([
             var template = 
                 '<td class="name">{{name}}</input></td>' +
                 '<td class="expression">{{expression}}</td>' +
-                '<td><div class="delete"></div></td>';
+                '<td><i class="delete icon-remove"></i></td>';
             var view = {
                 id: this.model.vertex.id,   
                 name:  this.model.vertex.name,
@@ -147,8 +180,7 @@ define([
         click: function(event) {
             event.stopPropagation();
             if (!geometryGraph.isEditing()) {
-                var editingVertex = AsyncAPI.edit(this.model.vertex);
-                this.model.replaceWithEditing(this.model.vertex, editingVertex);
+                AsyncAPI.edit(this.model.vertex);
             }
         },
 

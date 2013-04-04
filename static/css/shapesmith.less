@@ -168,7 +168,22 @@ input.field[type="text"] {
 #variables {
     background: none;
     width: 100%;
+    .delete   { 
+        visibility: hidden;
+        &:hover { 
+            color: red;
+        }
+    }
+    .vertex {
+        &:hover {
+            .delete {
+                visibility: visible;
+            }
+        }
+    }
 }
+
+
 
 #geometry {
     .vertex {
@@ -229,7 +244,7 @@ input.field[type="text"] {
             }
         }
         .title {
-            display: inline;
+            display: inline-block;
         }
     }
     .vertex.display {
@@ -248,6 +263,28 @@ input.field[type="text"] {
         }
         >.children > .vertex.implicit {
             display: block;
+        }
+    }
+}
+
+#geometry, #variables {
+    .vertex.editing {
+        background-color: rgb(190, 190, 190);
+        >div {
+            padding-left: 5px;
+        }
+        >div.title, >div.children {
+            padding-left: 0;
+        }
+    }
+    .vertex.editing {
+        >.title {
+            >.icon24 {
+                margin: 0 5px;
+            }
+        }
+        .vertex {
+            margin-left: 0;
         }
     }
 }

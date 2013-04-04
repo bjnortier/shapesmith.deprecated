@@ -46,6 +46,9 @@
         $('#scene canvas').mousewheel(function(event) {
             that.trigger('mousewheel', event);
         });
+        $('#graphs').click(function(event) {
+            that.trigger('containerClick', event);
+        });
 
         this.mousemove = function(event) {
             if (this.overDragThreshold(eventToPosition(event))) {

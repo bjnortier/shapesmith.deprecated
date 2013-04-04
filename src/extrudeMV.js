@@ -92,7 +92,6 @@ define([
     var EditingModel = GeomVertexMV.EditingModel.extend({
 
         initialize: function(options) {
-            this.displayModelConstructor = DisplayModel;
             GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
 
             var polyline = geometryGraph.childrenOf(this.vertex)[0];

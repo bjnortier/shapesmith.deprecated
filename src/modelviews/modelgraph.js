@@ -64,7 +64,8 @@ define([
                 wrappers[replacement.type].EditingModel :
                 wrappers[replacement.type].DisplayModel;
             var replacementModel = new modelConstructor({
-                original: original, 
+                original: original,
+                originalModel: originalModel, 
                 vertex: replacement,
             });
 
