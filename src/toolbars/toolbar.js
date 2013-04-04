@@ -104,7 +104,7 @@ define([
     var ExpanderItemView = Backbone.View.extend({
 
         tagName: "li",
-        className: "expander",
+        className: "item expander",
 
         initialize: function() {
             this.render();

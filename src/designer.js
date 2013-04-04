@@ -1,7 +1,7 @@
 define([
-    'vertexmodelmanager',
     'modelviews/modelgraph',
     'icons',
+    'modelviews/workplaneMV',
     'modelviews/pointMV',
     'modelviews/polylineMV',
     'modelviews/cubeMV',
@@ -20,9 +20,9 @@ define([
     'toolbars/exititemmodel',
     'toolbars/exportobjitemmodel',
     ], function(
-        vertexModelManager,
         modelgraph,
         icons,
+        WorkplaneMV,
         PointMV,
         PolylineMV,
         CubeMV,
@@ -43,6 +43,7 @@ define([
 
     var init = function() {
 
+        modelgraph.addWrapper('workplane', WorkplaneMV);
         modelgraph.addWrapper('point', PointMV);
         modelgraph.addWrapper('polyline', PolylineMV);
         modelgraph.addWrapper('cube', CubeMV);

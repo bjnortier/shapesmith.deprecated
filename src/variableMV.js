@@ -2,7 +2,7 @@ define([
         'jquery',
         'lib/jquery.mustache',
         'lib/jquery.autoGrowInput',
-        'vertexMV',
+        'modelviews/vertexMV',
         'geometrygraphsingleton', 
         'interactioncoordinator',
         'asyncAPI',

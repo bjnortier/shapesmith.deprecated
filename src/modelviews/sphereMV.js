@@ -6,7 +6,7 @@ define([
         'scene',
         'geometrygraphsingleton',
         'modelviews/geomvertexMV', 
-        'pointMV', 
+        'modelviews/pointMV', 
         'asyncAPI',
     ], 
     function(

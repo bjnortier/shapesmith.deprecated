@@ -7,10 +7,10 @@ define([
         'scenevieweventgenerator',
         'worldcursor',
         'geometrygraphsingleton',
-        'vertexMV',
+        'modelviews/vertexMV',
         'modelviews/geomvertexMV', 
-        'pointMV', 
-        'workplaneMV',
+        'modelviews/pointMV', 
+        'modelviews/workplaneMV',
         'asyncAPI',
     ], 
     function(

@@ -4,7 +4,7 @@ define([
         'calculations',
         'colors',
         'geometrygraphsingleton',
-        'geomvertexMV',
+        'modelviews/geomvertexMV',
         'scene',
         'heightanchorview',
         'icons',

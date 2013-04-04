@@ -1,6 +1,6 @@
 define([
         'calculations',
-        'workplaneMV',
+        'modelviews/workplaneMV',
         'geometrygraphsingleton',
         'icons',
         'toolbars/toolbar'

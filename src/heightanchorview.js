@@ -3,7 +3,7 @@ define([
     'scene',
     'geometrygraphsingleton',
     'settings',
-    'workplaneMV',
+    'modelviews/workplaneMV',
     'modelviews/geomvertexMV',
     ], function(calc, sceneModel, geometryGraph, settings, WorkplaneMV, GeomVertexMV) {
 

@@ -25,6 +25,15 @@ define([
 
     var currentDisplayModel = undefined;
 
+    var EditingModel = VertexMV.EditingModel.extend({
+
+        initialize: function(options) {
+            this.SceneView = GridView;
+            VertexMV.DisplayModel.prototype.initialize.call(this, options);
+        },
+        
+    });
+
     var DisplayModel = VertexMV.DisplayModel.extend({
 
         initialize: function(options) {

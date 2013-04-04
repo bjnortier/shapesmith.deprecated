@@ -6,7 +6,7 @@ define([
         'scenevieweventgenerator',
         'modelviews/vertexMV',
         'settings',
-        'workplaneMV'
+        'modelviews/workplaneMV'
     ], function(_, Events, calc, sceneModel, sceneViewEventGenerator, VertexMV, userSettings, WorkplaneMV) {
 
     var camera = sceneModel.view.camera;

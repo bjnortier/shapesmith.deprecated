@@ -102,10 +102,8 @@ define([
     });
 
     var toolbarModel = new GeomToolbarModel({name: 'geometry'});
-    var expander = new toolbar.ExpanderItem();
     toolbarModel.addItem(selectItemModel);
     toolbarModel.setToSelect();
-    expander.toggle();
     return toolbarModel;
 
 });

@@ -3,7 +3,7 @@ define([
         'jquery',
         'lib/jquery.mustache',
         'calculations',
-        'vertexMV',
+        'modelviews/vertexMV',
         'asyncAPI',
         'commandstack',
         'geometrygraphsingleton', 
