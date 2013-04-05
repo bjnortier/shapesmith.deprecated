@@ -218,7 +218,7 @@ define([
     }
 
     var createTree = function(vertex, domElement) {
-        var model = models.get(vertex);
+        var model = models.get(vertex.id);
         var domView = model.addTreeView({appendDomElement: domElement});
         var childrenPlaceholder = domView.$el.find('> .children.' + vertex.id);
         var node = new Node(

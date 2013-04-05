@@ -43,7 +43,6 @@ define([
 
             currentDisplayModel = this;
             this.renderAtZero = true;
-            this.views.push(new GridView({model: this}));
 
             settings.on('change:gridsize', this.gridSizeChanged, this);
             coordinator.on('mousemove', this.mousemove, this);
@@ -218,6 +217,7 @@ define([
     });
 
     return {
+        EditingModel: EditingModel,
         DisplayModel: DisplayModel,
         getCurrent  : function() { return currentDisplayModel; },
     }

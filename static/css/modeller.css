@@ -276,6 +276,7 @@ img#logo {
 }
 
 .toolbar .expander .icon8x32 {
+    display: inline-block;
     width: 8px;
     height: 32px;
     background-image: url('/images/icons/contract8x32.png');

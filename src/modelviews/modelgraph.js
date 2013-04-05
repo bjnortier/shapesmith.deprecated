@@ -84,8 +84,8 @@ define([
             originalModel.destroy();
         }); 
 
-        this.get = function(vertex) {
-            return models[vertex.id];
+        this.get = function(id) {
+            return models[id];
         }
 
         this.cancelIfEditing = function() {

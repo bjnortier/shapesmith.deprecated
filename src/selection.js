@@ -25,6 +25,9 @@ define([
                     deselected.push(selected[i]);
                 }
             }
+            if (found) {
+                return;
+            }
             selected = [id];
             
             if (deselected.length > 0) {

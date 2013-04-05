@@ -48,34 +48,130 @@
             }
             this.materials = {
                 normal: {
-                    face: new THREE.MeshLambertMaterial({color: normalColor, ambient: normalColor, name: 'normal.face'}),
-                    faceTranslucent: new THREE.MeshLambertMaterial({color: normalColor, transparent: true, opacity: 0.5, name: 'normal.faceTranslucent'}),
-                    wire: new THREE.MeshBasicMaterial({color: normalColor, wireframe: true, linewidth: 1, name: 'normal.wire'}),
-                    edge: new THREE.LineBasicMaterial({color: normalColor, linewidth: 2, name: 'normal.edge'}),
+                    face: new THREE.MeshLambertMaterial({
+                        color: normalColor,
+                        ambient: normalColor,
+                        name: 'normal.face'
+                    }),
+                    faceTranslucent: new THREE.MeshLambertMaterial({color: normalColor,
+                        transparent: true,
+                        opacity: 0.5,
+                        name: 'normal.faceTranslucent'
+                    }),
+                    wire: new THREE.MeshBasicMaterial({
+                        color: normalColor,
+                        wireframe: true,
+                        linewidth: 1,
+                        name: 'normal.wire'
+                    }),
+                    edge: new THREE.LineBasicMaterial({
+                        color: normalColor,
+                        linewidth: 2,
+                        name: 'normal.edge'
+                    }),
                 },
                 implicit: {
-                    face: new THREE.MeshLambertMaterial({color: 0xff0000, transparent: true, opacity: 0, name: 'implicit.face'}),
-                    faceTranslucent: new THREE.MeshLambertMaterial({color: 0xff0000, transparent: true, opacity: 0, name: 'implicit.faceTranslucent'}),
-                    wire: new THREE.MeshBasicMaterial({color: 0x000000, wireframe: true, transparent: true, opacity: 0, name: 'implicit.wire'}),
-                    edge: new THREE.LineBasicMaterial({color: 0x000000, transparent: true, opacity: 0, linewidth: 1, name: 'implicit.edge'}),  
+                    face: new THREE.MeshLambertMaterial({
+                        color: 0xff0000,
+                        transparent: true,
+                        opacity: 0,
+                        name: 'implicit.face'
+                    }),
+                    faceTranslucent: new THREE.MeshLambertMaterial({color: 0xff0000,
+                        transparent: true,
+                        opacity: 0,
+                        name: 'implicit.faceTranslucent'
+                    }),
+                    wire: new THREE.MeshBasicMaterial({
+                        color: 0x000000,
+                        wireframe: true,
+                        transparent: true,
+                        opacity: 0,
+                        name: 'implicit.wire'
+                    }),
+                    edge: new THREE.LineBasicMaterial({
+                        color: 0x000000,
+                        transparent: true,
+                        opacity: 0,
+                        linewidth: 1,
+                        name: 'implicit.edge'
+                    }),
                 },
                 highlight: {
-                    face: new THREE.MeshLambertMaterial({color: highlightColor, ambient: 0xffff99, name: 'highlight.face'}),
-                    faceTranslucent: new THREE.MeshLambertMaterial({color: highlightColor, transparent: true, opacity: 0.6, name: 'highlight.faceTranslucent'}),
-                    wire: new THREE.MeshBasicMaterial({color: highlightColor, wireframe: true, linewidth: 1, name: 'highlight.wire'}),
-                    edge: new THREE.LineBasicMaterial({color: highlightColor, linewidth: 2, name: 'highlight.edge'}),
-                },
+                    face: new THREE.MeshLambertMaterial({
+                        color: highlightColor,
+                        ambient: 0xffff99,
+                        transparent: true,
+                        opacity: 0.5,
+                        name: 'highlight.face'
+                    }),
+                    faceTranslucent: new THREE.MeshLambertMaterial({
+                        color: highlightColor,
+                        transparent: true,
+                        opacity: 0.6,
+                        name: 'highlight.faceTranslucent'
+                    }),
+                    wire: new THREE.MeshBasicMaterial({
+                        color: highlightColor,
+                        wireframe: true,
+                        linewidth: 1,
+                        name: 'highlight.wire'
+                    }),
+                    edge: new THREE.LineBasicMaterial({
+                        color: highlightColor,
+                        linewidth: 2,
+                        name: 'highlight.edge'
+                    }),
+                    },
                 selected: {
-                    face: new THREE.MeshLambertMaterial({color: 0xffff66, name: 'selected.face'}),
-                    faceTranslucent: new THREE.MeshLambertMaterial({color: 0xffff66, transparent: true, opacity: 0.6, name: 'selected.faceTranslucent'}),
-                    wire: new THREE.MeshBasicMaterial({color: 0xffff66, wireframe: true, linewidth: 1, name: 'selected.wire'}),
-                    edge: new THREE.LineBasicMaterial({color: 0xffff66, linewidth: 2, name: 'selected.edge'}),
+                    face: new THREE.MeshLambertMaterial({
+                        color: 0x999933,
+                        ambient: 0xffff99,
+                        transparent: true,
+                        opacity: 0.5,
+                        name: 'selected.face'}),
+                    faceTranslucent: new THREE.MeshLambertMaterial({
+                        color: 0x999933,
+                        transparent: true,
+                        opacity: 0.6,
+                        name: 'selected.faceTranslucent'
+                    }),
+                    wire: new THREE.MeshBasicMaterial({
+                        color: 0x999933,
+                        wireframe: true,
+                        linewidth: 1,
+                        name: 'selected.wire'
+                    }),
+                    edge: new THREE.LineBasicMaterial({
+                        color: 0x999933,
+                        linewidth: 2,
+                        name: 'selected.edge'
+                    }),
                 },
                 editing: {
-                    face: new THREE.MeshLambertMaterial({color: 0x0099cc, transparent: true, opacity: 0.5, name: 'editing.face'}),
-                    faceTranslucent: new THREE.MeshLambertMaterial({color: 0x0099cc, transparent: true, opacity: 0.2, name: 'editing.faceTranslucent'}),
-                    wire: new THREE.MeshBasicMaterial({color: 0x007088, wireframe: true, linewidth: 1, name: 'editing.wire'}),
-                    edge: new THREE.LineBasicMaterial({color: 0x007088, linewidth: 2, name: 'editing.edge'}),
+                    face: new THREE.MeshLambertMaterial({
+                        color: 0x0099cc,
+                        transparent: true,
+                        opacity: 0.5,
+                        name: 'editing.face'
+                    }),
+                    faceTranslucent: new THREE.MeshLambertMaterial({
+                        color: 0x0099cc,
+                        transparent: true,
+                        opacity: 0.2,
+                        name: 'editing.faceTranslucent'
+                    }),
+                    wire: new THREE.MeshBasicMaterial({
+                        color: 0x007088,
+                        wireframe: true,
+                        linewidth: 1,
+                        name: 'editing.wire'
+                        }),
+                    edge: new THREE.LineBasicMaterial({
+                        color: 0x007088,
+                        linewidth: 2,
+                        name: 'editing.edge'
+                    }),
                 },
 
             }
@@ -365,12 +461,12 @@
 
 
         canSelect: function() {
-            return !this.vertex.implicit && this.inContext;
+            return !this.vertex.implicit && this.inContext && !this.selected;
         },
 
         keyup: function(event) {
             if (!this.vertex.implicit && (event.keyCode === 46)) {
-                if (this.sceneView.highlighted || this.materialsView) {
+                if (this.get('selected')) {
                     this.tryDelete();
                 }
             }

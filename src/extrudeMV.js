@@ -162,8 +162,6 @@ define([
     var DisplayModel = GeomVertexMV.DisplayModel.extend({
 
         initialize: function(options) {
-            this.displayModelConstructor = DisplayModel;
-            this.editingModelConstructor = EditingModel;
             GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
 
             this.sceneView = new DisplayFacesSceneView({model: this});
