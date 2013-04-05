@@ -34,6 +34,7 @@ define([
         render: function() {
             GeomVertexMV.EditingSceneView.prototype.render.call(this);
             
+            // Not this.model.vertex as this is view is also used on other models
             var pointChildren = geometryGraph.childrenOf(this.model.polyline);
             if (pointChildren.length === 0) {
                 return;

@@ -101,7 +101,7 @@ define(['calculations', 'scene', 'geometrygraphsingleton'], function(calc, scene
 
             // Ignore any editing intersections
             var faceIntersections = intersections.filter(function(intersection) {
-                return !intersection.view.model.vertex.editing;
+                return !intersection.view.model.vertex || !intersection.view.model.vertex.editing;
             })
             if (geometryGraph.isEditing()) {
                 var closestEdgePosition = this.findClosestNonEditingEdge(event);
@@ -123,7 +123,7 @@ define(['calculations', 'scene', 'geometrygraphsingleton'], function(calc, scene
                     var intersections = this.findFaceIntersections(event);
                     // Ignore any editing intersections
                     var faceIntersects = intersections.filter(function(intersection) {
-                        return !intersection.view.model.vertex.editing;
+                        return !intersection.view.model.vertex || !intersection.view.model.vertex.editing;
                     })
                     if (geometryGraph.isEditing()) {
                         var closestEdgePosition = this.findClosestNonEditingEdge(event);
@@ -295,8 +295,12 @@ define(['calculations', 'scene', 'geometrygraphsingleton'], function(calc, scene
         var raycaster = new THREE.Raycaster(camera.position, mouse3D.sub(camera.position).normalize());
 
         return function(sceneView) {
-            if (!((sceneView.model.vertex.category === 'geometry') ||
-                  (sceneView.model.vertex.category === 'notes'))) {
+            var isVertexView = !!sceneView.model.vertex;
+            var testForIntersect = 
+                (isVertexView && ((sceneView.model.vertex.category === 'geometry')))
+                || 
+                !isVertexView;
+            if (!testForIntersect) {
                 return [];
             }
             // Only intersect mesh objects

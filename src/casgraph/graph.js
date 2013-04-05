@@ -336,8 +336,17 @@ define(['underscore', 'backbone-events', 'casgraph/sha1hasher'],
         // events are considered implicit
         this.diffFrom = function(fromGraph, listener) {
             var toGraph = this;
-            var fromIds = _.pluck(fromGraph.vertices(), idKey);
-            var toIds = _.pluck(toGraph.vertices(), idKey);
+
+            // Contruct the ids sequence as a leaf-first sequence so that
+            // listeners will be notified in the correct order
+            var fromIds = [];
+            fromGraph.leafFirstSearch(function(v) {
+                fromIds.push(v[idKey]);
+            })
+            var toIds = [];
+            toGraph.leafFirstSearch(function(v) {
+                toIds.push(v[idKey]);
+            })
 
             // Added/removed
             var verticesRemoved = _.difference(fromIds, toIds);
