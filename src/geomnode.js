@@ -65,6 +65,8 @@ define([
             axis: {u: 0, v: 0, w: 1},
             angle: 0,
         };
+        this.transforming = options.transforming || false;
+        this.transforms = options.transforms || [];
         this.parameters = options.parameters || {};
         this.editing = options.editing || false;
         this.proto = options.proto || false;
@@ -80,14 +82,16 @@ define([
     GeomNode.prototype.cloneNonEditing = function(options) {
         var options = options || {};
         var cloneOptions = _.extend(options, {
-            type     : this.type, 
-            id       : this.id,
-            isClone : true,
-            name     : this.name,
-            implicit : this.implicit,
+            type      : this.type, 
+            id        : this.id,
+            isClone   : true,
+            name      : this.name,
+            implicit  : this.implicit,
+            transforming : this.transforming,
+            transforms: calc.copyObj(this.transforms),
             workplane : calc.copyObj(this.workplane),
-            parameters : calc.copyObj(this.parameters),
-            inContext: this.inContext,
+            parameters: calc.copyObj(this.parameters),
+            inContext : this.inContext,
         })
         var newNode = new this.constructor(cloneOptions);
         return newNode;
@@ -111,6 +115,7 @@ define([
             name: obj.name,
             implicit: obj.implicit,
             workplane: obj.workplane,
+            transforms: obj.transforms,
             parameters: obj.parameters,
         }
     }
