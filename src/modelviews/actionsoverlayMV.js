@@ -127,7 +127,6 @@ define([
         events: {
             'click .title'   : 'titleClick',
             'click .color'   : 'selectColor',
-            'click .texture' : 'selectTexture',
         },
 
         titleClick: function() {
@@ -150,13 +149,6 @@ define([
             });
             selection.deselectAll();
             AsyncAPI.tryCommitReplace(this.model.geometryVertices, newVertices);
-        },
-
-        selectTexture: function(event) {
-            this.model.vertex.parameters.material = {
-                texture: $(event.target).data('texture')
-            }
-            this.model.tryCommit();
         },
 
         show: function() {
