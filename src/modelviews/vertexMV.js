@@ -286,7 +286,6 @@ define([
             // Cancel first as the editing state is unknown (i.e. parameter values may have
             // changed and SHA values are unknown
             this.cancel();
-            var that = this;
             result = AsyncAPI.tryCommitDelete(this.originalVertex);
             eventProxy.trigger('committedDelete');
             selection.deselectAll();
@@ -415,6 +414,7 @@ define([
 
         tryDelete: function() {
             AsyncAPI.tryCommitDelete(this.vertex);
+            selection.deselectAll();
         },
 
     });
