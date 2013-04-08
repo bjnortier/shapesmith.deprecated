@@ -1,16 +1,16 @@
 define([], function() {
 
     return [
-        './spec/casgraph/sha1hasher.test.js',
-        './spec/casgraph/graph.test.js',
-        './spec/casgraph/replicator.test.js',
-        './spec/graphapi.test.js',
-        './spec/geometrygraph.test.js',
-        './spec/geomnode.test.js',
-        './spec/validation.test.js',
-        './spec/mesh.test.js',
-        './spec/variablegraph.test.js',
-        './spec/layers/layertree.test.js',
+        '../test/spec/casgraph/sha1hasher.test',
+        '../test/spec/casgraph/graph.test',
+        '../test/spec/casgraph/replicator.test',
+        '../test/spec/graphapi.test',
+        '../test/spec/geometrygraph.test',
+        '../test/spec/geomnode.test',
+        '../test/spec/validation.test',
+        '../test/spec/mesh.test',
+        '../test/spec/variablegraph.test',
+        '../test/spec/layers/layertree.test',
     ]
 
 });

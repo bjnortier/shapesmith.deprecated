@@ -1,5 +1,5 @@
 
-define(['src/layers/layertree'], function(LayerTree) {
+define(['layers/layertree'], function(LayerTree) {
 
     describe('LayerTree', function() {
 

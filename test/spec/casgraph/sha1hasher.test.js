@@ -1,4 +1,4 @@
-define(['src/casgraph/sha1hasher'], function(sha1hasher) {
+define(['casgraph/sha1hasher'], function(sha1hasher) {
 
     describe('SHA1 Hasher', function() {
 

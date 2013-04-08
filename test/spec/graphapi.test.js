@@ -1,8 +1,8 @@
 
 define([
-        'src/geomnode',
-        'src/geometrygraph',
-        'src/graphapi'
+        'geomnode',
+        'geometrygraph',
+        'graphapi'
     ], 
     function(GeomNode, GeometryGraph, API) {
 

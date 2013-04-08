@@ -1,4 +1,4 @@
-define(['src/geomnode', 'src/geometrygraph'], 
+define(['geomnode', 'geometrygraph'], 
     function(GeomNode, GeometryGraph) {
 
     var graph = new GeometryGraph.Graph();

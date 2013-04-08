@@ -1,4 +1,4 @@
-define(['src/mesh'], function(Mesh) {
+define(['mesh'], function(Mesh) {
 
     describe('Mesh', function() {
 
