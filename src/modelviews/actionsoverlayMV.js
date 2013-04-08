@@ -18,16 +18,8 @@ define([
     var Model = Backbone.Model.extend({
 
         initialize: function() {
-            selection.on('selected', this.updateActionsView, this);
-            selection.on('deselected', this.updateActionsView, this);
-        },
-
-        destroy: function() {
-            this.geomVertexModels = [];
-            this.geometryVertices = [];
-            this.view && this.view.remove();
-            selection.off('selected', this.updateActionsView, this);
-            selection.off('deselected', this.updateActionsView, this);
+            // selection.on('selected', this.updateActionsView, this);
+            // selection.on('deselected', this.updateActionsView, this);
         },
 
         updateActionsView: function(_, selection) {

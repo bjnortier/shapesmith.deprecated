@@ -17,12 +17,8 @@ define([
     var Model = Backbone.Model.extend({
 
         initialize: function() {
-            selection.on('selected', this.selected, this);
-            selection.on('deselected', this.deselected, this);
-        },
-
-        destroy: function() {
-            this.sceneView && this.sceneView.remove();
+            // selection.on('selected', this.selected, this);
+            // selection.on('deselected', this.deselected, this);
         },
 
         deselected: function() {
