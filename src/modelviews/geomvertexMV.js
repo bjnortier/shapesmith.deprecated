@@ -13,7 +13,6 @@
         'selection',
         'geometrygraphsingleton',
         'asyncAPI',
-        'modelviews/materialsdomview',
         'icons',
         'latheapi/adapter',
     ], function(
@@ -30,7 +29,6 @@
         selection,
         geometryGraph,
         AsyncAPI,
-        MaterialsDOMView,
         icons,
         latheAdapter) {
 

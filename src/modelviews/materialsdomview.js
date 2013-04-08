@@ -1,8 +1,10 @@
 define([
         'scene',
+        'selection',
+        'asyncAPI',
         'modelviews/overlaydomview'
     ],
-    function(sceneModel, OverlayDOMView) {
+    function(sceneModel, selection, AsyncAPI, OverlayDOMView) {
 
     var MaterialsDOMView = OverlayDOMView.extend({
 
@@ -74,10 +76,12 @@ define([
         },
 
         selectColor: function(event) {
-            this.model.vertex.parameters.material = {
+            selection.deselectAll();
+            var newVertex = this.model.vertex.cloneNonEditing();
+            newVertex.parameters.material = {
                 color: $(event.target).data('color')
             }
-            this.model.tryCommit();
+            AsyncAPI.tryCommitReplace([this.model.vertex], [newVertex]);
         },
 
         selectTexture: function(event) {
