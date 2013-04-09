@@ -88,6 +88,7 @@ define([
                 // Prototype polylines will always have an implicit point as first child
                 var pointChildren = geometryGraph.childrenOf(this.vertex);
                 this.activePoint = pointChildren[0];
+                this.activePoint.active = true;
             } else {
                 this.originalImplicitChildren = _.uniq(
                     geometryGraph.childrenOf(this.vertex).filter(
@@ -180,7 +181,9 @@ define([
 
         addPoint: function(position) {
             var point = geometryGraph.addPointToParent(this.vertex);
+            this.activePoint.active = false;
             this.activePoint = point;
+            this.activePoint.active = true;
             this.workplanePositionChanged(position);
             this.updateHint();
         },
@@ -191,7 +194,9 @@ define([
 
         updateHint: function() {
             if (this.vertex.proto) {
-                var points = geometryGraph.childrenOf(this.polyline);
+                var points = geometryGraph.childrenOf(this.polyline).filter(function(v) {
+                    return (v.type === 'point');
+                })
                 if (points.length < 3) {
                     this.hintView.set('Click to add a corner.');
                 } else if (points.length === 3) {

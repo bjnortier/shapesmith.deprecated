@@ -28,7 +28,7 @@ define([
       var designPath = path.join(root, user, design);
       fs.exists(designPath, function(exists) {
         if (exists) {
-          callback(util.format('design path: "%s" already exists', designPath));
+          callback('already_exists');
         } else {
           // Create the design directory with the graph and vertex buckets
           fs.mkdir(designPath, function(err) {

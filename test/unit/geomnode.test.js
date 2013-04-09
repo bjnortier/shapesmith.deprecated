@@ -1,4 +1,4 @@
-define(['src/geomnode'], function(GeomNode) {
+define(['geomnode'], function(GeomNode) {
 
     describe('GeomNode', function() {
 

@@ -19,11 +19,16 @@ Shapemsith is an
 ### Requirements
 
 1. Nodejs with NPM
+1. Grunt-CLI
 1. A WebGL-capable browser
 
 I recommend using [Homebrew](http://mxcl.github.com/homebrew/) to install nodejs. When you have homebrew, install nodejs (npm is included):
      
     $ brew install node
+
+### Install grunt-cli
+
+    $ npm install -g grunt-cli
 
 ### Install the dependencies
 

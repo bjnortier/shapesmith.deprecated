@@ -1,4 +1,4 @@
-define(['src/GeomNode', 'src/Geometrygraph'], function(GeomNode, GeometryGraph) {
+define(['GeomNode', 'Geometrygraph'], function(GeomNode, GeometryGraph) {
 
     describe('GeometryGraph', function() {
 

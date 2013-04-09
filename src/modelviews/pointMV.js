@@ -144,7 +144,7 @@ define([
 
         isClickable: function() { 
             if (this.model.vertex.implicit) {
-                return true;
+                return !this.model.vertex.active;
             } else {
                 return GeomVertexMV.EditingSceneView.prototype.isClickable(this);
             }

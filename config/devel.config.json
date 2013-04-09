@@ -1,3 +1,4 @@
 {
-    "diskDBPath": "db/"
+    "diskDBPath": "db/",
+    "port": 8000
 }

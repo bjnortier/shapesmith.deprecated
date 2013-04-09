@@ -3,9 +3,7 @@ define([
         'backbone-events',
         'lathe/primitives/cube',
         'lathe/primitives/sphere',
-        'lathe/polygon3d',
         'lathe/bsp',
-        'lathe/conv',
         'latheapi/bspdb',
     ], 
     function(
@@ -13,9 +11,7 @@ define([
         Events,
         Cube,
         Sphere,
-        Polygon3D,
         BSP,
-        Conv,
         bspdb) {
 
     

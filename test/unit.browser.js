@@ -1,8 +1,8 @@
 requirejs.config({
-    baseUrl:'..',
+    baseUrl:'../src',
     paths: {
-        'underscore': 'node_modules/underscore/underscore',
-        'backbone-events': 'node_modules/backbone-events/lib/backbone-events',
+        'underscore': '../node_modules/underscore/underscore',
+        'backbone-events': '../node_modules/backbone-events/lib/backbone-events',
     },
     shim: {
         'underscore': {
@@ -17,7 +17,7 @@ requirejs.config({
 
 chai.Assertion.includeStack = true;
 
-requirejs(['test/specs'], function(specs) {
+requirejs(['./unitspecs.js'], function(specs) {
 
     assert = chai.assert;
 

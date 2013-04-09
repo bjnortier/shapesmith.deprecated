@@ -40,17 +40,31 @@ requirejs([
 
         render: function() {
             var html = 
-                '<input placeholder="new project (press return to create)" class="field" required="required">';
+                '<input id="new-design-name" placeholder="new project (press return to create)" class="field" required="required"/>' +
+                '<input id="hidden-button" type="submit" value="create"/>'
+
             this.$el.html(html);
         },
 
         events: {
-            'keyup input': 'keyup'
+            'keyup #new-design-name': 'keyup',
+            'click #hidden-button' : 'click',
+
         },
 
         keyup: function(event) {
-            var newDesignName = this.$el.find('input').val().trim();
-            if ((event.keyCode === 13) && (newDesignName.length)) {
+            if (event.keyCode === 13) {
+                this.createDesign();
+            }
+        },
+
+        click: function(event) {
+            this.createDesign();
+        },
+
+        createDesign: function() {
+            var newDesignName = this.$el.find('#new-design-name').val().trim();
+            if (newDesignName.length) {
                 var that = this;
                 $.ajax({
                     type: 'put',
@@ -65,7 +79,7 @@ requirejs([
                             '&splash=true';
                     },
                     error: function(response) {
-                        that.$el.find('input').addClass('error');
+                        that.$el.find('#new-design-name').addClass('error');
                     }
                 });
             }

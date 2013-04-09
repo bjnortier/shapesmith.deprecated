@@ -1,4 +1,4 @@
-define(['underscore', 'src/casgraph/graph', 'src/casgraph/replicator'], function(_, CASGraph, Replicator) {
+define(['underscore', 'casgraph/graph', 'casgraph/replicator'], function(_, CASGraph, Replicator) {
 
     describe('CAS Graph Replicator', function() {
 

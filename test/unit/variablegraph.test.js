@@ -1,4 +1,4 @@
-define(['src/variablegraph'], function(variableGraph) {
+define(['variablegraph'], function(variableGraph) {
     describe('Variables', function() {
 
         var graph;

@@ -188,13 +188,6 @@ define(['calculations', 'scene', 'geometrygraphsingleton'], function(calc, scene
             }
         }
 
-        this.hoverend = function(event) {
-            if (this.hoverView) {
-                this.hoverView.trigger('hoverend', event);
-            }
-            delete this.hoverView;
-        }
-
         this.findFaceIntersections = function(event) {
             var sceneElement = $('#scene');
             var selector = createSelector(sceneElement, sceneModel.view.camera, event);
