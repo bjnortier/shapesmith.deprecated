@@ -10,7 +10,7 @@ var chai = requirejs('chai');
 
 chai.Assertion.includeStack = true;
 
-var specs = requirejs('./test/specs.js');
+var specs = requirejs('./test/unitspecs.js');
 specs.forEach(function(spec) {
     requirejs(spec);
 });

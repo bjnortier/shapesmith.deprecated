@@ -222,9 +222,7 @@ define([
         }
         
         // This is for webdriver to determine when things have loaded
-        if (!SS.loadDone) {
-            SS.loadDone = true;
-        }
+        globals.loadDone = true;
     }
 
     return {

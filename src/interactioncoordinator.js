@@ -68,28 +68,10 @@
                     $('#scene').css('cursor', '');
                 }
             } 
-
-            // Hovering
-            lastPosition = eventToPosition(event);
-            if (isHovering) {
-                isHovering = false;
-                sceneViewEventGenerator.hoverend(event)
-            }
-            setTimeout(function() {
-                var pos1 = eventToPosition(event);
-                var pos2 = lastPosition;
-                var dx = Math.abs(pos1.x - pos2.x);
-                var dy = Math.abs(pos1.y - pos2.y);
-                if(Math.sqrt(dx*dx + dy*dy) < 3) {
-                    if (!isHovering) {
-                        sceneViewEventGenerator.hoverstart(event)
-                        isHovering = true;
-                    }
-                }
-            }, 1000);
         }
 
         this.mouseup = function(event) {
+            console.log('mouseup');
             if (!dragging) {
 
                 // Prevent multiple click event on double click

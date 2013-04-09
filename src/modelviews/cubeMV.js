@@ -83,6 +83,7 @@ define([
                 this.stage = 0;
                 this.updateHint();
                 this.activePoint = points[0];
+                this.activePoint.active = true;
             } else {
                 this.originalImplicitChildren = geometryGraph.childrenOf(this.vertex).filter(function(v) {
                     return v.implicit;
@@ -151,6 +152,7 @@ define([
         addPoint: function(position) {
             var point = geometryGraph.addPointToParent(this.vertex);
             this.activePoint = point;
+            this.activePoint.active = true;
             this.workplanePositionChanged(position);
         },
 

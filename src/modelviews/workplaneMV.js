@@ -66,11 +66,11 @@ define([
         },
 
         workplaneClick: function(event) {
-            VertexMV.eventProxy.trigger('workplaneClick', this.lastPosition);
+            VertexMV.eventProxy.trigger('workplaneClick');
         },
 
         workplaneDblClick: function(eventst) {
-            VertexMV.eventProxy.trigger('workplaneDblClick', this.lastPosition);
+            VertexMV.eventProxy.trigger('workplaneDblClick');
         },
 
         mousemove: function(event) {
