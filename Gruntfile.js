@@ -49,12 +49,22 @@ module.exports = function(grunt) {
             server: path.resolve('./src/api/server.js')
           }
         }
+    },
+
+    chmod: {
+      options: {
+        mode: '755'
+      },
+      build: {
+        src: ['build/bin/start', 'build/node_modules/supervisor/lib/cli-wrapper.js']
+      }
     }
   });
 
   grunt.loadNpmTasks('grunt-contrib-requirejs');
   grunt.loadNpmTasks('grunt-simple-mocha');
   grunt.loadNpmTasks('grunt-express');
+  grunt.loadNpmTasks('grunt-chmod');
 
   // Unit testing
   grunt.registerTask('unit', ['simplemocha:unit']);
@@ -64,6 +74,6 @@ module.exports = function(grunt) {
   grunt.registerTask('functional', ['express', 'simplemocha:functional']);
 
   // Build the single JS file
-  grunt.registerTask('build', ['requirejs'])
+  grunt.registerTask('build', ['requirejs', 'chmod:build'])
 
 };
