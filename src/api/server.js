@@ -50,6 +50,7 @@ app.use('/images', express.static(path.join(rootDir, 'static', 'images')));
 app.use('/css', express.static(path.join(rootDir, 'static', 'css')));
 app.use('/ui/', express.static(path.join(rootDir, 'src')));
 app.use('/ui/node_modules', express.static(path.join(rootDir, 'node_modules')));
+app.use('/node_modules', express.static(path.join(rootDir, 'node_modules')));
 app.use('/lib', express.static(path.join(rootDir, 'src/lib')));
 
 // app.use(express.logger());

@@ -25,6 +25,23 @@ module.exports = function(grunt) {
       },
     },
 
+    requirejs: {
+      compile: {
+        options: {
+          appDir: ".",
+          baseUrl: "src",
+          dir: "build",
+          optimize: "none",
+          mainConfigFile: "src/main.ui.js",
+          modules: [
+            {
+              name: "main.ui"
+            }
+          ]
+        }
+      }
+    },
+
     express: {
         server: {
           options: {
@@ -35,14 +52,18 @@ module.exports = function(grunt) {
     }
   });
 
+  grunt.loadNpmTasks('grunt-contrib-requirejs');
   grunt.loadNpmTasks('grunt-simple-mocha');
+  grunt.loadNpmTasks('grunt-express');
 
   // Unit testing
   grunt.registerTask('unit', ['simplemocha:unit']);
   
   // Functional testing - requires a running server
-  grunt.loadNpmTasks('grunt-express');
   process.env['app_env'] = 'functional';
   grunt.registerTask('functional', ['express', 'simplemocha:functional']);
+
+  // Build the single JS file
+  grunt.registerTask('build', ['requirejs'])
 
 };

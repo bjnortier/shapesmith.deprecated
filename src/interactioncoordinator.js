@@ -71,7 +71,6 @@
         }
 
         this.mouseup = function(event) {
-            console.log('mouseup');
             if (!dragging) {
 
                 // Prevent multiple click event on double click
