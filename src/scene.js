@@ -35,7 +35,7 @@ define([
 
             // Renderer
             this.renderer = new THREE.WebGLRenderer({antialias: true});
-            this.renderer.autoClear = false;
+            this.renderer.autoClear = true;
             this.renderer.setClearColorHex(0x080808, 0.0);
             this.renderer.setSize(width, height);
 
