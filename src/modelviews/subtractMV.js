@@ -52,7 +52,6 @@ define([
     var EditingSceneView = GeomVertexMV.EditingSceneView.extend({
 
         render: function() {
-            GeomVertexMV.EditingSceneView.prototype.render.call(this);
             this.renderMesh();
         },
 

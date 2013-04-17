@@ -271,7 +271,11 @@ app.get(/^\/_api\/([\w%]+)\/([\w%]+)\/vertex\/([\w%]+)\/?$/, function(req, res) 
   var sha = req.params[2];
   db.getVertex(user, design, sha, function(err, data) {
     if (err) {
-      res.send(500, err);
+      if (err === 'notFound') {
+        res.send(404, 'not found');
+      } else {
+        res.send(500, err);
+      }
     } else {
       return res.json(data);
     }

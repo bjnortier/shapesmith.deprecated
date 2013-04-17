@@ -318,8 +318,8 @@
         },
 
         renderMesh: function(result) {
-            this.clear();
             if (this.model.inContext) {
+                this.clear();
                 var toMesh = this.polygonsToMesh(result.polygons);
                 var faceGeometry = toMesh.geometry;
                 var faceMaterial = this.model.vertex.editing ? 

@@ -35,6 +35,7 @@ define([
             VertexMV.EditingModel.prototype.initialize.call(this, original, vertex);
             this.domView = new EditingView({model: this});
             this.views.push(this.domView);
+            this.views.push(new SliderView({model: this}));
             coordinator.on('sceneClick', this.tryCommit, this);
         },
 
@@ -47,16 +48,6 @@ define([
             event.stopPropagation();
             this.tryCommit();
         },
-
-        // replaceOrAppendInTable: function(view, tableSelector) {
-        //     var rowIndex = view.model.attributes.rowIndex;
-        //     if ((rowIndex !== undefined) && 
-        //         (rowIndex < $(tableSelector + ' tr').length)) {
-        //         $($(tableSelector + ' tr')[rowIndex]).before(view.$el);
-        //     } else {
-        //         $(tableSelector).append(view.$el);
-        //     }
-        // },
 
     })
 
@@ -104,6 +95,7 @@ define([
             } else {
                 this.$el.removeClass('error');
             }
+            this.$el.find('.expr').val(this.model.vertex.parameters.expression);
         },
 
         updateFromDOM: function() {
@@ -111,6 +103,37 @@ define([
             var expr = this.$el.find('.expr').val();
             this.model.vertex.name = name;
             this.model.vertex.parameters.expression = expr;
+        },
+
+    });
+
+    var SliderView =  Backbone.View.extend({
+
+        className: 'variable-slider',
+
+        initialize: function() {
+            this.render();
+            $('body').append(this.$el);
+        },
+
+        render: function() {
+            var template = '<input type="range" value="{{value}}" min="0" max="50" step="1"/>';
+            var view = {
+                value: this.model.vertex.parameters.expression,
+            }
+            this.$el.html($.mustache(template, view));
+            var editingRow = $('.vertex.editing.' + this.model.vertex.id);
+            this.$el.css('left', editingRow.position().left + editingRow.width() + 20 + 'px');
+            this.$el.css('top',  editingRow.position().top + 5 + 'px');
+        },
+
+        events: {
+            'change' : 'change',
+        },
+
+        change: function() {
+            this.model.vertex.parameters.expression = this.$el.find('input').val();
+            this.model.vertex.trigger('change', this.model.vertex);
         },
 
     });
@@ -129,16 +152,6 @@ define([
         destroy: function() {
             VertexMV.DisplayModel.prototype.destroy.call(this);
         },
-
-        // replaceOrAppendInTable: function(view, tableSelector) {
-        //     var rowIndex = view.model.attributes.rowIndex;
-        //     if ((rowIndex !== undefined) && 
-        //         (rowIndex < $(tableSelector + ' tr').length)) {
-        //         $($(tableSelector + ' tr')[rowIndex]).before(view.$el);
-        //     } else {
-        //         $(tableSelector).append(view.$el);
-        //     }
-        // },
 
     })
 

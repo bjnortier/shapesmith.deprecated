@@ -96,7 +96,11 @@ define([
       var vertexPath = path.join(root, user, design, 'vertex', sha);
       fs.readFile(vertexPath, function (err, data) {
         if (err) {
-          callback(err);
+          if (err.code === 'ENOENT') {
+            callback('notFound');
+          } else {
+            callback(err);
+          }
         } else {
           callback(undefined, JSON.parse(data));
         }
