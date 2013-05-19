@@ -60,7 +60,7 @@ define([
                     }
                 } else if (evt.data.hasOwnProperty('id')) {
                     var jobResult = {
-                        bsp: BSP.deserialize(evt.data.bsp),
+                        serializedBSP: evt.data.bsp,
                         polygons: evt.data.polygons,
                     }
                     broker.trigger(evt.data.id, jobResult);
@@ -122,8 +122,8 @@ define([
         return jobQueue.queueJob({sha: sha, cube: dimensions});
     }
 
-    var createSubtract = function(sha, childSHAs) {
-        return jobQueue.queueJob({sha: sha, subtract: childSHAs});
+    var createSubtract = function(sha, childSHAs, childBSPs) {
+        return jobQueue.queueJob({sha: sha, subtract: childBSPs});
     }
 
     return {

@@ -29,7 +29,16 @@ define([
                 Lathe.broker.on(jobId, function(jobResult) {
                     jobResult.sha = sha;
                     jobResult.id = jobId;
+
+                    bspdb.write(jobResult, function(err) {
+                        if (err) {
+                            postMessage({error: 'error writing to BSP DB' + err});
+                        }
+                    })
+
                     callback(undefined, jobResult);
+            
+
                 });
             }
         });
@@ -38,7 +47,7 @@ define([
     var generateParent = function(vertex, callback) {
 
         var children = geometryGraph.childrenOf(vertex);
-        var childSHAs = {};
+        var childResults = {};
         var allChildrenExist;
 
         // Ensure all children exist 
@@ -49,7 +58,7 @@ define([
                     callback(err)
                 } else {
                     --remaining;
-                    childSHAs[child.id] = result.sha;
+                    childResults[child.id] = result;
                     if (remaining === 0) {
                         allChildrenExist();
                     }
@@ -59,12 +68,18 @@ define([
 
         allChildrenExist = function() {
             var uniqueObj = GeomNode.strip(vertex);
-            uniqueObj.childSHAs = children.map(function(child) {
-                return childSHAs[child.id];
+            var childSHAs = children.map(function(child) {
+                return childResults[child.id].sha;
             })
+            uniqueObj.childSHAs = childSHAs;
             var sha = SHA1Hasher.hash(uniqueObj);
+
+            var childBSPs = children.map(function(child) {
+                return childResults[child.id].serializedBSP;
+            })
+
             getOrGenerate(sha, function() {
-                return Lathe.createSubtract(sha, uniqueObj.childSHAs);
+                return Lathe.createSubtract(sha, childSHAs, childBSPs);
             }, callback);
         }
         

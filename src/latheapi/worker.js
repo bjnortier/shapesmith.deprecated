@@ -25,23 +25,18 @@ requirejs([
         'lathe/primitives/cube',
         'lathe/primitives/sphere',
         'lathe/conv',
-        'latheapi/bspdb',
     ],
-    function(BSP, Cube, Sphere, Conv, BSPDB) {
+    function(BSP, Cube, Sphere, Conv) {
 
         var infoHandler = function(a,b,c,d) {
             postMessage({info: [a,b,c,d].join('')});
         }
+        
         var errorHandler = function(a,b,c,d) {
             postMessage({error: [a,b,c,d].join('')});
         }
 
-        var bspdb = new BSPDB(infoHandler, errorHandler);
-        bspdb.on('initialized', function() {
-            postMessage('initialized');
-        })
-
-        var cacheAndReturnResult = function(id, sha, bsp) {
+        var returnResult = function(id, sha, bsp) {
             if (!bsp) {
                 postMessage({error: 'no BSP for ' + id});
                 return;
@@ -61,11 +56,6 @@ requirejs([
             }
             postMessage(jobResult);
             
-            bspdb.write(jobResult, function(err) {
-                if (err) {
-                    postMessage({error: 'error writing to BSP DB' + err});
-                }
-            })
         }
 
         this.addEventListener('message', function(e) {
@@ -73,10 +63,10 @@ requirejs([
             // Create new with the arguments
             if (e.data.sphere) {
                 var bsp = new Sphere(e.data.sphere).bsp;
-                cacheAndReturnResult(e.data.id, e.data.sha, bsp);
+                returnResult(e.data.id, e.data.sha, bsp);
             } else if (e.data.cube) {
                 var bsp = new Cube(e.data.cube).bsp;
-                cacheAndReturnResult(e.data.id, e.data.sha, bsp);
+                returnResult(e.data.id, e.data.sha, bsp);
             } else if (e.data.subtract) {
 
                 // The child BSPs start off as an array of SHAs, 
@@ -84,31 +74,17 @@ requirejs([
                 var childBSPs = e.data.subtract;
                 var remaining = childBSPs.length;
 
-                childBSPs.forEach(function(childSHA) {
-                    bspdb.read(childSHA, function(err, result) {
-                        if (err) {
-                            postMessage({error: 'exception during chlid read: ' + childSHA});
-                        } else if (!result) {
-                            postMessage({error: 'child BSP not found: ' + childSHA});
-                        } else {
-                            postMessage({info: 'fetched' + childSHA});
-                            childBSPs.splice(childBSPs.indexOf(childSHA), 1, result.bsp);
-                            --remaining;
-                            if (remaining === 0) {
-                                var a = BSP.deserialize(childBSPs[0]);
-                                var b = BSP.deserialize(childBSPs[1]);
-                                var bsp = BSP.difference(a,b);
-                                cacheAndReturnResult(e.data.id, e.data.sha, bsp);
-
-                            }
-                        }
-                    });
-                });
+                var a = BSP.deserialize(childBSPs[0]);
+                var b = BSP.deserialize(childBSPs[1]);
+                var bsp = BSP.difference(a,b);
+                returnResult(e.data.id, e.data.sha, bsp);
 
             } else {
                 postMessage({error: 'unknown worker message:' + JSON.stringify(e.data)});
             }
 
         }, false);
+
+        postMessage('initialized');
     }
 );
