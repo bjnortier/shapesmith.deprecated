@@ -25,7 +25,7 @@
     "backbone-events": "git://github.com/bjnortier/backbone-events.git#0.9.9",
     "node-supervisor": "git://github.com/bjnortier/node-supervisor.git#exit-on-EOF",
     "backbone": "= 0.9.9",
-    "lathe": ">= 0.1.0",
+    "lathe": ">= 0.2.0",
     "grunt": "~0.4.1"
   },
   "devDependencies": {

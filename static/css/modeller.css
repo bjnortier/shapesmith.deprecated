@@ -179,12 +179,12 @@ img#logo {
     padding: 5px;
 }   
 
-#geometry tr, #variables tr {
-    border-bottom: solid thin #999;
+#variables tr {
+    /*border-bottom: solid thin #999;*/
 }
 
 #geometry tr:first-child, #variables tr:first-child {
-    border-bottom: solid thin #666;
+    /*border-bottom: solid thin #666;*/
 }
 
 .vertex.display {
@@ -376,8 +376,17 @@ input.field[type="text"] {
     background: none; 
 }
 
-#geometry .title, #variables .title {
+.section {
     padding: 5px;
+    border-bottom: solid thin rgb(206, 206, 206)
+}
+
+.title {
+    padding: 5px;
+}
+
+.section.geometry {
+    margin-top: 10px;
 }
 
 input.field[type="text"] {
@@ -558,10 +567,6 @@ body {
 
 #elevation-plane #ruler {
     color: #000;
-}
-
-.toolbar {
-    background-color: rgba(200, 200, 200, 0.7);
 }
 
 #geometry .vertex, #variables {
