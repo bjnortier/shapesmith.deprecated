@@ -219,7 +219,7 @@ define([
         var options = options || {};
         options.type = 'cube';
         options.category = 'geometry';
-        options.parameters = options.parameters || {height: 0};
+        options.parameters = options.parameters || {width:0, depth: 0, height: 0};
         GeomNode.prototype.constructor.call(this, options);
     }
 

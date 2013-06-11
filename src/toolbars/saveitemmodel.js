@@ -11,10 +11,10 @@ define([
 
     var Model = Toolbar.ItemModel.extend({
 
-        name: 'tag',
+        name: 'save',
 
         initialize: function() {
-            this.icon = icons.tag;
+            this.icon = icons.save;
             Toolbar.ItemModel.prototype.initialize.call(this);
         },
 
