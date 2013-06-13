@@ -11,10 +11,8 @@ define([
 
     initialize: function(options) {
       this.vertex = options.vertex;
-      this.corner = options.corner;
+      this.origin = options.origin;
       this.heightKey = options.heightKey;
-
-      
 
       GeomVertexMV.EditingSceneView.prototype.initialize.call(this);
       this.render();
@@ -22,6 +20,7 @@ define([
       this.on('drag', this.drag, this);
       this.on('dragEnded', this.dragEnded, this);
       this.vertex.on('change', this.render, this);
+      this.origin.on('change', this.render, this);
     },
 
     remove: function() {
@@ -30,6 +29,7 @@ define([
       this.off('drag', this.drag, this);
       this.off('dragEnded', this.dragEnded, this);
       this.vertex.off('change', this.render, this);
+      this.origin.off('change', this.render, this);
     },
 
     render: function() {
@@ -44,9 +44,9 @@ define([
           new THREE.MeshBasicMaterial({color: 0xcc6666, wireframe: true})
         ]);
 
-      this.cornerPosition = calc.objToVector(this.corner.parameters.coordinate, geometryGraph, THREE.Vector3);
+      this.originPosition = calc.objToVector(this.origin.parameters.coordinate, geometryGraph, THREE.Vector3);
       this.heightBasePosition = new THREE.Vector3().addVectors(
-        this.cornerPosition,
+        this.originPosition,
         new THREE.Vector3(
           geometryGraph.evaluate(this.model.vertex.parameters.width),
           geometryGraph.evaluate(this.model.vertex.parameters.depth), 

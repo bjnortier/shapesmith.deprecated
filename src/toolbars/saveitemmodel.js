@@ -33,9 +33,9 @@ define([
                 data: JSON.stringify({commit: commit, screenshot: screenshot}),
                 success: function(response) {
                     console.info('SAVE: ' + commit);
-                    hintView.set('Saved.');
+                    // hintView.set('Saved.');
                     setTimeout(function() {
-                        hintView.clear();
+                        // hintView.clear();
                     }, 1000);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {

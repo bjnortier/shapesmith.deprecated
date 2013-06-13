@@ -7,8 +7,9 @@ define([
     'geometrygraphsingleton',
     'modelviews/geomvertexMV', 
     'modelviews/pointMV', 
+    'modelviews/heightanchorview',
     'modelviews/heightOnWidthDepthAnchorView',
-    'modelviews/widthDepthCornerView',
+    'modelviews/widthdepthcornerview',
     'asyncAPI',
     'latheapi/normalize',
     
@@ -21,7 +22,8 @@ define([
     geometryGraph,
     GeomVertexMV,
     PointMV,
-    EditingHeightAnchor,
+    OriginHeightAnchor,
+    CornerEditingHeightAnchor,
     WidthDepthCornerView,
     AsyncAPI,
     Normalize) {
@@ -85,18 +87,19 @@ define([
         this.stage = 0;
         this.updateHint();
       } else {
-        this.originalImplicitChildren = geometryGraph.childrenOf(this.vertex).filter(function(v) {
-          return v.implicit;
-        })
-        this.editingImplicitChildren = [];
-        this.editingImplicitChildren = this.originalImplicitChildren.map(function(child, i) {
-          return AsyncAPI.edit(child);
-        })
+        this.originalImplicitChildren = [this.corner];
+        this.editingImplicitChildren = [AsyncAPI.edit(this.corner)];
 
-        that.views.push(new EditingHeightAnchor({
+        that.views.push(new OriginHeightAnchor({
+          model: that, 
+          heightKey: 'height',
+          pointVertex: this.editingImplicitChildren[0],
+        }));
+
+        that.views.push(new CornerEditingHeightAnchor({
           model: this, 
           heightKey: 'height',
-          corner: this.corner,
+          origin: this.editingImplicitChildren[0],
           vertex: this.vertex,
         }));
 
@@ -149,10 +152,10 @@ define([
         } else if (this.stage === 1) {
           ++this.stage;
 
-          this.heightAnchor = new EditingHeightAnchor({
+          this.heightAnchor = new CornerEditingHeightAnchor({
             model: this, 
             heightKey: 'height',
-            corner: this.corner,
+            origin: this.corner,
             vertex: this.vertex,
           });
           this.heightAnchor.dragStarted();
