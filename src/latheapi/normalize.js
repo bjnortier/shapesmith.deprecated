@@ -20,6 +20,11 @@ define([
     var wAbs = Math.abs(w);
     var dAbs = Math.abs(d);
     var hAbs = Math.abs(h);
+
+    var translate = cube.transforms.translate || {x:0, y:0, z:0};
+    var dx = geometryGraph.evaluate(translate.x);
+    var dy = geometryGraph.evaluate(translate.y);
+    var dz = geometryGraph.evaluate(translate.z);
     return {
       x: Math.min(corner.x, corner.x + w),
       y: Math.min(corner.y, corner.y + d),
@@ -27,6 +32,9 @@ define([
       w: wAbs,
       d: dAbs,
       h: hAbs,
+      dx: dx,
+      dy: dy,
+      dz: dz,
     }
 
   }

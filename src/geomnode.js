@@ -66,7 +66,7 @@ define([
             angle: 0,
         };
         this.transforming = options.transforming || false;
-        this.transforms = options.transforms || [];
+        this.transforms = options.transforms || {};
         this.parameters = options.parameters || {};
         this.editing = options.editing || false;
         this.proto = options.proto || false;
