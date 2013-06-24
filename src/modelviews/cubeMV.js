@@ -312,8 +312,6 @@ define([
         dx: Math.abs(width/2),
         dy: Math.abs(depth/2),
         dz: height,
-        // min: new THREE.Vector3(Math.min(p1.x, p2.x), Math.min(p1.y, p2.y), 0),
-        // max: new THREE.Vector3(Math.max(p1.x, p2.x), Math.max(p1.y, p2.y), 0),
       }
     },
 
@@ -327,14 +325,6 @@ define([
       this.createMesh(function(result) {
         that.renderMesh(result);
       });
-    },
-
-    isDraggable: function() {
-      // Can translate if none selected or the only selected object is this one
-      var selected = selection.getSelected();
-      // var draggable = !selected.length || 
-      var draggable = ((selected.length === 1) && (selected[0] === this.model.vertex.id));
-      return draggable;
     },
 
     dragStarted: function() {

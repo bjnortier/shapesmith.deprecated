@@ -66,7 +66,6 @@ define([
         this.vertex.transforms.translate || {x:0,y:0,z:0}, 
         geometryGraph, 
         THREE.Vector3);
-      console.log('initialTranslation', this.initialTranslation);
       this.originalVertex = this.vertex;
       this.originalVertex.transforming = true;
       this.editingVertex = AsyncAPI.edit(this.vertex);
@@ -112,6 +111,8 @@ define([
       this.on('dragStarted', this.dragStarted, this);
       this.on('dragEnded', this.dragEnded, this);
       this.on('drag', this.drag, this);
+      this.on('mouseenter', this.mouseenter, this);
+      this.on('mouseleave', this.mouseleave, this);
     },
 
     remove: function() {
@@ -123,6 +124,8 @@ define([
       this.off('dragStarted', this.dragStarted, this);
       this.off('dragEnded', this.dragEnded, this);
       this.off('drag', this.drag, this);
+      this.off('mouseenter', this.mouseenter, this);
+      this.off('mouseleave', this.mouseleave, this);
     },
 
     render: function() {
@@ -185,6 +188,7 @@ define([
       }
       this.editingModel = modelGraph.get(this.editingVertex.id);
       this.dragging = true;
+      this.sceneObject.add(this.axis);
     },
 
     drag: function(position) {
@@ -210,9 +214,18 @@ define([
     },
 
     dragEnded: function() {
+      this.sceneObject.remove(this.axis);
       this.dragging = false;
       this.editingVertex.transforming = false;
       this.editingModel.tryCommit();
+    },
+
+    mouseenter: function() {
+      this.sceneObject.add(this.axis);
+    },
+
+    mouseleave: function() {
+      this.sceneObject.remove(this.axis);
     },
 
   });
@@ -221,6 +234,20 @@ define([
 
     faceColor: 0x993333,
     edgeColor: 0xcc6666,
+
+    initialize: function() {
+      var axisGeom = new THREE.Geometry();
+      axisGeom.vertices.push(new THREE.Vector3(0, 0, 5000));
+      axisGeom.vertices.push(new THREE.Vector3(0, 0, -5000));
+
+      this.axis = new THREE.Line(axisGeom, 
+        new THREE.LineBasicMaterial({ color: 0xff00000 }));
+
+      var extents = this.model.selectedModel.getExtents();
+      this.axis.position = extents.center;
+
+      SceneView.prototype.initialize.call(this);
+    },
 
     render: function() {
       SceneView.prototype.render.call(this);
@@ -240,32 +267,34 @@ define([
           new THREE.Vector3(0, 0, extents.dz + 2*this.cameraScale.z));
       }
     },
+
   });
 
-  var ZMinSceneView = SceneView.extend({
+  // var ZMinSceneView = SceneView.extend({
 
-    faceColor: 0x993333,
-    edgeColor: 0xcc6666,
+  //   faceColor: 0x993333,
+  //   edgeColor: 0xcc6666,
 
-    render: function() {
-      SceneView.prototype.render.call(this);
+  //   render: function() {
+  //     SceneView.prototype.render.call(this);
       
-      var extents = this.model.selectedModel.getExtents();
-      this.arrow.position = extents.center.clone().add(
-        new THREE.Vector3(0, 0, 0));
-      this.arrow.children[0].position.z = -2;
-      this.arrow.children[0].rotation.x = -Math.PI/2; 
-    },
+  //     var extents = this.model.selectedModel.getExtents();
+  //     this.arrow.position = extents.center.clone().add(
+  //       new THREE.Vector3(0, 0, 0));
+  //     this.arrow.children[0].position.z = -2;
+  //     this.arrow.children[0].rotation.x = -Math.PI/2; 
+  //   },
 
-    updateCameraScale: function() {
-      SceneView.prototype.updateCameraScale.call(this);
-      if (!this.dragging) {
-        var extents = this.model.selectedModel.getExtents();
-        this.initialPosition = extents.center.clone().add(
-          new THREE.Vector3(0, 0, - 2*this.cameraScale.z));
-      }
-    },
-  });
+  //   updateCameraScale: function() {
+  //     SceneView.prototype.updateCameraScale.call(this);
+  //     if (!this.dragging) {
+  //       var extents = this.model.selectedModel.getExtents();
+  //       this.initialPosition = extents.center.clone().add(
+  //         new THREE.Vector3(0, 0, - 2*this.cameraScale.z));
+  //     }
+  //   },
+
+  // });
 
   return new Model();
 

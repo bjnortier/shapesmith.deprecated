@@ -1,96 +1,94 @@
 define([
-        'jquery',
-        'lib/jquery.mustache',
-        'calculations',
-        'worldcursor',
-        'scene',
-        'geometrygraphsingleton',
-        'modelviews/geomvertexMV', 
-        'asyncAPI',
-    ], 
-    function(
-        $, __$,
-        calc,
-        worldCursor,
-        sceneModel,
-        geometryGraph,
-        GeomVertexMV,
-        AsyncAPI) {
+    'jquery',
+    'lib/jquery.mustache',
+    'calculations',
+    'worldcursor',
+    'scene',
+    'geometrygraphsingleton',
+    'modelviews/geomvertexMV', 
+    'asyncAPI',
+  ], 
+  function(
+    $, __$,
+    calc,
+    worldCursor,
+    sceneModel,
+    geometryGraph,
+    GeomVertexMV,
+    AsyncAPI) {
 
-    // ---------- Editing ----------
+  // ---------- Editing ----------
 
-    var EditingModel = GeomVertexMV.EditingModel.extend({
+  var EditingModel = GeomVertexMV.EditingModel.extend({
 
-        initialize: function(options) {
-            this.DOMView = EditingDOMView;
-            this.SceneView = EditingSceneView;
-            GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
-        },
+    initialize: function(options) {
+      this.DOMView = EditingDOMView;
+      this.SceneView = EditingSceneView;
+      GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
+    },
 
-        workplaneClick: function(position) {
-            if (!this.vertex.proto) {
-                this.tryCommit();
-            }
-        },
+    workplaneClick: function(position) {
+      if (!this.vertex.proto) {
+        this.tryCommit();
+      }
+    },
 
-    });
+  });
 
-    var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
+  var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
 
-        render: function() {
-            GeomVertexMV.EditingDOMView.prototype.render.call(this);
-            var template = 
-                this.beforeTemplate +
-                this.afterTemplate;
-            var view = this.baseView;
-            this.$el.html($.mustache(template, view));
-            return this;
-        },
+    render: function() {
+      GeomVertexMV.EditingDOMView.prototype.render.call(this);
+      var template = 
+        this.beforeTemplate +
+        this.afterTemplate;
+      var view = this.baseView;
+      this.$el.html($.mustache(template, view));
+      return this;
+    },
 
-    });
+  });
 
-    var EditingSceneView = GeomVertexMV.EditingSceneView.extend({
+  var EditingSceneView = GeomVertexMV.EditingSceneView.extend({
 
-        render: function() {
-            this.renderMesh();
-        },
+    render: function() {
+      this.renderMesh();
+    },
 
-    });
+  });
 
-    // ---------- Display ----------
+  // ---------- Display ----------
 
-    var DisplayModel = GeomVertexMV.DisplayModel.extend({
+  var DisplayModel = GeomVertexMV.DisplayModel.extend({
 
-        initialize: function(options) {
-            this.SceneView = DisplaySceneView;
-            GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
-        },
+    initialize: function(options) {
+      this.SceneView = DisplaySceneView;
+      GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
+    },
 
-        destroy: function() {
-            GeomVertexMV.DisplayModel.prototype.destroy.call(this);
-        },
+    destroy: function() {
+      GeomVertexMV.DisplayModel.prototype.destroy.call(this);
+    },
 
-    });
+  });
 
-    var DisplaySceneView = GeomVertexMV.DisplaySceneView.extend({
+  var DisplaySceneView = GeomVertexMV.DisplaySceneView.extend({
 
-        render: function() {
-            GeomVertexMV.DisplaySceneView.prototype.render.call(this);
-            var that = this;
-            this.createMesh(function(result) {
-                that.renderMesh(result);
-            });
-        },
+    render: function() {
+      GeomVertexMV.DisplaySceneView.prototype.render.call(this);
+      var that = this;
+      this.createMesh(function(result) {
+        that.renderMesh(result);
+      });
+    },
 
-    });
+  });
 
+  // ---------- Module ----------
 
-
-    // ---------- Module ----------
-
-    return {
-        DisplayModel: DisplayModel,
-        EditingModel: EditingModel,
-    } 
+  return {
+    DisplayModel: DisplayModel,
+    EditingModel: EditingModel,
+  } 
 
 });

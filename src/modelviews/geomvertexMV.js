@@ -276,29 +276,51 @@
 
     polygonsToMesh: function(polygons) {
       var geometry = new THREE.Geometry();
-      var indices = polygons.map(function(coordinates, i) {
-        var indices = coordinates.map(function(coordinate) {
-          return geometry.vertices.push(new THREE.Vector3(coordinate.x, coordinate.y, coordinate.z)) - 1;
+      var indices = [];
+      var box3 = new THREE.Box3();
+      polygons.forEach(function(coordinates, i) {
+
+        // Remove degenerates
+        var coordinates = coordinates.reduce(function(acc, c, i) {
+          if (i === 0) {
+            return acc.concat(c);
+          } else if (new THREE.Vector3().subVectors(c,acc[acc.length-1]).length() > 0.000000001) {
+            return acc.concat(c);
+          } else {
+            return acc;
+          }
+        }, []);
+
+        var polygonIndices = coordinates.map(function(coordinate) {
+          var vertex = new THREE.Vector3(coordinate.x, coordinate.y, coordinate.z);
+          box3.expandByPoint(vertex);
+          return geometry.vertices.push(vertex) - 1;
         });
         if (coordinates.length < 3) {
-          throw Error('invalid polygon');
+          // Ignore degenerates
+          // throw Error('invalid polygon');
         } else if (coordinates.length === 3) {
-          geometry.faces.push(new THREE.Face3(indices[0],indices[1],indices[2]));
+          geometry.faces.push(new THREE.Face3(polygonIndices[0],polygonIndices[1],polygonIndices[2]));
         } else if (coordinates.length === 4) {
-          geometry.faces.push(new THREE.Face4(indices[0],indices[1],indices[2],indices[3]));
+          geometry.faces.push(new THREE.Face4(polygonIndices[0],polygonIndices[1],polygonIndices[2],polygonIndices[3]));
         } else {
           // Only support cnvex polygons
-          geometry.faces.push(new THREE.Face3(indices[0],indices[1],indices[2]));
+          geometry.faces.push(new THREE.Face3(polygonIndices[0],polygonIndices[1],polygonIndices[2]));
           for (var i = 2; i < coordinates.length -1; ++i) {
-            geometry.faces.push(new THREE.Face3(indices[0], indices[0]+i,indices[0]+i+1));
+            geometry.faces.push(new THREE.Face3(polygonIndices[0], polygonIndices[0]+i,polygonIndices[0]+i+1));
           }
         }
-        return indices;
+        
+        indices.push(polygonIndices);
 
       })
 
       geometry.computeFaceNormals();
-      return {geometry: geometry, indices: indices};
+      return {
+        geometry: geometry, 
+        indices: indices,
+        box3: box3,
+      };
     },
 
     createMesh: function(callback) {
@@ -321,6 +343,9 @@
       if (this.model.inContext) {
         this.clear();
         var toMesh = this.polygonsToMesh(result.polygons);
+
+        this.center = toMesh.box3.center();
+
         var faceGeometry = toMesh.geometry;
         var faceMaterial = this.model.vertex.editing ? 
           this.materials.editing.face :
@@ -472,6 +497,12 @@
 
     workplaneClick: function(event) {
       selection.deselectAll();
+    },
+
+    getExtents: function() {
+      return {
+        center: this.sceneView.center,
+      }
     },
 
   })
@@ -694,6 +725,13 @@
         selection.deselectAll();
         AsyncAPI.edit(this.model.vertex);
       }
+    },
+
+    isDraggable: function() {
+      // Can translate if this is the only selected object
+      var selected = selection.getSelected();
+      var draggable = ((selected.length === 1) && (selected[0] === this.model.vertex.id));
+      return draggable;
     },
 
   });
