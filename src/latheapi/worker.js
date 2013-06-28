@@ -25,9 +25,10 @@ requirejs([
     'lathe/bsp',
     'lathe/primitives/cube',
     'lathe/primitives/sphere',
+    'lathe/primitives/subtract3d',
     'lathe/conv',
   ],
-  function(BSP, Cube, Sphere, Conv) {
+  function(BSP, Cube, Sphere, Subtract3D, Conv) {
 
     var infoHandler = function(a,b,c,d) {
       postMessage({info: [a,b,c,d].join('')});
@@ -78,7 +79,12 @@ requirejs([
 
         var a = BSP.deserialize(childBSPs[0]);
         var b = BSP.deserialize(childBSPs[1]);
-        var bsp = BSP.difference(a,b,transforms);
+        var subtract = new Subtract3D(a,b);
+        var bsp = subtract.bsp;
+        if (transforms.translate) {
+          var bsp = bsp.translate(transforms.translate.x, transforms.translate.y, transforms.translate.z);
+        }
+
         returnResult(e.data.id, e.data.sha, bsp);
 
       } else {

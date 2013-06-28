@@ -227,6 +227,8 @@ define([
 
     Cube.prototype.getExpressions = function() {
         return {
+            'width'  : this.parameters.width,
+            'depth'  : this.parameters.depth,
             'height' : this.parameters.height,
         };
     }

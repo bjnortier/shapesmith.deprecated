@@ -228,9 +228,6 @@ define([
         '<div>width  <input class="field width" type="text" value="{{width}}"></input></div>' +
         '<div>depth  <input class="field depth" type="text" value="{{depth}}"></input></div>' +
         '<div>height <input class="field height" type="text" value="{{height}}"></input></div>' +
-        '<div>dx<input class="field dx" type="text" value="{{dx}}"></input></div>' +
-        '<div>dy<input class="field dy" type="text" value="{{dy}}"></input></div>' +
-        '<div>dz<input class="field dz" type="text" value="{{dz}}"></input></div>' + 
         this.afterTemplate;
         
       var translate = this.model.vertex.transforms.translate || {x:0, y:0, z:0};
@@ -238,9 +235,6 @@ define([
         width  : this.model.vertex.parameters.width,
         depth  : this.model.vertex.parameters.depth,
         height : this.model.vertex.parameters.height,
-        dx     : translate.x,
-        dy     : translate.y,
-        dz     : translate.z,
       });
       this.$el.html($.mustache(template, view));
       return this;

@@ -33,6 +33,21 @@ define([
       }
     },
 
+    translate: function(translation) {
+      // if (!this.startOrigin) {
+      //   this.startOrigin = {
+      //     x: this.origin.parameters.coordinate.x,
+      //     y: this.origin.parameters.coordinate.y,
+      //     z: this.origin.parameters.coordinate.z,
+      //   }
+      // }
+      this.vertex.transforms.translate = this.vertex.transforms.translate || {x:0, y:0, z:0};
+      this.vertex.transforms.translate.x = translation.x;
+      this.vertex.transforms.translate.y = translation.y;
+      this.vertex.transforms.translate.z = translation.z;
+      this.vertex.trigger('change', this.vertex);
+    },
+
   });
 
   var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
@@ -41,10 +56,41 @@ define([
       GeomVertexMV.EditingDOMView.prototype.render.call(this);
       var template = 
         this.beforeTemplate +
+        '<div>dx<input class="field dx" type="text" value="{{dx}}"></input></div>' +
+        '<div>dy<input class="field dy" type="text" value="{{dy}}"></input></div>' +
+        '<div>dz<input class="field dz" type="text" value="{{dz}}"></input></div>' + 
         this.afterTemplate;
-      var view = this.baseView;
+
+      var translate = this.model.vertex.transforms.translate || {x:0, y:0, z:0};
+      var view = _.extend(this.baseView, {
+        dx     : translate.x,
+        dy     : translate.y,
+        dz     : translate.z,
+      });
       this.$el.html($.mustache(template, view));
       return this;
+    },
+
+    update: function() {
+      var that = this;
+      var translate = this.model.vertex.transforms.translate || {x:0, y:0, z:0};
+      ['x', 'y', 'z'].forEach(function(key) {
+        that.$el.find('.field.d' + key).val(translate[key]);
+      });
+    },
+
+    updateFromDOM: function() {
+      var that = this;
+      var translate = this.model.vertex.transforms.translate || {x:0, y:0, z:0};
+      ['dx', 'dy', 'dz'].forEach(function(key) {
+        try {
+          var expression = that.$el.find('.field.' + key).val();
+          translate[key] = expression;
+        } catch(e) {
+          console.error(e);
+        }
+      });
+      this.model.vertex.trigger('change', this.model.vertex);
     },
 
   });
@@ -52,7 +98,11 @@ define([
   var EditingSceneView = GeomVertexMV.EditingSceneView.extend({
 
     render: function() {
-      this.renderMesh();
+      GeomVertexMV.EditingSceneView.prototype.render.call(this);
+      var that = this;
+      this.createMesh(function(result) {
+        that.renderMesh(result);
+      });
     },
 
   });
