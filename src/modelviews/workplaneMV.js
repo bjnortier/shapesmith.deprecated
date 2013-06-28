@@ -232,11 +232,11 @@ define([
       this.sceneObject.add(new THREE.Line(axes[2], 
           new THREE.LineBasicMaterial({ color: 0xff0000 })));
       this.sceneObject.add(new THREE.Line(axes[3], 
-          new THREE.LineBasicMaterial({ color: 0x6666ff })));
+          new THREE.LineBasicMaterial({ color: 0x6666cc })));
       this.sceneObject.add(new THREE.Line(axes[4], 
-          new THREE.LineBasicMaterial({ color: 0x66ff66 })));
+          new THREE.LineBasicMaterial({ color: 0x66cc66 })));
       this.sceneObject.add(new THREE.Line(axes[5], 
-          new THREE.LineBasicMaterial({ color: 0xff6666 })));
+          new THREE.LineBasicMaterial({ color: 0xcc6666 })));
 
     },
 

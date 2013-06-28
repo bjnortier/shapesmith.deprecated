@@ -290,14 +290,14 @@ define([
       var height = geometryGraph.evaluate(this.vertex.parameters.height);
 
       var p1 = calc.objToVector(origin.parameters.coordinate, geometryGraph, THREE.Vector3);
-      var p2 = new THREE.Vector3().addVectors(p1, new THREE.Vector3(width, depth, 0));
+      var p2 = new THREE.Vector3().addVectors(p1, new THREE.Vector3(width, depth, height));
       var center = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
 
       return {
         center: center,
         dx: Math.abs(width/2),
         dy: Math.abs(depth/2),
-        dz: height,
+        dz: Math.abs(height/2),
       }
     },
 

@@ -3,6 +3,45 @@ var path = require('path');
 module.exports = function(grunt) {
 
   grunt.initConfig({
+
+    jshint: {
+      options: {
+        curly: true,
+        eqeqeq: true,
+        immed: true,
+        latedef: true,
+        newcap: true,
+        noarg: true,
+        sub: true,
+        undef: true,
+        unused: true,
+        boss: true,
+        eqnull: true,
+        node: true,
+        loopfunc: true,
+      },
+      gruntfile: {
+        src: 'Gruntfile.js'
+      },
+      ui: {
+        src: ['src/modelviews/transforms/*.js'],
+        options: {
+          globals: {
+            define: false,
+            THREE: false,
+            $: false,
+          },
+        },
+      },
+    },
+
+    watch: {
+      ui: {
+        files: '<%= jshint.ui.src %>',
+        tasks: ['jshint:ui']
+      },
+    },
+
     simplemocha: {
       options: {
         // globals: ['should'],
@@ -61,6 +100,8 @@ module.exports = function(grunt) {
     }
   });
 
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-requirejs');
   grunt.loadNpmTasks('grunt-simple-mocha');
   grunt.loadNpmTasks('grunt-express');
@@ -74,6 +115,6 @@ module.exports = function(grunt) {
   grunt.registerTask('functional', ['express', 'simplemocha:functional']);
 
   // Build the single JS file
-  grunt.registerTask('build', ['requirejs', 'chmod:build'])
+  grunt.registerTask('build', ['requirejs', 'chmod:build']);
 
 };

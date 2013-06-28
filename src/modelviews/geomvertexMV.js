@@ -51,11 +51,6 @@
             ambient: normalColor,
             name: 'normal.face'
           }),
-          faceTranslucent: new THREE.MeshLambertMaterial({color: normalColor,
-            transparent: true,
-            opacity: 0.5,
-            name: 'normal.faceTranslucent'
-          }),
           wire: new THREE.MeshBasicMaterial({
             color: normalColor,
             wireframe: true,
@@ -75,11 +70,6 @@
             opacity: 0,
             name: 'implicit.face'
           }),
-          faceTranslucent: new THREE.MeshLambertMaterial({color: 0xff0000,
-            transparent: true,
-            opacity: 0,
-            name: 'implicit.faceTranslucent'
-          }),
           wire: new THREE.MeshBasicMaterial({
             color: 0x000000,
             wireframe: true,
@@ -98,16 +88,10 @@
         highlight: {
           face: new THREE.MeshLambertMaterial({
             color: highlightColor,
-            ambient: 0xffff99,
-            transparent: true,
-            opacity: 0.5,
+            ambient: normalColor,
+            // transparent: true,
+            // opacity: 0.5,
             name: 'highlight.face'
-          }),
-          faceTranslucent: new THREE.MeshLambertMaterial({
-            color: highlightColor,
-            transparent: true,
-            opacity: 0.6,
-            name: 'highlight.faceTranslucent'
           }),
           wire: new THREE.MeshBasicMaterial({
             color: highlightColor,
@@ -125,15 +109,9 @@
           face: new THREE.MeshLambertMaterial({
             color: 0x999933,
             ambient: 0xffff99,
-            transparent: true,
-            opacity: 0.5,
+            // transparent: true,
+            // opacity: 0.5,
             name: 'selected.face'}),
-          faceTranslucent: new THREE.MeshLambertMaterial({
-            color: 0x999933,
-            transparent: true,
-            opacity: 0.6,
-            name: 'selected.faceTranslucent'
-          }),
           wire: new THREE.MeshBasicMaterial({
             color: 0x999933,
             wireframe: true,
@@ -152,12 +130,6 @@
             transparent: true,
             opacity: 0.5,
             name: 'editing.face'
-          }),
-          faceTranslucent: new THREE.MeshLambertMaterial({
-            color: 0x0099cc,
-            transparent: true,
-            opacity: 0.2,
-            name: 'editing.faceTranslucent'
           }),
           wire: new THREE.MeshBasicMaterial({
             color: 0x007088,
@@ -210,11 +182,7 @@
       objects.meshes.forEach(function(mesh) {
         if (mesh.material) {
           if (mesh.material.name.endsWith('face')) {
-            if (mesh.material.name.indexOf('Translucent') !== -1) {
-              mesh.material = that.materials[key].faceTranslucent;
-            } else {
-              mesh.material = that.materials[key].face;
-            }
+            mesh.material = that.materials[key].face;
           } else if (mesh.material.name.endsWith('wire')) {
             mesh.material = that.materials[key].wire;
           }
@@ -344,13 +312,11 @@
         this.clear();
         var toMesh = this.polygonsToMesh(result.polygons);
 
-        var center = toMesh.box3.center();
-        center.z = 0;
         this.extents = {
-          center: center,
+          center: toMesh.box3.center(),
           dx: toMesh.box3.max.x - toMesh.box3.center().x,
           dy: toMesh.box3.max.y - toMesh.box3.center().y,
-          dz: toMesh.box3.max.z,
+          dz: toMesh.box3.max.z - toMesh.box3.center().z,
         };
 
         var faceGeometry = toMesh.geometry;
@@ -440,7 +406,18 @@
         '{{/implicit}}' +
         '</div>' + 
         '<div class="children {{id}}"></div>';
-      this.afterTemplate = '';
+      this.afterTemplate = 
+        '<div>axisx <input class="field axisx" type="text" value="{{axisx}}"></input></div>' +
+        '<div>axisy <input class="field axisy" type="text" value="{{axisx}}"></input></div>' +
+        '<div>axisz <input class="field axisz" type="text" value="{{axisx}}"></input></div>' + 
+        '<div>angle <input class="field angle" type="text" value="{{angle}}"></input></div>';
+
+      var rotation = this.model.vertex.transforms.rotation || {
+        axis: {
+          x:0, y:0, z:0,
+        },
+        angle: 0
+      }
       this.baseView = {
         id: this.model.vertex.id,
         name : this.model.vertex.name,
