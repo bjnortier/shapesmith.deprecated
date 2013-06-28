@@ -344,7 +344,14 @@
         this.clear();
         var toMesh = this.polygonsToMesh(result.polygons);
 
-        this.center = toMesh.box3.center();
+        var center = toMesh.box3.center();
+        center.z = 0;
+        this.extents = {
+          center: center,
+          dx: toMesh.box3.max.x - toMesh.box3.center().x,
+          dy: toMesh.box3.max.y - toMesh.box3.center().y,
+          dz: toMesh.box3.max.z,
+        };
 
         var faceGeometry = toMesh.geometry;
         var faceMaterial = this.model.vertex.editing ? 
@@ -500,9 +507,7 @@
     },
 
     getExtents: function() {
-      return {
-        center: this.sceneView.center,
-      }
+      return this.sceneView.extents;
     },
 
   })

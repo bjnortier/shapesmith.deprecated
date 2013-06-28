@@ -34,17 +34,12 @@ define([
     },
 
     translate: function(translation) {
-      // if (!this.startOrigin) {
-      //   this.startOrigin = {
-      //     x: this.origin.parameters.coordinate.x,
-      //     y: this.origin.parameters.coordinate.y,
-      //     z: this.origin.parameters.coordinate.z,
-      //   }
-      // }
       this.vertex.transforms.translate = this.vertex.transforms.translate || {x:0, y:0, z:0};
-      this.vertex.transforms.translate.x = translation.x;
-      this.vertex.transforms.translate.y = translation.y;
-      this.vertex.transforms.translate.z = translation.z;
+      this.vertex.transforms.translate =  {
+        x: translation.x,
+        y: translation.y,
+        z: translation.z,
+      };
       this.vertex.trigger('change', this.vertex);
     },
 
@@ -82,9 +77,9 @@ define([
     updateFromDOM: function() {
       var that = this;
       var translate = this.model.vertex.transforms.translate || {x:0, y:0, z:0};
-      ['dx', 'dy', 'dz'].forEach(function(key) {
+      ['x', 'y', 'z'].forEach(function(key) {
         try {
-          var expression = that.$el.find('.field.' + key).val();
+          var expression = that.$el.find('.field.d' + key).val();
           translate[key] = expression;
         } catch(e) {
           console.error(e);

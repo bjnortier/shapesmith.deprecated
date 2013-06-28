@@ -65,8 +65,6 @@ define([
         materials);
       cube.position = position.add(new THREE.Vector3(
         dimensions.w/2, dimensions.d/2, dimensions.h/2));
-      cube.position = position.add(new THREE.Vector3(
-        dimensions.dx, dimensions.dy, dimensions.dz));
       this.sceneObject.add(cube);
     },
 
@@ -291,15 +289,9 @@ define([
       var depth = geometryGraph.evaluate(this.vertex.parameters.depth);
       var height = geometryGraph.evaluate(this.vertex.parameters.height);
 
-      var translate = this.vertex.transforms.translate || {x:0, y:0, z:0};
-      var dx = geometryGraph.evaluate(translate.x);
-      var dy = geometryGraph.evaluate(translate.y);
-      var dz = geometryGraph.evaluate(translate.z);
-
       var p1 = calc.objToVector(origin.parameters.coordinate, geometryGraph, THREE.Vector3);
       var p2 = new THREE.Vector3().addVectors(p1, new THREE.Vector3(width, depth, 0));
-      var center = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5).add(
-        new THREE.Vector3(dx, dy, dz));
+      var center = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
 
       return {
         center: center,
