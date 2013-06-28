@@ -384,12 +384,17 @@ define([
 
     fieldKeyUp: function(event) {
       event.stopPropagation();
+
       // Return
       if (event.keyCode === 13) {
+        // Webkit Bug https://bugs.webkit.org/show_bug.cgi?id=114745
+        this.$el.find('input').blur();
         this.model.tryCommit()
       }
       // Escape
       if (event.keyCode === 27) {
+        // Webkit Bug https://bugs.webkit.org/show_bug.cgi?id=114745
+        this.$el.find('input').blur();
         this.model.cancel();
       } 
     },
