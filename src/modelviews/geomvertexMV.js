@@ -406,30 +406,57 @@
         '{{/implicit}}' +
         '</div>' + 
         '<div class="children {{id}}"></div>';
-      this.afterTemplate = 
+      this.afterTemplate = this.model.vertex.implicit ? '' : 
         '<div>axisx <input class="field axisx" type="text" value="{{axisx}}"></input></div>' +
-        '<div>axisy <input class="field axisy" type="text" value="{{axisx}}"></input></div>' +
-        '<div>axisz <input class="field axisz" type="text" value="{{axisx}}"></input></div>' + 
+        '<div>axisy <input class="field axisy" type="text" value="{{axisy}}"></input></div>' +
+        '<div>axisz <input class="field axisz" type="text" value="{{axisz}}"></input></div>' + 
         '<div>angle <input class="field angle" type="text" value="{{angle}}"></input></div>';
 
-      var rotation = this.model.vertex.transforms.rotation || {
-        axis: {
-          x:0, y:0, z:0,
-        },
-        angle: 0
-      }
+      var rotation = this.model.vertex.transforms.rotation;
       this.baseView = {
         id: this.model.vertex.id,
         name : this.model.vertex.name,
         implicit: this.model.vertex.implicit,
         icon: icons[this.model.vertex.type],
         isTopLevel: !geometryGraph.parentsOf(this.model.vertex).length,
+        axisx: rotation.axis.x,
+        axisy: rotation.axis.y,
+        axisz: rotation.axis.z,
+        angle: rotation.angle,
       }
     },
 
     remove: function() {
       VertexMV.EditingDOMView.prototype.remove.call(this);
     },
+
+    update: function() {
+      var that = this;
+      var rotation = this.model.vertex.transforms.rotation;
+      ['x', 'y', 'z'].forEach(function(key) {
+        that.$el.find('.field.axis' + key).val(rotation.axis[key]);
+      });
+      this.$el.find('.field.angle').val(rotation.angle);
+    },
+
+    updateFromDOM: function() {
+      var that = this;
+      ['x', 'y', 'z'].forEach(function(key) {
+        try {
+          var expression = that.$el.find('.field.axis' + key).val();
+          that.model.vertex.transforms.rotation.axis[key] = expression;
+        } catch(e) {
+          console.error(e);
+        }
+      });
+      try {
+        var expression = that.$el.find('.field.angle').val();
+        that.model.vertex.transforms.rotation.angle = expression;
+      } catch(e) {
+        console.error(e);
+      }
+      this.model.vertex.trigger('change', this.model.vertex);
+    }
 
   });
   

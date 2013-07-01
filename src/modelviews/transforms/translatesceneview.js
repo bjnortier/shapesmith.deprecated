@@ -74,9 +74,6 @@ define([
       this.originalVertex = this.model.vertex;
       this.originalVertex.transforming = true;
       this.editingVertex = AsyncAPI.edit(this.model.vertex);
-      this.editingVertex.transforms.translate = {
-        x: 0, y:0, z: 0,
-      };
       this.editingModel = modelGraph.get(this.editingVertex.id);
       this.dragging = true;
       this.sceneObject.add(this.axis);

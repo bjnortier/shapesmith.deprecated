@@ -66,7 +66,13 @@ define([
             angle: 0,
         };
         this.transforming = options.transforming || false;
-        this.transforms = options.transforms || {};
+        this.transforms = options.transforms || {
+          rotation: {
+            axis: {x: 0, y:0, z:0},
+            angle: 0,
+          },
+          translate: {x: 0, y:0, z:0},
+        };
         this.parameters = options.parameters || {};
         this.editing = options.editing || false;
         this.proto = options.proto || false;

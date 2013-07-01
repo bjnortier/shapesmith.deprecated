@@ -239,17 +239,16 @@ define([
     },
 
     update: function() {
+      GeomVertexMV.EditingDOMView.prototype.update.call(this);
+      
       var that = this;
       ['width', 'depth', 'height'].forEach(function(key) {
         that.$el.find('.field.' + key).val(that.model.vertex.parameters[key]);
       });
-      var translate = this.model.vertex.transforms.translate || {x:0, y:0, z:0};
-      ['x', 'y', 'z'].forEach(function(key) {
-        that.$el.find('.field.d' + key).val(translate[key]);
-      });
     },
 
     updateFromDOM: function() {
+      GeomVertexMV.EditingDOMView.prototype.updateFromDOM.call(this);
       var that = this;
       ['width', 'depth', 'height'].forEach(function(key) {
         try {

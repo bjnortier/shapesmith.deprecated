@@ -2,8 +2,10 @@ define([
     'calculations',
     'scene',
     'geometrygraphsingleton',
+    'asyncAPI',
+    'modelviews/modelgraph',
     './sceneview',
-  ], function(calc, sceneModel, geometryGraph, TransformSceneView) {
+  ], function(calc, sceneModel, geometryGraph, AsyncAPI, modelGraph, TransformSceneView) {
 
   var RotationSceneView = TransformSceneView.extend({
 
@@ -88,76 +90,90 @@ define([
       }
     },
 
+    dragStarted: function() {
+      this.originalVertex = this.model.vertex;
+      this.originalVertex.transforming = true;
+      this.editingVertex = AsyncAPI.edit(this.model.vertex);
+      this.editingModel = modelGraph.get(this.editingVertex.id);
+      this.dragging = true;
+    },
 
-  drag: function(position, intersections, event) {
+    drag: function(position, intersections, event) {
 
-    var planeOrigin = this.center;
-    var planeAxis = calc.objToVector(this.rotation.axis, geometryGraph, THREE.Vector3);
+      var planeOrigin = this.center;
+      var planeAxis = this.relativeRotationAxis;//calc.objToVector(this.rotation.axis, geometryGraph, THREE.Vector3);
 
-    var camera = sceneModel.view.camera;
-    var positionOnRotationPlane = calc.positionOnPlane($('#scene'), event, planeOrigin, planeAxis, camera);
+      var camera = sceneModel.view.camera;
+      var positionOnRotationPlane = calc.positionOnPlane($('#scene'), event, planeOrigin, planeAxis, camera);
 
-    if (!positionOnRotationPlane) {
-      return;
-    }
-
-    var v1 = new THREE.Vector3().subVectors(positionOnRotationPlane, planeOrigin).normalize();
-    var v2 = new THREE.Vector3().subVectors(this.arrowStartPosition, planeOrigin).normalize();
-    var v2CrossV1 = new THREE.Vector3().crossVectors(v2, v1);
-
-    var angle = parseFloat((Math.acos(v1.dot(v2))/Math.PI*180).toFixed(0));
-    if (planeAxis.dot(v2CrossV1) < 0) {
-      angle = -angle;
-    }
-
-    if (this.previousRelativeAngle === undefined) {
-      this.previousRelativeAngle = 0;
-    } else {
-      this.previousRelativeAngle = this.relativeAngle;
-    }
-
-    var round = function(value, tolerance) {
-      return Math.round(value/tolerance)*tolerance;
-    };
-
-    this.relativeAngle = angle;
-    if (!event.ctrlKey) {
-      this.relativeAngle = round(this.relativeAngle, 5);
-      if (this.relativeAngle === 360) {
-        this.relativeAngle = 0;
+      if (!positionOnRotationPlane) {
+        return;
       }
-    }
 
-    console.log(angle, this.relativeAngle);
+      var v1 = new THREE.Vector3().subVectors(positionOnRotationPlane, planeOrigin).normalize();
+      var v2 = this.arrowStartPosition.clone().normalize();
+      var v2CrossV1 = new THREE.Vector3().crossVectors(v2, v1);
 
-    if (this.relativeAngle !== this.previousRelativeAngle) {
-      // var quat1 = new THREE.Quaternion().setFromAxisAngle(this.startAxis, this.startAngle/180*Math.PI);
-    //   var quat2 = new THREE.Quaternion().setFromAxisAngle(this.relativeRotationAxis, Math.PI*this.relativeAngle/180);
-    //   var quat3 = new THREE.Quaternion().multiply(quat1, quat2);
-    //   quat3.normalize();
-      
-      var quat2 = new THREE.Quaternion().setFromAxisAngle(planeAxis, Math.PI*this.relativeAngle/180);
-      var quat3 = quat2.normalize();
+      var angle = parseFloat((Math.acos(v1.dot(v2))/Math.PI*180).toFixed(0));
+      if (planeAxis.dot(v2CrossV1) < 0) {
+        angle = -angle;
+      }
 
-      var quaternionToAxisAngle = function(q) {
-        var angle = 2*Math.acos(q.w);
-        var axis = new THREE.Vector3(q.x/Math.sqrt(1-q.w*q.w),
-                                     q.y/Math.sqrt(1-q.w*q.w),
-                                     q.z/Math.sqrt(1-q.w*q.w));
-        return {angle: angle/Math.PI*180, axis: axis};
+      if (this.previousRelativeAngle === undefined) {
+        this.previousRelativeAngle = 0;
+      } else {
+        this.previousRelativeAngle = this.relativeAngle;
+      }
+
+      var round = function(value, tolerance) {
+        return Math.round(value/tolerance)*tolerance;
       };
-      
-      var axisAngle = quaternionToAxisAngle(quat3);
 
-      this.rotation.axis.x = parseFloat(axisAngle.axis.x.toFixed(3));
-      this.rotation.axis.y = parseFloat(axisAngle.axis.y.toFixed(3));
-      this.rotation.axis.z = parseFloat(axisAngle.axis.z.toFixed(3));
-      this.rotation.angle  = parseFloat(axisAngle.angle.toFixed(2));
+      this.relativeAngle = angle;
+      if (!event.ctrlKey) {
+        this.relativeAngle = round(this.relativeAngle, 5);
+        if (this.relativeAngle === 360) {
+          this.relativeAngle = 0;
+        }
+      }
 
-      this.model.trigger('change');
-    }
+      if (this.relativeAngle !== this.previousRelativeAngle) {
+        // var quat1 = new THREE.Quaternion().setFromAxisAngle(this.startAxis, this.startAngle/180*Math.PI);
+      //   var quat2 = new THREE.Quaternion().setFromAxisAngle(this.relativeRotationAxis, Math.PI*this.relativeAngle/180);
+      //   var quat3 = new THREE.Quaternion().multiply(quat1, quat2);
+      //   quat3.normalize();
+        
+        var quat2 = new THREE.Quaternion().setFromAxisAngle(planeAxis, Math.PI*this.relativeAngle/180);
+        var quat3 = quat2.normalize();
 
-  },
+        var quaternionToAxisAngle = function(q) {
+          var angle = 2*Math.acos(q.w);
+          var axis = new THREE.Vector3(q.x/Math.sqrt(1-q.w*q.w),
+                                       q.y/Math.sqrt(1-q.w*q.w),
+                                       q.z/Math.sqrt(1-q.w*q.w));
+          return {angle: angle/Math.PI*180, axis: axis};
+        };
+
+        var axisAngle = quaternionToAxisAngle(quat3);
+
+        this.editingVertex.transforms.rotation.axis.x = parseFloat(axisAngle.axis.x.toFixed(3));
+        this.editingVertex.transforms.rotation.axis.y = parseFloat(axisAngle.axis.y.toFixed(3));
+        this.editingVertex.transforms.rotation.axis.z = parseFloat(axisAngle.axis.z.toFixed(3));
+        this.editingVertex.transforms.rotation.angle  = parseFloat(axisAngle.angle.toFixed(2));
+
+        this.sceneObject.quaternion = quat3;
+
+        this.editingVertex.trigger('change', this.editingVertex);
+      }
+
+    },
+
+    dragEnded: function() {
+      this.sceneObject.remove(this.axis);
+      this.dragging = false;
+      this.editingVertex.transforming = false;
+      this.editingModel.tryCommit();
+    },
 
     getAngle: function() {
       return geometryGraph.evaluate(this.rotation.angle);

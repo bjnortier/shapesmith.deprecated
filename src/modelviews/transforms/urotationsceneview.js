@@ -10,15 +10,6 @@ define([
     textColor: '#6666cc',
 
     initialize: function(options) {
-      // this.relativeAnchorPosition = new THREE.Vector3(0,this.options.radius,0);
-      if (!this.model.vertex.transforms.rotation) {
-        this.model.vertex.transforms.rotation = {
-          axis: {
-            x: 1, y: 0, z:0,
-          },
-          angle: 0
-        };
-      }
       var extents = this.model.selectedModel.getExtents();
       this.center = extents.center;
       this.radius = Math.sqrt(extents.dx*extents.dx + extents.dy*extents.dy + extents.dz*extents.dz);
