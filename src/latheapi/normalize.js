@@ -27,6 +27,7 @@ define([
       w: wAbs,
       d: dAbs,
       h: hAbs,
+      transforms: cube.transforms,
     }
 
   }
@@ -41,6 +42,7 @@ define([
       y: center.y,
       z: center.z,
       r: radius,
+      transforms: sphere.transforms,
     }
   }
 

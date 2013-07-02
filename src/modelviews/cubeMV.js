@@ -121,10 +121,20 @@ define([
           y: this.origin.parameters.coordinate.y,
           z: this.origin.parameters.coordinate.z,
         }
+        this.startRotationCenter = {
+          x: this.vertex.transforms.rotation.origin.x,
+          y: this.vertex.transforms.rotation.origin.y,
+          z: this.vertex.transforms.rotation.origin.z, 
+        }
       }
       this.origin.parameters.coordinate.x = this.startOrigin.x + translation.x;
       this.origin.parameters.coordinate.y = this.startOrigin.y + translation.y;
       this.origin.parameters.coordinate.z = this.startOrigin.z + translation.z;
+      this.vertex.transforms.rotation.origin =  {
+        x: this.startRotationCenter.x + translation.x,
+        y: this.startRotationCenter.y + translation.y,
+        z: this.startRotationCenter.z + translation.z,
+      };
       this.origin.trigger('change', this.origin);
     },
 
@@ -240,7 +250,6 @@ define([
 
     update: function() {
       GeomVertexMV.EditingDOMView.prototype.update.call(this);
-      
       var that = this;
       ['width', 'depth', 'height'].forEach(function(key) {
         that.$el.find('.field.' + key).val(that.model.vertex.parameters[key]);
@@ -264,7 +273,21 @@ define([
   }); 
 
 
-  var EditingSceneView = GeomVertexMV.EditingSceneView.extend(SceneViewMixin);
+  var EditingSceneView = GeomVertexMV.EditingSceneView.extend({
+
+    render: function() {
+      if (this.model.vertex.transforming) {
+        GeomVertexMV.EditingSceneView.prototype.render.call(this);
+        var that = this;
+        this.createMesh(function(result) {
+          that.renderMesh(result);
+        });
+      } else {
+        SceneViewMixin.render.call(this);
+      }
+    },
+
+  });
 
   // ---------- Display ----------
 
@@ -279,27 +302,6 @@ define([
       GeomVertexMV.DisplayModel.prototype.destroy.call(this);
     },
 
-    getExtents: function() {
-      var origin = geometryGraph.childrenOf(this.vertex).filter(function(v) {
-        return v.type === 'point'
-      })[0];
-
-      var width = geometryGraph.evaluate(this.vertex.parameters.width);
-      var depth = geometryGraph.evaluate(this.vertex.parameters.depth);
-      var height = geometryGraph.evaluate(this.vertex.parameters.height);
-
-      var p1 = calc.objToVector(origin.parameters.coordinate, geometryGraph, THREE.Vector3);
-      var p2 = new THREE.Vector3().addVectors(p1, new THREE.Vector3(width, depth, height));
-      var center = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
-
-      return {
-        center: center,
-        dx: Math.abs(width/2),
-        dy: Math.abs(depth/2),
-        dz: Math.abs(height/2),
-      }
-    },
-
   });
 
   var DisplaySceneView = GeomVertexMV.DisplaySceneView.extend(SceneViewMixin).extend({
@@ -310,14 +312,6 @@ define([
       this.createMesh(function(result) {
         that.renderMesh(result);
       });
-    },
-
-    dragStarted: function() {
-      console.log('dragStarted');
-    },
-
-    drag: function(position) {
-      console.log('drag', position);
     },
 
   })

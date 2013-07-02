@@ -7,7 +7,7 @@ define([
     'asyncAPI',
     'modelviews/modelgraph',
     'modelviews/transforms/translatesceneview',
-    'modelviews/transforms/urotationsceneview',
+    'modelviews/transforms/uvwrotationsceneviews',
     'calculations',
     'settings',
   ], 
@@ -20,7 +20,7 @@ define([
     AsyncAPI,
     modelGraph,
     TranslateSceneView,
-    URotationSceneView,
+    UVWRotationSceneViews,
     calc,
     settings) {
 
@@ -50,8 +50,10 @@ define([
 
         this.sceneViews = [
           new TranslateSceneView({model: this}),
-          new URotationSceneView({model: this}),
-        ]
+          new UVWRotationSceneViews.U({model: this}),
+          new UVWRotationSceneViews.V({model: this}),
+          new UVWRotationSceneViews.W({model: this}),
+        ];
       } else {
         this.sceneViews.forEach(function(view) {
           view.remove();

@@ -185,6 +185,7 @@ define([
     },
 
     update: function() {
+      GeomVertexMV.EditingDOMView.prototype.update.call(this);
       var that = this;
       ['radius'].forEach(function(key) {
         that.$el.find('.field.' + key).val(
@@ -193,6 +194,7 @@ define([
     },
 
     updateFromDOM: function() {
+      GeomVertexMV.EditingDOMView.prototype.updateFromDOM.call(this);
       var that = this;
       ['radius'].forEach(function(key) {
         try {
@@ -210,16 +212,16 @@ define([
 
   var EditingSceneView = GeomVertexMV.EditingSceneView.extend(SceneViewMixin).extend({
 
-    initialize: function(options) {
-      GeomVertexMV.EditingSceneView.prototype.initialize.call(this);
-      this.on('dragEnded', this.dragEnded, this);
-      this.on('drag', this.drag, this);
-    },
-
-    remove: function() {
-      GeomVertexMV.EditingSceneView.prototype.remove.call(this);
-      this.off('dragEnded', this.dragEnded, this);
-      this.off('drag', this.drag, this);
+    render: function() {
+      if (this.model.vertex.transforming) {
+        GeomVertexMV.EditingSceneView.prototype.render.call(this);
+        var that = this;
+        this.createMesh(function(result) {
+          that.renderMesh(result);
+        });
+      } else {
+        SceneViewMixin.render.call(this);
+      }
     },
 
 
@@ -236,28 +238,6 @@ define([
 
     destroy: function() {
       GeomVertexMV.DisplayModel.prototype.destroy.call(this);
-    },
-
-    getExtents: function() {
-      var origin = geometryGraph.childrenOf(this.vertex).filter(function(v) {
-        return v.type === 'point'
-      })[0];
-
-      var radius = geometryGraph.evaluate(this.vertex.parameters.radius);
-
-      var translate = this.vertex.transforms.translate || {x:0, y:0, z:0};
-      var dx = geometryGraph.evaluate(translate.x);
-      var dy = geometryGraph.evaluate(translate.y);
-      var dz = geometryGraph.evaluate(translate.z);
-
-      var center = calc.objToVector(origin.parameters.coordinate, geometryGraph, THREE.Vector3);
-
-      return {
-        center: center,
-        dx: radius,
-        dy: radius,
-        dz: radius,
-      }
     },
 
   }); 

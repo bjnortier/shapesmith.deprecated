@@ -60,30 +60,39 @@ requirejs([
       
     }
 
+    var applyTransforms = function(bsp, transforms) {
+      if (transforms.translation) {
+        bsp = bsp.translate(transforms.translation.x, transforms.translation.y, transforms.translation.z);
+      }
+      if (transforms.rotation.angle !== 0) {
+       bsp = bsp.translate(-transforms.rotation.origin.x, -transforms.rotation.origin.y, -transforms.rotation.origin.z); 
+       bsp = bsp.rotate(transforms.rotation.axis.x, transforms.rotation.axis.y, transforms.rotation.axis.z, transforms.rotation.angle/180*Math.PI);
+       bsp = bsp.translate(transforms.rotation.origin.x, transforms.rotation.origin.y, transforms.rotation.origin.z); 
+      }
+      return bsp;
+    }
+
     this.addEventListener('message', function(e) {
 
       // Create new with the arguments
       if (e.data.sphere) {
-        var bsp = new Sphere(e.data.sphere).bsp;
+        var bsp = applyTransforms(new Sphere(e.data.sphere).bsp, e.data.transforms || {});
         returnResult(e.data.id, e.data.sha, bsp);
       } else if (e.data.cube) {
-        var bsp = new Cube(e.data.cube).bsp;
+        var bsp = applyTransforms(new Cube(e.data.cube).bsp, e.data.transforms || {});
         returnResult(e.data.id, e.data.sha, bsp);
       } else if (e.data.subtract) {
 
         // The child BSPs start off as an array of SHAs, 
         // and each SHA is replaced with the BSP from the DB
         var childBSPs = e.data.subtract;
-        var transforms = e.data.transforms || {};
+        
         var remaining = childBSPs.length;
 
         var a = BSP.deserialize(childBSPs[0]);
         var b = BSP.deserialize(childBSPs[1]);
         var subtract = new Subtract3D(a,b);
-        var bsp = subtract.bsp;
-        if (transforms.translate) {
-          var bsp = bsp.translate(transforms.translate.x, transforms.translate.y, transforms.translate.z);
-        }
+        var bsp = applyTransforms(subtract.bsp, e.data.transforms || {});
 
         returnResult(e.data.id, e.data.sha, bsp);
 

@@ -34,11 +34,27 @@ define([
     },
 
     translate: function(translation) {
-      this.vertex.transforms.translate = this.vertex.transforms.translate || {x:0, y:0, z:0};
-      this.vertex.transforms.translate =  {
-        x: translation.x,
-        y: translation.y,
-        z: translation.z,
+      if (!this.startOrigin) {
+        this.startOrigin = {
+          x: this.vertex.transforms.translation.x,
+          y: this.vertex.transforms.translation.y,
+          z: this.vertex.transforms.translation.z,
+        }
+        this.startRotationCenter = {
+          x: this.vertex.transforms.rotation.origin.x,
+          y: this.vertex.transforms.rotation.origin.y,
+          z: this.vertex.transforms.rotation.origin.z, 
+        }
+      }
+      this.vertex.transforms.translation =  {
+        x: this.startOrigin.x + translation.x,
+        y: this.startOrigin.y + translation.y,
+        z: this.startOrigin.z + translation.z,
+      };
+      this.vertex.transforms.rotation.origin =  {
+        x: this.startRotationCenter.x + translation.x,
+        y: this.startRotationCenter.y + translation.y,
+        z: this.startRotationCenter.z + translation.z,
       };
       this.vertex.trigger('change', this.vertex);
     },
@@ -56,17 +72,19 @@ define([
         '<div>dz<input class="field dz" type="text" value="{{dz}}"></input></div>' + 
         this.afterTemplate;
 
-      var translate = this.model.vertex.transforms.translate || {x:0, y:0, z:0};
+      var translation = this.model.vertex.transforms.translation;
       var view = _.extend(this.baseView, {
-        dx     : translate.x,
-        dy     : translate.y,
-        dz     : translate.z,
+        dx     : translation.x,
+        dy     : translation.y,
+        dz     : translation.z,
       });
       this.$el.html($.mustache(template, view));
       return this;
     },
 
     update: function() {
+      GeomVertexMV.EditingDOMView.prototype.update.call(this);
+
       var that = this;
       var translate = this.model.vertex.transforms.translate || {x:0, y:0, z:0};
       ['x', 'y', 'z'].forEach(function(key) {
@@ -75,6 +93,8 @@ define([
     },
 
     updateFromDOM: function() {
+      GeomVertexMV.EditingDOMView.prototype.updateFromDOM.call(this);
+      
       var that = this;
       var translate = this.model.vertex.transforms.translate || {x:0, y:0, z:0};
       ['x', 'y', 'z'].forEach(function(key) {

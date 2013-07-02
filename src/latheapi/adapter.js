@@ -35,10 +35,7 @@ define([
               postMessage({error: 'error writing to BSP DB' + err});
             }
           })
-
           callback(undefined, jobResult);
-      
-
         });
       }
     });
@@ -91,7 +88,7 @@ define([
         var normalized = Normalize.normalizeVertex(vertex);
         var sha = SHA1Hasher.hash(normalized);
         getOrGenerate(sha, function() {
-          return Lathe.createSphere(sha, normalized);
+          return Lathe.createSphere(sha, normalized, vertex.transforms);
         }, callback);
         break;
 
@@ -99,7 +96,7 @@ define([
         var normalized = Normalize.normalizeVertex(vertex);
         var sha = SHA1Hasher.hash(normalized);
         getOrGenerate(sha, function() {
-          return Lathe.createCube(sha, normalized);
+          return Lathe.createCube(sha, normalized, vertex.transforms);
         }, callback);
         break;
       case 'subtract':
