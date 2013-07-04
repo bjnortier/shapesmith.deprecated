@@ -84,6 +84,8 @@ define([
     },
 
     dragStarted: function() {
+      this.model.hideOtherViews(this);
+      
       this.originalVertex = this.model.vertex;
       this.originalVertex.transforming = true;
       this.editingVertex = AsyncAPI.edit(this.model.vertex);

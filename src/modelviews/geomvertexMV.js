@@ -320,9 +320,16 @@
         };
 
         var faceGeometry = toMesh.geometry;
-        var faceMaterial = this.model.vertex.editing ? 
-          this.materials.editing.face :
-          this.materials.normal.face;
+        var faceMaterial;
+        if (this.model.vertex.editing) {
+          if (this.model.vertex.transforming) {
+            faceMaterial = this.materials.selected.face;
+          } else {
+            faceMaterial = this.materials.editing.face;
+          }
+        } else {
+          faceMaterial = this.materials.normal.face;
+        }
         var meshObject = new THREE.Mesh(faceGeometry, faceMaterial);
         this.sceneObject.add(meshObject);
         sceneModel.view.updateScene = true;
@@ -464,7 +471,6 @@
   var EditingSceneView = SceneView.extend({
 
     initialize: function() {
-      this.color = colors.geometry.editing;
       SceneView.prototype.initialize.call(this);
       this.model.vertex.on('change', this.renderIfInContext, this);
     },
@@ -551,8 +557,8 @@
         var template = 
           '<div class="title">' + 
             '{{#hasExplicitChildren}}' +
-            '<i class="dive icon-caret-down"></i>' +
-            '<i class="ascend icon-caret-up"></i>' +
+            '<i class="dive icon-chevron-sign-down"></i>' +
+            '<i class="ascend icon-chevron-sign-up"></i>' +
             '{{/hasExplicitChildren}}' +  
             '<div class="icon24" style="fill: {{color}}; stroke: {{color}};">{{{icon}}}</div>' +
             '<div class="name">{{name}}</div>' + 
@@ -583,12 +589,14 @@
 
     clickDive: function(event) {
       event.stopPropagation();
+      selection.deselectAll();
       this.trigger('dive');
-      this.dive()
+      this.dive();
     },
 
     clickAscend: function(event) {
       event.stopPropagation();
+      selection.deselectAll();
       this.trigger('ascend');
       this.ascend();
     },

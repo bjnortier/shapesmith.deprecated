@@ -68,6 +68,11 @@ define([
     },
 
     dragStarted: function() {
+      this.sceneViews.forEach(function(view) {
+        view.remove();
+      })
+      this.sceneViews = [];
+      
       this.initialTranslation = calc.objToVector(
         this.vertex.transforms.translate || {x:0,y:0,z:0}, 
         geometryGraph, 
@@ -101,6 +106,15 @@ define([
       this.dragging = false;
       this.editingVertex.transforming = false;
       this.editingModel.tryCommit();
+    },
+
+    hideOtherViews: function(view) {
+      this.sceneViews.forEach(function(otherView) {
+        if (otherView !== view) {
+          otherView.remove();
+        }
+      });
+      this.sceneViews = [view];
     },
 
   })
