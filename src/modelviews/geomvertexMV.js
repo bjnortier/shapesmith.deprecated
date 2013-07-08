@@ -679,14 +679,14 @@
     },
 
     highlight: function() {
-      this.highlighted = true;
-      if (!geometryGraph.isEditing()) {
-        if (this.model.vertex.implicit) {
-          // this.updateMaterials('normal');
-        } else {
-          this.updateMaterials('highlight');
-        }
-      }
+      // this.highlighted = true;
+      // if (!geometryGraph.isEditing()) {
+      //   if (this.model.vertex.implicit) {
+      //     // this.updateMaterials('normal');
+      //   } else {
+      //     this.updateMaterials('highlight');
+      //   }
+      // }
       // var implicitViews = this.findImplicitDescendantSceneviews(this.model.vertex);
       // implicitViews.forEach(function(view) {
       //   view.highlight && view.highlight();
@@ -694,14 +694,14 @@
     },
 
     unhighlight: function() {
-      delete this.highlighted;
-      if (!geometryGraph.isEditing()) {
-        if (this.model.vertex.implicit) {
-          // this.updateMaterials('implicit');
-        } else {
-          this.updateSelected();
-        }
-      }
+      // delete this.highlighted;
+      // if (!geometryGraph.isEditing()) {
+      //   if (this.model.vertex.implicit) {
+      //     // this.updateMaterials('implicit');
+      //   } else {
+      //     this.updateSelected();
+      //   }
+      // }
       // var implicitViews = this.findImplicitDescendantSceneviews(this.model.vertex);
       // implicitViews.forEach(function(view) {
       //   view.unhighlight();

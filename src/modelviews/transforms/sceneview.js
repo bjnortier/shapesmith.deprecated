@@ -22,6 +22,8 @@ define([
       this.render();
       sceneModel.view.on('cameraMoved', this.cameraMoved, this);
       sceneModel.view.on('cameraMoveStopped', this.cameraMoveStopped, this);
+      this.on('mouseenterfirst', this.highlight, this);
+      this.on('mouseleavefirst', this.unhighlight, this);
       this.on('dragStarted', this.dragStarted, this);
       this.on('dragEnded', this.dragEnded, this);
       this.on('drag', this.drag, this);
@@ -35,6 +37,8 @@ define([
       sceneModel.view.updateScene = true;
       sceneModel.view.off('cameraMoved', this.cameraMoved, this);
       sceneModel.view.off('cameraMoveStopped', this.cameraMoveStopped, this);
+      this.off('mouseenterfirst', this.highlight, this);
+      this.off('mouseleavefirst', this.unhighlight, this);
       this.off('dragStarted', this.dragStarted, this);
       this.off('dragEnded', this.dragEnded, this);
       this.off('drag', this.drag, this);

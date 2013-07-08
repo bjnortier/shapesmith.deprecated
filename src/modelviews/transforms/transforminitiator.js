@@ -7,6 +7,7 @@ define([
     'asyncAPI',
     'modelviews/modelgraph',
     'modelviews/transforms/translatesceneview',
+    'modelviews/transforms/scalesceneview',
     'modelviews/transforms/uvwrotationsceneviews',
     'calculations',
     'settings',
@@ -20,6 +21,7 @@ define([
     AsyncAPI,
     modelGraph,
     TranslateSceneView,
+    ScaleSceneView,
     UVWRotationSceneViews,
     calc,
     settings) {
@@ -35,7 +37,7 @@ define([
     deselected: function() {
       this.sceneViews.forEach(function(view) {
         view.remove();
-      })
+      });
       this.sceneViews = [];
     },
 
@@ -50,6 +52,7 @@ define([
 
         this.sceneViews = [
           new TranslateSceneView({model: this}),
+          new ScaleSceneView({model: this}),
           new UVWRotationSceneViews.U({model: this}),
           new UVWRotationSceneViews.V({model: this}),
           new UVWRotationSceneViews.W({model: this}),
@@ -57,7 +60,7 @@ define([
       } else {
         this.sceneViews.forEach(function(view) {
           view.remove();
-        })
+        });
         this.sceneViews = [];
 
         this.selectedModel.sceneView.on('dragStarted', this.dragStarted, this);
@@ -70,7 +73,7 @@ define([
     dragStarted: function() {
       this.sceneViews.forEach(function(view) {
         view.remove();
-      })
+      });
       this.sceneViews = [];
       
       this.initialTranslation = calc.objToVector(
@@ -86,7 +89,7 @@ define([
     drag: function(position) {
       this.sceneViews.forEach(function(view) {
         view.remove();
-      })
+      });
       this.sceneViews = [];
 
       if (!this.initialPosition) {
@@ -117,11 +120,8 @@ define([
       this.sceneViews = [view];
     },
 
-  })
-
-  
+  });
 
   return new Model();
-
 
 });

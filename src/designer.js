@@ -7,7 +7,7 @@ define([
     'modelviews/sphereMV',
     'modelviews/subtractMV',
     'modelviews/modelgraph',
-    'modelviews/transforminitiator',
+    'modelviews/transforms/transforminitiator',
     'modelviews/actionsoverlayMV',
     'icons',
     'toolbars/toolbar',

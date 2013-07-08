@@ -27,7 +27,7 @@ define([
       axisGeom.vertices.push(new THREE.Vector3(0, 0, -5000));
 
       this.axis = new THREE.Line(axisGeom, 
-        new THREE.LineBasicMaterial({ color: 0xff00000 }));
+        new THREE.LineBasicMaterial({ color: 0xff0000 }));
 
       var extents = this.model.selectedModel.getExtents();
       this.axis.position = extents.center;
@@ -68,6 +68,16 @@ define([
         this.initialPosition = extents.center.clone().add(
           new THREE.Vector3(0, 0, extents.dz + 2*this.cameraScale.z));
       }
+    },
+
+    highlight: function() {
+      this.sceneObject.add(this.axis);
+      sceneModel.view.updateScene = true;
+    },
+
+    unhighlight: function() {
+      this.sceneObject.remove(this.axis); 
+      sceneModel.view.updateScene = true; 
     },
 
     dragStarted: function() {

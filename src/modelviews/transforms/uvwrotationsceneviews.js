@@ -4,14 +4,14 @@ define([
 
   var U = RotationSceneView.extend({
 
-    arrowLineColor: 0x333399,
+    arrowLineColor: 0x3333cc,
     arrowFaceColor: 0x6666cc,
     textColor: '#6666cc',
 
     initialize: function(options) {
       var extents = this.model.selectedModel.getExtents();
       this.center = extents.center;
-      this.radius = Math.sqrt(extents.dx*extents.dx + extents.dy*extents.dy + extents.dz*extents.dz);
+      this.radius = Math.sqrt(extents.dx*extents.dx + extents.dy*extents.dy + extents.dz*extents.dz) + 5;
       this.rotation = this.model.vertex.transforms.rotation;
       this.arrowStartPosition = new THREE.Vector3(0, this.radius, 0);
 
@@ -30,14 +30,14 @@ define([
 
   var V = RotationSceneView.extend({
 
-    arrowLineColor: 0x339933,
+    arrowLineColor: 0x33cc33,
     arrowFaceColor: 0x66cc66,
     textColor: '#66cc66',
 
     initialize: function(options) {
       var extents = this.model.selectedModel.getExtents();
       this.center = extents.center;
-      this.radius = Math.sqrt(extents.dx*extents.dx + extents.dy*extents.dy + extents.dz*extents.dz);
+      this.radius = Math.sqrt(extents.dx*extents.dx + extents.dy*extents.dy + extents.dz*extents.dz) + 5;
       this.rotation = this.model.vertex.transforms.rotation;
       this.arrowStartPosition = new THREE.Vector3(0, 0, this.radius);
 
@@ -56,14 +56,14 @@ define([
 
   var W = RotationSceneView.extend({
 
-    arrowLineColor: 0x993333,
+    arrowLineColor: 0xcc3333,
     arrowFaceColor: 0xcc6666,
     textColor: '#cc6666',
 
     initialize: function(options) {
       var extents = this.model.selectedModel.getExtents();
       this.center = extents.center;
-      this.radius = Math.sqrt(extents.dx*extents.dx + extents.dy*extents.dy + extents.dz*extents.dz);
+      this.radius = Math.sqrt(extents.dx*extents.dx + extents.dy*extents.dy + extents.dz*extents.dz) + 5;
       this.rotation = this.model.vertex.transforms.rotation;
       this.arrowStartPosition = new THREE.Vector3(this.radius, 0, 0);
 
