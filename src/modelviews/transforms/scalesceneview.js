@@ -18,8 +18,10 @@ define([
 
   var TranslateSceneView = TransformSceneView.extend({
 
-    faceColor: 0xcc3333,
-    edgeColor: 0xcc6666,
+    greyLineColor: 0xcc3333,
+    greyFaceColor: 0xcc6666,
+    highlightFaceColor: 0xcc3333,
+    highlightLineColor: 0xff0000,
 
     initialize: function() {
       TransformSceneView.prototype.initialize.call(this);
@@ -50,7 +52,7 @@ define([
         0));
       boundaryGeometry.vertices.push(boundaryGeometry.vertices[0]);
       var boundary = new THREE.Line(boundaryGeometry, 
-        new THREE.LineBasicMaterial({ color: 0xff0000 }));
+        new THREE.LineBasicMaterial({ color: this.greyLineColor }));
 
       boundary.position = new THREE.Vector3(extents.center.x, extents.center.y, 0);
       this.sceneObject.add(boundary);
@@ -65,9 +67,10 @@ define([
       cornerGeometry.vertices.push(new THREE.Vector3(-1, -1, 0));
       cornerGeometry.faces.push(new THREE.Face4(0,1,2,3));
       cornerGeometry.faces.push(new THREE.Face4(0,6,5,4));
+      cornerGeometry.computeFaceNormals();
 
       var that = this;
-      [
+      this.corners = [
         {
           rotation: 0,
           offset: new THREE.Vector3(extents.dx + buffer, extents.dy + buffer, 0)
@@ -89,13 +92,14 @@ define([
         var corner = THREE.SceneUtils.createMultiMaterialObject(
           cornerGeometry,
           [
-            new THREE.MeshBasicMaterial({color: 0xcc3333, side: THREE.DoubleSide } ),
-            new THREE.MeshBasicMaterial({color: 0xcc6666, wireframe: true})
+            new THREE.MeshBasicMaterial({color: that.greyFaceColor, transparent: true, opacity: 0.5, side: THREE.DoubleSide } ),
           ]);
         corner.position = new THREE.Vector3(extents.center.x, extents.center.y, 0)
           .add(rotationAndOffset.offset);
         corner.rotation.z = rotationAndOffset.rotation;
         that.sceneObject.add(corner);
+        corner.scale = that.cameraScale;
+        return corner;
         
       });
     },
@@ -103,8 +107,11 @@ define([
     updateCameraScale: function() {
       TransformSceneView.prototype.updateCameraScale.call(this);
 
-      if (this.arrow) {
-        this.arrow.scale = this.cameraScale;
+      if (this.corners) {
+        var that = this;
+        this.corners.forEach(function(corner) {
+          corner.scale = that.cameraScale;
+        })
       }
 
       if (!this.dragging) {

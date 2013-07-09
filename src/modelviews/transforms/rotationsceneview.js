@@ -27,36 +27,34 @@ define([
         circleGeom.vertices.push(new THREE.Vector3(x,y,0));
       }
       var circleMaterial = new THREE.LineBasicMaterial({ 
-        color: this.arrowLineColor, 
+        color: this.greyLineColor, 
         linewidth: 1.0});
       var circle = new THREE.Line(circleGeom, circleMaterial);
 
       var arcGeom = new THREE.Geometry();
       if (this.relativeAngle !== 0) {
-          var arcStartAngle = Math.min(-this.relativeAngle, 0);
-          var arcEndAngle = Math.max(-this.relativeAngle, 0);
+        var arcStartAngle = Math.min(-this.relativeAngle, 0);
+        var arcEndAngle = Math.max(-this.relativeAngle, 0);
 
-          if (arcStartAngle === -this.relativeAngle) {
-              arcGeom.vertices.push(new THREE.Vector3(0,0,0));
-          }
-          for (i = arcStartAngle; i <= arcEndAngle; ++i) {
-              angle = i/180*Math.PI;
-              x = (this.radius)*Math.cos(angle);
-              y = (this.radius)*Math.sin(angle);
-              arcGeom.vertices.push(new THREE.Vector3(x,y,0));
-          }
-          if (arcEndAngle === -this.relativeAngle) {
-              arcGeom.vertices.push(new THREE.Vector3(0,0,0));
-          }
+        if (arcStartAngle === -this.relativeAngle) {
+          arcGeom.vertices.push(new THREE.Vector3(0,0,0));
+        }
+        for (i = arcStartAngle; i <= arcEndAngle; ++i) {
+          angle = i/180*Math.PI;
+          x = (this.radius)*Math.cos(angle);
+          y = (this.radius)*Math.sin(angle);
+          arcGeom.vertices.push(new THREE.Vector3(x,y,0));
+        }
+        if (arcEndAngle === -this.relativeAngle) {
+          arcGeom.vertices.push(new THREE.Vector3(0,0,0));
+        }
       }
       var angleArc = new THREE.Line(arcGeom, circleMaterial);
                                   
       var arrowGeometry = new THREE.CylinderGeometry(0, 0.75, 2, 3);
-      var arrowMaterials = [
-          new THREE.MeshBasicMaterial({color: this.arrowLineColor, wireframe: false}),
-          new THREE.MeshBasicMaterial({color: this.arrowFaceColor, wireframe: true})
-      ];
-      this.arrow = THREE.SceneUtils.createMultiMaterialObject(arrowGeometry, arrowMaterials);
+      this.arrow = new THREE.Mesh(
+        arrowGeometry,
+        new THREE.MeshBasicMaterial({color: this.greyFaceColor, transparent: true, opacity: 0.5}));
       this.arrow.position = new THREE.Vector3(this.radius, 0, 0);
       this.arrow.scale = this.cameraScale;
 

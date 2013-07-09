@@ -4,9 +4,10 @@ define([
 
   var U = RotationSceneView.extend({
 
-    arrowLineColor: 0x3333cc,
-    arrowFaceColor: 0x6666cc,
-    textColor: '#6666cc',
+    greyLineColor: 0x3333cc,
+    greyFaceColor: 0x6666cc,
+    highlightFaceColor: 0x3333cc,
+    highlightLineColor: 0x0000ff,
 
     initialize: function(options) {
       var extents = this.model.selectedModel.getExtents();
@@ -23,16 +24,16 @@ define([
       this.circleAndArrow.rotation.y = Math.PI/2;
       this.circleAndArrow.rotation.x = Math.PI/2;
     },
-
     relativeRotationAxis: new THREE.Vector3(1,0,0),
 
   });
 
   var V = RotationSceneView.extend({
 
-    arrowLineColor: 0x33cc33,
-    arrowFaceColor: 0x66cc66,
-    textColor: '#66cc66',
+    greyLineColor: 0x33cc33,
+    greyFaceColor: 0x66cc66,
+    highlightFaceColor: 0x33cc33,
+    highlightLineColor: 0x00ff00,
 
     initialize: function(options) {
       var extents = this.model.selectedModel.getExtents();
@@ -56,9 +57,10 @@ define([
 
   var W = RotationSceneView.extend({
 
-    arrowLineColor: 0xcc3333,
-    arrowFaceColor: 0xcc6666,
-    textColor: '#cc6666',
+    greyLineColor: 0xcc3333,
+    greyFaceColor: 0xcc6666,
+    highlightFaceColor: 0xcc3333,
+    highlightLineColor: 0xff0000,
 
     initialize: function(options) {
       var extents = this.model.selectedModel.getExtents();

@@ -82,6 +82,46 @@ define([
       this.cameraScale = new THREE.Vector3(newScale, newScale, newScale);
     },
 
+    highlight: function() {
+      this.updateMaterials(this.highlightLineColor, this.highlightFaceColor, 1.0);
+    },
+
+    unhighlight: function() {
+      this.updateMaterials(this.greyLineColor, this.greyFaceColor, 0.5);
+    },
+
+    findObjects: function(sceneObjects) {
+      var lines = [], meshes = [];
+      var searchFn = function(obj) {
+        if (obj.children.length) {
+          obj.children.map(searchFn);
+        }
+        if (obj instanceof THREE.Mesh) {
+          meshes.push(obj);
+        } else if (obj instanceof THREE.Line) {
+          lines.push(obj);
+        }
+      }
+      sceneObjects.forEach(function(obj) {
+        searchFn(obj);
+      });
+      return {lines: lines, meshes: meshes};
+    },
+
+    updateMaterials: function(lineColor, faceColor, faceOpacity) {
+      var objects = this.findObjects([this.sceneObject]);
+      var that = this;
+      objects.lines.forEach(function(line) {
+        line.material.color = new THREE.Color(lineColor);
+      });
+      objects.meshes.forEach(function(mesh) {
+        if (mesh.material) {
+          mesh.material.color = new THREE.Color(faceColor);
+          mesh.material.opacity = faceOpacity;
+        }
+      });
+      sceneModel.view.updateScene = true;
+    },
 
   });
 

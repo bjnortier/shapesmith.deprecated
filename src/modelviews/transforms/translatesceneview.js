@@ -18,8 +18,10 @@ define([
 
   var TranslateSceneView = TransformSceneView.extend({
 
-    faceColor: 0xcc3333,
-    edgeColor: 0xcc6666,
+    greyLineColor: 0xcc3333,
+    greyFaceColor: 0xcc6666,
+    highlightFaceColor: 0xcc3333,
+    highlightLineColor: 0xff0000,
 
     initialize: function() {
       var axisGeom = new THREE.Geometry();
@@ -27,7 +29,7 @@ define([
       axisGeom.vertices.push(new THREE.Vector3(0, 0, -5000));
 
       this.axis = new THREE.Line(axisGeom, 
-        new THREE.LineBasicMaterial({ color: 0xff0000 }));
+        new THREE.LineBasicMaterial({ color: this.greyLineColor }));
 
       var extents = this.model.selectedModel.getExtents();
       this.axis.position = extents.center;
@@ -39,12 +41,9 @@ define([
       TransformSceneView.prototype.render.call(this);
 
       this.arrow = new THREE.Object3D();
-      this.arrow.add(THREE.SceneUtils.createMultiMaterialObject(
+      this.arrow.add(new THREE.Mesh(
         new THREE.CylinderGeometry(0, 0.75, 1.5, 3), 
-        [
-          new THREE.MeshBasicMaterial({color: this.faceColor } ),
-          new THREE.MeshBasicMaterial({color: this.edgeColor, wireframe: true})
-        ]));
+        new THREE.MeshBasicMaterial({color: this.greyFaceColor, transparent: true, opacity: 0.5})));
 
       this.arrow.scale = this.cameraScale;
       this.sceneObject.add(this.arrow);
@@ -71,13 +70,13 @@ define([
     },
 
     highlight: function() {
+      TransformSceneView.prototype.highlight.call(this);
       this.sceneObject.add(this.axis);
-      sceneModel.view.updateScene = true;
     },
 
     unhighlight: function() {
+      TransformSceneView.prototype.unhighlight.call(this);
       this.sceneObject.remove(this.axis); 
-      sceneModel.view.updateScene = true; 
     },
 
     dragStarted: function() {
