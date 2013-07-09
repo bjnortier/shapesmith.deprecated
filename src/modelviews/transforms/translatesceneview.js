@@ -18,10 +18,10 @@ define([
 
   var TranslateSceneView = TransformSceneView.extend({
 
-    greyLineColor: 0xcc3333,
-    greyFaceColor: 0xcc6666,
+    greyLineColor: 0xcc9999,
+    greyFaceColor: 0xcc9999,
     highlightFaceColor: 0xcc3333,
-    highlightLineColor: 0xff0000,
+    highlightLineColor: 0xcc3333,
 
     initialize: function() {
       var axisGeom = new THREE.Geometry();

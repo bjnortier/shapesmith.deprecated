@@ -4,10 +4,10 @@ define([
 
   var U = RotationSceneView.extend({
 
-    greyLineColor: 0x3333cc,
-    greyFaceColor: 0x6666cc,
+    greyLineColor: 0x9999cc,
+    greyFaceColor: 0x9999cc,
     highlightFaceColor: 0x3333cc,
-    highlightLineColor: 0x0000ff,
+    highlightLineColor: 0x3333cc,
 
     initialize: function(options) {
       var extents = this.model.selectedModel.getExtents();
@@ -30,8 +30,8 @@ define([
 
   var V = RotationSceneView.extend({
 
-    greyLineColor: 0x33cc33,
-    greyFaceColor: 0x66cc66,
+    greyLineColor: 0x99cc99,
+    greyFaceColor: 0x99cc99,
     highlightFaceColor: 0x33cc33,
     highlightLineColor: 0x00ff00,
 
@@ -57,10 +57,10 @@ define([
 
   var W = RotationSceneView.extend({
 
-    greyLineColor: 0xcc3333,
-    greyFaceColor: 0xcc6666,
+    greyLineColor: 0xcc9999,
+    greyFaceColor: 0xcc9999,
     highlightFaceColor: 0xcc3333,
-    highlightLineColor: 0xff0000,
+    highlightLineColor: 0xcc3333,
 
     initialize: function(options) {
       var extents = this.model.selectedModel.getExtents();
