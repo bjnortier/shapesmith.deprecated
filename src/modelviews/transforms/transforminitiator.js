@@ -77,7 +77,7 @@ define([
       this.sceneViews = [];
       
       this.initialTranslation = calc.objToVector(
-        this.vertex.transforms.translate || {x:0,y:0,z:0}, 
+        this.vertex.transforms.translation,
         geometryGraph, 
         THREE.Vector3);
       this.originalVertex = this.vertex;

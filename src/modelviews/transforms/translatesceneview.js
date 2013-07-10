@@ -34,7 +34,12 @@ define([
       var extents = this.model.selectedModel.getExtents();
       this.axis.position = extents.center;
 
+
       TransformSceneView.prototype.initialize.call(this);
+      this.initialTranslation = calc.objToVector(
+        this.model.vertex.transforms.translation, 
+        geometryGraph, 
+        THREE.Vector3);
     },
 
     render: function() {

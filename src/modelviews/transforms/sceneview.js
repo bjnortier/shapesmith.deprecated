@@ -4,20 +4,18 @@ define([
     'settings',
     'scene',
     'scenevieweventgenerator',
-    'geometrygraphsingleton',
   ], function(
     Backbone, 
     calc,
     settings,
     sceneModel,
-    sceneViewEventGenerator,
-    geometryGraph) {
+    sceneViewEventGenerator) {
 
   var SceneView = Backbone.View.extend({
 
     initialize: function() {
       this.scene = sceneModel.view.scene;
-      this.initialTranslation = calc.objToVector(this.model.vertex.transforms.translate || {x:0,y:0,z:0}, geometryGraph, THREE.Vector3);
+
       this.updateCameraScale();
       this.render();
       sceneModel.view.on('cameraMoved', this.cameraMoved, this);
@@ -87,7 +85,9 @@ define([
     },
 
     unhighlight: function() {
-      this.updateMaterials(this.greyLineColor, this.greyFaceColor, 0.5);
+      if (!this.dragging) {
+        this.updateMaterials(this.greyLineColor, this.greyFaceColor, 0.5);
+      }
     },
 
     findObjects: function(sceneObjects) {
@@ -101,7 +101,7 @@ define([
         } else if (obj instanceof THREE.Line) {
           lines.push(obj);
         }
-      }
+      };
       sceneObjects.forEach(function(obj) {
         searchFn(obj);
       });
@@ -110,7 +110,6 @@ define([
 
     updateMaterials: function(lineColor, faceColor, faceOpacity) {
       var objects = this.findObjects([this.sceneObject]);
-      var that = this;
       objects.lines.forEach(function(line) {
         line.material.color = new THREE.Color(lineColor);
       });

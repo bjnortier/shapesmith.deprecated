@@ -35,36 +35,35 @@ define([
       var boundaryGeometry = new THREE.Geometry();
       var buffer = 5;
       boundaryGeometry.vertices.push(new THREE.Vector3(
-        + extents.dx + buffer, 
-        + extents.dy + buffer, 
-        0));
+        + extents.dx, 
+        + extents.dy, 
+        0).add(new THREE.Vector3(extents.center.x, extents.center.y, 0)));
       boundaryGeometry.vertices.push(new THREE.Vector3(
-        - extents.dx - buffer, 
-        + extents.dy + buffer, 
-        0));
+        - extents.dx, 
+        + extents.dy, 
+        0).add(new THREE.Vector3(extents.center.x, extents.center.y, 0)));
       boundaryGeometry.vertices.push(new THREE.Vector3(
-        - extents.dx - buffer, 
-        - extents.dy - buffer, 
-        0));
+        - extents.dx, 
+        - extents.dy, 
+        0).add(new THREE.Vector3(extents.center.x, extents.center.y, 0)));
       boundaryGeometry.vertices.push(new THREE.Vector3(
-        + extents.dx + buffer, 
-        - extents.dy - buffer, 
-        0));
+        + extents.dx, 
+        - extents.dy, 
+        0).add(new THREE.Vector3(extents.center.x, extents.center.y, 0)));
       boundaryGeometry.vertices.push(boundaryGeometry.vertices[0]);
-      var boundary = new THREE.Line(boundaryGeometry, 
+      this.boundary = new THREE.Line(boundaryGeometry, 
         new THREE.LineBasicMaterial({ color: this.greyLineColor }));
 
-      boundary.position = new THREE.Vector3(extents.center.x, extents.center.y, 0);
-      this.sceneObject.add(boundary);
+      this.sceneObject.add(this.boundary);
 
       var cornerGeometry = new THREE.Geometry();
       cornerGeometry.vertices.push(new THREE.Vector3(0,0,0));
       cornerGeometry.vertices.push(new THREE.Vector3(-buffer/2, 0, 0));
-      cornerGeometry.vertices.push(new THREE.Vector3(-buffer/2, -1, 0));
-      cornerGeometry.vertices.push(new THREE.Vector3(-1, -1, 0));
+      cornerGeometry.vertices.push(new THREE.Vector3(-buffer/2, 1, 0));
+      cornerGeometry.vertices.push(new THREE.Vector3(1, 1, 0));
       cornerGeometry.vertices.push(new THREE.Vector3(0, -buffer/2, 0));
-      cornerGeometry.vertices.push(new THREE.Vector3(-1, -buffer/2, 0));
-      cornerGeometry.vertices.push(new THREE.Vector3(-1, -1, 0));
+      cornerGeometry.vertices.push(new THREE.Vector3(1, -buffer/2, 0));
+      cornerGeometry.vertices.push(new THREE.Vector3(1, 1, 0));
       cornerGeometry.faces.push(new THREE.Face4(0,1,2,3));
       cornerGeometry.faces.push(new THREE.Face4(0,6,5,4));
       cornerGeometry.computeFaceNormals();
@@ -73,19 +72,19 @@ define([
       this.corners = [
         {
           rotation: 0,
-          offset: new THREE.Vector3(extents.dx + buffer, extents.dy + buffer, 0)
+          offset: new THREE.Vector3(extents.dx, extents.dy, 0)
         },
         {
           rotation: Math.PI/2,
-          offset: new THREE.Vector3(-extents.dx - buffer, extents.dy + buffer, 0)
+          offset: new THREE.Vector3(-extents.dx, extents.dy, 0)
         },
         {
           rotation: Math.PI,
-          offset: new THREE.Vector3(-extents.dx - buffer, -extents.dy - buffer, 0)
+          offset: new THREE.Vector3(-extents.dx, -extents.dy, 0)
         },
         {
           rotation: 3*Math.PI/2,
-          offset: new THREE.Vector3(extents.dx + buffer, -extents.dy - buffer, 0)
+          offset: new THREE.Vector3(extents.dx, -extents.dy, 0)
         },
 
       ].map(function(rotationAndOffset) {
@@ -111,14 +110,9 @@ define([
         var that = this;
         this.corners.forEach(function(corner) {
           corner.scale = that.cameraScale;
-        })
+        });
       }
 
-      if (!this.dragging) {
-        var extents = this.model.selectedModel.getExtents();
-        this.initialPosition = extents.center.clone().add(
-          new THREE.Vector3(0, 0, extents.dz + 2*this.cameraScale.z));
-      }
     },
 
     dragStarted: function() {
@@ -129,37 +123,55 @@ define([
       this.editingVertex = AsyncAPI.edit(this.model.vertex);
       this.editingModel = modelGraph.get(this.editingVertex.id);
       this.dragging = true;
-      this.sceneObject.add(this.axis);
     },
 
-    // drag: function(position, intersection, event) {
-    //   var sceneElement = $('#scene');
-    //   var camera = sceneModel.view.camera;
-    //   var mouseRay = calc.mouseRayForEvent(sceneElement, camera, event);
+    drag: function(position) {
+      var extents = this.model.selectedModel.getExtents();
+      if (!this.initialPosition) {
+        this.initialPosition = position;
+        this.centerOnWorkplane = new THREE.Vector3(extents.center.x, extents.center.y, 0);
+        this.initialDistance = new THREE.Vector3().subVectors(
+          this.initialPosition, this.centerOnWorkplane).length();
+        console.log(this.initialDistance);
+      } else {
 
-    //   var extents = this.model.selectedModel.getExtents();
-    //   var rayOrigin = calc.objToVector(extents.center, geometryGraph, THREE.Vector3);
-    //   var rayDirection = new THREE.Vector3(0,0,1);
-    //   var ray = new THREE.Ray(rayOrigin, rayDirection);
+        var round = function(value, tolerance) {
+          return Math.round(value*tolerance)/tolerance;
+        };
 
-    //   var positionOnNormal = calc.positionOnRay(mouseRay, ray);
+        var distance = new THREE.Vector3().subVectors(
+          position, this.centerOnWorkplane).length();
 
-    //   this.arrow.position = positionOnNormal;
-    //   var diff = new THREE.Vector3().subVectors(positionOnNormal, this.initialPosition);
-    //   var grid = settings.get('gridsize');
-    //   var translation = new THREE.Vector3(Math.round(diff.x/grid) * grid,
-    //                                       Math.round(diff.y/grid) * grid,
-    //                                       Math.round(diff.z/grid) * grid).add(this.initialTranslation);
-      
-    //   this.editingModel.translate(translation);
-    // },
+        var scale = round(distance/this.initialDistance, 10);
+        console.log(scale);
 
-    // dragEnded: function() {
-    //   this.sceneObject.remove(this.axis);
-    //   this.dragging = false;
-    //   this.editingVertex.transforming = false;
-    //   this.editingModel.tryCommit();
-    // },
+        var that = this;
+        [
+          new THREE.Vector3(extents.center.x, extents.center.y, 0).add(
+            new THREE.Vector3(extents.dx*scale, extents.dy*scale, 0)),
+          new THREE.Vector3(extents.center.x, extents.center.y, 0).add(
+            new THREE.Vector3(-extents.dx*scale, extents.dy*scale, 0)),
+          new THREE.Vector3(extents.center.x, extents.center.y, 0).add(
+            new THREE.Vector3(-extents.dx*scale, -extents.dy*scale, 0)),
+          new THREE.Vector3(extents.center.x, extents.center.y, 0).add(
+            new THREE.Vector3(extents.dx*scale, -extents.dy*scale, 0)),
+        ].map(function(p, i) {
+          that.corners[i].position = p;
+          that.boundary.geometry.vertices[i] = p;
+        });
+        this.boundary.geometry.vertices[4] = this.boundary.geometry.vertices[0]; 
+        this.boundary.geometry.verticesNeedUpdate = true;
+        sceneModel.view.updateScene = true;
+      // this.editingModel.translate(translation);
+      }
+    
+    },
+
+    dragEnded: function() {
+      this.dragging = false;
+      this.editingVertex.transforming = false;
+      this.editingModel.tryCommit();
+    },
 
     mouseenter: function() {
       this.sceneObject.add(this.axis);
