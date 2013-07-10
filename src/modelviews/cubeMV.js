@@ -117,9 +117,9 @@ define([
     translate: function(translation) {
       if (!this.startOrigin) {
         this.startOrigin = {
-          x: this.origin.parameters.coordinate.x,
-          y: this.origin.parameters.coordinate.y,
-          z: this.origin.parameters.coordinate.z,
+          x: geometryGraph.evaluate(this.origin.parameters.coordinate.x),
+          y: geometryGraph.evaluate(this.origin.parameters.coordinate.y),
+          z: geometryGraph.evaluate(this.origin.parameters.coordinate.z),
         }
         this.startRotationCenter = {
           x: this.vertex.transforms.rotation.origin.x,
@@ -127,14 +127,47 @@ define([
           z: this.vertex.transforms.rotation.origin.z, 
         }
       }
-      this.origin.parameters.coordinate.x = this.startOrigin.x + translation.x;
-      this.origin.parameters.coordinate.y = this.startOrigin.y + translation.y;
-      this.origin.parameters.coordinate.z = this.startOrigin.z + translation.z;
+      this.origin.parameters.coordinate = {
+        x: this.startOrigin.x + translation.x,
+        y: this.startOrigin.y + translation.y,
+        z: this.startOrigin.z + translation.z,
+      }
       this.vertex.transforms.rotation.origin =  {
         x: this.startRotationCenter.x + translation.x,
         y: this.startRotationCenter.y + translation.y,
         z: this.startRotationCenter.z + translation.z,
       };
+      this.origin.trigger('change', this.origin);
+    },
+
+    scale: function(factor) {
+      if (!this.startOrigin) {
+        this.startOrigin = {
+          x: geometryGraph.evaluate(this.origin.parameters.coordinate.x),
+          y: geometryGraph.evaluate(this.origin.parameters.coordinate.y),
+          z: geometryGraph.evaluate(this.origin.parameters.coordinate.z),
+        };
+        this.startWidth = geometryGraph.evaluate(this.vertex.parameters.width);
+        this.startDepth = geometryGraph.evaluate(this.vertex.parameters.depth);
+        this.startHeight = geometryGraph.evaluate(this.vertex.parameters.height);
+        this.scaleCenter = {
+          x: this.startOrigin.x + this.startWidth/2,
+          y: this.startOrigin.y + this.startDepth/2,
+          z: 0,
+        };
+      }
+
+      this.origin.parameters.coordinate = {
+        x: Math.round((this.scaleCenter.x - (this.scaleCenter.x - this.startOrigin.x)*factor)*10)/10,
+        y: Math.round((this.scaleCenter.y - (this.scaleCenter.y - this.startOrigin.y)*factor)*10)/10,
+        z: Math.round((this.scaleCenter.z - (this.scaleCenter.z - this.startOrigin.z)*factor)*10)/10,
+      }
+      this.vertex.parameters.width = this.startWidth*factor;
+      this.vertex.parameters.depth = this.startDepth*factor;
+      this.vertex.parameters.height = this.startHeight*factor;
+
+      // Origin point change event will cascade up to the cube vertex
+      // so only one trigger is necessary
       this.origin.trigger('change', this.origin);
     },
 

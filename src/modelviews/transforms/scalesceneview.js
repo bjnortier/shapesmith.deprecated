@@ -135,15 +135,9 @@ define([
         console.log(this.initialDistance);
       } else {
 
-        var round = function(value, tolerance) {
-          return Math.round(value*tolerance)/tolerance;
-        };
-
         var distance = new THREE.Vector3().subVectors(
           position, this.centerOnWorkplane).length();
-
-        var scale = round(distance/this.initialDistance, 10);
-        console.log(scale);
+        var scale = Math.round(distance/this.initialDistance*10)/10;
 
         var that = this;
         [
@@ -162,7 +156,7 @@ define([
         this.boundary.geometry.vertices[4] = this.boundary.geometry.vertices[0]; 
         this.boundary.geometry.verticesNeedUpdate = true;
         sceneModel.view.updateScene = true;
-      // this.editingModel.translate(translation);
+        this.editingModel.scale(scale);
       }
     
     },
