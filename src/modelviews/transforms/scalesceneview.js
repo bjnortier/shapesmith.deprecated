@@ -24,6 +24,10 @@ define([
     highlightLineColor: 0xcc3333,
 
     initialize: function() {
+      var extents = this.model.selectedModel.getExtents();
+      this.center = extents.center;
+      this.center.z = 0;
+
       TransformSceneView.prototype.initialize.call(this);
     },
 
@@ -128,6 +132,7 @@ define([
     drag: function(position) {
       var extents = this.model.selectedModel.getExtents();
       if (!this.initialPosition) {
+        this.initialScale = this.model.vertex.transforms.scale.factor;
         this.initialPosition = position;
         this.centerOnWorkplane = new THREE.Vector3(extents.center.x, extents.center.y, 0);
         this.initialDistance = new THREE.Vector3().subVectors(
@@ -156,7 +161,11 @@ define([
         this.boundary.geometry.vertices[4] = this.boundary.geometry.vertices[0]; 
         this.boundary.geometry.verticesNeedUpdate = true;
         sceneModel.view.updateScene = true;
-        this.editingModel.scale(scale);
+
+        // The scale factor parameter is relative to the previous scale
+        this.editingModel.scale(
+          this.center,
+          Math.round(this.initialScale*scale*10)/10);
       }
     
     },

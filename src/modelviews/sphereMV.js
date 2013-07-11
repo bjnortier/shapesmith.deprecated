@@ -96,6 +96,33 @@ define([
 
     },
 
+    translate: function(translation) {
+      if (!this.startOrigin) {
+        this.startOrigin = {
+          x: this.origin.parameters.coordinate.x,
+          y: this.origin.parameters.coordinate.y,
+          z: this.origin.parameters.coordinate.z,
+        }
+      }
+      this.origin.parameters.coordinate.x = this.startOrigin.x + translation.x;
+      this.origin.parameters.coordinate.y = this.startOrigin.y + translation.y;
+      this.origin.parameters.coordinate.z = this.startOrigin.z + translation.z;
+      this.origin.trigger('change', this.origin);
+    },
+
+    scale: function(factor) {
+      if (!this.startOrigin) {
+        this.startOrigin = {
+          x: geometryGraph.evaluate(this.origin.parameters.coordinate.x),
+          y: geometryGraph.evaluate(this.origin.parameters.coordinate.y),
+          z: geometryGraph.evaluate(this.origin.parameters.coordinate.z),
+        };
+        this.startRadius = geometryGraph.evaluate(this.vertex.parameters.radius);
+      }
+      this.vertex.parameters.radius = this.startRadius*factor;
+      this.vertex.trigger('change', this.vertex);
+    },
+
     workplanePositionChanged: function(position, event) {
       if (this.vertex.proto) {
         // Center
@@ -138,20 +165,6 @@ define([
       } else {
         this.tryCommit();
       }
-    },
-
-    translate: function(translation) {
-      if (!this.startOrigin) {
-        this.startOrigin = {
-          x: this.origin.parameters.coordinate.x,
-          y: this.origin.parameters.coordinate.y,
-          z: this.origin.parameters.coordinate.z,
-        }
-      }
-      this.origin.parameters.coordinate.x = this.startOrigin.x + translation.x;
-      this.origin.parameters.coordinate.y = this.startOrigin.y + translation.y;
-      this.origin.parameters.coordinate.z = this.startOrigin.z + translation.z;
-      this.origin.trigger('change', this.origin);
     },
 
     updateHint: function() {

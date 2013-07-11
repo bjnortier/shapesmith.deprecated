@@ -68,11 +68,15 @@ define([
     this.transforming = options.transforming || false;
     this.transforms = options.transforms || {
       rotation: {
-      origin: {x: 0, y:0, z: 0},
-      axis: {x: 0, y:0, z:1},
-      angle: 0,
+        origin: {x: 0, y:0, z: 0},
+        axis: {x: 0, y:0, z:1},
+        angle: 0,
       },
       translation: {x: 0, y:0, z:0},
+      scale: {
+        origin: {x: 0, y:0, z: 0},
+        factor: 1,
+      }
     };
     this.parameters = options.parameters || {};
     this.editing = options.editing || false;

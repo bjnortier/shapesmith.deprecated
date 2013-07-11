@@ -59,6 +59,14 @@ define([
       this.vertex.trigger('change', this.vertex);
     },
 
+    scale: function(origin, factor) {
+      this.vertex.transforms.scale.origin.x = origin.x;
+      this.vertex.transforms.scale.origin.y = origin.y;
+      this.vertex.transforms.scale.origin.z = origin.z;
+      this.vertex.transforms.scale.factor = factor;
+      this.vertex.trigger('change', this.vertex);
+    },
+
   });
 
   var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
@@ -86,7 +94,7 @@ define([
       GeomVertexMV.EditingDOMView.prototype.update.call(this);
 
       var that = this;
-      var translate = this.model.vertex.transforms.translate || {x:0, y:0, z:0};
+      var translate = this.model.vertex.transforms.translation;
       ['x', 'y', 'z'].forEach(function(key) {
         that.$el.find('.field.d' + key).val(translate[key]);
       });
@@ -96,7 +104,7 @@ define([
       GeomVertexMV.EditingDOMView.prototype.updateFromDOM.call(this);
       
       var that = this;
-      var translate = this.model.vertex.transforms.translate || {x:0, y:0, z:0};
+      var translate = this.model.vertex.transforms.translation;
       ['x', 'y', 'z'].forEach(function(key) {
         try {
           var expression = that.$el.find('.field.d' + key).val();

@@ -24,6 +24,7 @@ define([
       this.circleAndArrow.rotation.y = Math.PI/2;
       this.circleAndArrow.rotation.x = Math.PI/2;
     },
+    
     relativeRotationAxis: new THREE.Vector3(1,0,0),
 
   });

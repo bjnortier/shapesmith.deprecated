@@ -249,8 +249,8 @@
       polygons.forEach(function(coordinates, i) {
 
         // Remove degenerates
-        var coordinates = coordinates.reduce(function(acc, c, i) {
-          if (i === 0) {
+        var coordinates = coordinates.reduce(function(acc, c, j) {
+          if (j === 0) {
             return acc.concat(c);
           } else if (new THREE.Vector3().subVectors(c,acc[acc.length-1]).length() > 0.000000001) {
             return acc.concat(c);
@@ -417,7 +417,8 @@
         '<div>axisx <input class="field axisx" type="text" value="{{axisx}}"></input></div>' +
         '<div>axisy <input class="field axisy" type="text" value="{{axisy}}"></input></div>' +
         '<div>axisz <input class="field axisz" type="text" value="{{axisz}}"></input></div>' + 
-        '<div>angle <input class="field angle" type="text" value="{{angle}}"></input></div>';
+        '<div>angle <input class="field angle" type="text" value="{{angle}}"></input></div>' +
+        '<div>scale <input class="field scale" type="text" value="{{scale}}"></input></div>';
 
       var rotation = this.model.vertex.transforms.rotation;
       this.baseView = {
@@ -430,6 +431,7 @@
         axisy: rotation.axis.y,
         axisz: rotation.axis.z,
         angle: rotation.angle,
+        scale: this.model.vertex.transforms.scale.factor,
       }
     },
 
@@ -440,10 +442,12 @@
     update: function() {
       var that = this;
       var rotation = this.model.vertex.transforms.rotation;
+      var scale = this.model.vertex.transforms.scale.factor;
       ['x', 'y', 'z'].forEach(function(key) {
         that.$el.find('.field.axis' + key).val(rotation.axis[key]);
       });
       this.$el.find('.field.angle').val(rotation.angle);
+      this.$el.find('.field.scale').val(scale);
     },
 
     updateFromDOM: function() {
@@ -457,8 +461,8 @@
         }
       });
       try {
-        var expression = that.$el.find('.field.angle').val();
-        that.model.vertex.transforms.rotation.angle = expression;
+        that.model.vertex.transforms.rotation.angle =  that.$el.find('.field.angle').val();;
+        that.model.vertex.transforms.scale.factor =  that.$el.find('.field.scale').val();;
       } catch(e) {
         console.error(e);
       }
@@ -756,13 +760,13 @@
   // ---------- Module ----------
 
   return {
-    SceneView    : SceneView,
-    EditingModel   : EditingModel,
-    EditingDOMView   : EditingDOMView,
-    EditingSceneView : EditingSceneView,
-    DisplayModel   : DisplayModel, 
-    DisplayDOMView   : DisplayDOMView,
-    DisplaySceneView : DisplaySceneView,
+    SceneView       : SceneView,
+    EditingModel    : EditingModel,
+    EditingDOMView  : EditingDOMView,
+    EditingSceneView: EditingSceneView,
+    DisplayModel    : DisplayModel, 
+    DisplayDOMView  : DisplayDOMView,
+    DisplaySceneView: DisplaySceneView,
   }
 
 });
