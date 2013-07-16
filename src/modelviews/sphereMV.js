@@ -110,7 +110,7 @@ define([
       this.origin.trigger('change', this.origin);
     },
 
-    scale: function(factor) {
+    scale: function(origin, factor) {
       if (!this.startOrigin) {
         this.startOrigin = {
           x: geometryGraph.evaluate(this.origin.parameters.coordinate.x),
