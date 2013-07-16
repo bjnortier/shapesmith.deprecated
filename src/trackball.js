@@ -12,8 +12,8 @@ define([
 
         var minDistance = 3;
         var maxDistance = 10000;
-        var position = { azimuth: -Math.PI/2, elevation: 1.08, distance: 1000 };
-        var target = { azimuth: -Math.PI/2, elevation: 1.08, distance: 300, scenePosition: new THREE.Vector3() };
+        var position = { azimuth: Math.PI/4, elevation: 1.08, distance: 1000 };
+        var target = { azimuth: Math.PI/4, elevation: 1.08, distance: 300, scenePosition: new THREE.Vector3() };
         var targetCameraPosition = camera.position.clone();
         var lastMousePosition = undefined;
         var targetOnDown = undefined;

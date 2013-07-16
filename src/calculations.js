@@ -46,7 +46,7 @@ define([], function() {
         return rotateAroundAxis(worldPosition, axis, -workplaneVertex.workplane.angle);
     }
 
-    function positionOnPlane(sceneElement, event, origin, normal, camera) {
+    var positionOnPlane = function(sceneElement, event, origin, normal, camera) {
         var mouse = {};
         mouse.x = (event.offsetX / sceneElement.innerWidth()) * 2 - 1;
         mouse.y = -(event.offsetY / sceneElement.innerHeight()) * 2 + 1;

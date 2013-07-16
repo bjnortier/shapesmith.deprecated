@@ -6,6 +6,7 @@ define([
         'lib/text!icons/subtract.svg',
         'lib/text!icons/cog.svg',
         'lib/text!icons/tag.svg',
+        'lib/text!icons/save.svg',
         'lib/text!icons/list.svg',
     ], 
     function(
@@ -16,6 +17,7 @@ define([
         subtract,
         cog,
         tag,
+        save,
         list) {
 
     return {
@@ -26,6 +28,7 @@ define([
         subtract : subtract,
         cog      : cog,
         tag      : tag,
+        save     : save,
         list     : list,
     }
 

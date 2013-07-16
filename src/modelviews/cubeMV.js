@@ -1,257 +1,359 @@
 define([
-        'jquery',
-        'lib/jquery.mustache',
-        'calculations',
-        'worldcursor',
-        'scene',
-        'geometrygraphsingleton',
-        'modelviews/geomvertexMV', 
-        'modelviews/pointMV', 
-        'heightanchorview',
-        'asyncAPI',
-        'latheapi/normalize',
-        
-    ], 
-    function(
-        $, __$,
-        calc,
-        worldCursor,
-        sceneModel,
-        geometryGraph,
-        GeomVertexMV,
-        PointMV,
-        EditingHeightAnchor,
-        AsyncAPI,
-        Normalize) {
+    'jquery',
+    'lib/jquery.mustache',
+    'calculations',
+    'worldcursor',
+    'scene',
+    'selection',
+    'geometrygraphsingleton',
+    'modelviews/geomvertexMV', 
+    'modelviews/pointMV', 
+    'modelviews/heightanchorview',
+    'modelviews/heightOnWidthDepthAnchorView',
+    'modelviews/widthdepthcornerview',
+    'asyncAPI',
+    'latheapi/normalize',
+    
+  ], 
+  function(
+    $, __$,
+    calc,
+    worldCursor,
+    sceneModel,
+    selection,
+    geometryGraph,
+    GeomVertexMV,
+    PointMV,
+    OriginHeightAnchor,
+    CornerEditingHeightAnchor,
+    WidthDepthCornerView,
+    AsyncAPI,
+    Normalize) {
 
-    // ---------- Common ----------
+  // ---------- Common ----------
 
-    var SceneViewMixin = {
+  var SceneViewMixin = {
 
-        render: function() {
-            GeomVertexMV.SceneView.prototype.render.call(this);
+    render: function() {
+      GeomVertexMV.SceneView.prototype.render.call(this);
 
-            var points = geometryGraph.childrenOf(this.model.vertex).filter(function(v) {
-                return v.type === 'point'
-            });
-            if (points.length !== 2) {
-                return;
-            }
+      var points = geometryGraph.childrenOf(this.model.vertex).filter(function(v) {
+        return v.type === 'point'
+      });
+      if (points.length !== 1) {
+        return;
+      }
 
-            var materials;
-            if (this.model.vertex.editing) {
-                materials = [
-                    this.materials.editing.face, 
-                    this.materials.editing.wire
-                ]
-            } else {
-                materials = [
-                    this.materials.normal.face, 
-                    this.materials.normal.wire
-                ]
-            }
+      var materials;
+      if (this.model.vertex.editing) {
+        materials = [
+          this.materials.editing.face, 
+          this.materials.editing.wire
+        ]
+      } else {
+        materials = [
+          this.materials.normal.face, 
+          this.materials.normal.wire
+        ]
+      }
 
-            var dimensions = Normalize.normalizeVertex(this.model.vertex);
-            var position = new THREE.Vector3(dimensions.x, dimensions.y, dimensions.z);
+      var dimensions = Normalize.normalizeVertex(this.model.vertex);
+      var position = new THREE.Vector3(dimensions.x, dimensions.y, dimensions.z);
 
-            var cube = THREE.SceneUtils.createMultiMaterialObject(
-                new THREE.CubeGeometry(dimensions.w, dimensions.d, dimensions.h),
-                materials);
-            cube.position = position.add(new THREE.Vector3(
-                dimensions.w/2, dimensions.d/2, dimensions.h/2));
-            this.sceneObject.add(cube);
-        },
+      var cube = THREE.SceneUtils.createMultiMaterialObject(
+        new THREE.CubeGeometry(dimensions.w, dimensions.d, dimensions.h),
+        materials);
+      cube.position = position.add(new THREE.Vector3(
+        dimensions.w/2, dimensions.d/2, dimensions.h/2));
+      this.sceneObject.add(cube);
+    },
 
-    }
+  }
 
-    // ---------- Editing ----------
+  // ---------- Editing ----------
 
-    var EditingModel = GeomVertexMV.EditingModel.extend({
+  var EditingModel = GeomVertexMV.EditingModel.extend({
 
-        initialize: function(options) {
-            this.DOMView = EditingDOMView;
-            this.SceneView = EditingSceneView;
-            GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
+    initialize: function(options) {
+      this.DOMView = EditingDOMView;
+      this.SceneView = EditingSceneView;
+      GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
 
-            var points = geometryGraph.childrenOf(this.vertex).filter(function(v) {
-                return v.type === 'point'
-            });
+      this.origin = geometryGraph.childrenOf(this.vertex).filter(function(v) {
+        return v.type === 'point'
+      })[0];
 
-            // Create the child models
-            var that = this;
-            if (this.vertex.proto) {
-                this.stage = 0;
-                this.updateHint();
-                this.activePoint = points[0];
-                this.activePoint.active = true;
-            } else {
-                this.originalImplicitChildren = geometryGraph.childrenOf(this.vertex).filter(function(v) {
-                    return v.implicit;
-                })
-                this.editingImplicitChildren = [];
-                this.editingImplicitChildren = this.originalImplicitChildren.map(function(child, i) {
-                    var editing = AsyncAPI.edit(child);
-                    that.views.push(new EditingHeightAnchor({
-                        model: that, 
-                        heightKey: 'height',
-                        pointVertex: editing
-                    }));
-                    return editing;
-                })
-            }
+      // Create the child models
+      var that = this;
+      if (this.vertex.proto) {
+        this.stage = 0;
+        this.updateHint();
+      } else {
+        this.originalImplicitChildren = [this.origin];
+        this.origin = AsyncAPI.edit(this.origin);
+        this.editingImplicitChildren = [this.origin];
 
-        },
+        if (!this.vertex.transforming) {
+          that.views.push(new OriginHeightAnchor({
+            model: that, 
+            heightKey: 'height',
+            pointVertex: this.origin,
+          }));
 
-        workplanePositionChanged: function(position, event) {
-            if (this.vertex.proto) {
-                if (this.activePoint) {
-                    this.activePoint.parameters.coordinate.x = position.x;
-                    this.activePoint.parameters.coordinate.y = position.y;
-                    this.activePoint.parameters.coordinate.z = position.z;
-                    this.activePoint.trigger('change', this.activePoint);            
-                } else if (this.activeHeightAnchor) {
-                    this.activeHeightAnchor.drag(position, undefined, event);
-                }
-            }
-        },
-
-        sceneViewClick: function(viewAndEvent) {
-            if (this.vertex.proto) {
-                this.workplaneClick(worldCursor.lastPosition);
-            }
-        },
-
-        workplaneClick: function(position) {
-            if (this.vertex.proto) {
-                if (this.stage === 0) {
-                    this.addPoint(position);
-                    ++this.stage;
-                    this.updateHint();
-                } else if (this.stage === 1) {
-                    ++this.stage;
-                    this.activeHeightAnchor = new EditingHeightAnchor({
-                        model: this, 
-                        heightKey: 'height',
-                        pointVertex: this.activePoint
-                    });
-                    this.activeHeightAnchor.dragStarted();
-                    this.activeHeightAnchor.isDraggable = function() {
-                        return false;
-                    };
-                    this.views.push(this.activeHeightAnchor);
-                    delete this.activePoint;
-                    this.updateHint();
-                } else if (this.stage === 2) {
-                    this.tryCommit();
-                }
-            } else {
-                this.tryCommit();
-            }
-        },
-
-        addPoint: function(position) {
-            var point = geometryGraph.addPointToParent(this.vertex);
-            this.activePoint = point;
-            this.activePoint.active = true;
-            this.workplanePositionChanged(position);
-        },
-
-        updateHint: function() {
-            if (this.vertex.proto) {
-                switch(this.stage) {
-                    case 0: 
-                        this.hintView.set('Click to add a corner.');
-                        break;
-                    case 1:
-                        this.hintView.set('Click to add a corner diagonally opposite.');
-                        break;
-                    case 2:
-                        this.hintView.set('Click to set the height.');
-                        break;
-                }
-            }
-        },
-
-    });
-
-    var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
-
-        render: function() {
-            GeomVertexMV.EditingDOMView.prototype.render.call(this);
-            var template = 
-                this.beforeTemplate +
-                '<div>' + 
-                'height <input class="field height" type="text" value="{{height}}"></input>' +
-                '</div>' +
-                this.afterTemplate;
-                
-            var view = _.extend(this.baseView, {
-                height : this.model.vertex.parameters.height,
-            });
-            this.$el.html($.mustache(template, view));
-            return this;
-        },
-
-        update: function() {
-            var that = this;
-            ['height'].forEach(function(key) {
-                that.$el.find('.field.' + key).val(
-                    that.model.vertex.parameters[key]);
-            });
-        },
-
-        updateFromDOM: function() {
-            var that = this;
-            ['height'].forEach(function(key) {
-                try {
-                    var expression = that.$el.find('.field.' + key).val();
-                    that.model.vertex.parameters[key] = expression;
-                } catch(e) {
-                    console.error(e);
-                }
-            });
-            this.model.vertex.trigger('change', this.model.vertex);
+          that.views.push(new CornerEditingHeightAnchor({
+            model: this, 
+            heightKey: 'height',
+            origin: this.origin,
+            vertex: this.vertex,
+          }));
+          that.views.push(new WidthDepthCornerView({
+            model: this,
+          }))
         }
+      }
 
-    }); 
+    },
 
+    translate: function(translation) {
+      if (!this.startOrigin) {
+        this.startOrigin = {
+          x: geometryGraph.evaluate(this.origin.parameters.coordinate.x),
+          y: geometryGraph.evaluate(this.origin.parameters.coordinate.y),
+          z: geometryGraph.evaluate(this.origin.parameters.coordinate.z),
+        }
+        this.startRotationCenter = {
+          x: this.vertex.transforms.rotation.origin.x,
+          y: this.vertex.transforms.rotation.origin.y,
+          z: this.vertex.transforms.rotation.origin.z, 
+        }
+      }
+      this.origin.parameters.coordinate = {
+        x: this.startOrigin.x + translation.x,
+        y: this.startOrigin.y + translation.y,
+        z: this.startOrigin.z + translation.z,
+      }
+      this.vertex.transforms.rotation.origin =  {
+        x: this.startRotationCenter.x + translation.x,
+        y: this.startRotationCenter.y + translation.y,
+        z: this.startRotationCenter.z + translation.z,
+      };
+      this.origin.trigger('change', this.origin);
+    },
 
-    var EditingSceneView = GeomVertexMV.EditingSceneView.extend(SceneViewMixin);
+    scale: function(origin, factor) {
+      if (!this.startOrigin) {
+        this.startOrigin = {
+          x: geometryGraph.evaluate(this.origin.parameters.coordinate.x),
+          y: geometryGraph.evaluate(this.origin.parameters.coordinate.y),
+          z: geometryGraph.evaluate(this.origin.parameters.coordinate.z),
+        };
+        this.startWidth = geometryGraph.evaluate(this.vertex.parameters.width);
+        this.startDepth = geometryGraph.evaluate(this.vertex.parameters.depth);
+        this.startHeight = geometryGraph.evaluate(this.vertex.parameters.height);
+        this.scaleCenter = {
+          x: this.startOrigin.x + this.startWidth/2,
+          y: this.startOrigin.y + this.startDepth/2,
+          z: 0,
+        };
+      }
 
-    // ---------- Display ----------
+      this.origin.parameters.coordinate = {
+        x: Math.round((this.scaleCenter.x - (this.scaleCenter.x - this.startOrigin.x)*factor)*10)/10,
+        y: Math.round((this.scaleCenter.y - (this.scaleCenter.y - this.startOrigin.y)*factor)*10)/10,
+        z: Math.round((this.scaleCenter.z - (this.scaleCenter.z - this.startOrigin.z)*factor)*10)/10,
+      }
+      this.vertex.parameters.width = this.startWidth*factor;
+      this.vertex.parameters.depth = this.startDepth*factor;
+      this.vertex.parameters.height = this.startHeight*factor;
 
-    var DisplayModel = GeomVertexMV.DisplayModel.extend({
+      // Origin point change event will cascade up to the cube vertex
+      // so only one trigger is necessary
+      this.origin.trigger('change', this.origin);
+    },
 
-        initialize: function(options) {
-            this.SceneView = DisplaySceneView;
-            GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
-        },
+    workplanePositionChanged: function(position, event) {
+      if (this.vertex.proto) {
+        if (this.stage === 0) {
+          this.origin.parameters.coordinate.x = position.x;
+          this.origin.parameters.coordinate.y = position.y;
+          this.origin.parameters.coordinate.z = position.z;
+          this.origin.trigger('change', this.origin);
+        } else if (this.stage === 1) {  
+          this.vertex.parameters.width = position.x - this.origin.parameters.coordinate.x;
+          this.vertex.parameters.depth = position.y - this.origin.parameters.coordinate.y;
+          this.vertex.trigger('change', this.vertex);
+        } else if (this.stage === 2) {
+          this.heightAnchor.drag(position, undefined, event);
+        }
+      }
+    },
 
-        destroy: function() {
-            GeomVertexMV.DisplayModel.prototype.destroy.call(this);
-        },
+    sceneViewClick: function(viewAndEvent) {
+      if (this.vertex.proto) {
+        this.workplaneClick(worldCursor.lastPosition);
+      }
+    },
 
-    });
+    workplaneClick: function(position) {
+      if (this.vertex.proto) {
+        if (this.stage === 0) {
+          ++this.stage;
 
-    var DisplaySceneView = GeomVertexMV.DisplaySceneView.extend(SceneViewMixin).extend({
+          this.widthDepthCornerView = new WidthDepthCornerView({
+            model: this, 
+          });
+          this.widthDepthCornerView.dragStarted();
+          this.widthDepthCornerView.isDraggable = function() {
+            return false;
+          };
+          this.views.push(this.widthDepthCornerView);
 
-        render: function() {
-            GeomVertexMV.DisplaySceneView.prototype.render.call(this);
-            var that = this;
-            this.createMesh(function(result) {
-                that.renderMesh(result);
-            });
-        },
+          this.updateHint();
 
-    })
+        } else if (this.stage === 1) {
+          ++this.stage;
 
+          this.heightAnchor = new CornerEditingHeightAnchor({
+            model: this, 
+            heightKey: 'height',
+            origin: this.origin,
+            vertex: this.vertex,
+          });
+          this.heightAnchor.dragStarted();
+          this.heightAnchor.isDraggable = function() {
+            return false;
+          };
+          this.views.push(this.heightAnchor);
+          delete this.activePoint;
+          this.updateHint();
 
+        } else if (this.stage === 2) {
+          this.tryCommit();
+        }
+      } else {
+        this.tryCommit();
+      }
+    },
 
-    // ---------- Module ----------
+    addPoint: function(position) {
+      var point = geometryGraph.addPointToParent(this.vertex);
+      this.activePoint = point;
+      this.activePoint.active = true;
+      this.workplanePositionChanged(position);
+    },
 
-    return {
-        EditingModel: EditingModel,
-        DisplayModel: DisplayModel,
+    updateHint: function() {
+      if (this.vertex.proto) {
+        switch(this.stage) {
+          case 0: 
+            this.hintView.set('Click to add a corner.');
+            break;
+          case 1:
+            this.hintView.set('Click to add a corner diagonally opposite.');
+            break;
+          case 2:
+            this.hintView.set('Click to set the height.');
+            break;
+        }
+      }
+    },
+
+  });
+
+  var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
+
+    render: function() {
+      GeomVertexMV.EditingDOMView.prototype.render.call(this);
+      var template = 
+        this.beforeTemplate +
+        '<div>width  <input class="field width" type="text" value="{{width}}"></input></div>' +
+        '<div>depth  <input class="field depth" type="text" value="{{depth}}"></input></div>' +
+        '<div>height <input class="field height" type="text" value="{{height}}"></input></div>' +
+        this.afterTemplate;
+        
+      var translate = this.model.vertex.transforms.translate || {x:0, y:0, z:0};
+      var view = _.extend(this.baseView, {
+        width  : this.model.vertex.parameters.width,
+        depth  : this.model.vertex.parameters.depth,
+        height : this.model.vertex.parameters.height,
+      });
+      this.$el.html($.mustache(template, view));
+      return this;
+    },
+
+    update: function() {
+      GeomVertexMV.EditingDOMView.prototype.update.call(this);
+      var that = this;
+      ['width', 'depth', 'height'].forEach(function(key) {
+        that.$el.find('.field.' + key).val(that.model.vertex.parameters[key]);
+      });
+    },
+
+    updateFromDOM: function() {
+      GeomVertexMV.EditingDOMView.prototype.updateFromDOM.call(this);
+      var that = this;
+      ['width', 'depth', 'height'].forEach(function(key) {
+        try {
+          var expression = that.$el.find('.field.' + key).val();
+          that.model.vertex.parameters[key] = expression;
+        } catch(e) {
+          console.error(e);
+        }
+      });
+      this.model.vertex.trigger('change', this.model.vertex);
     }
+
+  }); 
+
+
+  var EditingSceneView = GeomVertexMV.EditingSceneView.extend({
+
+    render: function() {
+      if (this.model.vertex.transforming) {
+        GeomVertexMV.EditingSceneView.prototype.render.call(this);
+        var that = this;
+        this.createMesh(function(result) {
+          that.renderMesh(result);
+        });
+      } else {
+        SceneViewMixin.render.call(this);
+      }
+    },
+
+  });
+
+  // ---------- Display ----------
+
+  var DisplayModel = GeomVertexMV.DisplayModel.extend({
+
+    initialize: function(options) {
+      this.SceneView = DisplaySceneView;
+      GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
+    },
+
+    destroy: function() {
+      GeomVertexMV.DisplayModel.prototype.destroy.call(this);
+    },
+
+  });
+
+  var DisplaySceneView = GeomVertexMV.DisplaySceneView.extend(SceneViewMixin).extend({
+
+    render: function() {
+      GeomVertexMV.DisplaySceneView.prototype.render.call(this);
+      var that = this;
+      this.createMesh(function(result) {
+        that.renderMesh(result);
+      });
+    },
+
+  })
+
+  // ---------- Module ----------
+
+  return {
+    EditingModel: EditingModel,
+    DisplayModel: DisplayModel,
+  }
 
 });

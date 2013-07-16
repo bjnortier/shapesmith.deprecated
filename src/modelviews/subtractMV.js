@@ -1,96 +1,167 @@
 define([
-        'jquery',
-        'lib/jquery.mustache',
-        'calculations',
-        'worldcursor',
-        'scene',
-        'geometrygraphsingleton',
-        'modelviews/geomvertexMV', 
-        'asyncAPI',
-    ], 
-    function(
-        $, __$,
-        calc,
-        worldCursor,
-        sceneModel,
-        geometryGraph,
-        GeomVertexMV,
-        AsyncAPI) {
+    'jquery',
+    'lib/jquery.mustache',
+    'calculations',
+    'worldcursor',
+    'scene',
+    'geometrygraphsingleton',
+    'modelviews/geomvertexMV', 
+    'asyncAPI',
+  ], 
+  function(
+    $, __$,
+    calc,
+    worldCursor,
+    sceneModel,
+    geometryGraph,
+    GeomVertexMV,
+    AsyncAPI) {
 
-    // ---------- Editing ----------
+  // ---------- Editing ----------
 
-    var EditingModel = GeomVertexMV.EditingModel.extend({
+  var EditingModel = GeomVertexMV.EditingModel.extend({
 
-        initialize: function(options) {
-            this.DOMView = EditingDOMView;
-            this.SceneView = EditingSceneView;
-            GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
-        },
+    initialize: function(options) {
+      this.DOMView = EditingDOMView;
+      this.SceneView = EditingSceneView;
+      GeomVertexMV.EditingModel.prototype.initialize.call(this, options);
+    },
 
-        workplaneClick: function(position) {
-            if (!this.vertex.proto) {
-                this.tryCommit();
-            }
-        },
+    workplaneClick: function(position) {
+      if (!this.vertex.proto) {
+        this.tryCommit();
+      }
+    },
 
-    });
+    translate: function(translation) {
+      if (!this.startOrigin) {
+        this.startOrigin = {
+          x: this.vertex.transforms.translation.x,
+          y: this.vertex.transforms.translation.y,
+          z: this.vertex.transforms.translation.z,
+        }
+        this.startRotationCenter = {
+          x: this.vertex.transforms.rotation.origin.x,
+          y: this.vertex.transforms.rotation.origin.y,
+          z: this.vertex.transforms.rotation.origin.z, 
+        }
+      }
+      this.vertex.transforms.translation =  {
+        x: this.startOrigin.x + translation.x,
+        y: this.startOrigin.y + translation.y,
+        z: this.startOrigin.z + translation.z,
+      };
+      this.vertex.transforms.rotation.origin =  {
+        x: this.startRotationCenter.x + translation.x,
+        y: this.startRotationCenter.y + translation.y,
+        z: this.startRotationCenter.z + translation.z,
+      };
+      this.vertex.trigger('change', this.vertex);
+    },
 
-    var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
+    scale: function(origin, factor) {
+      this.vertex.transforms.scale.origin.x = origin.x;
+      this.vertex.transforms.scale.origin.y = origin.y;
+      this.vertex.transforms.scale.origin.z = origin.z;
+      this.vertex.transforms.scale.factor = factor;
+      this.vertex.trigger('change', this.vertex);
+    },
 
-        render: function() {
-            GeomVertexMV.EditingDOMView.prototype.render.call(this);
-            var template = 
-                this.beforeTemplate +
-                this.afterTemplate;
-            var view = this.baseView;
-            this.$el.html($.mustache(template, view));
-            return this;
-        },
+  });
 
-    });
+  var EditingDOMView = GeomVertexMV.EditingDOMView.extend({
 
-    var EditingSceneView = GeomVertexMV.EditingSceneView.extend({
+    render: function() {
+      GeomVertexMV.EditingDOMView.prototype.render.call(this);
+      var template = 
+        this.beforeTemplate +
+        '<div>dx<input class="field dx" type="text" value="{{dx}}"></input></div>' +
+        '<div>dy<input class="field dy" type="text" value="{{dy}}"></input></div>' +
+        '<div>dz<input class="field dz" type="text" value="{{dz}}"></input></div>' + 
+        this.afterTemplate;
 
-        render: function() {
-            this.renderMesh();
-        },
+      var translation = this.model.vertex.transforms.translation;
+      var view = _.extend(this.baseView, {
+        dx     : translation.x,
+        dy     : translation.y,
+        dz     : translation.z,
+      });
+      this.$el.html($.mustache(template, view));
+      return this;
+    },
 
-    });
+    update: function() {
+      GeomVertexMV.EditingDOMView.prototype.update.call(this);
 
-    // ---------- Display ----------
+      var that = this;
+      var translate = this.model.vertex.transforms.translation;
+      ['x', 'y', 'z'].forEach(function(key) {
+        that.$el.find('.field.d' + key).val(translate[key]);
+      });
+    },
 
-    var DisplayModel = GeomVertexMV.DisplayModel.extend({
+    updateFromDOM: function() {
+      GeomVertexMV.EditingDOMView.prototype.updateFromDOM.call(this);
+      
+      var that = this;
+      var translate = this.model.vertex.transforms.translation;
+      ['x', 'y', 'z'].forEach(function(key) {
+        try {
+          var expression = that.$el.find('.field.d' + key).val();
+          translate[key] = expression;
+        } catch(e) {
+          console.error(e);
+        }
+      });
+      this.model.vertex.trigger('change', this.model.vertex);
+    },
 
-        initialize: function(options) {
-            this.SceneView = DisplaySceneView;
-            GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
-        },
+  });
 
-        destroy: function() {
-            GeomVertexMV.DisplayModel.prototype.destroy.call(this);
-        },
+  var EditingSceneView = GeomVertexMV.EditingSceneView.extend({
 
-    });
+    render: function() {
+      GeomVertexMV.EditingSceneView.prototype.render.call(this);
+      var that = this;
+      this.createMesh(function(result) {
+        that.renderMesh(result);
+      });
+    },
 
-    var DisplaySceneView = GeomVertexMV.DisplaySceneView.extend({
+  });
 
-        render: function() {
-            GeomVertexMV.DisplaySceneView.prototype.render.call(this);
-            var that = this;
-            this.createMesh(function(result) {
-                that.renderMesh(result);
-            });
-        },
+  // ---------- Display ----------
 
-    });
+  var DisplayModel = GeomVertexMV.DisplayModel.extend({
 
+    initialize: function(options) {
+      this.SceneView = DisplaySceneView;
+      GeomVertexMV.DisplayModel.prototype.initialize.call(this, options);
+    },
 
+    destroy: function() {
+      GeomVertexMV.DisplayModel.prototype.destroy.call(this);
+    },
 
-    // ---------- Module ----------
+  });
 
-    return {
-        DisplayModel: DisplayModel,
-        EditingModel: EditingModel,
-    } 
+  var DisplaySceneView = GeomVertexMV.DisplaySceneView.extend({
+
+    render: function() {
+      GeomVertexMV.DisplaySceneView.prototype.render.call(this);
+      var that = this;
+      this.createMesh(function(result) {
+        that.renderMesh(result);
+      });
+    },
+
+  });
+
+  // ---------- Module ----------
+
+  return {
+    DisplayModel: DisplayModel,
+    EditingModel: EditingModel,
+  } 
 
 });

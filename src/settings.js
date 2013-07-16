@@ -8,7 +8,7 @@ define([
     var Model = Backbone.Model.extend({
 
         initialize: function() {
-            this.set('gridsize', 10);
+            this.set('gridsize', 1);
             this.set('snapgrid', true);
             this.set('snapfaces', false);
             this.set('snapedges', false);

@@ -11,10 +11,10 @@ define([
 
     var Model = Toolbar.ItemModel.extend({
 
-        name: 'tag',
+        name: 'save',
 
         initialize: function() {
-            this.icon = icons.tag;
+            this.icon = icons.save;
             Toolbar.ItemModel.prototype.initialize.call(this);
         },
 
@@ -33,9 +33,9 @@ define([
                 data: JSON.stringify({commit: commit, screenshot: screenshot}),
                 success: function(response) {
                     console.info('SAVE: ' + commit);
-                    hintView.set('Saved.');
+                    // hintView.set('Saved.');
                     setTimeout(function() {
-                        hintView.clear();
+                        // hintView.clear();
                     }, 1000);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {

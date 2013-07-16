@@ -22,7 +22,7 @@ body {
 #toolbar {
     margin-left: -174px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.14);
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(220, 220, 220, 0.7);
 }
 
 #toolbar .item {
@@ -194,7 +194,13 @@ input.field[type="text"] {
             >.actions, >.dive {
                 display: inline-block;
                 vertical-align: middle;
-                margin-top: -13px;
+                margin-top: -16px;
+                color: black;
+                font-size: 16px;
+            }
+            >.actions, >.ascend {
+                vertical-align: middle;
+                margin-top: -16px;
                 color: black;
                 font-size: 16px;
             }
@@ -205,7 +211,7 @@ input.field[type="text"] {
                 }
             }
         }
-        .dive {
+        .dive, .ascend {
             margin-right: 5px;
         }
         &:hover {
@@ -235,6 +241,7 @@ input.field[type="text"] {
             }
             >.ascend {
                 display: inline-block;
+                vertical-align: middle;
             }
             >.actions { 
                 // >.showhide, >.delete,  {
