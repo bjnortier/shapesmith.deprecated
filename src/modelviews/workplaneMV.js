@@ -1,4 +1,6 @@
 define([
+    'jquery',
+    'lib/jquery.mustache',
     'colors',
     'calculations', 
     'interactioncoordinator', 
@@ -7,10 +9,11 @@ define([
     'geomnode',
     'geometrygraphsingleton',
     'modelviews/vertexMV',
-    'workplanecoordinator',
     'selection',
     'asyncAPI',
+    'icons',
   ], function(
+    $, _$,
     colors,
     calc, 
     coordinator, 
@@ -19,9 +22,9 @@ define([
     geomNode,
     geometryGraph,
     VertexMV,
-    workplaneCoordinator,
     selection,
-    AsyncAPI) {
+    AsyncAPI,
+    icons) {
 
   var currentDisplayModel = undefined;
 
@@ -29,7 +32,8 @@ define([
 
     initialize: function(options) {
       this.SceneView = GridView;
-      VertexMV.DisplayModel.prototype.initialize.call(this, options);
+      VertexMV.EditingModel.prototype.initialize.call(this, options);
+      this.views.push(new EditingDOMView({model: this}));
     },
     
   });
@@ -42,7 +46,6 @@ define([
       VertexMV.DisplayModel.prototype.initialize.call(this, options);
 
       currentDisplayModel = this;
-      this.renderAtZero = true;
 
       settings.on('change:gridsize', this.gridSizeChanged, this);
       coordinator.on('mousemove', this.mousemove, this);
@@ -52,6 +55,9 @@ define([
       geometryGraph.on('vertexAdded', this.vertexAdded, this);
       geometryGraph.on('vertexRemoved', this.vertexRemoved, this);
       geometryGraph.on('vertexReplaced', this.vertexReplaced, this);
+
+
+      this.views.push(new DisplayDOMView({model: this}));
     },
 
     destroy: function() {
@@ -63,6 +69,7 @@ define([
       geometryGraph.off('vertexAdded', this.vertexAdded, this);
       geometryGraph.off('vertexRemoved', this.vertexRemoved, this);
       geometryGraph.off('vertexReplaced', this.vertexReplaced, this);
+
     },
 
     workplaneClick: function(event) {
@@ -122,18 +129,110 @@ define([
 
   });
 
+  var DisplayDOMView = VertexMV.DisplayDOMView.extend({
+
+    render: function() {
+      this.$el.html($.mustache(
+        '<div class="icon32">{{{icon}}}</div>',
+        {
+          icon: icons.workplane,
+        }));
+      $('#workplane-settings').append(this.$el);
+    },
+
+    events: {
+      'click' : 'click',
+    },
+
+    click: function(event) {
+      event.stopPropagation();
+      if (!geometryGraph.isEditing()) {
+        AsyncAPI.edit(this.model.vertex);
+      }
+    },
+
+  });
+
+  var EditingDOMView = VertexMV.EditingDOMView.extend({
+
+    render: function() {
+      var template = 
+        '<div>origin</div>' +   
+        '<div>' +
+          'x <input class="field originx" type="text" value="{{originx}}"></input>' +
+          'y <input class="field originy" type="text" value="{{originy}}"></input>' +
+          'z <input class="field originz" type="text" value="{{originz}}"></input>' +
+        '</div>' +
+        '<div>axis</div>' +   
+        '<div>' +
+          'x <input class="field axisx" type="text" value="{{axisx}}"></input>' +
+          'y <input class="field axisy" type="text" value="{{axisy}}"></input>' +
+          'z <input class="field axisz" type="text" value="{{axisz}}"></input>' +
+        '</div>' +
+        '<div>angle <input class="field angle" type="text" value="{{angle}}"></input></div>';
+      var parameters = this.model.vertex.workplane;
+      var view = {
+        originx : parameters.origin.x,
+        originy : parameters.origin.y,
+        originz : parameters.origin.z,
+        axisx : parameters.axis.x,
+        axisy : parameters.axis.y,
+        axisz : parameters.axis.z,
+        angle: parameters.angle,
+      };
+      this.$el.html($.mustache(template, view));
+      $('#workplane-settings').append(this.$el);
+      return this;
+    },
+
+    update: function() {
+      var parameters = this.model.vertex.workplane;
+      ['x', 'y', 'z'].forEach(function(key) {
+        this.$el.find('.origin' + key).val(parameters.origin[key]);
+        this.$el.find('.axis' + key).val(parameters.axis[key]);
+      }, this);
+      this.$el.find('.angle').val(parameters.angle);
+    },
+
+    updateFromDOM: function() {
+      var parameters = this.model.vertex.workplane;
+      ['x', 'y', 'z'].forEach(function(key) {
+        var expression;
+        try {
+          expression = this.$el.find('.field.origin' + key).val();
+          parameters.origin[key] = expression;
+
+          expression = this.$el.find('.field.axis' + key).val();
+          parameters.axis[key] = expression;
+
+
+        } catch(e) {
+          console.error(e);
+        }
+      }, this);
+
+      try {
+        var expression = this.$el.find('.field.angle').val();
+        parameters.angle = expression;
+      } catch(e) {
+        console.error(e);
+      }
+      this.model.vertex.trigger('change', this.model.vertex);
+
+    },
+
+  })
+
   var GridView = VertexMV.SceneView.extend({
 
     initialize: function() {
       VertexMV.SceneView.prototype.initialize.call(this);
       this.model.on('change', this.render, this);
-      workplaneCoordinator.on('change', this.render, this);
     },
 
     remove: function() {
       VertexMV.SceneView.prototype.remove.call(this);
       this.model.off('change', this.render, this);
-      workplaneCoordinator.off('change', this.render, this);
     },
     
     render: function() {
@@ -148,7 +247,6 @@ define([
         color: colors.workplane.majorGridLine});
       majorGridLineGeometry.vertices.push(new THREE.Vector3(-Math.floor(boundary/grid)*grid, 0, 0));
       majorGridLineGeometry.vertices.push(new THREE.Vector3(Math.ceil(boundary/grid)*grid, 0, 0));
-
 
       for (var x = -Math.floor(boundary/grid); x <= Math.ceil(boundary/grid); ++x) {
         if ((x % 10 === 0) && (x !== 0)) {
@@ -224,6 +322,16 @@ define([
 
       axes[5].vertices.push(new THREE.Vector3(0, 0, 0));
       axes[5].vertices.push(new THREE.Vector3(0, 0, -5000));
+
+
+      axes.forEach(function(axis) {
+        axis.vertices.forEach(function(vertex) {
+          vertex.add(new THREE.Vector3(
+            this.model.vertex.workplane.origin.x,
+            this.model.vertex.workplane.origin.y,
+            this.model.vertex.workplane.origin.z));
+        }, this);
+      }, this);
 
       this.sceneObject.add(new THREE.Line(axes[0], 
           new THREE.LineBasicMaterial({ color: 0x0000ff }))); 

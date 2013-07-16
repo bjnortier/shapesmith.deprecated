@@ -411,7 +411,7 @@ input.field[type="text"] {
     color: #ff706b;
 }
 
-#geometry .field {
+#geometry .field, #workplane-settings .field {
     margin: 5px;
     padding: 5px;
 }

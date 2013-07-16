@@ -444,13 +444,13 @@ define([
 
 
   return {
-    eventProxy       : eventProxy,
-    Model          : Model,
-    SceneView        : SceneView,
-    EditingModel       : EditingModel,
-    EditingDOMView     : EditingDOMView,
-    DisplayModel       : DisplayModel,
-    DisplayDOMView     : DisplayDOMView
+    eventProxy    : eventProxy,
+    Model         : Model,
+    SceneView     : SceneView,
+    EditingModel  : EditingModel,
+    EditingDOMView: EditingDOMView,
+    DisplayModel  : DisplayModel,
+    DisplayDOMView: DisplayDOMView
   }
 
 });

@@ -8,6 +8,7 @@ define([
         'lib/text!icons/tag.svg',
         'lib/text!icons/save.svg',
         'lib/text!icons/list.svg',
+        'lib/text!icons/workplane.svg',
     ], 
     function(
         point, 
@@ -18,7 +19,8 @@ define([
         cog,
         tag,
         save,
-        list) {
+        list,
+        workplane) {
 
     return {
         point    : point, 
@@ -30,6 +32,7 @@ define([
         tag      : tag,
         save     : save,
         list     : list,
+        workplane: workplane,
     }
 
 });

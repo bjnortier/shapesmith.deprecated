@@ -165,7 +165,7 @@ define([], function() {
     var rotateAroundAxis = function(position, axis, angle) {
         if (angle !== 0) {
             var quaternion = new THREE.Quaternion().setFromAxisAngle(axis, angle/180*Math.PI);
-            var newPosition = quaternion.multiplyVector3(position, new THREE.Vector3());
+            var newPosition = position.clone().applyQuaternion(quaternion);
             return newPosition;
         } else {
             return position.clone();
