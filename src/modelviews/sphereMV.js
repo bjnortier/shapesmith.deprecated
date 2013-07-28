@@ -1,6 +1,6 @@
 define([
     'jquery',
-    'lib/jquery.mustache',
+    'lib/mustache',
     'calculations',
     'worldcursor',
     'scene',
@@ -10,7 +10,8 @@ define([
     'asyncAPI',
   ], 
   function(
-    $, __$,
+    $,
+    Mustache,
     calc,
     worldCursor,
     sceneModel,
@@ -193,7 +194,7 @@ define([
       var view = _.extend(this.baseView, {
         radius : this.model.vertex.parameters.radius,
       });
-      this.$el.html($.mustache(template, view));
+      this.$el.html(Mustache.render(template, view));
       return this;
     },
 

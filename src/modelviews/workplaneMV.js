@@ -89,15 +89,13 @@ define([
     },
 
     pushVertex: function(vertex) {
-      this.persistentHeight = this.vertex.workplane.origin.z;
-      this.vertex.workplane.origin.z = vertex.workplane.origin.z;
+      this.savedWorkplane = this.vertex.workplane;
+      this.vertex.workplane = vertex.workplane;
     },
 
     popVertex: function(vertex) {
-      if (this.persistentHeight !== undefined) {
-        this.vertex.workplane.origin.z = this.persistentHeight;
-        this.persistentHeight = undefined;
-      }
+      this.vertex.workplane = this.savedWorkplane;
+      this.savedWorkplane = undefined;
     },
 
     vertexAdded: function(vertex) {
@@ -205,7 +203,6 @@ define([
           expression = this.$el.find('.field.axis' + key).val();
           parameters.axis[key] = expression;
 
-
         } catch(e) {
           console.error(e);
         }
@@ -252,7 +249,6 @@ define([
         if ((x % 10 === 0) && (x !== 0)) {
           var line = new THREE.Line(majorGridLineGeometry, majorMaterialInside);
           line.position.x = x*grid;
-          line.position.z = this.model.vertex.workplane.origin.z;
           line.rotation.z = 90 * Math.PI / 180;
           this.sceneObject.add(line);
         }
@@ -262,7 +258,6 @@ define([
         if ((y % 10 === 0) && (y !== 0)) {
           var line = new THREE.Line(majorGridLineGeometry, majorMaterialInside);
           line.position.y = y*grid;
-          line.position.z = this.model.vertex.workplane.origin.z;
           this.sceneObject.add(line);
         }
       }
@@ -281,7 +276,6 @@ define([
           if (x % 10 !== 0) {
             var line = new THREE.Line(minorGridLineGeometry, minorMaterialInside);
             line.position.x = x*grid;
-            line.position.z = this.model.vertex.workplane.origin.z;
             line.rotation.z = 90 * Math.PI / 180;
             this.sceneObject.add(line);
           }
@@ -291,13 +285,18 @@ define([
           if (y % 10 !== 0) {
             var line = new THREE.Line(minorGridLineGeometry, minorMaterialInside);
             line.position.y = y*grid;
-            line.position.z = this.model.vertex.workplane.origin.z;
             this.sceneObject.add(line);
           }
         }
       }
 
       this.addAxes();
+
+      this.sceneObject.position.add(
+        calc.objToVector(
+          this.model.vertex.workplane.origin, 
+          geometryGraph, 
+          THREE.Vector3));
 
     },
 
@@ -322,16 +321,6 @@ define([
 
       axes[5].vertices.push(new THREE.Vector3(0, 0, 0));
       axes[5].vertices.push(new THREE.Vector3(0, 0, -5000));
-
-
-      axes.forEach(function(axis) {
-        axis.vertices.forEach(function(vertex) {
-          vertex.add(new THREE.Vector3(
-            this.model.vertex.workplane.origin.x,
-            this.model.vertex.workplane.origin.y,
-            this.model.vertex.workplane.origin.z));
-        }, this);
-      }, this);
 
       this.sceneObject.add(new THREE.Line(axes[0], 
           new THREE.LineBasicMaterial({ color: 0x0000ff }))); 
