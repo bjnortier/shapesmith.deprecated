@@ -161,6 +161,11 @@ define([
 
     render: function() {
       var template = 
+        '<div>' + 
+          '<input type="button" name="xy" value="XY"/>' + 
+          '<input type="button" name="yz" value="YZ"/>' + 
+          '<input type="button" name="zx" value="ZX"/>' +
+        '</div>' +
         '<div>origin</div>' +   
         '<div>' +
           'x <input class="field originx" type="text" value="{{originx}}"></input>' +
@@ -187,6 +192,23 @@ define([
       this.$el.html($.mustache(template, view));
       $('#workplane-settings').append(this.$el);
       return this;
+    },
+
+    events: function() {
+      var vertexEvents = VertexMV.EditingDOMView.prototype.events.call(this);
+      return _.extend(vertexEvents, {
+        'click [name=xy]' : 'xy',
+      });
+    },
+
+    xy: function() {
+      this.model.vertex.workplane = {
+        origin: {x:0, y:0, z:0},
+        axis: {x:0, y:0, z:0},
+        angle: 0
+      };
+      this.model.vertex.trigger('change', this.model.vertex);
+      this.model.tryCommit();
     },
 
     update: function() {

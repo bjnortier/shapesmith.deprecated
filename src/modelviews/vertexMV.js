@@ -363,11 +363,13 @@ define([
       this.model.vertex.off('change', this.update, this);
     },
 
-    events: {
-      'click .field'  : 'fieldClick',
-      'change .field'   : 'fieldChange',
-      'keyup .field'  : 'fieldKeyUp',
-      'click .delete'   : 'delete',
+    events: function() {
+      return {
+        'click .field'  : 'fieldClick',
+        'change .field'   : 'fieldChange',
+        'keyup .field'  : 'fieldKeyUp',
+        'click .delete'   : 'delete',
+      };
     },
 
     fieldClick: function(event) {

@@ -98,17 +98,9 @@ define([
       var ray = new THREE.Ray(rayOrigin, rayDirection);
 
       var absolutePositionOnNormal = calc.positionOnRay(mouseRay, ray);
-      var absluteOriginPosition = calc.objToVector(
-        this.pointVertex.parameters.coordinate, 
-        geometryGraph, 
-        THREE.Vector3);
-      absluteOriginPosition.add(calc.objToVector(
-        this.pointVertex.workplane.origin, 
-        geometryGraph, 
-        THREE.Vector3));
 
       var grid = settings.get('gridsize');
-      var h = absolutePositionOnNormal.z - absluteOriginPosition.z;
+      var h = absolutePositionOnNormal.z - rayOrigin.z;
       this.model.vertex.parameters[this.heightKey] = 
         Math.round(parseFloat(h/grid))*grid;
 
