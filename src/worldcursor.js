@@ -6,8 +6,15 @@ define([
     'scenevieweventgenerator',
     'modelviews/vertexMV',
     'settings',
-    'modelviews/workplaneMV'
-  ], function(_, Events, calc, sceneModel, sceneViewEventGenerator, VertexMV, userSettings, WorkplaneMV) {
+    'modelviews/currentworkplane'
+  ], function(_,
+    Events,
+    calc,
+    sceneModel,
+    sceneViewEventGenerator,
+    VertexMV,
+    userSettings,
+    currentWorkplane) {
 
   var camera = sceneModel.view.camera;
   var snapSettingsOverride = undefined;
@@ -29,7 +36,7 @@ define([
   }
 
   var getPositionOnWorkplane = function(event) {
-    var workplaneModel = WorkplaneMV.getCurrent();
+    var workplaneModel = currentWorkplane.get();
     var positionOnWorkplane = 
       calc.positionOnWorkplane($('#scene'), event, workplaneModel.vertex, camera);
     return positionOnWorkplane;

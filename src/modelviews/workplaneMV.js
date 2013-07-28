@@ -1,32 +1,35 @@
 define([
     'jquery',
-    'lib/jquery.mustache',
+    'lib/mustache',
     'colors',
     'calculations', 
     'interactioncoordinator', 
+    'modelviews/currentworkplane',
     'scene',
     'settings',
     'geomnode',
     'geometrygraphsingleton',
     'modelviews/vertexMV',
+    'modelviews/zanchorview',
     'selection',
     'asyncAPI',
     'icons',
   ], function(
-    $, _$,
+    $,
+    Mustache,
     colors,
     calc, 
     coordinator, 
+    currentWorkplane,
     sceneModel,
     settings,
     geomNode,
     geometryGraph,
     VertexMV,
+    ZAnchorView,
     selection,
     AsyncAPI,
     icons) {
-
-  var currentDisplayModel = undefined;
 
   var EditingModel = VertexMV.EditingModel.extend({
 
@@ -34,6 +37,7 @@ define([
       this.SceneView = GridView;
       VertexMV.EditingModel.prototype.initialize.call(this, options);
       this.views.push(new EditingDOMView({model: this}));
+      this.views.push(new ZAnchorView({model: this, vertex: this.vertex, coordinate: this.vertex.workplane.origin })); 
       coordinator.on('sceneClick', this.tryCommit, this);
     },
 
@@ -51,7 +55,7 @@ define([
       this.SceneView = GridView;
       VertexMV.DisplayModel.prototype.initialize.call(this, options);
 
-      currentDisplayModel = this;
+      currentWorkplane.set(this);
 
       settings.on('change:gridsize', this.gridSizeChanged, this);
       coordinator.on('mousemove', this.mousemove, this);
@@ -136,7 +140,7 @@ define([
   var DisplayDOMView = VertexMV.DisplayDOMView.extend({
 
     render: function() {
-      this.$el.html($.mustache(
+      this.$el.html(Mustache.render(
         '<div class="icon32">{{{icon}}}</div>',
         {
           icon: icons.workplane,
@@ -168,28 +172,24 @@ define([
         '</div>' +
         '<div>origin</div>' +   
         '<div>' +
-          'x <input class="field originx" type="text" value="{{originx}}"></input>' +
-          'y <input class="field originy" type="text" value="{{originy}}"></input>' +
-          'z <input class="field originz" type="text" value="{{originz}}"></input>' +
+          'x <input class="field originx" type="text" value="{{origin.x}}"></input>' +
+          'y <input class="field originy" type="text" value="{{origin.y}}"></input>' +
+          'z <input class="field originz" type="text" value="{{origin.z}}"></input>' +
         '</div>' +
         '<div>axis</div>' +   
         '<div>' +
-          'x <input class="field axisx" type="text" value="{{axisx}}"></input>' +
-          'y <input class="field axisy" type="text" value="{{axisy}}"></input>' +
-          'z <input class="field axisz" type="text" value="{{axisz}}"></input>' +
+          'x <input class="field axisx" type="text" value="{{axis.x}}"></input>' +
+          'y <input class="field axisy" type="text" value="{{axis.y}}"></input>' +
+          'z <input class="field axisz" type="text" value="{{axis.z}}"></input>' +
         '</div>' +
         '<div>angle <input class="field angle" type="text" value="{{angle}}"></input></div>';
-      var parameters = this.model.vertex.workplane;
+      var workplane = this.model.vertex.workplane;
       var view = {
-        originx : parameters.origin.x,
-        originy : parameters.origin.y,
-        originz : parameters.origin.z,
-        axisx : parameters.axis.x,
-        axisy : parameters.axis.y,
-        axisz : parameters.axis.z,
-        angle: parameters.angle,
+        origin : workplane.origin,
+        axis: workplane.axis,
+        angle: workplane.angle,
       };
-      this.$el.html($.mustache(template, view));
+      this.$el.html(Mustache.render(template, view));
       $('#workplane-settings').append(this.$el);
       return this;
     },
@@ -206,7 +206,7 @@ define([
     xy: function() {
       this.model.vertex.workplane = {
         origin: {x:0, y:0, z:0},
-        axis: {x:0, y:0, z:0},
+        axis: {x:0, y:0, z:1},
         angle: 0
       };
       this.model.vertex.trigger('change', this.model.vertex);
@@ -277,11 +277,13 @@ define([
     initialize: function() {
       VertexMV.SceneView.prototype.initialize.call(this);
       this.model.on('change', this.render, this);
+      this.model.vertex.on('change', this.render, this);
     },
 
     remove: function() {
       VertexMV.SceneView.prototype.remove.call(this);
       this.model.off('change', this.render, this);
+      this.model.vertex.off('change', this.render, this);
     },
     
     render: function() {
@@ -406,7 +408,6 @@ define([
   return {
     EditingModel: EditingModel,
     DisplayModel: DisplayModel,
-    getCurrent  : function() { return currentDisplayModel; },
   }
 
 });

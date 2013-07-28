@@ -290,7 +290,9 @@ define(['calculations', 'scene', 'geometrygraphsingleton'], function(calc, scene
     return function(sceneView) {
       var isVertexView = !!sceneView.model.vertex;
       var testForIntersect = 
-        (isVertexView && ((sceneView.model.vertex.category === 'geometry')))
+        (isVertexView && ((sceneView.model.vertex.category === 'geometry')
+                          ||
+                          (sceneView.model.vertex.type === 'workplane')))
         || 
         !isVertexView;
       if (!testForIntersect) {

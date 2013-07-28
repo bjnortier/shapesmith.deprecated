@@ -1,13 +1,13 @@
 define([
         'calculations',
-        'modelviews/workplaneMV',
+        'modelviews/currentworkplane',
         'geometrygraphsingleton',
         'icons',
         'toolbars/toolbar',
         'geomnode',
     ], function(
         Calc,
-        WorkplaneMV,
+        currentWorkplane,
         geometryGraph,
         icons,
         toolbar,
@@ -20,7 +20,7 @@ define([
         activate: function() {
             toolbar.ItemModel.prototype.activate.call(this);
 
-            var workplane = Calc.copyObj(WorkplaneMV.getCurrent().vertex.workplane);
+            var workplane = Calc.copyObj(currentWorkplane.get().vertex.workplane);
             var point = new GeomNode.Point({
                 editing   : true,
                 proto     : true,
