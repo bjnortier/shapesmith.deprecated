@@ -114,16 +114,16 @@ define([
 
   var jobQueue = new JobQueue();
 
-  var createSphere = function(sha, dimensions, transforms) {
-    return jobQueue.queueJob({sha: sha, sphere: dimensions, transforms: transforms})
+  var createSphere = function(sha, dimensions, transforms, workplane) {
+    return jobQueue.queueJob({sha: sha, sphere: dimensions, transforms: transforms, workplane: workplane})
   }
 
-  var createCube = function(sha, dimensions, transforms) {
-    return jobQueue.queueJob({sha: sha, cube: dimensions, transforms: transforms});
+  var createCube = function(sha, dimensions, transforms, workplane) {
+    return jobQueue.queueJob({sha: sha, cube: dimensions, transforms: transforms, workplane: workplane});
   }
 
-  var createSubtract = function(sha, childBSPs, transforms) {
-    return jobQueue.queueJob({sha: sha, subtract: childBSPs, transforms: transforms});
+  var createSubtract = function(sha, childBSPs, transforms, workplane) {
+    return jobQueue.queueJob({sha: sha, subtract: childBSPs, transforms: transforms, workplane: workplane});
   }
 
   return {

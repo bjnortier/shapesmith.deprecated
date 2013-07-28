@@ -1,6 +1,6 @@
 define([
     'jquery',
-    'lib/jquery.mustache',
+    'lib/mustache',
     'calculations', 
     'colors',
     'scene', 
@@ -13,7 +13,8 @@ define([
     'asyncAPI',
   ], 
   function(
-    $, __$,
+    $, 
+    Mustache,
     calc, 
     colors, 
     sceneModel, 
@@ -82,7 +83,7 @@ define([
         '</div>' +
         this.afterTemplate;
       var view = this.baseView;
-      this.$el.html($.mustache(template, view));
+      this.$el.html(Mustache.render(template, view));
       this.update();
       return this;
     },
@@ -133,7 +134,10 @@ define([
           this.materials.editing.face, 
           this.materials.editing.wire
         ]);
-      this.point.position = calc.objToVector(this.model.vertex.parameters.coordinate, geometryGraph, THREE.Vector3);
+      this.point.position = calc.objToVector(
+        this.model.vertex.parameters.coordinate, 
+        geometryGraph, 
+        THREE.Vector3);
       this.sceneObject.add(this.point);
       this.updateScaledObjects();
     },
@@ -197,7 +201,7 @@ define([
         '<div class="dim z">{{z}}</div>)';
       var view = 
         calc.objToVector(this.model.vertex.parameters.coordinate, geometryGraph, THREE.Vector3);
-      this.$el.html($.mustache(template, view));
+      this.$el.html(Mustache.render(template, view));
     },
 
     update: function() {
@@ -246,22 +250,15 @@ define([
       GeomVertexMV.EditingSceneView.prototype.render.call(this);
       var radius = this.model.vertex.implicit ? 0.4 : 0.5;
 
-      if (this.mouseIsOver) {
-        this.point = THREE.SceneUtils.createMultiMaterialObject(
-          new THREE.CubeGeometry(1, 1, 1), [
-            this.materials.editing.face, 
-            this.materials.editing.wire
-          ]);
+
+      var materials;
+      if (this.model.vertex.implicit && !this.highlighted) {
+        materials = [this.materials.implicit.face];
       } else {
-        var materials;
-        if (this.model.vertex.implicit && !this.highlighted) {
-          materials = [this.materials.implicit.face];
-        } else {
-          materials = [this.materials.normal.face, this.materials.normal.wire];
-        }
-        this.point = THREE.SceneUtils.createMultiMaterialObject(
-          new THREE.CubeGeometry(1, 1, 1), materials);
+        materials = [this.materials.normal.face, this.materials.normal.wire];
       }
+      this.point = THREE.SceneUtils.createMultiMaterialObject(
+        new THREE.CubeGeometry(1, 1, 1), materials);
 
       this.point.scale = this.cameraScale;
       this.point.position = calc.objToVector(
@@ -271,20 +268,6 @@ define([
       this.sceneObject.add(this.point);
       this.updateScaledObjects();
     },
-
-    // mouseenter: function() {
-    //   if (!geometryGraph.isEditing()) {
-    //     this.mouseIsOver = true;
-    //     this.render();
-    //   }
-    // },
-
-    // mouseleave: function() {
-    //   if (!geometryGraph.isEditing()) {
-    //     delete this.mouseIsOver;
-    //     this.render();
-    //   }
-    // },
 
     updateScaledObjects: function() {
       if (this.model.inContext) {

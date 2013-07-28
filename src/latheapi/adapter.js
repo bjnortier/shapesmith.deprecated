@@ -89,7 +89,7 @@ define([
         var normalized = Normalize.normalizeVertex(vertex);
         var sha = SHA1Hasher.hash(normalized);
         getOrGenerate(sha, function() {
-          return Lathe.createSphere(sha, normalized, vertex.transforms);
+          return Lathe.createSphere(sha, normalized, vertex.transforms, vertex.workplane);
         }, callback);
         break;
 
@@ -97,7 +97,7 @@ define([
         var normalized = Normalize.normalizeVertex(vertex);
         var sha = SHA1Hasher.hash(normalized);
         getOrGenerate(sha, function() {
-          return Lathe.createCube(sha, normalized, vertex.transforms);
+          return Lathe.createCube(sha, normalized, vertex.transforms, vertex.workplane);
         }, callback);
         break;
       case 'subtract':

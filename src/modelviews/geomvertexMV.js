@@ -1,7 +1,7 @@
   define([
     'backbone',
     'jquery',
-    'lib/jquery.mustache',
+    'lib/mustache',
     'colors',
     'scene',
     'interactioncoordinator',
@@ -17,7 +17,8 @@
     'latheapi/adapter',
   ], function(
     Backbone,
-    $, __$,
+    $, 
+    Mustache,
     colors, 
     sceneModel,
     coordinator,
@@ -307,6 +308,15 @@
       });
     },
 
+    render: function() {
+      VertexMV.SceneView.prototype.render.call(this);
+      this.sceneObject.position.add(
+        calc.objToVector(
+          this.model.vertex.workplane.origin, 
+          geometryGraph, 
+          THREE.Vector3));
+    },
+
     renderMesh: function(result) {
       if (this.model.inContext) {
         this.clear();
@@ -414,22 +424,33 @@
         '</div>' + 
         '<div class="children {{id}}"></div>';
       this.afterTemplate = this.model.vertex.implicit ? '' : 
-        '<div>axisx <input class="field axisx" type="text" value="{{axisx}}"></input></div>' +
-        '<div>axisy <input class="field axisy" type="text" value="{{axisy}}"></input></div>' +
-        '<div>axisz <input class="field axisz" type="text" value="{{axisz}}"></input></div>' + 
+        '<div class="workplane">' +
+          '<div class="origin">' +
+            '<div>x <input class="field workplane.origin.x" type="text" value="{{workplane.origin.x}}"></input></div>' +
+            '<div>y <input class="field workplane.origin.y" type="text" value="{{workplane.origin.y}}"></input></div>' +
+            '<div>z <input class="field workplane.origin.z" type="text" value="{{workplane.origin.z}}"></input></div>' +     
+          '</div>' +
+        '</div>' +
+        '<div>axisx <input class="field axisx" type="text" value="{{axis.x}}"></input></div>' +
+        '<div>axisy <input class="field axisy" type="text" value="{{axis.y}}"></input></div>' +
+        '<div>axisz <input class="field axisz" type="text" value="{{axis.z}}"></input></div>' + 
         '<div>angle <input class="field angle" type="text" value="{{angle}}"></input></div>' +
         '<div>scale <input class="field scale" type="text" value="{{scale}}"></input></div>';
 
       var rotation = this.model.vertex.transforms.rotation;
+      var workplane = this.model.vertex.workplane;
       this.baseView = {
         id: this.model.vertex.id,
         name : this.model.vertex.name,
         implicit: this.model.vertex.implicit,
         icon: icons[this.model.vertex.type],
         isTopLevel: !geometryGraph.parentsOf(this.model.vertex).length,
-        axisx: rotation.axis.x,
-        axisy: rotation.axis.y,
-        axisz: rotation.axis.z,
+        workplane: this.model.vertex.workplane,
+        axis: { 
+          x: rotation.axis.x,
+          y: rotation.axis.y,
+          z: rotation.axis.z,
+        },
         angle: rotation.angle,
         scale: this.model.vertex.transforms.scale.factor,
       }
@@ -574,7 +595,8 @@
             '</div>' +
           '</div>' +
           '<div class="children {{id}}"></div>';
-        this.$el.html($.mustache(template, view));
+        this.$el.html(
+          Mustache.render(template, view));
         return this;
       } else {
         this.$el.html();
@@ -611,7 +633,8 @@
       var color = (parameters.material && parameters.material.color) || '#6cbe32';
       this.$el.find('> .title > .icon24').attr(
         "style", 
-        $.mustache("fill: {{color}}; stroke: {{color}}", {color: color}));
+        
+        Mustache.render("fill: {{color}}; stroke: {{color}}", {color: color}));
     },
 
     dive: function() {
@@ -619,7 +642,8 @@
       var color = "#bbb";
       this.$el.find('> .title > .icon24').attr(
         "style", 
-        $.mustache("fill: {{color}}; stroke: {{color}}", {color: color}));
+        
+        Mustache.render("fill: {{color}}; stroke: {{color}}", {color: color}));
     },
 
     clickTitle: function(event) {

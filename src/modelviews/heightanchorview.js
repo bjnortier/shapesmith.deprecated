@@ -38,12 +38,11 @@ define([
           new THREE.MeshBasicMaterial({color: 0xcc6666, wireframe: true})
         ]);
       var pointPosition = calc.objToVector(this.pointVertex.parameters.coordinate, geometryGraph, THREE.Vector3);
+
       var heightParameterValue = geometryGraph.evaluate(this.model.vertex.parameters[this.heightKey]);
       var zOffset = this.getZOffset(heightParameterValue);
       this.pointSceneObject.position = pointPosition;
-      this.pointSceneObject.position.z = 
-        heightParameterValue + 
-        pointPosition.z + zOffset;
+      this.pointSceneObject.position.z = heightParameterValue + pointPosition.z + zOffset;
       this.pointSceneObject.scale = this.cameraScale;
       this.pointSceneObject.rotation.x = heightParameterValue >= 0 ? Math.PI/2 : 3*Math.PI/2;
       this.sceneObject.add(this.pointSceneObject);
@@ -86,16 +85,32 @@ define([
       var camera = sceneModel.view.camera;
       var mouseRay = calc.mouseRayForEvent(sceneElement, camera, event);
 
-      var rayOrigin = calc.objToVector(this.pointVertex.parameters.coordinate, geometryGraph, THREE.Vector3);
+      var rayOrigin = calc.objToVector(
+        this.pointVertex.parameters.coordinate, 
+        geometryGraph, 
+        THREE.Vector3);
+      rayOrigin.add(calc.objToVector(
+        this.pointVertex.workplane.origin, 
+        geometryGraph, 
+        THREE.Vector3));
+
       var rayDirection = new THREE.Vector3(0,0,1);
       var ray = new THREE.Ray(rayOrigin, rayDirection);
 
-      var positionOnNormal = calc.positionOnRay(mouseRay, ray);
-      var pointPosition = calc.objToVector(this.pointVertex.parameters.coordinate, geometryGraph, THREE.Vector3);
+      var absolutePositionOnNormal = calc.positionOnRay(mouseRay, ray);
+      var absluteOriginPosition = calc.objToVector(
+        this.pointVertex.parameters.coordinate, 
+        geometryGraph, 
+        THREE.Vector3);
+      absluteOriginPosition.add(calc.objToVector(
+        this.pointVertex.workplane.origin, 
+        geometryGraph, 
+        THREE.Vector3));
+
       var grid = settings.get('gridsize');
+      var h = absolutePositionOnNormal.z - absluteOriginPosition.z;
       this.model.vertex.parameters[this.heightKey] = 
-        Math.round(parseFloat((positionOnNormal.z -  this.cameraScale.x).toFixed(0))/grid)*grid - 
-        pointPosition.z;
+        Math.round(parseFloat(h/grid))*grid;
 
       this.model.vertex.trigger('change', this.model.vertex);
     },

@@ -1,6 +1,6 @@
 define([
     'jquery',
-    'lib/jquery.mustache',
+    'lib/mustache',
     'calculations',
     'worldcursor',
     'scene',
@@ -16,7 +16,8 @@ define([
     
   ], 
   function(
-    $, __$,
+    $, 
+    Mustache,
     calc,
     worldCursor,
     sceneModel,
@@ -277,7 +278,7 @@ define([
         depth  : this.model.vertex.parameters.depth,
         height : this.model.vertex.parameters.height,
       });
-      this.$el.html($.mustache(template, view));
+      this.$el.html(Mustache.render(template, view));
       return this;
     },
 

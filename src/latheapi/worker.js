@@ -60,7 +60,7 @@ requirejs([
       
     }
 
-    var applyTransforms = function(bsp, transforms) {
+    var applyTransforms = function(bsp, transforms, workplane) {
       if (transforms.translation) {
         bsp = bsp.translate(transforms.translation.x, transforms.translation.y, transforms.translation.z);
       }
@@ -74,6 +74,10 @@ requirejs([
         bsp = bsp.scale(transforms.scale.factor);
         bsp = bsp.translate(transforms.scale.origin.x, transforms.scale.origin.y, -transforms.scale.origin.z); 
       }
+      // All primitives have a workplane, but booleans do not.
+      if (workplane) {
+        bsp = bsp.translate(workplane.origin.x, workplane.origin.y, workplane.origin.z); 
+      }
       return bsp;
     }
 
@@ -81,10 +85,10 @@ requirejs([
 
       // Create new with the arguments
       if (e.data.sphere) {
-        var bsp = applyTransforms(new Sphere(e.data.sphere).bsp, e.data.transforms || {});
+        var bsp = applyTransforms(new Sphere(e.data.sphere).bsp, e.data.transforms, e.data.workplane);
         returnResult(e.data.id, e.data.sha, bsp);
       } else if (e.data.cube) {
-        var bsp = applyTransforms(new Cube(e.data.cube).bsp, e.data.transforms || {});
+        var bsp = applyTransforms(new Cube(e.data.cube).bsp, e.data.transforms, e.data.workplane);
         returnResult(e.data.id, e.data.sha, bsp);
       } else if (e.data.subtract) {
 

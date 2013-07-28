@@ -51,13 +51,12 @@ define([
           geometryGraph.evaluate(this.model.vertex.parameters.width),
           geometryGraph.evaluate(this.model.vertex.parameters.depth), 
           0));
-      
+
       var heightParameterValue = geometryGraph.evaluate(this.model.vertex.parameters[this.heightKey]);
       var zOffset = this.getZOffset(heightParameterValue);
       this.pointSceneObject.position = this.heightBasePosition.clone();
       this.pointSceneObject.position.z = 
-        heightParameterValue + 
-        this.heightBasePosition.z + zOffset;
+        heightParameterValue + zOffset;
       this.pointSceneObject.scale = this.cameraScale;
       this.pointSceneObject.rotation.x = heightParameterValue >= 0 ? Math.PI/2 : 3*Math.PI/2;
       this.sceneObject.add(this.pointSceneObject);
@@ -100,15 +99,28 @@ define([
       var camera = sceneModel.view.camera;
       var mouseRay = calc.mouseRayForEvent(sceneElement, camera, event);
 
-      var rayOrigin = this.heightBasePosition;
+      var rayOrigin = new THREE.Vector3().addVectors(
+        this.originPosition,
+        new THREE.Vector3(
+          geometryGraph.evaluate(this.model.vertex.parameters.width),
+          geometryGraph.evaluate(this.model.vertex.parameters.depth), 
+          0));
+      rayOrigin.add(calc.objToVector(
+        this.model.vertex.workplane.origin, 
+        geometryGraph, 
+        THREE.Vector3));
+
       var rayDirection = new THREE.Vector3(0,0,1);
       var ray = new THREE.Ray(rayOrigin, rayDirection);
 
       var positionOnNormal = calc.positionOnRay(mouseRay, ray);
+
+      var absolutePositionOnNormal = calc.positionOnRay(mouseRay, ray);
+
       var grid = settings.get('gridsize');
+      var h = absolutePositionOnNormal.z - rayOrigin.z;
       this.model.vertex.parameters[this.heightKey] = 
-        Math.round(parseFloat((positionOnNormal.z -  this.cameraScale.x).toFixed(0))/grid)*grid - 
-        this.heightBasePosition.z;
+        Math.round(parseFloat(h/grid))*grid;
 
       this.model.vertex.trigger('change', this.model.vertex);
     },
