@@ -34,6 +34,12 @@ define([
       this.SceneView = GridView;
       VertexMV.EditingModel.prototype.initialize.call(this, options);
       this.views.push(new EditingDOMView({model: this}));
+      coordinator.on('sceneClick', this.tryCommit, this);
+    },
+
+    destroy: function() {
+      VertexMV.EditingModel.prototype.destroy.call(this);
+      coordinator.off('sceneClick', this.tryCommit, this);
     },
     
   });
