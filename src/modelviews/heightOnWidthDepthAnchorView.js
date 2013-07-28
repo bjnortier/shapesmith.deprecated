@@ -110,15 +110,31 @@ define([
         geometryGraph, 
         THREE.Vector3));
 
+      // Apply Workplane
+      var workplaneOrigin = calc.objToVector(
+        this.vertex.workplane.origin, 
+        geometryGraph, 
+        THREE.Vector3);
+      var workplaneAxis =  calc.objToVector(
+        this.vertex.workplane.axis, 
+        geometryGraph, 
+        THREE.Vector3);
+      var workplaneAngle = geometryGraph.evaluate(this.vertex.workplane.angle);
+
+      var rayOriginUsingWorkplane = calc.rotateAroundAxis(rayOrigin, workplaneAxis, workplaneAngle);
+      rayOriginUsingWorkplane.add(workplaneOrigin);
+
       var rayDirection = new THREE.Vector3(0,0,1);
-      var ray = new THREE.Ray(rayOrigin, rayDirection);
+      var rayDirectionUsingWorkplane = calc.rotateAroundAxis(rayDirection, workplaneAxis, workplaneAngle);
 
-      var positionOnNormal = calc.positionOnRay(mouseRay, ray);
-
+      var ray = new THREE.Ray(rayOriginUsingWorkplane, rayDirectionUsingWorkplane);
       var absolutePositionOnNormal = calc.positionOnRay(mouseRay, ray);
 
+      // Back into local coordinates
+      var positionOnNormalInLocalCoords = 
+        calc.rotateAroundAxis(absolutePositionOnNormal, workplaneAxis, -workplaneAngle);
       var grid = settings.get('gridsize');
-      var h = absolutePositionOnNormal.z - rayOrigin.z;
+      var h = positionOnNormalInLocalCoords.z - rayOrigin.z;
       this.model.vertex.parameters[this.heightKey] = 
         Math.round(parseFloat(h/grid))*grid;
 

@@ -76,6 +76,11 @@ requirejs([
       }
       // All primitives have a workplane, but booleans do not.
       if (workplane) {
+        bsp = bsp.rotate(
+          workplane.axis.x, 
+          workplane.axis.y, 
+          workplane.axis.z, 
+          workplane.angle/180*Math.PI);
         bsp = bsp.translate(workplane.origin.x, workplane.origin.y, workplane.origin.z); 
       }
       return bsp;

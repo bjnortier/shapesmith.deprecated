@@ -198,6 +198,8 @@ define([
       var vertexEvents = VertexMV.EditingDOMView.prototype.events.call(this);
       return _.extend(vertexEvents, {
         'click [name=xy]' : 'xy',
+        'click [name=yz]' : 'yz',
+        'click [name=zx]' : 'zx',
       });
     },
 
@@ -206,6 +208,28 @@ define([
         origin: {x:0, y:0, z:0},
         axis: {x:0, y:0, z:0},
         angle: 0
+      };
+      this.model.vertex.trigger('change', this.model.vertex);
+      this.model.tryCommit();
+    },
+
+    yz: function() {
+      var tanpi6 = parseFloat(Math.tan(Math.PI/6).toFixed(4));
+      this.model.vertex.workplane = {
+        origin: {x:0, y:0, z:0},
+        axis: {x:tanpi6, y:tanpi6, z:tanpi6},
+        angle: 120,
+      };
+      this.model.vertex.trigger('change', this.model.vertex);
+      this.model.tryCommit();
+    },
+
+    zx: function() {
+      var mintanpi6 = parseFloat(-Math.tan(Math.PI/6).toFixed(4));
+      this.model.vertex.workplane = {
+        origin: {x:0, y:0, z:0},
+        axis: {x:mintanpi6, y:mintanpi6, z:mintanpi6},
+        angle: 120,
       };
       this.model.vertex.trigger('change', this.model.vertex);
       this.model.tryCommit();
@@ -320,11 +344,23 @@ define([
 
       this.addAxes();
 
-      this.sceneObject.position.add(
+      var quaternion = new THREE.Quaternion();
+      var axis = calc.objToVector(
+          this.model.vertex.workplane.axis, 
+          geometryGraph, 
+          THREE.Vector3);
+      var angle = this.model.vertex.workplane.angle/180*Math.PI;
+        
+      quaternion.setFromAxisAngle(axis, angle);
+      this.sceneObject.useQuaternion = true;
+      this.sceneObject.quaternion = quaternion;
+
+      this.sceneObject.position = 
         calc.objToVector(
           this.model.vertex.workplane.origin, 
           geometryGraph, 
-          THREE.Vector3));
+          THREE.Vector3);
+
 
     },
 

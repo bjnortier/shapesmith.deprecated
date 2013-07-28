@@ -188,6 +188,7 @@ define([], function() {
         toScreenCoordinates : toScreenCoordinates,
         objToVector         : objToVector,
         addOffset           : addOffset,
+        rotateAroundAxis    : rotateAroundAxis,
     }
 
 });

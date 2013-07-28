@@ -10,7 +10,7 @@ define([
   var EditingHeightAnchor = GeomVertexMV.EditingSceneView.extend({
 
     initialize: function(options) {
-      this.pointVertex = options.pointVertex;
+      this.vertex = options.pointVertex;
       this.heightKey = options.heightKey;
       GeomVertexMV.EditingSceneView.prototype.initialize.call(this);
       this.render();
@@ -37,7 +37,7 @@ define([
           new THREE.MeshBasicMaterial({color: 0x993333, opacity: 0.5, wireframe: false } ),
           new THREE.MeshBasicMaterial({color: 0xcc6666, wireframe: true})
         ]);
-      var pointPosition = calc.objToVector(this.pointVertex.parameters.coordinate, geometryGraph, THREE.Vector3);
+      var pointPosition = calc.objToVector(this.vertex.parameters.coordinate, geometryGraph, THREE.Vector3);
 
       var heightParameterValue = geometryGraph.evaluate(this.model.vertex.parameters[this.heightKey]);
       var zOffset = this.getZOffset(heightParameterValue);
@@ -86,21 +86,35 @@ define([
       var mouseRay = calc.mouseRayForEvent(sceneElement, camera, event);
 
       var rayOrigin = calc.objToVector(
-        this.pointVertex.parameters.coordinate, 
+        this.vertex.parameters.coordinate, 
         geometryGraph, 
         THREE.Vector3);
-      rayOrigin.add(calc.objToVector(
-        this.pointVertex.workplane.origin, 
+
+      // Apply Workplane
+      var workplaneOrigin = calc.objToVector(
+        this.vertex.workplane.origin, 
         geometryGraph, 
-        THREE.Vector3));
+        THREE.Vector3);
+      var workplaneAxis =  calc.objToVector(
+        this.vertex.workplane.axis, 
+        geometryGraph, 
+        THREE.Vector3);
+      var workplaneAngle = geometryGraph.evaluate(this.vertex.workplane.angle);
+
+      var rayOriginUsingWorkplane = calc.rotateAroundAxis(rayOrigin, workplaneAxis, workplaneAngle);
+      rayOriginUsingWorkplane.add(workplaneOrigin);
 
       var rayDirection = new THREE.Vector3(0,0,1);
-      var ray = new THREE.Ray(rayOrigin, rayDirection);
+      var rayDirectionUsingWorkplane = calc.rotateAroundAxis(rayDirection, workplaneAxis, workplaneAngle);
 
+      var ray = new THREE.Ray(rayOriginUsingWorkplane, rayDirectionUsingWorkplane);
       var absolutePositionOnNormal = calc.positionOnRay(mouseRay, ray);
 
+      // Back into local coordinates
+      var positionOnNormalInLocalCoords = 
+        calc.rotateAroundAxis(absolutePositionOnNormal, workplaneAxis, -workplaneAngle);
       var grid = settings.get('gridsize');
-      var h = absolutePositionOnNormal.z - rayOrigin.z;
+      var h = positionOnNormalInLocalCoords.z - rayOrigin.z;
       this.model.vertex.parameters[this.heightKey] = 
         Math.round(parseFloat(h/grid))*grid;
 
