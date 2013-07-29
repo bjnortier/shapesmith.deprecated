@@ -154,16 +154,11 @@ define([
       }
     },
 
-    // This view is not draggable, but the display scene view can transfer 
-    // the dragging to this view (e.g. when a point is dragged), but only for
-    // points that are not prototypes any more
     isDraggable: function() {
-      return !this.model.vertex.proto || (this.model.parentModel && this.model.parentModel.childPointsAreDraggable);
+      return true;
     },
 
     dragStarted: function() {
-      // The drag was started when the point was being edited, as
-      // opposed to starting from a display node
       this.dragStartedInEditingMode = true;
     },
 
@@ -315,8 +310,7 @@ define([
     },
 
     isDraggable: function() {
-      return !this.model.vertex.implicit;
-      // return !geometryGraph.isEditing();
+      return false;
     },
 
     isClickable: function() {

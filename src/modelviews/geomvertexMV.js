@@ -311,22 +311,24 @@
     render: function() {
       VertexMV.SceneView.prototype.render.call(this);
 
-      var quaternion = new THREE.Quaternion();
-      var axis = calc.objToVector(
-          this.model.vertex.workplane.axis, 
-          geometryGraph, 
-          THREE.Vector3);
-      var angle = this.model.vertex.workplane.angle/180*Math.PI;
+      if (!this.isLocal) {
+        var quaternion = new THREE.Quaternion();
+        var axis = calc.objToVector(
+            this.model.vertex.workplane.axis, 
+            geometryGraph, 
+            THREE.Vector3);
+        var angle = this.model.vertex.workplane.angle/180*Math.PI;
 
-      quaternion.setFromAxisAngle(axis, angle);
-      this.sceneObject.useQuaternion = true;
-      this.sceneObject.quaternion = quaternion;
+        quaternion.setFromAxisAngle(axis, angle);
+        this.sceneObject.useQuaternion = true;
+        this.sceneObject.quaternion = quaternion;
 
-      this.sceneObject.position = 
-        calc.objToVector(
-          this.model.vertex.workplane.origin, 
-          geometryGraph, 
-          THREE.Vector3);
+        this.sceneObject.position = 
+          calc.objToVector(
+            this.model.vertex.workplane.origin, 
+            geometryGraph, 
+            THREE.Vector3);
+      }
     },
 
     renderMesh: function(result) {

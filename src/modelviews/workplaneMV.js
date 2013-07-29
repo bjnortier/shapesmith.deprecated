@@ -10,7 +10,9 @@ define([
     'geomnode',
     'geometrygraphsingleton',
     'modelviews/vertexMV',
+    'modelviews/originview',
     'modelviews/zanchorview',
+    'modelviews/originDOMView',
     'selection',
     'asyncAPI',
     'icons',
@@ -26,7 +28,9 @@ define([
     geomNode,
     geometryGraph,
     VertexMV,
+    OriginView,
     ZAnchorView,
+    OriginDOMView,
     selection,
     AsyncAPI,
     icons) {
@@ -37,7 +41,9 @@ define([
       this.SceneView = GridView;
       VertexMV.EditingModel.prototype.initialize.call(this, options);
       this.views.push(new EditingDOMView({model: this}));
-      this.views.push(new ZAnchorView({model: this, vertex: this.vertex, coordinate: this.vertex.workplane.origin })); 
+      this.views.push(new OriginView({model: this, vertex: this.vertex, origin: this.vertex.workplane.origin })); 
+      this.views.push(new OriginDOMView({model: this, vertex: this.vertex, origin: this.vertex.workplane.origin })); 
+      this.views.push(new ZAnchorView({model: this, vertex: this.vertex, origin: this.vertex.workplane.origin })); 
       coordinator.on('sceneClick', this.tryCommit, this);
     },
 
@@ -362,7 +368,6 @@ define([
           this.model.vertex.workplane.origin, 
           geometryGraph, 
           THREE.Vector3);
-
 
     },
 

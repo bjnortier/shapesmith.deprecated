@@ -11,10 +11,10 @@ define([
 
     initialize: function(options) {
       this.vertex = options.vertex;
-      this.coordinate = options.coordinate;
+      this.origin = options.origin;
 
       this.rayOrigin = calc.objToVector(
-        this.coordinate, 
+        this.origin, 
         geometryGraph, 
         THREE.Vector3);
 
@@ -42,7 +42,7 @@ define([
           new THREE.MeshBasicMaterial({color: 0x993333, opacity: 0.5, wireframe: false } ),
           new THREE.MeshBasicMaterial({color: 0xcc6666, wireframe: true})
         ]);
-      var pointPosition = calc.objToVector(this.coordinate, geometryGraph, THREE.Vector3);
+      var pointPosition = calc.objToVector(this.origin, geometryGraph, THREE.Vector3);
 
       var zOffset = 1.5*this.cameraScale.x;
 
@@ -120,7 +120,7 @@ define([
       // var h = positionOnNormalInLocalCoords.z - rayOrigin.z;
 
       var grid = settings.get('gridsize');
-      this.coordinate.z = Math.round(parseFloat(h/grid))*grid;
+      this.origin.z = Math.round(parseFloat(h/grid))*grid;
 
       this.vertex.trigger('change', this.vertex);
     },
