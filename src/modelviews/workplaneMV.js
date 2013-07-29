@@ -210,31 +210,40 @@ define([
     },
 
     xy: function() {
-      this.model.vertex.workplane = {
-        origin: {x:0, y:0, z:0},
-        axis: {x:0, y:0, z:1},
-        angle: 0
-      };
+      // This convulted setting is because the origin object is referenced
+      // in the origin view and z anchor.
+      this.model.vertex.workplane.origin.x = 0;
+      this.model.vertex.workplane.origin.y = 0;
+      this.model.vertex.workplane.origin.z = 0;
+      this.model.vertex.workplane.axis.x = 0;
+      this.model.vertex.workplane.axis.y = 0;
+      this.model.vertex.workplane.axis.z = 1;
+      this.model.vertex.workplane.angle = 0;
       this.model.vertex.trigger('change', this.model.vertex);
     },
 
     yz: function() {
       var tanpi6 = parseFloat(Math.tan(Math.PI/6).toFixed(4));
-      this.model.vertex.workplane = {
-        origin: {x:0, y:0, z:0},
-        axis: {x:tanpi6, y:tanpi6, z:tanpi6},
-        angle: 120,
-      };
+      this.model.vertex.workplane.origin.x = 0;
+      this.model.vertex.workplane.origin.y = 0;
+      this.model.vertex.workplane.origin.z = 0;
+      this.model.vertex.workplane.axis.x = tanpi6;
+      this.model.vertex.workplane.axis.y = tanpi6;
+      this.model.vertex.workplane.axis.z = tanpi6;
+      this.model.vertex.workplane.angle = 120;
+
       this.model.vertex.trigger('change', this.model.vertex);
     },
 
     zx: function() {
       var mintanpi6 = parseFloat(-Math.tan(Math.PI/6).toFixed(4));
-      this.model.vertex.workplane = {
-        origin: {x:0, y:0, z:0},
-        axis: {x:mintanpi6, y:mintanpi6, z:mintanpi6},
-        angle: 120,
-      };
+      this.model.vertex.workplane.origin.x = 0;
+      this.model.vertex.workplane.origin.y = 0;
+      this.model.vertex.workplane.origin.z = 0;
+      this.model.vertex.workplane.axis.x = mintanpi6;
+      this.model.vertex.workplane.axis.y = mintanpi6;
+      this.model.vertex.workplane.axis.z = mintanpi6;
+      this.model.vertex.workplane.angle = 120;
       this.model.vertex.trigger('change', this.model.vertex);
     },
 
