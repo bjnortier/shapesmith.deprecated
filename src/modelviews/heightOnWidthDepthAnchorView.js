@@ -55,8 +55,7 @@ define([
       var heightParameterValue = geometryGraph.evaluate(this.model.vertex.parameters[this.heightKey]);
       var zOffset = this.getZOffset(heightParameterValue);
       this.pointSceneObject.position = this.heightBasePosition.clone();
-      this.pointSceneObject.position.z = 
-        heightParameterValue + zOffset;
+      this.pointSceneObject.position.z += heightParameterValue + zOffset;
       this.pointSceneObject.scale = this.cameraScale;
       this.pointSceneObject.rotation.x = heightParameterValue >= 0 ? Math.PI/2 : 3*Math.PI/2;
       this.sceneObject.add(this.pointSceneObject);
@@ -85,6 +84,7 @@ define([
 
     dragStarted: function() {
       this.showHeightLine = true;
+      this.originPosition = calc.objToVector(this.origin.parameters.coordinate, geometryGraph, THREE.Vector3);
     },
 
     dragEnded: function() {

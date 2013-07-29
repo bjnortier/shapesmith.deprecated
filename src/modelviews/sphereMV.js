@@ -7,6 +7,7 @@ define([
     'geometrygraphsingleton',
     'modelviews/geomvertexMV', 
     'modelviews/pointMV', 
+    'modelviews/zanchorview',
     'asyncAPI',
   ], 
   function(
@@ -18,6 +19,7 @@ define([
     geometryGraph,
     GeomVertexMV,
     PointMV,
+    ZAnchorView,
     AsyncAPI) {
 
   // ---------- Common ----------
@@ -89,10 +91,19 @@ define([
         this.updateHint();
         this.activePoint = this.origin;
       } else {
+
         this.originalImplicitChildren = geometryGraph.childrenOf(this.vertex);
         this.editingImplicitChildren = [];
         this.origin = AsyncAPI.edit(this.origin);
         this.editingImplicitChildren = [this.origin];
+        
+        if (!this.vertex.transforming) {
+          this.views.push(new ZAnchorView({
+            model: this, 
+            vertex: this.origin,
+            origin: this.origin.parameters.coordinate,
+          }));
+        }
       }
 
     },

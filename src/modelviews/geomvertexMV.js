@@ -311,7 +311,7 @@
     render: function() {
       VertexMV.SceneView.prototype.render.call(this);
 
-      if (!this.isLocal) {
+      if (!this.isGlobal) {
         var quaternion = new THREE.Quaternion();
         var axis = calc.objToVector(
             this.model.vertex.workplane.axis, 
@@ -721,54 +721,15 @@
     },
 
     highlight: function() {
-      // this.highlighted = true;
-      // if (!geometryGraph.isEditing()) {
-      //   if (this.model.vertex.implicit) {
-      //     // this.updateMaterials('normal');
-      //   } else {
-      //     this.updateMaterials('highlight');
-      //   }
-      // }
-      // var implicitViews = this.findImplicitDescendantSceneviews(this.model.vertex);
-      // implicitViews.forEach(function(view) {
-      //   view.highlight && view.highlight();
-      // })
     },
 
     unhighlight: function() {
-      // delete this.highlighted;
-      // if (!geometryGraph.isEditing()) {
-      //   if (this.model.vertex.implicit) {
-      //     // this.updateMaterials('implicit');
-      //   } else {
-      //     this.updateSelected();
-      //   }
-      // }
-      // var implicitViews = this.findImplicitDescendantSceneviews(this.model.vertex);
-      // implicitViews.forEach(function(view) {
-      //   view.unhighlight();
-      // })
     },
 
     click: function(event) {
       var vertexToSelect, parents;
       if (this.model.canSelect()) {
         vertexToSelect = this.model.vertex;
-      } else if (this.model.vertex.implicit) {
-        // Select the parent that is in context
-        // var findNonImplicitContextParent = function(vertex) {
-        //   var parents = _.uniq(geometryGraph.parentsOf(vertex));
-        //   if (parents.length === 1) {
-        //     if (parents[0].implicit) {
-        //       return findNonImplicitContextParent(parents[0]);
-        //     } else {
-        //       return parents[0];
-        //     }
-        //   } else {
-        //     return undefined;
-        //   }
-        // }
-        // vertexToSelect = findNonImplicitContextParent(this.model.vertex);
       } 
       if (vertexToSelect) {
         if (event.shiftKey) {

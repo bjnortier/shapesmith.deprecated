@@ -18,6 +18,7 @@ define([
     initialize: function(options) {
       this.vertex = options.vertex;
       this.origin = options.origin;
+      this.isGlobal = options.isGlobal;
       this.render();
       DimensionView.prototype.initialize.call(this);
     },
@@ -43,19 +44,23 @@ define([
         geometryGraph, 
         THREE.Vector3);
 
-      // Apply Workplane
-      var workplaneOrigin = calc.objToVector(
-        this.model.vertex.workplane.origin, 
-        geometryGraph, 
-        THREE.Vector3);
-      var workplaneAxis =  calc.objToVector(
-        this.model.vertex.workplane.axis, 
-        geometryGraph, 
-        THREE.Vector3);
-      var workplaneAngle = geometryGraph.evaluate(this.model.vertex.workplane.angle);
+      if (this.isGlobal) {
+        var globalPosition = localPosition;
+      } else {
+        // Apply Workplane
+        var workplaneOrigin = calc.objToVector(
+          this.model.vertex.workplane.origin, 
+          geometryGraph, 
+          THREE.Vector3);
+        var workplaneAxis =  calc.objToVector(
+          this.model.vertex.workplane.axis, 
+          geometryGraph, 
+          THREE.Vector3);
+        var workplaneAngle = geometryGraph.evaluate(this.model.vertex.workplane.angle);
+        var globalPosition = calc.rotateAroundAxis(localPosition, workplaneAxis, workplaneAngle);
+        globalPosition.add(workplaneOrigin);
+      } 
 
-      var globalPosition = calc.rotateAroundAxis(localPosition, workplaneAxis, workplaneAngle);
-      globalPosition.add(workplaneOrigin);
 
       var screenPos = calc.toScreenCoordinates(sceneWidth, sceneHeight, camera, globalPosition);
         

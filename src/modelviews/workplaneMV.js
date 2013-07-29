@@ -41,9 +41,9 @@ define([
       this.SceneView = GridView;
       VertexMV.EditingModel.prototype.initialize.call(this, options);
       this.views.push(new EditingDOMView({model: this}));
-      this.views.push(new OriginView({model: this, vertex: this.vertex, origin: this.vertex.workplane.origin })); 
-      this.views.push(new OriginDOMView({model: this, vertex: this.vertex, origin: this.vertex.workplane.origin })); 
-      this.views.push(new ZAnchorView({model: this, vertex: this.vertex, origin: this.vertex.workplane.origin })); 
+      this.views.push(new OriginView({model: this, vertex: this.vertex, origin: this.vertex.workplane.origin, isGlobal: true })); 
+      this.views.push(new OriginDOMView({model: this, vertex: this.vertex, origin: this.vertex.workplane.origin, isGlobal: true })); 
+      this.views.push(new ZAnchorView({model: this, vertex: this.vertex, origin: this.vertex.workplane.origin, isGlobal: true })); 
       coordinator.on('sceneClick', this.tryCommit, this);
     },
 
@@ -216,7 +216,6 @@ define([
         angle: 0
       };
       this.model.vertex.trigger('change', this.model.vertex);
-      this.model.tryCommit();
     },
 
     yz: function() {
@@ -227,7 +226,6 @@ define([
         angle: 120,
       };
       this.model.vertex.trigger('change', this.model.vertex);
-      this.model.tryCommit();
     },
 
     zx: function() {
@@ -238,7 +236,6 @@ define([
         angle: 120,
       };
       this.model.vertex.trigger('change', this.model.vertex);
-      this.model.tryCommit();
     },
 
     update: function() {

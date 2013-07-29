@@ -12,11 +12,7 @@ define([
     initialize: function(options) {
       this.vertex = options.vertex;
       this.origin = options.origin;
-
-      this.rayOrigin = calc.objToVector(
-        this.origin, 
-        geometryGraph, 
-        THREE.Vector3);
+      this.isGlobal = options.isGlobal;
 
       GeomVertexMV.EditingSceneView.prototype.initialize.call(this);
       this.render();
@@ -33,6 +29,7 @@ define([
     },
 
     render: function() {
+
       GeomVertexMV.EditingSceneView.prototype.render.call(this);
       var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
 
@@ -44,10 +41,8 @@ define([
         ]);
       var pointPosition = calc.objToVector(this.origin, geometryGraph, THREE.Vector3);
 
-      var zOffset = 1.5*this.cameraScale.x;
-
-      // this.pointSceneObject.position = pointPosition;
-      this.pointSceneObject.position.z = zOffset;
+      this.pointSceneObject.position = pointPosition;
+      this.pointSceneObject.position.z += 1.5*this.cameraScale.x;;
       this.pointSceneObject.scale = this.cameraScale;
       this.pointSceneObject.rotation.x = Math.PI/2;
       this.sceneObject.add(this.pointSceneObject);
@@ -72,6 +67,10 @@ define([
 
     dragStarted: function() {
       this.showHeightLine = true;
+      this.rayOrigin = calc.objToVector(
+        this.origin, 
+        geometryGraph, 
+        THREE.Vector3);
     },
 
     dragEnded: function() {
@@ -86,41 +85,42 @@ define([
       var camera = sceneModel.view.camera;
       var mouseRay = calc.mouseRayForEvent(sceneElement, camera, event);
 
-      if (true) {
+      var rayDirection = new THREE.Vector3(0,0,1);
+      var ray = new THREE.Ray(this.rayOrigin, rayDirection);
+      var absolutePositionOnNormal = calc.positionOnRay(mouseRay, ray);
+      var h = absolutePositionOnNormal.z - this.rayOrigin.z;
+
+      if (!this.isGlobal) {
+        // Apply Workplane
+        var workplaneOrigin = calc.objToVector(
+          this.vertex.workplane.origin, 
+          geometryGraph, 
+          THREE.Vector3);
+        var workplaneAxis = calc.objToVector(
+          this.vertex.workplane.axis, 
+          geometryGraph, 
+          THREE.Vector3);
+        var workplaneAngle = geometryGraph.evaluate(this.vertex.workplane.angle);
+
+        var rayOriginUsingWorkplane = calc.rotateAroundAxis(this.rayOrigin, workplaneAxis, workplaneAngle);
+        rayOriginUsingWorkplane.add(workplaneOrigin);
+
         var rayDirection = new THREE.Vector3(0,0,1);
-        var ray = new THREE.Ray(this.rayOrigin, rayDirection);
+        var rayDirectionUsingWorkplane = calc.rotateAroundAxis(rayDirection, workplaneAxis, workplaneAngle);
+
+        var ray = new THREE.Ray(rayOriginUsingWorkplane, rayDirectionUsingWorkplane);
         var absolutePositionOnNormal = calc.positionOnRay(mouseRay, ray);
-        var h = absolutePositionOnNormal.z - this.rayOrigin.z;
+
+        // Back into local coordinates
+        var positionOnNormalInLocalCoords = 
+          calc.rotateAroundAxis(absolutePositionOnNormal, workplaneAxis, -workplaneAngle);
+        positionOnNormalInLocalCoords.sub(workplaneOrigin);
+
+        var h = positionOnNormalInLocalCoords.z - this.rayOrigin.z;
       }
 
-      // Apply Workplane
-      // var workplaneOrigin = calc.objToVector(
-      //   this.vertex.workplane.origin, 
-      //   geometryGraph, 
-      //   THREE.Vector3);
-      // var workplaneAxis = calc.objToVector(
-      //   this.vertex.workplane.axis, 
-      //   geometryGraph, 
-      //   THREE.Vector3);
-      // var workplaneAngle = geometryGraph.evaluate(this.vertex.workplane.angle);
-
-      // var rayOriginUsingWorkplane = calc.rotateAroundAxis(rayOrigin, workplaneAxis, workplaneAngle);
-      // rayOriginUsingWorkplane.add(workplaneOrigin);
-
-      // var rayDirection = new THREE.Vector3(0,0,1);
-      // var rayDirectionUsingWorkplane = calc.rotateAroundAxis(rayDirection, workplaneAxis, workplaneAngle);
-
-      // var ray = new THREE.Ray(rayOriginUsingWorkplane, rayDirectionUsingWorkplane);
-      // var absolutePositionOnNormal = calc.positionOnRay(mouseRay, ray);
-
-      // // Back into local coordinates
-      // var positionOnNormalInLocalCoords = 
-      //   calc.rotateAroundAxis(absolutePositionOnNormal, workplaneAxis, -workplaneAngle);
-
-      // var h = positionOnNormalInLocalCoords.z - rayOrigin.z;
-
       var grid = settings.get('gridsize');
-      this.origin.z = Math.round(parseFloat(h/grid))*grid;
+      this.origin.z = this.rayOrigin.z + Math.round(parseFloat(h/grid))*grid;
 
       this.vertex.trigger('change', this.vertex);
     },

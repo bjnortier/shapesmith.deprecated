@@ -27,6 +27,7 @@ define([
     initialize: function(options) {
       this.vertex = options.vertex;
       this.origin = options.origin;
+      this.isGlobal = options.isGlobal;
 
       GeomVertexMV.EditingSceneView.prototype.initialize.call(this);
       this.render();
@@ -66,11 +67,12 @@ define([
     },
 
     isDraggable: function() {
-      return true;
+      return !this.dragging;
     },
 
     dragStarted: function() {
       this.startPosition = calc.objToVector(this.origin, geometryGraph, THREE.Vector3);
+      this.dragging = true;
     },
 
     drag: function(position) {
@@ -80,6 +82,7 @@ define([
     },
 
     dragEnded: function() {
+      this.dragging = false;
     },
 
   });
