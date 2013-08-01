@@ -10,12 +10,6 @@ define([
     highlightLineColor: 0x3333cc,
 
     initialize: function(options) {
-      var extents = this.model.selectedModel.getExtents();
-      this.center = extents.center;
-      this.radius = Math.sqrt(extents.dx*extents.dx + extents.dy*extents.dy + extents.dz*extents.dz) + 5;
-      this.rotation = this.model.vertex.transforms.rotation;
-      this.arrowStartPosition = new THREE.Vector3(0, this.radius, 0);
-
       RotationSceneView.prototype.initialize.call(this, options);
     },
     
@@ -23,6 +17,10 @@ define([
       RotationSceneView.prototype.render.call(this);
       this.circleAndArrow.rotation.y = Math.PI/2;
       this.circleAndArrow.rotation.x = Math.PI/2;
+    },
+
+    getArrowStartPosition: function() {
+      return new THREE.Vector3(0, this.radius, 0);
     },
     
     relativeRotationAxis: new THREE.Vector3(1,0,0),
@@ -37,12 +35,6 @@ define([
     highlightLineColor: 0x00ff00,
 
     initialize: function(options) {
-      var extents = this.model.selectedModel.getExtents();
-      this.center = extents.center;
-      this.radius = Math.sqrt(extents.dx*extents.dx + extents.dy*extents.dy + extents.dz*extents.dz) + 5;
-      this.rotation = this.model.vertex.transforms.rotation;
-      this.arrowStartPosition = new THREE.Vector3(0, 0, this.radius);
-
       RotationSceneView.prototype.initialize.call(this, options);
     },
     
@@ -50,6 +42,10 @@ define([
       RotationSceneView.prototype.render.call(this);
       this.circleAndArrow.rotation.x = -Math.PI/2;
       this.circleAndArrow.rotation.z = -Math.PI/2;
+    },
+
+    getArrowStartPosition: function() {
+      return new THREE.Vector3(0, 0, this.radius);
     },
 
     relativeRotationAxis: new THREE.Vector3(0,1,0),
@@ -64,17 +60,15 @@ define([
     highlightLineColor: 0xcc3333,
 
     initialize: function(options) {
-      var extents = this.model.selectedModel.getExtents();
-      this.center = extents.center;
-      this.radius = Math.sqrt(extents.dx*extents.dx + extents.dy*extents.dy + extents.dz*extents.dz) + 5;
-      this.rotation = this.model.vertex.transforms.rotation;
-      this.arrowStartPosition = new THREE.Vector3(this.radius, 0, 0);
-
       RotationSceneView.prototype.initialize.call(this, options);
     },
     
     render: function() {
       RotationSceneView.prototype.render.call(this);
+    },
+
+    getArrowStartPosition: function() {
+      return new THREE.Vector3(this.radius, 0, 0);
     },
 
     relativeRotationAxis: new THREE.Vector3(0,0,1),

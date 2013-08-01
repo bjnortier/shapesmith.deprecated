@@ -163,12 +163,13 @@ define([], function() {
     }
 
     var rotateAroundAxis = function(position, axis, angle) {
+        var position = position.clone();
         if (angle !== 0) {
             var quaternion = new THREE.Quaternion().setFromAxisAngle(axis, angle/180*Math.PI);
-            var newPosition = position.clone().applyQuaternion(quaternion);
+            var newPosition = position.applyQuaternion(quaternion);
             return newPosition;
         } else {
-            return position.clone();
+            return position;
         }
     }
 

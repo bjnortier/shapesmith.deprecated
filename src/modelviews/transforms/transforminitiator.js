@@ -53,9 +53,9 @@ define([
         this.sceneViews = [
           new TranslateSceneView({model: this}),
           new ScaleSceneView({model: this}),
-          new UVWRotationSceneViews.U({model: this}),
-          new UVWRotationSceneViews.V({model: this}),
-          new UVWRotationSceneViews.W({model: this}),
+          new UVWRotationSceneViews.U({initiator: this, model: this.selectedModel, vertex: this.vertex}),
+          new UVWRotationSceneViews.V({initiator: this, model: this.selectedModel, vertex: this.vertex}),
+          new UVWRotationSceneViews.W({initiator: this, model: this.selectedModel, vertex: this.vertex}),
         ];
       } else {
         this.sceneViews.forEach(function(view) {

@@ -13,6 +13,7 @@ define([
     'modelviews/originview',
     'modelviews/zanchorview',
     'modelviews/originDOMView',
+    'modelviews/transforms/uvwrotationsceneviews',
     'selection',
     'asyncAPI',
     'icons',
@@ -31,6 +32,7 @@ define([
     OriginView,
     ZAnchorView,
     OriginDOMView,
+    UVWRotationSceneViews,
     selection,
     AsyncAPI,
     icons) {
@@ -44,12 +46,27 @@ define([
       this.views.push(new OriginView({model: this, vertex: this.vertex, origin: this.vertex.workplane.origin, isGlobal: true })); 
       this.views.push(new OriginDOMView({model: this, vertex: this.vertex, origin: this.vertex.workplane.origin, isGlobal: true })); 
       this.views.push(new ZAnchorView({model: this, vertex: this.vertex, origin: this.vertex.workplane.origin, isGlobal: true })); 
+      this.views.push(new UVWRotationSceneViews.U({initiator: this, model: this, vertex: this.vertex, isWorkplane: true}));
+      this.views.push(new UVWRotationSceneViews.V({initiator: this, model: this, vertex: this.vertex, isWorkplane: true}));
+      this.views.push(new UVWRotationSceneViews.W({initiator: this, model: this, vertex: this.vertex, isWorkplane: true}));
       coordinator.on('sceneClick', this.tryCommit, this);
     },
 
     destroy: function() {
       VertexMV.EditingModel.prototype.destroy.call(this);
       coordinator.off('sceneClick', this.tryCommit, this);
+    },
+
+    getExtents: function() {
+      return {
+        center: new THREE.Vector3(),
+        dx: Math.sqrt(45*45/3),
+        dy: Math.sqrt(45*45/3),
+        dz: Math.sqrt(45*45/3),
+      };      
+    },
+
+    hideOtherViews: function() {
     },
     
   });
@@ -98,10 +115,6 @@ define([
 
     mousemove: function(event) {
       VertexMV.eventProxy.trigger('workplanePositionChanged', event);
-    },
-
-    edit: function() {
-      geometryGraph.edit(this.vertex);
     },
 
     pushVertex: function(vertex) {
@@ -160,6 +173,7 @@ define([
 
     click: function(event) {
       event.stopPropagation();
+      selection.deselectAll();
       if (!geometryGraph.isEditing()) {
         AsyncAPI.edit(this.model.vertex);
       }

@@ -119,6 +119,29 @@ define([
       if (this.sceneObject) {
         this.scene.remove(this.sceneObject);
         sceneViewEventGenerator.deregister(this);
+
+        var dispose = function(obj) {
+
+          if (obj.geometry) {
+            obj.geometry.dispose();  
+          }
+          if (obj.material) {
+            if (obj.material instanceof THREE.MeshFaceMaterial) {  
+              obj.material.materials.forEach(function(obj) {
+                obj.dispose();
+              });
+            } else { 
+              // obj.material.dispose(); 
+            }
+          } 
+          if (obj.dispose) {  
+            obj.dispose();
+          }
+          if (obj.children) {
+            obj.children.forEach(dispose);
+          }
+        };
+        dispose(this.sceneObject);
       }
       
       this.boundingBox = {
