@@ -26,8 +26,6 @@ define([
     initialize: function() {
       var extents = this.model.selectedModel.getExtents();
       this.center = extents.center;
-      this.center.z = 0;
-
       TransformSceneView.prototype.initialize.call(this);
     },
 

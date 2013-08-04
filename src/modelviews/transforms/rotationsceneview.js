@@ -20,15 +20,16 @@ define([
       this.model = options.model;
       this.vertex = options.vertex;
       var extents = this.model.getExtents();
-      this.center = extents.center;
       this.radius = Math.sqrt(extents.dx*extents.dx + extents.dy*extents.dy + extents.dz*extents.dz) + 5;
 
       if (this.isWorkplane) {
         this.rotationObj = this.vertex.workplane;
       } else {
         this.rotationObj = this.vertex.transforms.rotation;
+        this.rotationObj.origin = extents.center;
       }
 
+      this.center = calc.objToVector(this.rotationObj.origin, geometryGraph, THREE.Vector3);
       TransformSceneView.prototype.initialize.call(this, options);
       this.vertex.on('change', this.render, this);
     },
@@ -76,8 +77,6 @@ define([
       var quat3 = new THREE.Quaternion().multiplyQuaternions(quat1, quat2);
       quat3.normalize();
 
-      console.log('1', this.relativeRotationAxis, this.relativeAngle);
-      console.log('2', calc.objToVector(this.rotationObj.axis, geometryGraph, THREE.Vector3), geometryGraph.evaluate(this.rotationObj.angle));
       
       this.sceneObject.useQuaternion = true;
       this.sceneObject.quaternion = quat3;
@@ -108,14 +107,15 @@ define([
       }
       this.originalAxis = calc.objToVector(this.rotationObj.axis, geometryGraph, THREE.Vector3);
       this.originalAngle = geometryGraph.evaluate(this.rotationObj.angle);
-      this.dragging = true;
-
+      this.originalOrigin = calc.objToVector(this.rotationObj.origin, geometryGraph, THREE.Vector3);
     },
 
     drag: function(position, intersections, event) {
-
-      var planeOrigin = this.center;
+      
       var planeAxis = this.relativeRotationAxis;
+      var planeAxis = calc.rotateAroundAxis(planeAxis, this.originalAxis, this.originalAngle);
+      
+      var planeOrigin = this.originalOrigin;
 
       var positionOnRotationPlane = calc.positionOnPlane($('#scene'), event, planeOrigin, planeAxis, camera);
 
@@ -127,7 +127,7 @@ define([
       var v2 = this.getArrowStartPosition().clone().normalize();
       v2 = calc.rotateAroundAxis(
         v2,
-        this.relativeRotationAxis,
+        this.originalAxis,
         this.originalAngle);
       var v2CrossV1 = new THREE.Vector3().crossVectors(v2, v1);
 
@@ -156,7 +156,7 @@ define([
 
       if (this.relativeAngle !== this.previousRelativeAngle) {
         var quat1 = new THREE.Quaternion().setFromAxisAngle(this.originalAxis, Math.PI*this.originalAngle/180);
-        var quat2 = new THREE.Quaternion().setFromAxisAngle(planeAxis, Math.PI*this.relativeAngle/180);
+        var quat2 = new THREE.Quaternion().setFromAxisAngle(this.relativeRotationAxis, Math.PI*this.relativeAngle/180);
         var quat3 = new THREE.Quaternion().multiplyQuaternions(quat1, quat2);
         quat3.normalize();
 
