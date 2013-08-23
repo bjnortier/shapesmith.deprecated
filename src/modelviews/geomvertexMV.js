@@ -250,33 +250,48 @@
       polygons.forEach(function(coordinates, i) {
 
         // Remove degenerates
+        var eps = 0.001;
         var coordinates = coordinates.reduce(function(acc, c, j) {
           if (j === 0) {
             return acc.concat(c);
-          } else if (new THREE.Vector3().subVectors(c,acc[acc.length-1]).length() > 0.000000001) {
-            return acc.concat(c);
           } else {
-            return acc;
+            var l = new THREE.Vector3().subVectors(c,acc[acc.length-1]).length();
+            console.log(l);
+            if (l > eps) {
+              return acc.concat(c);
+            } else {
+              return acc;
+            }
           }
         }, []);
+        if (new THREE.Vector3().subVectors(
+            coordinates[0],
+            coordinates[coordinates.length-1]).length()
+             <= eps) {
+          coordinates = coordinates.slice(1);
+        }
 
-        var polygonIndices = coordinates.map(function(coordinate) {
-          var vertex = new THREE.Vector3(coordinate.x, coordinate.y, coordinate.z);
-          box3.expandByPoint(vertex);
-          return geometry.vertices.push(vertex) - 1;
-        });
+        
         if (coordinates.length < 3) {
           // Ignore degenerates
-          // throw Error('invalid polygon');
-        } else if (coordinates.length === 3) {
-          geometry.faces.push(new THREE.Face3(polygonIndices[0],polygonIndices[1],polygonIndices[2]));
-        } else if (coordinates.length === 4) {
-          geometry.faces.push(new THREE.Face4(polygonIndices[0],polygonIndices[1],polygonIndices[2],polygonIndices[3]));
+          // console.warn('invalid polygon');
         } else {
-          // Only support cnvex polygons
-          geometry.faces.push(new THREE.Face3(polygonIndices[0],polygonIndices[1],polygonIndices[2]));
-          for (var i = 2; i < coordinates.length -1; ++i) {
-            geometry.faces.push(new THREE.Face3(polygonIndices[0], polygonIndices[0]+i,polygonIndices[0]+i+1));
+          var polygonIndices = coordinates.map(function(coordinate) {
+            var vertex = new THREE.Vector3(coordinate.x, coordinate.y, coordinate.z);
+            box3.expandByPoint(vertex);
+            return geometry.vertices.push(vertex) - 1;
+          });
+
+          if (coordinates.length === 3) {
+            geometry.faces.push(new THREE.Face3(polygonIndices[0],polygonIndices[1],polygonIndices[2]));
+          } else if (coordinates.length === 4) {
+            geometry.faces.push(new THREE.Face4(polygonIndices[0],polygonIndices[1],polygonIndices[2],polygonIndices[3]));
+          } else {
+            // Only support convex polygons
+            geometry.faces.push(new THREE.Face3(polygonIndices[0],polygonIndices[1],polygonIndices[2]));
+            for (var i = 2; i < coordinates.length -1; ++i) {
+              geometry.faces.push(new THREE.Face3(polygonIndices[0], polygonIndices[0]+i,polygonIndices[0]+i+1));
+            }
           }
         }
         
@@ -342,6 +357,7 @@
           dy: toMesh.box3.max.y - toMesh.box3.center().y,
           dz: toMesh.box3.max.z - toMesh.box3.center().z,
         };
+        console.log(this.extents);
 
         var faceGeometry = toMesh.geometry;
         var faceMaterial;
@@ -355,6 +371,13 @@
           faceMaterial = this.materials.normal.face;
         }
         var meshObject = new THREE.Mesh(faceGeometry, faceMaterial);
+
+        // Debug - show edges
+        // var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
+        //   faceMaterial,
+        //   new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true, linewidth: 5}),
+        // ]);
+  
         this.sceneObject.add(meshObject);
         sceneModel.view.updateScene = true;
       }
