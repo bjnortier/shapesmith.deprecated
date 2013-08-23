@@ -26,9 +26,9 @@ I recommend using [Homebrew](http://mxcl.github.com/homebrew/) to install nodejs
      
     $ brew install node
 
-### Install grunt-cli
+### Install grunt-cli and nodemon (nodemon is used suring development to restart on code changes)
 
-    $ npm install -g grunt-cli
+    $ npm install -g grunt-cli nodemon
 
 ### Install the dependencies
 
