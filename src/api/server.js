@@ -32,6 +32,15 @@ switch (app_env) {
 
 var diskDBPath = path.normalize(path.join(rootDir, nconf.get('diskDBPath')));
 
+console.info("");
+console.info("    .                           .  .   ");
+console.info(",-. |-. ,-. ,-. ,-. ,-. ,-,-. . |- |-. ");
+console.info("`-. | | ,-| | | |-' `-. | | | | |  | | ");
+console.info("`-' ' ' `-^ |-' `-' `-' ' ' ' ' `' ' ' ");
+console.info("            |                          ");
+console.info("");
+
+
 console.info('\n\nconfiguration:');
 console.info('--------------');
 console.info('environment: ', app_env);
