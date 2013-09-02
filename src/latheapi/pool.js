@@ -4,17 +4,13 @@ define([
     'lathe/primitives/cube',
     'lathe/primitives/sphere',
     'lathe/bsp',
-    'latheapi/bspdb',
   ], 
   function(
     _,
     Events,
     Cube,
     Sphere,
-    BSP,
-    bspdb) {
-
-  
+    BSP) {
 
   // The job queue will manage the jobs, and put jobs in a queue
   // if there are no workers available. When a worker becomes available,
@@ -90,6 +86,7 @@ define([
     }
 
     var doJob = function(job, worker) {
+      console.log('doing job', job.id);
       worker.busy = true;
       worker.postMessage(job);
     }
@@ -97,7 +94,6 @@ define([
     var doNextJob = function(worker) {
       if (worker.initialized && !worker.busy && queue.length) {
         var job = queue.shift();
-        console.log('doing queued job', job.id);
         doJob(job, worker);
       }
     }

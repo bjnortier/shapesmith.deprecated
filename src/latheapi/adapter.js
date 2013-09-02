@@ -27,14 +27,19 @@ define([
       } else {
         var jobId = generator();
         Lathe.broker.on(jobId, function(jobResult) {
-          jobResult.sha = sha;
-          jobResult.id = jobId;
 
-          bspdb.write(jobResult, function(err) {
+          bspdb.write({
+            sha: sha,
+            polygons: jobResult.polygons,
+            serializedBSP: jobResult.serializedBSP,
+          }, function(err) {
             if (err) {
               postMessage({error: 'error writing to BSP DB' + err});
             }
-          })
+          });
+
+          jobResult.sha = sha;
+          jobResult.id = jobId;
           callback(undefined, jobResult);
         });
       }
@@ -75,11 +80,33 @@ define([
         return childResults[child.id].serializedBSP;
       })
 
-      getOrGenerate(sha, function() {
-        return Lathe.createSubtract(sha, childBSPs, vertex.transforms);
-      }, callback);
+      if (addCallbackAndShouldGenerate(sha, callback)) {
+        getOrGenerate(sha, function() {
+          return Lathe.createSubtract(sha, childBSPs, vertex.transforms);
+        }, performCallback);
+      }
     }
     
+  }
+
+  // Share the generate callbacks so only a single generate is performed
+  // for multiple renders for example
+
+  var generateCallbacks = {};
+
+  var addCallbackAndShouldGenerate = function(sha, callback) {
+    if (!generateCallbacks[sha]) {
+      generateCallbacks[sha] = [];
+    }
+    generateCallbacks[sha].push(callback);
+    return generateCallbacks[sha].length === 1;
+  }
+
+  var performCallback = function(err, result) {
+    generateCallbacks[result.sha].forEach(function(callback) {
+      callback(err, result);
+    });
+    generateCallbacks[result.sha] = undefined;
   }
 
   var generate = function(vertex, callback) {
@@ -87,17 +114,21 @@ define([
       case 'sphere':
         var normalized = Normalize.normalizeVertex(vertex);
         var sha = SHA1Hasher.hash(normalized);
-        getOrGenerate(sha, function() {
-          return Lathe.createSphere(sha, normalized, vertex.transforms, vertex.workplane);
-        }, callback);
+        if (addCallbackAndShouldGenerate(sha, callback)) {
+          getOrGenerate(sha, function() {
+            return Lathe.createSphere(sha, normalized, vertex.transforms, vertex.workplane);
+          }, performCallback);
+        }
         break;
 
       case 'cube':
         var normalized = Normalize.normalizeVertex(vertex);
         var sha = SHA1Hasher.hash(normalized);
-        getOrGenerate(sha, function() {
-          return Lathe.createCube(sha, normalized, vertex.transforms, vertex.workplane);
-        }, callback);
+        if (addCallbackAndShouldGenerate(sha, callback)) {
+          getOrGenerate(sha, function() {
+            return Lathe.createCube(sha, normalized, vertex.transforms, vertex.workplane);
+          }, performCallback);
+        }
         break;
       case 'subtract':
         generateSubtract(vertex, callback);
