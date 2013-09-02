@@ -17,8 +17,13 @@ body {
 }
 #toolbar {
   margin-left: -174px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.14);
-  background-color: rgba(220, 220, 220, 0.7);
+  background-color: rgba(255, 255, 255, 0.64);
+  position: absolute;
+  left: 50%;
+  bottom: 0px;
+  padding: 0;
+  font-size: 8px;
+  border-top: solid 3px #9ff1f8;
 }
 #toolbar .item {
   padding-bottom: 10px;
@@ -38,12 +43,6 @@ body {
   position: relative;
   /*padding-top: 5px;*/
 
-}
-#toolbar {
-  padding: 5px;
-  bottom: 10px;
-  border-radius: 5px;
-  font-size: 8px;
 }
 .toolbar {
   background: none;
@@ -123,8 +122,8 @@ input.field[type="text"] {
   padding: 0;
   height: 100%;
   min-width: 150px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
   background-color: rgba(255, 255, 255, 0.64);
+  border-right: solid 3px #9ff1f8;
 }
 #variables {
   background: none;

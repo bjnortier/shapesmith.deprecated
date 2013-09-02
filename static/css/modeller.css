@@ -75,15 +75,6 @@ img#logo {
     height: 50px;
 }
 
-#toolbar {
-    background: rgba(200, 200, 200, 0.7);
-    position: absolute;
-    left: 50%;
-    bottom: 0px;
-    margin-left: -229px;
-    padding: 0;
-}
-
 .toolbar.main {
     padding-left: 10px;
 }

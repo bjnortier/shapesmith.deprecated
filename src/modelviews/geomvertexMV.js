@@ -256,7 +256,6 @@
             return acc.concat(c);
           } else {
             var l = new THREE.Vector3().subVectors(c,acc[acc.length-1]).length();
-            console.log(l);
             if (l > eps) {
               return acc.concat(c);
             } else {
@@ -308,13 +307,13 @@
     },
 
     createMesh: function(callback) {
-      var that = this;
-      latheAdapter.generate(
-        that.model.vertex,
+      var vertex = this.model.vertex;
+      var sha = latheAdapter.generate(
+        vertex,
         function(err, result) {
 
         if (err) {
-          console.error('no mesh', that.model.vertex.id);
+          console.error('no mesh', vertex.id);
           return;
         } else if(callback) {
           callback(result);
@@ -357,7 +356,6 @@
           dy: toMesh.box3.max.y - toMesh.box3.center().y,
           dz: toMesh.box3.max.z - toMesh.box3.center().z,
         };
-        console.log(this.extents);
 
         var faceGeometry = toMesh.geometry;
         var faceMaterial;
@@ -377,7 +375,7 @@
         //   faceMaterial,
         //   new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true, linewidth: 5}),
         // ]);
-  
+
         this.sceneObject.add(meshObject);
         sceneModel.view.updateScene = true;
       }

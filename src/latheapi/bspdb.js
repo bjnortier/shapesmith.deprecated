@@ -11,7 +11,7 @@ define([
         var that = this;
         var db;
 
-        var openDBRequest = indexedDB.open("test29", 1);
+        var openDBRequest = indexedDB.open("shapesmith", 1);
         
         openDBRequest.onerror = function(event) {
             console.error('Could not create BSP database');

@@ -22,8 +22,7 @@ define([
       if (err) {
         console.error('error reading from BSP DB', err);
       }
-      // if (jobResult) {
-      if (false) {  
+      if (jobResult) {
         callback(undefined, jobResult);
       } else {
         var jobId = generator();
