@@ -128,7 +128,9 @@ define([
     },
 
     vertexAdded: function(vertex) {
-      this.trigger('change');
+      if (vertex.category === 'geometry') {
+        this.trigger('change');
+      }
     },
 
     vertexRemoved: function(vertex) {

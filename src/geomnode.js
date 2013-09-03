@@ -60,6 +60,7 @@ define([
     }
 
     this.implicit = options.implicit || false;
+
     this.workplane = options.workplane || {
       origin: {x: 0, y:0, z: 0},
       axis  : {x: 0, y: 0, z: 1},
@@ -157,6 +158,8 @@ define([
     }    
     options.type = 'variable';
     GeomNode.prototype.constructor.call(this, options);
+    this.transforms = undefined;
+    this.workplane = undefined;
   }
 
   _.extend(Variable.prototype, GeomNode.prototype);

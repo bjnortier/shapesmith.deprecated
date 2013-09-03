@@ -50,10 +50,6 @@ define([
                         key: 'snapgrid',
                     }, 
                     {
-                        label: 'Edges', 
-                        key: 'snapedges'
-                    },
-                    {
                         label: 'Faces',
                         key: 'snapfaces'
                     }
