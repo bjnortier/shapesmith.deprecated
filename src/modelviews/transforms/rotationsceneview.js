@@ -26,10 +26,9 @@ define([
         this.rotationObj = this.vertex.workplane;
       } else {
         this.rotationObj = this.vertex.transforms.rotation;
-        this.rotationObj.origin = extents.center;
       }
 
-      this.center = calc.objToVector(this.rotationObj.origin, geometryGraph, THREE.Vector3);
+      this.center = extents.center;//calc.objToVector(this.rotationObj.origin, geometryGraph, THREE.Vector3);
       TransformSceneView.prototype.initialize.call(this, options);
       this.vertex.on('change', this.render, this);
     },
@@ -107,16 +106,13 @@ define([
       }
       this.originalAxis = calc.objToVector(this.rotationObj.axis, geometryGraph, THREE.Vector3);
       this.originalAngle = geometryGraph.evaluate(this.rotationObj.angle);
-      this.originalOrigin = calc.objToVector(this.rotationObj.origin, geometryGraph, THREE.Vector3);
+      this.originalOrigin = calc.objToVector(this.center, geometryGraph, THREE.Vector3);
     },
 
     drag: function(position, intersections, event) {
       
-      var planeAxis = this.relativeRotationAxis;
-      var planeAxis = calc.rotateAroundAxis(planeAxis, this.originalAxis, this.originalAngle);
-      
+      var planeAxis = calc.rotateAroundAxis(this.relativeRotationAxis, this.originalAxis, this.originalAngle);
       var planeOrigin = this.originalOrigin;
-
       var positionOnRotationPlane = calc.positionOnPlane($('#scene'), event, planeOrigin, planeAxis, camera);
 
       if (!positionOnRotationPlane) {
