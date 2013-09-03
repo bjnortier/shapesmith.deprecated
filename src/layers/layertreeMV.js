@@ -1,7 +1,7 @@
 define([
         'backbone',
         'jquery',
-        'lib/jquery.mustache',
+        'lib/mustache',
         'calculations',
         'modelviews/vertexMV',
         'asyncAPI',
@@ -10,7 +10,8 @@ define([
         'layers/layertreedragdropmixin',
     ], function(
         Backbone,
-        $, __$,
+        $,
+        Mustache,
         calc,
         VertexMV,
         AsyncAPI,
@@ -151,7 +152,7 @@ define([
                 '<div class="name">{{name}}</div>' + 
                 '<div class="delete"></div>' +
                 '<div>';
-            this.$el.html($.mustache(template, view));
+            this.$el.html(Mustache.render(template, view));
         },
 
         updateChildren: function() {

@@ -1,11 +1,11 @@
 define([
     'backbone',
     'jquery',
-    'lib/jquery.mustache',
+    'lib/mustache',
     'geometrygraphsingleton', 
     'asyncAPI',
     'layers/layertreeMV',
-    ], function(Backbone, $, __$, geometryGraph, AsyncAPI, LayerTreeMV) {
+    ], function(Backbone, $, Mustache, geometryGraph, AsyncAPI, LayerTreeMV) {
 
     var layerTree = geometryGraph.layerTree;
 
@@ -50,7 +50,7 @@ define([
                 '<div title="Zone" class="icon24 zone"></div>' +
                 '</td>'; 
             var view = {};
-            this.$el.html($.mustache(template, view));
+            this.$el.html(Mustache.render(template, view));
             return this;
         },
 
@@ -97,7 +97,7 @@ define([
                 '<div class="name">{{name}}</div>' + 
                 '<div class="delete"></div>' +
                 '</td>';
-            this.$el.html($.mustache(template, view));
+            this.$el.html(Mustache.render(template, view));
             return this;
         },
 

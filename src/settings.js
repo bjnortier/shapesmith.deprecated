@@ -2,8 +2,8 @@ define([
     'backbone',
     'jquery',
     'lib/jquery.autoGrowInput',
-    'lib/jquery.mustache',
-    ], function(Backbone, $, __$, __$) {
+    'lib/mustache',
+    ], function(Backbone, $, __$, Mustache) {
 
     var Model = Backbone.Model.extend({
 
@@ -68,7 +68,7 @@ define([
             '<input class="field {{key}}" type="checkbox" id="snap_{{key}}"><label for="snap_{{key}}">{{label}}</label>' +
             '</td></tr>{{/snapping}}</table>' +
             '<div class="button-container"><div class="button">Save settings</div></div>';
-            this.$el.html($.mustache(template, view));
+            this.$el.html(Mustache.render(template, view));
 
             var that = this;
             ['snapgrid', 'snapedges', 'snapfaces'].forEach(function(key) {

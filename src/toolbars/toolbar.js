@@ -1,9 +1,9 @@
 define([
     'jquery',
-    'lib/jquery.mustache',
+    'lib/mustache',
     'backbone',
   ], 
-  function($, _$, Backbone) {
+  function($, Mustache, Backbone) {
 
   var ItemModel = Backbone.Model.extend({
 
@@ -50,7 +50,7 @@ define([
       var template = 
         '<div class="icon32">{{{icon}}}</div>' + 
         '<div class="label">{{label}}</div>';
-      $(this.el).html($.mustache(template, view));
+      $(this.el).html(Mustache.render(template, view));
       return this;
     },
 

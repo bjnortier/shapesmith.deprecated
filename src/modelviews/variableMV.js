@@ -1,13 +1,14 @@
 define([
     'jquery',
-    'lib/jquery.mustache',
     'lib/jquery.autoGrowInput',
+    'lib/mustache',
     'modelviews/vertexMV',
     'geometrygraphsingleton', 
     'interactioncoordinator',
     'asyncAPI',
   ], function(
-    $, __$, __$,
+    $, __$, 
+    Mustache,
     VertexMV, 
     geometryGraph, 
     coordinator,
@@ -85,7 +86,7 @@ define([
         view.name = this.model.vertex.name;
         view.expression = this.model.vertex.parameters.expression;
       }
-      this.$el.html($.mustache(template, view));
+      this.$el.html(Mustache.render(template, view));
       return this;
     },
 
@@ -122,7 +123,7 @@ define([
       var view = {
         value: this.model.vertex.parameters.expression,
       }
-      this.$el.html($.mustache(template, view));
+      this.$el.html(Mustache.render(template, view));
       var editingRow = $('.vertex.editing.' + this.model.vertex.id);
       this.$el.css('left', editingRow.position().left + editingRow.width() + 20 + 'px');
       this.$el.css('top',  editingRow.position().top + 5 + 'px');
@@ -181,7 +182,7 @@ define([
         name:  this.model.vertex.name,
         expression: this.model.vertex.parameters.expression,
       }
-      this.$el.html($.mustache(template, view));
+      this.$el.html(Mustache.render(template, view));
       return this;
     },
 

@@ -116,23 +116,27 @@ define(['calculations', 'scene', 'geometrygraphsingleton'], function(calc, scene
 
     this.drag = function(event) {
       if (mouseDownOnDraggableIntersections.length > 0) {
+        var intersections = this.findFaceIntersections(event);
+        var faceIntersects = intersections.filter(function(intersection) {
+          return !intersection.view.model.vertex || !intersection.view.model.vertex.editing;
+        })
+        // Ignore any editing intersections
+        if (geometryGraph.isEditing()) {
+          var closestEdgePosition = this.findClosestNonEditingEdge(event);
+        }
         if (!dragging) {
-          mouseDownOnDraggableIntersections[0].view.trigger('dragStarted', event);
+          this.trigger('dragStarted', 
+            mouseDownOnDraggableIntersections[0],
+            event,
+            faceIntersects[0] && faceIntersects[0].position,
+            closestEdgePosition);
           dragging = true;
         } else {
-          var intersections = this.findFaceIntersections(event);
-          // Ignore any editing intersections
-          var faceIntersects = intersections.filter(function(intersection) {
-            return !intersection.view.model.vertex || !intersection.view.model.vertex.editing;
-          })
-          if (geometryGraph.isEditing()) {
-            var closestEdgePosition = this.findClosestNonEditingEdge(event);
-          }
           this.trigger('drag', 
             mouseDownOnDraggableIntersections[0],
             event, 
             faceIntersects[0] && faceIntersects[0].position,
-            closestEdgePosition)
+            closestEdgePosition);
         }
         return true;
       } else {

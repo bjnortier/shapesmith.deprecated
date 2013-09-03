@@ -1,6 +1,6 @@
 define([
         'jquery',
-        'lib/jquery.mustache',
+        'lib/mustache',
         'calculations',
         'colors',
         'geometrygraphsingleton',
@@ -10,7 +10,8 @@ define([
         'icons',
     ], 
     function(
-        $, __$,
+        $, 
+        Mustache,
         calc,
         colors,
         geometryGraph,
@@ -138,7 +139,7 @@ define([
                 name: this.model.vertex.name,
                 height: this.model.vertex.parameters.height,
             };
-            this.$el.html($.mustache(template, view));
+            this.$el.html(Mustache.render(template, view));
             this.update();
             return this;
         },

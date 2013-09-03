@@ -76,6 +76,13 @@ define([
       }
     }
 
+    this.sceneViewDragStarted = function(intersection, event, facePosition, edgePosition) {
+      var newPosition = getPositionForEvent(event, facePosition, edgePosition);
+      if (newPosition) {
+        intersection.view.trigger('dragStarted', newPosition, intersection, event);
+      }
+    }
+
     this.sceneViewDrag = function(intersection, event, facePosition, edgePosition) {
       var newPosition = getPositionForEvent(event, facePosition, edgePosition);
       if (newPosition) {
@@ -108,6 +115,7 @@ define([
 
 
       sceneViewEventGenerator.on('positionChanged', this.workplaneOrFacePositionChanged, this);
+      sceneViewEventGenerator.on('dragStarted', this.sceneViewDragStarted, this);
       sceneViewEventGenerator.on('drag', this.sceneViewDrag, this);
     }
 
