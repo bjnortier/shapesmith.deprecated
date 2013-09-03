@@ -56,7 +56,7 @@ define([
         modelgraph.addWrapper('sphere', SphereMV);
         modelgraph.addWrapper('subtract', SubtractMV);
 
-        geomToolbar.addItem(new PointItemModel());
+        // geomToolbar.addItem(new PointItemModel());
         geomToolbar.addItem(new CubeItemModel());
         geomToolbar.addItem(new SphereItemModel());
         geomToolbar.addItem(new SubtractItemModel());
