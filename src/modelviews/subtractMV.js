@@ -63,7 +63,7 @@ define([
     scale: function(origin, factor) {
       this.vertex.transforms.scale.origin.x = origin.x;
       this.vertex.transforms.scale.origin.y = origin.y;
-      this.vertex.transforms.scale.origin.z = origin.z;
+      this.vertex.transforms.scale.origin.z = 0;
       this.vertex.transforms.scale.factor = factor;
       this.vertex.trigger('change', this.vertex);
     },
