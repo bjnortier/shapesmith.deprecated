@@ -72,19 +72,20 @@ define([
       this.sceneObject.add(rotationObject);
       rotationObject.add(this.circleAndArrow);
      
-      var quat1 = new THREE.Quaternion().setFromAxisAngle(
-        this.relativeRotationAxis, 0);
-        // Math.PI*this.relativeAngle/180);
-      var quat2 = new THREE.Quaternion().setFromAxisAngle(
-        calc.objToVector(this.rotationObj.axis, geometryGraph, THREE.Vector3),
-        geometryGraph.evaluate(this.rotationObj.angle)/180*Math.PI);
-      var quat3 = new THREE.Quaternion().multiplyQuaternions(quat1, quat2);
-      quat3.normalize();
-
-      
-      rotationObject.useQuaternion = true;
-      rotationObject.quaternion = quat3;
-      rotationObject.position = this.center;
+      if (!this.isWorkplane) {
+        var quat1 = new THREE.Quaternion().setFromAxisAngle(
+          this.relativeRotationAxis, 0);
+          // Math.PI*this.relativeAngle/180);
+        var quat2 = new THREE.Quaternion().setFromAxisAngle(
+          calc.objToVector(this.rotationObj.axis, geometryGraph, THREE.Vector3),
+          geometryGraph.evaluate(this.rotationObj.angle)/180*Math.PI);
+        var quat3 = new THREE.Quaternion().multiplyQuaternions(quat1, quat2);
+        quat3.normalize();
+        
+        rotationObject.useQuaternion = true;
+        rotationObject.quaternion = quat3;
+        rotationObject.position = this.center;
+      }
 
     },
 
@@ -114,16 +115,33 @@ define([
     },
 
     drag: function(position, intersections, event) {
-      
-      var planeAxis = calc.rotateAroundAxis(this.relativeRotationAxis, this.originalAxis, this.originalAngle);
-      var planeOrigin = this.originalOrigin;
-      var positionOnRotationPlane = calc.positionOnPlane($('#scene'), event, planeOrigin, planeAxis, camera);
+
+      var planeNormal = calc.rotateAroundAxis(this.relativeRotationAxis, this.originalAxis, this.originalAngle);
+      var planeOrigin = this.originalOrigin.clone();
+      var workplaneOrigin = new THREE.Vector3(0,0,0);
+      var workplaneAxis = new THREE.Vector3(0,0,1);
+      var workplaneAngle = 0;
+
+      if (!this.isWorkplane) {
+        // Local Workplane
+        workplaneOrigin = calc.objToVector(
+          this.editingVertex.workplane.origin, 
+          geometryGraph, 
+          THREE.Vector3);
+        workplaneAxis =  calc.objToVector(
+          this.editingVertex.workplane.axis, 
+          geometryGraph, 
+          THREE.Vector3);
+        workplaneAngle = geometryGraph.evaluate(this.editingVertex.workplane.angle);
+      }
+
+      var positionOnRotationPlane = calc.positionOnPlane($('#scene'), event, planeOrigin, planeNormal, workplaneOrigin, workplaneAxis, workplaneAngle, camera);
 
       if (!positionOnRotationPlane) {
         return;
       }
 
-      var v1 = new THREE.Vector3().subVectors(positionOnRotationPlane, planeOrigin).normalize();
+      var v1 = positionOnRotationPlane.clone().normalize();
       var v2 = this.getArrowStartPosition().clone().normalize();
       v2 = calc.rotateAroundAxis(
         v2,
@@ -132,7 +150,7 @@ define([
       var v2CrossV1 = new THREE.Vector3().crossVectors(v2, v1);
 
       var angle = parseFloat((Math.acos(v1.dot(v2))/Math.PI*180).toFixed(0));
-      if (planeAxis.dot(v2CrossV1) < 0) {
+      if (planeNormal.dot(v2CrossV1) < 0) {
         angle = -angle;
       }
 

@@ -61,8 +61,10 @@ requirejs([
     }
 
     var applyReverseWorkplane = function(bsp, workplane) {
-      if (workplane.angle !== 0) {
+      if (!((workplane.origin.x === 0) && (workplane.origin.y === 0) && (workplane.origin.z === 0))) {  
         bsp = bsp.translate(-workplane.origin.x, -workplane.origin.y, -workplane.origin.z); 
+      }
+      if (workplane.angle !== 0) {
         bsp = bsp.rotate(
           workplane.axis.x, 
           workplane.axis.y, 
@@ -92,6 +94,8 @@ requirejs([
           workplane.axis.y, 
           workplane.axis.z, 
           workplane.angle/180*Math.PI);
+      }
+      if (!((workplane.origin.x === 0) && (workplane.origin.y === 0) && (workplane.origin.z === 0))) {
         bsp = bsp.translate(workplane.origin.x, workplane.origin.y, workplane.origin.z); 
       }
       return bsp;
