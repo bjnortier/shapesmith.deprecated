@@ -99,18 +99,7 @@ define([
       var camera = sceneModel.view.camera;
       var mouseRay = calc.mouseRayForEvent(sceneElement, camera, event);
 
-      var rayOrigin = new THREE.Vector3().addVectors(
-        this.originPosition,
-        new THREE.Vector3(
-          geometryGraph.evaluate(this.model.vertex.parameters.width),
-          geometryGraph.evaluate(this.model.vertex.parameters.depth), 
-          0));
-      rayOrigin.add(calc.objToVector(
-        this.model.vertex.workplane.origin, 
-        geometryGraph, 
-        THREE.Vector3));
-
-      // Apply Workplane
+      // Local Workplane
       var workplaneOrigin = calc.objToVector(
         this.vertex.workplane.origin, 
         geometryGraph, 
@@ -121,12 +110,16 @@ define([
         THREE.Vector3);
       var workplaneAngle = geometryGraph.evaluate(this.vertex.workplane.angle);
 
+     var rayOrigin = new THREE.Vector3().addVectors(
+        this.originPosition,
+        new THREE.Vector3(
+          geometryGraph.evaluate(this.vertex.parameters.width),
+          geometryGraph.evaluate(this.vertex.parameters.depth), 
+          0));
+      rayOrigin.add(workplaneOrigin);
       var rayOriginUsingWorkplane = calc.rotateAroundAxis(rayOrigin, workplaneAxis, workplaneAngle);
-      rayOriginUsingWorkplane.add(workplaneOrigin);
-
       var rayDirection = new THREE.Vector3(0,0,1);
       var rayDirectionUsingWorkplane = calc.rotateAroundAxis(rayDirection, workplaneAxis, workplaneAngle);
-
       var ray = new THREE.Ray(rayOriginUsingWorkplane, rayDirectionUsingWorkplane);
       var absolutePositionOnNormal = calc.positionOnRay(mouseRay, ray);
 

@@ -82,7 +82,7 @@ define([
 
       if (addCallbackAndShouldGenerate(sha, callback)) {
         getOrGenerate(sha, function() {
-          return Lathe.createSubtract(sha, childBSPs, vertex.transforms);
+          return Lathe.createSubtract(sha, childBSPs, vertex.transforms, vertex.workplane);
         }, performCallback);
       }
     }

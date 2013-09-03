@@ -86,7 +86,7 @@ define([
     }
 
     var doJob = function(job, worker) {
-      console.log('doing job', job.id);
+      // console.log('doing job', job.id);
       worker.busy = true;
       worker.postMessage(job);
     }

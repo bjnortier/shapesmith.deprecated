@@ -65,7 +65,12 @@ define([
       this.circleAndArrow = new THREE.Object3D();
       this.circleAndArrow.add(this.arrow);
       this.circleAndArrow.add(circle);
-      this.sceneObject.add(this.circleAndArrow);
+
+      // Separate object so the scene object can be
+      // transformed with the workplane
+      var rotationObject = new THREE.Object3D();
+      this.sceneObject.add(rotationObject);
+      rotationObject.add(this.circleAndArrow);
      
       var quat1 = new THREE.Quaternion().setFromAxisAngle(
         this.relativeRotationAxis, 0);
@@ -77,10 +82,9 @@ define([
       quat3.normalize();
 
       
-      this.sceneObject.useQuaternion = true;
-      this.sceneObject.quaternion = quat3;
-
-      this.sceneObject.position = this.center;
+      rotationObject.useQuaternion = true;
+      rotationObject.quaternion = quat3;
+      rotationObject.position = this.center;
 
     },
 

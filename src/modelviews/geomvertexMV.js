@@ -176,19 +176,18 @@
 
     updateMaterials: function(key) {
       var objects = this.findObjects([this.sceneObject]);
-      var that = this;
       objects.lines.forEach(function(line) {
-        line.material = that.materials[key].edge;
-      });
+        line.material = this.materials[key].edge;
+      }, this);
       objects.meshes.forEach(function(mesh) {
         if (mesh.material) {
           if (mesh.material.name.endsWith('face')) {
-            mesh.material = that.materials[key].face;
+            mesh.material = this.materials[key].face;
           } else if (mesh.material.name.endsWith('wire')) {
-            mesh.material = that.materials[key].wire;
+            mesh.material = this.materials[key].wire;
           }
         }
-      });
+      }, this);
       sceneModel.view.updateScene = true;
     },
 
@@ -208,7 +207,6 @@
 
       var screenBox = new THREE.Box2();
 
-      var that = this;
       corners.forEach(function(corner) {
         var screenPos = calc.toScreenCoordinates(sceneWidth, sceneHeight, camera, corner);
         screenBox.expandByPoint(new THREE.Vector2(
@@ -217,7 +215,7 @@
         screenBox.expandByPoint(new THREE.Vector2(
           Math.max(screenBox.max.x, screenPos.x + 5),
           Math.max(screenBox.max.y, screenPos.y + 5)));
-      })
+      }, this)
 
       return screenBox;
     },
@@ -247,6 +245,17 @@
       var geometry = new THREE.Geometry();
       var indices = [];
       var box3 = new THREE.Box3();
+
+      var workplaneAxis = calc.objToVector(
+          this.model.vertex.workplane.axis, 
+          geometryGraph, 
+          THREE.Vector3);
+      var workplaneAngle = geometryGraph.evaluate(this.model.vertex.workplane.angle);
+      var workplaneOrigin = calc.objToVector(
+            this.model.vertex.workplane.origin, 
+            geometryGraph, 
+            THREE.Vector3);
+
       polygons.forEach(function(coordinates, i) {
 
         // Remove degenerates
@@ -277,7 +286,12 @@
         } else {
           var polygonIndices = coordinates.map(function(coordinate) {
             var vertex = new THREE.Vector3(coordinate.x, coordinate.y, coordinate.z);
-            box3.expandByPoint(vertex);
+
+            var localVertex = vertex.clone();
+            localVertex.sub(workplaneOrigin);
+            localVertex = calc.rotateAroundAxis(localVertex, workplaneAxis, -workplaneAngle);
+            box3.expandByPoint(localVertex);
+
             return geometry.vertices.push(vertex) - 1;
           });
 
@@ -296,7 +310,7 @@
         
         indices.push(polygonIndices);
 
-      })
+      }, this)
 
       geometry.computeFaceNormals();
       return {
@@ -459,13 +473,13 @@
         '</div>' + 
         '<div class="children {{id}}"></div>';
       this.afterTemplate = this.model.vertex.implicit ? '' : 
-        '<div class="workplane">' +
-          '<div class="origin">' +
-            '<div>x <input class="field workplane.origin.x" type="text" value="{{workplane.origin.x}}"></input></div>' +
-            '<div>y <input class="field workplane.origin.y" type="text" value="{{workplane.origin.y}}"></input></div>' +
-            '<div>z <input class="field workplane.origin.z" type="text" value="{{workplane.origin.z}}"></input></div>' +     
-          '</div>' +
-        '</div>' +
+        // '<div class="workplane">' +
+        //   '<div class="origin">' +
+        //     '<div>x <input class="field workplane.origin.x" type="text" value="{{workplane.origin.x}}"></input></div>' +
+        //     '<div>y <input class="field workplane.origin.y" type="text" value="{{workplane.origin.y}}"></input></div>' +
+        //     '<div>z <input class="field workplane.origin.z" type="text" value="{{workplane.origin.z}}"></input></div>' +     
+        //   '</div>' +
+        // '</div>' +
         '<div>axisx <input class="field axisx" type="text" value="{{axis.x}}"></input></div>' +
         '<div>axisy <input class="field axisy" type="text" value="{{axis.y}}"></input></div>' +
         '<div>axisz <input class="field axisz" type="text" value="{{axis.z}}"></input></div>' + 
@@ -480,7 +494,7 @@
         implicit: this.model.vertex.implicit,
         icon: icons[this.model.vertex.type],
         isTopLevel: !geometryGraph.parentsOf(this.model.vertex).length,
-        workplane: this.model.vertex.workplane,
+        // workplane: this.model.vertex.workplane,
         axis: { 
           x: rotation.axis.x,
           y: rotation.axis.y,
@@ -496,29 +510,27 @@
     },
 
     update: function() {
-      var that = this;
       var rotation = this.model.vertex.transforms.rotation;
       var scale = this.model.vertex.transforms.scale.factor;
       ['x', 'y', 'z'].forEach(function(key) {
-        that.$el.find('.field.axis' + key).val(rotation.axis[key]);
-      });
+        this.$el.find('.field.axis' + key).val(rotation.axis[key]);
+      }, this);
       this.$el.find('.field.angle').val(rotation.angle);
       this.$el.find('.field.scale').val(scale);
     },
 
     updateFromDOM: function() {
-      var that = this;
       ['x', 'y', 'z'].forEach(function(key) {
         try {
-          var expression = that.$el.find('.field.axis' + key).val();
-          that.model.vertex.transforms.rotation.axis[key] = expression;
+          var expression = this.$el.find('.field.axis' + key).val();
+          this.model.vertex.transforms.rotation.axis[key] = expression;
         } catch(e) {
           console.error(e);
         }
-      });
+      }, this);
       try {
-        that.model.vertex.transforms.rotation.angle =  that.$el.find('.field.angle').val();;
-        that.model.vertex.transforms.scale.factor =  that.$el.find('.field.scale').val();;
+        this.model.vertex.transforms.rotation.angle =  this.$el.find('.field.angle').val();;
+        this.model.vertex.transforms.scale.factor =  this.$el.find('.field.scale').val();;
       } catch(e) {
         console.error(e);
       }

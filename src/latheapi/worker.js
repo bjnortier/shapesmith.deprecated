@@ -60,7 +60,19 @@ requirejs([
       
     }
 
-    var applyTransforms = function(bsp, transforms, workplane) {
+    var applyReverseWorkplane = function(bsp, workplane) {
+      if (workplane.angle !== 0) {
+        bsp = bsp.translate(-workplane.origin.x, -workplane.origin.y, -workplane.origin.z); 
+        bsp = bsp.rotate(
+          workplane.axis.x, 
+          workplane.axis.y, 
+          workplane.axis.z, 
+          -workplane.angle/180*Math.PI);
+      }
+      return bsp;
+    }
+
+    var applyTransformsAndWorkplane = function(bsp, transforms, workplane) {
       if (transforms.translation) {
         bsp = bsp.translate(transforms.translation.x, transforms.translation.y, transforms.translation.z);
       }
@@ -74,8 +86,7 @@ requirejs([
         bsp = bsp.scale(transforms.scale.factor);
         bsp = bsp.translate(transforms.scale.origin.x, transforms.scale.origin.y, -transforms.scale.origin.z); 
       }
-      // All primitives have a workplane, but booleans do not.
-      if (workplane) {
+      if (workplane.angle !== 0) {
         bsp = bsp.rotate(
           workplane.axis.x, 
           workplane.axis.y, 
@@ -90,10 +101,10 @@ requirejs([
 
       // Create new with the arguments
       if (e.data.sphere) {
-        var bsp = applyTransforms(new Sphere(e.data.sphere).bsp, e.data.transforms, e.data.workplane);
+        var bsp = applyTransformsAndWorkplane(new Sphere(e.data.sphere).bsp, e.data.transforms, e.data.workplane);
         returnResult(e.data.id, e.data.sha, bsp);
       } else if (e.data.cube) {
-        var bsp = applyTransforms(new Cube(e.data.cube).bsp, e.data.transforms, e.data.workplane);
+        var bsp = applyTransformsAndWorkplane(new Cube(e.data.cube).bsp, e.data.transforms, e.data.workplane);
         returnResult(e.data.id, e.data.sha, bsp);
       } else if (e.data.subtract) {
 
@@ -106,7 +117,8 @@ requirejs([
         var a = BSP.deserialize(childBSPs[0]);
         var b = BSP.deserialize(childBSPs[1]);
         var subtract = new Subtract3D(a,b);
-        var bsp = applyTransforms(subtract.bsp, e.data.transforms || {});
+        var bsp = applyReverseWorkplane(subtract.bsp, e.data.workplane);
+        bsp = applyTransformsAndWorkplane(bsp, e.data.transforms, e.data.workplane);
 
         returnResult(e.data.id, e.data.sha, bsp);
 
