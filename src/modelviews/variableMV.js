@@ -103,6 +103,7 @@ define([
       var expr = this.$el.find('.expr').val();
       this.model.vertex.name = name;
       this.model.vertex.parameters.expression = expr;
+      
     },
 
   });

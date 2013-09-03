@@ -388,10 +388,10 @@ define([
 
     events: function() {
       return {
-        'click .field'  : 'fieldClick',
-        'change .field'   : 'fieldChange',
-        'keyup .field'  : 'fieldKeyUp',
-        'click .delete'   : 'delete',
+        'click .field' : 'fieldClick',
+        'change .field': 'fieldChange',
+        'keyup .field' : 'fieldKeyUp',
+        'click .delete': 'delete',
       };
     },
 
@@ -404,6 +404,7 @@ define([
       event.stopPropagation();
       if (this.updateFromDOM) {
         this.updateFromDOM();
+        this.model.vertex.trigger('change', this.model.vertex);
       }
     },
 
