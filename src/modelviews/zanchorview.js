@@ -7,11 +7,13 @@ define([
   'modelviews/geomvertexMV',
   ], function(calc, sceneModel, geometryGraph, settings, WorkplaneMV, GeomVertexMV) {
 
-  var EditingHeightAnchor = GeomVertexMV.EditingSceneView.extend({
+  var ZAnchor = GeomVertexMV.EditingSceneView.extend({
 
     initialize: function(options) {
-      this.vertex = options.pointVertex;
-      this.heightKey = options.heightKey;
+      this.vertex = options.vertex;
+      this.origin = options.origin;
+      this.isGlobal = options.isGlobal;
+
       GeomVertexMV.EditingSceneView.prototype.initialize.call(this);
       this.render();
       this.on('dragStarted', this.dragStarted, this);
@@ -27,8 +29,8 @@ define([
     },
 
     render: function() {
+
       GeomVertexMV.EditingSceneView.prototype.render.call(this);
-      var ambient = this.highlightAmbient || this.selectedAmbient || this.ambient || 0x333333;
       var color = this.highlightColor || this.selectedColor || this.color || 0x00dd00;
 
       this.pointSceneObject = THREE.SceneUtils.createMultiMaterialObject(
@@ -37,14 +39,12 @@ define([
           new THREE.MeshBasicMaterial({color: 0x993333, opacity: 0.5, wireframe: false } ),
           new THREE.MeshBasicMaterial({color: 0xcc6666, wireframe: true})
         ]);
-      var pointPosition = calc.objToVector(this.vertex.parameters.coordinate, geometryGraph, THREE.Vector3);
+      var pointPosition = calc.objToVector(this.origin, geometryGraph, THREE.Vector3);
 
-      var heightParameterValue = geometryGraph.evaluate(this.model.vertex.parameters[this.heightKey]);
-      var zOffset = this.getZOffset(heightParameterValue);
       this.pointSceneObject.position = pointPosition;
-      this.pointSceneObject.position.z = heightParameterValue + pointPosition.z + zOffset;
+      this.pointSceneObject.position.z += 1.5*this.cameraScale.x;;
       this.pointSceneObject.scale = this.cameraScale;
-      this.pointSceneObject.rotation.x = heightParameterValue >= 0 ? Math.PI/2 : 3*Math.PI/2;
+      this.pointSceneObject.rotation.x = Math.PI/2;
       this.sceneObject.add(this.pointSceneObject);
 
       if (this.showHeightLine) {
@@ -61,16 +61,16 @@ define([
       this.pointSceneObject.scale = this.cameraScale;
     },
 
-    getZOffset: function(heightParameterValue) {
-      return heightParameterValue < 0 ? -1.5*this.cameraScale.x : 1.5*this.cameraScale.x;
-    },
-
     isDraggable: function() {
       return true;
     },
 
     dragStarted: function() {
       this.showHeightLine = true;
+      this.rayOrigin = calc.objToVector(
+        this.origin, 
+        geometryGraph, 
+        THREE.Vector3);
     },
 
     dragEnded: function() {
@@ -85,44 +85,48 @@ define([
       var camera = sceneModel.view.camera;
       var mouseRay = calc.mouseRayForEvent(sceneElement, camera, event);
 
-      var rayOrigin = calc.objToVector(
-        this.vertex.parameters.coordinate, 
-        geometryGraph, 
-        THREE.Vector3);
-
-      // Apply Workplane
-      var workplaneOrigin = calc.objToVector(
-        this.vertex.workplane.origin, 
-        geometryGraph, 
-        THREE.Vector3);
-      var workplaneAxis =  calc.objToVector(
-        this.vertex.workplane.axis, 
-        geometryGraph, 
-        THREE.Vector3);
-      var workplaneAngle = geometryGraph.evaluate(this.vertex.workplane.angle);
-
-      var rayOriginUsingWorkplane = calc.rotateAroundAxis(rayOrigin, workplaneAxis, workplaneAngle);
-      rayOriginUsingWorkplane.add(workplaneOrigin);
-
       var rayDirection = new THREE.Vector3(0,0,1);
-      var rayDirectionUsingWorkplane = calc.rotateAroundAxis(rayDirection, workplaneAxis, workplaneAngle);
-
-      var ray = new THREE.Ray(rayOriginUsingWorkplane, rayDirectionUsingWorkplane);
+      var ray = new THREE.Ray(this.rayOrigin, rayDirection);
       var absolutePositionOnNormal = calc.positionOnRay(mouseRay, ray);
+      var h = absolutePositionOnNormal.z - this.rayOrigin.z;
 
-      // Back into local coordinates
-      var positionOnNormalInLocalCoords = 
-        calc.rotateAroundAxis(absolutePositionOnNormal, workplaneAxis, -workplaneAngle);
+      if (!this.isGlobal) {
+        // Apply Workplane
+        var workplaneOrigin = calc.objToVector(
+          this.vertex.workplane.origin, 
+          geometryGraph, 
+          THREE.Vector3);
+        var workplaneAxis = calc.objToVector(
+          this.vertex.workplane.axis, 
+          geometryGraph, 
+          THREE.Vector3);
+        var workplaneAngle = geometryGraph.evaluate(this.vertex.workplane.angle);
+
+        var rayOriginUsingWorkplane = calc.rotateAroundAxis(this.rayOrigin, workplaneAxis, workplaneAngle);
+        rayOriginUsingWorkplane.add(workplaneOrigin);
+
+        var rayDirection = new THREE.Vector3(0,0,1);
+        var rayDirectionUsingWorkplane = calc.rotateAroundAxis(rayDirection, workplaneAxis, workplaneAngle);
+
+        var ray = new THREE.Ray(rayOriginUsingWorkplane, rayDirectionUsingWorkplane);
+        var absolutePositionOnNormal = calc.positionOnRay(mouseRay, ray);
+
+        // Back into local coordinates
+        var positionOnNormalInLocalCoords = 
+          calc.rotateAroundAxis(absolutePositionOnNormal, workplaneAxis, -workplaneAngle);
+        positionOnNormalInLocalCoords.sub(workplaneOrigin);
+
+        var h = positionOnNormalInLocalCoords.z - this.rayOrigin.z;
+      }
+
       var grid = settings.get('gridsize');
-      var h = positionOnNormalInLocalCoords.z - rayOrigin.z;
-      this.model.vertex.parameters[this.heightKey] = 
-        Math.round(parseFloat(h/grid))*grid;
+      this.origin.z = this.rayOrigin.z + Math.round(parseFloat(h/grid))*grid;
 
-      this.model.vertex.trigger('change', this.model.vertex);
+      this.vertex.trigger('change', this.vertex);
     },
 
   });
   
-  return EditingHeightAnchor;
+  return ZAnchor;
 
 });

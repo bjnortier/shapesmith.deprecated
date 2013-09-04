@@ -35,18 +35,25 @@ define([], function() {
     }
     
     var positionOnWorkplane = function(sceneElement, event, workplaneVertex, camera) {
+        var planeOrigin = new THREE.Vector3(0,0,0);
+        var planeNormal = new THREE.Vector3(0,0,1);
 
-        var origin = objToVector(workplaneVertex.workplane.origin, undefined, THREE.Vector3);
-        var axis   = objToVector(workplaneVertex.workplane.axis, undefined, THREE.Vector3);   
-        var angle  = workplaneVertex.workplane.angle;
-        var normal = rotateAroundAxis(new THREE.Vector3(0,0,1), axis, angle);
-        var worldPosition = positionOnPlane(sceneElement, event, origin, normal, camera);
+        var workplaneOrigin = objToVector(workplaneVertex.workplane.origin, undefined, THREE.Vector3);
+        var workplaneAxis   = objToVector(workplaneVertex.workplane.axis, undefined, THREE.Vector3);   
+        var workplaneAngle  = workplaneVertex.workplane.angle;
 
-        worldPosition.sub(origin);
-        return rotateAroundAxis(worldPosition, axis, -workplaneVertex.workplane.angle);
+        var localPosition = positionOnPlane(sceneElement, event, planeOrigin, planeNormal, 
+          workplaneOrigin, workplaneAxis, workplaneAngle, camera);
+        return localPosition;
     }
 
-    var positionOnPlane = function(sceneElement, event, origin, normal, camera) {
+    var positionOnPlane = function(sceneElement, event, planeOrigin, planeNormal, 
+          workplaneOrigin, workplaneAxis, workplaneAngle, camera) {
+
+        var rotatedPlaneOrigin = rotateAroundAxis(planeOrigin, workplaneAxis, workplaneAngle);
+        var origin = new THREE.Vector3().addVectors(rotatedPlaneOrigin, workplaneOrigin);
+        var normal = rotateAroundAxis(planeNormal, workplaneAxis, workplaneAngle);
+
         var mouse = {};
         mouse.x = (event.offsetX / sceneElement.innerWidth()) * 2 - 1;
         mouse.y = -(event.offsetY / sceneElement.innerHeight()) * 2 + 1;
@@ -68,8 +75,11 @@ define([], function() {
         if (d === 0) {
             return undefined;
         }
-        return new THREE.Vector3().addVectors(l0, l.clone().multiplyScalar(d));
-
+        var localPosition = new THREE.Vector3().addVectors(l0, l.clone().multiplyScalar(d));
+        localPosition.sub(workplaneOrigin);
+        localPosition = rotateAroundAxis(localPosition, workplaneAxis, -workplaneAngle);
+        localPosition.sub(planeOrigin);
+        return localPosition;
     }
 
     var positionOnRay = function(mouseRay, ray) {
@@ -163,12 +173,13 @@ define([], function() {
     }
 
     var rotateAroundAxis = function(position, axis, angle) {
+        var position = position.clone();
         if (angle !== 0) {
             var quaternion = new THREE.Quaternion().setFromAxisAngle(axis, angle/180*Math.PI);
-            var newPosition = quaternion.multiplyVector3(position, new THREE.Vector3());
+            var newPosition = position.applyQuaternion(quaternion);
             return newPosition;
         } else {
-            return position.clone();
+            return position;
         }
     }
 
@@ -188,6 +199,7 @@ define([], function() {
         toScreenCoordinates : toScreenCoordinates,
         objToVector         : objToVector,
         addOffset           : addOffset,
+        rotateAroundAxis    : rotateAroundAxis,
     }
 
 });

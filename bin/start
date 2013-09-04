@@ -3,4 +3,4 @@
 basedir=`dirname "$0"`/..
 pushd $basedir
 echo $PWD
-node_modules/supervisor/lib/cli-wrapper.js src/api/app.js
+nodemon src/api/app.js

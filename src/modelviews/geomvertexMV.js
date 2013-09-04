@@ -1,7 +1,7 @@
   define([
     'backbone',
     'jquery',
-    'lib/jquery.mustache',
+    'lib/mustache',
     'colors',
     'scene',
     'interactioncoordinator',
@@ -17,7 +17,8 @@
     'latheapi/adapter',
   ], function(
     Backbone,
-    $, __$,
+    $, 
+    Mustache,
     colors, 
     sceneModel,
     coordinator,
@@ -175,19 +176,18 @@
 
     updateMaterials: function(key) {
       var objects = this.findObjects([this.sceneObject]);
-      var that = this;
       objects.lines.forEach(function(line) {
-        line.material = that.materials[key].edge;
-      });
+        line.material = this.materials[key].edge;
+      }, this);
       objects.meshes.forEach(function(mesh) {
         if (mesh.material) {
           if (mesh.material.name.endsWith('face')) {
-            mesh.material = that.materials[key].face;
+            mesh.material = this.materials[key].face;
           } else if (mesh.material.name.endsWith('wire')) {
-            mesh.material = that.materials[key].wire;
+            mesh.material = this.materials[key].wire;
           }
         }
-      });
+      }, this);
       sceneModel.view.updateScene = true;
     },
 
@@ -207,7 +207,6 @@
 
       var screenBox = new THREE.Box2();
 
-      var that = this;
       corners.forEach(function(corner) {
         var screenPos = calc.toScreenCoordinates(sceneWidth, sceneHeight, camera, corner);
         screenBox.expandByPoint(new THREE.Vector2(
@@ -216,7 +215,7 @@
         screenBox.expandByPoint(new THREE.Vector2(
           Math.max(screenBox.max.x, screenPos.x + 5),
           Math.max(screenBox.max.y, screenPos.y + 5)));
-      })
+      }, this)
 
       return screenBox;
     },
@@ -246,42 +245,72 @@
       var geometry = new THREE.Geometry();
       var indices = [];
       var box3 = new THREE.Box3();
+
+      var workplaneAxis = calc.objToVector(
+          this.model.vertex.workplane.axis, 
+          geometryGraph, 
+          THREE.Vector3);
+      var workplaneAngle = geometryGraph.evaluate(this.model.vertex.workplane.angle);
+      var workplaneOrigin = calc.objToVector(
+            this.model.vertex.workplane.origin, 
+            geometryGraph, 
+            THREE.Vector3);
+
       polygons.forEach(function(coordinates, i) {
 
         // Remove degenerates
+        var eps = 0.001;
         var coordinates = coordinates.reduce(function(acc, c, j) {
           if (j === 0) {
             return acc.concat(c);
-          } else if (new THREE.Vector3().subVectors(c,acc[acc.length-1]).length() > 0.000000001) {
-            return acc.concat(c);
           } else {
-            return acc;
+            var l = new THREE.Vector3().subVectors(c,acc[acc.length-1]).length();
+            if (l > eps) {
+              return acc.concat(c);
+            } else {
+              return acc;
+            }
           }
         }, []);
+        if (new THREE.Vector3().subVectors(
+            coordinates[0],
+            coordinates[coordinates.length-1]).length()
+             <= eps) {
+          coordinates = coordinates.slice(1);
+        }
 
-        var polygonIndices = coordinates.map(function(coordinate) {
-          var vertex = new THREE.Vector3(coordinate.x, coordinate.y, coordinate.z);
-          box3.expandByPoint(vertex);
-          return geometry.vertices.push(vertex) - 1;
-        });
+        
         if (coordinates.length < 3) {
           // Ignore degenerates
-          // throw Error('invalid polygon');
-        } else if (coordinates.length === 3) {
-          geometry.faces.push(new THREE.Face3(polygonIndices[0],polygonIndices[1],polygonIndices[2]));
-        } else if (coordinates.length === 4) {
-          geometry.faces.push(new THREE.Face4(polygonIndices[0],polygonIndices[1],polygonIndices[2],polygonIndices[3]));
+          // console.warn('invalid polygon');
         } else {
-          // Only support cnvex polygons
-          geometry.faces.push(new THREE.Face3(polygonIndices[0],polygonIndices[1],polygonIndices[2]));
-          for (var i = 2; i < coordinates.length -1; ++i) {
-            geometry.faces.push(new THREE.Face3(polygonIndices[0], polygonIndices[0]+i,polygonIndices[0]+i+1));
+          var polygonIndices = coordinates.map(function(coordinate) {
+            var vertex = new THREE.Vector3(coordinate.x, coordinate.y, coordinate.z);
+
+            var localVertex = vertex.clone();
+            localVertex.sub(workplaneOrigin);
+            localVertex = calc.rotateAroundAxis(localVertex, workplaneAxis, -workplaneAngle);
+            box3.expandByPoint(localVertex);
+
+            return geometry.vertices.push(vertex) - 1;
+          });
+
+          if (coordinates.length === 3) {
+            geometry.faces.push(new THREE.Face3(polygonIndices[0],polygonIndices[1],polygonIndices[2]));
+          } else if (coordinates.length === 4) {
+            geometry.faces.push(new THREE.Face4(polygonIndices[0],polygonIndices[1],polygonIndices[2],polygonIndices[3]));
+          } else {
+            // Only support convex polygons
+            geometry.faces.push(new THREE.Face3(polygonIndices[0],polygonIndices[1],polygonIndices[2]));
+            for (var i = 2; i < coordinates.length -1; ++i) {
+              geometry.faces.push(new THREE.Face3(polygonIndices[0], polygonIndices[0]+i,polygonIndices[0]+i+1));
+            }
           }
         }
         
         indices.push(polygonIndices);
 
-      })
+      }, this)
 
       geometry.computeFaceNormals();
       return {
@@ -292,19 +321,42 @@
     },
 
     createMesh: function(callback) {
-      var that = this;
-      latheAdapter.generate(
-        that.model.vertex,
+      var vertex = this.model.vertex;
+      var sha = latheAdapter.generate(
+        vertex,
         function(err, result) {
 
         if (err) {
-          console.error('no mesh', that.model.vertex.id);
+          console.error('no mesh', vertex.id);
           return;
         } else if(callback) {
           callback(result);
         }
         
       });
+    },
+
+    render: function() {
+      VertexMV.SceneView.prototype.render.call(this);
+
+      if (!this.isGlobal) {
+        var quaternion = new THREE.Quaternion();
+        var axis = calc.objToVector(
+            this.model.vertex.workplane.axis, 
+            geometryGraph, 
+            THREE.Vector3);
+        var angle = this.model.vertex.workplane.angle/180*Math.PI;
+
+        quaternion.setFromAxisAngle(axis, angle);
+        this.sceneObject.useQuaternion = true;
+        this.sceneObject.quaternion = quaternion;
+
+        this.sceneObject.position = 
+          calc.objToVector(
+            this.model.vertex.workplane.origin, 
+            geometryGraph, 
+            THREE.Vector3);
+      }
     },
 
     renderMesh: function(result) {
@@ -331,6 +383,13 @@
           faceMaterial = this.materials.normal.face;
         }
         var meshObject = new THREE.Mesh(faceGeometry, faceMaterial);
+
+        // Debug - show edges
+        // var meshObject = THREE.SceneUtils.createMultiMaterialObject(faceGeometry, [
+        //   faceMaterial,
+        //   new THREE.MeshBasicMaterial({color: 0xff0000, wireframe: true, linewidth: 5}),
+        // ]);
+
         this.sceneObject.add(meshObject);
         sceneModel.view.updateScene = true;
       }
@@ -414,22 +473,33 @@
         '</div>' + 
         '<div class="children {{id}}"></div>';
       this.afterTemplate = this.model.vertex.implicit ? '' : 
-        '<div>axisx <input class="field axisx" type="text" value="{{axisx}}"></input></div>' +
-        '<div>axisy <input class="field axisy" type="text" value="{{axisy}}"></input></div>' +
-        '<div>axisz <input class="field axisz" type="text" value="{{axisz}}"></input></div>' + 
+        // '<div class="workplane">' +
+        //   '<div class="origin">' +
+        //     '<div>x <input class="field workplane.origin.x" type="text" value="{{workplane.origin.x}}"></input></div>' +
+        //     '<div>y <input class="field workplane.origin.y" type="text" value="{{workplane.origin.y}}"></input></div>' +
+        //     '<div>z <input class="field workplane.origin.z" type="text" value="{{workplane.origin.z}}"></input></div>' +     
+        //   '</div>' +
+        // '</div>' +
+        '<div>axisx <input class="field axisx" type="text" value="{{axis.x}}"></input></div>' +
+        '<div>axisy <input class="field axisy" type="text" value="{{axis.y}}"></input></div>' +
+        '<div>axisz <input class="field axisz" type="text" value="{{axis.z}}"></input></div>' + 
         '<div>angle <input class="field angle" type="text" value="{{angle}}"></input></div>' +
         '<div>scale <input class="field scale" type="text" value="{{scale}}"></input></div>';
 
       var rotation = this.model.vertex.transforms.rotation;
+      var workplane = this.model.vertex.workplane;
       this.baseView = {
         id: this.model.vertex.id,
         name : this.model.vertex.name,
         implicit: this.model.vertex.implicit,
         icon: icons[this.model.vertex.type],
         isTopLevel: !geometryGraph.parentsOf(this.model.vertex).length,
-        axisx: rotation.axis.x,
-        axisy: rotation.axis.y,
-        axisz: rotation.axis.z,
+        // workplane: this.model.vertex.workplane,
+        axis: { 
+          x: rotation.axis.x,
+          y: rotation.axis.y,
+          z: rotation.axis.z,
+        },
         angle: rotation.angle,
         scale: this.model.vertex.transforms.scale.factor,
       }
@@ -440,33 +510,31 @@
     },
 
     update: function() {
-      var that = this;
       var rotation = this.model.vertex.transforms.rotation;
       var scale = this.model.vertex.transforms.scale.factor;
       ['x', 'y', 'z'].forEach(function(key) {
-        that.$el.find('.field.axis' + key).val(rotation.axis[key]);
-      });
+        this.$el.find('.field.axis' + key).val(rotation.axis[key]);
+      }, this);
       this.$el.find('.field.angle').val(rotation.angle);
       this.$el.find('.field.scale').val(scale);
     },
 
     updateFromDOM: function() {
-      var that = this;
       ['x', 'y', 'z'].forEach(function(key) {
         try {
-          var expression = that.$el.find('.field.axis' + key).val();
-          that.model.vertex.transforms.rotation.axis[key] = expression;
+          var expression = this.$el.find('.field.axis' + key).val();
+          this.model.vertex.transforms.rotation.axis[key] = expression;
         } catch(e) {
           console.error(e);
         }
-      });
+      }, this);
       try {
-        that.model.vertex.transforms.rotation.angle =  that.$el.find('.field.angle').val();;
-        that.model.vertex.transforms.scale.factor =  that.$el.find('.field.scale').val();;
+        this.model.vertex.transforms.rotation.angle =  this.$el.find('.field.angle').val();;
+        this.model.vertex.transforms.scale.factor =  this.$el.find('.field.scale').val();;
       } catch(e) {
         console.error(e);
       }
-      this.model.vertex.trigger('change', this.model.vertex);
+      
     }
 
   });
@@ -574,7 +642,8 @@
             '</div>' +
           '</div>' +
           '<div class="children {{id}}"></div>';
-        this.$el.html($.mustache(template, view));
+        this.$el.html(
+          Mustache.render(template, view));
         return this;
       } else {
         this.$el.html();
@@ -611,7 +680,8 @@
       var color = (parameters.material && parameters.material.color) || '#6cbe32';
       this.$el.find('> .title > .icon24').attr(
         "style", 
-        $.mustache("fill: {{color}}; stroke: {{color}}", {color: color}));
+        
+        Mustache.render("fill: {{color}}; stroke: {{color}}", {color: color}));
     },
 
     dive: function() {
@@ -619,7 +689,8 @@
       var color = "#bbb";
       this.$el.find('> .title > .icon24').attr(
         "style", 
-        $.mustache("fill: {{color}}; stroke: {{color}}", {color: color}));
+        
+        Mustache.render("fill: {{color}}; stroke: {{color}}", {color: color}));
     },
 
     clickTitle: function(event) {
@@ -683,54 +754,15 @@
     },
 
     highlight: function() {
-      // this.highlighted = true;
-      // if (!geometryGraph.isEditing()) {
-      //   if (this.model.vertex.implicit) {
-      //     // this.updateMaterials('normal');
-      //   } else {
-      //     this.updateMaterials('highlight');
-      //   }
-      // }
-      // var implicitViews = this.findImplicitDescendantSceneviews(this.model.vertex);
-      // implicitViews.forEach(function(view) {
-      //   view.highlight && view.highlight();
-      // })
     },
 
     unhighlight: function() {
-      // delete this.highlighted;
-      // if (!geometryGraph.isEditing()) {
-      //   if (this.model.vertex.implicit) {
-      //     // this.updateMaterials('implicit');
-      //   } else {
-      //     this.updateSelected();
-      //   }
-      // }
-      // var implicitViews = this.findImplicitDescendantSceneviews(this.model.vertex);
-      // implicitViews.forEach(function(view) {
-      //   view.unhighlight();
-      // })
     },
 
     click: function(event) {
       var vertexToSelect, parents;
       if (this.model.canSelect()) {
         vertexToSelect = this.model.vertex;
-      } else if (this.model.vertex.implicit) {
-        // Select the parent that is in context
-        // var findNonImplicitContextParent = function(vertex) {
-        //   var parents = _.uniq(geometryGraph.parentsOf(vertex));
-        //   if (parents.length === 1) {
-        //     if (parents[0].implicit) {
-        //       return findNonImplicitContextParent(parents[0]);
-        //     } else {
-        //       return parents[0];
-        //     }
-        //   } else {
-        //     return undefined;
-        //   }
-        // }
-        // vertexToSelect = findNonImplicitContextParent(this.model.vertex);
       } 
       if (vertexToSelect) {
         if (event.shiftKey) {

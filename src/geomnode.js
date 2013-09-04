@@ -60,17 +60,18 @@ define([
     }
 
     this.implicit = options.implicit || false;
+
     this.workplane = options.workplane || {
       origin: {x: 0, y:0, z: 0},
-      axis: {u: 0, v: 0, w: 1},
-      angle: 0,
+      axis  : {x: 0, y: 0, z: 1},
+      angle : 0,
     };
     this.transforming = options.transforming || false;
     this.transforms = options.transforms || {
       rotation: {
         origin: {x: 0, y:0, z: 0},
-        axis: {x: 0, y:0, z:1},
-        angle: 0,
+        axis  : {x: 0, y:0, z:1},
+        angle : 0,
       },
       translation: {x: 0, y:0, z:0},
       scale: {
@@ -93,16 +94,16 @@ define([
   GeomNode.prototype.cloneNonEditing = function(options) {
     var options = options || {};
     var cloneOptions = _.extend(options, {
-      type    : this.type, 
-      id    : this.id,
-      isClone   : true,
-      name    : this.name,
-      implicit  : this.implicit,
-      transforming : this.transforming,
-      transforms: calc.copyObj(this.transforms),
-      workplane : calc.copyObj(this.workplane),
-      parameters: calc.copyObj(this.parameters),
-      inContext : this.inContext,
+      type        : this.type, 
+      id          : this.id,
+      isClone     : true,
+      name        : this.name,
+      implicit    : this.implicit,
+      transforming: this.transforming,
+      transforms  : calc.copyObj(this.transforms),
+      workplane   : calc.copyObj(this.workplane),
+      parameters  : calc.copyObj(this.parameters),
+      inContext   : this.inContext,
     })
     var newNode = new this.constructor(cloneOptions);
     return newNode;
@@ -121,11 +122,11 @@ define([
   // Strip for serialization
   var strip = function(obj) {
     return {
-      id  : obj.id,
-      type: obj.type, 
-      name: obj.name,
-      implicit: obj.implicit,
-      workplane: obj.workplane,
+      id        : obj.id,
+      type      : obj.type, 
+      name      : obj.name,
+      implicit  : obj.implicit,
+      workplane : obj.workplane,
       transforms: obj.transforms,
       parameters: obj.parameters,
     }
@@ -157,6 +158,8 @@ define([
     }    
     options.type = 'variable';
     GeomNode.prototype.constructor.call(this, options);
+    this.transforms = undefined;
+    this.workplane = undefined;
   }
 
   _.extend(Variable.prototype, GeomNode.prototype);
@@ -328,17 +331,17 @@ define([
   // ---------- Module ----------
 
   return {
-    resetIDCounters : resetIDCounters,
-    strip       : strip,     
-    Node      : GeomNode,
-    Workplane     : Workplane,
-    Variable    : Variable,
-    Point       : Point,
-    Polyline    : Polyline,
-    Cube      : Cube,
-    Sphere      : Sphere,
-    Extrude     : Extrude,
-    Subtract    : Subtract,
+    resetIDCounters: resetIDCounters,
+    strip          : strip,     
+    Node           : GeomNode,
+    Workplane      : Workplane,
+    Variable       : Variable,
+    Point          : Point,
+    Polyline       : Polyline,
+    Cube           : Cube,
+    Sphere         : Sphere,
+    Extrude        : Extrude,
+    Subtract       : Subtract,
     constructors: {
       'workplane' : Workplane,
       'variable'  : Variable,

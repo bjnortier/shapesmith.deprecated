@@ -34,7 +34,6 @@ define([
       var extents = this.model.selectedModel.getExtents();
       this.axis.position = extents.center;
 
-
       TransformSceneView.prototype.initialize.call(this);
       this.initialTranslation = calc.objToVector(
         this.model.vertex.transforms.translation, 
@@ -95,25 +94,44 @@ define([
       this.sceneObject.add(this.axis);
     },
 
-    drag: function(position, intersection, event) {
+    drag: function(workplanePosition, intersection, event) {
+
       var sceneElement = $('#scene');
       var camera = sceneModel.view.camera;
       var mouseRay = calc.mouseRayForEvent(sceneElement, camera, event);
 
-      var extents = this.model.selectedModel.getExtents();
-      var rayOrigin = calc.objToVector(extents.center, geometryGraph, THREE.Vector3);
+      // Local Workplane
+      var workplaneOrigin = calc.objToVector(
+        this.editingVertex.workplane.origin, 
+        geometryGraph, 
+        THREE.Vector3);
+      var workplaneAxis =  calc.objToVector(
+        this.editingVertex.workplane.axis, 
+        geometryGraph, 
+        THREE.Vector3);
+      var workplaneAngle = geometryGraph.evaluate(this.editingVertex.workplane.angle);
+
+      var rayOrigin = this.initialPosition.clone();
+      rayOrigin.add(workplaneOrigin);
+      var rayOriginUsingWorkplane = calc.rotateAroundAxis(rayOrigin, workplaneAxis, workplaneAngle);
       var rayDirection = new THREE.Vector3(0,0,1);
-      var ray = new THREE.Ray(rayOrigin, rayDirection);
+      var rayDirectionUsingWorkplane = calc.rotateAroundAxis(rayDirection, workplaneAxis, workplaneAngle);
+      var ray = new THREE.Ray(rayOriginUsingWorkplane, rayDirectionUsingWorkplane);
+      var absolutePositionOnNormal = calc.positionOnRay(mouseRay, ray);
 
-      var positionOnNormal = calc.positionOnRay(mouseRay, ray);
-
-      this.arrow.position = positionOnNormal;
-      var diff = new THREE.Vector3().subVectors(positionOnNormal, this.initialPosition);
+      // Back into local coordinates
+      var positionOnNormalInLocalCoords = 
+        calc.rotateAroundAxis(absolutePositionOnNormal, workplaneAxis, -workplaneAngle);
+      positionOnNormalInLocalCoords.sub(workplaneOrigin);
       var grid = settings.get('gridsize');
+
+      this.arrow.position = positionOnNormalInLocalCoords;
+      this.arrow.position.z -= 2*this.cameraScale.z;
+
+      var diff = new THREE.Vector3().subVectors(positionOnNormalInLocalCoords, this.initialPosition);
       var translation = new THREE.Vector3(Math.round(diff.x/grid) * grid,
                                           Math.round(diff.y/grid) * grid,
                                           Math.round(diff.z/grid) * grid).add(this.initialTranslation);
-      
       this.editingModel.translate(translation);
     },
 

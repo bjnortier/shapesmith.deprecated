@@ -1,8 +1,8 @@
 define([
     'backbone',
     'jquery',
-    'lib/jquery.mustache',
-    ], function(Backbone, $, __$) {
+    'lib/mustache',
+    ], function(Backbone, $, Mustache) {
 
     var Model = Backbone.Model.extend({
 
@@ -37,7 +37,7 @@ define([
                 '<li>Click browser back button to undo.</li>' +
             '</ul>' +
             '<div class="button-container"><div class="button">Continue</div></div>';
-            this.$el.html($.mustache(template, {}));
+            this.$el.html(Mustache.render(template, {}));
    
             return this;
         },

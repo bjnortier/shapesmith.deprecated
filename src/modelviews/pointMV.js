@@ -1,6 +1,6 @@
 define([
     'jquery',
-    'lib/jquery.mustache',
+    'lib/mustache',
     'calculations', 
     'colors',
     'scene', 
@@ -13,7 +13,8 @@ define([
     'asyncAPI',
   ], 
   function(
-    $, __$,
+    $, 
+    Mustache,
     calc, 
     colors, 
     sceneModel, 
@@ -82,7 +83,7 @@ define([
         '</div>' +
         this.afterTemplate;
       var view = this.baseView;
-      this.$el.html($.mustache(template, view));
+      this.$el.html(Mustache.render(template, view));
       this.update();
       return this;
     },
@@ -133,7 +134,10 @@ define([
           this.materials.editing.face, 
           this.materials.editing.wire
         ]);
-      this.point.position = calc.objToVector(this.model.vertex.parameters.coordinate, geometryGraph, THREE.Vector3);
+      this.point.position = calc.objToVector(
+        this.model.vertex.parameters.coordinate, 
+        geometryGraph, 
+        THREE.Vector3);
       this.sceneObject.add(this.point);
       this.updateScaledObjects();
     },
@@ -150,16 +154,11 @@ define([
       }
     },
 
-    // This view is not draggable, but the display scene view can transfer 
-    // the dragging to this view (e.g. when a point is dragged), but only for
-    // points that are not prototypes any more
     isDraggable: function() {
-      return !this.model.vertex.proto || (this.model.parentModel && this.model.parentModel.childPointsAreDraggable);
+      return true;
     },
 
     dragStarted: function() {
-      // The drag was started when the point was being edited, as
-      // opposed to starting from a display node
       this.dragStartedInEditingMode = true;
     },
 
@@ -197,7 +196,7 @@ define([
         '<div class="dim z">{{z}}</div>)';
       var view = 
         calc.objToVector(this.model.vertex.parameters.coordinate, geometryGraph, THREE.Vector3);
-      this.$el.html($.mustache(template, view));
+      this.$el.html(Mustache.render(template, view));
     },
 
     update: function() {
@@ -205,8 +204,28 @@ define([
       var camera = sceneModel.view.camera;
       var sceneWidth = $('#scene').innerWidth();
       var sceneHeight = $('#scene').innerHeight();
-      var screenPos = calc.toScreenCoordinates(sceneWidth, sceneHeight, camera, 
-        calc.objToVector(this.model.vertex.parameters.coordinate,  geometryGraph, THREE.Vector3));
+
+      var localPosition = calc.objToVector(
+        this.model.vertex.parameters.coordinate,  
+        geometryGraph, 
+        THREE.Vector3);
+
+      // Apply Workplane
+      var workplaneOrigin = calc.objToVector(
+        this.model.vertex.workplane.origin, 
+        geometryGraph, 
+        THREE.Vector3);
+      var workplaneAxis =  calc.objToVector(
+        this.model.vertex.workplane.axis, 
+        geometryGraph, 
+        THREE.Vector3);
+      var workplaneAngle = geometryGraph.evaluate(this.model.vertex.workplane.angle);
+
+      var globalPosition = calc.rotateAroundAxis(localPosition, workplaneAxis, workplaneAngle);
+      globalPosition.add(workplaneOrigin);
+
+      var screenPos = calc.toScreenCoordinates(sceneWidth, sceneHeight, camera, globalPosition);
+        
       this.$el.css('left', (screenPos.x + 10) + 'px');
       this.$el.css('top',  (screenPos.y + 0) + 'px');
     },
@@ -246,22 +265,15 @@ define([
       GeomVertexMV.EditingSceneView.prototype.render.call(this);
       var radius = this.model.vertex.implicit ? 0.4 : 0.5;
 
-      if (this.mouseIsOver) {
-        this.point = THREE.SceneUtils.createMultiMaterialObject(
-          new THREE.CubeGeometry(1, 1, 1), [
-            this.materials.editing.face, 
-            this.materials.editing.wire
-          ]);
+
+      var materials;
+      if (this.model.vertex.implicit && !this.highlighted) {
+        materials = [this.materials.implicit.face];
       } else {
-        var materials;
-        if (this.model.vertex.implicit && !this.highlighted) {
-          materials = [this.materials.implicit.face];
-        } else {
-          materials = [this.materials.normal.face, this.materials.normal.wire];
-        }
-        this.point = THREE.SceneUtils.createMultiMaterialObject(
-          new THREE.CubeGeometry(1, 1, 1), materials);
+        materials = [this.materials.normal.face, this.materials.normal.wire];
       }
+      this.point = THREE.SceneUtils.createMultiMaterialObject(
+        new THREE.CubeGeometry(1, 1, 1), materials);
 
       this.point.scale = this.cameraScale;
       this.point.position = calc.objToVector(
@@ -271,20 +283,6 @@ define([
       this.sceneObject.add(this.point);
       this.updateScaledObjects();
     },
-
-    // mouseenter: function() {
-    //   if (!geometryGraph.isEditing()) {
-    //     this.mouseIsOver = true;
-    //     this.render();
-    //   }
-    // },
-
-    // mouseleave: function() {
-    //   if (!geometryGraph.isEditing()) {
-    //     delete this.mouseIsOver;
-    //     this.render();
-    //   }
-    // },
 
     updateScaledObjects: function() {
       if (this.model.inContext) {
@@ -312,8 +310,7 @@ define([
     },
 
     isDraggable: function() {
-      return !this.model.vertex.implicit;
-      // return !geometryGraph.isEditing();
+      return false;
     },
 
     isClickable: function() {

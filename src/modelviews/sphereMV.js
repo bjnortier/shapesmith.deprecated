@@ -1,22 +1,25 @@
 define([
     'jquery',
-    'lib/jquery.mustache',
+    'lib/mustache',
     'calculations',
     'worldcursor',
     'scene',
     'geometrygraphsingleton',
     'modelviews/geomvertexMV', 
     'modelviews/pointMV', 
+    'modelviews/zanchorview',
     'asyncAPI',
   ], 
   function(
-    $, __$,
+    $,
+    Mustache,
     calc,
     worldCursor,
     sceneModel,
     geometryGraph,
     GeomVertexMV,
     PointMV,
+    ZAnchorView,
     AsyncAPI) {
 
   // ---------- Common ----------
@@ -88,10 +91,19 @@ define([
         this.updateHint();
         this.activePoint = this.origin;
       } else {
+
         this.originalImplicitChildren = geometryGraph.childrenOf(this.vertex);
         this.editingImplicitChildren = [];
         this.origin = AsyncAPI.edit(this.origin);
         this.editingImplicitChildren = [this.origin];
+        
+        if (!this.vertex.transforming) {
+          this.views.push(new ZAnchorView({
+            model: this, 
+            vertex: this.origin,
+            origin: this.origin.parameters.coordinate,
+          }));
+        }
       }
 
     },
@@ -193,7 +205,7 @@ define([
       var view = _.extend(this.baseView, {
         radius : this.model.vertex.parameters.radius,
       });
-      this.$el.html($.mustache(template, view));
+      this.$el.html(Mustache.render(template, view));
       return this;
     },
 

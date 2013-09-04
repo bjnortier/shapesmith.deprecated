@@ -1,35 +1,72 @@
 define([
+    'jquery',
+    'lib/mustache',
     'colors',
     'calculations', 
     'interactioncoordinator', 
+    'modelviews/currentworkplane',
     'scene',
     'settings',
     'geomnode',
     'geometrygraphsingleton',
     'modelviews/vertexMV',
-    'workplanecoordinator',
+    'modelviews/originview',
+    'modelviews/zanchorview',
+    'modelviews/originDOMView',
+    'modelviews/transforms/uvwrotationsceneviews',
     'selection',
     'asyncAPI',
+    'icons',
   ], function(
+    $,
+    Mustache,
     colors,
     calc, 
     coordinator, 
+    currentWorkplane,
     sceneModel,
     settings,
     geomNode,
     geometryGraph,
     VertexMV,
-    workplaneCoordinator,
+    OriginView,
+    ZAnchorView,
+    OriginDOMView,
+    UVWRotationSceneViews,
     selection,
-    AsyncAPI) {
-
-  var currentDisplayModel = undefined;
+    AsyncAPI,
+    icons) {
 
   var EditingModel = VertexMV.EditingModel.extend({
 
     initialize: function(options) {
       this.SceneView = GridView;
-      VertexMV.DisplayModel.prototype.initialize.call(this, options);
+      VertexMV.EditingModel.prototype.initialize.call(this, options);
+      this.views.push(new EditingDOMView({model: this}));
+      this.views.push(new OriginView({model: this, vertex: this.vertex, origin: this.vertex.workplane.origin, isGlobal: true })); 
+      this.views.push(new OriginDOMView({model: this, vertex: this.vertex, origin: this.vertex.workplane.origin, isGlobal: true })); 
+      this.views.push(new ZAnchorView({model: this, vertex: this.vertex, origin: this.vertex.workplane.origin, isGlobal: true })); 
+      this.views.push(new UVWRotationSceneViews.U({initiator: this, model: this, vertex: this.vertex, isWorkplane: true}));
+      this.views.push(new UVWRotationSceneViews.V({initiator: this, model: this, vertex: this.vertex, isWorkplane: true}));
+      this.views.push(new UVWRotationSceneViews.W({initiator: this, model: this, vertex: this.vertex, isWorkplane: true}));
+      coordinator.on('sceneClick', this.tryCommit, this);
+    },
+
+    destroy: function() {
+      VertexMV.EditingModel.prototype.destroy.call(this);
+      coordinator.off('sceneClick', this.tryCommit, this);
+    },
+
+    getExtents: function() {
+      return {
+        center: new THREE.Vector3(),
+        dx: Math.sqrt(45*45/3),
+        dy: Math.sqrt(45*45/3),
+        dz: Math.sqrt(45*45/3),
+      };      
+    },
+
+    hideOtherViews: function() {
     },
     
   });
@@ -41,8 +78,7 @@ define([
       this.SceneView = GridView;
       VertexMV.DisplayModel.prototype.initialize.call(this, options);
 
-      currentDisplayModel = this;
-      this.renderAtZero = true;
+      currentWorkplane.set(this);
 
       settings.on('change:gridsize', this.gridSizeChanged, this);
       coordinator.on('mousemove', this.mousemove, this);
@@ -52,6 +88,9 @@ define([
       geometryGraph.on('vertexAdded', this.vertexAdded, this);
       geometryGraph.on('vertexRemoved', this.vertexRemoved, this);
       geometryGraph.on('vertexReplaced', this.vertexReplaced, this);
+
+
+      this.views.push(new DisplayDOMView({model: this}));
     },
 
     destroy: function() {
@@ -63,6 +102,7 @@ define([
       geometryGraph.off('vertexAdded', this.vertexAdded, this);
       geometryGraph.off('vertexRemoved', this.vertexRemoved, this);
       geometryGraph.off('vertexReplaced', this.vertexReplaced, this);
+
     },
 
     workplaneClick: function(event) {
@@ -77,24 +117,20 @@ define([
       VertexMV.eventProxy.trigger('workplanePositionChanged', event);
     },
 
-    edit: function() {
-      geometryGraph.edit(this.vertex);
-    },
-
     pushVertex: function(vertex) {
-      this.persistentHeight = this.vertex.workplane.origin.z;
-      this.vertex.workplane.origin.z = vertex.workplane.origin.z;
+      this.savedWorkplane = this.vertex.workplane;
+      this.vertex.workplane = vertex.workplane;
     },
 
     popVertex: function(vertex) {
-      if (this.persistentHeight !== undefined) {
-        this.vertex.workplane.origin.z = this.persistentHeight;
-        this.persistentHeight = undefined;
-      }
+      this.vertex.workplane = this.savedWorkplane;
+      this.savedWorkplane = undefined;
     },
 
     vertexAdded: function(vertex) {
-      this.trigger('change');
+      if (vertex.category === 'geometry') {
+        this.trigger('change');
+      }
     },
 
     vertexRemoved: function(vertex) {
@@ -122,18 +158,160 @@ define([
 
   });
 
+  var DisplayDOMView = VertexMV.DisplayDOMView.extend({
+
+    render: function() {
+      this.$el.html(Mustache.render(
+        '<div class="icon32">{{{icon}}}</div>',
+        {
+          icon: icons.workplane,
+        }));
+      $('#workplane-settings').append(this.$el);
+    },
+
+    events: {
+      'click' : 'click',
+    },
+
+    click: function(event) {
+      event.stopPropagation();
+      selection.deselectAll();
+      if (!geometryGraph.isEditing()) {
+        AsyncAPI.edit(this.model.vertex);
+      }
+    },
+
+  });
+
+  var EditingDOMView = VertexMV.EditingDOMView.extend({
+
+    render: function() {
+      var template = 
+        '<div>' + 
+          '<input type="button" name="xy" value="XY"/>' + 
+          '<input type="button" name="yz" value="YZ"/>' + 
+          '<input type="button" name="zx" value="ZX"/>' +
+        '</div>' +
+        '<div>origin</div>' +   
+        '<div>' +
+          'x <input class="field originx" type="text" value="{{origin.x}}"></input>' +
+          'y <input class="field originy" type="text" value="{{origin.y}}"></input>' +
+          'z <input class="field originz" type="text" value="{{origin.z}}"></input>' +
+        '</div>' +
+        '<div>axis</div>' +   
+        '<div>' +
+          'x <input class="field axisx" type="text" value="{{axis.x}}"></input>' +
+          'y <input class="field axisy" type="text" value="{{axis.y}}"></input>' +
+          'z <input class="field axisz" type="text" value="{{axis.z}}"></input>' +
+        '</div>' +
+        '<div>angle <input class="field angle" type="text" value="{{angle}}"></input></div>';
+      var workplane = this.model.vertex.workplane;
+      var view = {
+        origin : workplane.origin,
+        axis: workplane.axis,
+        angle: workplane.angle,
+      };
+      this.$el.html(Mustache.render(template, view));
+      $('#workplane-settings').append(this.$el);
+      return this;
+    },
+
+    events: function() {
+      var vertexEvents = VertexMV.EditingDOMView.prototype.events.call(this);
+      return _.extend(vertexEvents, {
+        'click [name=xy]' : 'xy',
+        'click [name=yz]' : 'yz',
+        'click [name=zx]' : 'zx',
+      });
+    },
+
+    xy: function() {
+      // This convulted setting is because the origin object is referenced
+      // in the origin view and z anchor.
+      this.model.vertex.workplane.origin.x = 0;
+      this.model.vertex.workplane.origin.y = 0;
+      this.model.vertex.workplane.origin.z = 0;
+      this.model.vertex.workplane.axis.x = 0;
+      this.model.vertex.workplane.axis.y = 0;
+      this.model.vertex.workplane.axis.z = 1;
+      this.model.vertex.workplane.angle = 0;
+      this.model.vertex.trigger('change', this.model.vertex);
+    },
+
+    yz: function() {
+      var tanpi6 = parseFloat(Math.tan(Math.PI/6).toFixed(4));
+      this.model.vertex.workplane.origin.x = 0;
+      this.model.vertex.workplane.origin.y = 0;
+      this.model.vertex.workplane.origin.z = 0;
+      this.model.vertex.workplane.axis.x = tanpi6;
+      this.model.vertex.workplane.axis.y = tanpi6;
+      this.model.vertex.workplane.axis.z = tanpi6;
+      this.model.vertex.workplane.angle = 120;
+
+      this.model.vertex.trigger('change', this.model.vertex);
+    },
+
+    zx: function() {
+      var mintanpi6 = parseFloat(-Math.tan(Math.PI/6).toFixed(4));
+      this.model.vertex.workplane.origin.x = 0;
+      this.model.vertex.workplane.origin.y = 0;
+      this.model.vertex.workplane.origin.z = 0;
+      this.model.vertex.workplane.axis.x = mintanpi6;
+      this.model.vertex.workplane.axis.y = mintanpi6;
+      this.model.vertex.workplane.axis.z = mintanpi6;
+      this.model.vertex.workplane.angle = 120;
+      this.model.vertex.trigger('change', this.model.vertex);
+    },
+
+    update: function() {
+      var parameters = this.model.vertex.workplane;
+      ['x', 'y', 'z'].forEach(function(key) {
+        this.$el.find('.origin' + key).val(parameters.origin[key]);
+        this.$el.find('.axis' + key).val(parameters.axis[key]);
+      }, this);
+      this.$el.find('.angle').val(parameters.angle);
+    },
+
+    updateFromDOM: function() {
+      var parameters = this.model.vertex.workplane;
+      ['x', 'y', 'z'].forEach(function(key) {
+        var expression;
+        try {
+          expression = this.$el.find('.field.origin' + key).val();
+          parameters.origin[key] = expression;
+
+          expression = this.$el.find('.field.axis' + key).val();
+          parameters.axis[key] = expression;
+
+        } catch(e) {
+          console.error(e);
+        }
+      }, this);
+
+      try {
+        var expression = this.$el.find('.field.angle').val();
+        parameters.angle = expression;
+      } catch(e) {
+        console.error(e);
+      }
+      this.model.vertex.trigger('change', this.model.vertex);
+
+    },
+
+  })
+
   var GridView = VertexMV.SceneView.extend({
 
     initialize: function() {
       VertexMV.SceneView.prototype.initialize.call(this);
       this.model.on('change', this.render, this);
-      workplaneCoordinator.on('change', this.render, this);
+      this.model.vertex.on('change', this.render, this);
     },
 
     remove: function() {
       VertexMV.SceneView.prototype.remove.call(this);
       this.model.off('change', this.render, this);
-      workplaneCoordinator.off('change', this.render, this);
+      this.model.vertex.off('change', this.render, this);
     },
     
     render: function() {
@@ -149,12 +327,10 @@ define([
       majorGridLineGeometry.vertices.push(new THREE.Vector3(-Math.floor(boundary/grid)*grid, 0, 0));
       majorGridLineGeometry.vertices.push(new THREE.Vector3(Math.ceil(boundary/grid)*grid, 0, 0));
 
-
       for (var x = -Math.floor(boundary/grid); x <= Math.ceil(boundary/grid); ++x) {
         if ((x % 10 === 0) && (x !== 0)) {
           var line = new THREE.Line(majorGridLineGeometry, majorMaterialInside);
           line.position.x = x*grid;
-          line.position.z = this.model.vertex.workplane.origin.z;
           line.rotation.z = 90 * Math.PI / 180;
           this.sceneObject.add(line);
         }
@@ -164,7 +340,6 @@ define([
         if ((y % 10 === 0) && (y !== 0)) {
           var line = new THREE.Line(majorGridLineGeometry, majorMaterialInside);
           line.position.y = y*grid;
-          line.position.z = this.model.vertex.workplane.origin.z;
           this.sceneObject.add(line);
         }
       }
@@ -183,7 +358,6 @@ define([
           if (x % 10 !== 0) {
             var line = new THREE.Line(minorGridLineGeometry, minorMaterialInside);
             line.position.x = x*grid;
-            line.position.z = this.model.vertex.workplane.origin.z;
             line.rotation.z = 90 * Math.PI / 180;
             this.sceneObject.add(line);
           }
@@ -193,13 +367,29 @@ define([
           if (y % 10 !== 0) {
             var line = new THREE.Line(minorGridLineGeometry, minorMaterialInside);
             line.position.y = y*grid;
-            line.position.z = this.model.vertex.workplane.origin.z;
             this.sceneObject.add(line);
           }
         }
       }
 
       this.addAxes();
+
+      var quaternion = new THREE.Quaternion();
+      var axis = calc.objToVector(
+          this.model.vertex.workplane.axis, 
+          geometryGraph, 
+          THREE.Vector3);
+      var angle = this.model.vertex.workplane.angle/180*Math.PI;
+        
+      quaternion.setFromAxisAngle(axis, angle);
+      this.sceneObject.useQuaternion = true;
+      this.sceneObject.quaternion = quaternion;
+
+      this.sceneObject.position = 
+        calc.objToVector(
+          this.model.vertex.workplane.origin, 
+          geometryGraph, 
+          THREE.Vector3);
 
     },
 
@@ -245,7 +435,6 @@ define([
   return {
     EditingModel: EditingModel,
     DisplayModel: DisplayModel,
-    getCurrent  : function() { return currentDisplayModel; },
   }
 
 });

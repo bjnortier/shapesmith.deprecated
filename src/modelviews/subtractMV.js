@@ -1,6 +1,6 @@
 define([
     'jquery',
-    'lib/jquery.mustache',
+    'lib/mustache',
     'calculations',
     'worldcursor',
     'scene',
@@ -9,7 +9,8 @@ define([
     'asyncAPI',
   ], 
   function(
-    $, __$,
+    $,
+    Mustache,
     calc,
     worldCursor,
     sceneModel,
@@ -62,7 +63,7 @@ define([
     scale: function(origin, factor) {
       this.vertex.transforms.scale.origin.x = origin.x;
       this.vertex.transforms.scale.origin.y = origin.y;
-      this.vertex.transforms.scale.origin.z = origin.z;
+      this.vertex.transforms.scale.origin.z = 0;
       this.vertex.transforms.scale.factor = factor;
       this.vertex.trigger('change', this.vertex);
     },
@@ -86,7 +87,7 @@ define([
         dy     : translation.y,
         dz     : translation.z,
       });
-      this.$el.html($.mustache(template, view));
+      this.$el.html(Mustache.render(template, view));
       return this;
     },
 

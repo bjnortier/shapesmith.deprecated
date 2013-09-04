@@ -16,10 +16,10 @@ requirejs.config({
 
 requirejs([
         'jquery',
-        'lib/jquery.mustache',
+        'lib/mustache',
         'underscore',
         'backbone'
-    ], function($, $$, _, Backbone) {
+    ], function($, Mustache, _, Backbone) {
 
     var CreateModel = Backbone.Model.extend({
 
@@ -126,7 +126,7 @@ requirejs([
                 '</div></div>';
             var view = {
             }
-            this.$el.html($.mustache(template, view));
+            this.$el.html(Mustache.render(template, view));
         },
 
     });
@@ -150,7 +150,7 @@ requirejs([
                 name: this.model.name,
                 imgsrc: this.model.screenshot
             }
-            this.$el.html($.mustache(template, view));
+            this.$el.html(Mustache.render(template, view));
         },
 
         events: {

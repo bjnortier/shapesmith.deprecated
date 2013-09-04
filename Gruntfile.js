@@ -35,11 +35,25 @@ module.exports = function(grunt) {
       },
     },
 
+    less: {
+      all: {
+        files: {
+          './static/css/designs.css'    : 'static/css/less/designs.less',
+          './static/css/grid.css'       : 'static/css/less/grid.less',
+          './static/css/shapesmith.css' : 'static/css/less/shapesmith.less',
+        },
+      },
+    },
+
     watch: {
       ui: {
         files: '<%= jshint.ui.src %>',
         tasks: ['jshint:ui']
       },
+      less: {
+        files: 'static/css/**/*.less',
+        tasks: ['less'],
+      }
     },
 
     simplemocha: {
@@ -102,6 +116,7 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-requirejs');
   grunt.loadNpmTasks('grunt-simple-mocha');
   grunt.loadNpmTasks('grunt-express');

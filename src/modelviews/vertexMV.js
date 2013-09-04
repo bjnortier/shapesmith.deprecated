@@ -119,6 +119,29 @@ define([
       if (this.sceneObject) {
         this.scene.remove(this.sceneObject);
         sceneViewEventGenerator.deregister(this);
+
+        var dispose = function(obj) {
+
+          if (obj.geometry) {
+            obj.geometry.dispose();  
+          }
+          if (obj.material) {
+            if (obj.material instanceof THREE.MeshFaceMaterial) {  
+              obj.material.materials.forEach(function(obj) {
+                obj.dispose();
+              });
+            } else { 
+              // obj.material.dispose(); 
+            }
+          } 
+          if (obj.dispose) {  
+            obj.dispose();
+          }
+          if (obj.children) {
+            obj.children.forEach(dispose);
+          }
+        };
+        dispose(this.sceneObject);
       }
       
       this.boundingBox = {
@@ -363,11 +386,13 @@ define([
       this.model.vertex.off('change', this.update, this);
     },
 
-    events: {
-      'click .field'  : 'fieldClick',
-      'change .field'   : 'fieldChange',
-      'keyup .field'  : 'fieldKeyUp',
-      'click .delete'   : 'delete',
+    events: function() {
+      return {
+        'click .field' : 'fieldClick',
+        'change .field': 'fieldChange',
+        'keyup .field' : 'fieldKeyUp',
+        'click .delete': 'delete',
+      };
     },
 
     fieldClick: function(event) {
@@ -379,6 +404,7 @@ define([
       event.stopPropagation();
       if (this.updateFromDOM) {
         this.updateFromDOM();
+        this.model.vertex.trigger('change', this.model.vertex);
       }
     },
 
@@ -444,13 +470,13 @@ define([
 
 
   return {
-    eventProxy       : eventProxy,
-    Model          : Model,
-    SceneView        : SceneView,
-    EditingModel       : EditingModel,
-    EditingDOMView     : EditingDOMView,
-    DisplayModel       : DisplayModel,
-    DisplayDOMView     : DisplayDOMView
+    eventProxy    : eventProxy,
+    Model         : Model,
+    SceneView     : SceneView,
+    EditingModel  : EditingModel,
+    EditingDOMView: EditingDOMView,
+    DisplayModel  : DisplayModel,
+    DisplayDOMView: DisplayDOMView
   }
 
 });

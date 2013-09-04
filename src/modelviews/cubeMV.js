@@ -1,6 +1,6 @@
 define([
     'jquery',
-    'lib/jquery.mustache',
+    'lib/mustache',
     'calculations',
     'worldcursor',
     'scene',
@@ -8,7 +8,7 @@ define([
     'geometrygraphsingleton',
     'modelviews/geomvertexMV', 
     'modelviews/pointMV', 
-    'modelviews/heightanchorview',
+    'modelviews/zanchorview',
     'modelviews/heightOnWidthDepthAnchorView',
     'modelviews/widthdepthcornerview',
     'asyncAPI',
@@ -16,7 +16,8 @@ define([
     
   ], 
   function(
-    $, __$,
+    $, 
+    Mustache,
     calc,
     worldCursor,
     sceneModel,
@@ -24,7 +25,7 @@ define([
     geometryGraph,
     GeomVertexMV,
     PointMV,
-    OriginHeightAnchor,
+    ZAnchorView,
     CornerEditingHeightAnchor,
     WidthDepthCornerView,
     AsyncAPI,
@@ -94,19 +95,20 @@ define([
         this.editingImplicitChildren = [this.origin];
 
         if (!this.vertex.transforming) {
-          that.views.push(new OriginHeightAnchor({
-            model: that, 
-            heightKey: 'height',
-            pointVertex: this.origin,
+          this.views.push(new ZAnchorView({
+            model: this, 
+            vertex: this.origin,
+            origin: this.origin.parameters.coordinate,
           }));
 
-          that.views.push(new CornerEditingHeightAnchor({
+          this.views.push(new CornerEditingHeightAnchor({
             model: this, 
             heightKey: 'height',
             origin: this.origin,
             vertex: this.vertex,
           }));
-          that.views.push(new WidthDepthCornerView({
+
+          this.views.push(new WidthDepthCornerView({
             model: this,
           }))
         }
@@ -277,29 +279,27 @@ define([
         depth  : this.model.vertex.parameters.depth,
         height : this.model.vertex.parameters.height,
       });
-      this.$el.html($.mustache(template, view));
+      this.$el.html(Mustache.render(template, view));
       return this;
     },
 
     update: function() {
       GeomVertexMV.EditingDOMView.prototype.update.call(this);
-      var that = this;
       ['width', 'depth', 'height'].forEach(function(key) {
-        that.$el.find('.field.' + key).val(that.model.vertex.parameters[key]);
-      });
+        this.$el.find('.field.' + key).val(this.model.vertex.parameters[key]);
+      }, this);
     },
 
     updateFromDOM: function() {
       GeomVertexMV.EditingDOMView.prototype.updateFromDOM.call(this);
-      var that = this;
       ['width', 'depth', 'height'].forEach(function(key) {
         try {
-          var expression = that.$el.find('.field.' + key).val();
-          that.model.vertex.parameters[key] = expression;
+          var expression = this.$el.find('.field.' + key).val();
+          this.model.vertex.parameters[key] = expression;
         } catch(e) {
           console.error(e);
         }
-      });
+      }, this);
       this.model.vertex.trigger('change', this.model.vertex);
     }
 

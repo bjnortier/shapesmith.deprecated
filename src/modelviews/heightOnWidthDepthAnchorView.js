@@ -51,13 +51,11 @@ define([
           geometryGraph.evaluate(this.model.vertex.parameters.width),
           geometryGraph.evaluate(this.model.vertex.parameters.depth), 
           0));
-      
+
       var heightParameterValue = geometryGraph.evaluate(this.model.vertex.parameters[this.heightKey]);
       var zOffset = this.getZOffset(heightParameterValue);
       this.pointSceneObject.position = this.heightBasePosition.clone();
-      this.pointSceneObject.position.z = 
-        heightParameterValue + 
-        this.heightBasePosition.z + zOffset;
+      this.pointSceneObject.position.z += heightParameterValue + zOffset;
       this.pointSceneObject.scale = this.cameraScale;
       this.pointSceneObject.rotation.x = heightParameterValue >= 0 ? Math.PI/2 : 3*Math.PI/2;
       this.sceneObject.add(this.pointSceneObject);
@@ -86,6 +84,7 @@ define([
 
     dragStarted: function() {
       this.showHeightLine = true;
+      this.originPosition = calc.objToVector(this.origin.parameters.coordinate, geometryGraph, THREE.Vector3);
     },
 
     dragEnded: function() {
@@ -100,15 +99,37 @@ define([
       var camera = sceneModel.view.camera;
       var mouseRay = calc.mouseRayForEvent(sceneElement, camera, event);
 
-      var rayOrigin = this.heightBasePosition;
-      var rayDirection = new THREE.Vector3(0,0,1);
-      var ray = new THREE.Ray(rayOrigin, rayDirection);
+      // Local Workplane
+      var workplaneOrigin = calc.objToVector(
+        this.vertex.workplane.origin, 
+        geometryGraph, 
+        THREE.Vector3);
+      var workplaneAxis =  calc.objToVector(
+        this.vertex.workplane.axis, 
+        geometryGraph, 
+        THREE.Vector3);
+      var workplaneAngle = geometryGraph.evaluate(this.vertex.workplane.angle);
 
-      var positionOnNormal = calc.positionOnRay(mouseRay, ray);
+     var rayOrigin = new THREE.Vector3().addVectors(
+        this.originPosition,
+        new THREE.Vector3(
+          geometryGraph.evaluate(this.vertex.parameters.width),
+          geometryGraph.evaluate(this.vertex.parameters.depth), 
+          0));
+      rayOrigin.add(workplaneOrigin);
+      var rayOriginUsingWorkplane = calc.rotateAroundAxis(rayOrigin, workplaneAxis, workplaneAngle);
+      var rayDirection = new THREE.Vector3(0,0,1);
+      var rayDirectionUsingWorkplane = calc.rotateAroundAxis(rayDirection, workplaneAxis, workplaneAngle);
+      var ray = new THREE.Ray(rayOriginUsingWorkplane, rayDirectionUsingWorkplane);
+      var absolutePositionOnNormal = calc.positionOnRay(mouseRay, ray);
+
+      // Back into local coordinates
+      var positionOnNormalInLocalCoords = 
+        calc.rotateAroundAxis(absolutePositionOnNormal, workplaneAxis, -workplaneAngle);
       var grid = settings.get('gridsize');
+      var h = positionOnNormalInLocalCoords.z - rayOrigin.z;
       this.model.vertex.parameters[this.heightKey] = 
-        Math.round(parseFloat((positionOnNormal.z -  this.cameraScale.x).toFixed(0))/grid)*grid - 
-        this.heightBasePosition.z;
+        Math.round(parseFloat(h/grid))*grid;
 
       this.model.vertex.trigger('change', this.model.vertex);
     },

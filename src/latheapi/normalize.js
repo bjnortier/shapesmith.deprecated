@@ -28,6 +28,7 @@ define([
       d: dAbs,
       h: hAbs,
       transforms: cube.transforms,
+      workplane: cube.workplane,
     }
 
   }
@@ -43,6 +44,7 @@ define([
       z: center.z,
       r: radius,
       transforms: sphere.transforms,
+      workplane: sphere.workplane,
     }
   }
 
