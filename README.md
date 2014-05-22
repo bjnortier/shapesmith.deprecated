@@ -1,3 +1,5 @@
+*This version of Shapesmith has now been deprecated. Find the new version at http://shapesmith.net*
+
 # Shapesmith
 
 Shapesmith is a browser-based 3D modelling application that aims to be powerful, parametric, open and extensible.
